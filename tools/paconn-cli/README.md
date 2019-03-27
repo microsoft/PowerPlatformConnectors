@@ -21,6 +21,94 @@ The `paconn` command line tool is designed to aid Microsoft Power Platform custo
 
     `pip install paconn`
 
+
+## Custom Connector Directory and Files
+
+A custom connector consists of three files. An icon for the connector, an Open API swagger definition, and an API properties file. The properties file that contains connection parameters, brand color and few other information that aren't part of the Open API definition. The files are ideally located into a directory with the connector ID as the name of the directory.
+
+Sometimes, the custom connector directory may include a settings.json file. Although this file is not part of the connector definition, it can be used as an arguments store for the CLI.
+
+### API Definition (Swagger) File
+
+The API definition file describes the API for the custom connector using the OpenAPI definition. It is also known as the swagger file. More information about API definition to write custom connector can be found in [the connector documentation on the subject](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition).
+
+### API Properties File
+
+The API properties file contains some properties for the custom connector. These properties are not part of the API definition. It contains information such as the brand color, authentication information etc. A typical API properties file looks like the following:
+
+```json
+{
+  "properties": {
+    "capabilities": [],
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "clearText": false,
+            "required": "true",
+            "tabIndex": 2
+          },
+          "description": "The KEY for this api",
+          "displayName": "KEY",
+          "tooltip": "Provide your KEY"
+        }
+      }
+    },
+    "iconBrandColor": "#007EE6"
+  }
+}
+```
+
+More information on the each of the properties are given below:
+
+* `properties`: The container for the information.
+
+* `connectionParameters`: Defines the connection parameter for the service.
+
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
+
+* `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
+
+* `policyTemplateInstances`: An optional list of policy template instances and values used in the custom connector.
+
+### Icon File
+
+The icon file is small image representing the custom connector icon.
+
+### Settings File
+
+Instead of providing the arguments in the command line, a `settings.json` file can be used to specify them. A typical `settings.json` file looks like the following: 
+
+```json
+{
+  "connectorId": "CONNECTOR-ID",
+  "environment": "ENVIRONMENT-GUID",
+  "apiProperties": "apiProperties.json",
+  "apiDefinition": "apiDefinition.swagger.json",
+  "icon": "icon.png",
+  "powerAppsApiVersion": "2016-11-01",
+  "powerAppsUrl": "https://preview.api.powerapps.com"
+}
+```
+
+In the settings file the following items are expected. If an option is missing but required the console will prompt for the missing information.
+
+* `connectorId`: The connector id string for the custom connector. This parameter is required for download and update, but not for create since a new custom connector with new id will be created. If you need to update a custom connector just created using the same settings file, please make sure the settings file is correctly updated with the new connector id from the create operation.
+
+* `environment`: The environment GUID string for the custom connector. This parameter is required for all three operations.
+
+* `apiProperties`: The full path to the api properties `apiProperties.json` file. It is required for the create and update operation. When this option is present during the download, the file in the given location will be written to.
+
+* `apiDefinition`: The full path to the swagger file `apiDefinition.swagger.json` file. It is required for the create and update operation. When this option is present during the download, the file in the given location will be written to.
+
+* `icon`: The full path to the icon file `icon.png` file. It is required for the create and update operation. When this option is present during the download, the file in the given location will be written to.
+
+* `powerAppsUrl`: The API URL for PowerApps. This is optional and set to `https://preview.api.powerapps.com` by default.
+
+* `powerAppsApiVersion`: The API version to use for PowerApps. This is optional and set to `2016-11-01` by default.
+
+
 ## Command Line Operations
 
 ### Login
@@ -31,11 +119,6 @@ Login to Power Platform by running:
 
 This will ask you to login using device code login process. Please follow the prompt for the login.
 
-### Custom Connector Directory and Files
-
-A custom connector consists of three files. An icon for the connector, an Open API swagger definition, and an API properties file. The properties file that contains connection parameters, brand color and few other information that aren't part of the Open API definition. The files are ideally located into a directory with the connector ID as the name of the directory.
-
-Sometimes, the custom connector directory may include a settings.json file. Although this file is not part of the connector definition, it can be used as an arguments store for the CLI.
 
 ### Download Custom Connector Files
 
@@ -132,20 +215,8 @@ Arguments
                    When a settings file is specified some command 
                    line parameters are ignored.
    ```
-### Settings File
 
-Instead of providing the arguments in the command line, a `settings.json` file can be used to specify them. A typical `settings.json` file looks like the following: 
-```json
-{
-  "connectorId": "CONNECTOR-ID",
-  "environment": "ENVIRONMENT-GUID",
-  "apiProperties": "apiProperties.json",
-  "apiDefinition": "apiDefinition.swagger.json",
-  "icon": "icon.png",
-  "powerAppsApiVersion": "2016-11-01",
-  "powerAppsUrl": "https://preview.api.powerapps.com"
-}
-```
+
 ### Best Practice
 
 Download all the custom connectors and use git or any other source code management system to save the files. In case of an incorrect update, redeploy the connector by rerunning the update command with the correct set of files from the source code management system.
