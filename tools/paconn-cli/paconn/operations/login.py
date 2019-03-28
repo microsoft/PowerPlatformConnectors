@@ -11,12 +11,9 @@ from paconn.authentication.auth import get_authentication
 from paconn.common.util import display
 
 
-def login(client_id, client_secret, tenant):
+def login():
     """
     Login command.
     """
-    get_authentication(
-        client_id=client_id,
-        client_secret=client_secret,
-        tenant=tenant)
+    get_authentication()
     display('Login successful.')

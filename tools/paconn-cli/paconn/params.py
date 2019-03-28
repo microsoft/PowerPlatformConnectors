@@ -67,24 +67,7 @@ def load_arguments(self, command):
     Load command line arguments
     """
     with ArgumentsContext(self, _LOGIN) as arg_context:
-        arg_context.argument(
-            CLIENT_ID,
-            options_list=CLIENT_ID_OPTIONS,
-            type=str,
-            required=False,
-            help=CLIENT_ID_HELP)
-        arg_context.argument(
-            CLIENT_SECRET,
-            options_list=CLIENT_SECRET_OPTIONS,
-            type=str,
-            required=False,
-            help=CLIENT_SECRET_HELP)
-        arg_context.argument(
-            TENANT,
-            options_list=TENANT_OPTIONS,
-            type=str,
-            required=False,
-            help=TENANT_HELP)
+        pass
 
     with ArgumentsContext(self, _DOWNLOAD) as arg_context:
         arg_context.argument(

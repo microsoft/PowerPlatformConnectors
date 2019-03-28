@@ -14,7 +14,7 @@ from .profile import Profile
 from .tokenmanager import TokenManager
 
 
-def get_authentication(client_id, client_secret, tenant):
+def get_authentication():
     """
     Logs the user in and saves the token in a file.
     """
@@ -31,13 +31,7 @@ def get_authentication(client_id, client_secret, tenant):
 
     # Get new token
     if token_expired:
-        if not client_id and not client_secret:
-            credentials = profile.authenticate_device_code()
-        else:
-            credentials = profile.authenticate_client_credentials(
-                client_id=client_id,
-                client_secret=client_secret,
-                tenant=tenant)
+        credentials = profile.authenticate_device_code()
         tokenmanager.write(credentials)
         token_expired = TokenManager.is_expired(credentials)
 
