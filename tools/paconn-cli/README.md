@@ -112,7 +112,7 @@ or
    
 or
    
-`paconn create -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
+`paconn update -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
 
 When environment or connector ID is not specified the command will prompt for the missing argument(s). However, the API definition, API properties, and icon file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the updated connector ID on successful completion. If you are using a settings.json for the update command, please make sure correct environment and connector ID are specified.
 
