@@ -24,13 +24,13 @@ The `paconn` command line tool is designed to aid Microsoft Power Platform custo
 
 ## Custom Connector Directory and Files
 
-A custom connector consists of three files. An icon for the connector, an Open API swagger definition, and an API properties file. The properties file that contains connection parameters, brand color and few other information that aren't part of the Open API definition. The files are ideally located into a directory with the connector ID as the name of the directory.
+A custom connector consists of three files. An icon for the connector, an Open API swagger definition, and an API properties file. The files are generally located in a directory with the connector ID as the name of the directory.
 
-Sometimes, the custom connector directory may include a settings.json file. Although this file is not part of the connector definition, it can be used as an arguments store for the CLI.
+Sometimes, the custom connector directory may include a `settings.json` file. Although this file is not part of the connector definition, it can be used as an arguments store for the CLI.
 
 ### API Definition (Swagger) File
 
-The API definition file describes the API for the custom connector using the OpenAPI definition. It is also known as the swagger file. More information about API definition to write custom connector can be found in [the connector documentation on the subject](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition).
+The API definition file describes the API for the custom connector using the OpenAPI specification. It is also known as the swagger file. More information about API definition to write custom connector can be found in [the connector documentation on the subject](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition).
 
 ### API Properties File
 
