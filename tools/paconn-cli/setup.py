@@ -9,7 +9,7 @@
 import os
 from setuptools import setup
 
-__VERSION__ = '0.0.8'
+__VERSION__ = '0.0.9'
 
 def read(fname):
     """Local read helper function for long documentation"""
