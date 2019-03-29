@@ -26,7 +26,7 @@ TENANT_HELP = 'The tenant.'
 
 ENVIRONMENT = 'environment'
 ENVIRONMENT_OPTIONS = ['--env', '-e']
-ENVIRONMENT_HELP = 'Power Platform environment GUID.'
+ENVIRONMENT_HELP = 'Power Platform environment ID.'
 
 CONNECTOR_ID = 'connector_id'
 CONNECTOR_ID_OPTIONS = ['--cid', '-c']
