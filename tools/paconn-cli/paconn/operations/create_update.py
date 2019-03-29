@@ -82,9 +82,6 @@ def create_update(powerapps_rp, settings, client_secret, is_update):
     _file_check(
         file=settings.api_definition,
         file_type='API Definition')
-    _file_check(
-        file=settings.icon,
-        file_type='Icon')
 
     # Open the property file
     with open(settings.api_properties, 'r') as file:
@@ -131,10 +128,11 @@ def create_update(powerapps_rp, settings, client_secret, is_update):
     sas_url = response[_SHARED_ACCESS_SIGNATURE]
 
     # Upload the icon
-    icon_uri = upload_icon(
-        sas_url=sas_url,
-        file_path=settings.icon)
-    properties[_ICON_URI] = icon_uri
+    if settings.icon:
+        icon_uri = upload_icon(
+            sas_url=sas_url,
+            file_path=settings.icon)
+        properties[_ICON_URI] = icon_uri
 
     # Update or create the connector
     if is_update is True:
