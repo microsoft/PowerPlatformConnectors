@@ -21,6 +21,105 @@ The `paconn` command line tool is designed to aid Microsoft Power Platform custo
 
     `pip install paconn`
 
+
+## Custom Connector Directory and Files
+
+A custom connector consists of three files. An icon for the connector, an Open API swagger definition, and an API properties file. The files are generally located in a directory with the connector ID as the name of the directory.
+
+Sometimes, the custom connector directory may include a `settings.json` file. Although this file is not part of the connector definition, it can be used as an argument-store for the CLI.
+
+### API Definition (Swagger) File
+
+The API definition file describes the API for the custom connector using the OpenAPI specification. It is also known as the swagger file. More information about API definition to write custom connector can be found in [the connector documentation on the subject](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition). Please also review the tutorial on [extending an OpenApi definition](https://docs.microsoft.com/en-us/connectors/custom-connectors/openapi-extensions).
+
+### API Properties File
+
+The API properties file contains some properties for the custom connector. These properties are not part of the API definition. It contains information such as the brand color, authentication information, etc. A typical API properties file looks like the following:
+
+```json
+{
+  "properties": {
+    "capabilities": [],
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "clearText": false,
+            "required": "true",
+            "tabIndex": 2
+          },
+          "description": "The KEY for this API",
+          "displayName": "KEY",
+          "tooltip": "Provide your KEY"
+        }
+      }
+    },
+    "iconBrandColor": "#007EE6",
+    "policyTemplateInstances": [
+      {
+        "title": "MyPolicy",
+        "templateId": "setqueryparameter",
+        "parameters": {
+            "x-ms-apimTemplateParameter.name": "queryParameterName",
+            "x-ms-apimTemplateParameter.value": "queryParameterValue",
+            "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      }
+    ]    
+  }
+}
+```
+
+More information on the each of the properties are given below:
+
+* `properties`: The container for the information.
+
+* `connectionParameters`: Defines the connection parameter for the service.
+
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
+
+* `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
+
+* `policyTemplateInstances`: An optional list of policy template instances and values used in the custom connector.
+
+### Icon File
+
+The icon file is small image representing the custom connector icon.
+
+### Settings File
+
+Instead of providing the arguments in the command line, a `settings.json` file can be used to specify them. A typical `settings.json` file looks like the following: 
+
+```json
+{
+  "connectorId": "CONNECTOR-ID",
+  "environment": "ENVIRONMENT-GUID",
+  "apiProperties": "apiProperties.json",
+  "apiDefinition": "apiDefinition.swagger.json",
+  "icon": "icon.png",
+  "powerAppsApiVersion": "2016-11-01",
+  "powerAppsUrl": "https://preview.api.powerapps.com"
+}
+```
+
+In the settings file the following items are expected. If an option is missing but required, the console will prompt for the missing information.
+
+* `connectorId`: The connector ID string for the custom connector. This parameter is required for download and update operations, but not for the create operation since a new custom connector with the new ID will be created. If you need to update a custom connector just created using the same settings file, please make sure the settings file is correctly updated with the new connector ID from the create operation.
+
+* `environment`: The environment ID string for the custom connector. This parameter is required for all three operations.
+
+* `apiProperties`: The path to the API properties `apiProperties.json` file. It is required for the create and update operation. When this option is present during the download, the file will be downloaded to the given location.
+
+* `apiDefinition`: The path to the swagger file. It is required for the create and update operation. When this option is present during the download, the file in the given location will be written to.
+
+* `icon`: The path to the icon file. It is required for the create and update operation. When this option is present during the download, the file in the given location will be written to.
+
+* `powerAppsUrl`: The API URL for PowerApps. This is optional and set to `https://preview.api.powerapps.com` by default.
+
+* `powerAppsApiVersion`: The API version to use for PowerApps. This is optional and set to `2016-11-01` by default.
+
+
 ## Command Line Operations
 
 ### Login
@@ -31,11 +130,6 @@ Login to Power Platform by running:
 
 This will ask you to login using device code login process. Please follow the prompt for the login.
 
-### Custom Connector Directory and Files
-
-A custom connector consists of three files. An icon for the connector, an Open API swagger definition, and an API properties file. The properties file that contains connection parameters, brand color and few other information that aren't part of the Open API definition. The files are ideally located into a directory with the connector ID as the name of the directory.
-
-Sometimes, the custom connector directory may include a settings.json file. Although this file is not part of the connector definition, it can be used as an arguments store for the CLI.
 
 ### Download Custom Connector Files
 
@@ -47,7 +141,7 @@ Download the custom connector files by running:
 
 or
    
-`paconn download -e [Power Platform Environment GUID] -c [Connector ID]`
+`paconn download -e [Power Platform Environment ID] -c [Connector ID]`
    
 or
    
@@ -61,7 +155,7 @@ All the arguments can be also specified using a settings.json file. More informa
 Arguments
    --cid -c      : The custom connector ID.
    --dest -d     : Destination directory.
-   --env -e      : Power Platform environment GUID.
+   --env -e      : Power Platform environment ID.
    --pau -u      : Power Platform URL.
    --pav -v      : Power Platform API version.
    --settings -s : A settings file containing required parameters.
@@ -76,7 +170,7 @@ A new custom connector can be created from the three files introduced earlier. C
    
 or
    
-`paconn create -e [Power Platform Environment GUID] --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json] --icon [Path to icon.png] --secret [The OAuth2 client secret for the connector]`
+`paconn create -e [Power Platform Environment ID] --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json] --icon [Path to icon.png] --secret [The OAuth2 client secret for the connector]`
    
 or
    
@@ -91,7 +185,7 @@ All the arguments can be also specified using a settings.json file. More informa
 Arguments
    --api-def     : Location for the Open API definition JSON document.
    --api-prop    : Location for the API properties JSON document.
-   --env -e      : Power Platform environment GUID.
+   --env -e      : Power Platform environment ID.
    --icon        : Location for the icon file.
    --pau -u      : Power Platform URL.
    --pav -v      : Power Platform API version.
@@ -108,11 +202,11 @@ Like the `create` operation, an existing custom connector can be updated from th
    
 or
    
-`paconn update -e [Power Platform Environment GUID] -c [Connector ID] --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json] --icon [Path to icon.png] --secret [The OAuth2 client secret for the connector]`
+`paconn update -e [Power Platform Environment ID] -c [Connector ID] --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json] --icon [Path to icon.png] --secret [The OAuth2 client secret for the connector]`
    
 or
    
-`paconn create -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
+`paconn update -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
 
 When environment or connector ID is not specified the command will prompt for the missing argument(s). However, the API definition, API properties, and icon file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the updated connector ID on successful completion. If you are using a settings.json for the update command, please make sure correct environment and connector ID are specified.
 
@@ -123,7 +217,7 @@ Arguments
    --api-def     : Location for the Open API definition JSON document.
    --api-prop    : Location for the API properties JSON document.
    --cid -c      : The custom connector ID.
-   --env -e      : Power Platform environment GUID.
+   --env -e      : Power Platform environment ID.
    --icon        : Location for the icon file.
    --pau -u      : Power Platform URL.
    --pav -v      : Power Platform API version.
@@ -132,20 +226,8 @@ Arguments
                    When a settings file is specified some command 
                    line parameters are ignored.
    ```
-### Settings File
 
-Instead of providing the arguments in the command line, a `settings.json` file can be used to specify them. A typical `settings.json` file looks like the following: 
-```json
-{
-  "connectorId": "CONNECTOR-ID",
-  "environment": "ENVIRONMENT-GUID",
-  "apiProperties": "apiProperties.json",
-  "apiDefinition": "apiDefinition.swagger.json",
-  "icon": "icon.png",
-  "powerAppsApiVersion": "2016-11-01",
-  "powerAppsUrl": "https://preview.api.powerapps.com"
-}
-```
+
 ### Best Practice
 
 Download all the custom connectors and use git or any other source code management system to save the files. In case of an incorrect update, redeploy the connector by rerunning the update command with the correct set of files from the source code management system.
