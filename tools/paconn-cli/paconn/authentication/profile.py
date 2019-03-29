@@ -54,39 +54,3 @@ class Profile:
             client_id=client_id)
 
         return credentials.token
-
-    def authenticate_client_credentials(self, tenant, client_id, client_secret):
-        """
-        Authenticate the end-user using client id and secret.
-        """
-
-        context = self._get_authentication_context(tenant)
-
-        mgmt_token = context.acquire_token_with_client_credentials(
-            resource=self.resource,
-            client_id=client_id,
-            client_secret=client_secret)
-
-        credentials = AADTokenCredentials(
-            token=mgmt_token,
-            client_id=client_id)
-
-        return credentials.token
-
-    def refresh_authentication(self, tenant, refresh_token, client_id, client_secret):
-        """
-        Refreshes an authentication.
-        """
-        context = self._get_authentication_context(tenant)
-
-        mgmt_token = context.acquire_token_with_refresh_token(
-            resource=self.resource,
-            refresh_token=refresh_token,
-            client_id=client_id,
-            client_secret=client_secret)
-
-        credentials = AADTokenCredentials(
-            token=mgmt_token,
-            client_id=client_id)
-
-        return credentials.token
