@@ -1,4 +1,11 @@
-# Office365 Groups Connector
+
+### NOTE
+> This is a *sample* connector.  The connector is provided here with the intent to illustrate certain features and functionality around connectors.
+
+# Office365 Groups Connector (Sample)
+Office 365 Groups lets you manage group membership and calendar events in your organization using your Office 365 account. You can perform various actions such as get group roster, add or remove members and create group events. 
+
+Public Connector: https://docs.microsoft.com/en-us/Connectors/office365groups/
 
 ##  Setup
 
