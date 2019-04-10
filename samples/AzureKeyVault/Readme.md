@@ -37,6 +37,18 @@ Run the following commands and follow the prompts:
 paconn create --settings "settings.json" --secret <client_secret>
 ```
 
+## Supported Operations
+The connector supports the following operations:
+* `List keys`: List keys in the specified vault
+* `Get key`: Gets the public part of a stored key
+* `Create key`: Creates a new key
+* `Decrypt data`: Decrypts a single block of encrypted data
+* `Encrypt data`: Encrypts an arbitrary sequence of bytes using an encryption key
+* `List secrets`: List secrets in a specified key vault
+* `Get secret`: Get a specified secret from a given key vault
+* `Create or update secret value`: Sets a secret in a specified key vault
+* `List secret versions`: List all versions of the specified secret
+* `Get secret version`: Get the value of a specified secret version from a given key vault
 
 
 
