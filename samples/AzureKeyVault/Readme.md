@@ -34,7 +34,7 @@ At this point, we now have a valid Azure AD application that can be used to get 
 Run the following commands and follow the prompts:
 
 ```paconn
-paconn create --settings "settings.json" --secret <client_secret>
+paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>
 ```
 
 ## Supported Operations
