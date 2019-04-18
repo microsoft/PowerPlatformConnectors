@@ -1,19 +1,30 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+pr:
+  branches:
+    include:
+    - master
+    - releases/*
+  paths:
+    include:
+    - connectors/*
 
-trigger:
-- master
+jobs:
+- job: get_content
+  steps:
+  - powershell: |
+      $GitUrl = 'https://api.github.com/repos'
 
-pool:
-  vmImage: 'Ubuntu-16.04'
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+      $SourceRepo = [System.Uri]$Env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI
+      $SourceRepo = $SourceRepo.AbsolutePath -replace '.git'
+      $GitUrl = $GitUrl + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
+      $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
+      
+      $SwaggerUri = 'https://connectorgithubcheck.azurewebsites.net/api/ConnectorGithubCheckRun?code=Ja8rWjlRxfsOo4AhKcQh9Ld5Bhzt3eAvC6n4OHAG6ZHRptBecMVdFQ=='
+      ForEach ($File in $Files) {
+        $filename = $File.filename
+        Write-Host $filename
+        if($filename.EndsWith('.swagger.json')) {
+          $Form = (Get-Content $filename)
+          $Result = Invoke-RestMethod -Uri $SwaggerUri -Method Post -Body $Form
+          Write-Host $Result
+        }
+      }
