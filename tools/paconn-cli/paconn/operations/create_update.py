@@ -8,12 +8,12 @@
 Method for create/update operation
 """
 
-import os
 import json
 import urllib.parse
 
 from knack.util import CLIError
 
+from paconn.common.util import file_exists
 from paconn.apimanager.iconuploader import upload_icon
 from paconn.operations.json_keys import (
     _PROPERTIES,
@@ -36,17 +36,6 @@ from paconn.operations.json_keys import (
     _TITLE,
     _SHARED_ACCESS_SIGNATURE
 )
-
-
-def _file_check(file, file_type):
-    """
-    Check if the given file exists.
-    """
-
-    if not file:
-        raise CLIError('{file_type} must be specified.'.format(file_type=file_type))
-    if not os.path.exists(file):
-        raise CLIError('File does not exist: {file}'.format(file=file))
 
 
 def _create_backendservice_url(openapi_definition):
@@ -76,10 +65,10 @@ def create_update(powerapps_rp, settings, client_secret, is_update):
     """
 
     # Make sure the required files exist
-    _file_check(
+    file_exists(
         file=settings.api_properties,
         file_type='API Properties')
-    _file_check(
+    file_exists(
         file=settings.api_definition,
         file_type='API Definition')
 
@@ -121,7 +110,9 @@ def create_update(powerapps_rp, settings, client_secret, is_update):
     properties[_DESCRIPTION] = openapi_definition[_INFO][_DESCRIPTION]
 
     # Validate Open API Definition
-    powerapps_rp.validate_connector(openapi_definition)
+    powerapps_rp.validate_connector(
+        payload=openapi_definition,
+        certification_rules=False)
 
     # Get the shared access signature
     response = powerapps_rp.generate_resource_storage(settings.environment)

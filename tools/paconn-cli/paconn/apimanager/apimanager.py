@@ -9,15 +9,13 @@ A manager class for the API calls
 """
 
 import json
-from urllib.parse import urljoin, urlparse, urlencode, urlunparse, quote
+from urllib.parse import urljoin, urlencode, urlunparse, quote
 import requests
 
 from knack.util import CLIError
-
 from knack.log import get_logger
 
 from paconn.common.util import display, format_json
-
 from paconn.authentication.tokenmanager import (
     _ACCESS_TOKEN,
     _TOKEN_TYPE,
@@ -25,28 +23,6 @@ from paconn.authentication.tokenmanager import (
 )
 
 LOGGER = get_logger(__name__)
-
-
-# pylint: disable=too-few-public-methods
-class APIManagerBuilder:
-    """
-    A builder class to create an API Manager object from an url
-    """
-    @staticmethod
-    def get_from_url(url, base_path, api_version, credentials):
-        """
-        Creates an APIManager object from given URL, Base Path and credentials
-        """
-        # pylint: disable=unused-variable
-        (scheme, netloc, path, params, query, fragment) = urlparse(url)
-
-        return APIManager(
-            scheme=scheme,
-            region=None,
-            netlocation=netloc,
-            base_path=base_path,
-            api_version=api_version,
-            credentials=credentials)
 
 
 class APIManager:

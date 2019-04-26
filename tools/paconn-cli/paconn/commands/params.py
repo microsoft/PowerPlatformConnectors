@@ -9,7 +9,7 @@ CLI parameter definitions
 """
 
 from knack.arguments import ArgumentsContext
-from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE
+from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
 
 CLIENT_ID = 'client_id'
 CLIENT_ID_OPTIONS = ['--clid', '-i']
@@ -46,7 +46,7 @@ POWERAPPS_VERSION_HELP = 'Power Platform api version.'
 
 SETTINGS = 'settings_file'
 SETTINGS_OPTIONS = ['--settings', '-s']
-SETTINGS_HELP = 'A settings file containing required parameters. When a settings file is specified some commandline parameters are ignored.'
+SETTINGS_HELP = 'A settings file containing required parameters. When a settings file is specified some commandline parameters are ignored.'  # noqa: E501
 
 API_PROPERTIES = 'api_properties'
 API_PROPERTIES_OPTIONS = ['--api-prop']
@@ -206,6 +206,32 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help=CLIENT_SECRET_CONN_HELP)
+        arg_context.argument(
+            SETTINGS,
+            options_list=SETTINGS_OPTIONS,
+            type=str,
+            required=False,
+            help=SETTINGS_HELP)
+
+    with ArgumentsContext(self, _VALIDATE) as arg_context:
+        arg_context.argument(
+            API_DEFINITION,
+            options_list=API_DEFINITION_OPTIONS,
+            type=str,
+            required=False,
+            help=API_DEFINITION_HELP)
+        arg_context.argument(
+            POWERAPPS_URL,
+            options_list=POWERAPPS_URL_OPTIONS,
+            type=str,
+            required=False,
+            help=POWERAPPS_URL_HELP)
+        arg_context.argument(
+            POWERAPPS_VERSION,
+            options_list=POWERAPPS_VERSION_OPTIONS,
+            type=str,
+            required=False,
+            help=POWERAPPS_VERSION_HELP)
         arg_context.argument(
             SETTINGS,
             options_list=SETTINGS_OPTIONS,

@@ -11,7 +11,7 @@ Defines the command table
 from knack.commands import CommandGroup
 
 from paconn import __CLI_NAME__
-from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE
+from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
 
 
 # pylint: disable=unused-argument
@@ -20,7 +20,7 @@ def load_command_table(self, args):
     Loads the command table
     """
     def operation_group(name):
-        return '{cli_name}.operations.{name}#{name}'.format(cli_name=__CLI_NAME__, name=name)
+        return '{cli_name}.commands.{name}#{name}'.format(cli_name=__CLI_NAME__, name=name)
 
     with CommandGroup(self, _COMMAND_GROUP, operation_group(_LOGIN)) as command_group:
         command_group.command(_LOGIN, _LOGIN)
@@ -33,3 +33,6 @@ def load_command_table(self, args):
 
     with CommandGroup(self, _COMMAND_GROUP, operation_group(_UPDATE)) as command_group:
         command_group.command(_UPDATE, _UPDATE)
+
+    with CommandGroup(self, _COMMAND_GROUP, operation_group(_VALIDATE)) as command_group:
+        command_group.command(_VALIDATE, _VALIDATE)

@@ -10,7 +10,7 @@ Flow API Manager
 
 
 # pylint: disable=too-few-public-methods
-class FlowManager:
+class FlowRP:
     """
     Flow API Manager class
     """

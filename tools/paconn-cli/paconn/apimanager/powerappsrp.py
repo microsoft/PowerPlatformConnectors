@@ -86,13 +86,19 @@ class PowerAppsRP:
 
         return response.json()
 
-    def validate_connector(self, payload):
+    def validate_connector(self, payload, certification_rules):
         """
         Validates a custom connector.
         """
         api = self.api_manager.add_object_id('validateApiSwagger')
 
-        endpoint = self.api_manager.construct_url(path=api)
+        query = None
+        if certification_rules:
+            query = {'enableConnectorCertificationRules': 'true'}
+
+        endpoint = self.api_manager.construct_url(
+            path=api,
+            query=query)
 
         response = self.api_manager.request(
             verb='POST',

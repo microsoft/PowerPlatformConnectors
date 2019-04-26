@@ -10,13 +10,6 @@ Prompts the user for missing arguments
 
 from knack.prompting import prompt_choice_list
 
-from paconn.apimanager.apimanager import APIManagerBuilder
-from paconn.apimanager.flowmanager import FlowManager
-
-_DEFAULT_FLOW_URL = 'https://preview.api.flow.microsoft.com'
-_DEFAULT_FLOW_BASE_PATH = 'providers/Microsoft.ProcessSimple'
-_DEFAULT_FLOW_API_VERSION = '2016-11-01'
-
 _PROPERTIES = 'properties'
 _VALUE = 'value'
 _DISPLAY_NAME = 'displayName'
@@ -25,18 +18,11 @@ _IS_CUSTOM_API = 'isCustomApi'
 _CREATED_BY = 'createdBy'
 
 
-def get_environment(credentials):
+def get_environment(flow_rp):
     """
     Prompt for environment if not provided.
     """
-    flow_api_manager = APIManagerBuilder.get_from_url(
-        url=_DEFAULT_FLOW_URL,
-        base_path=_DEFAULT_FLOW_BASE_PATH,
-        api_version=_DEFAULT_FLOW_API_VERSION,
-        credentials=credentials)
-    flow_manager = FlowManager(api_manager=flow_api_manager)
-
-    environments_val = flow_manager.get_environments()
+    environments_val = flow_rp.get_environments()
     environments_list = environments_val[_VALUE]
     environments = {
         env[_PROPERTIES][_DISPLAY_NAME]: env[_NAME]

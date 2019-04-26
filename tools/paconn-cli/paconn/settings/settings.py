@@ -18,15 +18,29 @@ class Settings:
             self,
             connector_id,
             environment,
-            powerapps_url,
-            powerapps_api_version,
             api_properties,
             api_definition,
-            icon):
+            icon,
+            powerapps_url,
+            powerapps_api_version,
+            flow_url=None,
+            flow_api_version=None):
+
+        # connector specific settings
         self.connector_id = connector_id
         self.environment = environment
-        self.powerapps_url = powerapps_url
-        self.powerapps_api_version = powerapps_api_version
+
+        # Files
         self.api_properties = api_properties
         self.api_definition = api_definition
         self.icon = icon
+
+        # PowerApps RP settings
+        self.powerapps_url = powerapps_url or 'https://preview.api.powerapps.com'
+        self.powerapps_api_version = powerapps_api_version or '2016-11-01'
+        self.powerapps_base_path = 'providers/Microsoft.PowerApps'         # Constant
+
+        # Flow RP Settings
+        self.flow_url = flow_url or 'https://preview.api.flow.microsoft.com'
+        self.flow_api_version = flow_api_version or '2016-11-01'
+        self.flow_base_path = 'providers/Microsoft.ProcessSimple'          # Constant
