@@ -36,11 +36,11 @@ class Settings:
         self.icon = icon
 
         # PowerApps RP settings
-        self.powerapps_url = powerapps_url or 'https://preview.api.powerapps.com'
+        self.powerapps_url = powerapps_url or 'https://api.powerapps.com'
         self.powerapps_api_version = powerapps_api_version or '2016-11-01'
         self.powerapps_base_path = 'providers/Microsoft.PowerApps'         # Constant
 
         # Flow RP Settings
-        self.flow_url = flow_url or 'https://preview.api.flow.microsoft.com'
+        self.flow_url = flow_url or 'https://api.flow.microsoft.com'
         self.flow_api_version = flow_api_version or '2016-11-01'
         self.flow_base_path = 'providers/Microsoft.ProcessSimple'          # Constant

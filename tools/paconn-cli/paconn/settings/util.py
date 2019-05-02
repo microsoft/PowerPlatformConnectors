@@ -9,7 +9,7 @@ Utility for loading settings.
 
 from paconn import _CREATE, _DOWNLOAD, _VALIDATE
 from paconn.authentication.tokenmanager import TokenManager
-from paconn.apimanager.powerappsrp import PowerAppsRPBuilder
+from paconn.apimanager.powerappsrpbuilder import PowerAppsRPBuilder
 from paconn.apimanager.flowrpbuilder import FlowRPBuilder
 from paconn.common.prompts import get_environment, get_connector_id
 from paconn.settings.settingsbuilder import SettingsBuilder
