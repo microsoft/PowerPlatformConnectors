@@ -149,8 +149,6 @@ or
 
 When environment or connector ID is not specified the command will prompt for the missing argument(s). The command will print the download location for the connector on successful completion.
 
-All the arguments can be also specified using a settings.json file. More information on the settings.json is provided later in this documentation.
-
 ```
 Arguments
    --cid -c      : The custom connector ID.
@@ -177,9 +175,6 @@ or
 `paconn create -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
 
 When environment is not specified the command will prompt for it. However, the API definition, API properties, and icon file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the connector ID for the newly created custom connector on successful completion. If you are using a settings.json for the create command, please make sure to update it with the new connector ID before you update the newly created connector.
-
-All the arguments can be also specified using a settings.json file. More information on the settings.json is provided later in this documentation.
-
 
 ```
 Arguments
@@ -209,8 +204,6 @@ or
 `paconn update -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
 
 When environment or connector ID is not specified the command will prompt for the missing argument(s). However, the API definition, API properties, and icon file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the updated connector ID on successful completion. If you are using a settings.json for the update command, please make sure correct environment and connector ID are specified.
-
-All the arguments can be also specified using a settings.json file. More information on the settings.json is provided later in this documentation.
   
 ```
 Arguments
@@ -222,6 +215,30 @@ Arguments
    --pau -u      : Power Platform URL.
    --pav -v      : Power Platform API version.
    --secret -r   : The OAuth2 client secret for the connector.
+   --settings -s : A settings file containing required parameters.
+                   When a settings file is specified some command 
+                   line parameters are ignored.
+   ```
+
+### Validate a Swagger JSON
+
+The validate operation takes a swagger file and verfies if it follows all the recommended rules. Validate a swagger file by running:
+   
+`paconn validate --api-def [Path to apiDefinition.swagger.json]`
+
+or
+
+`paconn validate -s [Path to settings.json]`
+
+The command will print the error, warning, or success message depending result of the verification.
+
+All the arguments can be also specified using a settings.json file.
+  
+```
+Arguments
+   --api-def     : Location for the Open API definition JSON document.
+   --pau -u      : Power Platform URL.
+   --pav -v      : Power Platform API version.
    --settings -s : A settings file containing required parameters.
                    When a settings file is specified some command 
                    line parameters are ignored.
@@ -251,6 +268,13 @@ If you believe you have found a security vulnerability that meets [Microsoft's d
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
+
+To contibute a connector, please start by creating a fork on the github repo. Once you have the
+fork created, create a branch on the forked repo. Clone this forked repo on you local machine,
+and checkout the branch. Create a folder for your connector under `connectors` folder and place
+your files there. Commit and push the changes to your forked branch. Create a pull request from
+the forked branch to the main repo to include your changes in the main repo. [Please see this
+document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
 
 When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
