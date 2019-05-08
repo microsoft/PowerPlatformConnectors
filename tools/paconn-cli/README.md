@@ -231,8 +231,6 @@ or
 `paconn validate -s [Path to settings.json]`
 
 The command will print the error, warning, or success message depending result of the verification.
-
-All the arguments can be also specified using a settings.json file.
   
 ```
 Arguments
