@@ -24,13 +24,13 @@ The `paconn` command line tool is designed to aid Microsoft Power Platform custo
 
 ## Custom Connector Directory and Files
 
-A custom connector consists of three files. An icon for the connector, an Open API swagger definition, and an API properties file. The files are generally located in a directory with the connector ID as the name of the directory.
+A custom connector consists of three files: An Open API swagger definition, an API properties file, and an optional icon for the connector. The files are generally located in a directory with the connector ID as the name of the directory.
 
 Sometimes, the custom connector directory may include a `settings.json` file. Although this file is not part of the connector definition, it can be used as an argument-store for the CLI.
 
 ### API Definition (Swagger) File
 
-The API definition file describes the API for the custom connector using the OpenAPI specification. It is also known as the swagger file. More information about API definition to write custom connector can be found in [the connector documentation on the subject](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition). Please also review the tutorial on [extending an OpenApi definition](https://docs.microsoft.com/en-us/connectors/custom-connectors/openapi-extensions).
+The API definition, also known as the swagger, describes the API for the custom connector using the OpenAPI specification. More information about API definition to write custom connector can be found in [the connector documentation on the subject](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition). Please also review the tutorial on [extending an OpenApi definition](https://docs.microsoft.com/en-us/connectors/custom-connectors/openapi-extensions).
 
 ### API Properties File
 
@@ -85,7 +85,7 @@ More information on the each of the properties are given below:
 
 ### Icon File
 
-The icon file is small image representing the custom connector icon.
+The icon is icon image file for the custom connector.
 
 ### Settings File
 
@@ -99,23 +99,23 @@ Instead of providing the arguments in the command line, a `settings.json` file c
   "apiDefinition": "apiDefinition.swagger.json",
   "icon": "icon.png",
   "powerAppsApiVersion": "2016-11-01",
-  "powerAppsUrl": "https://preview.api.powerapps.com"
+  "powerAppsUrl": "https://api.powerapps.com"
 }
 ```
 
 In the settings file the following items are expected. If an option is missing but required, the console will prompt for the missing information.
 
-* `connectorId`: The connector ID string for the custom connector. This parameter is required for download and update operations, but not for the create operation since a new custom connector with the new ID will be created. If you need to update a custom connector just created using the same settings file, please make sure the settings file is correctly updated with the new connector ID from the create operation.
+* `connectorId`: The connector ID string for the custom connector. This parameter is required for download and update operations, but not for the create operation since a new custom connector with the new ID will be created. It's also not needed for the validate command. If you need to update a custom connector just created using the same settings file, please make sure the settings file is correctly updated with the new connector ID from the create operation.
 
-* `environment`: The environment ID string for the custom connector. This parameter is required for all three operations.
+* `environment`: The environment ID string for the custom connector. This parameter is required for all operations, except the validate operation.
 
-* `apiProperties`: The path to the API properties `apiProperties.json` file. It is required for the create and update operation. When this option is present during the download, the file will be downloaded to the given location.
+* `apiProperties`: The path to the API properties file. It is required for the create and update operation. When this option is present during the download operation, the file will be downloaded to the given location, otherwise it will be saved as `apiProperties.json`.
 
-* `apiDefinition`: The path to the swagger file. It is required for the create and update operation. When this option is present during the download, the file in the given location will be written to.
+* `apiDefinition`: The path to the swagger file. It is required for the create, update, and validate operations. When this option is present during the download operation, the file in the given location will be written to, otherwise it will be saved as `apiDefinition.swagger.json`.
 
-* `icon`: The path to the icon file. It is required for the create and update operation. When this option is present during the download, the file in the given location will be written to.
+* `icon`: The path to the optional icon file. The create and update operations will use the default icon when this parameter is no specified. When this option is present during the download operation, the file in the given location will be written to, otherwise it will be saved as `icon.png`.
 
-* `powerAppsUrl`: The API URL for PowerApps. This is optional and set to `https://preview.api.powerapps.com` by default.
+* `powerAppsUrl`: The API URL for PowerApps. This is optional and set to `https://api.powerapps.com` by default.
 
 * `powerAppsApiVersion`: The API version to use for PowerApps. This is optional and set to `2016-11-01` by default.
 
@@ -162,9 +162,9 @@ Arguments
 ```
 ### Create a New Custom Connector
 
-A new custom connector can be created from the three files introduced earlier. Create a connector by running:
+A new custom connector can be created from the connectors files using the `create` operation. Create a connector by running:
    
-`paconn create --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json] --icon [Path to icon.png]`
+`paconn create --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json]`
    
 or
    
@@ -174,7 +174,7 @@ or
    
 `paconn create -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
 
-When environment is not specified the command will prompt for it. However, the API definition, API properties, and icon file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the connector ID for the newly created custom connector on successful completion. If you are using a settings.json for the create command, please make sure to update it with the new connector ID before you update the newly created connector.
+When environment is not specified the command will prompt for it. However, the API definition and API properties file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the connector ID for the newly created custom connector on successful completion. If you are using a settings file for the create command, please make sure to update it with the new connector ID before you update the newly created connector.
 
 ```
 Arguments
@@ -191,9 +191,9 @@ Arguments
 ```
 ### Update an Existing Custom Connector
 
-Like the `create` operation, an existing custom connector can be updated from the three files introduced earlier. Update a connector by running:
+Like the `create` operation, an existing custom connector can be updated using the `update` operation. Update a connector by running:
    
-`paconn update --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json] --icon [Path to icon.png]`
+`paconn update --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json]`
    
 or
    
@@ -203,7 +203,7 @@ or
    
 `paconn update -s [Path to settings.json] --secret [The OAuth2 client secret for the connector]`
 
-When environment or connector ID is not specified the command will prompt for the missing argument(s). However, the API definition, API properties, and icon file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the updated connector ID on successful completion. If you are using a settings.json for the update command, please make sure correct environment and connector ID are specified.
+When environment or connector ID is not specified the command will prompt for the missing argument(s). However, the API definition and API properties file must be provided as part of the command line argument or a settings file. The OAuth2 secret must be provided for a connector using OAuth2. The command will print the updated connector ID on successful completion. If you are using a settings file for the update command, please make sure correct environment and connector ID are specified.
   
 ```
 Arguments
@@ -230,7 +230,7 @@ or
 
 `paconn validate -s [Path to settings.json]`
 
-The command will print the error, warning, or success message depending result of the verification.
+The command will print the error, warning, or success message depending result of the validation.
   
 ```
 Arguments
@@ -245,13 +245,13 @@ Arguments
 
 ### Best Practice
 
-Download all the custom connectors and use git or any other source code management system to save the files. In case of an incorrect update, redeploy the connector by rerunning the update command with the correct set of files from the source code management system.
+Download all of your connectors and use git or any other source code management system to save the files. In case of an incorrect update, redeploy the connector by rerunning the update command with the correct set of files from the source code management system.
 
 Please test the custom connector and the settings file in a test environment before deploying in the production environment. Always double check that the environment and connector id are correct.
 
 ## Limitations
 
-The project is limited to creation, update, and download of custom connector in flow and powerapps environment. When an environment is not specified only the flow envrionments are listed to choose from. For non-custom connector the swagger file is not returned.
+The project is limited to creation, update, and download of custom connector in flow and powerapps environment. When an environment is not specified only the flow envrionments are displayed to choose from. For non-custom connector the swagger file is not returned.
 
 
 ## Reporting issues and feedback
@@ -267,12 +267,12 @@ This project welcomes contributions and suggestions.  Most contributions require
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
-To contibute a connector, please start by creating a fork on the github repo. Once you have the
-fork created, create a branch on the forked repo. Clone this forked repo on you local machine,
-and checkout the branch. Create a folder for your connector under `connectors` folder and place
-your files there. Commit and push the changes to your forked branch. Create a pull request from
-the forked branch to the main repo to include your changes in the main repo. [Please see this
-document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
+To contibute a connector to the open source repo, please start by creating a fork on the github repo.
+Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on you 
+local machine, and checkout the branch. Create a folder for your connector under the `connectors` folder
+and place the connector files in the sub-folder. Commit and push the changes to your forked branch.
+Create a pull request from the forked branch to the main repo to merge your changes into the main repo.
+[Please see this document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
 
 When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
