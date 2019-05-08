@@ -20,7 +20,7 @@ def download(environment, connector_id, destination, powerapps_url, powerapps_ve
     """
     Download command.
     """
-    settings, powerapps_rp, flow_rp = load_settings_and_powerapps_rp(
+    settings, powerapps_rp, _ = load_settings_and_powerapps_rp(
         environment=environment,
         settings_file=settings_file,
         connector_id=connector_id,

@@ -13,7 +13,7 @@ import urllib.parse
 
 from knack.util import CLIError
 
-from paconn.common.util import file_exists
+from paconn.common.util import ensure_file_exists
 from paconn.apimanager.iconuploader import upload_icon
 from paconn.operations.json_keys import (
     _PROPERTIES,
@@ -65,10 +65,10 @@ def create_update(powerapps_rp, settings, client_secret, is_update):
     """
 
     # Make sure the required files exist
-    file_exists(
+    ensure_file_exists(
         file=settings.api_properties,
         file_type='API Properties')
-    file_exists(
+    ensure_file_exists(
         file=settings.api_definition,
         file_type='API Definition')
 
@@ -112,7 +112,7 @@ def create_update(powerapps_rp, settings, client_secret, is_update):
     # Validate Open API Definition
     powerapps_rp.validate_connector(
         payload=openapi_definition,
-        certification_rules=False)
+        enable_certification_rules=False)
 
     # Get the shared access signature
     response = powerapps_rp.generate_resource_storage(settings.environment)

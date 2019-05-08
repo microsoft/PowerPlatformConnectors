@@ -7,7 +7,7 @@
 Utility for loading settings.
 """
 
-from paconn import _CREATE, _DOWNLOAD, _VALIDATE
+from paconn import _UPDATE, _DOWNLOAD, _VALIDATE
 from paconn.authentication.tokenmanager import TokenManager
 from paconn.apimanager.powerappsrpbuilder import PowerAppsRPBuilder
 from paconn.apimanager.flowrpbuilder import FlowRPBuilder
@@ -72,14 +72,18 @@ def load_settings_and_powerapps_rp(
         settings.api_definition = settings.api_definition or 'apiDefinition.swagger.json'
         settings.icon = settings.icon or 'icon.png'
 
-    # Propmt for missing arguments
+    # Prompt for environment for any
+    # operation other than `validate`
     if command_context is not _VALIDATE:
         prompt_for_environment(
             settings=settings,
             flow_rp=flow_rp)
-        if command_context is not _CREATE:
-            prompt_for_connector_id(
-                settings=settings,
-                powerapps_rp=powerapps_rp)
+
+    # Prompt for connector id for
+    # operation `update` and `download`
+    if command_context is _UPDATE or command_context is _DOWNLOAD:
+        prompt_for_connector_id(
+            settings=settings,
+            powerapps_rp=powerapps_rp)
 
     return settings, powerapps_rp, flow_rp

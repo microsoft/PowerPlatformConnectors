@@ -11,7 +11,7 @@ Method for create/update operation
 import io
 import json
 
-from paconn.common.util import file_exists
+from paconn.common.util import ensure_file_exists
 
 
 def validate(powerapps_rp, settings):
@@ -20,7 +20,7 @@ def validate(powerapps_rp, settings):
     """
 
     # Make sure the required files exist
-    file_exists(
+    ensure_file_exists(
         file=settings.api_definition,
         file_type='API Definition')
 
@@ -31,7 +31,7 @@ def validate(powerapps_rp, settings):
     # Validate Open API Definition
     result = powerapps_rp.validate_connector(
         payload=openapi_definition,
-        certification_rules=True)
+        enable_certification_rules=True)
 
     # Replace \r\n in the string to newlines
     result = bytes(result, 'utf-8').decode('unicode-escape')

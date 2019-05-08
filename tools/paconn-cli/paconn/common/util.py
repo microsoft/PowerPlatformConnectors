@@ -40,7 +40,7 @@ def format_json(content):
     return json_string
 
 
-def file_exists(file, file_type):
+def ensure_file_exists(file, file_type):
     """
     Check if the given file exists.
     """

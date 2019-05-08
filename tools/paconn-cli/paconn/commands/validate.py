@@ -15,7 +15,6 @@ from paconn.settings.util import load_settings_and_powerapps_rp
 import paconn.operations.validate
 
 
-# pylint: disable=too-many-arguments
 def validate(
         api_definition,
         powerapps_url,
@@ -24,7 +23,7 @@ def validate(
     """
     Validate command.
     """
-    settings, powerapps_rp, flow_rp = load_settings_and_powerapps_rp(
+    settings, powerapps_rp, _ = load_settings_and_powerapps_rp(
         environment=None,
         settings_file=settings_file,
         connector_id=None,

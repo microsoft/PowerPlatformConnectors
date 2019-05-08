@@ -15,11 +15,11 @@ from paconn.apimanager.flowrp import FlowRP
 # pylint: disable=too-few-public-methods
 class FlowRPBuilder:
     """
-    A builder class to create a PowerAppsRP object
+    A builder class to create a FlowRP object
     """
     def get_from_settings(credentials, settings):
         """
-        Returns powerapps rp object from a given settings and credentials.
+        Returns flow rp object from a given settings and credentials.
         """
 
         # Create the API Manager

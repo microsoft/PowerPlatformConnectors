@@ -27,7 +27,7 @@ def create(
     """
     Create command.
     """
-    settings, powerapps_rp, flow_rp = load_settings_and_powerapps_rp(
+    settings, powerapps_rp, _ = load_settings_and_powerapps_rp(
         environment=environment,
         settings_file=settings_file,
         api_properties=api_properties,
