@@ -9,7 +9,8 @@
 import os
 from setuptools import setup
 
-__VERSION__ = '0.0.9'
+__VERSION__ = '0.0.10'
+
 
 def read(fname):
     """Local read helper function for long documentation"""
@@ -41,9 +42,11 @@ setup(
         'paconn',
         'paconn.apimanager',
         'paconn.authentication',
+        'paconn.commands',
         'paconn.common',
         'paconn.config',
-        'paconn.operations'
+        'paconn.operations',
+        'paconn.settings'
     ],
     install_requires=[
         'docutils',

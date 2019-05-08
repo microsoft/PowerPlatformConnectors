@@ -10,6 +10,8 @@ import sys
 import os
 import json
 
+from knack.util import CLIError
+
 
 def get_config_dir():
     """
@@ -36,3 +38,14 @@ def format_json(content):
         indent=2,
         separators=(',', ': '))
     return json_string
+
+
+def ensure_file_exists(file, file_type):
+    """
+    Check if the given file exists.
+    """
+
+    if not file:
+        raise CLIError('{file_type} must be specified.'.format(file_type=file_type))
+    if not os.path.exists(file):
+        raise CLIError('File does not exist: {file}'.format(file=file))

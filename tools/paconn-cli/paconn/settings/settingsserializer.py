@@ -9,12 +9,21 @@ Represents a settings object consructed from settings.json
 
 import json
 from paconn.common.util import format_json
-from .settings import Settings
+from paconn.settings.settings import Settings
 
+# Connector sepecific settings
 _CONNECTOR_ID = 'connectorId'
 _ENVIRONMENT = 'environment'
+
+# PowerApps RP settings
 _POWERAPPS_URL = 'powerAppsUrl'
 _POWERAPPS_API_VERSION = 'powerAppsApiVersion'
+
+# Flow RP Settings
+_FLOW_URL = 'flowUrl'
+_FLOW_API_VERSION = 'flowApiVersion'
+
+# Files
 _API_PROPERTIES = 'apiProperties'
 _API_DEFINITION = 'apiDefinition'
 _ICON = 'icon'
@@ -50,13 +59,24 @@ class SettingsSerializer:
         Serializes a settings object into a dict
         """
         settings_dict = {
+            # Connector sepecific settings
             _CONNECTOR_ID: settings.connector_id,
             _ENVIRONMENT: settings.environment,
-            _POWERAPPS_URL: settings.powerapps_url,
-            _POWERAPPS_API_VERSION: settings.powerapps_api_version,
+
+            # Files
             _API_PROPERTIES: settings.api_properties,
             _API_DEFINITION: settings.api_definition,
-            _ICON: settings.icon
+            _ICON: settings.icon,
+
+            # PowerApps RP settings
+            _POWERAPPS_URL: settings.powerapps_url,
+            _POWERAPPS_API_VERSION: settings.powerapps_api_version
+            # powerapps_base_path IGNORED
+
+            # Flow RP Settings - DO NOT WRITE
+            # flow_url IGNORED
+            # flow_api_version IGNORED
+            # flow_base_path IGNORED
         }
         return settings_dict
 
@@ -66,12 +86,23 @@ class SettingsSerializer:
         Deserializes a dictionary to a settings object
         """
         settings = Settings(
+            # Connector sepecific settings
             connector_id=settings_dict.get(_CONNECTOR_ID, None),
             environment=settings_dict.get(_ENVIRONMENT, None),
-            powerapps_url=settings_dict.get(_POWERAPPS_URL, None),
-            powerapps_api_version=settings_dict.get(_POWERAPPS_API_VERSION, None),
+
+            # Files
             api_properties=settings_dict.get(_API_PROPERTIES, None),
             api_definition=settings_dict.get(_API_DEFINITION, None),
-            icon=settings_dict.get(_ICON, None)
+            icon=settings_dict.get(_ICON, None),
+
+            # PowerApps RP settings
+            powerapps_url=settings_dict.get(_POWERAPPS_URL, None),
+            powerapps_api_version=settings_dict.get(_POWERAPPS_API_VERSION, None),
+            # powerapps_base_path IGNORED
+
+            # Flow RP Settings
+            flow_url=settings_dict.get(_FLOW_URL, None),
+            flow_api_version=settings_dict.get(_FLOW_API_VERSION, None)
+            # flow_base_path IGNORED
         )
         return settings

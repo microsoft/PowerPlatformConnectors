@@ -13,7 +13,7 @@ import sys
 
 from knack import CLI, CLICommandsLoader
 # pylint: disable=unused-import
-from paconn.help import helps  # noqa: F401
+from paconn.commands.help import helps  # noqa: F401
 from paconn.common.util import get_config_dir
 
 
@@ -37,7 +37,7 @@ class ConnectorsCliCommandsLoader(CLICommandsLoader):
         """
         Loads command table
         """
-        from paconn.commands import load_command_table
+        from paconn.commands.commands import load_command_table
 
         load_command_table(self, args)
         return super(ConnectorsCliCommandsLoader, self).load_command_table(args)
@@ -46,7 +46,7 @@ class ConnectorsCliCommandsLoader(CLICommandsLoader):
         """
         Load arguments
         """
-        from paconn.params import load_arguments
+        from paconn.commands.params import load_arguments
 
         load_arguments(self, command)
         super(ConnectorsCliCommandsLoader, self).load_arguments(command)

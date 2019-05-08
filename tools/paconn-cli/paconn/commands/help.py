@@ -9,7 +9,7 @@ Help strings for the CLI
 """
 
 from knack.help_files import helps  # pylint: disable=unused-import
-from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE
+from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
 
 helps[_COMMAND_GROUP] = """
     short-summary: Microsoft Power Platform Connectors CLI
@@ -46,4 +46,12 @@ helps[_UPDATE] = """
     examples:
         - name: Update connector.
           text: paconn update
+"""
+
+helps[_VALIDATE] = """
+    type: command
+    short-summary: Validate the swagger for certification.
+    examples:
+        - name: Validate swagger
+          text: paconn validate
 """
