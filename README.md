@@ -1,9 +1,19 @@
+# Microsoft Power Platform Connectors
 
-# Contributing
+Welcome to the Microsoft Power Platform Connectors open source repository. This repository contains connector samples and related tools to facilitate connector development. 
+
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
+
+To contibute a connector to the open source repo, please start by creating a fork on the github repo.
+Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on you 
+local machine, and checkout the branch. Create a folder for your connector under the `connectors` folder
+and place the connector files in the sub-folder. Commit and push the changes to your forked branch.
+Create a pull request from the forked branch to the main repo to merge your changes into the main repo.
+[Please see this document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
 
 When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
@@ -13,7 +23,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-# Legal Notices
+## Legal Notices
 
 Microsoft and any contributors grant you a license to the Microsoft documentation and other content
 in this repository under the [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode),
