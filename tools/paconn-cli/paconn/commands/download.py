@@ -16,7 +16,14 @@ import paconn.operations.download
 
 
 # pylint: disable=too-many-arguments
-def download(environment, connector_id, destination, powerapps_url, powerapps_version, settings_file):
+def download(
+        environment,
+        connector_id,
+        destination,
+        powerapps_url,
+        powerapps_version,
+        settings_file,
+        overwrite):
     """
     Download command.
     """
@@ -34,6 +41,7 @@ def download(environment, connector_id, destination, powerapps_url, powerapps_ve
     directory = paconn.operations.download.download(
         powerapps_rp=powerapps_rp,
         settings=settings,
-        destination=destination)
+        destination=destination,
+        overwrite=overwrite)
 
     display('The connector is downloaded to {}.'.format(directory))

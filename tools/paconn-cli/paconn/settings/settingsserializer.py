@@ -35,12 +35,20 @@ class SettingsSerializer:
     Serializes and deserializes a settings object
     """
     @staticmethod
+    def to_json_string(settings):
+        """
+        Serializes a settings object into string
+        """
+        settings_dict = SettingsSerializer.serialize(settings)
+        json_str = format_json(settings_dict)
+        return json_str
+
+    @staticmethod
     def to_json(settings, filename):
         """
         Serializes a settings object into the settings.json
         """
-        settings_dict = SettingsSerializer.serialize(settings)
-        json_str = format_json(settings_dict)
+        json_str = SettingsSerializer.to_json_string(settings)
         open(filename, 'w').write(json_str)
 
     @staticmethod
