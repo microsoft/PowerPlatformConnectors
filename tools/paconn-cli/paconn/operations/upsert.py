@@ -14,6 +14,7 @@ import urllib.parse
 from knack.util import CLIError
 
 from paconn.common.util import ensure_file_exists
+from paconn.settings.util import write_settings
 from paconn.apimanager.iconuploader import upload_icon
 from paconn.operations.json_keys import (
     _PROPERTIES,
@@ -59,7 +60,7 @@ def _create_backendservice_url(openapi_definition):
     return url
 
 
-def create_update(powerapps_rp, settings, client_secret, is_update):
+def upsert(powerapps_rp, settings, client_secret, is_update, overwrite_settings):
     """
     Method for create/update operation
     """
@@ -137,5 +138,9 @@ def create_update(powerapps_rp, settings, client_secret, is_update):
             environment=settings.environment,
             payload=property_definition)
         connector_id = json.loads(api_registration)[_NAME]
+
+        # Save the settings
+        settings.connector_id = connector_id
+        write_settings(settings, overwrite_settings)
 
     return connector_id

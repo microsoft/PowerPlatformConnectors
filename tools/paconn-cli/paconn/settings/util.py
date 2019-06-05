@@ -8,11 +8,16 @@ Utility for loading settings.
 """
 
 from paconn import _UPDATE, _DOWNLOAD, _VALIDATE
+from paconn.common.util import write_with_prompt
 from paconn.authentication.tokenmanager import TokenManager
 from paconn.apimanager.powerappsrpbuilder import PowerAppsRPBuilder
 from paconn.apimanager.flowrpbuilder import FlowRPBuilder
 from paconn.common.prompts import get_environment, get_connector_id
 from paconn.settings.settingsbuilder import SettingsBuilder
+from paconn.settings.settingsserializer import SettingsSerializer
+
+# Setting file name
+SETTINGS_FILE = 'settings.json'
 
 
 def prompt_for_environment(settings, flow_rp):
@@ -87,3 +92,13 @@ def load_settings_and_powerapps_rp(
             powerapps_rp=powerapps_rp)
 
     return settings, powerapps_rp, flow_rp
+
+
+def write_settings(settings, overwrite):
+    filename = SETTINGS_FILE
+    settings_json = SettingsSerializer.to_json_string(settings)
+    write_with_prompt(
+        filename=filename,
+        mode='w',
+        content=settings_json,
+        overwrite=overwrite)

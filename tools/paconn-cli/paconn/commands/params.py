@@ -34,7 +34,7 @@ CONNECTOR_ID_HELP = 'The custom connector ID.'
 
 DESTINATION = 'destination'
 DESTINATION_OPTIONS = ['--dest', '-d']
-DESTINATION_HELP = 'Destination directory.'
+DESTINATION_HELP = 'Destination directory. Non-existent directories will be created.'
 
 POWERAPPS_URL = 'powerapps_url'
 POWERAPPS_URL_OPTIONS = ['--pau', '-u']
@@ -49,16 +49,24 @@ SETTINGS_OPTIONS = ['--settings', '-s']
 SETTINGS_HELP = 'A settings file containing required parameters. When a settings file is specified some commandline parameters are ignored.'  # noqa: E501
 
 API_PROPERTIES = 'api_properties'
-API_PROPERTIES_OPTIONS = ['--api-prop']
+API_PROPERTIES_OPTIONS = ['--api-prop', '-p']
 API_PROPERTIES_HELP = 'Location of the API properties JSON document.'
 
 API_DEFINITION = 'api_definition'
-API_DEFINITION_OPTIONS = ['--api-def']
+API_DEFINITION_OPTIONS = ['--api-def', '-d']
 API_DEFINITION_HELP = 'Location of the Open API definition JSON document.'
 
 ICON = 'icon'
-ICON_OPTIONS = ['--icon']
+ICON_OPTIONS = ['--icon', '-i']
 ICON_HELP = 'Location for the icon file.'
+
+OVERWRITE = 'overwrite'
+OVERWRITE_OPTIONS = ['--overwrite']
+OVERWRITE_HELP = 'Overwrite all the existing connector and settings files.'
+
+OVERWRITE_SETTINGS = 'overwrite_settings'
+OVERWRITE_SETTINGS_OPTIONS = ['--overwrite-settings']
+OVERWRITE_SETTINGS_HELP = 'Overwrite the existing settings file.'
 
 
 # pylint: disable=unused-argument
@@ -106,6 +114,15 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help=SETTINGS_HELP)
+        arg_context.argument(
+            OVERWRITE,
+            options_list=OVERWRITE_OPTIONS,
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help=OVERWRITE_HELP)
 
     with ArgumentsContext(self, _CREATE) as arg_context:
         arg_context.argument(
@@ -156,6 +173,15 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help=SETTINGS_HELP)
+        arg_context.argument(
+            OVERWRITE_SETTINGS,
+            options_list=OVERWRITE_SETTINGS_OPTIONS,
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help=OVERWRITE_SETTINGS_HELP)
 
     with ArgumentsContext(self, _UPDATE) as arg_context:
         arg_context.argument(

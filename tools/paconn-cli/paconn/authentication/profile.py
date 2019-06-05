@@ -12,7 +12,8 @@ import adal
 from msrestazure.azure_active_directory import AADTokenCredentials
 
 CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
-AUTHORITY_URL = 'https://login.microsoftonline.com/{tenant}'
+TENANT = 'common'
+AUTHORITY_URL = 'https://login.microsoftonline.com/{}'
 RESOURCE = 'https://management.core.windows.net/'
 
 
@@ -26,17 +27,16 @@ class Profile:
         self.authority_url = authority_url
 
     def _get_authentication_context(self, tenant):
-        auth_url = self.authority_url.format(
-            tenant=tenant)
+        auth_url = self.authority_url.format(tenant)
         return adal.AuthenticationContext(
             authority=auth_url,
             api_version=None)
 
-    def authenticate_device_code(self, client_id=CLIENT_ID):
+    def authenticate_device_code(self, tenant=TENANT, client_id=CLIENT_ID):
         """
         Authenticate the end-user using device auth.
         """
-        context = self._get_authentication_context('common')
+        context = self._get_authentication_context(tenant)
 
         code = context.acquire_user_code(
             resource=self.resource,

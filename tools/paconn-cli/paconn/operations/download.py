@@ -12,9 +12,10 @@ import json
 import requests
 
 from knack.util import CLIError
+from knack.prompting import prompt_y_n
 
 from paconn.common.util import format_json
-from paconn.settings.settingsserializer import SettingsSerializer
+from paconn.settings.util import write_settings, SETTINGS_FILE
 
 from paconn.operations.json_keys import (
     _PROPERTIES,
@@ -32,19 +33,48 @@ def _prepare_directory(destination, connector_id):
     """
     Create directory for saving a connector.
     """
-    if destination and os.path.isdir(destination):
-        os.chdir(destination)
 
-    if os.path.isdir(connector_id):
-        dir_error = '{} directory already exists. Please remove the directory before continuing.'
-        raise CLIError(dir_error.format(connector_id))
-    os.mkdir(connector_id)
-    os.chdir(connector_id)
+    # Use the destination directory when provided
+    if destination:
+        if not os.path.exists(destination):
+            # Create all sub-directories
+            os.makedirs(destination)
+    # Create a sub-directory in the current directory
+    # when a destination isn't provided
+    else:
+        if os.path.isdir(connector_id):
+            error = '{} directory already exists. Please remove the directory before continuing.'
+            raise CLIError(error.format(connector_id))
+        else:
+            os.mkdir(connector_id)
+            destination = connector_id
+
+    if os.path.isdir(destination):
+        os.chdir(destination)
+    else:
+        error = 'Couldn\'t download to the desination directory {}.'
+        raise CLIError(error.format(destination))
 
     return os.getcwd()
 
 
-def download(powerapps_rp, settings, destination):
+def _ensure_overwrite(settings):
+    """
+    Ensure the files can be overwritten, if exists
+    """
+    overwrite = False
+    files = [settings.api_properties, settings.api_definition, settings.icon, SETTINGS_FILE]
+    existing_files = [file for file in files if os.path.exists(file)]
+    if len(existing_files) > 0:
+        msg = '{} file(s) exist. Do you want to overwrite?'.format(existing_files)
+        overwrite = prompt_y_n(msg)
+        if not overwrite:
+            raise CLIError('{} files not overwritten.'.format(existing_files))
+
+    return overwrite
+
+
+def download(powerapps_rp, settings, destination, overwrite):
     """
     Download operation.
     """
@@ -52,6 +82,10 @@ def download(powerapps_rp, settings, destination):
     directory = _prepare_directory(
         destination=destination,
         connector_id=settings.connector_id)
+
+    # Check if files could be overwritten
+    if not overwrite:
+        overwrite = _ensure_overwrite(settings)
 
     api_registration = powerapps_rp.get_connector(
         environment=settings.environment,
@@ -63,7 +97,7 @@ def download(powerapps_rp, settings, destination):
     api_properties = api_registration[_PROPERTIES]
 
     # Save the settings
-    SettingsSerializer.to_json(settings, 'settings.json')
+    write_settings(settings, overwrite)
 
     # Property whitelist
     property_keys_whitelist = [
@@ -86,7 +120,11 @@ def download(powerapps_rp, settings, destination):
     }
 
     # Write the api properties
-    open(settings.api_properties, mode='w').write(format_json(api_properties_selected))
+    api_prop = format_json(api_properties_selected)
+    open(
+        file=settings.api_properties,
+        mode='w'
+        ).write(api_prop)
 
     # Write the open api definition,
     # either from swagger URL when available or from swagger property.
@@ -95,12 +133,18 @@ def download(powerapps_rp, settings, destination):
         response = requests.get(original_swagger_url, allow_redirects=True)
         response_string = response.content.decode('utf-8-sig')
         swagger = format_json(json.loads(response_string))
-        open(settings.api_definition, mode='w').write(swagger)
+        open(
+            file=settings.api_definition,
+            mode='w'
+            ).write(swagger)
 
     # Write the icon
     if _ICON_URI in api_properties:
         icon_url = api_properties[_ICON_URI]
         response = requests.get(icon_url, allow_redirects=True)
-        open(settings.icon, mode='wb').write(response.content)
+        open(
+            file=settings.icon,
+            mode='wb'
+            ).write(response.content)
 
     return directory

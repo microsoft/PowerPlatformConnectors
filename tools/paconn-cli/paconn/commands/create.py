@@ -11,7 +11,7 @@ Create command.
 from paconn import _CREATE
 from paconn.common.util import display
 from paconn.settings.util import load_settings_and_powerapps_rp
-from paconn.operations.create_update import create_update
+from paconn.operations.upsert import upsert
 
 
 # pylint: disable=too-many-arguments
@@ -23,7 +23,8 @@ def create(
         powerapps_url,
         powerapps_version,
         client_secret,
-        settings_file):
+        settings_file,
+        overwrite_settings):
     """
     Create command.
     """
@@ -38,10 +39,11 @@ def create(
         powerapps_version=powerapps_version,
         command_context=_CREATE)
 
-    connector_id = create_update(
+    connector_id = upsert(
         powerapps_rp=powerapps_rp,
         settings=settings,
         client_secret=client_secret,
-        is_update=False)
+        is_update=False,
+        overwrite_settings=overwrite_settings)
 
     display('{} created successfully.'.format(connector_id))

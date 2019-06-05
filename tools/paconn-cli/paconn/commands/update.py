@@ -10,7 +10,7 @@ Update command.
 from paconn import _UPDATE
 from paconn.common.util import display
 from paconn.settings.util import load_settings_and_powerapps_rp
-from paconn.operations.create_update import create_update
+from paconn.operations.upsert import upsert
 
 
 # pylint: disable=too-many-arguments
@@ -38,10 +38,11 @@ def update(
         powerapps_version=powerapps_version,
         command_context=_UPDATE)
 
-    connector_id = create_update(
+    connector_id = upsert(
         powerapps_rp=powerapps_rp,
         settings=settings,
         client_secret=client_secret,
-        is_update=True)
+        is_update=True,
+        overwrite=False)
 
     display('{} updated successfully.'.format(connector_id))
