@@ -15,28 +15,25 @@ jobs:
       command: 'custom'
       feedsToUse: 'select'
       versioningScheme: 'off'
-      arguments: 'sources Add -Name msazure -Source https://msazure.pkgs.visualstudio.com/DefaultCollection/_apis/packaging/ManualMirror/nuget/index.json'
+      arguments: 'sources Add -Name $(nugetpackagesourcename) -Source $(nugetmanualmirrorurl)'
   - task: NuGetCommand@2
     inputs:
       command: 'custom'
       feedsToUse: 'select'
       versioningScheme: 'off'
-      arguments: 'install BAPIConnectors.OSSValidators -Source msazure -Version 1.0.0'
+      arguments: 'install $(ossvalidatorspkg) -Source $(nugetpackagesourcename) -Version $(ossvalidatorsversion) -OutputDirectory $(ossvalidatorspkg)'
   - powershell: |
-      $GitUrl = 'https://api.github.com/repos'
-
       $SourceRepo = [System.Uri]$Env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI
       $SourceRepo = $SourceRepo.AbsolutePath -replace '.git'
 
-      $GitUrl = $GitUrl + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
+      $GitUrl = $(githubapi) + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
 
-      $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
-      
-      $swaggervalidator = "tools/SwaggerValidator/ValidateSwagger.exe"
+      $Files = Invoke-RestMethod -Uri $(GitUrl) -Method Get
+
       ForEach ($File in $Files) {
         $filename = $File.filename
         if($filename.EndsWith('.swagger.json')) {
-          iex "$ossvalidatorspkg.$ossvalidatorsversion/$swaggervalidator $filename"
+          iex "$ossvalidatorspkg/$(swaggervalidator) $filename"
           Write-Host $Result
         }
       }
