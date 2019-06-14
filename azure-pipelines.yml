@@ -8,11 +8,8 @@ pr:
     - connectors/*
 
 jobs:
-- job: get_content
+- job: validate_pr
   steps:
-  - powershell: |
-      mkdir swgvldtr
-      cd swgvldtr
   - task: NuGetCommand@2
     inputs:
       command: 'custom'
@@ -24,22 +21,22 @@ jobs:
       command: 'custom'
       feedsToUse: 'select'
       versioningScheme: 'off'
-      arguments: 'install BAPIConnectors.SwaggerValidator -Source msazure'
+      arguments: 'install BAPIConnectors.OSSValidators -Source msazure -Version 1.0.0'
   - powershell: |
       $GitUrl = 'https://api.github.com/repos'
 
       $SourceRepo = [System.Uri]$Env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI
       $SourceRepo = $SourceRepo.AbsolutePath -replace '.git'
+
       $GitUrl = $GitUrl + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
+
       $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
       
-      $SwaggerUri = 'https://connectorgithubcheck.azurewebsites.net/api/ConnectorGithubCheckRun?code=Ja8rWjlRxfsOo4AhKcQh9Ld5Bhzt3eAvC6n4OHAG6ZHRptBecMVdFQ=='
+      $swaggervalidator = "tools/SwaggerValidator/ValidateSwagger.exe"
       ForEach ($File in $Files) {
         $filename = $File.filename
-        Write-Host $filename
         if($filename.EndsWith('.swagger.json')) {
-          $Form = (Get-Content $filename)
-          $Result = Invoke-RestMethod -Uri $SwaggerUri -Method Post -Body $Form
+          iex "$ossvalidatorspkg.$ossvalidatorsversion/$swaggervalidator $filename"
           Write-Host $Result
         }
       }
