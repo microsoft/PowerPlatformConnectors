@@ -1,12 +1,3 @@
-pr:
-  branches:
-    include:
-    - master
-    - releases/*
-  paths:
-    include:
-    - connectors/*
-
 jobs:
 - job: validate_pr
   steps:
@@ -28,11 +19,18 @@ jobs:
 
       $GitUrl = '$(githubapi)' + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
 
+      # Get the list of files for the given PR
       $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
 
       ForEach ($File in $Files) {
         $filename = $File.filename
         if($filename.EndsWith('.swagger.json')) {
           $(Agent.BuildDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(swaggervalidator) $filename
+
+          # Error encountered
+          if($LastExitCode)
+          {
+            exit $LastExitCode
+          }
         }
       }
