@@ -1,0 +1,36 @@
+jobs:
+- job: validate_pr
+  steps:
+  - task: NuGetCommand@2
+    inputs:
+      command: 'custom'
+      feedsToUse: 'select'
+      versioningScheme: 'off'
+      arguments: 'sources Add -Name $(nugetpackagesourcename) -Source $(nugetmanualmirrorurl)'
+  - task: NuGetCommand@2
+    inputs:
+      command: 'custom'
+      feedsToUse: 'select'
+      versioningScheme: 'off'
+      arguments: 'install $(ossvalidatorspkg) -Source $(nugetpackagesourcename) -Version $(ossvalidatorsversion) -OutputDirectory $(Agent.BuildDirectory)'
+  - powershell: |
+      $SourceRepo = [System.Uri]$Env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI
+      $SourceRepo = $SourceRepo.AbsolutePath -replace '.git'
+
+      $GitUrl = '$(githubapi)' + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
+
+      # Get the list of files for the given PR
+      $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
+
+      ForEach ($File in $Files) {
+        $filename = $File.filename
+        if($filename.EndsWith('.swagger.json')) {
+          $(Agent.BuildDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(swaggervalidator) $filename
+
+          # Error encountered
+          if($LastExitCode)
+          {
+            exit $LastExitCode
+          }
+        }
+      }
