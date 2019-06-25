@@ -11,6 +11,7 @@ import os
 import json
 
 from knack.util import CLIError
+from knack.prompting import prompt_y_n
 
 
 def get_config_dir():
@@ -46,6 +47,23 @@ def ensure_file_exists(file, file_type):
     """
 
     if not file:
-        raise CLIError('{file_type} must be specified.'.format(file_type=file_type))
+        raise CLIError('{} must be specified.'.format(file_type))
     if not os.path.exists(file):
-        raise CLIError('File does not exist: {file}'.format(file=file))
+        raise CLIError('File does not exist: {}'.format(file))
+
+
+def ensure_overwrite(filename):
+    overwrite = True
+    if os.path.exists(filename):
+        msg = '{} file exists. Do you want to overwrite?'.format(filename)
+        overwrite = prompt_y_n(msg)
+
+    return overwrite
+
+
+def write_with_prompt(filename, mode, content, overwrite):
+    if not overwrite:
+        overwrite = ensure_overwrite(filename)
+
+    if overwrite:
+        open(filename, mode=mode).write(content)
