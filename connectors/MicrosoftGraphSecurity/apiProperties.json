@@ -1,15 +1,22 @@
 {
   "properties": {
     "capabilities": [
-      "actions"
+      "actions",
+      "triggers"
     ],
     "connectionParameters": {
       "token": {
         "oAuthSettings": {
           "clientId": "{{replace_with_your_client_id}}",
           "customParameters": {
+            "loginUri": {
+              "value": "https://login.windows.net"
+            },
             "resourceUri": {
-              "value": "https://graph.microsoft.com"
+              "value": "https://graph.microsoft.com/"
+            },
+            "tenantId": {
+              "value": "common"
             }
           },
           "identityProvider": "aad",
@@ -17,11 +24,56 @@
             "IsFirstParty": "False"
           },
           "redirectMode": "Global",
-          "redirectUrl": "https://global.consent.azure-apim.net/redirect"
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "scopes": [
+            "User.Read"
+          ]
         },
         "type": "oauthSetting"
+      },
+      "token:TenantId": {
+        "metadata": {
+          "sourceType": "AzureActiveDirectoryTenant"
+        },
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "hidden": "true",
+            "required": "false"
+          }
+        }
       }
     },
-    "iconBrandColor": "#0078D6"
+    "iconBrandColor": "#0078D6",
+    "policyTemplateInstances": [
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "OnAllNewAlerts"
+          ],
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "$filter": "createdDateTime gt @{triggerBody().value[0].createdDateTime}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().value"
+        },
+        "templateId": "pollingtrigger",
+        "title": "PollingTriggerPolicy_244e5aa7-92ba-67d0-028c-3dd9de2d7f3f",
+        "type": "PollingTrigger"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "OnNewHighSeverityAlerts"
+          ],
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "$filter": "Severity eq 'High' and createdDateTime gt @{triggerBody().value[0].createdDateTime}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().value"
+        },
+        "templateId": "pollingtrigger",
+        "title": "PollingTriggerPolicy_99ad161a-ec9a-897a-41e7-d51f785af49c",
+        "type": "PollingTrigger"
+      }
+    ]
   }
 }
