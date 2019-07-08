@@ -1,6 +1,6 @@
 # Microsoft Power Platform Connectors
 
-Welcome to the Microsoft Power Platform Connectors open source repository. This repository contains connector samples and related tools to facilitate connector development. 
+Welcome to the Microsoft Power Platform Connectors open source repository. This repository contains connector samples and related tools to facilitate connector development for Azure Logic Apps, Microsoft PowerApps and Microsoft Flow.
 
 ## Contributing
 
