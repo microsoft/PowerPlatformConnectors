@@ -43,3 +43,88 @@ jobs:
           }
         }
       }
+  - powershell: |
+      $currentLocation = Get-Location
+      $errorsTotal = 0
+      $warningsTotal = 0
+
+      $breakingChangeDetectorExec = "$(Agent.BuildDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(breakingchangedetector)"
+      $breakingChangeDetectorPath = split-path -path $breakingChangeDetectorExec
+      $bcdNewtonsoftPath = Join-Path $breakingChangeDetectorPath "Newtonsoft.Json.dll"
+
+      # Get the list of files for the given PR
+      $files = git diff HEAD~1 --name-only
+
+      if (-not $files) {
+          Write-Host "Changes not found"
+          exit 0
+      }
+
+      # Binding redirect to Newtosoft.Json v10
+      # Method to intercept resolution of binaries
+      $onAssemblyResolveEventHandler = [System.ResolveEventHandler] {
+          param($sender, $e)
+          foreach ($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
+              if ($assembly.FullName -like "Newtonsoft.Json,*") {
+                  $newtonsoft10 = [System.AppDomain]::CurrentDomain.GetAssemblies() | where FullName -Like "Newtonsoft.Json, Version=10.*"
+                  if ($newtonsoft10) {
+                      return $newtonsoft10
+                  }
+              }
+              if ($assembly.FullName -eq $e.Name) {
+                  return $assembly
+              }
+          }
+          return $null
+      }
+
+      # Loading breaking change detector libraries
+      Add-Type -Path $bcdNewtonsoftPath
+      [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolveEventHandler)
+      Get-ChildItem -Path $breakingChangeDetectorPath -Filter "*.dll" | ForEach-Object { Add-Type -Path $_.FullName }
+
+      foreach ($file in $files) { 
+          if ($file -match '.+?apidefinition.swagger.json$') {
+              $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
+              $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
+
+              if ($previousCommitHash) {
+                  $oldFilePath = Join-Path ([System.IO.Path]::GetTempPath()) ((Split-Path $file -leaf) + '.tmp')
+
+                  git show "$($previousCommitHash):$($file)" > $oldFilePath
+              
+                  if (Test-Path $oldFilePath) {
+                      $results = [Microsoft.Azure.Connectors.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $currentFilePath)
+
+                      $errors = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Error }
+                      $warnings = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Warning }
+
+                      if ($errors.Count -gt 0) {
+                          $errorsTotal += $errors.Count
+                          $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
+                      } # If there are any errors
+
+                      if ($warnings.Count -gt 0) {
+                          $warningsTotal += $warnings.Count
+                          $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
+                      } # If there are any warnings
+                      Remove-Item -Path $oldFilePath
+                  } # If old version of the swagger is available
+              } # If previous commit exists
+          } # If current file is a swagger file
+      } # For each file
+
+      [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolveEventHandler)
+      if ($errorsTotal -gt 0)
+      {
+          Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
+          exit 1
+      }
+      elseif ($warningsTotal -gt 0)
+      {
+          Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
+      }
+      else
+      {
+          Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
+      }
