@@ -9,8 +9,9 @@ Update command.
 
 from paconn import _UPDATE
 from paconn.common.util import display
-from paconn.settings.util import load_settings_and_powerapps_rp
+from paconn.settings.util import load_powerapps_and_flow_rp
 from paconn.operations.upsert import upsert
+from paconn.settings.settingsbuilder import SettingsBuilder
 
 
 # pylint: disable=too-many-arguments
@@ -27,7 +28,8 @@ def update(
     """
     Update command.
     """
-    settings, powerapps_rp, _ = load_settings_and_powerapps_rp(
+    # Get settings
+    settings = SettingsBuilder.get_settings(
         environment=environment,
         settings_file=settings_file,
         api_properties=api_properties,
@@ -35,7 +37,10 @@ def update(
         icon=icon,
         connector_id=connector_id,
         powerapps_url=powerapps_url,
-        powerapps_version=powerapps_version,
+        powerapps_version=powerapps_version)
+
+    powerapps_rp, _ = load_powerapps_and_flow_rp(
+        settings=settings,
         command_context=_UPDATE)
 
     connector_id = upsert(
@@ -43,6 +48,6 @@ def update(
         settings=settings,
         client_secret=client_secret,
         is_update=True,
-        overwrite=False)
+        overwrite_settings=False)
 
     display('{} updated successfully.'.format(connector_id))

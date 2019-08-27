@@ -8,6 +8,7 @@
 Method for create/update operation
 """
 
+import os
 import json
 import urllib.parse
 
@@ -120,7 +121,7 @@ def upsert(powerapps_rp, settings, client_secret, is_update, overwrite_settings)
     sas_url = response[_SHARED_ACCESS_SIGNATURE]
 
     # Upload the icon
-    if settings.icon:
+    if settings.icon and os.path.exists(settings.icon):
         icon_uri = upload_icon(
             sas_url=sas_url,
             file_path=settings.icon)

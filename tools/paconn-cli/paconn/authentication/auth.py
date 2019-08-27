@@ -10,11 +10,11 @@ Authentication methods
 
 from knack.util import CLIError
 
-from .profile import Profile
-from .tokenmanager import TokenManager
+from paconn.authentication.profile import Profile
+from paconn.authentication.tokenmanager import TokenManager
 
 
-def get_authentication():
+def get_authentication(settings, force_authenticate):
     """
     Logs the user in and saves the token in a file.
     """
@@ -23,16 +23,18 @@ def get_authentication():
 
     token_expired = TokenManager.is_expired(credentials)
 
-    # Valid token exists
-    if not token_expired:
-        return
-
-    profile = Profile()
-
     # Get new token
-    if token_expired:
+    if token_expired or force_authenticate:
+        profile = Profile(
+            client_id=settings.client_id,
+            tenant=settings.tenant,
+            resource=settings.resource,
+            authority_url=settings.authority_url)
+
         credentials = profile.authenticate_device_code()
+
         tokenmanager.write(credentials)
+
         token_expired = TokenManager.is_expired(credentials)
 
     # Couldn't acquire valid token
