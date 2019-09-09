@@ -13,7 +13,6 @@ from paconn.authentication.tokenmanager import TokenManager
 from paconn.apimanager.powerappsrpbuilder import PowerAppsRPBuilder
 from paconn.apimanager.flowrpbuilder import FlowRPBuilder
 from paconn.common.prompts import get_environment, get_connector_id
-from paconn.settings.settingsbuilder import SettingsBuilder
 from paconn.settings.settingsserializer import SettingsSerializer
 
 # Setting file name
@@ -35,27 +34,7 @@ def prompt_for_connector_id(settings, powerapps_rp):
             environment=settings.environment)
 
 
-def load_settings_and_powerapps_rp(
-        environment,
-        settings_file,
-        connector_id,
-        powerapps_url,
-        powerapps_version,
-        command_context,
-        api_properties,
-        api_definition,
-        icon):
-    # Get settings
-    settings = SettingsBuilder.get_settings(
-        environment=environment,
-        settings_file=settings_file,
-        api_properties=api_properties,
-        api_definition=api_definition,
-        icon=icon,
-        connector_id=connector_id,
-        powerapps_url=powerapps_url,
-        powerapps_version=powerapps_version,
-        command_context=command_context)
+def load_powerapps_and_flow_rp(settings, command_context):
 
     # Get credentials
     credentials = TokenManager().get_credentials()
@@ -91,7 +70,7 @@ def load_settings_and_powerapps_rp(
             settings=settings,
             powerapps_rp=powerapps_rp)
 
-    return settings, powerapps_rp, flow_rp
+    return powerapps_rp, flow_rp
 
 
 def write_settings(settings, overwrite):

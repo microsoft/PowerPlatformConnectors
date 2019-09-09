@@ -28,6 +28,12 @@ _API_PROPERTIES = 'apiProperties'
 _API_DEFINITION = 'apiDefinition'
 _ICON = 'icon'
 
+# Authentication settings
+_CLIENT_ID = 'clientId'
+_TENANT = 'tenant'
+_AUTHORITY_URL = 'authorityUrl'
+_RESOURCE = 'resource'
+
 
 # pylint: disable=too-few-public-methods
 class SettingsSerializer:
@@ -85,6 +91,12 @@ class SettingsSerializer:
             # flow_url IGNORED
             # flow_api_version IGNORED
             # flow_base_path IGNORED
+
+            # Authentication Settings - DO NOT WRITE
+            # client_id IGNORED
+            # tenant IGNORED
+            # authority_url IGNORED
+            # resource IGNORED
         }
         return settings_dict
 
@@ -110,7 +122,13 @@ class SettingsSerializer:
 
             # Flow RP Settings
             flow_url=settings_dict.get(_FLOW_URL, None),
-            flow_api_version=settings_dict.get(_FLOW_API_VERSION, None)
+            flow_api_version=settings_dict.get(_FLOW_API_VERSION, None),
             # flow_base_path IGNORED
+
+            # Authentication Settings
+            client_id=settings_dict.get(_CLIENT_ID, None),
+            tenant=settings_dict.get(_TENANT, None),
+            authority_url=settings_dict.get(_AUTHORITY_URL, None),
+            resource=settings_dict.get(_RESOURCE, None)
         )
         return settings

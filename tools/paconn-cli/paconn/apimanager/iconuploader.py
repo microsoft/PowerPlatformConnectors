@@ -18,13 +18,22 @@ def upload_icon(sas_url, file_path):
     (scheme, netloc, path, params, query, fragment) = urlparse(sas_url)
     # Account is the first part of the netlocation upto the dot
     account_name = netloc[0:netloc.index('.')]
+
+    # The assumption here is that the blob URL will be in the
+    # form accountname.blob.core.windows.net or
+    # accountname.blob.core.usgovcloudapi.net.
+    # Chopping off accountname.blob. to obtain the
+    # endpoint suffix.
+    endpoint_suffix = netloc.replace(account_name+'.blob.', '')
+
     # Container name is the path
     container_name = path.strip('/')
 
     # Create a block blob service
     blockblob_service = BlockBlobService(
         account_name=account_name,
-        sas_token=query)
+        sas_token=query,
+        endpoint_suffix=endpoint_suffix)
 
     # Get the file name of the icon
     file_name = os.path.basename(file_path)
