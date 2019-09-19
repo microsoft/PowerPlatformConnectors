@@ -1,22 +1,14 @@
 jobs:
 - job: validate_pr
   steps:
-  - powershell:
-    env:
-      mappednugetkey: $(nugetkey)
-      mappednugetuname: $(nugetuname)
-  - task: NuGetCommand@2
+  - task: DownloadPackage@1
     inputs:
-      command: 'custom'
-      feedsToUse: 'select'
-      versioningScheme: 'off'
-      arguments: 'sources Add -Name $(nugetpackagesourcename) -Source $(nugetmanualmirrorurl)'
-  - task: NuGetCommand@2
-    inputs:
-      command: 'custom'
-      feedsToUse: 'select'
-      versioningScheme: 'off'
-      arguments: 'install $(ossvalidatorspkg) -Source $(nugetpackagesourcename) -Version $(ossvalidatorsversion) -OutputDirectory $(Agent.BuildDirectory)'
+      packageType: 'nuget'
+      feed: '/3af14e61-2fb2-458a-8c64-e719475681c4'
+      view: '24157b6d-7d21-48c7-8441-088b76e777c8'
+      definition: '15ff6f7b-e005-41af-894b-067252ecadf1'
+      version: $(ossvalidatorsversion)
+      downloadPath: '$(System.ArtifactsDirectory)'
   - powershell: |
       $SourceRepo = [System.Uri]$Env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI
       $SourceRepo = $SourceRepo.AbsolutePath -replace '.git'
@@ -29,7 +21,7 @@ jobs:
       ForEach ($File in $Files) {
         $filename = $File.filename
         if($filename.EndsWith('.swagger.json')) {
-          $result = $(Agent.BuildDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(swaggervalidator) $filename
+          $result = $(System.ArtifactsDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(swaggervalidator) $filename
 
           # Error encountered
           if($LastExitCode)
@@ -48,7 +40,7 @@ jobs:
       $errorsTotal = 0
       $warningsTotal = 0
 
-      $breakingChangeDetectorExec = "$(Agent.BuildDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(breakingchangedetector)"
+      $breakingChangeDetectorExec = "$(System.ArtifactsDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(breakingchangedetector)"
       $breakingChangeDetectorPath = split-path -path $breakingChangeDetectorExec
       $bcdNewtonsoftPath = Join-Path $breakingChangeDetectorPath "Newtonsoft.Json.dll"
 
