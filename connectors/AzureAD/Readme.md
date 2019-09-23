@@ -21,9 +21,9 @@ This can be done using [Azure Portal] (https://portal.azure.com), by following t
 
 2. Configure (Update) your Azure AD application to access the Azure Active Directory API
 This step will ensure that your application can successfully retrieve an access token to invoke Azure Active Directory rest APIs on behalf of your users.  To do this, follow the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
-    - For redirect URI, use “https://global.consent.azure-apim.net/redirect”
+    - For redirect URI, use "https://global.consent.azure-apim.net/redirect"
     - For the credentials, use a client secret (and not certificates).  Remember to note the secret down, you will need this later and it is shown only once.
-    - For API permissions, make sure “Azure Active Directory” and “user_impersonation” are added.
+    - For API permissions, make sure "Azure Active Directory" and "user_impersonation" are added.
    
 At this point, we now have a valid Azure AD application that can be used to get permissions from end users and access Azure Active Directory.  The next step for us is to create a custom connector.
 
