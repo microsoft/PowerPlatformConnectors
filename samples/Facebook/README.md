@@ -11,20 +11,22 @@
     ```
 
 4. Use CLI tool `paconn` to create a new custom connector.
-5. On Facebook developer dashboard update 'Valid OAuth Redirect URIs' under Products >> Facebook Login >> Settings.
-  You can find the redirect URI on security page of your custom connector.
+5. On Facebook developer dashboard update 'Valid OAuth Redirect URIs' under Products >> Facebook Login >> Settings. You can find the redirect URI on security page of your custom connector.
+
+## Supported Triggers
+
+As part of this sample following triggers are supported:
+
+* `When there is a new post on my timeline`: Triggers a new flow when there is a new post on your timeline. It is possible for this trigger to not activate for all posts since detection of a post must pass several privacy checks including a person's privacy settings on Facebook.
 
 ## Supported Actions
 
 As part of this sample following actions are supported:
 
-* `Get my Pages`: Lists all the pages that you own.
+* `Get my feed`: Gets the feed from your timeline.
 
-* `Get feeds from my timeline`: Gets feed of posts from your timeline.
-
-* `Get page access token`: Get a page access token for a page you own.
-
-* `Get Page Feeds`: Gets feed of posts from a page
+* `Get page feed`: Get posts from the feed of a specified page.
 
 * `Post to my page`: Post a message to a page that you own.
-   This operation requires page access token, which can be retrieved by `Get page access token` action.
+
+* `Get user timeline`: Get posts from a user's timeline.
