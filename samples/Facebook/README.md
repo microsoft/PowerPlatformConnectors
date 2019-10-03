@@ -23,7 +23,7 @@ As part of this sample following triggers are supported:
 
 As part of this sample following actions are supported:
 
-* `Get my feed`: Gets the feed from your timeline.
+* `Get my feed`: Get the feed from your timeline.
 
 * `Get page feed`: Get posts from the feed of a specified page.
 
