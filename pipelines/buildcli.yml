@@ -1,19 +1,7 @@
-trigger:
-- master
-
 pool:
   vmImage: 'windows-latest'
-strategy:
-  matrix:
-    Python36:
-      python.version: '3.6'
 
 steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
-
 - task: ComponentGovernanceComponentDetection@0
   inputs:
     scanType: 'Register'
@@ -22,3 +10,22 @@ steps:
 - task: "ea576cd4-c61f-48f8-97e7-a3cb07b90a6f@2"
   inputs:
     toolMajorVersion: 'V2'
+steps:
+- task: PowerShell@1
+  displayName: 'PowerShell Script'
+  inputs:
+    scriptName: Security.CredScanAutomation/SecretsScan.ps1
+    arguments: '-limitRepos 0'
+    failOnStandardError: false
+  continueOnError: true
+steps:
+- task: PowerShell@1
+  displayName: 'PowerShell Script'
+  inputs:
+    scriptName: Security.CredScanAutomation/ParseSecretsScanResults.ps1
+    arguments: '-logsOutput "$(Agent.BuildDirectory)\_sdt\logs\CredentialScanner"'
+  continueOnError: true
+- task: PublishSecurityAnalysisLogs@3
+  inputs:
+    ArtifactName: 'CodeAnalysisLogs'
+    ArtifactType: 'Container'
