@@ -13,12 +13,62 @@
           "redirectMode": "Global",
           "redirectUrl": "https://global.consent.azure-apim.net/redirect",
           "scopes": [
-            "user_posts publish_pages publish_to_groups"
+            "user_posts publish_pages"
           ]
         },
         "type": "oauthSetting"
       }
     },
-    "iconBrandColor": "#007ee5"
+    "iconBrandColor": "#007ee5",
+    "policyTemplateInstances": [
+      {
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Accept",
+          "x-ms-apimTemplateParameter.value": "application/json",
+          "x-ms-apimTemplate-policySection": "Request"
+        },
+        "templateId": "setHeader",
+        "title": "Set HTTP header"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "UserTimeline"
+          ],
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplateParameter.newPath": "/{userId}/feed"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "Redirect to users endpoint"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "TriggerNewPost"
+          ],
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "since": "@{triggerBody().data[0].created_time}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().data"
+        },
+        "templateId": "pollingtrigger",
+        "title": "Polling trigger for new posts",
+        "type": "PollingTrigger"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "PostToPage"
+          ],
+          "x-ms-apimTemplateParameter.parameterTemplate": "@queryParameters('access_token')",
+          "x-ms-apimTemplateParameter.parameterValueUrl": "/{pageId}?fields=access_token",
+          "x-ms-apimTemplateParameter.parameterValuePathTemplate": "@body().access_token",
+          "x-ms-apimTemplateParameter.httpMethod": "GET",
+          "x-ms-apimTemplate-policySection": "Request"
+        },
+        "templateId": "SetValueFromUrl",
+        "title": "Set access_token for PostToPage"
+      }
+    ]
   }
 }
