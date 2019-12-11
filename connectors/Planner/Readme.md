@@ -1,10 +1,10 @@
 
 ## Planner Connector
-Planner API in Microsoft Graph lets you create tasks and assign them to users in a group in Office 365. It enables you to easily bring together teams, tasks, documents, and conversations for better results. This connector exposes a subset of this API as operations in Microsoft Power Automate and PowerApps.
+Planner API in Microsoft Graph lets you create tasks and assign them to users in a group in Office 365. It enables you to easily bring together teams, tasks, documents, and conversations for better results. This connector exposes a subset of this API as operations in Microsoft Power Automate and Power Apps.
 
 ## Pre-requisites
 You will need the following to proceed:
-* A Microsoft PowerApps or Microsoft Power Automate plan with custom connector feature
+* A Microsoft Power Apps or Microsoft Power Automate plan with custom connector feature
 * An Azure subscription
 * The Power platform CLI tools
 
@@ -20,7 +20,7 @@ This can be done on the [Azure Portal] (https://portal.azure.com), by following 
 2. Configure (Update) your Azure AD application to access Microsoft Graph API. This step will ensure that your application can successfully retrieve an access token to invoke the Microsoft Graph Rest API on behalf of your users. To do this, follow the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
     - For redirect URI, use "https://global.consent.azure-apim.net/redirect"
     - For the credentials, use a client secret (and not certificates).  Remember to note the secret down, you will need this later and it is shown only once.
-    - For API permissions, among other required permissions under "Microsoft Graph", please make sure "User.Read" is added. "User.Read" permission is required in order to login the current user and retrieve its information.
+    - For API permissions, among other required permissions under "Microsoft Graph", please make sure "User.Read" is added. "User.Read" permission is required in order to login the current user and retrieve relevant information.
    
 We now have a valid Azure AD application that can be used to get permissions from end users and authorize calls to Microsoft Graph. The next step for us is to create a custom connector.
 
