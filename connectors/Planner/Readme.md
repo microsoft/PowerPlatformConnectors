@@ -36,8 +36,8 @@ The connector supports the following operations:
 * `Get a task`: Get an existing Planner task
 * `Create a task`: Create a new task in Planner
 * `Update a task (V2)`: Update an existing Planner task
-* `Add assignees to a task`: Add assignees an existing Planner task
-* `Unassign users from a task`: Unassign users from an existing Planner task
+* `Add assignees to a task`: Add assignees to an existing Planner task
+* `Remove assignees from a task`: Remove assignees from an existing Planner task
 * `Get task details`: Get the task details for an existing task
 * `Update task details`: Update the task details for an existing task
 * `List tasks`: List the tasks in a plan
