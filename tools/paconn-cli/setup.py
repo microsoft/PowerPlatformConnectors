@@ -59,7 +59,7 @@ setup(
         'requests',
         'adal',
         'msrestazure',
-        'azure-storage-blob'
+        'azure-storage-blob>=2.1,<12.0'
     ],
     extras_require={
         ":python_version<'3.0'": ['pylint~=1.9.2'],
