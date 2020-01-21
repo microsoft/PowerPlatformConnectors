@@ -22,7 +22,7 @@ https://docs.microsoft.com/fr-fr/connectors/easyvistaselfhelp/
 
 
 ## How to get credentials
-<<Instructions on how user can get credentials to test connector in Flow/LogicApps/PowerApps>> 
+Use the credentials you obtained as your EasyVista account (host, login, password).
 
 
 ## Deployment instructions
