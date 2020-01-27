@@ -11,6 +11,9 @@ For the flow to be successfully created, you will need to have a Smarp account, 
   
   
 The authentication with Smarp is required.  
+
+
+If you do not have a Smarp account please contact Smarp [https://smarp.com/company/#contact-us](https://smarp.com/company/#contact-us)
   
   
 ## API documentation  
