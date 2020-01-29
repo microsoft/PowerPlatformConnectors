@@ -1,0 +1,314 @@
+{
+  "basePath": "/v1",
+  "consumes": [],
+  "definitions": {
+    "Notification": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "description": "Text that is used instead of the one defined in the app.",
+          "x-ms-summary": "Dynamic Text",
+          "type": "string"
+        },
+        "title": {
+          "description": "Title that is used instead of the one defined in the app.",
+          "x-ms-summary": "Dynamic Title",
+          "type": "string"
+        },
+        "input": {
+          "description": "Value that is passed as input to the notification action.",
+          "x-ms-summary": "Input Parameter",
+          "type": "string"
+        },
+        "devices": {
+          "description": "List of devices this notification is sent to. (default is all devices)",
+          "x-ms-summary": "Devices",
+          "items": {
+            "type": "string",
+            "description": "List of devices this notification is sent to. (default is all devices)",
+            "x-ms-dynamic-values": {
+              "operationId": "GetDevices",
+              "value-path": "id",
+              "value-title": "id"
+            }
+          },
+          "type": "array"
+        }
+      }
+    },
+    "NotificationDefinition": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Subscription": {
+      "properties": {
+        "actionName": {
+          "description": "A unique name to identify the online action.",
+          "x-ms-summary": "Action Name",
+          "type": "string",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "description": "url",
+          "title": "",
+          "type": "string",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        }
+      },
+      "required": [
+        "url",
+        "actionName"
+      ],
+      "type": "object"
+    },
+    "EventData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique id of trigger event",
+          "type": "string",
+          "x-ms-visibility": "internal"
+        },
+        "actionName": {
+          "description": "Name of the triggered action.",
+          "type": "string",
+          "x-ms-summary": "Action Name"
+        },
+        "input": {
+          "description": "Input passed with the action.",
+          "type": "string",
+          "x-ms-visibility": "important",
+          "x-ms-summary": "Action Input"
+        },
+        "timestamp": {
+          "description": "Timestamp of the event",
+          "type": "number",
+          "x-ms-visibility": "advanced",
+          "x-ms-summary": "Action Timestamp"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "More information about Pushcut",
+    "url": "https://www.pushcut.io"
+  },
+  "host": "api.pushcut.io",
+  "info": {
+    "contact": {
+      "email": "office@pushcut.io"
+    },
+    "description": "Pushcut is an app for iOS that lets you create smart notifications to kick off shortcuts, URLs, and online automations.",
+    "termsOfService": "https://www.pushcut.io/privacy/",
+    "title": "Pushcut",
+    "version": "1.0.0",
+    "x-ms-api-annotation": {
+      "status": "Preview"
+    }
+  },
+  "parameters": {},
+  "paths": {
+    "/devices": {
+      "get": {
+        "operationId": "GetDevices",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "description": "Name of the device",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "summary": "Get devices",
+        "description": "Gets a list of all active devices.",
+        "tags": [
+          "notification"
+        ],
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/notifications": {
+      "get": {
+        "operationId": "GetNotifications",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "items": {
+                "properties": {
+                  "id": {
+                    "description": "Name of the notification definition",
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "summary": "Get notifications",
+        "description": "Gets a list of all defined notifications.",
+        "tags": [
+          "notification"
+        ],
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/notifications/{notificationName}": {
+      "post": {
+        "description": "Sends a smart notification to your devices",
+        "operationId": "SendNotification",
+        "summary": "Send a notification",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "description": "Select a notification",
+            "x-ms-summary": "Notification",
+            "in": "path",
+            "name": "notificationName",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetNotifications",
+              "value-path": "id",
+              "value-title": "id"
+            },
+            "x-ms-visibility": "important"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Notification"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        }
+      }
+    },
+    "/subscriptions": {
+      "post": {
+        "operationId": "ActionExecuted",
+        "description": "Triggers when an online action is executed.",
+        "summary": "When an action is executed",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important"
+      },
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "$ref": "#/definitions/EventData"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}": {
+      "delete": {
+        "operationId": "DeleteSubscription",
+        "description": "Deletes a webhook subscription.",
+        "summary": "Remove action webhook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    }
+  },
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetDevices",
+      "parameters": {}
+    }
+  },
+  "produces": [],
+  "responses": {},
+  "schemes": [
+    "https"
+  ],
+  "security": [
+    {
+      "oauth": []
+    }
+  ],
+  "securityDefinitions": {
+    "oauth": {
+      "authorizationUrl": "https://api.pushcut.io/oauth/authorize",
+      "flow": "accessCode",
+      "scopes": {},
+      "tokenUrl": "https://api.pushcut.io/oauth/token",
+      "type": "oauth2"
+    },
+    "api_key": {
+      "in": "header",
+      "name": "API-Key",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0",
+  "tags": [
+    {
+      "description": "For sending smart notifications",
+      "name": "notification"
+    },
+    {
+      "description": "For registering an online action",
+      "name": "action"
+    }
+  ]
+}
