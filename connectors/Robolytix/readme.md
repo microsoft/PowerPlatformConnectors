@@ -23,9 +23,10 @@ Connector from external platform usually implements only one action called Sonar
 
 
 ## How to get credentials
-1/ Go to webpages [Robolytix.com](https://robolytix.com).
-2/ Sign-up for new account
-3/ Generate API Key in **Settings -> API Keys** menu.
+1. Go to webpages [Robolytix.com](https://robolytix.com)
+2. Sign-up for a new account
+3. Generate API Key in **Settings -> API Keys** menu
+4. Use API Key in related connection
 
 
 ## Deployment instructions
