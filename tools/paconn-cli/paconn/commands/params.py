@@ -11,18 +11,9 @@ CLI parameter definitions
 from knack.arguments import ArgumentsContext
 from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
 
-CLIENT_ID = 'client_id'
-CLIENT_ID_OPTIONS = ['--clid', '-i']
-CLIENT_ID_HELP = 'The client ID.'
-
 CLIENT_SECRET = 'client_secret'
 CLIENT_SECRET_OPTIONS = ['--secret', '-r']
-CLIENT_SECRET_HELP = 'The client secret.'
-CLIENT_SECRET_CONN_HELP = 'The OAuth2 client secret for the connector.'
-
-TENANT = 'tenant'
-TENANT_OPTIONS = ['--tenant', '-t']
-TENANT_HELP = 'The tenant.'
+CLIENT_SECRET_HELP = 'The OAuth2 client secret for the connector.'
 
 ENVIRONMENT = 'environment'
 ENVIRONMENT_OPTIONS = ['--env', '-e']
@@ -31,10 +22,6 @@ ENVIRONMENT_HELP = 'Power Platform environment ID.'
 CONNECTOR_ID = 'connector_id'
 CONNECTOR_ID_OPTIONS = ['--cid', '-c']
 CONNECTOR_ID_HELP = 'The custom connector ID.'
-
-DESTINATION = 'destination'
-DESTINATION_OPTIONS = ['--dest', '-d']
-DESTINATION_HELP = 'Destination directory. Non-existent directories will be created.'
 
 POWERAPPS_URL = 'powerapps_url'
 POWERAPPS_URL_OPTIONS = ['--pau', '-u']
@@ -60,14 +47,6 @@ ICON = 'icon'
 ICON_OPTIONS = ['--icon', '-i']
 ICON_HELP = 'Location for the icon file.'
 
-OVERWRITE = 'overwrite'
-OVERWRITE_OPTIONS = ['--overwrite']
-OVERWRITE_HELP = 'Overwrite all the existing connector and settings files.'
-
-OVERWRITE_SETTINGS = 'overwrite_settings'
-OVERWRITE_SETTINGS_OPTIONS = ['--overwrite-settings']
-OVERWRITE_SETTINGS_HELP = 'Overwrite the existing settings file.'
-
 
 # pylint: disable=unused-argument
 def load_arguments(self, command):
@@ -75,7 +54,45 @@ def load_arguments(self, command):
     Load command line arguments
     """
     with ArgumentsContext(self, _LOGIN) as arg_context:
-        pass
+        arg_context.argument(
+            'client_id',
+            options_list=['--clid', '-i'],
+            type=str,
+            required=False,
+            help='The client ID.')
+        arg_context.argument(
+            'tenant',
+            options_list=['--tenant', '-t'],
+            type=str,
+            required=False,
+            help='The tenant.')
+        arg_context.argument(
+            'authority_url',
+            options_list=['--authority_url', '-a'],
+            type=str,
+            required=False,
+            help='Authority URL for login.')
+        arg_context.argument(
+            'resource',
+            options_list=['--resource', '-r'],
+            type=str,
+            required=False,
+            help='Resource URL for login.')
+        arg_context.argument(
+            SETTINGS,
+            options_list=SETTINGS_OPTIONS,
+            type=str,
+            required=False,
+            help=SETTINGS_HELP)
+        arg_context.argument(
+            'force',
+            options_list=['--force', '-f'],
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help='Override a previous login, if exists.')
 
     with ArgumentsContext(self, _DOWNLOAD) as arg_context:
         arg_context.argument(
@@ -91,11 +108,11 @@ def load_arguments(self, command):
             required=False,
             help=CONNECTOR_ID_HELP)
         arg_context.argument(
-            DESTINATION,
-            options_list=DESTINATION_OPTIONS,
+            'destination',
+            options_list=['--dest', '-d'],
             type=str,
             required=False,
-            help=DESTINATION_HELP)
+            help='Destination directory. Non-existent directories will be created.')
         arg_context.argument(
             POWERAPPS_URL,
             options_list=POWERAPPS_URL_OPTIONS,
@@ -115,14 +132,14 @@ def load_arguments(self, command):
             required=False,
             help=SETTINGS_HELP)
         arg_context.argument(
-            OVERWRITE,
-            options_list=OVERWRITE_OPTIONS,
+            'overwrite',
+            options_list=['--overwrite', '-w'],
             type=bool,
             required=False,
             nargs='?',
             default=False,
             const=True,
-            help=OVERWRITE_HELP)
+            help='Overwrite all the existing connector and settings files.')
 
     with ArgumentsContext(self, _CREATE) as arg_context:
         arg_context.argument(
@@ -166,7 +183,7 @@ def load_arguments(self, command):
             options_list=CLIENT_SECRET_OPTIONS,
             type=str,
             required=False,
-            help=CLIENT_SECRET_CONN_HELP)
+            help=CLIENT_SECRET_HELP)
         arg_context.argument(
             SETTINGS,
             options_list=SETTINGS_OPTIONS,
@@ -174,14 +191,14 @@ def load_arguments(self, command):
             required=False,
             help=SETTINGS_HELP)
         arg_context.argument(
-            OVERWRITE_SETTINGS,
-            options_list=OVERWRITE_SETTINGS_OPTIONS,
+            'overwrite_settings',
+            options_list=['--overwrite-settings', '-w'],
             type=bool,
             required=False,
             nargs='?',
             default=False,
             const=True,
-            help=OVERWRITE_SETTINGS_HELP)
+            help='Overwrite the existing settings file.')
 
     with ArgumentsContext(self, _UPDATE) as arg_context:
         arg_context.argument(
@@ -231,7 +248,7 @@ def load_arguments(self, command):
             options_list=CLIENT_SECRET_OPTIONS,
             type=str,
             required=False,
-            help=CLIENT_SECRET_CONN_HELP)
+            help=CLIENT_SECRET_HELP)
         arg_context.argument(
             SETTINGS,
             options_list=SETTINGS_OPTIONS,

@@ -1,7 +1,6 @@
 {
   "basePath": "/",
   "consumes": [],
-  "definitions": {},
   "host": "graph.facebook.com",
   "info": {
     "description": "A sample Facebook connector for using with the CLI.",
@@ -10,28 +9,323 @@
   },
   "parameters": {},
   "paths": {
+    "/trigger/me/feed": {
+      "get": {
+        "description": "Triggers a new flow when there is a new post on your timeline. It is possible for this trigger to not activate for all posts since detection of a post must pass several privacy checks including a person's privacy settings on Facebook.",
+        "summary": "When there is a new post on my timeline",
+        "operationId": "TriggerNewPost",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "batch",
+        "x-ms-trigger-hint": "To see it work now, add a post to your Facebook timeline.",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TriggerFeedResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    },
+    "/me/feed": {
+      "get": {
+        "description": "Get the feed from your timeline.",
+        "summary": "Get my feed",
+        "operationId": "MyFeeds",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "Specify the fields you want returned. Example (id,name,picture).",
+            "required": false,
+            "x-ms-visibility": "advanced",
+            "default": "id, created_time, from, message, to, type",
+            "type": "string",
+            "x-ms-summary": "Fields"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of posts to be retrieved.",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Max posts",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "with",
+            "in": "query",
+            "description": "Restrict the list of posts to only those with location attached.",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "location"
+            ],
+            "x-ms-summary": "With or without location",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetFeedResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/{pageId}/feed": {
+      "get": {
+        "description": "Get posts from the feed of a specified page.",
+        "summary": "Get page feed",
+        "operationId": "PageFeeds",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "name": "pageId",
+            "in": "path",
+            "description": "Unique ID of the page from which posts have to be retrieved.",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetMyPages",
+              "parameters": {
+                "Accept": "application/json"
+              },
+              "value-collection": "data",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Page ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of posts to be retrieved.",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Max posts",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_hidden",
+            "in": "query",
+            "description": "Whether or not to include any posts that were hidden by the Page.",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Include hidden posts",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "Specify the fields you want returned. Example (id,name,picture).",
+            "required": false,
+            "x-ms-visibility": "advanced",
+            "default": "id, created_time, from, message, to, type",
+            "type": "string",
+            "x-ms-summary": "Fields"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetFeedResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "advanced"
+      },
+      "post": {
+        "description": "Post message to a page that you own.",
+        "summary": "Post to page",
+        "operationId": "PostToPage",
+        "consumes": [
+          "application/json",
+          "text/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "name": "pageId",
+            "in": "path",
+            "description": "Unique ID of the page to post to.",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetMyPages",
+              "parameters": {
+                "Accept": "application/json"
+              },
+              "value-collection": "data",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Page ID"
+          },
+          {
+            "name": "post",
+            "in": "body",
+            "required": true,
+            "description": "New message to be posted.",
+            "x-ms-summary": "Post Details",
+            "schema": {
+              "$ref": "#/definitions/PagePostFeedRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PostFeedResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    },
+    "/users/{userId}/feed": {
+      "get": {
+        "description": "Get posts from a user's timeline.",
+        "summary": "Get user timeline",
+        "operationId": "UserTimeline",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Unique ID of the user whose timeline have to be retrieved.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "User ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of posts to be retrieved.",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Max posts",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "with",
+            "in": "query",
+            "description": "Restrict the list of posts to only those with location attached.",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "location"
+            ],
+            "x-ms-summary": "With or without location",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "Specify the fields you want returned. Example (id,name,picture).",
+            "required": false,
+            "x-ms-visibility": "advanced",
+            "default": "id, created_time, from, message, to, type",
+            "type": "string",
+            "x-ms-summary": "Fields"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetFeedResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    },
     "/me/accounts": {
       "get": {
         "description": "Lists all the pages that you own",
-        "operationId": "GetAccounts",
-        "parameters": [
-          {
-            "default": "application/json",
-            "description": "Accept header",
-            "in": "header",
-            "name": "Accept",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Accept header",
-            "x-ms-visibility": "internal"
-          }
-        ],
+        "operationId": "GetMyPages",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "success",
             "schema": {
               "properties": {
                 "data": {
+                  "type": "array",
                   "description": "data",
                   "items": {
                     "properties": {
@@ -85,8 +379,7 @@
                       }
                     },
                     "type": "object"
-                  },
-                  "type": "array"
+                  }
                 },
                 "paging": {
                   "description": "paging",
@@ -113,312 +406,989 @@
             }
           }
         },
-        "summary": "Get my Pages",
-        "x-ms-visibility": "important"
+        "summary": "Get my pages",
+        "x-ms-visibility": "internal"
+      }
+    }
+  },
+  "definitions": {
+    "GetFeedResponse": {
+      "type": "object",
+      "x-ms-summary": "Feed",
+      "description": "List of feed items.",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostItem"
+          },
+          "x-ms-summary": "Response Data"
+        }
       }
     },
-    "/me/feed": {
-      "get": {
-        "description": "Get feeds from my timeline",
-        "operationId": "MyFeeds",
-        "parameters": [
-          {
-            "default": "application/json",
-            "description": "Accept header",
-            "in": "header",
-            "name": "Accept",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Accept header",
-            "x-ms-visibility": "internal"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "schema": {
-              "properties": {
-                "data": {
-                  "description": "data",
-                  "items": {
-                    "properties": {
-                      "created_time": {
-                        "description": "created_time",
-                        "title": "Created Time",
-                        "type": "string",
-                        "x-ms-visibility": "important"
-                      },
-                      "id": {
-                        "description": "id",
-                        "title": "Id",
-                        "type": "string",
-                        "x-ms-visibility": "important"
-                      },
-                      "message": {
-                        "description": "message",
-                        "title": "Message",
-                        "type": "string",
-                        "x-ms-visibility": "important"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "type": "array"
-                },
-                "paging": {
-                  "description": "paging",
-                  "properties": {
-                    "next": {
-                      "description": "next",
-                      "type": "string"
-                    },
-                    "previous": {
-                      "description": "previous",
-                      "type": "string"
-                    }
-                  },
-                  "type": "object"
-                }
-              },
-              "type": "object"
-            }
-          }
+    "PostItem": {
+      "description": "An individual entry in a profile's feed. The profile could be a user, page, app, or group.",
+      "x-ms-summary": "Feed Item",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique ID of the post.",
+          "type": "string",
+          "title": "Post ID"
         },
-        "summary": "Get feeds from my timeline",
-        "x-ms-visibility": "important"
-      }
-    },
-    "/{page_id}": {
-      "get": {
-        "description": "Get a page access token for a page you own",
-        "operationId": "GetPageAccessToken",
-        "parameters": [
-          {
-            "description": "Page Id.",
-            "in": "path",
-            "name": "page_id",
-            "required": true,
-            "type": "string",
-            "x-ms-dynamic-values": {
-              "operationId": "GetAccounts",
-              "parameters": {
-                "Accept": "application/json"
-              },
-              "value-collection": "data",
-              "value-path": "id",
-              "value-title": "name"
-            },
-            "x-ms-summary": "Page Id",
-            "x-ms-visibility": "important"
+        "admin_creator": {
+          "description": "Unique ID of admin who created the post. Applies to pages only.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminItem"
           },
-          {
-            "default": "access_token",
-            "description": "Field to retrieve.",
-            "in": "query",
-            "name": "fields",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Field to retrieve",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "default": "application/json",
-            "description": "Accept header",
-            "in": "header",
-            "name": "Accept",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Accept header",
-            "x-ms-visibility": "internal"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "schema": {
-              "properties": {
-                "access_token": {
-                  "description": "access_token",
-                  "title": "AccessToken",
-                  "type": "string",
-                  "x-ms-visibility": "important"
-                },
-                "id": {
-                  "description": "Page id",
-                  "title": "Id",
-                  "type": "string",
-                  "x-ms-visibility": "important"
-                }
-              },
-              "type": "object"
-            }
-          }
+          "x-ms-visibility": "advanced",
+          "title": "Admin Creators"
         },
-        "summary": "Get page access token",
-        "x-ms-visibility": "important"
+        "caption": {
+          "description": "The caption of a link in the post (appears beneath the name).",
+          "type": "string",
+          "title": "Link caption",
+          "x-ms-visibility": "advanced"
+        },
+        "created_time": {
+          "description": "The time the post was initially published. For a post about a life event, this will be the date and time of the life event.",
+          "type": "string",
+          "title": "Created Date-Time",
+          "x-ms-visibility": "advanced"
+        },
+        "description": {
+          "description": "A description of a link in the post (appears beneath the caption).",
+          "type": "string",
+          "title": "Link Description",
+          "x-ms-visibility": "advanced"
+        },
+        "feed_targeting": {
+          "$ref": "#/definitions/FeedTargetItem"
+        },
+        "from": {
+          "$ref": "#/definitions/UserItem"
+        },
+        "icon": {
+          "description": "A link to an icon representing the type of this post.",
+          "type": "string",
+          "title": "Icon link",
+          "x-ms-visibility": "advanced"
+        },
+        "is_hidden": {
+          "description": "If this post is marked as hidden (applies to Pages only).",
+          "type": "boolean",
+          "title": "Is hidden?",
+          "x-ms-visibility": "advanced"
+        },
+        "is_published": {
+          "description": "Indicates whether a scheduled post was published (applies to scheduled Page Post only, for users post and instanlty published posts this value is always true).",
+          "type": "boolean",
+          "title": "Is published?",
+          "x-ms-visibility": "advanced"
+        },
+        "link": {
+          "description": "The link attached to this post.",
+          "type": "string",
+          "format": "uri",
+          "title": "Link url",
+          "x-ms-visibility": "advanced"
+        },
+        "message": {
+          "description": "The status message in the post.",
+          "type": "string",
+          "title": "Status message"
+        },
+        "name": {
+          "description": "The name of the link.",
+          "type": "string",
+          "title": "Name"
+        },
+        "object_id": {
+          "description": "The ID of any uploaded photo or video attached to the post.",
+          "type": "string",
+          "title": "Media ID",
+          "x-ms-visibility": "advanced"
+        },
+        "picture": {
+          "description": "The picture scraped from any link included with the post.",
+          "type": "string",
+          "format": "uri",
+          "title": "Image url",
+          "x-ms-visibility": "advanced"
+        },
+        "place": {
+          "$ref": "#/definitions/PlaceItem"
+        },
+        "privacy": {
+          "$ref": "#/definitions/PrivacyItem"
+        },
+        "properties": {
+          "description": "A list of properties for any attached video, for example, the length of the video.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PropertyItem"
+          },
+          "title": "Post Properties",
+          "x-ms-visibility": "advanced"
+        },
+        "source": {
+          "description": "A URL to any Flash movie or video file attached to the post.",
+          "type": "string",
+          "format": "uri",
+          "title": "Video source",
+          "x-ms-visibility": "advanced"
+        },
+        "status_type": {
+          "description": "Description of the type of a status update.",
+          "type": "string",
+          "enum": [
+            "mobile_status_update",
+            "created_note",
+            "added_photos",
+            "added_video",
+            "shared_story",
+            "created_group",
+            "created_event",
+            "wall_post",
+            "app_created_story",
+            "published_story",
+            "tagged_in_photo",
+            "approved_friend"
+          ],
+          "title": "Status update type",
+          "x-ms-visibility": "advanced"
+        },
+        "story": {
+          "description": "Text from stories not intentionally generated by users, such as those generated when two people become friends, or when someone else posts on the person's wall.",
+          "type": "string",
+          "title": "Story text",
+          "x-ms-visibility": "advanced"
+        },
+        "targeting": {
+          "$ref": "#/definitions/TargetItem"
+        },
+        "to": {
+          "description": "Profiles mentioned or targeted in this post.",
+          "title": "To",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProfileCollection"
+          },
+          "x-ms-visibility": "advanced"
+        },
+        "type": {
+          "description": "A string indicating the object type of this post.",
+          "type": "string",
+          "title": "Post type",
+          "enum": [
+            "link",
+            "status",
+            "photo",
+            "video",
+            "offer"
+          ],
+          "x-ms-visibility": "advanced"
+        },
+        "updated_time": {
+          "type": "string",
+          "description": "The time of the last change to this post, or the comments on it.",
+          "title": "Last updated time",
+          "x-ms-visibility": "advanced"
+        },
+        "with_tags": {
+          "$ref": "#/definitions/ProfileCollection"
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "description": "Url of the media attached to this post. 'Attachments' field should be specified in a request.",
+            "type": "string",
+            "format": "uri",
+            "title": "Attached media Url",
+            "x-ms-visibility": "advanced"
+          }
+        }
       }
     },
-    "/{page_id}/feed": {
-      "get": {
-        "description": "Get page feeds.",
-        "operationId": "PageFeeds",
-        "parameters": [
-          {
-            "description": "Page Id.",
-            "in": "path",
-            "name": "page_id",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Page Id",
-            "x-ms-visibility": "important"
-          },
-          {
-            "default": "application/json",
-            "description": "Accept header",
-            "in": "header",
-            "name": "Accept",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Accept header",
-            "x-ms-visibility": "internal"
+    "AdminItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique ID of the admin user.",
+          "title": "User ID",
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "Name of the admin.",
+          "type": "string",
+          "title": "Admin full name",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "ProfileCollection": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserItem"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "headers": {
-              "Content-Type": {
-                "description": "Content-Type",
-                "type": "string"
+        }
+      }
+    },
+    "UserItem": {
+      "type": "object",
+      "x-ms-summary": "User",
+      "description": "Details of a specific Facebook user.",
+      "properties": {
+        "id": {
+          "title": "User ID",
+          "type": "string",
+          "description": "Unique ID of the user.",
+          "x-ms-visibility": "advanced"
+        },
+        "first_name": {
+          "title": "First name",
+          "type": "string",
+          "description": "User first name.",
+          "x-ms-visibility": "advanced"
+        },
+        "last_name": {
+          "title": "Last name",
+          "type": "string",
+          "description": "User last name.",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "title": "Full name",
+          "type": "string",
+          "description": "User full name.",
+          "x-ms-visibility": "advanced"
+        },
+        "gender": {
+          "title": "Gender",
+          "type": "string",
+          "description": "Gender of the user.",
+          "x-ms-visibility": "advanced"
+        },
+        "about": {
+          "title": "User bio",
+          "type": "string",
+          "description": "Body of the user's bio page.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "PropertyItem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The property name.",
+          "title": "Property name",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        },
+        "text": {
+          "description": "The value of the property.",
+          "type": "string",
+          "title": "Property value",
+          "x-ms-visibility": "advanced"
+        },
+        "href": {
+          "description": "Any link associated with the property.",
+          "type": "string",
+          "format": "uri",
+          "title": "Property link",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "PlaceItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique ID of the place",
+          "type": "string",
+          "title": "Place ID",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "Name of the place",
+          "type": "string",
+          "title": "Place name",
+          "x-ms-visibility": "advanced"
+        },
+        "overall_rating": {
+          "description": "Overall rating of place, on a 5-star scale. 0 means not enough data to get a combined rating.",
+          "type": "number",
+          "title": "Place rating",
+          "format": "float",
+          "x-ms-visibility": "advanced"
+        },
+        "location": {
+          "$ref": "#/definitions/LocationItem"
+        }
+      }
+    },
+    "LocationItem": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "description": "City of the location.",
+          "type": "string",
+          "title": "City name",
+          "x-ms-visibility": "advanced"
+        },
+        "country": {
+          "description": "Country of the location.",
+          "type": "string",
+          "title": "Country name",
+          "x-ms-visibility": "advanced"
+        },
+        "latitude": {
+          "description": "Latitude of the location.",
+          "type": "number",
+          "title": "Latitude",
+          "format": "float",
+          "x-ms-visibility": "advanced"
+        },
+        "located_in": {
+          "description": "The parent location if this location is located within another location.",
+          "type": "string",
+          "title": "Located in",
+          "x-ms-visibility": "advanced"
+        },
+        "longitude": {
+          "description": "Longitude of the location.",
+          "type": "number",
+          "title": "Longitude",
+          "format": "float",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "Name of the location.",
+          "type": "string",
+          "title": "Location name",
+          "x-ms-visibility": "advanced"
+        },
+        "region": {
+          "description": "Name of the location region.",
+          "type": "string",
+          "title": "Region name",
+          "x-ms-visibility": "advanced"
+        },
+        "state": {
+          "description": "State which the location is in.",
+          "type": "string",
+          "title": "State name",
+          "x-ms-visibility": "advanced"
+        },
+        "street": {
+          "description": "Street which the location is on.",
+          "type": "string",
+          "title": "Street name",
+          "x-ms-visibility": "advanced"
+        },
+        "zip": {
+          "description": "Location Zip Code.",
+          "type": "string",
+          "title": "Zipcode",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "PrivacyItem": {
+      "required": [
+        "value"
+      ],
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "Text that describes the privacy settings, as they would appear in Facebook.",
+          "title": "Privacy settings description",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        },
+        "value": {
+          "description": "The value of the privacy setting.",
+          "title": "Privacy value",
+          "type": "string",
+          "enum": [
+            "EVERYONE",
+            "ALL_FRIENDS",
+            "FRIENDS_OF_FRIENDS",
+            "SELF",
+            "CUSTOM"
+          ],
+          "x-ms-visibility": "advanced"
+        },
+        "allow": {
+          "description": "When value is CUSTOM, this is a comma-separated list of user IDs and friend list IDs that can see the post.",
+          "type": "string",
+          "title": "Allowed users",
+          "x-ms-visibility": "advanced"
+        },
+        "deny": {
+          "description": "When value is CUSTOM, this is a comma-separated list of user IDs and friend list IDs that cannot see the post.",
+          "type": "string",
+          "title": "Denied users",
+          "x-ms-visibility": "advanced"
+        },
+        "friends": {
+          "description": "When value is CUSTOM, this indicates which group of friends can see the post.",
+          "type": "string",
+          "title": "Denied friends",
+          "enum": [
+            "ALL_FRIENDS",
+            "FRIENDS_OF_FRIENDS",
+            "SOME_FRIENDS"
+          ],
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "FeedTargetItem": {
+      "description": "Object that controls news feed targeting for this post. Anyone in these groups will be more likely to see this post, others will be less likely. Applies to Pages only.",
+      "title": "News Feed Target",
+      "type": "object",
+      "properties": {
+        "geo_locations": {
+          "description": "This object allows you to specify a number of different geographic locations.",
+          "title": "Targetted locations",
+          "type": "object",
+          "properties": {
+            "countries": {
+              "description": "Values of targeting countries.",
+              "title": "Targetted countries",
+              "type": "array",
+              "x-ms-visibility": "advanced",
+              "items": {
+                "type": "string",
+                "title": "Country code"
               }
             },
-            "schema": {
-              "properties": {
-                "data": {
-                  "description": "data",
-                  "items": {
-                    "properties": {
-                      "created_time": {
-                        "description": "created_time",
-                        "title": "Created Time",
-                        "type": "string",
-                        "x-ms-visibility": "important"
-                      },
-                      "id": {
-                        "description": "id",
-                        "title": "Id",
-                        "type": "string",
-                        "x-ms-visibility": "important"
-                      },
-                      "message": {
-                        "description": "message",
-                        "title": "Message",
-                        "type": "string",
-                        "x-ms-visibility": "important"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "type": "array"
-                },
-                "paging": {
-                  "description": "paging",
-                  "properties": {
-                    "cursors": {
-                      "description": "cursors",
-                      "properties": {
-                        "after": {
-                          "description": "after",
-                          "type": "string"
-                        },
-                        "before": {
-                          "description": "before",
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                }
-              },
-              "type": "object"
-            }
-          }
-        },
-        "summary": "Get Page Feeds",
-        "x-ms-visibility": "important"
-      },
-      "post": {
-        "description": "Post message to a page that you own",
-        "operationId": "PostToMyPage",
-        "parameters": [
-          {
-            "description": "Page Id",
-            "in": "path",
-            "name": "page_id",
-            "required": true,
-            "type": "string",
-            "x-ms-dynamic-values": {
-              "operationId": "GetAccounts",
-              "parameters": {
-                "Accept": "application/json"
-              },
-              "value-collection": "data",
-              "value-path": "id",
-              "value-title": "name"
+            "regions": {
+              "description": "Values for targeted regions.",
+              "title": "Targetted regions keys",
+              "type": "array",
+              "x-ms-visibility": "advanced",
+              "items": {
+                "$ref": "#/definitions/GeoLocationItem"
+              }
             },
-            "x-ms-summary": "Page Id",
-            "x-ms-visibility": "important"
-          },
-          {
-            "description": "Message to post.",
-            "in": "query",
-            "name": "message",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Message to post",
-            "x-ms-visibility": "important"
-          },
-          {
-            "description": "Page access token.",
-            "in": "query",
-            "name": "access_token",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Page access token",
-            "x-ms-visibility": "important"
-          },
-          {
-            "default": "application/json",
-            "description": "Accept header",
-            "in": "header",
-            "name": "Accept",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Accept header",
-            "x-ms-visibility": "internal"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "schema": {
-              "properties": {
-                "id": {
-                  "description": "id",
-                  "format": "int32",
-                  "title": "Id",
-                  "type": "integer",
-                  "x-ms-visibility": "important"
-                }
-              },
-              "type": "object"
+            "cities": {
+              "description": "Values for targeted cities.",
+              "title": "Targeted cities keys",
+              "type": "array",
+              "x-ms-visibility": "advanced",
+              "items": {
+                "$ref": "#/definitions/GeoLocationItem"
+              }
+            },
+            "zips": {
+              "description": "Values for targeted locations with specified zip code keys.",
+              "title": "Targeted zip code keys",
+              "type": "array",
+              "x-ms-visibility": "advanced",
+              "items": {
+                "$ref": "#/definitions/GeoLocationItem"
+              }
             }
+          },
+          "x-ms-visibility": "advanced"
+        },
+        "age_min": {
+          "description": "Must be 13 or higher.",
+          "title": "Minimum age",
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "advanced"
+        },
+        "age_max": {
+          "description": "Maximum Age.",
+          "title": "Maximum age",
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "advanced"
+        },
+        "genders": {
+          "description": "Target specific genders. 1 targets all male viewers and 2 females. Default is to target both.",
+          "title": "Targetted genders",
+          "type": "array",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "integer",
+            "title": "Gender code. Use 1 for male and 2 for female.",
+            "format": "int32"
           }
         },
-        "summary": "Post to my page",
-        "x-ms-visibility": "important"
+        "relationship_statuses": {
+          "description": "Array of integers for targeting based on relationship status.",
+          "title": "Targetted relationship statuses",
+          "type": "array",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "integer",
+            "title": "Relationship status. Use 1 for single, 2 for 'in a relationship', 3 for married, and 4 for engaged.",
+            "format": "int32"
+          }
+        },
+        "interested_in": {
+          "description": "Indicates targeting based on the 'interested in' field of the user profile.",
+          "title": "Targetted interests",
+          "type": "array",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "integer",
+            "title": "Interest code. Use 1 to indicate male, 2 indicates female.",
+            "format": "int32"
+          }
+        },
+        "college_years": {
+          "description": "Array of integers for graduation year from college.",
+          "title": "Targetted college graduation year",
+          "type": "array",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "integer",
+            "title": "Graduation year",
+            "format": "int32"
+          }
+        },
+        "education_statuses": {
+          "description": "Array of integers for targeting based on education level.",
+          "title": "Targetted education statuses",
+          "type": "array",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "integer",
+            "title": "Education status code. Use 1 for high school, 2 for undergraduate, and 3 for alum (or localized equivalents).",
+            "format": "int32"
+          }
+        },
+        "locales": {
+          "description": "Targeted locales.",
+          "title": "Targetted locales",
+          "type": "array",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "integer",
+            "title": "Locale code",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "GeoLocationItem": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "Target location item's key.",
+          "title": "Location key",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "UserPostFeedRequest": {
+      "required": [
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "description": "The main body of the post, otherwise called the status message.",
+          "type": "string",
+          "title": "Status message"
+        },
+        "link": {
+          "description": "The URL of a link to attach to the post.",
+          "type": "string",
+          "format": "uri",
+          "title": "Post link",
+          "x-ms-visibility": "advanced"
+        },
+        "picture": {
+          "description": "Determines the preview image associated with the link.",
+          "type": "string",
+          "format": "uri",
+          "title": "Link image",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "Overwrites the title of the link preview.",
+          "type": "string",
+          "title": "Link name",
+          "x-ms-visibility": "advanced"
+        },
+        "caption": {
+          "description": "Overwrites the caption under the title in the link preview.",
+          "type": "string",
+          "title": "Link caption",
+          "x-ms-visibility": "advanced"
+        },
+        "description": {
+          "description": "Overwrites the description in the link preview.",
+          "type": "string",
+          "title": "Link description",
+          "x-ms-visibility": "advanced"
+        },
+        "place": {
+          "description": "Page ID of a location associated with this post.",
+          "type": "string",
+          "title": "Post location",
+          "x-ms-visibility": "advanced"
+        },
+        "tags": {
+          "description": "Comma-separated list of user IDs of people tagged in this post.",
+          "type": "string",
+          "title": "Tagged users",
+          "x-ms-visibility": "advanced"
+        },
+        "privacy": {
+          "$ref": "#/definitions/PrivacyItem"
+        },
+        "object_attachment": {
+          "description": "Facebook ID for an existing picture in the person's photo albums to use as the thumbnail image.",
+          "type": "string",
+          "title": "Thumbnail picture ID",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "PostFeedResponse": {
+      "type": "object",
+      "x-ms-summary": "Posted Item",
+      "description": "Details of the item posted to the feed.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Post ID"
+        }
+      }
+    },
+    "PagePostFeedRequest": {
+      "required": [
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "description": "The main body of the post, otherwise called the status message.",
+          "type": "string",
+          "title": "Status message"
+        },
+        "link": {
+          "description": "The URL of a link to attach to the post.",
+          "type": "string",
+          "format": "uri",
+          "title": "Post link",
+          "x-ms-visibility": "advanced"
+        },
+        "picture": {
+          "description": "Determines the preview image associated with the link.",
+          "type": "string",
+          "format": "uri",
+          "title": "Link image",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "Overwrites the title of the link preview.",
+          "type": "string",
+          "title": "Link name",
+          "x-ms-visibility": "advanced"
+        },
+        "caption": {
+          "description": "Overwrites the caption under the title in the link preview.",
+          "type": "string",
+          "title": "Link caption",
+          "x-ms-visibility": "advanced"
+        },
+        "description": {
+          "description": "Overwrites the description in the link preview.",
+          "type": "string",
+          "title": "Link description",
+          "x-ms-visibility": "advanced"
+        },
+        "actions": {
+          "description": "The action links attached to the post.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionItem"
+          },
+          "title": "Action links",
+          "x-ms-visibility": "advanced"
+        },
+        "place": {
+          "description": "Page ID of a location associated with this post",
+          "type": "string",
+          "title": "Post location",
+          "x-ms-visibility": "advanced"
+        },
+        "tags": {
+          "description": "Comma-separated list of user IDs of people tagged in this post.",
+          "type": "string",
+          "title": "Tag users",
+          "x-ms-visibility": "advanced"
+        },
+        "object_attachment": {
+          "description": "Facebook ID for an existing picture in the person's photo albums to use as the thumbnail image.",
+          "type": "string",
+          "title": "Thumbnail picture ID",
+          "x-ms-visibility": "advanced"
+        },
+        "targeting": {
+          "$ref": "#/definitions/TargetItem"
+        },
+        "feed_targeting": {
+          "$ref": "#/definitions/FeedTargetItem"
+        },
+        "published": {
+          "description": "Whether a story is shown about this newly published object.",
+          "type": "boolean",
+          "title": "Publish post.",
+          "x-ms-visibility": "advanced"
+        },
+        "scheduled_publish_time": {
+          "description": "Time when this post should go live, this can be any date between ten minutes and six months from the time of the API call.",
+          "type": "string",
+          "format": "date-time",
+          "title": "Schedule publish time",
+          "x-ms-visibility": "advanced"
+        },
+        "backdated_time": {
+          "description": "Specifies a time in the past to back-date this post to.",
+          "type": "string",
+          "format": "date-time",
+          "title": "Back date time.",
+          "x-ms-visibility": "advanced"
+        },
+        "backdated_time_granularity": {
+          "description": "Controls the display of how a backdated post appears.",
+          "type": "string",
+          "title": "Backdated time display format.",
+          "enum": [
+            "year",
+            "month",
+            "day",
+            "hour",
+            "minute"
+          ],
+          "x-ms-visibility": "advanced"
+        },
+        "child_attachments": {
+          "description": "Use to specify multiple links in the post. ",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChildAttachmentsItem"
+          },
+          "title": "Attachments",
+          "x-ms-visibility": "advanced"
+        },
+        "multi_share_end_card": {
+          "description": "If set to false, does not display the end card of a carousel link post when child_attachments is used.",
+          "type": "boolean",
+          "title": "Multi-share end card",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "ActionItem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name or label of the action link.",
+          "title": "Action link name",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        },
+        "link": {
+          "description": "The URL of the action link itself.",
+          "type": "string",
+          "title": "Action link",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "TargetItem": {
+      "type": "object",
+      "properties": {
+        "geo_locations": {
+          "description": "This object allows you to specify a number of different geographic locations.",
+          "title": "Targetted locations",
+          "type": "object",
+          "properties": {
+            "countries": {
+              "description": "Values of targeting countries.",
+              "title": "Targetted countries",
+              "type": "array",
+              "x-ms-visibility": "advanced",
+              "items": {
+                "type": "string",
+                "title": "Country code"
+              }
+            },
+            "regions": {
+              "description": "Values for targeted regions.",
+              "title": "Targetted regions keys",
+              "type": "array",
+              "x-ms-visibility": "advanced",
+              "items": {
+                "$ref": "#/definitions/GeoLocationItem"
+              }
+            },
+            "cities": {
+              "description": "Values for targeted cities.",
+              "title": "Targeted cities keys",
+              "type": "array",
+              "x-ms-visibility": "advanced",
+              "items": {
+                "$ref": "#/definitions/GeoLocationItem"
+              }
+            }
+          },
+          "x-ms-visibility": "advanced"
+        },
+        "locales": {
+          "description": "Targeted locales.",
+          "title": "Targetted locales",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "title": "Locale code",
+            "format": "int32"
+          },
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "ChildAttachmentsItem": {
+      "type": "object",
+      "properties": {
+        "link": {
+          "description": "The URL of a link to attach to the post.",
+          "title": "Attachment link",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        },
+        "picture": {
+          "description": "Determines the preview image associated with the link (1:1 aspect ratio and a minimum of 458 x 458 px for best display).",
+          "title": "Link picture",
+          "type": "string",
+          "format": "uri",
+          "x-ms-visibility": "advanced"
+        },
+        "image_hash": {
+          "description": "Hash of a preview image associated with the link from your ad image library (1:1 aspect ratio and a minimum of 458 x 458 px for best display).",
+          "title": "Image hash",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "The title of the link preview.",
+          "title": "Link name",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        },
+        "description": {
+          "description": "Used to show either a price, discount or website domain.",
+          "title": "Link description",
+          "type": "string",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "TriggerFeedResponse": {
+      "x-ms-summary": "Timeline Feed",
+      "description": "List of newly created posts.",
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TriggerItem"
+          },
+          "x-ms-summary": "Response Data"
+        }
+      }
+    },
+    "TriggerItem": {
+      "x-ms-summary": "Feed Item",
+      "description": "An individual entry in a profile's feed. The profile could be a user, page, app, or group.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The post ID.",
+          "type": "string",
+          "title": "Post ID"
+        },
+        "created_time": {
+          "description": "The time the post was initially published. For a post about a life event, this will be the date and time of the life event.",
+          "type": "string",
+          "title": "Created Time",
+          "x-ms-visibility": "advanced",
+          "format": "date-time"
+        },
+        "from": {
+          "$ref": "#/definitions/UserItem"
+        },
+        "message": {
+          "description": "The status message in the post.",
+          "type": "string",
+          "title": "Status message"
+        },
+        "type": {
+          "description": "A string indicating the object type of this post.",
+          "type": "string",
+          "title": "Post Type",
+          "enum": [
+            "link",
+            "status",
+            "photo",
+            "video",
+            "offer"
+          ],
+          "x-ms-visibility": "advanced"
+        },
+        "picture": {
+          "description": "The picture scraped from any link included with the post.",
+          "type": "string",
+          "format": "uri",
+          "title": "Image url",
+          "x-ms-visibility": "advanced"
+        },
+        "link": {
+          "description": "The link attached to this post.",
+          "type": "string",
+          "format": "uri",
+          "title": "Link url",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "The name of the link.",
+          "type": "string",
+          "title": "Name"
+        },
+        "description": {
+          "description": "A description of a link in the post (appears beneath the caption).",
+          "type": "string",
+          "title": "Link description",
+          "x-ms-visibility": "advanced"
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "description": "Url of the media attached to this post.",
+            "type": "string",
+            "format": "uri",
+            "title": "Attached media Url",
+            "x-ms-visibility": "advanced"
+          }
+        }
       }
     }
   },
@@ -428,9 +1398,9 @@
     "https"
   ],
   "security": [
-   {
+    {
       "oauth2_auth": [
-        "user_posts publish_pages publish_to_groups"
+        "user_posts publish_pages"
       ]
     }
   ],
@@ -439,7 +1409,7 @@
       "authorizationUrl": "https://graph.facebook.com/oauth/authorize",
       "flow": "accessCode",
       "scopes": {
-        "user_posts publish_pages publish_to_groups": "user_posts publish_pages publish_to_groups"
+        "user_posts publish_pages": "user_posts publish_pages"
       },
       "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
       "type": "oauth2"

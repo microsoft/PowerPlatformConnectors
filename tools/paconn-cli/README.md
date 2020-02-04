@@ -21,6 +21,7 @@ The `paconn` command line tool is designed to aid Microsoft Power Platform custo
 
     `pip install paconn`
 
+  If you get errors saying 'Access is denied', consider using the `--user` option or running the command as an Administrator (Windows).
 
 ## Custom Connector Directory and Files
 
