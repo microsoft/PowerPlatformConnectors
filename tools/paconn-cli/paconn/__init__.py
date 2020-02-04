@@ -8,7 +8,7 @@
 Initializer
 """
 
-__VERSION__ = '0.0.11'
+__VERSION__ = '0.0.12'
 __CLI_NAME__ = 'paconn'
 
 # Commands
