@@ -1,7 +1,6 @@
 ﻿
 ## Partner Center Referrals
-Partner Center Referrals connector allows you to manage Microsoft Partner Center Referrals. 
-
+Partner Center Referrals connector allows you to manage Microsoft Partner Center Referrals (https://partner.microsoft.com/en-us/membership/referrals).
 
 
 ## Pre-requisites
@@ -11,6 +10,7 @@ You need the following:
 
 
 ## API documentation
+Partner Center Referrals: https://partner.microsoft.com/en-us/membership/referrals
 API documentation: https://docs.microsoft.com/en-us/partner/develop/rest-api-reference
 Scenarios: https://docs.microsoft.com/en-us/partner/develop/scenarios
 
