@@ -10,7 +10,7 @@ the rights to use your contribution. For details, visit https://cla.microsoft.co
 
 To contibute a connector to the open source repo, please start by creating a fork on the github repo.
 Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on you 
-local machine, and checkout the branch. Create a folder for your connector under the `connectors` folder
+local machine, and checkout the branch. Create a folder for your connector under the `certified-connectors` folder
 and place the connector files in the sub-folder. Commit and push the changes to your forked branch.
 Create a pull request from the forked branch to the main repo to merge your changes into the main repo.
 [Please see this document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
