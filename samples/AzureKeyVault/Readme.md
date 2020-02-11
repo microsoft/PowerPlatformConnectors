@@ -9,7 +9,7 @@ Azure Key Vault provides a powerful and very extensive REST API.  Using this API
 
 ## Pre-requisites
 You will need the following to proceed:
-* A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+* A Microsoft Power Apps or Power Automate plan with custom connector feature
 * An Azure subscription
 * The Power platform CLI tools
 
