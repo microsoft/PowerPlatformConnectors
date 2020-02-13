@@ -4,7 +4,7 @@ KnowledgeLake RPA allows you to integrate any Windows, browser, or legacy system
 
 
 ## Pre-requisites
-* A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+* A Microsoft Power Apps or Power Automate plan with custom connector feature
 * An Azure subscription
 * The Power platform CLI tools
 
