@@ -16,6 +16,8 @@ For certified connectors, create a folder for your connector under the `certifie
 
 Ensure that you have removed any sensitive information, such as Client IDs, from your artifacts before continuing. Any sensitive information can be replaced with fake values for the purpose of your submission.
 
+Next, create a `readme.md` for your connector. An example can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/samples/AzureKeyVault) connector repository. Include this completed `readme.md` in your connector's folder which contains your artifacts. 
+
 Once complete, commit and push the changes to your forked branch. Create a pull request from the forked branch to the main repo to merge your changes into the main repo.
 [Please see this document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
 
