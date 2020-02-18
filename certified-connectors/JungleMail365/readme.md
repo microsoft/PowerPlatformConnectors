@@ -3,7 +3,7 @@
 JungleMail 365 Connector extends the capabilities of JungleMail and allows to automate certain tasks such as:
 
 1.  Newsletter approval using Power Automate (Flow): https://help-junglemail365.enovapoint.com/article/811-newsletter-approval-with-power-automate
-2.  Creating a newsletter archive in SharePoint using Power Automate (Flow): https://help-junglemail365.enovapoint.com/article/811-newsletter-approval-with-power-automate
+2.  Creating a newsletter archive in SharePoint using Power Automate (Flow): https://help-junglemail365.enovapoint.com/article/814-archiving-newsletters-with-power-automate
 3.  Exporting analytics and usage statistics using Power automate (Flow) or PowerApps
 
 ## Pre-requisites
