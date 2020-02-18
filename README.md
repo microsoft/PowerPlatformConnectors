@@ -9,7 +9,7 @@ Contributor License Agreement (CLA) declaring that you have the right to, and ac
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
 To contibute a connector to the open source repo, please start by creating a fork on the github repo.
-Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on you 
+Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on your 
 local machine, and checkout the branch. 
 
 For certified connectors, create a folder for your connector under the `certified-connectors` folder and place the connector files in the sub-folder. Otherwise, create a folder for your connector under the `custom-connectors` folder and place your connector files in that sub-folder.
