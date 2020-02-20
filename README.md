@@ -9,9 +9,14 @@ Contributor License Agreement (CLA) declaring that you have the right to, and ac
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
 To contibute a connector to the open source repo, please start by creating a fork on the github repo.
-Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on you 
-local machine, and checkout the branch. Create a folder for your connector under the `connectors` folder
-and place the connector files in the sub-folder. Ensure that you have removed any sensitive information, such as Client IDs, from your artifacts before continuing. Any sensitive information can be replaced with fake values for the purpose of your submission.
+Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on your 
+local machine, and checkout the branch. 
+
+For certified connectors, create a folder for your connector under the `certified-connectors` folder and place the connector files in the sub-folder. Otherwise, create a folder for your connector under the `custom-connectors` folder and place your connector files in that sub-folder.
+
+Ensure that you have removed any sensitive information, such as Client IDs, from your artifacts before continuing. Any sensitive information can be replaced with fake values for the purpose of your submission.
+
+Next, create a `readme.md` for your connector. An example can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/samples/AzureKeyVault) connector repository. Include this completed `readme.md` in your connector's folder which contains your artifacts. 
 
 Once complete, commit and push the changes to your forked branch. Create a pull request from the forked branch to the main repo to merge your changes into the main repo.
 [Please see this document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
