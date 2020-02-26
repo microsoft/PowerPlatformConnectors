@@ -132,7 +132,11 @@ def download(powerapps_rp, settings, destination, overwrite):
         original_swagger_url = api_properties[_API_DEFINITIONS][_ORIGINAL_SWAGGER_URL]
         response = requests.get(original_swagger_url, allow_redirects=True)
         response_string = response.content.decode('utf-8-sig')
-        swagger = format_json(json.loads(response_string))
+        # NOTE: The following line is creating issues for partners.
+        # We should add an option to pretty format the swagger file.
+        # Until then, lets preserve the original swagger as is.
+        # swagger = format_json(json.loads(response_string))
+        swagger = response_string
         open(
             file=settings.api_definition,
             mode='w'
