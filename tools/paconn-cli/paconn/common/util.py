@@ -29,13 +29,13 @@ def display(txt):
     print(txt, file=sys.stderr)
 
 
-def format_json(content):
+def format_json(content, sort_keys=False):
     """
     Format a given dictionary to a json formatted string.
     """
     json_string = json.dumps(
         content,
-        sort_keys=True,
+        sort_keys=sort_keys,
         indent=2,
         separators=(',', ': '))
     return json_string
