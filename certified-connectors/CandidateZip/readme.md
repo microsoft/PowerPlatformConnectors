@@ -5,7 +5,7 @@ Typically, we help recruiters who need to extract resumes or jobs into their ATS
 
 ## Pre-requisites
 You will need the following to proceed:
-* Active Microsoft Flow login
+* Active Microsoft Power Automate, Power Apps, or Logic Apps account
 * Active CandidateZip login
 
 
