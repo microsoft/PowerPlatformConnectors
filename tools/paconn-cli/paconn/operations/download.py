@@ -120,7 +120,10 @@ def download(powerapps_rp, settings, destination, overwrite):
     }
 
     # Write the api properties
-    api_prop = format_json(api_properties_selected)
+    api_prop = format_json(
+        content=api_properties_selected,
+        sort_keys=False)
+
     open(
         file=settings.api_properties,
         mode='w'
@@ -132,7 +135,11 @@ def download(powerapps_rp, settings, destination, overwrite):
         original_swagger_url = api_properties[_API_DEFINITIONS][_ORIGINAL_SWAGGER_URL]
         response = requests.get(original_swagger_url, allow_redirects=True)
         response_string = response.content.decode('utf-8-sig')
-        swagger = format_json(json.loads(response_string))
+
+        swagger = format_json(
+            content=json.loads(response_string),
+            sort_keys=False)
+
         open(
             file=settings.api_definition,
             mode='w'
@@ -142,6 +149,7 @@ def download(powerapps_rp, settings, destination, overwrite):
     if _ICON_URI in api_properties:
         icon_url = api_properties[_ICON_URI]
         response = requests.get(icon_url, allow_redirects=True)
+
         open(
             file=settings.icon,
             mode='wb'
