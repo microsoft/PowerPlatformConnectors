@@ -4,7 +4,7 @@ Create powerful forms and surveys and embed them in your website with JotForm. B
 
 ## Pre-requisites
 You will need the following to proceed:
- - A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+ - A Microsoft Power Apps or Power Automate plan with custom connector feature
  - [JotForm Enterprise](https://www.jotform.com/enterprise/) Account
 
 ## Supported Operations
@@ -15,4 +15,4 @@ Please use [these instructions](https://www.jotform.com/help/253-How-to-Create-a
 
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate and Power Apps.
