@@ -1,5 +1,5 @@
 ## Plumsail SP Connector
-Advanced SharePoint actions for Microsoft Flow, Azure Logic Apps or PowerApps.
+Advanced SharePoint actions for Microsoft Power Automate, Azure Logic Apps or Power Apps.
 
 ## Pre-requisites
 You will need the following to proceed:
