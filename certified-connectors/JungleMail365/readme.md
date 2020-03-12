@@ -4,7 +4,7 @@ JungleMail 365 Connector extends the capabilities of JungleMail and allows to au
 
 1.  Newsletter approval using Power Automate (Flow): https://help-junglemail365.enovapoint.com/article/811-newsletter-approval-with-power-automate
 2.  Creating a newsletter archive in SharePoint using Power Automate (Flow): https://help-junglemail365.enovapoint.com/article/814-archiving-newsletters-with-power-automate
-3.  Exporting analytics and usage statistics using Power automate (Flow) or PowerApps
+3.  Exporting analytics and usage statistics using Power Automate (Flow) or Power Apps
 
 ## Pre-requisites
 
@@ -44,4 +44,4 @@ Access is gained through the API key, it can be generated in JungleMail for Offi
 
 ## Deployment instructions
 
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
