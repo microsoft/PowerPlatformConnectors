@@ -5,7 +5,7 @@
 
 ## Pre-requisites
 You will need the following to proceed:
- - A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+ - A Microsoft Power Apps or Microsoft Power Automate plan with custom connector feature
  - The Power platform CLI tools
 
 ## Supported Operations
@@ -17,5 +17,5 @@ You only need an organizational Microsoft account to use this connector.
 
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
 
