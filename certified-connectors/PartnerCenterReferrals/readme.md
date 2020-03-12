@@ -6,7 +6,7 @@ Partner Center Referrals connector allows you to manage Microsoft Partner Center
 ## Pre-requisites
 You need the following:
 	- Microsoft Partner Center Account
-	- Microsoft Flow subscription
+	- Microsoft Power Automate subscription
 
 
 ## API documentation
@@ -26,5 +26,4 @@ Get a Microsoft Partner Center account: https://docs.microsoft.com/en-us/partner
 
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
-
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
