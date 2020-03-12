@@ -30,4 +30,4 @@ The API documentation can be found [here](https://apidocs.scrive.com/)
 - **Update document JSON:** This action updates the document meta-data using a provided JSON.
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
