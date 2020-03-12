@@ -9,7 +9,7 @@ It is suggested to register a new free account at [Robolytix.com](https://roboly
 
 You will also need the following to proceed:
 
-* A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+* A Microsoft Power Apps or Microsoft Power Automate plan with custom connector feature
 * An Azure subscription
 * The Power platform CLI tools
 
@@ -30,5 +30,5 @@ Connector from external platform usually implements only one action called Sonar
 
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps.
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
 
