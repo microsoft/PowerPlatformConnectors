@@ -20,7 +20,7 @@ You will need the following to proceed:
 Run the following commands and follow the prompts:
 
 ```paconn
-paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
+paconn create -s settings.json
 ```
 
 ## Supported Operations
