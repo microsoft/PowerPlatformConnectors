@@ -69,7 +69,7 @@ To build the app, you will need to:
 
 The basic functionality of the app should be working now.  This will allow you to browse products using the ODATA feed.
 
-![App Screen 1](images/sap-app-1.png)
+![App Screen 1](images/sap-app-1.PNG)
 
 ### Update a product
 To add support for updates, you will use a flow, as explained above.
