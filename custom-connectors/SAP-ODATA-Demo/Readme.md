@@ -58,6 +58,7 @@ Once that is done, your updates will start working. This is how the flow will lo
 
 ![Using a flow to set the x-csrf-token and the session info](images/flow-update.PNG)
 
+
 ## Sample Canvas app
 You can find a sample canvas app "SAP EPM Products Demo Starter.msapp" in this folder to illustrate how you may use the connector from a canvas app.
 
