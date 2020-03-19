@@ -9,7 +9,7 @@ First of all, you need to [Create an PDF4me Account](https://pdf4me.com/).
 
 
 ## API documentation
-The API documentation can be found [here]([https://developer.pdf4me.com/docs/api/microsoft-flow](https://developer.pdf4me.com/docs/api/microsoft-flow))
+The API documentation can be found here [https://developer.pdf4me.com/docs/api/microsoft-flow](https://developer.pdf4me.com/docs/api/microsoft-flow)
 
 
 ## Supported Operations
