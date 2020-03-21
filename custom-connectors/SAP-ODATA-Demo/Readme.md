@@ -11,7 +11,7 @@ This connector provides functionality to browse Products, Partners and Salesorde
 ## Pre-requisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
-* The Power platform CLI tools
+* The [Power platform CLI tools](https://docs.microsoft.com/connectors/custom-connectors/paconn-cli)
 * Access to the SAP ODATA Sample Service. If you dont have access, you can [sign up from SAP](https://developers.sap.com/tutorials/gateway-demo-signup.html).
 
 
