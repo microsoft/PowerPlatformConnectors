@@ -1,5 +1,5 @@
 ## GAC Connect2All
-GAC Connect2All integrates the PowerAutomate platform to Business Central and makes adaptations and the extensibility to connect virtual any Datasource to your business processes in Business Central possible. You do not need to be a Professional developer to seamlessly extend Business Central to interact to other business application and Datasources. GAC Connect2All delivers your business the scalability and flexibility to create smart integration solutions you need today and tomorrow.
+GAC Connect2All integrates the Microsoft Power Platform to Business Central and makes adaptations and the extensibility to connect virtual any Datasource to your business processes in Business Central possible. You do not need to be a Professional developer to seamlessly extend Business Central to interact to other business application and Datasources. GAC Connect2All delivers your business the scalability and flexibility to create smart integration solutions you need today and tomorrow.
 
 ## Pre-requisites
 The user, who wants to use to the Connect2All connector in Power Automate,  must meet the requirements below:
