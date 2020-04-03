@@ -1,12 +1,12 @@
-# Industrial App Store Microsoft Flow Connector
+# Industrial App Store Microsoft Power Automate Connector
 
-![IAS Connector](https://www.intelligentplant.com/datasheets/powerplatform/resources/AppStore-Automate-Connector-100px.png "Industrial App Store - Microsoft Flow Connector")
+![IAS Connector](https://www.intelligentplant.com/datasheets/powerplatform/resources/AppStore-Automate-Connector-100px.png "Industrial App Store - Microsoft Power Automate (Flow) Connector")
 
 Intelligent Plant’s [Industrial App Store](https://appstore.intelligentplant.com) Microsoft Automate (Flow) Connector enables Microsoft’s powerful analytics and visualizations to be applied to real-time and historical process data. Seamlessly integrate plant and corporate data and share with any colleague on any device, enabling faster, better, real-time decision making. The Industrial App Store Connector connects to Intelligent Plant’s Industrial App Store, while all data **remains** secure and safe on-premises. The plant data may be centralized in a corporate data lake or globally dispersed across many sites and historians. Either way, Industrial App Store Power BI Connector brings it all together and delivers to your fingertips.
 
-## Getting Started
+## Getting started with Microsoft Power Automate Industrial App Store Connector
 
-To start with Microsoft Flow check out this article [here](https://docs.microsoft.com/en-us/power-automate/getting-started). To get started with Industrial App Store Connector configure a step and choose an action from the connector (see below).
+To start with Microsoft Power Automate (Flow) check out this article [here](https://docs.microsoft.com/en-us/power-automate/getting-started). To get started with Industrial App Store Connector configure a step and choose an action from the connector (see below).
 
 ![IAS Connector](https://www.intelligentplant.com/datasheets/powerplatform/resources/msflow-ias-getstarted.gif "Industrial App Store Connector - Getting started")
 
@@ -14,7 +14,7 @@ To start with Microsoft Flow check out this article [here](https://docs.microsof
 
 * You will need App Store Connect to connect to you own data but its not essential if you wish to play around with demo data provided by Intelligent Plant. More info on how to connect your data to Industrial App Store can be found [here](https://community.powerbi.com/t5/Community-Blog/Connecting-industrial-historians-to-Microsoft-Power-BI-One/ba-p/942200 "Connecting industrial historians to Microsoft Power BI. One connector to get them all… ") and [here](https://appstore.intelligentplant.com/wiki/doku.php?id=app_store_connect:app_store_connect "Industrial App Store Wiki").
 
-* Any kind of Microsoft Automate (Flow) subscription is needed in order to create Flows. More info on subscription types can be found [here](http://download.microsoft.com/download/9/5/6/9568EFD0-403D-4AE4-95F0-7FACA2CCB2E4/PowerApps%20and%20Flow%20Licensing%20Guide%20-%20August.pdf).
+* Any kind of Microsoft Power Automate (Flow) subscription is needed in order to create Flows. More info on subscription types can be found [here](http://download.microsoft.com/download/9/5/6/9568EFD0-403D-4AE4-95F0-7FACA2CCB2E4/PowerApps%20and%20Flow%20Licensing%20Guide%20-%20August.pdf).
 
 ### Obtaining credentials
 
