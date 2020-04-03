@@ -52,6 +52,10 @@ Additional information on API calls made and its parameters can be found [here](
 
   Performs a RAW data query on a single data source for specified tags, date range.
 
+## Examples
+
+Coming soon
+
 ## Built With
 
 Industrial App Store Connector was built using
