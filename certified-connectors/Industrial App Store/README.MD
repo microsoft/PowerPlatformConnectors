@@ -1,4 +1,4 @@
-# Industrial App Store Microsoft Power Automate Connector
+# Intelligent Plant Industrial App Store Microsoft Power Automate Connector
 
 ![IAS Connector](https://www.intelligentplant.com/datasheets/powerplatform/resources/AppStore-Automate-Connector-100px.png "Industrial App Store - Microsoft Power Automate (Flow) Connector")
 
