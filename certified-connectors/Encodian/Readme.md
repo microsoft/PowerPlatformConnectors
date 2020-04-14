@@ -11,8 +11,6 @@
 The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
 
 ## Supported Operations
-### Add page number to footer in a Word DOCX document	
-Set the footer in a Word Document (DOCX) to contain a page number. Call Finish Editing on the output URL to complete the operation.
 
 ### Convert to PDF
 Convert a document to PDF or PDF/A format - https://support.encodian.com/hc/en-gb/articles/360011123574-Convert-to-PDF
