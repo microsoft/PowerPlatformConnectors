@@ -62,13 +62,16 @@ Coming soon. A workaround at the moment would be to schedule a fequent task.
 
 ## Known limitations
 
-* Users can only query for a single tag per action. This means if you wish to query two or more tags you'll have to define multiple actions of the same type. This is due to Microsoft not supporting 'explosive arrays' in swagger definition. We are currently working on a new API endpoint to support this.
+* Users can only query for a single tag per action. This means if you wish to query two or more tags you'll have to define multiple actions of the same type. This is due to Microsoft not supporting 'explosive arrays' in swagger definition. We are currently working on new API endpoints to support this.
 
 ## Examples
 
-* [Intelligent Plant Industrial App Store Microsoft Power Automate Connector - Act on Industrial data with Microsoft Power Automate (Flow)](https://www.youtube.com/watch?v=T5Aks4A60uI "Act on Industrial data with Microsoft Power Automate - A YouTube video")
+* Microsoft Power Automate Connector blog post - [Connecting industrial historians to Microsoft Power Automate. One connector to get them all…](https://powerusers.microsoft.com/t5/Power-Automate-Community-Blog/Connecting-industrial-historians-to-Microsoft-Power-Automate-One/ba-p/525552 "Connecting industrial historians to Microsoft Power Automate. One connector to get them all…").
+* Intelligent Plant Industrial App Store Microsoft Power Automate Connector (YouTube video) - [Act on Industrial data with Microsoft Power Automate (Flow)](https://www.youtube.com/watch?v=T5Aks4A60uI "Act on Industrial data with Microsoft Power Automate - A YouTube video")
 
-* Microsoft Power Automate Blog post - Coming soon.
+## Publications
+
+* A review by Nick Hance from reenhanced - [New in Power Automate: Industrial App Store](https://reenhanced.com/2020/new-in-power-automate-industrial-app-store/)
 
 ## Built With
 
