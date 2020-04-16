@@ -1,6 +1,6 @@
 
-## Encodian for PowerAutomate
-[Encodian for PowerAutomate](https://www.encodian.com/products/encodian-for-microsoft-power-automate/) - Supercharge your Microsoft Power Automate and Azure Logic Apps solutions with our enhanced document management actions, providing PDF conversion, document merging, watermarks, OCR and advanced document and image clean-up capabilities..
+## Encodian for Power Automate
+[Encodian for Power Automate](https://www.encodian.com/products/encodian-for-microsoft-power-automate/) - Supercharge your Microsoft Power Automate and Azure Logic Apps solutions with our enhanced document management actions, providing PDF conversion, document merging, watermarks, OCR and advanced document and image clean-up capabilities..
 
 ## Setup
 - [Register](https://www.encodian.com/apikey/) for an Encodian Subscription
