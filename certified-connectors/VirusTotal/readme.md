@@ -1,4 +1,7 @@
- VirusTotal Connector
+ ### NOTE
+> This is a *sample* connector.  The connector is provided here with the intent to illustrate certain features and functionality around connectors.
+
+ ## VirusTotal Connector
 
 
 Analyze suspicious files and URLs to detect types of malware, automatically share them with the security community.
