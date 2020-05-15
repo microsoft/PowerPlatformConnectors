@@ -2086,6 +2086,51 @@
         "description": "Extract text from the image provided - https://support.encodian.com/hc/en-gb/articles/360006998078-Extract-Text-from-Image-OCR"
       }
     },
+    "/api/v1/Core/FillPdfForm": {
+      "post": {
+        "tags": [
+          "Core"
+        ],
+        "operationId": "FillPdfForm",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "operation",
+            "in": "body",
+            "description": "Request object, refer to schema definition: DtoFillPdfForm",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/DtoFillPdfForm"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/DtoResponseFillPdfForm"
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "$ref": "#/definitions/DtoResponseFillPdfForm"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        },
+        "x-ms-visibility": "important",
+        "summary": "Fill a PDF Form",
+        "description": "Fill the PDF Form provided with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360008556077-Fill-a-PDF-Form"
+      }
+    },
     "/api/v1/DynamicSchema/GetDynamicSchemaCreateBarcode": {
       "get": {
         "tags": [
@@ -2122,6 +2167,41 @@
         "x-ms-visibility": "internal",
         "summary": "GetDynamicSchemaCreateBarcode",
         "description": "Provides the dynamic schema for the Create Barcode action."
+      }
+    },
+    "/api/v1/Mgmt/GetSubscriptionStatus": {
+      "get": {
+        "tags": [
+          "Mgmt"
+        ],
+        "operationId": "GetSubscriptionStatus",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/DtoResponseMgmtGetSubscriptionStatus"
+            }
+          },
+          "202": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/DtoResponseMgmtGetSubscriptionStatus"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "x-ms-visibility": "important",
+        "summary": "Get Subscription Status",
+        "description": "Get the the status of your Encodian Subscription - https://support.encodian.com/hc/en-gb/articles/360008589337-Get-Subscription-Status"
       }
     },
     "/api/v1/Mgmt/GetOperationStatus": {
@@ -3332,7 +3412,8 @@
     "DtoHtmlToPdf": {
       "required": [
         "FileName",
-        "outputFilename"
+        "outputFilename",
+        "encoding"
       ],
       "type": "object",
       "properties": {
@@ -3533,9 +3614,17 @@
             "BigEndianUnicode"
           ],
           "type": "string",
-          "x-ms-visibility": "advanced",
+          "x-ms-visibility": "internal",
           "x-ms-summary": "Encoding",
           "description": "Set the encoding type for the HTML."
+        },
+        "delay": {
+          "format": "int32",
+          "default": 5000,
+          "type": "integer",
+          "x-ms-visibility": "advanced",
+          "x-ms-summary": "Delay",
+          "description": "Set the delay in milliseconds between the HTML being received and the conversion to allo time for JavaScript to load."
         },
         "FinalOperation": {
           "default": true,
@@ -7671,13 +7760,19 @@
           "type": "string",
           "x-ms-visibility": "important",
           "x-ms-summary": "Title",
-          "description": "The Title of the PDF as set in the PDF properties"
+          "description": "The title of the PDF as set in the PDF properties"
         },
         "Subject": {
           "type": "string",
           "x-ms-visibility": "important",
           "x-ms-summary": "Subject",
-          "description": "The Subject of the PDF as set in the PDF properties"
+          "description": "The subject of the PDF as set in the PDF properties"
+        },
+        "Keywords": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "x-ms-summary": "Keywords",
+          "description": "The keywords of the PDF as set in the PDF properties"
         },
         "CreatedDate": {
           "format": "date-time",
@@ -8743,7 +8838,9 @@
             "Full",
             "Custom",
             "C40",
-            "Text"
+            "Text",
+            "EDIFACT",
+            "ANSIX12"
           ],
           "type": "string",
           "x-ms-visibility": "advanced",
@@ -9318,7 +9415,6 @@
     },
     "ImageRegion": {
       "required": [
-        "Name",
         "LowerLeftXCoordinate",
         "LowerLeftYCoordinate",
         "UpperRightXCoordinate",
@@ -9338,6 +9434,7 @@
         },
         "LowerLeftXCoordinate": {
           "format": "double",
+          "default": 0,
           "type": "number",
           "x-ms-visibility": "important",
           "x-ms-summary": "Lower Left X Coordinate",
@@ -9345,6 +9442,7 @@
         },
         "LowerLeftYCoordinate": {
           "format": "double",
+          "default": 0,
           "type": "number",
           "x-ms-visibility": "important",
           "x-ms-summary": "Lower Left Y Coordinate",
@@ -9352,6 +9450,7 @@
         },
         "UpperRightXCoordinate": {
           "format": "double",
+          "default": 0,
           "type": "number",
           "x-ms-visibility": "important",
           "x-ms-summary": "Upper Right X Coordinate",
@@ -9359,6 +9458,7 @@
         },
         "UpperRightYCoordinate": {
           "format": "double",
+          "default": 0,
           "type": "number",
           "x-ms-visibility": "important",
           "x-ms-summary": "Upper Right Y Coordinate",
@@ -9366,12 +9466,14 @@
         },
         "PageNumber": {
           "format": "int32",
+          "default": 1,
           "type": "integer",
           "x-ms-visibility": "important",
           "x-ms-summary": "Page Number",
           "description": "The number of the page to extract the image from"
         },
         "ImageType": {
+          "default": "PNG",
           "enum": [
             "JPG",
             "PNG",
@@ -9384,6 +9486,7 @@
           "description": "Select the output image format"
         },
         "ExtractEntirePage": {
+          "default": true,
           "type": "boolean",
           "x-ms-visibility": "important",
           "x-ms-summary": "Extract Entire Page",
@@ -9720,6 +9823,161 @@
           "x-ms-visibility": "important",
           "x-ms-summary": "Operation Status",
           "description": "Indicates whether the operation has completed, has been queued or has failed."
+        }
+      }
+    },
+    "DtoFillPdfForm": {
+      "required": [
+        "FileName"
+      ],
+      "type": "object",
+      "properties": {
+        "FileName": {
+          "default": "form.pdf",
+          "type": "string",
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Filename",
+          "description": "The filename of the source PDF file, the file extension is mandatory: 'file.pdf' and not 'file'"
+        },
+        "FileContent": {
+          "format": "byte",
+          "type": "string",
+          "x-ms-summary": "File Content",
+          "description": "The file content of the source PDF file"
+        },
+        "formData": {
+          "type": "string",
+          "x-ms-summary": "Form Data",
+          "description": "The JSON data to populate with the PDF Form with."
+        }
+      }
+    },
+    "DtoResponseFillPdfForm": {
+      "type": "object",
+      "properties": {
+        "HttpStatusCode": {
+          "format": "int32",
+          "type": "integer",
+          "x-ms-summary": "HTTP Status Code",
+          "description": "The HTTP Status code for the response."
+        },
+        "HttpStatusMessage": {
+          "type": "string",
+          "x-ms-summary": "HTTP Status Message",
+          "description": "The HTTP Status message for the response."
+        },
+        "OperationId": {
+          "type": "string",
+          "x-ms-summary": "Operation ID",
+          "description": "The unique ID assigned to this operation."
+        },
+        "Errors": {
+          "uniqueItems": false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Errors",
+          "description": "An array of error messages should an error occur."
+        },
+        "Operation Status": {
+          "type": "string",
+          "x-ms-summary": "Operation Status",
+          "description": "Indicates whether the operation has completed, has been queued or has failed."
+        },
+        "Filename": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "x-ms-summary": "Filename",
+          "description": "The filename of the document."
+        },
+        "FileContent": {
+          "format": "byte",
+          "type": "string",
+          "x-ms-visibility": "important",
+          "x-ms-summary": "File Content",
+          "description": "The processed document."
+        }
+      }
+    },
+    "DtoResponseMgmtGetSubscriptionStatus": {
+      "type": "object",
+      "properties": {
+        "availableActionsMonth": {
+          "format": "int32",
+          "type": "integer",
+          "x-ms-summary": "Available Actions",
+          "description": "The number of actions remaining for the current calendar month."
+        },
+        "subscriptionEnabled": {
+          "type": "boolean",
+          "x-ms-summary": "Subscription Enabled",
+          "description": "Indicates whether the Encodian subscription is enabled or disabled."
+        },
+        "subscriptionLevel": {
+          "type": "string",
+          "x-ms-summary": "Subscription Level",
+          "description": "Details the current Encodian subscription level."
+        },
+        "monthlyActions": {
+          "format": "int32",
+          "type": "integer",
+          "x-ms-summary": "Monthly Actions",
+          "description": "Details the allowed actions per month for the current Encodian subscription level."
+        },
+        "expiryDate": {
+          "format": "date-time",
+          "type": "string",
+          "x-ms-summary": "Expiry Date",
+          "description": "The date and time your Encodian subscription will expire."
+        },
+        "billingInterval": {
+          "type": "string",
+          "x-ms-summary": "Billing Interval",
+          "description": "Details the current billing interval (Monthly or Annually)."
+        },
+        "HttpStatusCode": {
+          "format": "int32",
+          "type": "integer",
+          "x-ms-summary": "HTTP Status Code",
+          "description": "The HTTP Status code for the response."
+        },
+        "HttpStatusMessage": {
+          "type": "string",
+          "x-ms-summary": "HTTP Status Message",
+          "description": "The HTTP Status message for the response."
+        },
+        "OperationId": {
+          "type": "string",
+          "x-ms-summary": "Operation ID",
+          "description": "The unique ID assigned to this operation."
+        },
+        "Errors": {
+          "uniqueItems": false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Errors",
+          "description": "An array of error messages should an error occur."
+        },
+        "Operation Status": {
+          "type": "string",
+          "x-ms-summary": "Operation Status",
+          "description": "Indicates whether the operation has completed, has been queued or has failed."
+        },
+        "Filename": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "x-ms-summary": "Filename",
+          "description": "The filename of the document."
+        },
+        "FileContent": {
+          "format": "byte",
+          "type": "string",
+          "x-ms-visibility": "important",
+          "x-ms-summary": "File Content",
+          "description": "The processed document."
         }
       }
     },
