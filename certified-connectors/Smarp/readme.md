@@ -27,8 +27,8 @@ The connector supports the following operations:
   
   
 ## How to get credentials  
-During creation the flow click the `Sign in` button and verify your account.  
+During creation of the flow click the `Sign in` button and verify your account.  
    
   
 ## Deployment instructions  
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps

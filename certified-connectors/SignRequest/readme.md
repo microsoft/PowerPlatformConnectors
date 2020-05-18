@@ -8,7 +8,7 @@ A free SignRequest account is required. Create one on [https://signrequest.com](
 
 
 ## API documentation
-The regular [REST API](https://signrequest.com/api/v1/docs/) is also used for the Flow/LogicApps/PowerApps connector. You can refer to the fields on the [SignRequest Quick Create endpoint](https://signrequest.com/api/v1/docs/#tag/signrequest-quick-create).
+The regular [REST API](https://signrequest.com/api/v1/docs/) is also used for the Power Automate/Logic Apps/Power Apps connector. You can refer to the fields on the [SignRequest Quick Create endpoint](https://signrequest.com/api/v1/docs/#tag/signrequest-quick-create).
 
 
 ## Supported Operations
@@ -21,5 +21,5 @@ Only a SignRequest account is required as OAuth2 is used to authenticate.
 
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
 

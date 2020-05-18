@@ -7,7 +7,7 @@ Envoy provides an extensive REST API for our visitor management platform.  Using
 
 ## Pre-requisites
 You will need the following to proceed:
-* A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+* A Microsoft Power Apps or Microsoft Power Automate plan with custom connector feature
 * An Envoy subscription
 * Be an Envoy Global Admin
 
