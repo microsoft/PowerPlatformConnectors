@@ -1,5 +1,4 @@
 ## Plumsail SP Connector
-=======
 Advanced SharePoint actions for Microsoft Power Automate, Azure Logic Apps or Power Apps.
 
 ## Pre-requisites
