@@ -147,3 +147,6 @@ Extract images from PDF using specified regions - https://support.encodian.com/h
 ### Extract Text from Image (OCR)
 Extract text from the image provided - https://support.encodian.com/hc/en-gb/articles/360006998078-Extract-Text-from-Image-OCR
 
+### Fill a PDF Form
+Fill the PDF Form provided with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360008556077-Fill-a-PDF-Form
+
