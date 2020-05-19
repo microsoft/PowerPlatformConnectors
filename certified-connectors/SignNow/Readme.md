@@ -12,7 +12,7 @@ First, update the clientId value in the apiProperties.json with your own.
 Run the following commands and follow the prompts:
 
 ```paconn
-paconn create --api-def signnow.swagger.2.0.json --api-prop apiProperties.json --secret <client_secret>
+paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>
 ```
 ## Supported Actions and Triggers
 See [documentation](https://help.signnow.com/v1.0/docs/signnow-flow-connector) for more details.
