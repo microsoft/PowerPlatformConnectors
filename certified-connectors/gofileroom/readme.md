@@ -5,7 +5,7 @@ GoFileRoom is a cloud-based document management and workflow solution. With the 
 
 ## Pre-requisites
 You will need the following to proceed:
-* A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+* A Microsoft Power Apps or Microsoft Power Automate plan with custom connector feature
 * Active GoFileRoom login
 * API Key for your GoFileRoom database
 
@@ -68,5 +68,5 @@ The connector supports the following operations:
 
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
 

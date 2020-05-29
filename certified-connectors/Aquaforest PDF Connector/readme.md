@@ -1,7 +1,7 @@
 ﻿
 
 ## Aquaforest PDF Connector
-The Aquaforest PDF Connector contains a group of actions that use the information available in PDF files to perform some simple operations for Office 365 and Flow.
+The Aquaforest PDF Connector contains a group of actions that use the information available in PDF files to perform some simple operations for Office 365 and Power Automate.
 
 
 ## Pre-requisites
@@ -30,5 +30,5 @@ The API documentation can be found [here]([https://www.aquaforest.com/en/aquafor
 Instructions to get credentials can be found [here]([https://www.aquaforest.com/en/aquaforest-flow-doc.asp#chapter1-2](https://www.aquaforest.com/en/aquaforest-flow-doc.asp#chapter1-2)).
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
 

@@ -4,7 +4,7 @@ LeadDesk offers cloud service for high-volume sales and customer-service. We hel
 
 ## Pre-requisites
 You will need the following to proceed:
-- A Microsoft PowerApps or Microsoft Flow plan enabling the use of Premium connectors
+- A Microsoft Power Apps or Microsoft Power Automate plan enabling the use of Premium connectors
 - A LeadDesk account (and your LeadDesk API key)
 
 ## API documentation
@@ -27,5 +27,5 @@ Modify an Agent: This operation edits an agent's personal and work related infor
 To test the connectors you need a LeadDesk API Key, which you will obtain when creating a LeadDesk account.
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
 

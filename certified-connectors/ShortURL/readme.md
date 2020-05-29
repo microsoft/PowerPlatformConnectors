@@ -1,6 +1,6 @@
 ﻿
 ## Short URL
-Create, update or delete a Short URL (Short Links, Tiny URLs) using a custom domain with Click Analytics for any link using the Short URL connector. The flow connector is a companion of Short URL for SharePoint. Short URL allows the creation and use of vanity and shortcut hyperlinks fully integrated within SharePoint!
+Create, update or delete a Short URL (Short Links, Tiny URLs) using a custom domain with Click Analytics for any link using the Short URL connector. The connector is a companion of Short URL for SharePoint. Short URL allows the creation and use of vanity and shortcut hyperlinks fully integrated within SharePoint!
 
 
 ## Pre-requisites
@@ -27,4 +27,4 @@ To get credentials, you need to subscribed for valid license of Short URL (https
 For further support, please contact support@cirrussoftltd.com
 
 ## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
