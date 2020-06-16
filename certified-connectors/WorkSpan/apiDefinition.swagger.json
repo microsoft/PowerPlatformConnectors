@@ -1,0 +1,789 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "WorkSpan",
+    "description": "WorkSpan is a collaborative platform for connecting with your partners and managing your partner programs. You can integrate your CRM, Partner Center and collaboration tools to WorkSpan.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "WorkSpan API Support",
+      "url": "https://support.workspan.com",
+      "email": "api-team@workspan.com"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.workspan.com"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing;Sales and CRM"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.workspan.com/privacy-policy"
+    }
+  ],
+  "host": "api.workspan.com",
+  "basePath": "/event/v1",
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "workspan_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "https://api.workspan.com/oauth/authorize",
+      "tokenUrl": "https://api.workspan.com/oauth/token",
+      "flow": "accessCode",
+      "scopes": {}
+    }
+  },
+  "tags": [
+    {
+      "name": "notifications",
+      "description": "Event Notifications from WorkSpan"
+    }
+  ],
+  "paths": {
+    "/subscriber": {
+      "x-ms-notification-content": {
+        "description": "Schema of event",
+        "schema": {
+          "$ref": "#/definitions/event_payload"
+        }
+      },
+      "post": {
+        "tags": [
+          "webhook-subscribe"
+        ],
+        "summary": "Subscribe to WorkSpan Collaboration Events",
+        "description": "Subscribe to various collaboration events such as sharing, tasks and comments",
+        "operationId": "Subscribe",
+        "x-ms-trigger": "single",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "subscribe_body",
+            "description": "Subscribe Request",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "event",
+                "name",
+                "subscriber_type",
+                "webhook_settings"
+              ],
+              "properties": {
+                "webhook_settings": {
+                  "type": "object",
+                  "required": [
+                    "callback_url"
+                  ],
+                  "properties": {
+                    "callback_url": {
+                      "type": "string",
+                      "description": "Callback URL",
+                      "title": "Callback URL of Webhook",
+                      "x-ms-notification-url": true,
+                      "x-ms-summary": "Callback URL",
+                      "x-ms-visibility": "internal"
+                    }
+                  }
+                },
+                "event": {
+                  "type": "string",
+                  "x-ms-summary": "Event Name",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetEventList",
+                    "value-collection": "events",
+                    "value-path": "name",
+                    "value-title": "description"
+                  }
+                },
+                "name": {
+                  "x-ms-summary": "Subscriber Name",
+                  "type": "string",
+                  "description": "Name assigned to the webhook"
+                },
+                "object_ids": {
+                  "x-ms-summary": "WorkSpan Object Id",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Object Ids for which webhook is registered"
+                },
+                "filters": {
+                  "type": "string",
+                  "description": "Filters for events",
+                  "x-ms-summary": "Filter example:\n (stage in [ \"closed\", \"won\", \"lost\" ]) AND (sales_details.partner = \"P1\")"
+                },
+                "subscriber_type": {
+                  "type": "string",
+                  "description": "Should be 'webhook' for webhook",
+                  "default": "webhook",
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/subscribe_resp"
+            }
+          },
+          "400": {
+            "description": "Error when subscribing to event"
+          }
+        }
+      }
+    },
+    "/metadata/event/{event}": {
+      "get": {
+        "operationId": "GetEventSchema",
+        "summary": "Get schema of collaboration event",
+        "description": "Get the schema of the WorkSpan Collaboration event",
+        "produces": [
+          "application/json"
+        ],
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "event",
+            "x-ms-url-encoding": "single",
+            "in": "path",
+            "description": "Name of event",
+            "x-ms-summary": "Name of event",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "API Error"
+          },
+          "404": {
+            "description": "event not defined"
+          }
+        }
+      }
+    },
+    "/metadata/event": {
+      "get": {
+        "operationId": "GetEventList",
+        "summary": "Get list of events",
+        "x-ms-summary": "Get list of events",
+        "description": "Get a list of WorkSpan Collaboration events",
+        "x-ms-visibility": "internal",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "events": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "API Error"
+          },
+          "404": {
+            "description": "event not defined"
+          }
+        }
+      }
+    },
+    "/subscriber/{subscriber_id}": {
+      "get": {
+        "tags": [
+          "read_subscriber"
+        ],
+        "summary": "Read subscriber information",
+        "description": "Read details of subscription",
+        "operationId": "ReadSubscriber",
+        "produces": [
+          "application/json"
+        ],
+        "x-ms-url-encoding": "single",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "subscriber_id",
+            "in": "path",
+            "description": "subscriber id assigened by WorkSpan",
+            "x-ms-summary": "subscriber id assigened by WorkSpan",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/event_subscribe_info"
+            }
+          },
+          "400": {
+            "description": "API Error"
+          },
+          "404": {
+            "description": "Subscriber not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "unsubscribe"
+        ],
+        "summary": "Delete subscriber",
+        "description": "Delete subscriber",
+        "operationId": "DeleteSubscriber",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "subscriber_id",
+            "in": "path",
+            "description": "ID of the subscriber that needs to be deleted",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "ID of the subscriber that needs to be deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "subscriber not found"
+          },
+          "200": {
+            "description": "successful operation"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/metadata/integration": {
+      "get": {
+        "operationId": "GetIntegrationList",
+        "summary": "Get list of integrations",
+        "produces": [
+          "application/json"
+        ],
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "integrations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "integration_id": {
+                        "type": "string"
+                      },
+                      "integration_type": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Successful in listing integrations"
+          },
+          "400": {
+            "description": "API Error"
+          },
+          "404": {
+            "description": "integration not defined"
+          }
+        },
+        "description": "Get list of integrations"
+      }
+    },
+    "/subscriber/object_integration_event": {
+      "post": {
+        "operationId": "SubscribeObjectEvent",
+        "x-ms-trigger": "single",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "Subscribe to WorkSpan Object Events",
+        "description": "Subscribe to various object events such as creates and updates on Opportunities",
+        "tags": [
+          "webhook-subscribe"
+        ],
+        "parameters": [
+          {
+            "required": true,
+            "in": "body",
+            "name": "subscribe_body",
+            "schema": {
+              "required": [
+                "integration_id",
+                "event",
+                "name",
+                "subscriber_type",
+                "webhook_settings"
+              ],
+              "type": "object",
+              "properties": {
+                "subscriber_type": {
+                  "x-ms-visibility": "internal",
+                  "default": "webhook",
+                  "type": "string",
+                  "description": "Should be 'webhook' for webhook"
+                },
+                "event": {
+                  "type": "string",
+                  "x-ms-summary": "WorkSpan Events",
+                  "x-ms-visibility": "internal",
+                  "default": "object.all"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name of event subscriber"
+                },
+                "integration_id": {
+                  "x-ms-summary": "Select Integration configured in WorkSpan",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetIntegrationList",
+                    "value-collection": "integrations",
+                    "value-path": "integration_id",
+                    "value-title": "name"
+                  },
+                  "type": "string"
+                },
+                "object_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "filters": {
+                  "x-ms-summary": "Filter example:\n (stage in [ \"closed\", \"won\", \"lost\" ]) AND (sales_details.partner = \"P1\")",
+                  "type": "string",
+                  "description": "Filters for events"
+                },
+                "webhook_settings": {
+                  "required": [
+                    "callback_url"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "callback_url": {
+                      "x-ms-summary": "Callback URL",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true,
+                      "title": "Callback URL of Webhook",
+                      "type": "string",
+                      "description": "Callback URL"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Subscribe Request"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/subscribe_resp"
+            },
+            "description": "successful operation"
+          },
+          "400": {
+            "description": "Error when subscribing to event"
+          }
+        }
+      },
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/wsobject_event_payload"
+        },
+        "description": "Schema of object event"
+      }
+    },
+    "/metadata/integration/{integration_id}": {
+      "get": {
+        "parameters": [
+          {
+            "x-ms-summary": "Integration Id",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "in": "path",
+            "name": "integration_id",
+            "type": "string",
+            "description": "Integration Id of Object Event Integration"
+          }
+        ],
+        "operationId": "GetObjectEventSchema",
+        "summary": "Get schema of object event",
+        "x-ms-visibility": "internal",
+        "description": "Get the schema of the WorkSpan Object event",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "successful operation"
+          },
+          "400": {
+            "description": "API Error"
+          },
+          "404": {
+            "description": "integration not defined"
+          }
+        }
+      }
+    },
+    "/bulkload_opportunity": {
+      "post": {
+        "consumes": [
+          "text/plain",
+          "application/json"
+        ],
+        "summary": "Bulk Load Opportunities (data in body)",
+        "description": "Upload integration input data as request body. Allowed formats are .csv and .json",
+        "x-ms-summary": "Bulk Load Opportunities (data in body)",
+        "operationId": "BulkloadOpportunity",
+        "parameters": [
+          {
+            "description": "Integration Id of CRM intergation configured in WorkSpan",
+            "in": "query",
+            "name": "integration_id",
+            "x-ms-summary": "Select Integration configured in WorkSpan",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "default": "csv",
+            "enum": [
+              "csv",
+              "json"
+            ],
+            "in": "query",
+            "name": "content_type",
+            "description": "Content type of data. Allowed formats are .csv and .json",
+            "x-ms-summary": "Content type of data. Allowed formats are .csv and .json",
+            "type": "string"
+          },
+          {
+            "default": ",",
+            "in": "query",
+            "name": "column_delimiter",
+            "description": "column delimiter (used if content_type is csv)",
+            "x-ms-summary": "column delimiter (used if content_type is csv)",
+            "type": "string"
+          },
+          {
+            "name": "Content-Type",
+            "default": "text/csv",
+            "enum": [
+              "text/csv",
+              "application/json"
+            ],
+            "description": "Content type of data. text/csv or application/json.",
+            "x-ms-summary": "Content type of data. text/csv or application/json.",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "Content-Encoding",
+            "description": "Content Encoding",
+            "x-ms-summary": "Content Encoding",
+            "enum": [
+              "gzip",
+              ""
+            ],
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "description": "For content type 'CSV': Data rows as csv. first row will be column headers. For content type 'JSON', data format is array: [ { key1 : value, key2 : value}, { key1 : value, key2 : value } ]",
+            "x-ms-summary": "data to be uploaded",
+            "in": "body",
+            "name": "bulkload_opportunity_request",
+            "schema": {}
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "data uploaded",
+            "schema": {
+              "$ref": "#/definitions/bulkload_response"
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "401": {
+            "description": "Authorization Error"
+          }
+        },
+        "x-ms-visibility": "advanced"
+      }
+    },
+    "/bulkload_opportunity/file": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "summary": "Bulk Load Opportunities (attachment)",
+        "x-ms-summary": "Bulk Load Opportunities (attachment)",
+        "description": "Upload integration input file. Allowed formats are .xlsx, .json and .csv",
+        "operationId": "BulkloadOpportunityFileAttachment",
+        "parameters": [
+          {
+            "description": "Integration Id of CRM intergation, that is configured in WorkSpan",
+            "in": "query",
+            "name": "integration_id",
+            "x-ms-summary": "Select Integration configured in WorkSpan",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "default": "xlsx",
+            "enum": [
+              "xlsx",
+              "csv",
+              "json"
+            ],
+            "in": "query",
+            "name": "content_type",
+            "description": "Content type of data. Allowed formats are .csv .xlsx and .json",
+            "x-ms-summary": "Content type of data. Allowed formats are .csv .xlsx and .json",
+            "type": "string"
+          },
+          {
+            "default": true,
+            "in": "query",
+            "name": "has_header_row",
+            "description": "Does excel file has header row?",
+            "x-ms-summary": "Does excel file has header row?",
+            "type": "boolean"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file to upload",
+            "x-ms-summary": "file to upload",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "data uploaded",
+            "schema": {
+              "$ref": "#/definitions/bulkload_response"
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "401": {
+            "description": "Authorization Error"
+          }
+        },
+        "x-ms-visibility": "advanced"
+      }
+    }
+  },
+  "definitions": {
+    "event_payload": {
+      "type": "object",
+      "description": "Payload of event - schema is fetched dynamically",
+      "additionalProperties": {
+        "$ref": "#/definitions/field"
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetEventSchema",
+        "parameters": {
+          "event": {
+            "parameter": "event"
+          }
+        },
+        "value-path": "schema"
+      },
+      "x-ms-dynamic-properties": {
+        "operationId": "GetEventSchema",
+        "parameters": {
+          "event": {
+            "parameterReference": "subscribe_body/event"
+          }
+        },
+        "itemValuePath": "schema"
+      }
+    },
+    "field": {
+      "type": "string"
+    },
+    "eventfilter": {
+      "type": "string"
+    },
+    "wsobject_event_payload": {
+      "x-ms-dynamic-schema": {
+        "value-path": "schema",
+        "parameters": {
+          "integration_id": {
+            "parameter": "integration_id"
+          }
+        },
+        "operationId": "GetObjectEventSchema"
+      },
+      "x-ms-dynamic-properties": {
+        "itemValuePath": "schema",
+        "parameters": {
+          "integration_id": {
+            "parameterReference": "subscribe_body/integration_id"
+          }
+        },
+        "operationId": "GetObjectEventSchema"
+      },
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/field"
+      },
+      "description": "Payload of event - schema is fetched dynamically"
+    },
+    "subscribe_resp": {
+      "type": "object",
+      "properties": {
+        "subscriber_id": {
+          "type": "string",
+          "description": "subscriber_id"
+        }
+      }
+    },
+    "event_subscribe_info": {
+      "type": "object",
+      "properties": {
+        "subscriber_id": {
+          "type": "string",
+          "description": "subscriber_id"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name assigned to the webhook"
+        },
+        "objectids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Object Ids for which webhook is registered"
+        },
+        "event": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Events for which webhook is registered"
+        },
+        "filters": {
+          "type": "string",
+          "description": "Filters for events"
+        },
+        "integraion_id": {
+          "type": "string",
+          "description": "Integration id used for object events"
+        },
+        "subscriber_type": {
+          "type": "string",
+          "description": "Should be 'webhook' for webhook",
+          "default": "webhook"
+        }
+      }
+    },
+    "bulkload_response": {
+      "type": "object",
+      "properties": {
+        "integration_id": {
+          "type": "string",
+          "description": "Integration Id"
+        },
+        "execution_id": {
+          "type": "string",
+          "description": "Execution Id"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation time",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
