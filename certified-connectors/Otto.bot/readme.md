@@ -30,4 +30,4 @@ Otto.bot connector allows users to rapidly build chatbot skills which can run au
 The connector supports the following operations:
 
 * `Return Results To Bot` - Send one or more responses to Otto during the execution of a skill. Compose a [Markdown supported message](https://markdown-it.github.io/) or build a rich, interactive UI using an [Adaptive Card](https://adaptivecards.io/). The returned results are specific to each request.
-* `Send File Attachments` - Send file attachments and data to a URL using multipart/form-data encoding. This API is created to support Logic apps as the built-in HTTP request connector cannot easily handle multipart/formdata
+* `Send File Attachments` - Send file attachments and data to a URL using multipart/form-data encoding. This API is created to support execution flows where the built-in HTTP request connector cannot easily handle multipart/formdata.
