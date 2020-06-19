@@ -8,7 +8,7 @@ This connector connects to the [Sample ODATA service on the demo SAP Gateway fro
 
 This connector provides functionality to browse Products, Partners and Salesorders. You can also create or update Products using the connector. You can easily extend this to add more functionality as needed (for example: listing Contacts or Sales Order details/line items).
 
-## Pre-requisites
+## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
 * The [Power platform CLI tools](https://docs.microsoft.com/connectors/custom-connectors/paconn-cli)
