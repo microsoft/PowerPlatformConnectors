@@ -5,7 +5,7 @@ This connector allows you to save KPI Target or KPI Actual data to your PIPware 
 
 ## Pre-requisites
 You will need the following to proceed:
-* A Power Automate plan
+* A Power Platform premium plan
 * The Power platform CLI tools (paconn)
 * An activated login to a PIPware instance for testing purposes
 * Your user account's API key for testing purposes
