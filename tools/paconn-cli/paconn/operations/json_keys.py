@@ -20,7 +20,6 @@ _ICON_BRAND_COLOR = 'iconBrandColor'
 _CAPABILITIES = 'capabilities'
 _POLICY_TEMPLATE_INSTANCES = 'policyTemplateInstances'
 _PUBLISHER='publisher'
-_STACK_OWNER='stackOwner'
 
 # Create update
 _OPEN_API_DEFINITION = 'openApiDefinition'
