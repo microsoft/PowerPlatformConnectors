@@ -25,7 +25,8 @@ from paconn.operations.json_keys import (
     _CONNECTION_PARAMETERS,
     _ICON_BRAND_COLOR,
     _CAPABILITIES,
-    _POLICY_TEMPLATE_INSTANCES
+    _POLICY_TEMPLATE_INSTANCES,
+    _PUBLISHER
 )
 
 
@@ -104,7 +105,8 @@ def download(powerapps_rp, settings, destination, overwrite):
         _CONNECTION_PARAMETERS,
         _ICON_BRAND_COLOR,
         _CAPABILITIES,
-        _POLICY_TEMPLATE_INSTANCES
+        _POLICY_TEMPLATE_INSTANCES,
+        _PUBLISHER
     ]
 
     # Remove the keys that aren't present in the property JSON

@@ -82,3 +82,6 @@ class TokenManager:
             token_expired = credentials[_EXPIRES_ON] < expiration_time
 
         return token_expired
+
+    def delete_token_file(self):
+        os.remove(self.token_file)

@@ -3,19 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # -----------------------------------------------------------------------------
-
 """
-Initializer
+Login command.
 """
 
-__VERSION__ = '0.0.14'
-__CLI_NAME__ = 'paconn'
+from paconn.authentication.auth import remove_authentication
+from paconn.common.util import display
 
-# Commands
-_COMMAND_GROUP = ''
-_LOGIN = 'login'
-_LOGOUT = 'logout'
-_DOWNLOAD = 'download'
-_CREATE = 'create'
-_UPDATE = 'update'
-_VALIDATE = 'validate'
+
+def logout():
+    """
+    Logout command.
+    """
+    remove_authentication()
+    display('Logout successful.')
