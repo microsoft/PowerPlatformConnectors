@@ -1,5 +1,3 @@
-
-
 ## PIPware Connector
 This connector allows you to save KPI Target or KPI Actual data to your PIPware instance. This is more efficient than capturing the data into PIPware manually. Commonly used data sources are Excel or SQL, but any source returning data in the expected format can be used.
 
@@ -25,6 +23,3 @@ Follow the below instructions to deploy the connector to your Power Automate acc
 The connector supports the following operations:
 * `SaveKPIActuals`: Create or update KPI values in your PIPware instance
 * `SaveKPITargets`: Create or update KPI targets in your PIPware instance
-
-
-
