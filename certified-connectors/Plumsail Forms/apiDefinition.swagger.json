@@ -1,0 +1,283 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "v1",
+    "title": "Plumsail Forms",
+    "description": "This API allows you to subscribe to Plumsail Forms submissions",
+    "contact": {
+      "name": "Plumsail Team",
+      "url": "https://plumsail.com",
+      "email": "support@plumsail.com"
+    }
+  },
+  "host": "forms.plumsail.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/api/v{version}/designer/forms": {
+      "get": {
+        "tags": [
+          "Designer"
+        ],
+        "operationId": "GetPublicForms",
+        "consumes": [],
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0,
+              1
+            ]
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns an array of public forms.",
+            "schema": {
+              "uniqueItems": false,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Form"
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get public forms",
+        "description": "Returns an array of public forms"
+      }
+    },
+    "/api/flow/schema/form": {
+      "get": {
+        "tags": [
+          "Schema"
+        ],
+        "operationId": "GetFormSchema",
+        "consumes": [],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-summary": "Form ID",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns form schema."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get form schema",
+        "description": "Returns schema of the specified form"
+      }
+    },
+    "/api/submissions": {
+      "x-ms-notification-content": {
+        "description": "Form data",
+        "schema": {
+          "$ref": "#/definitions/FormSchema"
+        }
+      },
+      "post": {
+        "tags": [
+          "SubmissionTrigger"
+        ],
+        "operationId": "FormIsSubmitted",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "subscriber",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "callbackUrl",
+                "formId"
+              ],
+              "type": "object",
+              "properties": {
+                "callbackUrl": {
+                  "type": "string",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true
+                },
+                "formId": {
+                  "format": "uuid",
+                  "type": "string",
+                  "x-ms-summary": "Form",
+                  "description": "The form which submissions you want to track.",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetPublicForms",
+                    "value-path": "id",
+                    "value-title": "name",
+                    "parameters": {
+                      "version": "2"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscription has been created."
+          },
+          "400": {
+            "description": "Invalid subscription configuration."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid."
+          }
+        },
+        "x-ms-visibility": "important",
+        "summary": "Form is submitted",
+        "description": "Fires whenever the target form is submitted",
+        "x-ms-trigger": "single"
+      }
+    },
+    "/api/submissions/{subscriberId}": {
+      "delete": {
+        "tags": [
+          "SubmissionTrigger"
+        ],
+        "operationId": "Unsubscribe",
+        "consumes": [],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "subscriberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Unsubscribe",
+        "description": "Removes the subscriber"
+      }
+    }
+  },
+  "definitions": {
+    "Form": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "Subscriber": {
+      "required": [
+        "callbackUrl",
+        "formId"
+      ],
+      "type": "object",
+      "properties": {
+        "callbackUrl": {
+          "type": "string",
+          "x-ms-visibility": "internal",
+          "x-ms-notification-url": true
+        },
+        "formId": {
+          "format": "uuid",
+          "type": "string",
+          "x-ms-summary": "Form",
+          "description": "The form which submissions you want to track.",
+          "x-ms-dynamic-values": {
+            "operationId": "GetPublicForms",
+            "value-path": "id",
+            "value-title": "name",
+            "parameters": {
+              "version": "2"
+            }
+          }
+        }
+      }
+    },
+    "FormSchema": {
+      "type": "object",
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "GetFormSchema",
+        "value-path": "response",
+        "parameters": {
+          "formId": {
+            "parameter": "formId"
+          }
+        }
+      },
+      "x-ms-dynamic-properties": {
+        "operationId": "GetFormSchema",
+        "parameters": {
+          "formId": {
+            "parameterReference": "subscriber/formId"
+          }
+        },
+        "itemValuePath": "response"
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2": {
+      "flow": "accessCode",
+      "authorizationUrl": "https://auth.plumsail.com/connect/authorize",
+      "tokenUrl": "https://auth.plumsail.com/connect/token",
+      "scopes": {
+        "openid": "openid",
+        "offline_access": "offline_access"
+      },
+      "type": "oauth2"
+    }
+  },
+  "security": [ { "oauth2": [] } ],
+  "tags": []
+}

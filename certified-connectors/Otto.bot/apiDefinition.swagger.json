@@ -1,0 +1,232 @@
+{
+  "basePath": "/v1",
+  "consumes": [],
+  "definitions": {
+    "AdaptiveCard": {
+      "properties": {
+        "$schema": {
+          "example": "https://adaptivecards.io/schemas/adaptive-card.json",
+          "type": "string"
+        },
+        "actions": {
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "body": {
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "type": {
+          "example": "AdaptiveCard",
+          "type": "string"
+        },
+        "version": {
+          "example": "1.1",
+          "type": "string"
+        }
+      },
+      "required": [
+        "$schema",
+        "type",
+        "version"
+      ],
+      "type": "object"
+    },
+    "AttachmentsRequestBody": {
+      "properties": {
+        "additionalParameters": {
+          "additionalProperties": true,
+          "default": {},
+          "description": "A JSON object describing the additional fields to send with POST request",
+          "example": {
+            "recordId": 123,
+            "recordType": "Ticket",
+            "title": "Screenshot of the connectwise login issue"
+          },
+          "type": "object"
+        },
+        "apiRequestHeaders": {
+          "additionalProperties": true,
+          "default": {},
+          "description": "A JSON object describing the headers to send with POST request such as Authorization",
+          "example": {
+            "Authorization": "Basic Zm9vOmJhcgo=",
+            "Authorization2": "Bearer ABC123",
+            "additionalHeader1": "additionalHeader1Value"
+          },
+          "type": "object"
+        },
+        "apiUrl": {
+          "description": "The API URL to send the attachments and data to.",
+          "example": "https://{connectwiseSite}/v4_6_release/apis/3.0/system/documents",
+          "type": "string"
+        },
+        "attachmentUrl": {
+          "description": "The URL which contains the attachment content to send to the API URL",
+          "example": "https://otto.bot/assets/images/logo/logo.png",
+          "type": "string"
+        },
+        "filename": {
+          "example": "screenshot-123.png",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attachmentUrl",
+        "apiUrl",
+        "filename",
+        "additionalParameters",
+        "apiRequestHeaders"
+      ],
+      "type": "object"
+    },
+    "Requestbody": {
+      "properties": {
+        "adaptiveCard": {
+          "$ref": "#/definitions/AdaptiveCard"
+        },
+        "renderPreformattedText": {
+          "example": false,
+          "type": "boolean"
+        },
+        "text": {
+          "example": "This is a **markdown** supported text.",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "type": "object"
+    },
+    "Response": {
+      "properties": {
+        "message": {
+          "example": "Successfully sent the result to the user.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    }
+  },
+  "host": "api.otto.bot",
+  "info": {
+    "description": "Otto is an easy-to-train chatbot which answers questions and automates the tasks you need done, while never forgetting, never leaving the organization, and working 24/7/365 to help you get more accomplished every single day. AI and automation solutions allow you to get more tasks done every day with more productivity, lower costs, without the constraint of time.",
+    "title": "Otto.bot",
+    "version": "1.0.0"
+  },
+  "parameters": {},
+  "paths": {
+    "/attachments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Initiate and send multipart/formdata file attachments and data to the specified URL. This API is created to support Logic apps as the HTTP request connector cannot correctly handle multipart/formdata\n",
+        "operationId": "SendAttachmentsToUrl",
+        "parameters": [
+          {
+            "description": "Request parameters",
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/AttachmentsRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successfully sent the attachments and request data."
+          },
+          "400": {
+            "description": "An error occured while processing the request. This could be due to any of the following.\n- Missing attachmentUrl, apiUrl, filename, apiRequestHeaders or additionalParameters fields\n- Incorrect attachmentUrl or apiUrl.\n"
+          }
+        },
+        "summary": "POST attachments and data to the specified URL using multipart formdata",
+        "tags": [
+          "Otto"
+        ]
+      }
+    },
+    "/skills/results": {
+      "post": {
+        "description": "Return the skill execution results to bot using API server. This API is created mainly to support clients that cannot make HTTP POST requests to the returnResultURL.\n",
+        "operationId": "ReturnResultsToBot",
+        "parameters": [
+          {
+            "description": "Return Result URL - The absolute URL sent from Otto when the skill is triggered.",
+            "in": "query",
+            "name": "returnResultURL",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Return Result URL"
+          },
+          {
+            "description": "Result details",
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/Requestbody"
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully sent the result to the user.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          },
+          "400": {
+            "description": "One or more required property is missing from request body or is invalid."
+          },
+          "401": {
+            "description": "Invalid API Key"
+          }
+        },
+        "summary": "Return results to bot",
+        "tags": [
+          "Otto"
+        ]
+      }
+    }
+  },
+  "produces": [],
+  "responses": {},
+  "schemes": [
+    "https"
+  ],
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "securityDefinitions": {
+    "API Key": {
+      "in": "header",
+      "name": "x-otto-bot-key",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0",
+  "tags": [
+    {
+      "description": "APIs used to interact with Otto",
+      "name": "Otto"
+    }
+  ]
+}
