@@ -1,7 +1,7 @@
 {
-  "title": "A JSON Schema for Swagger 2.0 API.",
-  "id": "http://swagger.io/v2/schema.json#",
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://swagger.io/v2/schema.json#",
+  "title": "A JSON Schema for Swagger 2.0 API.",
   "type": "object",
   "required": [
     "swagger",
@@ -87,9 +87,27 @@
     },
     "x-ms-capabilities": {
       "$ref": "#/definitions/x-ms-capabilities"
+    },
+    "x-ms-connector-metadata": {
+      "$ref": "#/definitions/x-ms-connector-metadata"
     }
   },
   "definitions": {
+    "$ref": {
+      "description": "Swagger $ref's should only point to objects immediatly under #/definitions, #/parameters, and #/responses.",
+      "type": "string",
+      "defaultSnippets": [
+        {
+          "body": "#/definitions/$0"
+        },
+        {
+          "body": "#/parameters/$0"
+        },
+        {
+          "body": "#/responses/$0"
+        }
+      ]
+    },
     "info": {
       "type": "object",
       "description": "General information about the API.",
@@ -337,6 +355,18 @@
         "x-ms-no-generic-test": {
           "$ref": "#/definitions/x-ms-no-generic-test"
         },
+        "x-ms-pageable": {
+          "$ref": "#/definitions/x-ms-pageable"
+        },
+        "x-ms-trigger": {
+          "$ref": "#/definitions/x-ms-trigger"
+        },
+        "x-ms-trigger-hint": {
+          "$ref": "#/definitions/x-ms-trigger-hint"
+        },
+        "x-ms-trigger-metadata": {
+          "$ref": "#/definitions/x-ms-trigger-metadata"
+        },
         "x-ms-visibility": {
           "$ref": "#/definitions/x-ms-visibility"
         }
@@ -355,7 +385,7 @@
       },
       "properties": {
         "$ref": {
-          "type": "string"
+          "$ref": "#/definitions/$ref"
         },
         "get": {
           "$ref": "#/definitions/operation"
@@ -380,6 +410,9 @@
         },
         "parameters": {
           "$ref": "#/definitions/parametersList"
+        },
+        "x-ms-notification-content": {
+          "$ref": "#/definitions/x-ms-notification-content"
         }
       }
     },
@@ -1089,10 +1122,25 @@
       },
       "properties": {
         "$ref": {
-          "type": "string"
+          "$ref": "#/definitions/$ref"
         },
         "format": {
-          "type": "string"
+          "description": "Swagger data types plus some Power Platform extensions:\n- `date-no-tz` - Represents an date-time that has no time-offset (ABNF: `full-date 'T' partial-time`).\n- `html` - Tells clients to emit html editor when editing and html viewer when viewing.",
+          "type": "string",
+          "enum": [
+            "int32",
+            "int64",
+            "float",
+            "double",
+            "byte",
+            "binary",
+            "date",
+            "date-time",
+            "password",
+            "date-no-tz",
+            "html",
+            "uri"
+          ]
         },
         "title": {
           "$ref": "http://json-schema.org/draft-04/schema#/properties/title"
@@ -1211,6 +1259,12 @@
         "x-ms-dynamic-values": {
           "$ref": "#/definitions/x-ms-dynamic-values"
         },
+        "x-ms-enum-values": {
+          "$ref": "#/definitions/x-ms-enum-values"
+        },
+        "x-ms-notification-url": {
+          "$ref": "#/definitions/x-ms-notification-url"
+        },
         "x-ms-summary": {
           "$ref": "#/definitions/x-ms-summary"
         },
@@ -1236,7 +1290,7 @@
       },
       "properties": {
         "$ref": {
-          "type": "string"
+          "$ref": "#/definitions/$ref"
         },
         "format": {
           "$ref": "#/definitions/schema/properties/format"
@@ -1330,6 +1384,9 @@
         },
         "x-ms-dynamic-values": {
           "$ref": "#/definitions/schema/properties/x-ms-dynamic-values"
+        },
+        "x-ms-enum-values": {
+          "$ref": "#/definitions/x-ms-enum-values"
         },
         "x-ms-summary": {
           "$ref": "#/definitions/schema/properties/x-ms-summary"
@@ -1917,7 +1974,7 @@
       "additionalProperties": false,
       "properties": {
         "$ref": {
-          "type": "string"
+          "$ref": "#/definitions/$ref"
         }
       }
     },
@@ -1944,10 +2001,6 @@
     "x-ms-api-annotation<operation>": {
       "description": "Used for versioning and life cycle management of an operation.",
       "type": "object",
-      "required": [
-        "family",
-        "revision"
-      ],
       "additionalProperties": false,
       "properties": {
         "family": {
@@ -1977,13 +2030,31 @@
       },
       "defaultSnippets": [
         {
-          "label": "",
+          "label": "family-revision",
           "body": {
             "family": "${1:OperationId}",
             "revision": "^${2:1}"
           }
         }
       ]
+    },
+    "x-ms-connector-metadata": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "propertyName",
+          "propertyValue"
+        ],
+        "properties": {
+          "propertyName": {
+            "type": "string"
+          },
+          "propertyValue": {
+            "type": "string"
+          }
+        }
+      }
     },
     "x-ms-deployment-version": {
       "description": "[TODO] ???",
@@ -2179,6 +2250,82 @@
         ]
       }
     },
+    "x-ms-no-generic-test": {
+      "type": "boolean"
+    },
+    "x-ms-pageable": {
+      "type": "object",
+      "description": "This extension configures an operation to be pageable.",
+      "required": [
+        "nextLinkName"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "nextLinkName": {
+          "description": "The name of the property at the root of the response that has the next link url.\nUsage: Be sure to use the policy template (id: `updatenextlink`) to enable the correct routing of this link.",
+          "type": "string",
+          "examples": [
+            "@odata.nextLink"
+          ]
+        }
+      },
+      "defaultSnippets": [
+        {
+          "label": "@odata.nextLink",
+          "body": {
+            "nextLinkName": "@odata.nextLink"
+          }
+        }
+      ]
+    },
+    "x-ms-enum-values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "value",
+          "displayName"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "title": "The value in the /enum array of the parent schema object for this enum value item."
+          },
+          "displayName": {
+            "title": "The text to display in user interfaces for this enum value. This text is localizable.",
+            "type": "string"
+          }
+        },
+        "defaultSnippets": [
+          {
+            "label": "new item",
+            "body": {
+              "value": "$1",
+              "displayName": "${2:$1}"
+            }
+          }
+        ]
+      },
+      "defaultSnippets": [
+        {
+          "label": "[...]",
+          "body": [
+            "^{\n    \"value\": \"$1\",\n    \"displayName\": \"${2:$1}\"\n  }$0"
+          ]
+        }
+      ]
+    },
+    "x-ms-notification-url": {
+      "type": "boolean"
+    },
+    "x-ms-notification-content": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "$ref": "#/definitions/schema"
+        }
+      }
+    },
     "x-ms-summary": {
       "title": "Specifies the title for an entity.",
       "description": "Recommended: Use title case for `x-ms-summary`.",
@@ -2188,8 +2335,34 @@
       "title": "A sample value to use when running a test.",
       "description": "The value should be a valid value for this entity.\nDO NOT include any secrets, keys, or personally identifiable data."
     },
-    "x-ms-no-generic-test": {
-      "type": "boolean"
+    "x-ms-trigger": {
+      "type": "string",
+      "enum": [
+        "batch",
+        "single"
+      ]
+    },
+    "x-ms-trigger-hint": {
+      "type": "string"
+    },
+    "x-ms-trigger-metadata": {
+      "type": "object",
+      "required": [
+        "kind",
+        "mode"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "query"
+          ]
+        },
+        "mode": {
+          "enum": [
+            "polling"
+          ]
+        }
+      }
     },
     "x-ms-visibility": {
       "title": "Specifies the user-facing visibility for an entity.",
