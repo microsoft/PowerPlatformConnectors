@@ -10,7 +10,7 @@ For the SMSLink connector to work successfully, you will need to have a SMSLink 
   
 ## Supported Operations  
 The connector supports the following operations:  
- - `Send SMS`: Sends an SMS to a destination with the desired text  
+ - `Send SMS`: Sends an SMS to a destination and a message  
     
 ## How to get credentials  
 From your SMSLink account, access SMS Gateway > Configurare si setari
