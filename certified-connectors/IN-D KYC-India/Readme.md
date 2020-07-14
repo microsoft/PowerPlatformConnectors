@@ -4,7 +4,7 @@ IN-D KYC India Connector helps users to classify all Indian ID documents such as
 
 ## Pre-requisites
 
-You will nedd the following to proceed
+You will need the following to proceed
 
 • Active Microsoft Power Automate, Power Apps, Logic Apps account <br />
 • You need an API key to access the connector which you can get from IN-D One portal. 
