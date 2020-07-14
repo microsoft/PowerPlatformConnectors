@@ -11,9 +11,9 @@ You will nedd the following to proceed
 
 ### Supported Operations
 
-• ID Document Classification : Classifies the ID documents by document type.
+• ID Document Classification : Classifies the ID documents by document type.<br />
 • ID Document Classification & Extraction : Classifies the ID documents by document type and extracts only the useful attributes
-  smartly from the ID document.
+  smartly from the ID document.<br />
 • ID Document Classification & Extraction (with Govt DB Validation) : classifies the ID documents by document type and extracts only the useful attributes
   smartly from the ID document. The extracted attributes are then validated against the Govt
   Database.
