@@ -53,4 +53,4 @@ The connector supports the following operations:
 
 ## Notes
 
-If you want that all users are able to sign in (and use the connector), instead of only admins, you can gran admin consent to the application. Follow instructions on how to grant admin consent to an application [[here](https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent)].
+If you want that all users are able to sign in (and use the connector), instead of only admins, you can grant admin consent to the application. Follow instructions on how to grant admin consent to an application [[here](https://docs.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent)].
