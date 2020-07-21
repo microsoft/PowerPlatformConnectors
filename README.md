@@ -1,6 +1,14 @@
 # Microsoft Power Platform Connectors
 
-Welcome to the Microsoft Power Platform Connectors open source repository. This open source repository contains custom connectors, certified connectors, and related tools to facilitate connector development for Azure Logic Apps, Microsoft Power Apps, and Microsoft Power Automate.
+Welcome to the Microsoft Power Platform Connectors open source repository. This repository contains custom connectors, certified connectors, and related tools to facilitate connector development for Azure Logic Apps, Microsoft Power Apps, and Microsoft Power Automate.
+
+## Custom Connectors
+
+The ```custom-connectors``` folder contains fully functional connector samples which can be deployed to the Power Platform for extension and use. These samples may not be certified connectors, but should be maintained by the open source community to offer useful scenarios or examples of connector concepts.
+
+## Certified Connectors
+
+The ```certified-connectors``` folder contains certified connectors which are already deployed and available out-of-box within the Power Platform for use. A requirement of our [connector certification program](https://docs.microsoft.com/connectors/custom-connectors/submit-certification) is that new certified connectors be open sourced for community contributions. The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform. The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 
 ## Contributing
 
@@ -8,9 +16,47 @@ This project welcomes contributions and suggestions.  Most contributions require
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
-To contibute a connector to the open source repo, please start by creating a fork on the github repo.
-Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on your 
-local machine, and checkout the branch. 
+### Creating a Fork
+
+To contibute to this open source repository, start by creating a fork on this repository. To do so, select the "fork" button on the upper right corner, and create your own copy of the repository. Next, sync your fork with the remote repository and clone your forked repository to your local machine.
+
+```git clone https://github.com/YOUR-USERNAME/PowerPlatformConnectors.git```
+
+Check your remote URL.
+
+```git remote -v```
+
+```origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (fetch)
+
+```origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (push)
+
+Add an upstream repository for your clone.
+
+```git remote add upstream https://github.com/microsoft/PowerPlatformConnectors.git```
+
+Verify the upstream links.
+
+```git remote -v```
+
+```origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (fetch) 
+
+```origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (push) 
+
+```upstream  https://github.com/microsoft/PowerPlatformConnectors.git``` (fetch) 
+
+```upstream  https://github.com/microsoft/PowerPlatformConnectors.git``` (push) 
+
+To keep your fork up to date with this repository's updates, run these commands:
+
+```git fetch upstream```
+
+```git checkout master```
+
+```git merge upstream/master```
+
+You are now ready to develop your connector in your own branch.
+
+### Submitting to the Open Source Repository
 
 For certified connectors, create a folder for your connector under the `certified-connectors` folder and place the connector files in the sub-folder. Otherwise, create a folder for your connector under the `custom-connectors` folder and place your connector files in that sub-folder.
 
