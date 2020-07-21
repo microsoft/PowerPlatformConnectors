@@ -8,7 +8,10 @@ The ```custom-connectors``` folder contains fully functional connector samples w
 
 ## Certified Connectors
 
-The ```certified-connectors``` folder contains certified connectors which are already deployed and available out-of-box within the Power Platform for use. A requirement of our [connector certification program](https://docs.microsoft.com/connectors/custom-connectors/submit-certification) is that new certified connectors be open sourced for community contributions. The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform. The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
+The ```certified-connectors``` folder contains certified connectors which are already deployed and available out-of-box within the Power Platform for use. 
+A requirement of our [connector certification program](https://docs.microsoft.com/connectors/custom-connectors/submit-certification) is that new certified connectors be open sourced for community contributions. 
+The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform. 
+The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 
 ## Contributing
 
@@ -58,22 +61,48 @@ You are now ready to develop your connector in your own branch.
 
 ### Submitting to the Open Source Repository
 
-For certified connectors, create a folder for your connector under the `certified-connectors` folder and place the connector files in the sub-folder. Otherwise, create a folder for your connector under the `custom-connectors` folder and place your connector files in that sub-folder.
+Contributions to the open source repository are made through pull requests. 
+Prior to submitting a pull request, ensure that your pull request does not contain any sensitive or specific information, for example Client IDs or Client Secrets. 
+Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated. 
+Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions. 
+An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/custom-connectors/AzureKeyVault) connector repository. 
+Include this completed `readme.md` in same connector directory which contains the artifacts. 
 
-Ensure that you have removed any sensitive information, such as Client IDs, from your artifacts before continuing. Any sensitive information can be replaced with fake values for the purpose of your submission.
+#### Custom Connectors
 
-Next, create a `readme.md` for your connector. An example can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/custom-connectors/AzureKeyVault) connector repository. Include this completed `readme.md` in your connector's folder which contains your artifacts. 
+Updates to an existing custom connector can be made through a simple pull request to update the custom connector files.
 
-Once complete, commit and push the changes to your forked branch. Create a pull request from the forked branch to the main repo to merge your changes into the main repo.
-[Please see this document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
+For new custom connectors, create a directory under the ```custom-connectors``` directory and place the connector files in the sub-folder. Ensure that a clear, structured, readme.md is included. 
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+#### Certified Connectors
+
+Updates to certified connectors must first be made through a pull request to the ```dev``` branch. 
+Once in the ```dev``` branch, the certified connector owner can submit the connector for certification and deployment throughout the Power Platform. 
+Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
+
+Updates to an existing certified connector can be made through a simple pull request to the ```dev``` branch to update the certified connector files. 
+This will be reviewed by the connector owner. Once a PR has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). 
+
+### Tooling and Validation
+
+#### CLA
+
+When a pull request is submitted, a CLA-bot will automatically determine whether you need to provide
+a CLA and annotate the PR appropriately. Simply follow the instructions
+provided by the bot to ensure your pull request can be properly reviewed.
+You will only need to do this once across all repos using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+#### Swagger Validation
+
+A submitted pull request will also be validated against our Swagger Validator tool, which checks the connector files to ensure it is a proper Swagger file and adheres to our connector requirements and guidelines. Any errors or warnings will be added to the PR for both the submitter and the reviewer to understand. We do not accept pull requests with outstanding unresolved Swagger Validator issues. 
+
+#### Breaking Change Detector
+
+Another validation which runs on a submitted pull request is the breaking changes validator. This is to catch any inadvertent, non-backwards-compatible (i.e. breaking) changes which may break a current user experience, for example, deleting a published operation. The Breaking Change Detector compares the previous version of the Swagger with the new submission and raises awareness of any breaking change. The submitter and reviewer must both acknowledge any breaking changes submitted and ensure that no end users are inadvertently negatively affected. 
 
 ## Legal Notices
 
