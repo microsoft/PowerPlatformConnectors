@@ -76,12 +76,12 @@ For new custom connectors, create a directory under the ```custom-connectors``` 
 
 #### Certified Connectors
 
-Updates to certified connectors must first be made through a pull request to the ```dev``` branch. 
-Once in the ```dev``` branch, the certified connector owner can submit the connector for certification and deployment throughout the Power Platform. 
-Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
+Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner. 
+Once a pull request has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
 
-Updates to an existing certified connector can be made through a simple pull request to the ```dev``` branch to update the certified connector files. 
-This will be reviewed by the connector owner. Once a PR has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). 
+Updates to an existing custom connector can be made through a simple pull request to the ```dev``` branch to update the custom connector files.
+
+For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
 
 ### Tooling and Validation
 
