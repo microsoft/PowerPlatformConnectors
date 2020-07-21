@@ -49,7 +49,7 @@ The connector supports the following operations:
 - `ListThreadPosts`: Get all the posts of the specified conversation thread.
 - `GetThreadPost`: Retrieves a post in a specified thread.
 - `GetAttachments`: Retrieve a list of attachments that belong to a post.
-- `ListGroups`: Retrieves all Office 365 Groups the user is part of (operation with `internal` visibility used to populate the dropdowns).
+- `ListGroups`: Retrieves all Microsoft 365 Groups the user is part of (operation with `internal` visibility used to populate the dropdowns).
 
 ## Notes
 
