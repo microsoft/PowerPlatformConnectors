@@ -29,14 +29,43 @@ steps:
     downloadPath: $(bcdFolder)
 - powershell: |
     # load libraries
-    $newtonsoftPath = Join-Path $(resourceStackFolder) "/lib/netstandard2.0/Newtonsoft.Json.dll"
-    $resourceStackPath = Join-Path $(resourceStackFolder) "/lib/netstandard2.0/Microsoft.WindowsAzure.ResourceStack.dll"
+    $newtonsoftPath = Join-Path "$(resourceStackFolder)" "/lib/net45/Newtonsoft.Json.dll"
+    $ResourceStackPath = Join-Path "$(resourceStackFolder)" "/lib/net461/Microsoft.WindowsAzure.ResourceStack.dll"
 
-    ls $(resourceStackFolder)
-    Write-Host $resourceStackPath
+    # Assembly resolve handler for Newtonsoft and resourcestack from different folders/version
+    $newtonsoft = [reflection.assembly]::LoadFrom($newtonsoftPath)
 
-    Add-Type -Path $newtonsoftPath
-    Add-Type -Path $resourceStackPath
+    $OnAssemblyResolve = [System.ResolveEventHandler] {
+      param($sender, $e)
+
+      if ($e.Name -like "Newtonsoft.Json*")
+      {
+        return $newtonsoft
+      }
+
+      foreach($a in [System.AppDomain]::CurrentDomain.GetAssemblies())
+      {
+        if ($a.FullName -eq $e.Name)
+      {
+          return $a
+        }
+      }
+      return $null
+    }
+
+    [System.AppDomain]::CurrentDomain.add_AssemblyResolve($OnAssemblyResolve)
+
+    try
+    {
+      Add-Type -Path $resourceStackPath
+    }
+    catch [System.Reflection.ReflectionTypeLoadException]
+    {
+      Write-Host "Message: $($_.Exception.Message)"
+      Write-Host "StackTrace: $($_.Exception.StackTrace)"
+      Write-Host "LoaderExceptions: $($_.Exception.LoaderExceptions)"
+      exit 1
+    }    
 
     # initialize serializer and validation configuration
     $jsonSerializerSettings = New-Object Newtonsoft.Json.JsonSerializerSettings
@@ -54,6 +83,8 @@ steps:
 
     # Get the list of files for the given PR
     $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
+
+    $exitCode = 0
 
     ForEach ($File in $Files) {
       $filename = $File.filename
@@ -104,6 +135,10 @@ steps:
         }
       }
     }
+
+    [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolve)
+
+    exit $exitCode
 - powershell: |
     # load libraries
     $bcdPath = Join-Path "$(bcdFolder)" "/lib/net46/Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.dll"
@@ -190,6 +225,8 @@ steps:
             } # If previous commit exists
         } # If current file is a swagger file
     } # For each file
+
+    [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolve)
 
     if ($errorsTotal -gt 0)
     {
