@@ -97,44 +97,60 @@ steps:
       }
     }
 - powershell: |
+    # load libraries
+    $bcdPath = Join-Path "$(bcdLocation)" "/lib/net46/Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.dll"
+    $newtonsoftPath = Join-Path "$(newtonsoftLocation)" "/lib/net45/Newtonsoft.Json.dll"
+    $ResourceStackPath = Join-Path "$(resourceStackLocation)" "/lib/net461/Microsoft.WindowsAzure.ResourceStack.dll"
+
+    # Assembly resolve handler for Newtonsoft and resourcestack from different folders/version
+    $newtonsoft = [reflection.assembly]::LoadFrom($newtonsoftPath)
+    $resourcestack = [reflection.assembly]::LoadFrom($ResourceStackPath) 
+
+    $OnAssemblyResolve = [System.ResolveEventHandler] {
+      param($sender, $e)
+
+      if ($e.Name -like "Newtonsoft.Json*")
+      {
+        return $newtonsoft
+      }
+
+      if ($e.Name -like "Microsoft.WindowsAzure.ResourceStack*")
+      {
+        return $resourcestack
+      }
+
+      foreach($a in [System.AppDomain]::CurrentDomain.GetAssemblies())
+      {
+        if ($a.FullName -eq $e.Name)
+      {
+          return $a
+        }
+      }
+      return $null
+    }
+
+    [System.AppDomain]::CurrentDomain.add_AssemblyResolve($OnAssemblyResolve)
+
+    Add-Type -Path $bcdPath
+
+    $oldFilePath = "$(aaptConnectorDir)\apiDefinition.swagger.json"
+    $newFilePath = "$(GetSettings.SettingsDirectory)\apiDefinition.swagger.json"
+    $results = [Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $newFilePath)
+
+    # We care about errors only
+    $errors = $results | Where-Object -FilterScript {$_.Level -EQ "Error"}
+
+    if ($errors) {
+        # Write error and quit
+        $errMessage = ($errors | Select-Object -Property LineNumber, ValuePath, Message | Format-Table | Out-String)
+        Write-Host  "##vso[task.LogIssue type=error;]$errMessage"
+        exit 1
+    }
+    
     $currentLocation = Get-Location
     $errorsTotal = 0
     $warningsTotal = 0
 
-    $breakingChangeDetectorExec = "$(System.ArtifactsDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(breakingchangedetector)"
-    $breakingChangeDetectorPath = split-path -path $breakingChangeDetectorExec
-    $bcdNewtonsoftPath = Join-Path $breakingChangeDetectorPath "Newtonsoft.Json.dll"
-
-    # Get the list of files for the given PR
-    $files = git diff HEAD~1 --name-only
-
-    if (-not $files) {
-        Write-Host "Changes not found"
-        exit 0
-    }
-
-    # Binding redirect to Newtosoft.Json v10
-    # Method to intercept resolution of binaries
-    $onAssemblyResolveEventHandler = [System.ResolveEventHandler] {
-        param($sender, $e)
-        foreach ($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
-            if ($assembly.FullName -like "Newtonsoft.Json,*") {
-                $newtonsoft10 = [System.AppDomain]::CurrentDomain.GetAssemblies() | where FullName -Like "Newtonsoft.Json, Version=10.*"
-                if ($newtonsoft10) {
-                    return $newtonsoft10
-                }
-            }
-            if ($assembly.FullName -eq $e.Name) {
-                return $assembly
-            }
-        }
-        return $null
-    }
-
-    # Loading breaking change detector libraries
-    Add-Type -Path $bcdNewtonsoftPath
-    [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolveEventHandler)
-    Get-ChildItem -Path $breakingChangeDetectorPath -Filter "*.dll" | ForEach-Object { Add-Type -Path $_.FullName }
 
     foreach ($file in $files) { 
         if ($file -match '.+?apidefinition.swagger.json$') {
@@ -147,7 +163,7 @@ steps:
                 git show "$($previousCommitHash):$($file)" > $oldFilePath
 
                 if (Test-Path $oldFilePath) {
-                    $results = [Microsoft.Azure.Connectors.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $currentFilePath)
+                    $results = [Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $currentFilePath)
 
                     $errors = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Error }
                     $warnings = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Warning }
@@ -167,7 +183,6 @@ steps:
         } # If current file is a swagger file
     } # For each file
 
-    [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolveEventHandler)
     if ($errorsTotal -gt 0)
     {
         Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
