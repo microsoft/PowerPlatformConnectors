@@ -1,121 +1,176 @@
-jobs:
-- job: validate_pr
-  steps:
-  - task: DownloadPackage@1
-    inputs:
-      packageType: 'nuget'
-      feed: 'ManualMirror@Local'
-      definition: 'ResourceStack'
-      version: $(ossvalidatorsversion)
-      downloadPath: '$(System.ArtifactsDirectory)'
-  - powershell: |
-      $SourceRepo = [System.Uri]$Env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI
-      $SourceRepo = $SourceRepo.AbsolutePath -replace '.git'
+variables:
+  resourceStackFolder: $(System.ArtifactsDirectory)/resourstack
+  
+steps:
+- task: DownloadPackage@1
+  inputs:
+    packageType: 'nuget'
+    feed: 'Official@Local'
+    definition: 'Microsoft.WindowsAzure.ResourceStack'
+    version: $(resourceStackVersion)
+    downloadPath: $(resourceStackFolder)
+- task: DownloadPackage@1
+  inputs:
+    packageType: 'nuget'
+    feed: 'NugetMirror'
+    definition: 'Newtonsoft.Json'
+    version: $(newtonsoftVersion)
+    downloadPath: $(resourceStackFolder)
+- powershell: |
+    # load libraries
+    $newtonsoftPath = Join-Path $(resourceStackFolder) "/lib/netstandard2.0/Newtonsoft.Json.dll"
+    $ResourceStackPath = Join-Path $(resourceStackFolder) "/lib/netstandard2.0/Microsoft.WindowsAzure.ResourceStack.dll"
+    Add-Type -Path $newtonsoftPath
+    Add-Type -Path $ResourceStackPath
 
-      $GitUrl = '$(githubapi)' + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
+    # initialize serializer and validation configuration
+    $jsonSerializerSettings = New-Object Newtonsoft.Json.JsonSerializerSettings
+    $jsonSerializerSettings.DateParseHandling = [Newtonsoft.Json.DateParseHandling]::None
+    $jsonSerializerSettings.DateTimeZoneHandling = [Newtonsoft.Json.DateTimeZoneHandling]::Utc
+    $jsonSerializer = [Newtonsoft.Json.JsonSerializer]::Create($jsonSerializerSettings)
+    
+    $configuration = New-Object Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationConfiguration
+    $configuration.IsCertificationValidation = $(isCertificationValidation)
+    
+    $SourceRepo = [System.Uri]$Env:SYSTEM_PULLREQUEST_SOURCEREPOSITORYURI
+    $SourceRepo = $SourceRepo.AbsolutePath -replace '.git'
 
-      # Get the list of files for the given PR
-      $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
+    $GitUrl = '$(githubapi)' + $SourceRepo + '/pulls/' + $Env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER + '/files'
 
-      ForEach ($File in $Files) {
-        $filename = $File.filename
-        if($filename.EndsWith('.swagger.json')) {
-          $result = $(System.ArtifactsDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(swaggervalidator) $filename
+    # Get the list of files for the given PR
+    $Files = Invoke-RestMethod -Uri $GitUrl -Method Get
 
-          # Error encountered
-          if($LastExitCode)
-          {
-            Write-Host  "##vso[task.LogIssue type=error;]$result"
-            exit $LastExitCode
-          }
-          else
-          {
-            Write-Host  "##vso[task.LogIssue type=warning;]$result"
-          }
+    ForEach ($File in $Files) {
+      $filename = $File.filename
+      if($filename.EndsWith('.swagger.json')) {
+        Try
+        {
+            [System.IO.TextReader] $contentReader = New-Object System.IO.StringReader -ArgumentList @(Get-Content $file -Raw)
+            [Newtonsoft.Json.Linq.JToken] $swaggerToken = $jsonSerializer.Deserialize($contentReader, [Newtonsoft.Json.Linq.JToken])
+        }
+        Catch [Newtonsoft.Json.JsonReaderException]
+        {
+            Write-Host "##vso[task.logissue type=error;sourcepath=$file;linenumber=$($_.Exception.LineNumber);columnnumber=$($_.Exception.LinePosition)]Swagger file '$file' is invalid. Details: $($_.Exception.Message)"
+            $exitCode = 1
+            continue
+        }
+        Catch
+        {
+            Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' is empty or it has invalid json content. Details: $($_.Exception.Message)"
+            $exitCode = 1
+            continue
+        }
+        Finally
+        {
+            if($contentReader)
+            {
+                $contentReader.Dispose()
+            }
+        }
+
+        $results = [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidator]::ValidateSwagger(`
+            $swaggerToken,`
+            [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationVersion]::MAR2019,`
+            $configuration)
+            
+        $warnings = $results.Where({$_.Level -EQ [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationResultLevel]::Warning})
+        $errors = $results.Where({$_.Level -IN [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationResultLevel]::Error,`
+                                                [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationResultLevel]::Critical})
+        if ($warnings)
+        {
+            $warnings.ForEach({Write-Host "##vso[task.logissue type=warning;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'"})
+        }
+
+        if ($errors)
+        {
+            $errors.ForEach({Write-Host "##vso[task.logissue type=error;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'"})
+            Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
+            $exitCode = 1
         }
       }
-  - powershell: |
-      $currentLocation = Get-Location
-      $errorsTotal = 0
-      $warningsTotal = 0
+    }
+- powershell: |
+    $currentLocation = Get-Location
+    $errorsTotal = 0
+    $warningsTotal = 0
 
-      $breakingChangeDetectorExec = "$(System.ArtifactsDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(breakingchangedetector)"
-      $breakingChangeDetectorPath = split-path -path $breakingChangeDetectorExec
-      $bcdNewtonsoftPath = Join-Path $breakingChangeDetectorPath "Newtonsoft.Json.dll"
+    $breakingChangeDetectorExec = "$(System.ArtifactsDirectory)/$(ossvalidatorspkg).$(ossvalidatorsversion)/$(breakingchangedetector)"
+    $breakingChangeDetectorPath = split-path -path $breakingChangeDetectorExec
+    $bcdNewtonsoftPath = Join-Path $breakingChangeDetectorPath "Newtonsoft.Json.dll"
 
-      # Get the list of files for the given PR
-      $files = git diff HEAD~1 --name-only
+    # Get the list of files for the given PR
+    $files = git diff HEAD~1 --name-only
 
-      if (-not $files) {
-          Write-Host "Changes not found"
-          exit 0
-      }
+    if (-not $files) {
+        Write-Host "Changes not found"
+        exit 0
+    }
 
-      # Binding redirect to Newtosoft.Json v10
-      # Method to intercept resolution of binaries
-      $onAssemblyResolveEventHandler = [System.ResolveEventHandler] {
-          param($sender, $e)
-          foreach ($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
-              if ($assembly.FullName -like "Newtonsoft.Json,*") {
-                  $newtonsoft10 = [System.AppDomain]::CurrentDomain.GetAssemblies() | where FullName -Like "Newtonsoft.Json, Version=10.*"
-                  if ($newtonsoft10) {
-                      return $newtonsoft10
-                  }
-              }
-              if ($assembly.FullName -eq $e.Name) {
-                  return $assembly
-              }
-          }
-          return $null
-      }
+    # Binding redirect to Newtosoft.Json v10
+    # Method to intercept resolution of binaries
+    $onAssemblyResolveEventHandler = [System.ResolveEventHandler] {
+        param($sender, $e)
+        foreach ($assembly in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
+            if ($assembly.FullName -like "Newtonsoft.Json,*") {
+                $newtonsoft10 = [System.AppDomain]::CurrentDomain.GetAssemblies() | where FullName -Like "Newtonsoft.Json, Version=10.*"
+                if ($newtonsoft10) {
+                    return $newtonsoft10
+                }
+            }
+            if ($assembly.FullName -eq $e.Name) {
+                return $assembly
+            }
+        }
+        return $null
+    }
 
-      # Loading breaking change detector libraries
-      Add-Type -Path $bcdNewtonsoftPath
-      [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolveEventHandler)
-      Get-ChildItem -Path $breakingChangeDetectorPath -Filter "*.dll" | ForEach-Object { Add-Type -Path $_.FullName }
+    # Loading breaking change detector libraries
+    Add-Type -Path $bcdNewtonsoftPath
+    [System.AppDomain]::CurrentDomain.add_AssemblyResolve($onAssemblyResolveEventHandler)
+    Get-ChildItem -Path $breakingChangeDetectorPath -Filter "*.dll" | ForEach-Object { Add-Type -Path $_.FullName }
 
-      foreach ($file in $files) { 
-          if ($file -match '.+?apidefinition.swagger.json$') {
-              $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
-              $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
+    foreach ($file in $files) { 
+        if ($file -match '.+?apidefinition.swagger.json$') {
+            $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
+            $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
 
-              if ($previousCommitHash) {
-                  $oldFilePath = Join-Path ([System.IO.Path]::GetTempPath()) ((Split-Path $file -leaf) + '.tmp')
+            if ($previousCommitHash) {
+                $oldFilePath = Join-Path ([System.IO.Path]::GetTempPath()) ((Split-Path $file -leaf) + '.tmp')
 
-                  git show "$($previousCommitHash):$($file)" > $oldFilePath
-              
-                  if (Test-Path $oldFilePath) {
-                      $results = [Microsoft.Azure.Connectors.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $currentFilePath)
+                git show "$($previousCommitHash):$($file)" > $oldFilePath
 
-                      $errors = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Error }
-                      $warnings = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Warning }
+                if (Test-Path $oldFilePath) {
+                    $results = [Microsoft.Azure.Connectors.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $currentFilePath)
 
-                      if ($errors.Count -gt 0) {
-                          $errorsTotal += $errors.Count
-                          $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
-                      } # If there are any errors
+                    $errors = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Error }
+                    $warnings = $results | where { $_.Level -EQ [Microsoft.Azure.Connectors.BreakingChangeDetector.BreakingChangeResultLevel]::Warning }
 
-                      if ($warnings.Count -gt 0) {
-                          $warningsTotal += $warnings.Count
-                          $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
-                      } # If there are any warnings
-                      Remove-Item -Path $oldFilePath
-                  } # If old version of the swagger is available
-              } # If previous commit exists
-          } # If current file is a swagger file
-      } # For each file
+                    if ($errors.Count -gt 0) {
+                        $errorsTotal += $errors.Count
+                        $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
+                    } # If there are any errors
 
-      [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolveEventHandler)
-      if ($errorsTotal -gt 0)
-      {
-          Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
-          exit 1
-      }
-      elseif ($warningsTotal -gt 0)
-      {
-          Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
-      }
-      else
-      {
-          Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
-      }
+                    if ($warnings.Count -gt 0) {
+                        $warningsTotal += $warnings.Count
+                        $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
+                    } # If there are any warnings
+                    Remove-Item -Path $oldFilePath
+                } # If old version of the swagger is available
+            } # If previous commit exists
+        } # If current file is a swagger file
+    } # For each file
+
+    [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolveEventHandler)
+    if ($errorsTotal -gt 0)
+    {
+        Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
+        exit 1
+    }
+    elseif ($warningsTotal -gt 0)
+    {
+        Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
+    }
+    else
+    {
+        Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
+    }
