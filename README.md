@@ -29,9 +29,9 @@ Check your remote URL.
 
 ```git remote -v```
 
-```origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (fetch)
+```> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (fetch)
 
-```origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (push)
+```> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (push)
 
 Add an upstream repository for your clone.
 
@@ -41,13 +41,13 @@ Verify the upstream links.
 
 ```git remote -v```
 
-```origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (fetch) 
+```> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (fetch) 
 
-```origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (push) 
+```> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git``` (push)
 
-```upstream  https://github.com/microsoft/PowerPlatformConnectors.git``` (fetch) 
+```> upstream  https://github.com/microsoft/PowerPlatformConnectors.git``` (fetch)
 
-```upstream  https://github.com/microsoft/PowerPlatformConnectors.git``` (push) 
+```> upstream  https://github.com/microsoft/PowerPlatformConnectors.git``` (push)
 
 To keep your fork up to date with this repository's updates, run these commands:
 
