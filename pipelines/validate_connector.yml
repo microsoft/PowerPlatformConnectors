@@ -17,6 +17,13 @@ steps:
   inputs:
     packageType: 'nuget'
     feed: 'NugetMirror'
+    definition: 'WindowsAzure.Storage'
+    version: $(azureStorageVersion)
+    downloadPath: $(resourceStackFolder)
+- task: DownloadPackage@1
+  inputs:
+    packageType: 'nuget'
+    feed: 'NugetMirror'
     definition: 'Newtonsoft.Json'
     version: $(newtonsoftVersion)
     downloadPath: $(resourceStackFolder)
@@ -30,10 +37,12 @@ steps:
 - powershell: |
     # load libraries
     $newtonsoftPath = Join-Path "$(resourceStackFolder)" "/lib/net45/Newtonsoft.Json.dll"
-    $ResourceStackPath = Join-Path "$(resourceStackFolder)" "/lib/net461/Microsoft.WindowsAzure.ResourceStack.dll"
+    $azureStoragePath = Join-Path "$(resourceStackFolder)" "/lib/net45/Microsoft.WindowsAzure.Storage.dll"
+    $resourceStackPath = Join-Path "$(resourceStackFolder)" "/lib/net461/Microsoft.WindowsAzure.ResourceStack.dll"
 
     # Assembly resolve handler for Newtonsoft and resourcestack from different folders/version
     $newtonsoft = [reflection.assembly]::LoadFrom($newtonsoftPath)
+    $azurestorage = [reflection.assembly]::LoadFrom($azureStoragePath)
 
     $OnAssemblyResolve = [System.ResolveEventHandler] {
       param($sender, $e)
@@ -41,6 +50,10 @@ steps:
       if ($e.Name -like "Newtonsoft.Json*")
       {
         return $newtonsoft
+      }
+      if ($e.Name -like "Microsoft.WindowsAzure.Storage*")
+      {
+        return $azurestorage
       }
 
       foreach($a in [System.AppDomain]::CurrentDomain.GetAssemblies())
