@@ -17,14 +17,17 @@ steps:
       $files = git diff HEAD~1 --name-only
 
       $pwd = ConvertTo-SecureString "$(utok)" -AsPlainText -Force
-      $cred = New-Object Management.Automation.PSCredential ($(uid), $pwd)
+      $cred = New-Object Management.Automation.PSCredential ( "$(uid)", $pwd )
 
       $headers = @{}
 
       $oldFileContent = "{'swagger': '2.0', 'host': 'graph.microsoft.com', 'schemes': ['https']}"
 
       $results = Invoke-RestMethod -Uri $(validatorUrl) -Method Post -Headers $headers -Authentication Basic -Credential $cred -Body $oldFileContent
-      Write-Host $results
+
+      $resultsJson = ConvertFrom-Json $results
+      Write-Host $resultsJson.Errors
+      Write-Host $resultsJson.Warnings
 
       foreach ($file in $files) { 
         if ($file -match '.+?apidefinition.swagger.json$') {
