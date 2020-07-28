@@ -16,6 +16,10 @@
 5. Use the `paconn` [CLI tool](https://docs.microsoft.com/connectors/custom-connectors/paconn-cli) to create a new custom connector.
 6. On the Facebook developer dashboard, update 'Valid OAuth Redirect URIs' under Products >> Facebook Login >> Settings with the redirect URI on security page of your custom connector.
 
+## Known Limitations
+
+This connector only supports scenarios with Instagram Professional accounts. 
+
 ## Supported Actions
 
 The following actions are supported by the connector:
