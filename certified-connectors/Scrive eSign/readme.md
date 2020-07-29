@@ -9,7 +9,7 @@ A Scrive account with an API license. [Create a free trial account](https://www.
 
 
 ## How to get credentials
-Credentials are the username and password for the Scrive account.
+Credentials are the email and password for the Scrive account.
 
 
 ## API documentation
@@ -28,6 +28,7 @@ The API documentation can be found [here](https://apidocs.scrive.com/)
 - **Get document PDF content:** This action gets the PDF content of the selected document document, making it available in future steps in the flow.
 - **Get document JSON:** This action gets the all the meta-data for the selected document in JSON format.
 - **Update document JSON:** This action updates the document meta-data using a provided JSON.
+- **Set File:** This action updates the main PDF file for the document.
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
