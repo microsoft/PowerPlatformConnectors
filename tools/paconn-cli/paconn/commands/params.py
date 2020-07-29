@@ -9,7 +9,7 @@ CLI parameter definitions
 """
 
 from knack.arguments import ArgumentsContext
-from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
+from paconn import _LOGIN, _LOGOUT, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
 
 CLIENT_SECRET = 'client_secret'
 CLIENT_SECRET_OPTIONS = ['--secret', '-r']

@@ -33,7 +33,7 @@ Please follow the steps as below:
 
 1. Make sure that you have [Microsoft Power Platform Connectors CLI](https://github.com/microsoft/PowerPlatformConnectors/tree/master/tools/paconn-cli) installed.
 2. Clone this GitHub repo. Open the command shell and change to this directory.
-3. Open file [apiProperties.json](apiProperties.json). Replace text `<clientId>` with the value of client ID you noted down above.
+3. Open file [apiProperties.json](apiProperties.json). Use the client ID you noted down above as the value of `clientId` property.
 4. Run the following commands with `<clientSecret>` replaced with the actual client secret and follow the prompts:
 
 ```
