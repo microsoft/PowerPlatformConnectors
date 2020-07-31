@@ -9,6 +9,8 @@ variables:
 
 steps:
   - powershell: |
+      $swaggerValidator = "$(validatorUrl)/ValidateSwagger"
+      $changeValidator = "$(validatorUrl)/ValidateChange"
       $errorsTotal = 0
       $warningsTotal = 0
 
@@ -23,7 +25,7 @@ steps:
 
       $oldFileContent = "{'swagger': '2.0', 'host': 'graph.microsoft.com', 'schemes': ['https']}"
 
-      $results = Invoke-RestMethod -Uri $(validatorUrl) -Method Post -Headers $headers -Credential $cred -Body $oldFileContent
+      $results = Invoke-RestMethod -Uri $swaggerValidator -Method Post -Headers $headers -Credential $cred -Body $oldFileContent
 
       $resultsJson = ConvertFrom-Json $results
       Write-Host $resultsJson.Errors
@@ -34,13 +36,14 @@ steps:
             $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
             $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
 
-            $oldFileContent = Get-Content $file -Raw
+            $newFileContent = Get-Content $file -Raw
 
             # Validate swagger
-            $results = Invoke-RestMethod -Uri $(validatorUrl) -Method Post -Headers $headers -Authentication Basic -Credential $cred -Body $oldFileContent
-                
-            $errors = $results | where {$_.Level -IN $swaggerErrorLevel, $swaggerCriticalLevel }
-            $warnings = $results | where {$_.Level -EQ $swaggerWarningLevel}
+            $results = Invoke-RestMethod -Uri $(validatorUrl) -Method Post -Headers $headers -Authentication Basic -Credential $cred -Body $newFileContent
+            
+            $resultsJson = ConvertFrom-Json $results
+            $errors = $resultsJson.Errors
+            $warnings = $resultsJson.Warnings
 
             if ($errors) {
               $errorsTotal += $errors.Count
@@ -55,27 +58,31 @@ steps:
 
             # Breaking change dectection
             if ($previousCommitHash) {
-              $oldFilePath = Join-Path ([System.IO.Path]::GetTempPath()) ((Split-Path $file -leaf) + '.tmp.json')
+              $oldSwagger = git show "$($previousCommitHash):$($file)" | Out-String | ConvertFrom-Json
+              $newSwagger = $newFileContent | ConvertFrom-Json
 
-              git show "$($previousCommitHash):$($file)" > $oldFilePath
+              $changeValidationJson = @{
+                "OldSwagger": $oldSwagger,
+                "NewSwagger": $newSwagger
+              }
 
-              if (Test-Path $oldFilePath) {
-                $results = [Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $currentFilePath)
+              # Validate changes
+              $results = Invoke-RestMethod -Uri $changeValidator -Method Post -Headers $headers -Authentication Basic -Credential $cred -Body $changeValidationJson
 
-                $errors = $results | where { $_.Level -EQ $bcdErrorLevel }
-                $warnings = $results | where { $_.Level -EQ $bcdWarningLevel }
+              $resultsJson = ConvertFrom-Json $results
+              $errors = $resultsJson.Errors
+              $warnings = $resultsJson.Warnings
 
-                if ($errors) {
-                    $errorsTotal += $errors.Count
-                    $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
-                } # If there are any errors
+              if ($errors) {
+                  $errorsTotal += $errors.Count
+                  $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
+              } # If there are any errors
 
-                if ($warnings) {
-                    $warningsTotal += $warnings.Count
-                    $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
-                } # If there are any warnings
-                Remove-Item -Path $oldFilePath
-              } # If old version of the swagger is available
+              if ($warnings) {
+                  $warningsTotal += $warnings.Count
+                  $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
+              } # If there are any warnings
+
             } # If previous commit exists perform breaking change validation
 
         } # If current file is a swagger file
