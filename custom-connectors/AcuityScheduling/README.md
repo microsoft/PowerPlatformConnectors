@@ -5,7 +5,7 @@
 ## Acuity Scheduling (Sample) Connector
 The Acuity Scheduling sample connector enables you to create new clients and view blocked times in your calendar
 
-## Pre-requisites
+## Prerequisites
 You will need the following:
 * An Acuity Scheduling **Powerhouse** account (Powerhouse is required to access the Acuity Scheduling API) `https://acuityscheduling.com/signup.php`
 * Your [User ID and API Key](https://secure.acuityscheduling.com/app.php?action=settings&key=api)

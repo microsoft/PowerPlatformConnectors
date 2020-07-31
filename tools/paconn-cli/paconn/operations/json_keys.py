@@ -19,6 +19,7 @@ _ORIGINAL_SWAGGER_URL = 'originalSwaggerUrl'
 _ICON_BRAND_COLOR = 'iconBrandColor'
 _CAPABILITIES = 'capabilities'
 _POLICY_TEMPLATE_INSTANCES = 'policyTemplateInstances'
+_PUBLISHER='publisher'
 
 # Create update
 _OPEN_API_DEFINITION = 'openApiDefinition'
