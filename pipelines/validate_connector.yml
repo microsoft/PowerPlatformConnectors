@@ -18,18 +18,12 @@ steps:
       $currentLocation = Get-Location
       $files = git diff HEAD~1 --name-only
 
-      $pwd = ConvertTo-SecureString "$(utok)" -AsPlainText -Force
-      $cred = New-Object Management.Automation.PSCredential ( "$(uid)", $pwd )
+      $pair = "$($uid):$($utok)"
+      $encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
 
-      $headers = @{}
-
-      $oldFileContent = "{'swagger': '2.0', 'host': 'graph.microsoft.com', 'schemes': ['https']}"
-
-      $results = Invoke-WebRequest -Uri $swaggerValidator -Method Post -Credential $cred -Body $oldFileContent
-
-      $resultsJson = ConvertFrom-Json $results
-      Write-Host $resultsJson.Errors
-      Write-Host $resultsJson.Warnings
+      $Headers = @{
+        Authorization = "Basic $encoded"
+      }
 
       foreach ($file in $files) { 
         if ($file -match '.+?apidefinition.swagger.json$') {
@@ -39,21 +33,21 @@ steps:
             $newFileContent = Get-Content $file -Raw
 
             # Validate swagger
-            $results = Invoke-RestMethod -Uri $(validatorUrl) -Method Post -Credential $cred -Body $newFileContent
+            $results = Invoke-WebRequest -Uri $validatorUrl -Headers $Headers -Method Post -ContentType "application/json" -Body $newFileContent
             
             $resultsJson = ConvertFrom-Json $results
             $errors = $resultsJson.Errors
             $warnings = $resultsJson.Warnings
 
             if ($errors) {
-              #$errorsTotal += $errors.Count
-              #$errors | foreach { Write-Host "##vso[task.logissue type=error;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
-              #Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
+              $errorsTotal += $errors.Count
+              $errors | foreach { Write-Host "##vso[task.logissue type=error;$_" }
+              Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
             } # If Swagger Error
             
             if ($warnings) {
               $warningsTotal += $warnings.Count
-              #$warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
+              $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;$_" }
             } # If Swagger Warnings
 
             # Breaking change dectection
@@ -69,20 +63,20 @@ steps:
               $changeValidationJson = ConvertTo-Json $changeValidation
 
               # Validate changes
-              $results = Invoke-RestMethod -Uri $changeValidator -Method Post -Headers $headers -Authentication Basic -Credential $cred -Body $changeValidationJson
+              $results = Invoke-WebRequest -Uri $changeValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $changeValidationJson
 
               $resultsJson = ConvertFrom-Json $results
               $errors = $resultsJson.Errors
               $warnings = $resultsJson.Warnings
 
               if ($errors) {
-                  #$errorsTotal += $errors.Count
-                  #$errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
+                  $errorsTotal += $errors.Count
+                  $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$_" }
               } # If there are any errors
 
               if ($warnings) {
-                  #$warningsTotal += $warnings.Count
-                  #$warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
+                  $warningsTotal += $warnings.Count
+                  $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$_" }
               } # If there are any warnings
 
             } # If previous commit exists perform breaking change validation
@@ -90,8 +84,6 @@ steps:
         } # If current file is a swagger file
 
       } # For each file
-
-      [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolve)
 
       if ($errorsTotal -gt 0) {
           Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
