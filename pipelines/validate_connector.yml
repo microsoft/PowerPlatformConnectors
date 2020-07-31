@@ -46,14 +46,14 @@ steps:
             $warnings = $resultsJson.Warnings
 
             if ($errors) {
-              $errorsTotal += $errors.Count
-              $errors | foreach { Write-Host "##vso[task.logissue type=error;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
-              Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
+              #$errorsTotal += $errors.Count
+              #$errors | foreach { Write-Host "##vso[task.logissue type=error;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
+              #Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
             } # If Swagger Error
             
             if ($warnings) {
               $warningsTotal += $warnings.Count
-              $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
+              #$warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
             } # If Swagger Warnings
 
             # Breaking change dectection
@@ -61,10 +61,12 @@ steps:
               $oldSwagger = git show "$($previousCommitHash):$($file)" | Out-String | ConvertFrom-Json
               $newSwagger = $newFileContent | ConvertFrom-Json
 
-              $changeValidationJson = @{
-                "OldSwagger": $oldSwagger,
-                "NewSwagger": $newSwagger
+              $changeValidation = @{
+                "OldSwagger" = $oldSwagger,
+                "NewSwagger" = $newSwagger
               }
+
+              $changeValidationJson = ConvertTo-Json $changeValidation
 
               # Validate changes
               $results = Invoke-RestMethod -Uri $changeValidator -Method Post -Headers $headers -Authentication Basic -Credential $cred -Body $changeValidationJson
@@ -74,13 +76,13 @@ steps:
               $warnings = $resultsJson.Warnings
 
               if ($errors) {
-                  $errorsTotal += $errors.Count
-                  $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
+                  #$errorsTotal += $errors.Count
+                  #$errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
               } # If there are any errors
 
               if ($warnings) {
-                  $warningsTotal += $warnings.Count
-                  $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
+                  #$warningsTotal += $warnings.Count
+                  #$warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
               } # If there are any warnings
 
             } # If previous commit exists perform breaking change validation
