@@ -15,12 +15,13 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: windows-2019
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - name: "Validate"
-        shell: powershell
+      - name: "Swagger Validator"
+        id: SwaggerValidator
+        shell: pwsh
         env:
           ValidatorUrl: ${{ secrets.ValidatorUrl }}
           UID: ${{ secrets.UID }}
@@ -60,13 +61,12 @@ jobs:
 
                 if ($errors) {
                   $errorsTotal += $errors.Count
-                  $errors | foreach { Write-Host "##vso[task.logissue type=error;$_" }
-                  Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
+                  $errors | foreach { Write-Host "$_" }
                 } # If Swagger Error
 
                 if ($warnings) {
                   $warningsTotal += $warnings.Count
-                  $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;$_" }
+                  $warnings | foreach { Write-Host "$_" }
                 } # If Swagger Warnings
 
                 # Breaking change dectection
@@ -91,12 +91,12 @@ jobs:
 
                   if ($errors) {
                       $errorsTotal += $errors.Count
-                      $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$_" }
+                      $errors | foreach { Write-Host "$_" }
                   } # If there are any errors
 
                   if ($warnings) {
                       $warningsTotal += $warnings.Count
-                      $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$_" }
+                      $warnings | foreach { Write-Host "$_" }
                   } # If there are any warnings
 
                 } # If previous commit exists perform breaking change validation
@@ -106,12 +106,12 @@ jobs:
           } # For each file
 
           if ($errorsTotal -gt 0) {
-              Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
+              Write-Host "Errors encountered."
               exit 1
           }
           elseif ($warningsTotal -gt 0) {
-              Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
+              Write-Host "Warnings encountered."    
           }
           else {
-              Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
+              Write-Host "No error or warnings encountered."    
           }
