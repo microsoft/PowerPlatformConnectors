@@ -1,0 +1,113 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-2019
+
+    steps:
+      - name: "Validate"
+        shell: powershell
+        env:
+          ValidatorUrl: ${{ secrets.ValidatorUrl }}
+          UID: ${{ secrets.UID }}
+          UTOK: ${{ secrets.UTOK }}
+        run: |
+          $swaggerValidator = "$env:ValidatorUrl/ValidateSwagger"
+          $changeValidator = "$env:ValidatorUrl/ValidateChange"
+          $errorsTotal = 0
+          $warningsTotal = 0
+
+          # Get the list of files for the given PR
+          $currentLocation = Get-Location
+          $files = git diff HEAD~1 --name-only
+
+          $pair = "$env:uid:$env:utok"
+          $encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
+
+          $Headers = @{
+            Authorization = "Basic $encoded"
+          }
+
+          foreach ($file in $files) { 
+            if ($file -match '.+?apidefinition.swagger.json$') {
+                $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
+                $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
+
+                $newFileContent = Get-Content $file -Raw
+
+                # Validate swagger
+                $results = Invoke-RestMethod -Uri $validatorUrl -Headers $Headers -Method Post -ContentType "application/json" -Body $newFileContent
+
+                $errors = $results.Errors
+                $warnings = $results.Warnings
+
+                if ($errors) {
+                  $errorsTotal += $errors.Count
+                  $errors | foreach { Write-Host "##vso[task.logissue type=error;$_" }
+                  Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
+                } # If Swagger Error
+
+                if ($warnings) {
+                  $warningsTotal += $warnings.Count
+                  $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;$_" }
+                } # If Swagger Warnings
+
+                # Breaking change dectection
+                # Check for breaking changes when previous commit exits
+                # And there is NO swagger validation error
+                if ($previousCommitHash -AND -NOT $errors) {
+                  $oldSwagger = git show "$($previousCommitHash):$($file)" | Out-String | ConvertFrom-Json
+                  $newSwagger = $newFileContent | ConvertFrom-Json
+
+                  $changeValidation = @{
+                    OldSwagger = $oldSwagger
+                    NewSwagger = $newSwagger
+                  }
+
+                  $changeValidationJson = ConvertTo-Json $changeValidation
+
+                  # Validate changes
+                  $results = Invoke-RestMethod -Uri $changeValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $changeValidationJson
+
+                  $errors = $results.Errors
+                  $warnings = $results.Warnings
+
+                  if ($errors) {
+                      $errorsTotal += $errors.Count
+                      $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$_" }
+                  } # If there are any errors
+
+                  if ($warnings) {
+                      $warningsTotal += $warnings.Count
+                      $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$_" }
+                  } # If there are any warnings
+
+                } # If previous commit exists perform breaking change validation
+
+            } # If current file is a swagger file
+
+          } # For each file
+
+          if ($errorsTotal -gt 0) {
+              Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
+              exit 1
+          }
+          elseif ($warningsTotal -gt 0) {
+              Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
+          }
+          else {
+              Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
+          }
