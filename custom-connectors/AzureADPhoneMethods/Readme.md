@@ -11,6 +11,8 @@ You will need the following to proceed:
 ## Building the connector 
 Since the Azure AD authentication methods APIs are secured by Azure Active Directory (AD), we first need to set up a few things in Azure AD so that our connectors can securely access the phone methods. After that is completed, you can create and test the sample connector.
 
+Check out [this blog post](https://janbakker.tech/prepopulate-phone-methods-using-a-custom-connector-in-power-automate/) for a step-by-step tutorial.
+
 ### Set up an Azure AD application for your custom connector
 We first need to register our connector as an application in Azure AD.  This will allow the connector to identify itself to Azure AD so that it can ask for permissions to access Key Vault data on behalf of the end user.  You can read more about this [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-scenarios) and follow the steps below:
 
