@@ -8,90 +8,9 @@ variables:
   bcdFolder: $(System.ArtifactsDirectory)/bcd
 
 steps:
-  - task: DownloadPackage@1
-    inputs:
-      packageType: "nuget"
-      feed: "Nuget"
-      definition: "WindowsAzure.Storage"
-      version: $(azureStorageVersion)
-      downloadPath: $(azstorageFolder)
-  - task: DownloadPackage@1
-    inputs:
-      packageType: "nuget"
-      feed: "Nuget"
-      definition: "Newtonsoft.Json"
-      version: $(newtonsoftVersion)
-      downloadPath: $(newtonsoftFolder)
-  - task: DownloadPackage@1
-    inputs:
-      packageType: "nuget"
-      feed: "powerplatformconnectors"
-      definition: "Microsoft.WindowsAzure.ResourceStack"
-      version: $(resourceStackVersion)
-      downloadPath: $(resourceStackFolder)
-  - task: DownloadPackage@1
-    inputs:
-      packageType: "nuget"
-      feed: "powerplatformconnectors"
-      definition: "BAPIConnectors.BreakingChangeDetector"
-      version: $(bcdVersion)
-      downloadPath: $(bcdFolder)
   - powershell: |
-      # load libraries
-      $bcdPath = Join-Path "$(bcdFolder)" "/lib/net46/Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.dll"
-      $newtonsoftPath = Join-Path "$(newtonsoftFolder)" "/lib/net45/Newtonsoft.Json.dll"
-      $azureStoragePath = Join-Path "$(azstorageFolder)" "/lib/net45/Microsoft.WindowsAzure.Storage.dll"
-      $resourceStackPath = Join-Path "$(resourceStackFolder)" "/lib/net461/Microsoft.WindowsAzure.ResourceStack.dll"
-
-      # Assembly resolve handler for Newtonsoft and resourcestack from different folders/version
-      $newtonsoft = [reflection.assembly]::LoadFrom($newtonsoftPath)
-      $azurestorage = [reflection.assembly]::LoadFrom($azureStoragePath)
-      $resourcestack = [reflection.assembly]::LoadFrom($ResourceStackPath) 
-
-      $OnAssemblyResolve = [System.ResolveEventHandler] {
-        param($sender, $e)
-
-        if ($e.Name -like "Newtonsoft.Json*") {
-          return $newtonsoft
-        }
-        elseif ($e.Name -like "Microsoft.WindowsAzure.Storage*") {
-          return $azurestorage
-        }
-        elseif ($e.Name -like "Microsoft.WindowsAzure.ResourceStack*") {
-          return $resourcestack
-        }
-
-        foreach($a in [System.AppDomain]::CurrentDomain.GetAssemblies()) {
-          if ($a.FullName -eq $e.Name) {
-            return $a
-          }
-        }
-        return $null
-      }
-
-      [System.AppDomain]::CurrentDomain.add_AssemblyResolve($OnAssemblyResolve)
-
-      Add-Type -Path $resourceStackPath
-      Add-Type -Path $bcdPath
-
-      # initialize serializer and validation configuration
-      $jsonSerializerSettings = New-Object Newtonsoft.Json.JsonSerializerSettings
-      $jsonSerializerSettings.DateParseHandling = [Newtonsoft.Json.DateParseHandling]::None
-      $jsonSerializerSettings.DateTimeZoneHandling = [Newtonsoft.Json.DateTimeZoneHandling]::Utc
-      $jsonSerializer = [Newtonsoft.Json.JsonSerializer]::Create($jsonSerializerSettings)
-
-      $configuration = New-Object Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationConfiguration
-      $configuration.IsCertificationValidation = $(isCertificationValidation)
-
-      $swaggerValidationVersion = [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationVersion]::MAR2019
-
-      $swaggerCriticalLevel = [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationResultLevel]::Critical
-      $swaggerErrorLevel = [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationResultLevel]::Error
-      $swaggerWarningLevel = [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidationResultLevel]::Warning
-
-      $bcdErrorLevel = [Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.BreakingChangeResultLevel]::Error
-      $bcdWarningLevel = [Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.BreakingChangeResultLevel]::Warning
-
+      $swaggerValidator = "$(validatorUrl)/ValidateSwagger"
+      $changeValidator = "$(validatorUrl)/ValidateChange"
       $errorsTotal = 0
       $warningsTotal = 0
 
@@ -99,77 +18,72 @@ steps:
       $currentLocation = Get-Location
       $files = git diff HEAD~1 --name-only
 
+      $pair = "$($uid):$($utok)"
+      $encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
+
+      $Headers = @{
+        Authorization = "Basic $encoded"
+      }
+
       foreach ($file in $files) { 
         if ($file -match '.+?apidefinition.swagger.json$') {
             $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
             $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
 
-            # Load swagger file
-            Try {
-                [System.IO.TextReader] $contentReader = New-Object System.IO.StringReader -ArgumentList @(Get-Content $file -Raw)
-                [Newtonsoft.Json.Linq.JToken] $swaggerToken = $jsonSerializer.Deserialize($contentReader, [Newtonsoft.Json.Linq.JToken])
-            }
-            Catch [Newtonsoft.Json.JsonReaderException] {
-                Write-Host "##vso[task.logissue type=error;sourcepath=$file;linenumber=$($_.Exception.LineNumber);columnnumber=$($_.Exception.LinePosition)]Swagger file '$file' is invalid. Details: $($_.Exception.Message)"
-                continue
-            }
-            Catch {
-                Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' is empty or it has invalid json content. Details: $($_.Exception.Message)"
-                continue
-            }
-            Finally {
-                if($contentReader) {
-                    $contentReader.Dispose()
-                }
-            }
+            $newFileContent = Get-Content $file -Raw
 
             # Validate swagger
-            $results = [Microsoft.WindowsAzure.ResourceStack.Common.Swagger.Validators.SwaggerValidator]::ValidateSwagger($swaggerToken, $swaggerValidationVersion, $configuration)
-                
-            $errors = $results | where {$_.Level -IN $swaggerErrorLevel, $swaggerCriticalLevel }
-            $warnings = $results | where {$_.Level -EQ $swaggerWarningLevel}
+            $results = Invoke-RestMethod -Uri $validatorUrl -Headers $Headers -Method Post -ContentType "application/json" -Body $newFileContent
+            
+            $errors = $results.Errors
+            $warnings = $results.Warnings
 
             if ($errors) {
               $errorsTotal += $errors.Count
-              $errors | foreach { Write-Host "##vso[task.logissue type=error;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
+              $errors | foreach { Write-Host "##vso[task.logissue type=error;$_" }
               Write-Host "##vso[task.logissue type=error;sourcepath=$file;]Swagger file '$file' contains error(s)."
             } # If Swagger Error
             
             if ($warnings) {
               $warningsTotal += $warnings.Count
-              $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;code=$($_.ErrorCode);]$($_.Message) ValuePath: '$($_.ValuePath)' Value: '$($_.Value)'" }
+              $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;$_" }
             } # If Swagger Warnings
 
             # Breaking change dectection
-            if ($previousCommitHash) {
-              $oldFilePath = Join-Path ([System.IO.Path]::GetTempPath()) ((Split-Path $file -leaf) + '.tmp.json')
+            # Check for breaking changes when previous commit exits
+            # And there is NO swagger validation error
+            if ($previousCommitHash -AND -NOT $errors) {
+              $oldSwagger = git show "$($previousCommitHash):$($file)" | Out-String | ConvertFrom-Json
+              $newSwagger = $newFileContent | ConvertFrom-Json
 
-              git show "$($previousCommitHash):$($file)" > $oldFilePath
+              $changeValidation = @{
+                OldSwagger = $oldSwagger
+                NewSwagger = $newSwagger
+              }
 
-              if (Test-Path $oldFilePath) {
-                $results = [Microsoft.PowerPlatform.ConnectorPlatform.BreakingChangeDetector.SwaggerBreakingChangeDetector]::FindDocumentBreakingChanges($oldFilePath, $currentFilePath)
+              $changeValidationJson = ConvertTo-Json $changeValidation
 
-                $errors = $results | where { $_.Level -EQ $bcdErrorLevel }
-                $warnings = $results | where { $_.Level -EQ $bcdWarningLevel }
+              # Validate changes
+              $results = Invoke-RestMethod -Uri $changeValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $changeValidationJson
 
-                if ($errors) {
-                    $errorsTotal += $errors.Count
-                    $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$($_.ValuePath): $($_.Message)" }
-                } # If there are any errors
+              $errors = $results.Errors
+              $warnings = $results.Warnings
 
-                if ($warnings) {
-                    $warningsTotal += $warnings.Count
-                    $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$($_.ValuePath): $($_.Message)" }
-                } # If there are any warnings
-                Remove-Item -Path $oldFilePath
-              } # If old version of the swagger is available
+              if ($errors) {
+                  $errorsTotal += $errors.Count
+                  $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$_" }
+              } # If there are any errors
+
+              if ($warnings) {
+                  $warningsTotal += $warnings.Count
+                  $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;]$_" }
+              } # If there are any warnings
+
             } # If previous commit exists perform breaking change validation
 
         } # If current file is a swagger file
 
       } # For each file
-
-      [System.AppDomain]::CurrentDomain.remove_AssemblyResolve($onAssemblyResolve)
 
       if ($errorsTotal -gt 0) {
           Write-Host "##vso[task.complete result=Failed;]Errors encountered."    
