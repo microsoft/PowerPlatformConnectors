@@ -26,12 +26,9 @@ jobs:
         shell: pwsh
         env:
           swaggerValidator: "${{secrets.ValidatorUrl}}/ValidateSwagger"
-          creds: "${{secrets.UID}}:${{secrets.UTOK}}"
-          UID: ${{ secrets.UID }}
-          UTOK: ${{ secrets.UTOK }}
+          changeValidator: "${{secrets.ValidatorUrl}}/ValidateChange"
+          token: ${{secrets.TOKEN}}
         run: |
-          #$swaggerValidator = "$env:ValidatorUrl/ValidateSwagger"
-          $changeValidator = "$env:ValidatorUrl/ValidateChange"
           $errorsTotal = 0
           $warningsTotal = 0
 
@@ -45,14 +42,11 @@ jobs:
           $swaggerFiles = $files | where {$_ -match '.+?apidefinition.swagger.json$'}
           Write-Host $swaggerFiles
 
-          $pair = "$env:uid:$env:utok"
-          $encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($env:creds))
+          $Headers = @{
+            Authorization = $env:token
+          }
           
           $results = Invoke-RestMethod -Uri $env:swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body "{}"
-
-          $Headers = @{
-            Authorization = "Basic $encoded"
-          }
 
           foreach ($file in $files) { 
             if ($file -match '.+?apidefinition.swagger.json$') {
@@ -92,7 +86,7 @@ jobs:
                   $changeValidationJson = ConvertTo-Json $changeValidation
 
                   # Validate changes
-                  $results = Invoke-RestMethod -Uri $changeValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $changeValidationJson
+                  $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $changeValidationJson
 
                   $errors = $results.Errors
                   $warnings = $results.Warnings
