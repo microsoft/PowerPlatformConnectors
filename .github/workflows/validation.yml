@@ -25,11 +25,12 @@ jobs:
         id: SwaggerValidator
         shell: pwsh
         env:
-          ValidatorUrl: ${{ secrets.ValidatorUrl }}
+          swaggerValidator: ${{ secrets.ValidatorUrl/ValidateSwagger }}
+          creds: ${{ secrets.UID:secrets.UTOK }}
           UID: ${{ secrets.UID }}
           UTOK: ${{ secrets.UTOK }}
         run: |
-          $swaggerValidator = "$env:ValidatorUrl/ValidateSwagger"
+          #$swaggerValidator = "$env:ValidatorUrl/ValidateSwagger"
           $changeValidator = "$env:ValidatorUrl/ValidateChange"
           $errorsTotal = 0
           $warningsTotal = 0
@@ -45,7 +46,9 @@ jobs:
           Write-Host $swaggerFiles
 
           $pair = "$env:uid:$env:utok"
-          $encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
+          $encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($env:creds))
+          
+          $results = Invoke-RestMethod -Uri $env:swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body "{}"
 
           $Headers = @{
             Authorization = "Basic $encoded"
@@ -59,7 +62,7 @@ jobs:
                 $newFileContent = Get-Content $file -Raw
 
                 # Validate swagger
-                $results = Invoke-RestMethod -Uri $swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $newFileContent
+                $results = Invoke-RestMethod -Uri $env:swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $newFileContent
 
                 $errors = $results.Errors
                 $warnings = $results.Warnings
