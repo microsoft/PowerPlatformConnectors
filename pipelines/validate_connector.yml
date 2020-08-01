@@ -2,9 +2,7 @@ pool:
   vmImage: "ubuntu-latest"
 
 steps:
-  - powershell: |
-      $swaggerValidator = "$env:ValidatorUrl/ValidateSwagger"
-      $changeValidator = "$env:ValidatorUrl/ValidateChange"
+  - pwsh: |
       $errorsTotal = 0
       $warningsTotal = 0
 
@@ -17,7 +15,7 @@ steps:
         Authorization = $env:token
       }
 
-      $results = Invoke-RestMethod -Uri $swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body "{}"
+      $results = Invoke-RestMethod -Uri $env:swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body "{}"
       $results
 
       foreach ($file in $swaggerFiles) { 
@@ -27,7 +25,7 @@ steps:
         $newFileContent = Get-Content $file -Raw
 
         # Validate swagger
-        $results = Invoke-RestMethod -Uri $swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $newFileContent
+        $results = Invoke-RestMethod -Uri $env:swaggerValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $newFileContent
         
         $errors = $results.Errors
         $warnings = $results.Warnings
@@ -57,7 +55,7 @@ steps:
           $changeValidationJson = ConvertTo-Json $changeValidation
 
           # Validate changes
-          $results = Invoke-RestMethod -Uri $changeValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $changeValidationJson
+          $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json" -Body $changeValidationJson
 
           $errors = $results.Errors
           $warnings = $results.Warnings
@@ -86,3 +84,7 @@ steps:
       else {
           Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
       }
+    env:
+      swaggerValidator: "$(ValidatorUrl)/ValidateSwagger"
+      changeValidator: "$(ValidatorUrl)/ValidateChange"
+      token: $(token)
