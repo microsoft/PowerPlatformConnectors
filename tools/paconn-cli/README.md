@@ -126,11 +126,16 @@ In the settings file the following items are expected. If an option is missing b
 ### Login
 
 Login to Power Platform by running:
-   
+
 `paconn login`
 
 This will ask you to login using device code login process. Please follow the prompt for the login.
 
+### Logout
+
+Logout by running:
+   
+`paconn logout`
 
 ### Download Custom Connector Files
 
