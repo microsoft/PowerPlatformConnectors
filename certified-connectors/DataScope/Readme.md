@@ -1,6 +1,6 @@
 
 ## DataScope Forms Connector
-DataScope Forms connector allows you to receive data form the Mobile App and web platfform. Syncronize forms, receive PDF, generate workflows and much more.
+DataScope Forms connector allows you to receive data form the DataScope Mobile App and web platform.
 
 ## Prerequisites
 You will need the following to proceed:
