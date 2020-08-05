@@ -4,7 +4,7 @@ Create user-driven solutions that solve everyday business problems in a fraction
 
 ## Prerequisites
 
-Create an account and subscribe to PowerTools Community Edition. It's completely free! Learn more at https://portal.apptigent.com/start.
+Create an account and subscribe to PowerTools LITE (Community Edition). It's completely free! Learn more at https://portal.apptigent.com/start.
 
 ## How to get credentials
 
@@ -24,4 +24,4 @@ The Community Edition plan includes 50 free action calls per day. Visit our Subs
 
 ## Supported Operations
 
-Please visit the [Apptigent Customer Portal] (https://portal.apptigent.com) for a complete list of API operations.
+Please visit the [Apptigent Customer Portal] (https://portal.apptigent.com) for a complete list of API operations in PowerTools LITE (Community Edition).
