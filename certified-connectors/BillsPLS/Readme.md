@@ -6,8 +6,8 @@ expenditure patterns at various levels.
 
 ## Pre-requisites
 
-You will need the following to proceed
-• Active Microsoft Power Automate, Power Apps, Logic Apps account
+You will need the following to proceed</br>
+• Active Microsoft Power Automate, Power Apps, Logic Apps account</br>
 • You need an API key to access the connector which you can get from IN-D One portal.
 
 ### Supported Operations
