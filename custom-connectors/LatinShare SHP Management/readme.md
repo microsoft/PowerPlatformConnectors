@@ -12,7 +12,7 @@ Run the following commands and follow the prompts:
 
 ```paconn
 paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --icon [Path to icon.png]
-```
+``
 
 ## Supported Operations
 Checkout full API Documentation on [LatinShare Documentation](http://flow.latinshare.com/documentacion/)
