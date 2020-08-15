@@ -1,5 +1,5 @@
 ## LatinShare SHP Management Connector
-Using LatinShare SHP Management API,  you can manage SharePoint Online resources.
+This connector provides a set of SharePoint-related actions. Using LatinShare SHP Management API, you can for example, document, folder, list and site management.  You can copy, move and delete documents and folders, delete subsites, and enable version control on lists via URL. 
 
 ## Pre-requisites
 You will need the following to proceed:
