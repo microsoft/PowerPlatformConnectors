@@ -11,8 +11,11 @@ You will need the following to proceed:
 
 
 ## How to get credentials
-<<Instructions on how user can get credentials to test connector in Flow/LogicApps/PowerApps>> 
-
+* Login to the [Agilit-e Admin Portal](https://portal.agilite.io)
+* In the Main Menu, under Administration, click on the "API Keys" menu item
+* Create an API Key profile if you don't yet have one
+* Against the API Key profile in the view, click on the "Generate API Key" icon
+* Copy the API Key as it is what's required for this Connector
 
 ## API documentation
 Click [here](https://docs.agilite.io/reference) to access online API Documentation
