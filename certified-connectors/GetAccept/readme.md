@@ -8,7 +8,7 @@ A GetAccept account is required to use this connection.
 Goto [getaccept.com](https://www.getaccept.com) to register a free account.
 
 ## API documentation
-<<https://app.thomsonreuters.com/api>> 
+<<https://app.getaccept.com/api>> 
 
 ## How to get credentials?
 
