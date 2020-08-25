@@ -1,0 +1,171 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Ticketing.events",
+    "description": "This connector will enable you to add attendees and tickets to your Ticketing.events account.",
+	"contact": {
+      "name": "Ticketing.events Support",
+      "url": "https://kb.ticketing.events/",
+      "email": "support@ticketing.events"
+    }
+  },
+  "x-ms-connector-metadata": [
+      {
+        "propertyName": "Website",
+        "propertyValue": "https://ticketing.events/"
+      },
+      {
+        "propertyName": "Privacy policy",
+        "propertyValue": "https://ticketing.events/terms.html#privacy"
+      },
+      {
+        "propertyName": "Categories",
+        "propertyValue": "Productivity;Lifestyle and Entertainment" 
+      }
+  ],
+  "host": "ticketing.events",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "query"
+    }
+  },
+  "paths": {
+    "/app/flow/events": {
+      "get": {
+        "description": "This operation will show you available events for you to choose from.",
+        "summary": "Events",
+        "operationId": "GetLists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetLists"
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/app/flow/schema/{listID}": {
+      "get": {
+        "description": "Event details fields from the selection made.",
+        "summary": "Event fields",
+        "operationId": "GetListSchema",
+        "parameters": [
+          {
+            "name": "listID",
+            "type": "number",
+            "in": "path",
+            "description": "Event and attendee details for the event you selected.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Event and attendee details"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/app/flow/addTicket/{eventID}": {
+      "post": {
+        "description": "This operation will create attendees and add tickets to their profile.",
+        "summary": "Add tickets to attendees",
+        "operationId": "CreateListItem",
+        "parameters": [
+          {
+            "name": "eventID",
+            "type": "number",
+            "in": "path",
+            "description": "Select event where attendee tickets should be added.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Select Event",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "dynamicListSchema",
+            "in": "body",
+            "description": "Details for the selected event.",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetListSchema",
+                "parameters": {
+                  "listID": {
+                    "parameter": "eventID"
+                  }
+                },
+                "value-path": "items"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DynamicResponseGetListSchema"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GetLists": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "DynamicResponseGetListSchema": {
+      "type": "object",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetListSchema",
+        "parameters": {
+          "listID": {
+            "parameter": "eventID"
+          }
+        },
+        "value-path": "items"
+      }
+    }
+  }
+}
