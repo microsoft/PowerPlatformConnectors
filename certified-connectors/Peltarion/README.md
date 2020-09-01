@@ -1,9 +1,9 @@
 # Peltarion Connector
-Add artificial intelligence to your apps! With Peltarion’s plugin, it has never been easier to create smart applications.
+Use deep learning in your apps! Peltarion’s plugin is the simplest and fastest way to create smart applications. With this Peltarion integration, you can build and deploy AI models, and through the API connect to your app.
 
-With this Peltarion integration, you can build and deploy AI models, and through the API connect to your Bubble app.
+See below for some of the things you can build.
 
-Some cool things that you can do, amongst others. Use the Peltarion plugin to build an app that:
+Use the Peltarion plugin to build an app that:
 
 - Can tell the difference between music genres and classify them accordingly ([link](https://bit.ly/34K98Sm))
 - Understands the semantic meaning of words and use it to classify movie reviews or customer support messages ([link](https://bit.ly/3jrkZsP))
