@@ -21,7 +21,7 @@ The connector only support one operation, called *callapi*. To use the connector
 ```
 ClearCollect(dd, { <YOUR-INPUT-PARAM>: TextInput1.Text});
 Set(jdata,JSON(dd,JSONFormat.IncludeBinaryData));
-Set(res, PeltarionConnectorTest.callapi("https://a.gcp-eu-west-1.platform.peltarion.com/deployment/<YOUR-DPLOYMENT-ID>/forward","<YOUR-TOKEN>",jdata))
+Set(res, PeltarionConnector.callapi("https://a.gcp-eu-west-1.platform.peltarion.com/deployment/<YOUR-DPLOYMENT-ID>/forward","<YOUR-TOKEN>",jdata))
 ```
 
 The *res* is an object with three values:
