@@ -2,6 +2,9 @@
 
 Tyntec Conversation API allows you to send customized Viber messages.
 
+Reach over 1 billion Viber users and interact with them to acquire new customers, expand your customer engagement, and provide customer care right on the messaging app. Use the connector to provide instant support for customer queries, notify delivery updates, send promotional offers with images and interactive buttons.
+
+
 ### User Cases of this connector
 - Use this connector in PowerApps Workflows (great for Marketing, CRM or Sales)
 - Send SMS messages using Azure Logic Apps
