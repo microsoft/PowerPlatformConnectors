@@ -2,6 +2,9 @@
 
 Tyntec Conversation API allows you to send template WhatsApp messages.
 
+Create conversational experiences with your customers right on the world’s number one messaging app (over 2 billion monthly active users). Leveraging WhatsApp’s end-to-end encryption and rich features (images, videos, audios, documents, interactive buttons, etc.), you can remove friction from customer onboarding, notifications and support communication.
+
+
 ### User Cases of this connector
 -   Use this connector in PowerApps Workflows (great for Marketing, CRM or Sales)
 -   Send SMS messages using Azure Logic Apps
