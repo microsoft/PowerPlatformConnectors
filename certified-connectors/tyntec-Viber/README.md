@@ -19,15 +19,11 @@ You will need the following to proceed:
 ## Supported requests
 - **Send_Viber** using tyntec Conversation API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
  - To make a successful request, please, populate the followings fields:
- - **apikey** - your tyntec API key
  - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
  - **from** - your Viber Service ID
- - **contentType** - content type of your message, use **text**
- - **channels key item** - used tyntec Conversation API channel, use **viber**
  - **text** - text of your Viber message
 - **Status_Check**
  - To make a successful status check, please, provide the connector with the following values
- - **apikey** - your tyntec API key
  - **id** - messageID of your message (_returned after each request_)
 
 
