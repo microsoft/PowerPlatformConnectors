@@ -2,6 +2,8 @@
 
 Tyntec Conversation API allows you to send customized SMS messages.
 
+Use the most universal texting channel SMS when it’s critical that any user must get the message, no matter which chat app they’re using. For use cases such as sending a one-time-passcode or two-factor authentication (2FA), the SMS channel is the most-widely used method for phone-based authentication, thanks to its global coverage and high open rates.
+
 ### User Cases of this connector
 -   Use this connector in PowerApps Workflows (great for Marketing, CRM or Sales)
 -   Send SMS messages using Azure Logic Apps
