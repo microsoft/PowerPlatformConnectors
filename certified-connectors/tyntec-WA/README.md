@@ -4,7 +4,6 @@ Tyntec Conversation API allows you to send template WhatsApp messages.
 
 Create conversational experiences with your customers right on the world’s number one messaging app (over 2 billion monthly active users). Leveraging WhatsApp’s end-to-end encryption and rich features (images, videos, audios, documents, interactive buttons, etc.), you can remove friction from customer onboarding, notifications and support communication.
 
-
 ### User Cases of this connector
 -   Use this connector in PowerApps Workflows (great for Marketing, CRM or Sales)
 -   Send SMS messages using Azure Logic Apps
@@ -22,7 +21,7 @@ You will need the following to proceed:
 
 
 ## Supported requests
--   **Send_WhatsApp** using tyntec Conversation API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+-   **Send WhatsApp** using tyntec Conversation API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
     -   To make a successful request, please, populate the followings fields:
         -   **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
         -   **from** - your WhatsApp Business account number number
@@ -32,8 +31,8 @@ You will need the following to proceed:
         -   **parameter-type** - use **text**
         -   **parameter-text** - input your parameter
         -   _if your template uses more parameters, repeat **parameter-type** and **parameter-text** for each parameter your template requires_
-
-- **Status_Check**
+        
+- **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
         -   **id** - messageID of your message (_returned after each request_)
 
