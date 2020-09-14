@@ -1,9 +1,10 @@
-## Tyntec Conversation API - Send Viber
+## Tyntec Conversations API - Send Viber
 
-Tyntec Conversation API allows you to send customized Viber messages.
+Tyntec Conversations API allows you to send customized Viber messages.
 
 Reach over 1 billion Viber users and interact with them to acquire new customers, expand your customer engagement, and provide customer care right on the messaging app. Use the connector to provide instant support for customer queries, notify delivery updates, send promotional offers with images and interactive buttons.
-### User Cases of this connector
+
+### Use Cases of this connector
 - Use this connector in PowerApps Workflows (great for Marketing, CRM or Sales)
 - Send SMS messages using Azure Logic Apps
 - Build SMS support in your Microsoft Power Automate automatizations
@@ -18,7 +19,7 @@ You will need the following to proceed:
 - [Viber Service ID](https://www.tyntec.com/viber-business-messages#contact)
 
 ## Supported requests
-- **Send Viber** using tyntec Conversation API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+- **Send Viber** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
  - To make a successful request, please, populate the followings fields:
  - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
  - **from** - your Viber Service ID
