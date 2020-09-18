@@ -9,9 +9,9 @@ The AvePoint Cloud Governance connector offers automation and integration of Clo
 
 You will need the following to proceed:
 
-• To use the connector, you need to be an AvePoint Cloud Governance administrator.
+• You need to be an AvePoint Cloud Governance administrator.
 
-• You need to create an API Authentication Profile to generate client secret to be used while calling the APIs
+• You need to create an API Authentication Profile in AvePoint Cloud Governance to generate a client secret. The client secret will be used to call the Cloud Governance API.
 
 
 ## Supported Operations
@@ -26,4 +26,4 @@ The connector supports the following operations:
 
 ## Deployment instructions
 
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
+Please refer to [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
