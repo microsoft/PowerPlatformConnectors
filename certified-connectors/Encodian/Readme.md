@@ -150,3 +150,14 @@ Extract text from the image provided - https://support.encodian.com/hc/en-gb/art
 ### Fill a PDF Form
 Fill the PDF Form provided with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360008556077-Fill-a-PDF-Form
 
+### Convert Mail Message
+Convert an email (EML or MSG file) to PDF - https://support.encodian.com/hc/en-gb/articles/360011566298-Convert-Mail-Message
+
+### Convert Excel
+Convert Microsoft Excel documents to another document format - https://support.encodian.com/hc/en-gb/articles/360011804178-Convert-Excel
+
+### Create HMAC
+Create a Hash-based message authentication code (HMAC) using a secret key - https://support.encodian.com/hc/en-gb/articles/360012782058-Create-HMAC
+
+
+
