@@ -51,6 +51,9 @@ Perform OCR on an existing PDF document - https://support.encodian.com/hc/en-gb/
 ### Split PDF
 Split a PDF Document into multiple PDF Documents - https://support.encodian.com/hc/en-gb/articles/360002953277-Split-PDF
 
+### Split PDF by Text
+Split a PDF Document into multiple PDF Documents using Text Search or Regular Expressions - https://support.encodian.com/hc/en-gb/articles/360012726397-Split-PDF-by-Text
+
 ### Convert Word to PDF Form
 Convert the Word document provided (Legacy Form Controls Only) to a PDF form document. - https://support.encodian.com/hc/en-gb/articles/360012307133-Convert-Word-to-PDF-Form
 
