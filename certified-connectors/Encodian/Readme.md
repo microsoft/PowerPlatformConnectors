@@ -51,6 +51,9 @@ Perform OCR on an existing PDF document - https://support.encodian.com/hc/en-gb/
 ### Split PDF
 Split a PDF Document into multiple PDF Documents - https://support.encodian.com/hc/en-gb/articles/360002953277-Split-PDF
 
+### Split PDF by Text
+Split a PDF Document into multiple PDF Documents using Text Search or Regular Expressions - https://support.encodian.com/hc/en-gb/articles/360012726397-Split-PDF-by-Text
+
 ### Convert Word to PDF Form
 Convert the Word document provided (Legacy Form Controls Only) to a PDF form document. - https://support.encodian.com/hc/en-gb/articles/360012307133-Convert-Word-to-PDF-Form
 
@@ -149,4 +152,15 @@ Extract text from the image provided - https://support.encodian.com/hc/en-gb/art
 
 ### Fill a PDF Form
 Fill the PDF Form provided with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360008556077-Fill-a-PDF-Form
+
+### Convert Mail Message
+Convert an email (EML or MSG file) to PDF - https://support.encodian.com/hc/en-gb/articles/360011566298-Convert-Mail-Message
+
+### Convert Excel
+Convert Microsoft Excel documents to another document format - https://support.encodian.com/hc/en-gb/articles/360011804178-Convert-Excel
+
+### Create HMAC
+Create a Hash-based message authentication code (HMAC) using a secret key - https://support.encodian.com/hc/en-gb/articles/360012782058-Create-HMAC
+
+
 
