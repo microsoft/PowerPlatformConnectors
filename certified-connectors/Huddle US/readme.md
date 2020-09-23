@@ -1,10 +1,10 @@
-# Huddle
-Huddle provides document collaboration & client engagement portals for Enterprise and Government clients and partners. This connector helps to automate your workflows for document storage, retrieval, task assignment, and customized notifications. 
+# Huddle for US Gov and Healthcare
+**US GOVERNMENT & HEALTHCARE VERSION** (Standard version is also available.) Huddle provides document collaboration & client engagement portals for Enterprise and Government clients and partners. This connector helps to automate your workflows for document storage, retrieval, task assignment, and customized notifications. 
 
 
 ## Pre-requisites
 You will need the following to proceed:
-* A [Huddle](https://huddle.com) account
+* A [Huddle for US Gov & Healthcare](https://huddle.com) account
 * A Client ID for your OAuth App provided by Huddle Support
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
 * The Power platform CLI tools
