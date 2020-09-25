@@ -13,24 +13,24 @@ See below for some of the things you can build.
 
 1. Sign up for free on the Peltarion Platform ([link](https://bit.ly/3llPmTf))
 1. Build and train your AI model on the Peltarion platform
-1. Add the Peltarion plugin to your app
-1. Connect the Peltarion action to your workflow
+1. Add the Peltarion connector to your app. Enter the URL and token for your build model (see image below)
 
 The connector only support one operation, called *callapi*. To use the connector and store the value into a variable *res*, you can call the API like this:
 
 ```
 ClearCollect(dd, { <YOUR-INPUT-PARAM>: TextInput1.Text});
-Set(jdata,JSON(dd,JSONFormat.IncludeBinaryData));
-Set(res, PeltarionConnector.callapi("https://a.gcp-eu-west-1.platform.peltarion.com/deployment/<YOUR-DPLOYMENT-ID>/forward","<YOUR-TOKEN>",jdata))
+Set(jdata, JSON(dd, JSONFormat.IncludeBinaryData));
+Set(res, PeltarionConnector.callapi(jdata))
 ```
 
 The *res* is an object with three values:
 
-- *key* is the name of the predicted class. For regression problems, the *key* is always "value" 
+- *key* is the name of the predicted class. For regression problems, the *key* is always "value"
 - *val* is the probability of the class
 - *errorMessage* holds the error message, if any
 
 Your URL, token and input name is found on the Deployment view on the Peltarion Platform. See screenshot below.
+
 ![URL, token and input](screenshot.png)
 
 For information on how to build and train an AI model on the Peltarion platform, visit our knowledge center (link: https://bit.ly/3gC6XCN)
