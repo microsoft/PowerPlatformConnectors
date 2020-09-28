@@ -24,16 +24,35 @@
         "iconBrandColor": {
           "type": "string"
         },
+        "publisher": {
+          "type": "string"
+        },
+        "stackOwner": {
+          "type": "string"
+        },
         "capabilities": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "actions",
+              "triggers"
+            ]
           }
         },
         "connectionParameters": {
           "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/ConnectionParameter"
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[0-9a-zA-Z_]+$": {
+              "$ref": "#/definitions/ConnectionParameter"
+            },
+            "^[0-9a-zA-Z_]+:(?!TenantId$)[0-9a-zA-Z_]+$": {
+              "$ref": "#/definitions/ConnectionParameter-primitive"
+            },
+            "^token:TenantId$": {
+              "$ref": "#/definitions/ConnectionParameter-claim-TenantId"
+            }
           }
         },
         "policyTemplateInstances": {
@@ -47,7 +66,481 @@
   },
   "definitions": {
     "ConnectionParameter": {
-      "type": "object"
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "oneOf": [
+        {
+          "$ref": "#/definitions/ConnectionParameter-primitive"
+        },
+        {
+          "description": "Enables a connection to use a gateway.",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "gatewaySetting"
+              ]
+            },
+            "uiDefinition": {
+              "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+            }
+          }
+        },
+        {
+          "description": "An OAuth authentication token parameter.",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "oauthSetting"
+              ]
+            },
+            "oAuthSettings": {
+              "$ref": "#/definitions/oAuthSettings"
+            },
+            "uiDefinition": {
+              "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+            }
+          }
+        }
+      ]
+    },
+    "ConnectionParameter-primitive": {
+      "description": "A primitive typed connection parameter.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "securestring",
+            "int",
+            "bool"
+          ]
+        },
+        "allowedValues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "uiDefinition": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "defaultValue": {
+          "type": [
+            "string"
+          ]
+        },
+        "uiDefinition": {
+          "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+        }
+      }
+    },
+    "ConnectionParameter-claim-TenantId": {
+      "type": "object",
+      "required": [
+        "type",
+        "metadata",
+        "uiDefinition"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string"
+          ]
+        },
+        "metadata": {
+          "enum": [
+            {
+              "sourceType": "AzureActiveDirectoryTenant"
+            }
+          ]
+        },
+        "uiDefinition": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "constraints": {
+                  "enum": [
+                    {
+                      "hidden": "true",
+                      "required": "false"
+                    }
+                  ]
+                },
+                "description": {
+                  "enum": [
+                    "The tenant ID of for the Azure Active Directory application"
+                  ]
+                },
+                "displayName": {
+                  "enum": [
+                    "Tenant"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ConnectionParameter-uiDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tooltip": {
+          "type": "string"
+        },
+        "tabIndex": {
+          "type": "integer"
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "clearText": {
+              "type": "boolean"
+            },
+            "required": {
+              "type": "string"
+            },
+            "tabIndex": {
+              "type": "integer"
+            },
+            "capability": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "hidden": {
+              "type": "string"
+            },
+            "allowedValues": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "dependencies": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "values"
+                ],
+                "properties": {
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "oAuthSettings": {
+      "type": "object",
+      "required": [
+        "identityProvider"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "identityProvider": {
+          "type": "string",
+          "enum": [
+            "oauth2",
+            "oauth2generic",
+            "aad",
+            "aadcertificate",
+            "facebook"
+          ]
+        },
+        "clientId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "clientSecret": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "redirectMode": {
+          "type": "string",
+          "enum": [
+            "Global",
+            "Direct"
+          ]
+        },
+        "redirectUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "required": [
+            "IsFirstParty"
+          ],
+          "properties": {
+            "IsFirstParty": {
+              "type": "string",
+              "enum": [
+                "True",
+                "False"
+              ],
+              "examples": [
+                "False"
+              ]
+            }
+          }
+        },
+        "additionalParameters": {
+          "description": "Defines the set of additional parameters to add in the 'customParameters' and specifies conditions when the parameter should be applicable.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": [
+                  "string",
+                  "securestring"
+                ]
+              },
+              "applicableWhen": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "parameter": {
+                      "description": "The name of some other connectionParameter.",
+                      "type": "string"
+                    },
+                    "oneOf": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "customParameters": {
+          "type": "object",
+          "additionalItems": {
+            "$ref": "#/definitions/oAuthSettings-CustomParameter"
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "description": "identityProvider: oauth2",
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "oauth2"
+              ]
+            },
+            "customParameters": {
+              "additionalProperties": false,
+              "properties": {
+                "authorizationUrl": {},
+                "tokenUrl": {},
+                "refreshUrl": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "identityProvider: oauth2generic",
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "oauth2generic"
+              ]
+            },
+            "customParameters": {
+              "properties": {
+                "authorizationUrlQueryStringTemplate": {},
+                "authorizationUrlTemplate": {},
+                "refreshBodyTemplate": {},
+                "refreshUrlTemplate": {},
+                "refreshUrlQueryStringTemplate": {},
+                "scopeListDelimiter": {},
+                "tokenBodyTemplate": {},
+                "tokenUrlTemplate": {},
+                "tokenUrlQueryStringTemplate": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "identityProvider: aad",
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "aad"
+              ]
+            },
+            "customParameters": {
+              "required": [
+                "resourceUri"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "resourceUri": {},
+                "loginUri": {},
+                "tenantId": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "identityProvider: aadcertificate",
+          "required": [
+            "identityProvider",
+            "properties"
+          ],
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "aadcertificate"
+              ]
+            },
+            "properties": {
+              "type": "object",
+              "required": [
+                "IsFirstParty"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "IsFirstParty": {
+                  "description": "aadcertificate is only supported for 1st party AAD apps.",
+                  "enum": [
+                    "True"
+                  ]
+                },
+                "AzureActiveDirectoryResourceId": {
+                  "type": "string"
+                }
+              }
+            },
+            "customParameters": {
+              "required": [
+                "resourceUri"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "resourceUri": {},
+                "loginUri": {},
+                "loginUriAAD": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "Unknown identifier",
+          "not": {
+            "properties": {
+              "identityProvider": {
+                "enum": [
+                  "oauth2",
+                  "oauth2generic",
+                  "aad",
+                  "aadcertificate"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "patternProperties": {
+        "^[cC]lientI[dD]$": {
+          "$ref": "#/definitions/oAuthSettings/properties/clientId"
+        },
+        "^[cC]lientSecret$": {
+          "$ref": "#/definitions/oAuthSettings/properties/clientSecret"
+        }
+      }
+    },
+    "oAuthSettings-CustomParameter": {
+      "description": "Specifies a value for a custom parameter associated with the identityProvider.",
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string"
+        }
+      }
     },
     "PolicyTemplateInstance": {
       "oneOf": [
@@ -430,10 +923,19 @@
               },
               "additionalProperties": {
                 "description": "The value of the querystring parameter (property name is the parameter name) which may utilize SOME expression syntax."
-              }
+              },
+              "examples": [
+                {
+                  "$filter": "CreatedDateTime gt @{triggerBody().value[0].CreatedDateTime}"
+                }
+              ]
             },
             "x-ms-apimTemplateParameter.triggerDataPath": {
-              "type": "string"
+              "description": "The path within the response to the values of the trigger.",
+              "type": "string",
+              "examples": [
+                "@triggerBody().value"
+              ]
             }
           }
         }
