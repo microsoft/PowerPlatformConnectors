@@ -1,6 +1,6 @@
 # HYAS Insight Connector
 
-HYAS Insight integration to Microsoft Azure Sentinel provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure.
+HYAS Insight integration to Microsoft Azure Sentinel provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure..
 
 ## Pre-requisites
 You will need the following to proceed:
