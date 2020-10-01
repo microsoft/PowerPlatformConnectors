@@ -1,9 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "3.64.3",
+    "version": "3.65.4",
     "title": "AtBot Logic",
-    "description": "AtBot by H3 Solutions, Inc., is a business bot that services the Microsoft cloud.",
+    "description": "AtBot is a no-code bot building service that allows you to create conversational UIs quickly without any programming experience.",
     "contact": {
       "name": "AtBot Support",
       "url": "https://admin.atbot.io/Docs",
@@ -524,6 +524,40 @@
             "schema": {
               "$ref": "#/definitions/BotGroupConversationStartResponse"
             }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/triggers/bot/sendBridgeEvent": {
+      "post": {
+        "tags": [
+          "Bot",
+          "Chat Bridge"
+        ],
+        "summary": "Send Event",
+        "description": "This operation is used to a send an event to the bot client.",
+        "x-ms-no-generic-test": true,
+        "operationId": "SendBridgeEvent",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "content",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChatBridgeEvent"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         },
         "deprecated": false
@@ -1426,6 +1460,49 @@
         }
       }
     },
+    "/api/triggers/webhooks/registerBridge": {
+      "post": {
+        "tags": [
+          "WebHookRegistrations",
+          "Chat Bridge"
+        ],
+        "summary": "Register chat bridge between two or more conversations",
+        "description": "This operation is used to initiate a chat bridge between two or more users.",
+        "x-ms-no-generic-test": true,
+        "operationId": "WebHookRegistrations_InitiateBridge",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "webHook",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WebHookChatBridge"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/WebHook"
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "x-ms-notification-content": {
+        "description": "Data from the bot",
+        "schema": {
+          "$ref": "#/definitions/BridgeOutcome"
+        }
+      }
+    },
     "/api/triggers/bot/saveBotMemory": {
       "post": {
         "tags": [
@@ -1989,6 +2066,12 @@
           "type": "string",
           "x-ms-summary": "Signal Response JSON",
           "x-ms-visibility": "advanced"
+        },
+        "messageId": {
+          "description": "(Optional) ID of a previous message in the same conversation to replace.  If supplied, the bot will replace an existing chat message with this message.",
+          "type": "string",
+          "x-ms-summary": "Message ID",
+          "x-ms-visibility": "advanced"
         }
       }
     },
@@ -2287,7 +2370,12 @@
       "type": "object",
       "properties": {
         "id": {
-          "description": "Id of the message created from the reply. Used to update the message.",
+          "description": "Id of the conversation created from the start group conversation. Used to update the conversation.",
+          "type": "string",
+          "x-ms-summary": "Conversation Id"
+        },
+        "messageId": {
+          "description": "Id of the message created from the start group conversation. Used to update the message.",
           "type": "string",
           "x-ms-summary": "Message Id"
         },
@@ -3147,6 +3235,117 @@
           "x-ms-summary": "Show in chat",
           "default": true,
           "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "WebHookChatBridge": {
+      "required": [
+        "participants",
+        "endBridgeCommand",
+        "idleTimeoutDuration",
+        "webHookUri"
+      ],
+      "type": "object",
+      "properties": {
+        "webHookUri": {
+          "type": "string",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "readOnly": true
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "readOnly": true
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "readOnly": true
+        },
+        "participants": {
+          "type": "array",
+          "description": "List all participants of the chat bridge",
+          "x-ms-summary": "Participants",
+          "items": {
+            "type": "object",
+            "required": [ "chatUserName", "activityJson" ],
+            "properties": {
+              "chatUserName": {
+                "type": "string",
+                "description": "Display name of the chat user.",
+                "x-ms-summary": "User Name"
+              },
+              "chatInitiationMessage": {
+                "type": "string",
+                "description": "Message to send to this user when the chat bridge is established.",
+                "x-ms-summary": "Initiation Message"
+              },
+              "activityJson": {
+                "type": "string",
+                "description": "The reply activity for the chat user.",
+                "x-ms-summary": "Reply Activity"
+              }
+            }
+          }
+        },
+        "endBridgeCommand": {
+          "description": "The keyword command to send to the bot to end the chat bridge.",
+          "type": "string",
+          "default": "#stop",
+          "x-ms-summary": "End Chat Command"
+        },
+        "idleTimeoutDuration": {
+          "description": "The duration (in minutes) of idle activity to trigger a timeout.",
+          "type": "integer",
+          "format": "int32",
+          "default": 3,
+          "x-ms-summary": "Idle Timeout",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "BridgeOutcome": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "description": "The outcome of the bridge.",
+          "type": "string",
+          "x-ms-summary": "Outcome"
+        },
+        "bridgeClosedBy": {
+          "description": "The user that closed the bridge.",
+          "type": "string",
+          "x-ms-summary": "Bridge Closed By"
+        }
+      }
+    },
+    "ChatBridgeEvent": {
+      "required": [
+        "activityJson",
+        "eventObject"
+      ],
+      "type": "object",
+      "properties": {
+        "activityJson": {
+          "description": "Reply Activity from the bot",
+          "type": "string",
+          "x-ms-summary": "Reply Activity"
+        },
+        "eventObject": {
+          "type": "object",
+          "x-ms-summary": "Event JSON",
+          "description": "The JSON object to be sent in the chat event."
         }
       }
     },
