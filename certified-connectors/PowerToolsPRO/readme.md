@@ -1,6 +1,6 @@
 ## Apptigent PowerTools PRO
 
-Create user-driven solutions that solve everyday business problems in a fraction of the time with the ultimate FREE power user toolkit. Manipulate text, modify collections, format dates and times, convert currency, perform advanced mathematical calculations, shorten URL's, encode strings, and more in just a few clicks. No need to learn complex formulas or expression syntax, PowerTools takes care of all the heavy lifting so users can be instantly more productive. With a powerful toolkit of advanced capabilities at their disposal, every user in the organization will have the ability to deliver outstanding results.
+Create user-driven solutions that solve everyday business problems in a fraction of the time with the ultimate toolkit for Power Platform professionals. Redact a sensitive document, localize currencies and dates, translate text into multiple languages, perform advanced calculations, convert text to speech and more with only a few clicks. PowerTools PRO eliminates the need for complex expression syntax and formulas, putting the power to build advanced solutions back in the hands of business users. Increase productivity, reduce delivery time and accelerate adoption with a powerful set of utilities designed to supercharge no-code apps, forms and workflows.
 
 ## Prerequisites
 
