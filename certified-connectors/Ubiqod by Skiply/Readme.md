@@ -1,12 +1,12 @@
 
 ## Ubiqod by Skiply
-Ubiqod provides a simple and powerfull platform to connect your Skiply connected buttons or QR Codes to third party platforms. 
+Ubiqod provides a simple and powerfull platform to connect your Skiply connected buttons or QR Codes to third party platforms.  
 This connector will trigger a flow each time data is sent by a device belonging to the configured group.
 
 ## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan
-* An Ubiqod subscription with Skiply buttons activated
+* An Ubiqod subscription with Skiply buttons activated  
 The Ubiqod API Key can be found in the "Account" section of your Ubiqod backend.
 
 ## Prepare your device
