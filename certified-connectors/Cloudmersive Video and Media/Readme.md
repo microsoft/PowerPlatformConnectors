@@ -1,5 +1,5 @@
 
-## Cloudmersive Currency
+## Cloudmersive Video and Media
 [Video and Media API](https://cloudmersive.com/video-and-media-services-api) covers a wide array of common video and audio processing needs, including encoding, decoding, editing, resizing, moderating and extracting metadata.  Stateless high-security processing ensures fast performance and strong security.
 
 
