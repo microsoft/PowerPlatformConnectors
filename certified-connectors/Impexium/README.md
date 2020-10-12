@@ -2,8 +2,8 @@
 Impexium is a SaaS based AMS that allows businesses to automate  workflows, including adding activities, contacts, relationships and committee members.
 
 ## Prerequisites
-1. Create an account on the Impexium site. Visit support.impexium.com if you need help.
-## How to get credentials?
+Create an account on the Impexium site. Visit support.impexium.com if you need help.
+
 
 ##Supported Triggers
 1. When an Individual is added.
