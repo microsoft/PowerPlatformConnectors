@@ -14,13 +14,13 @@ If there's an issue with a carrier's web service, our connector will return an e
 
 ## Supported Operations
 The connector supports the following operations:
-* `Get rates
-* `Create Shipment
-* `Pickup Shipment
+* `Get rates`
+* `Create Shipment`
+* `Pickup Shipment`
 * `Cancel Shipment`
 * `Track Shipment`
-* `Print Label
-* `Get Printers
+* `Print Label`
+* `Get Printers`
 
 
 
