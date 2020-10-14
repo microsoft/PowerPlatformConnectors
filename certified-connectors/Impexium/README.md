@@ -1,5 +1,5 @@
 ##Impexium Connector
-Impexium is a SaaS based AMS that allows businesses to automate  workflows, including adding activities, contacts, relationships and committee members.
+Impexium is the premier association management software solution for nonprofits and member-based organizations.
 
 ## Prerequisites
 Create an account on the Impexium site. Visit support.impexium.com if you need help.
