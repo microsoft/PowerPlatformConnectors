@@ -1,4 +1,4 @@
-# Instagram Connector
+# Instagram Professional Connector
 
 ### NOTE
 > This is a *sample* connector.  The connector is provided here with the intent to illustrate certain features and functionality around connectors.
@@ -24,7 +24,7 @@ This connector only supports scenarios with Instagram Professional accounts.
 
 The following actions are supported by the connector:
 
-* `Get my accounts`: This operation gets the Instagram user accounts.
+* `Get my accounts`: This operation gets the Instagram Professional user accounts.
 
 * `Get my profile`: This operation returns detailed information about a User.
 
