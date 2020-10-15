@@ -4,7 +4,7 @@ Use Dokobit portal with all the features that it has but make it automated so th
 
 ## Prerequisites
 
-Dokobit Portal Flow connector requires a valid Dokobit Portal account with API access token. 
+In order to use Dokobit Portal, a Business or Enterprise plan in Dokobit Portal is required. Register for free at https://app.dokobit.com to explore the benefits, and contact us at sales@dokobit.com about upgrading your plan.
 
 ## How to get credentials?
 
