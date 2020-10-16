@@ -2,7 +2,7 @@
 
 ## Expensya Connector
 Expensya is a leading Spend Management solution, in Europe, and this connector will allow our partners and customers to build on top of our technology
-Expensya Connector contains a group of actions that use the information to perform some simple operations for Power Automate.
+Expensya Connector contains a group of actions to perform some simple operations for Power Automate.
 
 
 
