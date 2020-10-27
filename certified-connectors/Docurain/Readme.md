@@ -17,7 +17,7 @@ To proceed, you will need the following.
 4. Once authenticated, run `paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json`
 5. Select the target environment for your connector
 
-### Create Connection
+## Create Connection
 Create a new connection using your API Key.<br>
 The Access token you created in the Docurain console screen will be your API Key.<br>
 `token [access_token]`
