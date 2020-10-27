@@ -14,7 +14,7 @@ To proceed, you will need the following.
 1. Clone the PowerPlatformConnectors GitHub repository
 2. Open a terminal, then change to the `Docurain` directory
 3. Run `paconn login`, then follow the authentication steps
-4. Once authenticated, run `paconn create -s settings.json`
+4. Once authenticated, run `paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json`
 5. Select the target environment for your connector
 
 ### Create Connection
