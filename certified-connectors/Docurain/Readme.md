@@ -34,45 +34,38 @@ The Acuity Scheduling sample connector currently supports the following actions:
 * **Displays Docurain-rendered PDFs in PDFViewer based on the input values (json) from the screen and the "sample" templates previously registered in Docurain.**
   1. Setting the OnSelect button.<br>
     `Docurain.Render("[output format]", "[template name]", "[data format]", "[JSON with any properties]")`<br>
-    <img width="600px" src="images/PowerApp1-1.png">
-
-  1. PDFViewer settings<br>
-    <img width="600px" src="images/PowerApp1-2.png">
-
-  1. Input value in each field and click the button. The result is displayed in PDFViewer.<br>
-    <img width="600px" src="images/PowerApp1-3.png">
+    <img width="600px" src="images/PowerApp1-1.png">.<br>
+  2. PDFViewer settings<br>
+    <img width="600px" src="images/PowerApp1-2.png">.<br>
+  3. Input value in each field and click the button. The result is displayed in PDFViewer.<br>
+    <img width="600px" src="images/PowerApp1-3.png">.<br>
 
 ### PowerApp And Flow
 * **Download a Docurain-rendered PDF based on the input values (json) from the screen and a "sample" template previously registered in Docurain.**
-
   1. Setting the OnSelect button.<br>
     Determine the result returned from `DourainRender`, download the file or display the message.<br>
     `DourainRender` is Sample Flow. `DourainRender` will be explained in the following sections.<br>
-    <img width="500px" src="images/Download1-1.png">
-
-  1. Flow in Power Automate<br>
+    <img width="600px" src="images/Download1-1.png"><br>
+  2. Flow in Power Automate<br>
     `DourainRender`(sample)<br>
-    <img width="500px" src="images/Download1-2.png"><br>
+    <img width="600px" src="images/Download1-2.png"><br>
     Temporarily save the Docurain output PDF to OneDrive and respond to PowerApp with the URL of the file. In case of an error, the response of the API is JSON, so it responds with a body.<br>
-    <img width="500px" src="images/Download1-3.png"><br>
-    <img width="500px" src="images/Download1-4.png">
-
-  1. Input a value in each field and click the button to download the PDF.<br>
-    <img width="500px" src="images/Download1-5.png">
+    <img width="600px" src="images/Download1-3.png"><br>
+    <img width="600px" src="images/Download1-4.png"><br>
+  3. Input a value in each field and click the button to download the PDF.<br>
+    <img width="600px" src="images/Download1-5.png"><br>
 
 * **If Render times out due to large data or output results, use RenderAsync to avoid it.**
   1. Setting the OnSelect button.<br>
     Determine the result returned from `DourainRenderAsync`, download the file or display the message.<br>
     `DourainRenderAsync` is Sample Flow. `DourainRenderAsync` will be explained in the following sections.<br>
-    <img width="500px" src="images/RenderAsync1-1.png"><br>
-
-  1. Flow in Power Automate<br>
+    <img width="600px" src="images/RenderAsync1-1.png"><br>
+  2. Flow in Power Automate<br>
     `DourainRenderAsync`(sample)<br>
     **If you want to use it in the actual flow, add a step to determine the response of each API.**<br>
-    <img width="500px" src="images/RenderAsync1-2.png"><br>
-
-  1. Input a value in each field and click the button to download the PDF.<br>
-    <img width="500px" src="images/RenderAsync1-3.png">
+    <img width="600px" src="images/RenderAsync1-2.png"><br>
+  3. Input a value in each field and click the button to download the PDF.<br>
+    <img width="600px" src="images/RenderAsync1-3.png"><br>
 
 ## Further Support
 * Login to the Docurain console screen and connect to the following URL.
