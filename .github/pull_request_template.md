@@ -1,7 +1,6 @@
 
-
 ---
+Please check the following conditions for your PR.
 
-This checklist is used to make sure that common guidelines for a pull request are followed.
-
-- [ ] The PR has modified HISTORY.rst describing any customer-facing, functional changes. Note that this does not include changes only to help content. (see [Modifying change log](https://github.com/Azure/azure-cli/tree/master/doc/authoring_command_modules#modify-change-log)).
+- [ ] `apiDefinition.swagger.json` is validated using `paconn validate` command.
+- [ ] `apiProperties.json` has a valid brand color. Invalid brand colors are `#007ee5` and `#ffffff`.

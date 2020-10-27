@@ -1,0 +1,1332 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "id": "https://raw.githubusercontent.com/microsoft/PowerPlatformConnectors/master/schemas/paconn-apiProperties.schema.json#",
+  "title": "The JSON schema for the apiProperties.json files managed by the paconn tool.",
+  "type": "object",
+  "required": [
+    "properties"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "examples": [
+        "https://raw.githubusercontent.com/microsoft/PowerPlatformConnectors/master/schemas/paconn-apiProperties.schema.json#"
+      ]
+    },
+    "properties": {
+      "type": "object",
+      "required": [
+        "iconBrandColor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "iconBrandColor": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "stackOwner": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "actions",
+              "triggers"
+            ]
+          }
+        },
+        "connectionParameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[0-9a-zA-Z_]+$": {
+              "$ref": "#/definitions/ConnectionParameter"
+            },
+            "^[0-9a-zA-Z_]+:(?!TenantId$)[0-9a-zA-Z_]+$": {
+              "$ref": "#/definitions/ConnectionParameter-primitive"
+            },
+            "^token:TenantId$": {
+              "$ref": "#/definitions/ConnectionParameter-claim-TenantId"
+            }
+          }
+        },
+        "policyTemplateInstances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PolicyTemplateInstance"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ConnectionParameter": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "oneOf": [
+        {
+          "$ref": "#/definitions/ConnectionParameter-primitive"
+        },
+        {
+          "description": "Enables a connection to use a gateway.",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "gatewaySetting"
+              ]
+            },
+            "uiDefinition": {
+              "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+            }
+          }
+        },
+        {
+          "description": "An OAuth authentication token parameter.",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "oauthSetting"
+              ]
+            },
+            "oAuthSettings": {
+              "$ref": "#/definitions/oAuthSettings"
+            },
+            "uiDefinition": {
+              "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+            }
+          }
+        }
+      ]
+    },
+    "ConnectionParameter-primitive": {
+      "description": "A primitive typed connection parameter.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "securestring",
+            "int",
+            "bool"
+          ]
+        },
+        "allowedValues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "uiDefinition": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "defaultValue": {
+          "type": [
+            "string"
+          ]
+        },
+        "uiDefinition": {
+          "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+        }
+      }
+    },
+    "ConnectionParameter-claim-TenantId": {
+      "type": "object",
+      "required": [
+        "type",
+        "metadata",
+        "uiDefinition"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string"
+          ]
+        },
+        "metadata": {
+          "enum": [
+            {
+              "sourceType": "AzureActiveDirectoryTenant"
+            }
+          ]
+        },
+        "uiDefinition": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ConnectionParameter-uiDefinition"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "constraints": {
+                  "enum": [
+                    {
+                      "hidden": "true",
+                      "required": "false"
+                    }
+                  ]
+                },
+                "description": {
+                  "enum": [
+                    "The tenant ID of for the Azure Active Directory application"
+                  ]
+                },
+                "displayName": {
+                  "enum": [
+                    "Tenant"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ConnectionParameter-uiDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tooltip": {
+          "type": "string"
+        },
+        "tabIndex": {
+          "type": "integer"
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "clearText": {
+              "type": "boolean"
+            },
+            "required": {
+              "type": "string"
+            },
+            "tabIndex": {
+              "type": "integer"
+            },
+            "capability": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "hidden": {
+              "type": "string"
+            },
+            "allowedValues": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "dependencies": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "values"
+                ],
+                "properties": {
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "oAuthSettings": {
+      "type": "object",
+      "required": [
+        "identityProvider"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "identityProvider": {
+          "type": "string",
+          "enum": [
+            "oauth2",
+            "oauth2generic",
+            "aad",
+            "aadcertificate",
+            "facebook"
+          ]
+        },
+        "clientId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "clientSecret": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "redirectMode": {
+          "type": "string",
+          "enum": [
+            "Global",
+            "Direct"
+          ]
+        },
+        "redirectUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "required": [
+            "IsFirstParty"
+          ],
+          "properties": {
+            "IsFirstParty": {
+              "type": "string",
+              "enum": [
+                "True",
+                "False"
+              ],
+              "examples": [
+                "False"
+              ]
+            }
+          }
+        },
+        "additionalParameters": {
+          "description": "Defines the set of additional parameters to add in the 'customParameters' and specifies conditions when the parameter should be applicable.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": [
+                  "string",
+                  "securestring"
+                ]
+              },
+              "applicableWhen": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "parameter": {
+                      "description": "The name of some other connectionParameter.",
+                      "type": "string"
+                    },
+                    "oneOf": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "customParameters": {
+          "type": "object",
+          "additionalItems": {
+            "$ref": "#/definitions/oAuthSettings-CustomParameter"
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "description": "identityProvider: oauth2",
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "oauth2"
+              ]
+            },
+            "customParameters": {
+              "additionalProperties": false,
+              "properties": {
+                "authorizationUrl": {},
+                "tokenUrl": {},
+                "refreshUrl": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "identityProvider: oauth2generic",
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "oauth2generic"
+              ]
+            },
+            "customParameters": {
+              "properties": {
+                "authorizationUrlQueryStringTemplate": {},
+                "authorizationUrlTemplate": {},
+                "refreshBodyTemplate": {},
+                "refreshUrlTemplate": {},
+                "refreshUrlQueryStringTemplate": {},
+                "scopeListDelimiter": {},
+                "tokenBodyTemplate": {},
+                "tokenUrlTemplate": {},
+                "tokenUrlQueryStringTemplate": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "identityProvider: aad",
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "aad"
+              ]
+            },
+            "customParameters": {
+              "required": [
+                "resourceUri"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "resourceUri": {},
+                "loginUri": {},
+                "tenantId": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "identityProvider: aadcertificate",
+          "required": [
+            "identityProvider",
+            "properties"
+          ],
+          "properties": {
+            "identityProvider": {
+              "enum": [
+                "aadcertificate"
+              ]
+            },
+            "properties": {
+              "type": "object",
+              "required": [
+                "IsFirstParty"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "IsFirstParty": {
+                  "description": "aadcertificate is only supported for 1st party AAD apps.",
+                  "enum": [
+                    "True"
+                  ]
+                },
+                "AzureActiveDirectoryResourceId": {
+                  "type": "string"
+                }
+              }
+            },
+            "customParameters": {
+              "required": [
+                "resourceUri"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "resourceUri": {},
+                "loginUri": {},
+                "loginUriAAD": {}
+              }
+            }
+          }
+        },
+        {
+          "description": "Unknown identifier",
+          "not": {
+            "properties": {
+              "identityProvider": {
+                "enum": [
+                  "oauth2",
+                  "oauth2generic",
+                  "aad",
+                  "aadcertificate"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "patternProperties": {
+        "^[cC]lientI[dD]$": {
+          "$ref": "#/definitions/oAuthSettings/properties/clientId"
+        },
+        "^[cC]lientSecret$": {
+          "$ref": "#/definitions/oAuthSettings/properties/clientSecret"
+        }
+      }
+    },
+    "oAuthSettings-CustomParameter": {
+      "description": "Specifies a value for a custom parameter associated with the identityProvider.",
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "PolicyTemplateInstance": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-convertarraytoobject"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-convertobjecttoarray"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-dynamichosturl"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-encodepropertyvalue"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-pollingtrigger"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-routerequesttoendpoint"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-setheader"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-setproperty"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-setqueryparameter"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-setvaluefromurl"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-stringreplace"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-stringtoarray"
+        },
+        {
+          "$ref": "#/definitions/PolicyTemplateInstance-updatenextlink"
+        }
+      ],
+      "defaultSnippets": [
+        {
+          "label": "add new instance",
+          "body": {
+            "templateId": "$0"
+          }
+        },
+        {
+          "label": "Route request to endpoint",
+          "body": {
+            "templateId": "routerequesttoendpoint",
+            "title": "Route to '${1}'",
+            "parameters": {
+              "x-ms-apimTemplate-operationName": [
+                "${2:operationId}$0"
+              ],
+              "x-ms-apimTemplateParameter.newPath": "${1:/new/backend/path}"
+            }
+          }
+        },
+        {
+          "label": "Update pagination nextLink",
+          "body": {
+            "templateId": "updatenextlink",
+            "title": "Update ${1} property to make paging work",
+            "parameters": {
+              "x-ms-apimTemplate-operationName": [
+                "^\"${2:operationId}\"$0"
+              ],
+              "x-ms-apimTemplateParameter.nextLinkPropertyName": "${1:@odata.nextLink}"
+            }
+          }
+        },
+        {
+          "label": "Set query parameter - default value",
+          "body": {
+            "templateId": "setqueryparameter",
+            "title": "Default value for ${1}",
+            "parameters": {
+              "x-ms-apimTemplate-operationName": [
+                "^\"${4:operationId}\"$0"
+              ],
+              "x-ms-apimTemplateParameter.name": "^\"${1:\\$top}\"",
+              "x-ms-apimTemplateParameter.value": "${2:50}",
+              "x-ms-apimTemplateParameter.existsAction": "${3:skip}"
+            }
+          }
+        }
+      ]
+    },
+    "PolicyTemplateInstanceBase": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            }
+          },
+          "patternProperties": {
+            "^x-ms-apimTemplateParameter.\\w+$": {
+              "description": "By convention, most template parameters are named like this."
+            }
+          }
+        }
+      }
+    },
+    "Parameter<x-ms-apimTemplate-policySection>-Request-Response": {
+      "type": "string",
+      "enum": [
+        "Request",
+        "Response"
+      ]
+    },
+    "Parameter<x-ms-apimTemplate-policySection>-Request-Response-Failure": {
+      "type": "string",
+      "enum": [
+        "Request",
+        "Response",
+        "Failure"
+      ]
+    },
+    "PolicyTemplateInstance-convertarraytoobject": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "convertarraytoobject",
+            "ConvertArrayToObject"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.propertyParentPath",
+            "x-ms-apimTemplateParameter.keyWithinCollectionPath",
+            "x-ms-apimTemplateParameter.newPropertyPath"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            },
+            "x-ms-apimTemplateParameter.propertyParentPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.propertySubPath": {
+              "type": "string",
+              "default": "null"
+            },
+            "x-ms-apimTemplateParameter.keyWithinCollectionPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.newPropertyPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.retainKey": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-convertobjecttoarray": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "convertobjecttoarray",
+            "ConvertObjectToArray"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.propertyParentPath",
+            "x-ms-apimTemplateParameter.newPropertyPath"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            },
+            "x-ms-apimTemplateParameter.propertyParentPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.propertySubPath": {
+              "type": "string",
+              "default": "null"
+            },
+            "x-ms-apimTemplateParameter.newPropertyPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.keyName": {
+              "type": "string",
+              "default": "key"
+            },
+            "x-ms-apimTemplateParameter.valueName": {
+              "type": "string",
+              "default": "value"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-dynamichosturl": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "dynamichosturl",
+            "DynamicHostUrl",
+            "dynamicHostUrl"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.urlTemplate"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplateParameter.urlTemplate": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-encodepropertyvalue": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "encodepropertyvalue",
+            "EncodePropertyValue"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.propertyParentPath",
+            "x-ms-apimTemplateParameter.newPropertyPath"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            },
+            "x-ms-apimTemplateParameter.propertyParentPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.propertySubPath": {
+              "type": "string",
+              "default": "null"
+            },
+            "x-ms-apimTemplateParameter.newPropertyPath": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-pollingtrigger": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "pollingtrigger",
+            "PollingTrigger"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "type": {
+          "enum": [
+            "PollingTrigger"
+          ]
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.triggerConfig",
+            "x-ms-apimTemplateParameter.triggerDataPath"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplateParameter.triggerConfig": {
+              "type": "object",
+              "description": "A dictionary where each key is a query param name and value is a value expression.\nNote: the key 'x-ms-triggerConfig-nextLink' is a special setting.",
+              "properties": {
+                "x-ms-triggerConfig-nextLink": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "The property name on the root response result object that is the semantic 'nextLink' to the next page of results. If not specified, the default at runtime is '@odata.nextLink'."
+                }
+              },
+              "additionalProperties": {
+                "description": "The value of the querystring parameter (property name is the parameter name) which may utilize SOME expression syntax."
+              },
+              "examples": [
+                {
+                  "$filter": "CreatedDateTime gt @{triggerBody().value[0].CreatedDateTime}"
+                }
+              ]
+            },
+            "x-ms-apimTemplateParameter.triggerDataPath": {
+              "description": "The path within the response to the values of the trigger.",
+              "type": "string",
+              "examples": [
+                "@triggerBody().value"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-routerequesttoendpoint": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "routerequesttoendpoint",
+            "RouteRequestToEndpoint"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.newPath"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplateParameter.newPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.httpMethod": {
+              "type": "string",
+              "enum": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS",
+                "HEAD",
+                "@Request.OriginalHTTPMethod" // Same as not being specified
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-setheader": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "setheader",
+            "SetHeader",
+            "setHeader"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.name",
+            "x-ms-apimTemplateParameter.value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response-Failure"
+            },
+            "x-ms-apimTemplateParameter.name": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.value": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.existsAction": {
+              "type": "string",
+              "enum": [
+                "override",
+                "skip",
+                "append"
+              ],
+              "default": "override"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-setproperty": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "setproperty",
+            "SetProperty"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.newPropertyParentPathTemplate",
+            "x-ms-apimTemplateParameter.newPropertySubPathTemplate",
+            "x-ms-apimTemplateParameter.propertyValuePathTemplate"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            },
+            "x-ms-apimTemplateParameter.newPropertyParentPathTemplate": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.newPropertySubPathTemplate": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.propertyValuePathTemplate": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-setqueryparameter": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "setqueryparameter",
+            "SetQueryParameter",
+            "setQueryParameter"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.name",
+            "x-ms-apimTemplateParameter.value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplateParameter.name": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.value": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.existsAction": {
+              "type": "string",
+              "enum": [
+                "override",
+                "skip",
+                "append"
+              ],
+              "default": "override"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-setvaluefromurl": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "setvaluefromurl",
+            "SetValueFromUrl"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.parameterTemplate",
+            "x-ms-apimTemplateParameter.parameterValueUrl",
+            "x-ms-apimTemplateParameter.parameterValuePathTemplate"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            },
+            "x-ms-apimTemplateParameter.parameterTemplate": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.parameterValueUrl": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.parameterValuePathTemplate": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.httpMethod": {
+              "type": "string",
+              "enum": [
+                "GET",
+                "POST",
+                "PUT"
+              ],
+              "default": "GET"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-stringreplace": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "stringreplace",
+            "StringReplace"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.propertyParentPath",
+            "x-ms-apimTemplateParameter.sourceString",
+            "x-ms-apimTemplateParameter.replacementString",
+            "x-ms-apimTemplateParameter.newPropertyPath"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            },
+            "x-ms-apimTemplateParameter.propertyParentPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.propertySubPath": {
+              "type": "string",
+              "default": "null"
+            },
+            "x-ms-apimTemplateParameter.sourceString": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.replacementString": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.newPropertyPath": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-stringtoarray": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "stringtoarray",
+            "StringToArray"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.propertyParentPath",
+            "x-ms-apimTemplateParameter.delimiterList",
+            "x-ms-apimTemplateParameter.childPropertyName",
+            "x-ms-apimTemplateParameter.newPropertyPath"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplate-policySection": {
+              "$ref": "#/definitions/Parameter<x-ms-apimTemplate-policySection>-Request-Response"
+            },
+            "x-ms-apimTemplateParameter.propertyParentPath": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.propertySubPath": {
+              "type": "string",
+              "default": "null"
+            },
+            "x-ms-apimTemplateParameter.delimiterList": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.childPropertyName": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.newPropertyPath": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "PolicyTemplateInstance-updatenextlink": {
+      "type": "object",
+      "required": [
+        "templateId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "enum": [
+            "updatenextlink"
+          ]
+        },
+        "title": {
+          "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/title"
+        },
+        "parameters": {
+          "type": "object",
+          "required": [
+            "x-ms-apimTemplateParameter.nextLinkPropertyName"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x-ms-apimTemplate-operationName": {
+              "$ref": "#/definitions/PolicyTemplateInstanceBase/properties/parameters/properties/x-ms-apimTemplate-operationName"
+            },
+            "x-ms-apimTemplateParameter.nextLinkPropertyName": {
+              "type": "string"
+            },
+            "x-ms-apimTemplateParameter.nextLinkParentPropertyPath": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

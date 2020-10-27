@@ -9,7 +9,7 @@ D7SMS provides powerful and easy to integrate REST API. Using this API, you can 
 
 ## Pre-requisites
 You will need the following to proceed:
-* A Miicrosoft Flow plan with custom connector feature
+* A Miicrosoft Power Automate plan with custom connector feature
 * A D7SMS Subscription
 * D7SMS API authentication details. 
 

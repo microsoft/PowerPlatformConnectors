@@ -26,5 +26,5 @@ Use the credentials you obtained as your EasyVista account (host, login, passwor
 
 
 ## Deployment instructions
-https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli to deploy this connector as custom connector in Microsoft Flow and PowerApps
+https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
 

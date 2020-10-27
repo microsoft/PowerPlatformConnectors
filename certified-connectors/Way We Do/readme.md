@@ -1,4 +1,4 @@
-﻿
+
 ## Way We Do
 
 Way We Do enables teams to actively use repeatable policies, procedures, processes and playbooks in their day to day workflows to increase efficiency, quality and compliance. This connector offers the ability to integrate your other applications with Way We Do.
@@ -26,4 +26,4 @@ The connector supports the following operations:
 
 ## Deployment instructions
 
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps.
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
