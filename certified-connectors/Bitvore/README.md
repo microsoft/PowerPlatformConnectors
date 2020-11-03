@@ -1,4 +1,4 @@
-# Bitvore Cellenus Entity API
+# Bitvore Entity API
 
 ## Description
 
