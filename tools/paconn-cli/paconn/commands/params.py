@@ -264,6 +264,15 @@ def load_arguments(self, command):
             required=False,
             help=API_DEFINITION_HELP)
         arg_context.argument(
+            "custom_connector_rules_only",
+            options_list=['--custom_connector_rules_only', '-l'],
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help='Enable certification validation rules.')
+        arg_context.argument(
             POWERAPPS_URL,
             options_list=POWERAPPS_URL_OPTIONS,
             type=str,

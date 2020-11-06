@@ -18,6 +18,7 @@ import paconn.operations.validate
 
 def validate(
         api_definition,
+        custom_connector_rules_only,
         powerapps_url,
         powerapps_version,
         settings_file):
@@ -41,7 +42,8 @@ def validate(
 
     result = paconn.operations.validate.validate(
         powerapps_rp=powerapps_rp,
-        settings=settings)
+        settings=settings,
+        custom_connector_rules_only=custom_connector_rules_only)
 
     if result:
         display(result)

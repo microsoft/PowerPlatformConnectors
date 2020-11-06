@@ -14,7 +14,7 @@ import json
 from paconn.common.util import ensure_file_exists
 
 
-def validate(powerapps_rp, settings):
+def validate(powerapps_rp, settings, custom_connector_rules_only):
     """
     Method for create/update operation
     """
@@ -31,7 +31,7 @@ def validate(powerapps_rp, settings):
     # Validate Open API Definition
     result = powerapps_rp.validate_connector(
         payload=openapi_definition,
-        enable_certification_rules=True)
+        custom_connector_rules_only=custom_connector_rules_only)
 
     # Replace \r\n in the string to newlines
     result = bytes(result, 'utf-8').decode('unicode-escape')
