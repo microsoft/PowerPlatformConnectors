@@ -9,6 +9,6 @@ To use this integration, you need to have an account on the PDF4me Developer Por
 
 You will find a Primary Key and Secondary Key listed in the page.
 You can pass this key in the following format to add the PDF4me connector in Microsoft Power Automate.
-Format : Basic <Your Key>
+Format : Basic [Your Key]
 
 You're now ready to start using this integration.
