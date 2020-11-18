@@ -6,8 +6,6 @@ SkyPoint is a customer data platform that champions privacy and compliance throu
 
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
-* An Azure subscription
-* The Power platform CLI tools
 
 ## Supported Operations
 
@@ -15,8 +13,8 @@ The connector supports the following operations:
 
 # Actions
 
-* `Get Entities`: Gets all entities of selected instance
-* `Get items from an entity`: Gets all items of specified entity
+* `Get Entities`: Gets all entities of the selected instance
+* `Get items from an entity`: Gets all items of a specified entity
 * `Get Item`: Gets specified item of an entity
 
 # Triggers
