@@ -22,4 +22,10 @@ This connector supports the following operations:
 * `Send SMS`: Send a text message to multiple mobile recipients.
 * `Fetch Inbox`: Fetch messages from your application's inbox.
 
-For more information on parameters accepted/required by the connector's operations, please refer to our [documentation](https://build.at-labs.io/docs/sms%2Foverview).
+It also supports the following triggers:
+
+* `When you receive a Delivery Report for a sent message`: Triggered when you receive a Delivery Report for a message initially sent.
+* `When you receive a message in your inbox`: Triggered whenever a message is sent to any of your registered shortcodes.
+* `When a number opts out of receiving your bulk messages`: Triggered whenever a user opts out of receiving messages from your alphanumeric sender ID.
+
+For more information on parameters accepted/required by the connector's operations, please refer to our [documentation](https://developers.africastalking.com/docs/sms/overview).
