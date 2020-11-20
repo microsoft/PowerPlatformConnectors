@@ -1,7 +1,7 @@
 ## Prerequisites
 1. Create Data247 account
     * [Sign Up][1]
-2. After successful registeration, get your Private Key from your account.
+2. After successful registration, get your Private Key from your account.
 
 3. In case you need assistance contact Data247 support
     * [Support][2]
