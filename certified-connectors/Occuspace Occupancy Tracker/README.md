@@ -22,4 +22,4 @@ The Occuspace Connector provides you with RESTful interface to extract real-time
 
 ## API Documentation
 
-For further information on how to setup our connector, please refer to our support article [here](https://occuspace.io/microsoft-connector).
+For further information on how to setup our connector, please refer to our support article [here]((mailto:support@occuspace.io?subject=[GitHub]%20Microsoft%20Custom%20Connector)).
