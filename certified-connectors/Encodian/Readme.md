@@ -51,6 +51,12 @@ Perform OCR on an existing PDF document - https://support.encodian.com/hc/en-gb/
 ### Split PDF
 Split a PDF Document into multiple PDF Documents - https://support.encodian.com/hc/en-gb/articles/360002953277-Split-PDF
 
+### Split PDF by Text
+Split a PDF Document into multiple PDF Documents using Text Search or Regular Expressions - https://support.encodian.com/hc/en-gb/articles/360012726397-Split-PDF-by-Text
+
+### Split PDF by Barcode
+Split a PDF Document into multiple PDF Documents using barcodes - https://support.encodian.com/hc/en-gb/articles/360013629457-Split-PDF-by-Barcode
+
 ### Convert Word to PDF Form
 Convert the Word document provided (Legacy Form Controls Only) to a PDF form document. - https://support.encodian.com/hc/en-gb/articles/360012307133-Convert-Word-to-PDF-Form
 
@@ -159,5 +165,6 @@ Convert Microsoft Excel documents to another document format - https://support.e
 ### Create HMAC
 Create a Hash-based message authentication code (HMAC) using a secret key - https://support.encodian.com/hc/en-gb/articles/360012782058-Create-HMAC
 
-
+### Create Hash Code
+Create a Hashcode / message digest - https://support.encodian.com/hc/en-gb/articles/360013996077-Create-Hash-Code
 
