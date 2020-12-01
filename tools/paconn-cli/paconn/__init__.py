@@ -8,12 +8,13 @@
 Initializer
 """
 
-__VERSION__ = '0.0.13'
+__VERSION__ = '0.0.15'
 __CLI_NAME__ = 'paconn'
 
 # Commands
 _COMMAND_GROUP = ''
 _LOGIN = 'login'
+_LOGOUT = 'logout'
 _DOWNLOAD = 'download'
 _CREATE = 'create'
 _UPDATE = 'update'

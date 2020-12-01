@@ -12,6 +12,7 @@ Defines constants for JSON keys.
 _PROPERTIES = 'properties'
 _ICON_URI = 'iconUri'
 _CONNECTION_PARAMETERS = 'connectionParameters'
+_CONNECTION_PARAMETER_SET = 'connectionParameterSets'
 
 # Save
 _API_DEFINITIONS = 'apiDefinitions'
@@ -19,6 +20,7 @@ _ORIGINAL_SWAGGER_URL = 'originalSwaggerUrl'
 _ICON_BRAND_COLOR = 'iconBrandColor'
 _CAPABILITIES = 'capabilities'
 _POLICY_TEMPLATE_INSTANCES = 'policyTemplateInstances'
+_PUBLISHER='publisher'
 
 # Create update
 _OPEN_API_DEFINITION = 'openApiDefinition'

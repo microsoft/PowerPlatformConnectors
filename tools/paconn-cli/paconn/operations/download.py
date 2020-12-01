@@ -23,9 +23,11 @@ from paconn.operations.json_keys import (
     _ORIGINAL_SWAGGER_URL,
     _ICON_URI,
     _CONNECTION_PARAMETERS,
+    _CONNECTION_PARAMETER_SET,
     _ICON_BRAND_COLOR,
     _CAPABILITIES,
-    _POLICY_TEMPLATE_INSTANCES
+    _POLICY_TEMPLATE_INSTANCES,
+    _PUBLISHER
 )
 
 
@@ -102,9 +104,11 @@ def download(powerapps_rp, settings, destination, overwrite):
     # Property whitelist
     property_keys_whitelist = [
         _CONNECTION_PARAMETERS,
+        _CONNECTION_PARAMETER_SET,
         _ICON_BRAND_COLOR,
         _CAPABILITIES,
-        _POLICY_TEMPLATE_INSTANCES
+        _POLICY_TEMPLATE_INSTANCES,
+        _PUBLISHER
     ]
 
     # Remove the keys that aren't present in the property JSON
