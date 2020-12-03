@@ -1,0 +1,319 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Eigen Events",
+    "description": "Provides events from Ingenuity for use as flow triggers. You can use this connector to start flows whenever a selected event completes in the Eigen Ingenuity System",
+    "x-ms-api-annotation": {
+      "status": "Preview"
+    },
+    "contact": {
+      "email": "support@eigen-ltd.com",
+      "name": "Eigen Ltd",
+      "url": "https://www.eigen.co/"
+    }
+  },
+  "host": "c91a5acf572e.ngrok.io",
+  "basePath": "/",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/events/api/webhook/{eventIds}": {
+      "x-ms-notification-content": {
+        "description": "Details of the incoming event.",
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "GetDynamicEventSchema",
+            "parameters": {
+              "eventIds": {
+                "parameter": "eventIds"
+              }
+            },
+            "value-path": "schema"
+          }
+        }
+      },
+      "post": {
+        "description": "This operation triggers when any of the events subscribed to occurs",
+        "summary": "When an event occurs",
+        "operationId": "CreateWebhook",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "eventIds",
+            "in": "path",
+            "required": true,
+            "x-ms-summary": "EventID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetSupportedEvents",
+              "value-path": "value",
+              "value-collection": "events",
+              "value-title": "display"
+            },
+            "description": "Select Event Id",
+            "type": "number"
+          },
+          {
+            "name": "Body of Trigger Request",
+            "in": "body",
+            "description": "The body of Trigger-Creation request",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "callbackUrl"
+              ],
+              "properties": {
+                "callbackUrl": {
+                  "title": "The callback URL",
+                  "x-ms-summary": "Callback URL",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Response to successfully created webhook.",
+            "schema": {
+              "$ref": "#/definitions/WebhookCreationResponse"
+            }
+          },
+          "401": {
+            "description": "Response to unauthorized request.",
+            "x-ms-summary": "Request not authorized"
+          },
+          "500": {
+            "description": "Internal server error response.",
+            "x-ms-summary": "Internal server error"
+          }
+        }
+      }
+    },
+    "/events/api/webhook/delete/{webhookId}": {
+      "delete": {
+        "description": "This action deletes a webhook you had created",
+        "summary": "Delete a webhook you created",
+        "operationId": "DeleteWebhook",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The ID of the webhook to delete",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Response to successfully deleting a webhook.",
+            "x-ms-summary": "Webhook deleted"
+          },
+          "401": {
+            "description": "Response to unauthorized request.",
+            "x-ms-summary": "Request not authorized"
+          },
+          "500": {
+            "description": "Internal server error response.",
+            "x-ms-summary": "Internal server error"
+          }
+        }
+      }
+    },
+    "/events/api/events": {
+      "get": {
+        "description": "This action will fetch all events supported by this server",
+        "summary": "Get Events Available",
+        "operationId": "GetSupportedEvents",
+        "responses": {
+          "200": {
+            "description": "Response for events",
+            "x-ms-summary": "Success response",
+            "schema": {
+              "$ref": "#/definitions/SupportedEventsBody"
+            }
+          },
+          "500": {
+            "description": "Internal server error response.",
+            "x-ms-summary": "Internal server error"
+          },
+          "401": {
+            "description": "Response to unauthorized request.",
+            "x-ms-summary": "Request not authorized"
+          }
+        }
+      }
+    },
+    "/events/api/schema/{eventIds}": {
+      "get": {
+        "description": "This action will fetch the schema for the selected eventId",
+        "summary": "Get Dynamic Schema For Event",
+        "operationId": "GetDynamicEventSchema",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "eventIds",
+            "in": "path",
+            "required": true,
+            "description": "Get the schema for event",
+            "type": "number",
+            "x-ms-url-encoding": "single",
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response for Schema",
+            "x-ms-summary": "Schema response",
+            "schema": {
+              "$ref": "#/definitions/DynamicSchemaForEvent"
+            }
+          },
+          "404": {
+            "description": "Failed Operation",
+            "x-ms-summary": "Failed to get event schema"
+          },
+          "500": {
+            "description": "Failed Operation",
+            "x-ms-summary": "Internal Server error"
+          },
+          "401": {
+            "description": "Response to unauthorized request.",
+            "x-ms-summary": "Request not authorized"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "WebhookCreationResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Success",
+          "description": "Webhook created",
+          "x-ms-summary": "Webhook created",
+          "x-ms-visibility": "internal"
+        },
+        "description": {
+          "type": "string",
+          "title": "Server message",
+          "description": "The success repsonse",
+          "x-ms-summary": "Operation succeeded",
+          "x-ms-visibility": "important"
+        },
+        "value": {
+          "type": "object",
+          "properties": {
+            "webhookId": {
+              "type": "string",
+              "description": "The webhook Id",
+              "x-ms-visibility": "internal"
+            }
+          }
+        }
+      }
+    },
+    "FailureResponseBody": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Failed Operation",
+          "description": "Failed request",
+          "x-ms-summary": "Request Failed",
+          "x-ms-visibility": "internal"
+        },
+        "description": {
+          "type": "string",
+          "title": "Error message",
+          "description": "The error repsonse",
+          "x-ms-summary": "An error was detected",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "SupportedEventsBody": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "title": "Event Collection",
+          "description": "The events supported",
+          "x-ms-visibility": "internal",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "The event id"
+              },
+              "display": {
+                "type": "string",
+                "description": "The event name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "DynamicSchemaForEvent":{
+      "type": "object",
+      "properties": {
+        "schema":{
+          "description": "The dynamic schema for given event"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetSupportedEvents"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.eigen.co"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://eigen.co/terms-conditions-policies/#privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication;Productivity"
+    }
+  ]
+}
