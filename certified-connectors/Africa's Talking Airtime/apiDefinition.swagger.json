@@ -1,0 +1,303 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Africa's Talking Airtime",
+    "description": "Provides actions to distribute airtime to your users instantly via Africa's Talking's Airtime service and to watch for status notifications regarding these airtime requests",
+    "version": "1.0",
+    "contact": {
+      "name": "Advice and answers from the Africa's Talking Team",
+      "url": "https://help.africastalking.com/en/",
+      "email": "airtime@africastalking.com"
+    }
+  },
+  "host": "api.africastalking.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/version1/airtime/send": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "201",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errorMessage": {
+                  "type": "string",
+                  "description": "errorMessage"
+                },
+                "numSent": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "numSent"
+                },
+                "responses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "string",
+                        "description": "amount"
+                      },
+                      "discount": {
+                        "type": "string",
+                        "description": "discount"
+                      },
+                      "errorMessage": {
+                        "type": "string",
+                        "description": "errorMessage"
+                      },
+                      "phoneNumber": {
+                        "type": "string",
+                        "description": "phoneNumber"
+                      },
+                      "requestId": {
+                        "type": "string",
+                        "description": "requestId"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "status"
+                      }
+                    }
+                  },
+                  "description": "responses"
+                },
+                "totalAmount": {
+                  "type": "string",
+                  "description": "totalAmount"
+                },
+                "totalDiscount": {
+                  "type": "string",
+                  "description": "totalDiscount"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send Airtime",
+        "description": "Send airtime to multiple recipients",
+        "operationId": "SendAirtime",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "description": "Your application's username.",
+                  "title": "Username",
+                  "x-ms-visibility": "important"
+                },
+                "recipients": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "phoneNumber": {
+                        "type": "string",
+                        "description": "Phone number to be topped up in international format (e.g +234811222333)",
+                        "title": "Phone Number",
+                        "x-ms-visibility": "important"
+                      },
+                      "amount": {
+                        "type": "string",
+                        "description": "The value of airtime to send together with the currency code (e.g. KES 10.00).",
+                        "title": "Amount",
+                        "x-ms-visibility": "important"
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "phoneNumber"
+                    ]
+                  },
+                  "description": "recipients"
+                }
+              },
+              "x-ms-visibility": "important",
+              "required": [
+                "recipients",
+                "username"
+              ]
+            },
+            "x-ms-visibility": "important"
+          }
+        ]
+      }
+    },
+    "/query/transaction/find": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Send airtime request successfully queued",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Find transaction status",
+        "description": "Find a particular airtime transaction's status",
+        "operationId": "FindTransactionStatus",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Your application's username",
+            "x-ms-summary": "Username",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "transactionId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "ID of the transaction you'd like to find.",
+            "x-ms-summary": "Transaction ID",
+            "x-ms-visibility": "important"
+          }
+        ]
+      }
+    },
+    "/api/v1/powerapps/{username}/airtime/status/callback": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "requestId": {
+              "type": "string",
+              "description": "requestId"
+            },
+            "status": {
+              "type": "string",
+              "description": "status"
+            }
+          }
+        },
+        "description": "A new airtime delivery status notification"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Airtime Notification webhook created successfully"
+          }
+        },
+        "summary": "When you receive an Airtime Status Notification",
+        "description": "Triggered when you receive an delivery status notification for an initial request to send airtime.",
+        "operationId": "AirtimeStatusNotification",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your application's username",
+            "x-ms-summary": "Username",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "url",
+                  "title": "",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true
+                }
+              },
+              "x-ms-visibility": "internal",
+              "required": [
+                "url"
+              ]
+            },
+            "x-ms-visibility": "internal"
+          }
+        ]
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://africastalking.com/airtime"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://africastalking.com/privacy_policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication;Finance"
+    }
+  ],
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "apiKey"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": []
+}
