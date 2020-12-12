@@ -2,7 +2,10 @@
 Impexium is the premier association management software solution for nonprofits and member-based organizations.
 
 ## Prerequisites
-Create an account on the Impexium site. Visit support.impexium.com if you need help.
+To use this connector, you must have an Impexium account with access to one or more Impexium environments.
+
+##How to get credentials?
+Contact support@impexium.com to get your API Key
 
 
 ##Supported Triggers

@@ -28,9 +28,16 @@ You will need the following to proceed:
         -   **templateId** - the name of your approved template
         -   **language-policy** - language policy of your template
         -   **language-code** - language code of your template
-        -   **parameter-type** - use **text**
-        -   **parameter-text** - input your parameter
+        -   **components type** - use **body** if you are sending text. Rich media use **header**
+        -   **type of parameter** - use **text** if sending text, rich media uses **media**
+        -   **parameter-url** - input the source url
+        -   **parameter-type** - type of used media - support **image**, **document** and **video**
+        -   **parameter-filename** - filename for your rich media
+        -   **parameter-text** - input your text message
         -   _if your template uses more parameters, repeat **parameter-type** and **parameter-text** for each parameter your template requires_
+    
+
+        
         
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
