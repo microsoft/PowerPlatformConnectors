@@ -1,0 +1,773 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "The Entity API provides access to information about corporate entities available in the Bitvore database. Companies can be searched for based on some criteria (e.g. name, ticker, industry, etc) or directly using a Bitvore ID which uniquely identifies an entity.",
+    "version": "2.0",
+    "title": "Bitvore Cellenus",
+    "contact":{
+      "name":"Bitvore Support",
+      "url":"https://bitvore.com/contact-us/",
+      "email":"support@bitvore.com"
+    }
+  },
+  "host": "api.bitvore.com",
+  "basePath": "/entityapi",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/entities": {
+      "get": {
+        "tags": [
+          "Entity"
+        ],
+        "summary": "Organization Search",
+        "description": "Search can be performed using one of two approaches, a lookup or a parameterized query. A lookup takes a single string as input to matching entities. A paramaterized query takes one or more search parameters.",
+        "operationId": "handleOrgLookupUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "lookup",
+            "in": "query",
+            "description": "Lookup option. Value is used to match multiple fields.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary":"lookup",
+            "x-ms-visibility":"important"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "One or more names to search for.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"name",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "ticker",
+            "in": "query",
+            "description": "One or more tickers to search for.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"ticker",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "domainName",
+            "in": "query",
+            "description": "One or more domain names to search for.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"domainName",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "description": "One or more locations companies must have their headquarters in.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"location",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "fips",
+            "in": "query",
+            "description": "One or more FIPS codes identifying locations the companies must have their headquarters in.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"fips",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "zip",
+            "in": "query",
+            "description": "One or more zip codes identifying locations the companies must have their headquarters in.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"zip",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "naics",
+            "in": "query",
+            "description": "One or more NAICS codes identifying industries the companies must operate in.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"naics",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "sic",
+            "in": "query",
+            "description": "One or more SIC codes identifying industries the companies must operate in.",
+            "required": false,
+            "type": "string",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary":"sic",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "revRange",
+            "in": "query",
+            "description": "Revenue range (in millions) companies must fall in. The range is formated as lower-upper where lower and upper must be one of 0, 1, 10, 50, 100, 200, 1000. The upper bound can be ommited to report over 1B.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary":"revRange",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "empRange",
+            "in": "query",
+            "description": "Employee range companies must fall in. The range is formated as lower-upper where lower and upper must be one of 1, 10, 50, 200, 500, 1000, 5000, 10000. The upper bound can be ommited to report over 1B.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary":"empRange",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "pageNo",
+            "in": "query",
+            "description": "Page number of the total result set to return, default is 1.",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "format": "int32",
+            "x-ms-summary":"pageNo",
+            "x-ms-visibility":"advanced"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of results out of the total result set per page to return, default is 100, maximum is 1000.",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "format": "int32",
+            "x-ms-summary":"pageSize",
+            "x-ms-visibility":"advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "$ref": "#/definitions/OrgSearchResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid parameter used.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized to view organizations.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          }
+        }
+      }
+    },
+    "/entities/{id}": {
+      "get": {
+        "tags": [
+          "Entity"
+        ],
+        "summary": "Organization Details",
+        "description": "Returns detailed information about the company with the given Bitvore ID.",
+        "operationId": "handleGetOrgUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string",
+            "x-ms-summary":"id",
+            "x-ms-url-encoding":"single",
+            "x-ms-visibility":"important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "$ref": "#/definitions/OrganizationDetails"
+            }
+          },
+          "400": {
+            "description": "Invalid parameter used.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized to view organizations.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          }
+        }
+      }
+    },
+    "/matches": {
+      "post": {
+        "tags": [
+          "Entity"
+        ],
+        "summary": "Organization Matching",
+        "description": "Attempts to find companies matching input specifications made up of a list of property values. Multiple companies can be matched in a single call.",
+        "operationId": "handleOrgMatchingUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "specs",
+            "description": "specs",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/OrganizationMatchingSpecification"
+              }
+            },
+            "x-ms-visibility":"important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "$ref": "#/definitions/SingleOrganizationMatchingResult"
+            }
+          },
+          "400": {
+            "description": "Invalid parameter used.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "Entity"
+        ],
+        "summary": "Return API Version",
+        "description": "Deprecated",
+        "operationId": "getVersionUsingGET_2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized to get version.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "schema": {
+              "$ref": "#/definitions/GeneralAPIResponse"
+            }
+          }
+        },
+        "parameters": []
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://bitvore.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://bitvore.com/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Intelligence;AI"
+    }
+  ],
+  "definitions": {
+    "Exchange": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "string",
+          "example": "NYSE",
+          "description": "More commonly used acronym for the exchange"
+        },
+        "mic": {
+          "type": "string",
+          "example": "XNYS",
+          "description": "Market Identifier Code (MIC). Deprecated in favor of the market symbol."
+        },
+        "symbol": {
+          "type": "string",
+          "example": "NYQ",
+          "description": "Exchange symbol"
+        }
+      }
+    },
+    "GeneralAPIResponse": {
+      "type": "object",
+      "required": [
+        "reason",
+        "reasonSupport",
+        "response",
+        "success"
+      ],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "example": "Could not locate subject.",
+          "description": "Text reason for the failure (if not successful)"
+        },
+        "reasonSupport": {
+          "type": "object",
+          "example": "Longer description of the missing subject.",
+          "description": "Additional information about the failure (if not successful)"
+        },
+        "response": {
+          "type": "object",
+          "description": "Response payload"
+        },
+        "success": {
+          "type": "boolean",
+          "example": true,
+          "description": "Indicates whether the call was successful or not"
+        }
+      },
+      "description": "Properties common to most API responses."
+    },
+    "IndustrySummary": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "example": "55101050",
+          "description": "Unique ID of the industry"
+        },
+        "name": {
+          "type": "string",
+          "example": "Corporate Financial Services",
+          "description": "Name of the industry"
+        }
+      },
+      "description": "Summary information about an industry."
+    },
+    "OrgSearchResponse": {
+      "type": "object",
+      "required": [
+        "reason",
+        "reasonSupport",
+        "response",
+        "returned",
+        "success",
+        "total"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "example": 1,
+          "description": "Deprecated, replaced by the returned property"
+        },
+        "reason": {
+          "type": "string",
+          "example": "Could not locate subject.",
+          "description": "Text reason for the failure (if not successful)"
+        },
+        "reasonSupport": {
+          "type": "string",
+          "example": "Longer description of the missing subject.",
+          "description": "Additional information about the failure (if not successful)"
+        },
+        "response": {
+          "type": "array",
+          "description": "Response payload",
+          "items": {
+            "$ref": "#/definitions/OrganizationSummary"
+          }
+        },
+        "returned": {
+          "type": "integer",
+          "format": "int32",
+          "example": 1,
+          "description": "Number of organizations returned by search, may be less than total if paging used"
+        },
+        "success": {
+          "type": "boolean",
+          "example": true,
+          "description": "Indicates whether the call was successful or not"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32",
+          "example": 10,
+          "description": "Total number of organizations matching search criteria"
+        }
+      },
+      "description": "Organization search response."
+    },
+    "OrganizationDetails": {
+      "type": "object",
+      "properties": {
+        "aliases": {
+          "type": "array",
+          "description": "List of aliases for the organization",
+          "items": {
+            "type": "string"
+          }
+        },
+        "city": {
+          "type": "string",
+          "example": "Irvine",
+          "description": "City the organization is headquartered in"
+        },
+        "country": {
+          "type": "string",
+          "example": "UNITED STATES",
+          "description": "Country the organization is headquartered in"
+        },
+        "description": {
+          "type": "string",
+          "example": "ACME is a manufacturer of cartoon explosives.",
+          "description": "Description of the organization"
+        },
+        "domainName": {
+          "type": "string",
+          "example": "acme.com",
+          "description": "Domain name of the organization (if website known)"
+        },
+        "employees": {
+          "type": "string",
+          "example": "10-50",
+          "description": "Estimated number of employees (range based)",
+          "enum": [
+            "1-10",
+            "10-50",
+            "50-100",
+            "100-250",
+            "250-500",
+            "500-1000",
+            "1000-5000",
+            "5000-10000",
+            "10000-"
+          ]
+        },
+        "exchange": {
+          "$ref": "#/definitions/Exchange"
+        },
+        "facebookUrl": {
+          "type": "string",
+          "description": "Absolute URL to the company's Facebook page"
+        },
+        "fundingTotal": {
+          "type": "integer",
+          "format": "int64",
+          "example": 12000000,
+          "description": "Estimate of total funding the organization has received"
+        },
+        "id": {
+          "type": "string",
+          "example": "b00001aaa",
+          "description": "ID (BvId) of the organization"
+        },
+        "lastFundingAmount": {
+          "type": "integer",
+          "format": "int64",
+          "example": 12000000,
+          "description": "Estimate of the funding received in its last funding year"
+        },
+        "lastFundingYear": {
+          "type": "integer",
+          "format": "int32",
+          "example": 2014,
+          "description": "Last year the organization received funding"
+        },
+        "linkedInUrl": {
+          "type": "string",
+          "description": "Absolute URL to the company's LinkedIn page"
+        },
+        "monitored": {
+          "type": "string",
+          "example": "active",
+          "description": "Indicates whether the orgnaization is being actively monitored.",
+          "enum": [
+            "inactive",
+            "pending",
+            "active"
+          ]
+        },
+        "naicsIndustry": {
+          "$ref": "#/definitions/IndustrySummary"
+        },
+        "name": {
+          "type": "string",
+          "example": "ACME Corp",
+          "description": "Name of the organization"
+        },
+        "parent": {
+          "$ref": "#/definitions/OrganizationSummary"
+        },
+        "revenue": {
+          "type": "string",
+          "example": "50-100",
+          "description": "Estimated annual revenue in millions (range based)",
+          "enum": [
+            "0-1",
+            "1-10",
+            "10-50",
+            "50-100",
+            "100-500",
+            "500-1000",
+            "1000-10000",
+            "10000-"
+          ]
+        },
+        "sicIndustry": {
+          "$ref": "#/definitions/IndustrySummary"
+        },
+        "state": {
+          "type": "string",
+          "example": "CALIFORNIA",
+          "description": "State the organization is headquartered in"
+        },
+        "ticker": {
+          "type": "string",
+          "example": "ACME",
+          "description": "Stock ticker of the organization (if traded)"
+        },
+        "twitterUrl": {
+          "type": "string",
+          "description": "Absolute URL to the company's Twitter page"
+        },
+        "ultimateParent": {
+          "$ref": "#/definitions/OrganizationSummary"
+        },
+        "yearClosed": {
+          "type": "integer",
+          "format": "int32",
+          "example": 2015,
+          "description": "Year the organization went out of business if no longer in business"
+        },
+        "yearFounded": {
+          "type": "integer",
+          "format": "int32",
+          "example": 1968,
+          "description": "Year the organization was founded"
+        }
+      },
+      "description": "Detailed information about an organization."
+    },
+    "OrganizationMatchingSpecification": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/List"
+      }
+    },
+    "List": {
+      "type": "object"
+    },
+    "OrganizationSummary": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "example": "Irvine",
+          "description": "City the organization is headquartered in"
+        },
+        "country": {
+          "type": "string",
+          "example": "UNITED STATES",
+          "description": "Country the organization is headquartered in"
+        },
+        "domainName": {
+          "type": "string",
+          "example": "acme.com",
+          "description": "Domain name of the organization (if website known)"
+        },
+        "id": {
+          "type": "string",
+          "example": "b00001aaa",
+          "description": "ID (BvId) of the organization"
+        },
+        "monitored": {
+          "type": "string",
+          "example": "active",
+          "description": "Indicates whether the orgnaization is being actively monitored.",
+          "enum": [
+            "inactive",
+            "pending",
+            "active"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "example": "ACME Corp",
+          "description": "Name of the organization"
+        },
+        "parent": {
+          "$ref": "#/definitions/OrganizationSummary"
+        },
+        "state": {
+          "type": "string",
+          "example": "CALIFORNIA",
+          "description": "State the organization is headquartered in"
+        },
+        "ticker": {
+          "type": "string",
+          "example": "ACME",
+          "description": "Stock ticker of the organization (if traded)"
+        }
+      },
+      "description": "Summary information about an organization."
+    },
+    "PotentialOrganizationMatch": {
+      "type": "object",
+      "properties": {
+        "hits": {
+          "type": "array",
+          "example": "[\"Name\",\"DomainName\"]",
+          "description": "List of the properties in the input specification that this company has matches for",
+          "items": {
+            "type": "string"
+          }
+        },
+        "org": {
+          "$ref": "#/definitions/OrganizationSummary"
+        }
+      },
+      "description": "One potential matching organization."
+    },
+    "SingleOrganizationMatchingResult": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "description": "List of candidate matches",
+          "items": {
+            "$ref": "#/definitions/PotentialOrganizationMatch"
+          }
+        },
+        "spec": {
+          "type": "object",
+          "description": "Input organization specification used to find candidates",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "description": "Results of trying to match an organization using the input specification."
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-BV-APIKEY"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Entity",
+      "description": "Entity API"
+    }
+  ]
+}
