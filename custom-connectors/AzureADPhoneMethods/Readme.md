@@ -12,13 +12,12 @@ You will need the following to proceed:
 Since the Azure AD authentication methods APIs are secured by Azure Active Directory (AD), we first need to set up a few things in Azure AD so that our connectors can securely access the phone methods. After that is completed, you can create and test the sample connector.
 
 ### Set up an Azure AD application for your custom connector
-We first need to register our connector as an application in Azure AD.  This will allow the connector to identify itself to Azure AD so that it can ask for permissions to access Key Vault data on behalf of the end user.  You can read more about this [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-scenarios) and follow the steps below:
+We first need to register our connector as an application in Azure AD.  This will allow the connector to identify itself to Azure AD so that it can ask for permissions to access Graph API data on behalf of the end user.  You can read more about this [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-scenarios) and follow the steps below:
 
 1. Create an Azure AD application
 This Azure AD application will be used to identify the connector to the Microsoft Graph API.  This can be done using [Azure Portal] (https://portal.azure.com), by following the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).  Once created, note down the value of Application (Client) ID.  You will need this later.
 
-2. Configure (Update) your Azure AD application to access the Azure Key Vault API
-This step will ensure that your application can successfully retrieve an access token to invoke Azure Key Vault on behalf of your users.  To do this, follow the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
+2. Configure (Update) your Azure AD application to access the Graph API phone methods data
     - For redirect URI, use “https://global.consent.azure-apim.net/redirect”
     - For the credentials, use a client secret (and not certificates).  Remember to note the secret down, you will need this later and it is shown only once.
     - For API permissions, Graph API **delegated** permissions **UserAuthenticationMethod.ReadWrite.All** needs to be added to the app registration. Don't forget to grant admin access.
