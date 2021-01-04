@@ -1,6 +1,6 @@
 
 ## Xbridger Document Manager
-[Xbridger Document Manager](https://xbridger.com/) - is a set of document management actions available within Power Automate and as custom APIs to enhance your document management processes in SharePoint online by providing capabilities such as document conversion, extraction of images from word document, creation of modern pages etc. using Power Automate.
+[Xbridger Document Manager](https://xbridger.com/) - is a set of document management actions available within Power Automate and as custom APIs to enhance your document management processes in SharePoint online by providing capabilities such as document conversion, extraction of images from word document, conversion of word document to a modern page etc. using Power Automate.
 
 ## Prerequisites
 - [Register](http://account.xbridger.com/signup) for an Xbridger API subscription OR
