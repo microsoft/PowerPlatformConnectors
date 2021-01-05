@@ -35,13 +35,25 @@ You will need the following to proceed:
         -   **parameter-filename** - filename for your rich media
         -   **parameter-text** - input your text message
         -   _if your template uses more parameters, repeat **parameter-type** and **parameter-text** for each parameter your template requires_
-    
-
         
         
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
         -   **id** - messageID of your message (_returned after each request_)
+
+## Supported Triggers
+
+- **Incoming Message** Trigger any flow on new incoming messages
+    - **Response Fields**
+        - **messageId** (the message ID)
+        - **channel** - the channel on which the message was received (viber, whatsapp or sms)
+        - **from** - the sender's phone number
+        - **to** - the reciever's phone number (you)
+        - **receivedAt** - when was the message received
+        - **text** - the text of the message
+        - **file** - any attached file to the message
+        - **event** - on which event the webhook was triggered
+        - **timestamp** - the timestamp of the message
 
 
 ## How to get API key 
