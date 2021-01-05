@@ -24,10 +24,20 @@ You will need the following to proceed:
  - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
  - **from** - your Viber Service ID
  - **text** - text of your Viber message
+
+- **Send Rich Media** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+ - To make a successful request, please, populate the followings fields:
+ - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
+ - **from** - your Viber Service ID
+ - **components type - 1**  - type of sent media (an image)
+ - **components url - 1** - url to given media (the link to image)
+
 - **Status Check**
  - To make a successful status check, please, provide the connector with the following values
 
  - **id** - messageID of your message (_returned after each request_)
+
+
 
 ## Supported Triggers
 - **Incoming Message** Trigger any flow on new incoming messages
