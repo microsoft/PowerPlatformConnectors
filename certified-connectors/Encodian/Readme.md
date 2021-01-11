@@ -15,6 +15,15 @@ The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360
 ### Convert to PDF
 Convert a document to PDF or PDF/A format - https://support.encodian.com/hc/en-gb/articles/360011123574-Convert-to-PDF
 
+### Convert Word
+Convert Microsoft Word documents to PDF, HTML, DOCX, DOC, TXT, TIFF or PNG file formats - https://support.encodian.com/hc/en-gb/articles/360015616117-Convert-Word
+
+### Convert Excel
+Convert Microsoft Excel and CSV documents to PDF, XSLX, HTML, CSV, TIFF, PNG or TXT file formats - https://support.encodian.com/hc/en-gb/articles/360011804178-Convert-Excel
+
+### Convert Mail Message
+Convert an email (EML or MSG file) to PDF - https://support.encodian.com/hc/en-gb/articles/360011566298-Convert-Mail-Message
+
 ### Convert PDF to PDFA
 Convert a PDF document to PDF/A format - https://support.encodian.com/hc/en-gb/articles/360010578413-Convert-PDF-to-PDFA
 
@@ -155,12 +164,6 @@ Extract text from the image provided - https://support.encodian.com/hc/en-gb/art
 
 ### Fill a PDF Form
 Fill the PDF Form provided with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360008556077-Fill-a-PDF-Form
-
-### Convert Mail Message
-Convert an email (EML or MSG file) to PDF - https://support.encodian.com/hc/en-gb/articles/360011566298-Convert-Mail-Message
-
-### Convert Excel
-Convert Microsoft Excel documents to another document format - https://support.encodian.com/hc/en-gb/articles/360011804178-Convert-Excel
 
 ### Create HMAC
 Create a Hash-based message authentication code (HMAC) using a secret key - https://support.encodian.com/hc/en-gb/articles/360012782058-Create-HMAC
