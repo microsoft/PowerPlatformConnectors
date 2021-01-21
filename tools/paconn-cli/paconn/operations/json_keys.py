@@ -12,6 +12,7 @@ Defines constants for JSON keys.
 _PROPERTIES = 'properties'
 _ICON_URI = 'iconUri'
 _CONNECTION_PARAMETERS = 'connectionParameters'
+_CONNECTION_PARAMETER_SET = 'connectionParameterSets'
 
 # Save
 _API_DEFINITIONS = 'apiDefinitions'

@@ -5,21 +5,64 @@
     "DownloadDocumentRequest": {
       "properties": {
         "documentId": {
+          "description": "Unique identifier of the document to download.",
           "title": "Document",
           "type": "string"
         }
       },
+      "required": [
+        "documentId"
+      ],
+      "type": "object"
+    },
+    "ExecuteFlowRequest": {
+      "properties": {
+        "flowId": {
+          "description": "The flow to execute.",
+          "title": "Flow",
+          "type": "string",
+          "x-ms-dynamic-values": {
+            "operationId": "GetFlows",
+            "parameters": {},
+            "value-path": "flowId",
+            "value-title": "displayName"
+          }
+        },
+        "executionData": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "GetFlowSchema",
+            "parameters": {
+                "flowId": {
+                  "parameter": "flowId"
+                }
+            }
+          },
+          "x-ms-dynamic-properties": {
+            "operationId": "GetFlowSchema",
+            "parameters": {
+              "flowId": {
+                "parameterReference": "req/flowId"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "flowId",
+        "executionData"
+      ],
       "type": "object"
     },
     "ExecuteDynamicsFlowRequest": {
       "properties": {
         "entityId": {
-          "description": "Unique identifier of the entity you want to launch the Smart Flow from.",
+          "description": "Unique identifier of the entity you want to launch the flow from.",
           "title": "Entity",
           "type": "string"
         },
         "flowId": {
-          "description": "The Smart Flow to execute.",
+          "description": "The flow to execute.",
           "title": "Flow",
           "type": "string",
           "x-ms-dynamic-values": {
@@ -33,6 +76,36 @@
           "description": "The user name of the user to execute the flow with. If none provided, the user of the connector will be used.",
           "title": "User Name",
           "type": "string"
+        },
+        "timeout": {
+          "description": "The amount of seconds that the operation will wait for the flow execution to complete. (1 minute if left empty)",
+          "title": "Timeout",
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "advanced"
+        },
+        "executionMode": {
+          "description": "The execution mode of the selected flow.",
+          "title": "Execution Mode",
+          "type": "string",
+          "default": "Default",
+          "enum": [
+            "Default",
+            "Batch"
+          ],
+          "x-ms-editor-options": {
+            "items": [
+              {
+                "title": "Default",
+                "value": "0"
+              },
+              {
+                "title": "Batch",
+                "value": "1"
+              }
+            ]
+          },
+          "x-ms-visibility": "advanced"
         }
       },
       "required": [
@@ -79,10 +152,27 @@
     "GetDocumentsRequest": {
       "properties": {
         "executionId": {
+          "description": "Unique identifier of the execution to get the documents from.",
           "title": "Execution",
           "type": "string"
         }
       },
+      "required": [
+        "executionId"
+      ],
+      "type": "object"
+    },
+    "GetExecutionStatusRequest": {
+      "properties": {
+        "executionId": {
+          "description": "Unique identifier of the execution to get the execution status from.",
+          "title": "Execution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executionId"
+      ],
       "type": "object"
     },
     "GetDocumentsResponse": {
@@ -132,7 +222,10 @@
   "paths": {
     "/api/Documents": {
       "post": {
-        "description": "Get documents from a Smart Flow execution.",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get documents from a flow execution.",
         "operationId": "GetDocuments",
         "parameters": [
           {
@@ -171,8 +264,51 @@
         ]
       }
     },
+    "/api/ExecutionStatus": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get the status of an execution.",
+        "operationId": "GetExecutionStatus",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "req",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetExecutionStatusRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/FlowExecutionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get Execution Status",
+        "tags": [
+          "Flows"
+        ]
+      }
+    },
     "/api/DownloadDocument": {
       "post": {
+        "consumes": [
+          "application/json"
+        ],
         "description": "Downloads the document from an execution.",
         "operationId": "DownloadDocument",
         "parameters": [
@@ -207,10 +343,52 @@
         ]
       }
     },
+    "/api/ExecuteFlow": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Execute a Flow.",
+        "operationId": "ExecuteFlow",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "req",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ExecuteFlowRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/FlowExecutionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Execute Flow",
+        "tags": [
+          "Flows"
+        ]
+      }
+    },
     "/api/ExecuteDynamicsFlow": {
       "post": {
-        "consumes": [],
-        "description": "Execute a Smart Flow for a Dynamics 365 data set.",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Execute a flow for a Dynamics 365 data set.",
         "operationId": "ExecuteDynamicsFlow",
         "parameters": [
           {
@@ -240,6 +418,7 @@
           }
         },
         "summary": "Execute Dynamics Flow",
+        "deprecated": true,
         "tags": [
           "Flows"
         ]
@@ -247,7 +426,9 @@
     },
     "/api/Flows": {
       "get": {
-        "consumes": [],
+        "consumes": [
+          "application/json"
+        ],
         "operationId": "GetFlows",
         "parameters": [],
         "produces": [
@@ -272,6 +453,41 @@
           }
         },
         "summary": "Get Flows",
+        "tags": [
+          "Flows"
+        ],
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/api/FlowSchema": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "operationId": "GetFlowSchema",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "flowId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get Flow Schema",
         "tags": [
           "Flows"
         ],
