@@ -16,8 +16,7 @@ from paconn.common.prompts import get_environment, get_connector_id
 from paconn.settings.settingsserializer import SettingsSerializer
 
 # Setting file name
-SETTINGS_FILE = 'settings.json'
-
+SETTINGS_FILE = 'paconn-settings.json'
 
 def prompt_for_environment(settings, flow_rp):
     # Select environment if not provided
