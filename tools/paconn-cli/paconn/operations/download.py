@@ -75,6 +75,9 @@ def _ensure_overwrite(settings):
 
     return overwrite
 
+def _delete_unecessary_oauth_settings(properties):
+    del properties['properties']['connectionParameters']['token']['oAuthSettings']['redirectUrl']
+    del properties['properties']['connectionParameters']['token']['oAuthSettings']['properties']
 
 def download(powerapps_rp, settings, destination, overwrite):
     """
@@ -122,6 +125,8 @@ def download(powerapps_rp, settings, destination, overwrite):
         prop: api_properties[prop]
         for prop in properties_present
     }
+
+    _delete_unecessary_oauth_settings(api_properties_selected)
 
     # Write the api properties
     api_prop = format_json(
