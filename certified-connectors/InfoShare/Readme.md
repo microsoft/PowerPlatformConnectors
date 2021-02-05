@@ -4,7 +4,7 @@ Kendox InfoShare provides a powerful and very extensive REST API. Using this API
 
 ## Pre-requisites
 You will need the following to proceed:
-* A license to use this connector available via sales@kendox.com.
+* A license to use this connector available via sales365@kendox.com.
 * Kendox InfoShare with the WCF service endpoints reachable online.
 * Kendox InfoShare login credentials.
 
