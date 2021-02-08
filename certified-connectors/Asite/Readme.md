@@ -2,7 +2,7 @@
 
 Asite is an open construction platform that enables organizations with comprehensive range of solutions connect dispersed teams across the lifecycle of capital assets by collaborate, plan, design, and build with seamless information sharing across the entire supply chain which helps capital project owners stay at the forefront of innovation, maintaining a golden thread of information.
 
-Asite connector helps to build a connection between two systems for file exchange. Connector collaborate both systems by upload and download file files based on triggers.
+The Asite connector helps to build a connection between two systems for file exchange. The connector collaborates both systems by uploading and downloading files based on triggers.
 
 # Pre-requisites
 
