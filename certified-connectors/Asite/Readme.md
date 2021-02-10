@@ -8,7 +8,7 @@ The Asite connector helps to build a connection between two systems for file exc
 
 - Required Asite CDE Subscription
 - Active Asite login credentials
-- Configuration on Asite for required workflow trigger of type &#39;Microsoft Flow&#39;
+- Configuration on Asite for required workflow trigger of type "Microsoft Flow";
 
 # Actions
 
@@ -16,14 +16,14 @@ Following are the internal and external actions used during connection flow to s
 
 | **Name** | **Trigger / Action Name** | **API EndPoint** | **Description** | **Visibility** |
 | -------- | ------------------------- | ---------------- | --------------- | -------------- |
-| Select Project Name || /workspaceList | It will list out all the Asite&#39;s projects where you have access. | Internal |
+| Select Project Name || /workspaceList | It will list out all the Asite's projects where you have access. | Internal |
 | Select Folder Name || /folderAndFileList | It will list out all the accessible folders based on your access from the selected Project. | Internal |
 | When an Asite workflow event is triggered | Trigger | /asitePullDataWebhook | To upload file with metadata and download file on defined folder based on triggered workflow. | Important |
 | Download a File | Action | /downloadFileByUrl | To download a file by public link via triggered event. | Important |
 | List of configured Triggers from Asite Platform | | /triggerList | To display list of configured Triggers from Asite Platform | Internal |
 | Delete configured trigger || /deleteAsitePullDataWebhook/{id} | To Delete configured trigger | Internal |
 | Get Dynamic Schema based on project and folder | | /getFolderAttributes | Get Dynamic Schema based on project and folder | Internal |
-| Define File&#39;s Metadata | Action | /saveMetadataForUpload | To define metadata of a file which required to upload file | Important |
+| Define File's Metadata | Action | /saveMetadataForUpload | To define metadata of a file which required to upload file | Important |
 | Upload a File | Action | /uploadFileFromExternalSystem | To upload a file in defined Project and Folder on Asite Platform. | Important |
 | Get dynamic schema based on project Id and trigger Id || /getFolderAttributesFromTrigger | Get dynamic schema based on project Id and trigger Id | Internal |
 
