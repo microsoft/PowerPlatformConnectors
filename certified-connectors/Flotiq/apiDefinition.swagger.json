@@ -2,8 +2,13 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "Flotiq abstract API",
-    "description": "Flotiq abstract API"
+    "title": "Flotiq headless CMS",
+    "description": "Flotiq headless content management system",
+    "contact":{
+      "name": "Flotiq support",
+      "url": "https://flotiq.com",
+      "email": "hello@flotiq.com"
+    }
   },
   "host": "api.flotiq.com",
   "basePath": "/",
@@ -19,6 +24,7 @@
       "get": {
         "summary": "Get Content Type schema",
         "operationId": "GetContentTypeSchema",
+        "description": "Get Content Type schema",
         "parameters": [
           {
             "name": "contentTypeId",
@@ -26,99 +32,16 @@
             "type": "string",
             "description": "Select Content Type Definition id you want fields from",
             "required": true,
-            "x-ms-summary": "Select Content Type"
+            "x-ms-summary": "Select Content Type",
+            "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/CTD"
             }
-          }
-        }
-      }
-    },
-    "/api/v1/internal/contenttype": {
-      "get": {
-        "summary": "Get Content Types",
-        "operationId": "GetCTD",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/content/{contentTypeLabel}": {
-      "get": {
-        "summary": "List Content Objects",
-        "description": "List Content Objects",
-        "operationId": "ListContentObjects",
-        "parameters": [
-          {
-            "name": "contentTypeLabel",
-            "default": "",
-            "in": "path",
-            "type": "string",
-            "required": true,
-            "description": "Select the CTD",
-            "x-ms-summary": "Select",
-            "x-ms-dynamic-values": {
-              "operationId": "GetCTD",
-              "value-collection": "data",
-              "value-path": "name",
-              "value-title": "label"
-            }
-          },
-          {
-            "name": "page",
-            "default": "1",
-            "in": "query",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "limit",
-            "default": "20",
-            "in": "query",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "order_by",
-            "default": "internal.createdAt",
-            "in": "query",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "order_direction",
-            "default": "asc",
-            "in": "query",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "hydrate",
-            "default": "0",
-            "in": "query",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "filters",
-            "default": "{}",
-            "in": "query",
-            "type": "string",
-            "required": true
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "default",
-            "schema": {}
           }
         }
       },
@@ -126,15 +49,17 @@
         "summary": "Create Content Object",
         "description": "Create Content Object",
         "operationId": "CreateContentObject",
+        "consumes": ["application/json"],
         "parameters": [
           {
-            "name": "contentTypeLabel",
+            "name": "contentTypeId",
             "default": "",
             "in": "path",
             "type": "string",
             "required": true,
             "description": "Select the CTD",
             "x-ms-summary": "Select",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "GetCTD",
               "value-collection": "data",
@@ -147,16 +72,7 @@
             "in": "body",
             "description": "Dynamic schema of objects in selected CTD",
             "schema": {
-              "type": "object",
-              "x-ms-dynamic-schema": {
-                "operationId": "GetContentTypeSchema",
-                "parameters": {
-                  "contentTypeId": {
-                    "parameter": "contentTypeLabel"
-                  }
-                },
-                "value-path": "schemaDefinition/allOf/1/properties"
-              }
+              "type":"object"
             },
             "required": true
           }
@@ -167,6 +83,22 @@
             "schema": {}
           }
         }
+      }
+    },
+    "/api/v1/internal/contenttype": {
+      "get": {
+        "summary": "Get Content Types",
+        "description": "Get list of defined Content Type Definitions",
+        "operationId": "GetCTD",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of items",
+            "schema": {
+                "type":"object"
+              }
+            }
+          }
       }
     },
     "/api/v1/content/{contentTypeLabel}/{id}": {
@@ -183,6 +115,7 @@
             "required": true,
             "description": "Select the CTD",
             "x-ms-summary": "Select",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "GetCTD",
               "value-collection": "data",
@@ -191,18 +124,14 @@
             }
           },
           {
-            "name": "hydrate",
-            "default": "0",
-            "in": "query",
-            "type": "string",
-            "required": true
-          },
-          {
             "name": "id",
             "default": "",
             "in": "path",
             "type": "string",
-            "required": true
+            "required": true,
+            "description": "ID of the content object",
+            "x-ms-summary": "ID of the content object",
+            "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
@@ -214,9 +143,41 @@
       }
     }
   },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://flotiq.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://flotiq.com/flotiq-privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Website"
+    }
+  ],
   "definitions": {
-    "GetCTD": {
-      "type": "object"
+    "CTD": {
+      "type": "object",
+      "x-ms-dynamic-schema": {
+          "operationId": "GetContentTypeSchema",
+          "parameters": {
+            "contentTypeId": {
+              "parameter": "contentTypeId"
+            }
+          },
+          "value-path": "schemaDefinition/allOf/1/properties"
+      },
+      "x-ms-dynamic-properties": {
+        "operationId": "GetContentTypeSchema",
+        "itemValuePath": "schemaDefinition/allOf/1",
+        "parameters": {
+          "contentTypeId":{
+            "parameterReference": "contentTypeId"
+          }
+        }
+      }
     }
   },
   "parameters": {},
