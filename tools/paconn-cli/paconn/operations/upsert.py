@@ -16,10 +16,11 @@ from knack.util import CLIError
 
 from paconn.common.util import ensure_file_exists
 from paconn.settings.util import write_settings
-from paconn.apimanager.iconuploader import upload_icon
+from paconn.apimanager.fileuploader import upload_file
 from paconn.operations.json_keys import (
     _PROPERTIES,
     _ICON_URI,
+    _SCRIPT_URI,
     _OPEN_API_DEFINITION,
     _ENVIRONMENT,
     _NAME,
@@ -116,16 +117,27 @@ def upsert(powerapps_rp, settings, client_secret, is_update, overwrite_settings)
         payload=openapi_definition,
         enable_certification_rules=False)
 
-    # Get the shared access signature
+    # Get the shared access signature for icon
     response = powerapps_rp.generate_resource_storage(settings.environment)
-    sas_url = response[_SHARED_ACCESS_SIGNATURE]
+    icon_sas_url = response[_SHARED_ACCESS_SIGNATURE]
 
     # Upload the icon
     if settings.icon and os.path.exists(settings.icon):
-        icon_uri = upload_icon(
-            sas_url=sas_url,
+        icon_uri = upload_file(
+            sas_url=icon_sas_url,
             file_path=settings.icon)
         properties[_ICON_URI] = icon_uri
+
+    # Get the shared access signature for script
+    response = powerapps_rp.generate_resource_storage(settings.environment)
+    script_sas_url = response[_SHARED_ACCESS_SIGNATURE]
+
+    # Upload the script
+    if settings.script and os.path.exists(settings.script):
+        script_uri = upload_file(
+            sas_url=script_sas_url,
+            file_path=settings.script)
+        properties[_SCRIPT_URI] = script_uri
 
     # Update or create the connector
     if is_update is True:

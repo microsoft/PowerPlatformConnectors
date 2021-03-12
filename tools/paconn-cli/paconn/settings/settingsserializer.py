@@ -27,6 +27,7 @@ _FLOW_API_VERSION = 'flowApiVersion'
 _API_PROPERTIES = 'apiProperties'
 _API_DEFINITION = 'apiDefinition'
 _ICON = 'icon'
+_SCRIPT = 'script'
 
 # Authentication settings
 _CLIENT_ID = 'clientId'
@@ -81,6 +82,7 @@ class SettingsSerializer:
             _API_PROPERTIES: settings.api_properties,
             _API_DEFINITION: settings.api_definition,
             _ICON: settings.icon,
+            _SCRIPT: settings.script,
 
             # PowerApps RP settings
             _POWERAPPS_URL: settings.powerapps_url,
@@ -114,6 +116,7 @@ class SettingsSerializer:
             api_properties=settings_dict.get(_API_PROPERTIES, None),
             api_definition=settings_dict.get(_API_DEFINITION, None),
             icon=settings_dict.get(_ICON, None),
+            script=settings_dict.get(_SCRIPT,None),
 
             # PowerApps RP settings
             powerapps_url=settings_dict.get(_POWERAPPS_URL, None),

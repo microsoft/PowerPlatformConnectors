@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 
 """
-Uploads an icon for the custom connector
+Uploads an file for the custom connector
 """
 import os
 import mimetypes
@@ -13,7 +13,7 @@ from urllib.parse import urlparse, urlunparse
 from azure.storage.blob import ContentSettings, BlockBlobService
 
 
-def upload_icon(sas_url, file_path):
+def upload_file(sas_url, file_path):
     # Break the SAS URL
     (scheme, netloc, path, params, query, fragment) = urlparse(sas_url)
     # Account is the first part of the netlocation upto the dot
@@ -35,7 +35,7 @@ def upload_icon(sas_url, file_path):
         sas_token=query,
         endpoint_suffix=endpoint_suffix)
 
-    # Get the file name of the icon
+    # Get the file name of the file
     file_name = os.path.basename(file_path)
     # Determine the content type and encoding for the file
     (content_type, content_encoding) = mimetypes.guess_type(file_name)
@@ -43,14 +43,14 @@ def upload_icon(sas_url, file_path):
         content_type=content_type,
         content_encoding=content_encoding)
 
-    # Upload the icon
+    # Upload the file
     blockblob_service.create_blob_from_path(
         container_name=container_name,
         blob_name=file_name,
         file_path=file_path,
         content_settings=content_settings)
 
-    # Append the icon name to the path to generate the download link
+    # Append the file name to the path to generate the download link
     path = path + '/' + file_name
     urlparts = (scheme, netloc, path, params, query, fragment)
     sas_download_url = urlunparse(urlparts)
