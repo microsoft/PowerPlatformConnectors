@@ -4,9 +4,9 @@ EXPOCAD is a Professional Event Floor Plan Management Software Specifically Crea
 
 ## Prerequisites
 You will need the following to proceed:
-* [Sign-up](https://365.training/Account/SignIn) for a 365.Training account
-* [Request](https://365l.ink/ConnectorAPIRequest) an API key 
-
+* Your API Key to authenticate your connection (API Key)
+* Your organization account name for use with EXPOCAD (ClientName)
+* Your event database name for use with EXPOCAD (databaseName)
 
 
 ## Supported Actions
