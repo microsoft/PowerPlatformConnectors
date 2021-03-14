@@ -38,6 +38,7 @@ The connector supports the following operations:
 * `Get Event Information` : Returns basic information about the supplied event.
 * `Get Event Statistics` : Returns basic statistics describing the supplied event.
 * `Get financial information for the specified booth` : Returns financial information for the specified booth.
+* `Get Invoice Details`: Gets details of a single invoice. Either invoiceNo or exhibtitorId is required.
 * `Get Specific Booth` : Returns the specified booth.
 * `Get the currently set default rate plan` : Returns the currently set default rate plan from the supplied event.
 * `Get the master list of payment types` : Returns the master list of payment types.
@@ -50,6 +51,7 @@ The connector supports the following operations:
 * `Return a collection of all booth classes` : Returns a collection of all booth classes in the supplied event.
 * `Return the specified booth class` : Returns the specified booth class.
 * `Returns the master list of requestable items` : Will return items that match either the glCode or the transactionCode
+* `Return all invoices in supplied event`: Returns all invoices in the supplied event.
 * `Set the default rate plan` : Sets the default rate plan for the supplied event.
 * `Uncombine the specified booth` : Uncombines the specified booth in the supplied event.
 * `Undelete the specified booths` : Undeletes the specified booths in the supplied event.
@@ -59,4 +61,4 @@ The connector supports the following operations:
 * `Update the specified booth class` : Updates the specified booth class.
 
 ## Supported Triggers
-The connector does not have any supported triggers
+The connector does not have any supported triggers.
