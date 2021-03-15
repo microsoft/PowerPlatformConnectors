@@ -26,6 +26,7 @@ from paconn.operations.json_keys import (
     _CONNECTION_PARAMETERS,
     _CONNECTION_PARAMETER_SET,
     _ICON_BRAND_COLOR,
+    _SCRIPT_OPERATIONS,
     _CAPABILITIES,
     _POLICY_TEMPLATE_INSTANCES,
     _PUBLISHER
@@ -107,6 +108,7 @@ def download(powerapps_rp, settings, destination, overwrite):
         _CONNECTION_PARAMETERS,
         _CONNECTION_PARAMETER_SET,
         _ICON_BRAND_COLOR,
+        _SCRIPT_OPERATIONS,
         _CAPABILITIES,
         _POLICY_TEMPLATE_INSTANCES,
         _PUBLISHER
