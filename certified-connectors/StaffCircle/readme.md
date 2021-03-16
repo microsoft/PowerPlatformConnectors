@@ -1,4 +1,4 @@
-﻿## SOLYP Connector
+﻿## StaffCircle Connector
 StaffCircle is an employee success platform which combines company culture with Performance Management in order to create high performing teams even in distributed work environments. StafffCircle includes Objective, Reviews, Values and Feedback linked to your competency framework. Drive engagement and performance with deep insight.
 
 ## Pre-requisites
