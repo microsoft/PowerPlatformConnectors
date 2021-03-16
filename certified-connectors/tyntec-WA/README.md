@@ -22,6 +22,7 @@ You will need the following to proceed:
 
 ## Supported requests
 -   **Send WhatsApp** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+    *Sends template message*
     -   To make a successful request, please, populate the followings fields:
         -   **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
         -   **from** - your WhatsApp Business account number number
@@ -35,13 +36,31 @@ You will need the following to proceed:
         -   **parameter-filename** - filename for your rich media
         -   **parameter-text** - input your text message
         -   _if your template uses more parameters, repeat **parameter-type** and **parameter-text** for each parameter your template requires_
-    
+-   **WhatsApp Free-Form Message**
+    - Sends a free form message
+        -   **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
+        -   **from** - your WhatsApp Business account number number
+        -   **contentType** - use **text** if you are sending text
+        -   **text** - input your text message
 
-        
         
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
         -   **id** - messageID of your message (_returned after each request_)
+
+## Supported Triggers
+
+- **Incoming Message** Trigger any flow on new incoming messages
+    - **Response Fields**
+        - **messageId** (the message ID)
+        - **channel** - the channel on which the message was received (viber, whatsapp or sms)
+        - **from** - the sender's phone number
+        - **to** - the reciever's phone number (you)
+        - **receivedAt** - when was the message received
+        - **text** - the text of the message
+        - **file** - any attached file to the message
+        - **event** - on which event the webhook was triggered
+        - **timestamp** - the timestamp of the message
 
 
 ## How to get API key 
