@@ -129,7 +129,7 @@ Login to Power Platform by running:
 
 `paconn login`
 
-This will ask you to login using device code login process. Please follow the prompt for the login.
+This will ask you to login using device code login process. Please follow the prompt for the login. Service Principle authentication is not supported at this point. Please review [a customer workaround posted in the issues page](https://github.com/microsoft/PowerPlatformConnectors/issues/287).
 
 ### Logout
 
