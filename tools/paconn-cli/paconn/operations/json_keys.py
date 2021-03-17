@@ -11,7 +11,7 @@ Defines constants for JSON keys.
 # All
 _PROPERTIES = 'properties'
 _ICON_URI = 'iconUri'
-_SCRIPT_URI = 'ScriptDefinitionUrl'
+_SCRIPT_URI = 'scriptDefinitionUrl'
 _CONNECTION_PARAMETERS = 'connectionParameters'
 _CONNECTION_PARAMETER_SET = 'connectionParameterSets'
 
