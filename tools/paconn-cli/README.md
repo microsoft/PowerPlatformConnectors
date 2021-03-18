@@ -58,9 +58,9 @@ The API properties file contains some properties for the custom connector. These
     },
     "iconBrandColor": "#007EE6",
     "scriptOperations": [
-        getCall,
-        postCall,
-        putCall
+        "getCall",
+        "postCall",
+        "putCall"
     ]
     "policyTemplateInstances": [
       {
