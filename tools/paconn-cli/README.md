@@ -85,7 +85,7 @@ More information on the each of the properties are given below:
 
 * `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
 
-* `scriptOperations`: A list of the operations that are executed with the script file.
+* `scriptOperations`: A list of the operations that are executed with the script file. An empty scriptOperations list indicates that all operations are executed with the script file.
 
 * `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
 
