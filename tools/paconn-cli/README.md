@@ -61,7 +61,7 @@ The API properties file contains some properties for the custom connector. These
         "getCall",
         "postCall",
         "putCall"
-    ]
+    ],
     "policyTemplateInstances": [
       {
         "title": "MyPolicy",
