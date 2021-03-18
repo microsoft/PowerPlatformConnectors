@@ -22,7 +22,7 @@ _ICON_BRAND_COLOR = 'iconBrandColor'
 _SCRIPT_OPERATIONS = 'scriptOperations'
 _CAPABILITIES = 'capabilities'
 _POLICY_TEMPLATE_INSTANCES = 'policyTemplateInstances'
-_PUBLISHER='publisher'
+_PUBLISHER = 'publisher'
 
 # Create update
 _OPEN_API_DEFINITION = 'openApiDefinition'

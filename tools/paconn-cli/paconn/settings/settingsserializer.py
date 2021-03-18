@@ -116,7 +116,7 @@ class SettingsSerializer:
             api_properties=settings_dict.get(_API_PROPERTIES, None),
             api_definition=settings_dict.get(_API_DEFINITION, None),
             icon=settings_dict.get(_ICON, None),
-            script=settings_dict.get(_SCRIPT,None),
+            script=settings_dict.get(_SCRIPT, None),
 
             # PowerApps RP settings
             powerapps_url=settings_dict.get(_POWERAPPS_URL, None),
