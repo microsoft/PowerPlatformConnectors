@@ -6,8 +6,8 @@ Search by postcode, UPRN, full or partial address and ensure you get the right
 OS Places API is the UK’s most trusted, most comprehensive online address database. Users can now use Power Platform’s tools to further benefit from Ordnance Survey’s secure, scalable and resilient address look-up API. 
 
 ## Prerequisites
-OS Places API requires an active license with Ordnance Survey. Customers must either sign up for a free trial, premium or PSGA subscriptions to generate access key required login to the API Connector. 
-* Subscription plan options can be found here: https://developer.ordnancesurvey.co.uk/os-places-api
+OS Places API requires an active license with Ordnance Survey. Customers must either sign up for a free trial or premium  subscriptions to generate access key required login to the API Connector. 
+* Subscription plan options can be found here: https://developer.ordnancesurvey.co.uk/content/contact-us
 
 ## API Documentation
 The API documentation can be found here https://apidocs.os.uk/docs/os-places-overview
