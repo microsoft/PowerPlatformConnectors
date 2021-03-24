@@ -1,5 +1,17 @@
 # Powell Teams
+
 Powell Teams API endpoints documentation.
+
+# Prerequisites
+
+You will need the following to proceed:
+
+An Powell Teams environment. 
+
+More information : https://appsource.microsoft.com/en-us/product/office/WA200001585?tab=Overview
+
+# Documentation
+
 In order to use this API, you need to be authorized. To do so, click on the "Authorize" button and provide a valid Microsoft Graph Access Token with the following delegated permissions :
 
 - Directory.AccessAsUser.All
