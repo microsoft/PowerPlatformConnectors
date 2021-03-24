@@ -1,0 +1,534 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "SmartDialog",
+    "description": "SmartDialog is a platform used to send and receive SMS- and WhatsApp messages. It offers a wide variety of smart messaging services.",
+    "contact": {
+      "name": "Arena Interactive Support",
+      "email": "support@arenainteractive.fi",
+      "url": "https://www.arenainteractive.fi/contact"
+    }
+  },
+  "host": "api.arena.fi",
+  "basePath": "/api-integrations/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/customers": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customerUsers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "customerId": {
+                        "type": "string",
+                        "description": "customerId",
+                        "title": "Customer Id"
+                      },
+                      "customerName": {
+                        "type": "string",
+                        "description": "customerName",
+                        "title": "Customer Name"
+                      }
+                    }
+                  },
+                  "description": "customerUsers"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get User Customers",
+        "description": "Get signed in User's assigned Customers.",
+        "operationId": "GetUserCustomers",
+        "x-ms-visibility": "internal",
+        "parameters": []
+      }
+    },
+    "/messages": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "MessageId": {
+                  "type": "string",
+                  "description": "Newly created message's identifier.",
+                  "title": "Message Id"
+                },
+                "MessagePartCount": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Approximated number of message parts for this message.",
+                  "title": "Message Part Count"
+                },
+                "Recipients": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Address": {
+                        "type": "string",
+                        "description": "Recipient address (phone number/email/user id etc.).",
+                        "title": "Recipient Address"
+                      },
+                      "Id": {
+                        "type": "string",
+                        "description": "Recipient identifier used for receiving delivery status information.",
+                        "title": "Recipient Id"
+                      }
+                    }
+                  },
+                  "description": "Recipients"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send Message",
+        "description": "Send a Message to recipients.",
+        "x-ms-visibility": "important",
+        "operationId": "SendMessage",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Customer-Id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The Customer to use for sending.",
+            "x-ms-summary": "Customer",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetUserCustomers",
+              "value-path": "customerId",
+              "value-collection": "customerUsers",
+              "value-title": "customerName"
+            }
+          },
+          {
+            "name": "Service-Id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The Service to use for sending.",
+            "x-ms-summary": "Service",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetCustomerServices",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "Customer-Id": {
+                  "parameter": "Customer-Id"
+                },
+                "ServiceType": "OneWay"
+              }
+            }
+          },
+          {
+            "name": "Request Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Sender": {
+                  "type": "string",
+                  "description": "The sender of the message, can be alphanumeric, long code or short code (restrictions apply).",
+                  "title": "Message Sender",
+                  "x-ms-visibility": "important"
+                },
+                "Content": {
+                  "type": "string",
+                  "description": "The content of the message.",
+                  "title": "Message Content",
+                  "x-ms-visibility": "important"
+                },
+                "Protocol": {
+                  "type": "string",
+                  "description": "The protocol to use for sending the message.",
+                  "title": "Message Protocol",
+                  "default": "SMS",
+                  "x-ms-visibility": "important",
+                  "enum": [
+                    "SMS"
+                  ]
+                },
+                "SendDateTime": {
+                  "type": "string",
+                  "description": "The date and time to send the message. Leave empty to send instantly.",
+                  "title": "Send Datetime",
+                  "format": "date-time",
+                  "x-ms-visibility": "important"
+                },
+                "Recipients": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Address": {
+                        "type": "string",
+                        "description": "Message recipient address.",
+                        "title": "Address",
+                        "x-ms-visibility": "important"
+                      },
+                      "Personalization": {
+                        "type": "object",
+                        "properties": {},
+                        "description": "Any placeholder values for the recipient as a simple key:value object.",
+                        "title": "Personalization"
+                      }
+                    },
+                    "required": [
+                      "Address"
+                    ]
+                  },
+                  "description": "Recipients"
+                },
+                "AttachmentUri": {
+                  "type": "string",
+                  "description": "Attachment Uri to be used when sending WhatsApp message that contains an attachment.",
+                  "title": "Attachment Uri"
+                }
+              },
+              "required": [
+                "Sender",
+                "Protocol",
+                "Content",
+                "Recipients"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/service/{Service}/pipelines/actions": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "sender": {
+              "type": "string",
+              "description": "The message sender.",
+              "title": "Message Sender",
+              "x-ms-visibility": "important"
+            },
+            "recipient": {
+              "type": "string",
+              "description": "The recipient of the message.",
+              "title": "Message Recipient",
+              "x-ms-visibility": "important"
+            },
+            "content": {
+              "type": "string",
+              "description": "The content of the received message.",
+              "title": "Message Content",
+              "x-ms-visibility": "important"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "The timestamp of the message.",
+              "title": "Message Timestamp",
+              "x-ms-visibility": "important",
+              "format": "date-time"
+            },
+            "protocol": {
+              "type": "string",
+              "description": "The protocol of the received message.",
+              "title": "Message Protocol",
+              "x-ms-visibility": "important"
+            },
+            "attachments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The filename of the attachment.",
+                    "title": "Attachment Filename",
+                    "x-ms-visibility": "important"
+                  },
+                  "mimeType": {
+                    "type": "string",
+                    "description": "The mime type of the attachment.",
+                    "title": "Attachment Mime Type",
+                    "x-ms-visibility": "important"
+                  },
+                  "resourceLocation": {
+                    "type": "string",
+                    "description": "The attachment resource location.",
+                    "title": "Attachment Resource Location",
+                    "x-ms-visibility": "important"
+                  }
+                }
+              },
+              "description": "attachments"
+            }
+          }
+        },
+        "description": "New message callback response"
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "ActionId"
+                }
+              }
+            }
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "operationId": "NewMessage",
+        "summary": "New Message",
+        "description": "When a new message arrives to a 2-Way service.",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "Customer",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The Customer to use.",
+            "x-ms-summary": "Customer",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetUserCustomers",
+              "value-path": "customerId",
+              "value-collection": "customerUsers",
+              "value-title": "customerName"
+            }
+          },
+          {
+            "name": "Service",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The 2-Way service to use.",
+            "x-ms-summary": "Service",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetCustomerServices",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "Customer-Id": {
+                  "parameter": "Customer"
+                },
+                "ServiceType": "TwoWay"
+              }
+            }
+          },
+          {
+            "name": "Create webhook request body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The action name.",
+                  "title": "Action Name",
+                  "x-ms-visibility": "internal",
+                  "default": "PowerAutomate (Auto Created Webhook)"
+                },
+                "actionType": {
+                  "type": "string",
+                  "description": "The type of action to create.",
+                  "title": "Action Type",
+                  "x-ms-visibility": "internal",
+                  "default": "HttpRequest"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "The action description.",
+                  "title": "Action Description",
+                  "x-ms-visibility": "internal",
+                  "default": "PowerAutomate auto-created webhook. Please don\u00b4t modify. Will be removed by PowerAutomate , when the Flow/Logic App is disabled or removed"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "endpointUrl": {
+                      "type": "string",
+                      "description": "Webhook callback url.",
+                      "title": "Endpoint Url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true
+                    },
+                    "httpVerb": {
+                      "type": "string",
+                      "description": "The http method to use for creating the webhook.",
+                      "title": "Http Method",
+                      "x-ms-visibility": "internal",
+                      "default": "POST"
+                    }
+                  },
+                  "description": "options",
+                  "required": [
+                    "endpointUrl",
+                    "httpVerb"
+                  ]
+                }
+              },
+              "required": [
+                "actionType",
+                "description",
+                "name",
+                "options"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/services/{Customer-Id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Service Identifier.",
+                    "title": "Service Id"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "",
+                    "title": "Service Name"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Customer Services",
+        "description": "Get a specific Customer's services.",
+        "operationId": "GetCustomerServices",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "Customer-Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Customer",
+            "x-ms-url-encoding": "single",
+            "description": "The Customer to use for getting services."
+          },
+          {
+            "name": "ServiceType",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "OneWay",
+            "x-ms-visibility": "internal",
+            "x-ms-summary": "Service Type",
+            "description": "Type of service to fetch."
+          }
+        ]
+      }
+    },
+    "/pipelines/{Pipeline-Id}/actions/{Action-Id}": {
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Delete webhook",
+        "description": "Action used to delete the web hook created by the NewMessage trigger.",
+        "operationId": "DeleteTrigger",
+        "parameters": [
+          {
+            "name": "Pipeline-Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Pipeline Id",
+            "x-ms-url-encoding": "single",
+            "description": "Identifier of the action pipeline."
+          },
+          {
+            "name": "Action-Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Action Id",
+            "x-ms-url-encoding": "single",
+            "description": "Identifier of the two-way service pipeline-action to delete."
+          }
+        ],
+        "x-ms-visibility": "internal"
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.arenainteractive.fi"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.arenainteractive.fi/privacypolicy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication;Collaboration"
+    }
+  ],
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://arenafi.b2clogin.com/arenafi.onmicrosoft.com/B2C_1A_SmartDialog_Integrations/oauth2/v2.0/authorize",
+      "tokenUrl": "https://arenafi.b2clogin.com/arenafi.onmicrosoft.com/B2C_1A_SmartDialog_Integrations/oauth2/v2.0/token",
+      "scopes": {
+        "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management": "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": [
+        "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management"
+      ]
+    }
+  ],
+  "tags": []
+}
