@@ -42,7 +42,7 @@ At this point we have a valid OAuth application endpoint for external client app
 ### Update ServiceNow instance details and Client ID
 #### Update instance details
 1. Go to your ServiceNow instance, copy the `instance` details and update in the next step. 
-2. Replace `instance` in 
+2. Replace `YourInstance` in 
     - apiProperties.json file - under authorizationURL, tokenURL and refreshURL
     - apiDefinitions.swagger.json file - for host, authorizationURL and tokenURL.  
 
