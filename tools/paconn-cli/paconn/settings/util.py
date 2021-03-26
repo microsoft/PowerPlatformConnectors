@@ -55,7 +55,10 @@ def load_powerapps_and_flow_rp(settings, command_context):
         settings.api_properties = settings.api_properties or 'apiProperties.json'
         settings.api_definition = settings.api_definition or 'apiDefinition.swagger.json'
         settings.icon = settings.icon or 'icon.png'
-        settings.script = settings.script or 'script.csx'
+
+        # Get the script file only if script exists
+        if settings.script:
+            settings.script = settings.script
 
     # Prompt for environment for any
     # operation other than `validate`

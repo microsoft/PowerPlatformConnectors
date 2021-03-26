@@ -135,6 +135,9 @@ def upsert(powerapps_rp, settings, client_secret, is_update, overwrite_settings)
             file_path=settings.script)
         properties[_SCRIPT_URI] = script_uri
 
+    else:
+        properties[_SCRIPT_URI] = None
+
     # Update or create the connector
     if is_update is True:
         api_registration = powerapps_rp.update_connector(
