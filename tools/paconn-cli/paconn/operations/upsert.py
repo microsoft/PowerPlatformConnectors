@@ -136,7 +136,7 @@ def upsert(powerapps_rp, settings, client_secret, is_update, overwrite_settings)
         properties[_SCRIPT_URI] = script_uri
 
     else:
-        properties[_SCRIPT_URI] = None
+        properties[_SCRIPT_URI] = ""
 
     # Update or create the connector
     if is_update is True:
