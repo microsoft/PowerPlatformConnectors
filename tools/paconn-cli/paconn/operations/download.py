@@ -98,10 +98,7 @@ def download(powerapps_rp, settings, destination, overwrite):
     if _PROPERTIES not in api_registration:
         raise CLIError('Properties not present in the api registration information.')
 
-    api_properties = api_registration[_PROPERTIES]
-
-    # Save the settings
-    write_settings(settings, overwrite)
+    api_properties = api_registration[_PROPERTIES]    
 
     # Property whitelist
     property_keys_whitelist = [
@@ -171,5 +168,10 @@ def download(powerapps_rp, settings, destination, overwrite):
             file=settings.script,
             mode='wb'
             ).write(response.content)
+    else:
+        settings.script=None
+
+    # Save the settings
+    write_settings(settings, overwrite)
 
     return directory

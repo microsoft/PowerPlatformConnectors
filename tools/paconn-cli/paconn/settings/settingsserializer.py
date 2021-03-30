@@ -47,8 +47,6 @@ class SettingsSerializer:
         Serializes a settings object into string
         """
         settings_dict = SettingsSerializer.serialize(settings)
-        if settings_dict.get(_SCRIPT) == '':
-            settings_dict.pop(_SCRIPT)
         json_str = format_json(settings_dict)
         return json_str
 
