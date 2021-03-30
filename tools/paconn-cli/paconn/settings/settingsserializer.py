@@ -82,7 +82,6 @@ class SettingsSerializer:
             _API_PROPERTIES: settings.api_properties,
             _API_DEFINITION: settings.api_definition,
             _ICON: settings.icon,
-            _SCRIPT: settings.script,
 
             # PowerApps RP settings
             _POWERAPPS_URL: settings.powerapps_url,
@@ -100,6 +99,10 @@ class SettingsSerializer:
             # authority_url IGNORED
             # resource IGNORED
         }
+
+        if settings.script is not None:
+            settings_dict[_SCRIPT] = settings.script
+
         return settings_dict
 
     @staticmethod
