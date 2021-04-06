@@ -13,7 +13,12 @@ You will need the following to proceed:
 The connector supports the following operations:
 
 #### Core API
-* `Core API Setting`: Multi-function ID verification API to verify remote physical document, its authenticity and face match the document with your user photo.
+* `Core API Setting`: Build your own identity verification application by uploading images of government-issued documents.
+
+#### DocuPass API
+* `Creating DocuPass Session`: Create a verification session for every user requiring identity verification.
+* `Validating Callback`: To make sure the data was sent from our server.
+
 #### Vault API
 * `Get Vault Entry Content`: When entries are added to the vault, both Core API and DocuPass API will return a vault entry identifier named vaultid.
 * `List and Filter Entries`: List all the entries stored inside the vault or search for entries with specific values.
@@ -25,18 +30,13 @@ The connector supports the following operations:
 * `Face Search`: Face search allows you to search the entire vault using an image of a person.
 * `Face Search Training`: Before performing face search, you must issue a train command to train the document datasets inside your vault. You may also train your vault data through web portal.  The training task is asynchronous, training time depends on the number of vault entries and images. It could take from several seconds to an hour.
 * `Training Status`: Check whether vault training is still ongoing or has completed.
-#### DocuPass API
-* `Creating DocuPass Session`: Create a verification session for every user requiring identity verification.
-* `Validating Callback`: To make sure the data was sent from our server.
 
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
 
-
 ##API documentation
 API documentation can be found [here](https://developer.idanalyzer.com/index.html).
-
 
 ##Further Support
 Feel free to write to us or give us a call for support or further information regarding our service. We will reply to you as soon as possible. But yes, it can take up to 24 hours. For all the support requests and general queries you can contact support@idanalyzer.com
