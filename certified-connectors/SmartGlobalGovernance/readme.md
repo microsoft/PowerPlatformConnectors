@@ -4,8 +4,8 @@ Smart Global Governance provides a powerful REST API to interact with Smart Comp
 ## Prerequisites
 You will need the following to proceed:
 
-* A Microsoft Power Apps or Power Automate plan with certified connector feature
-* A Smart Compliance Booster subscription with notifications to Microsoft Teams enabled
+* A Microsoft Power Apps or Power Automate plan.
+* A Smart Compliance Booster subscription with the API access enabled.
 
 ## Operations
 
