@@ -35,9 +35,9 @@ The connector supports the following operations:
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
 
-##API documentation
+## API documentation
 API documentation can be found [here](https://developer.idanalyzer.com/index.html).
 
-##Further Support
+## Further Support
 Feel free to write to us or give us a call for support or further information regarding our service. We will reply to you as soon as possible. But yes, it can take up to 24 hours. For all the support requests and general queries you can contact support@idanalyzer.com
 or visit [contact-us](https://www.idanalyzer.com/contact.html).
