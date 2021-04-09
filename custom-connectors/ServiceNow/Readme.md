@@ -57,7 +57,7 @@ paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
 ```
 
 ## Sample Canvas app
-You can find a sample canvas app "Evaluate ServiceNow connector.msapp" in this folder that illustrates how you may use the connector from a canvas app.
+You can download a sample canvas app "ServiceNowCustomConnectorDemoApp.msapp" [here](https://blogdocuments.blob.core.windows.net/blogdocscontainer/ServiceNowCustomConnectorDemoApp.msapp) that illustrates how you may use the connector from a canvas app.
 
 To build the app, you will need to:
 * Deploy the custom connector from GitHub to an environment using steps from above
@@ -83,7 +83,7 @@ The app provides example use of the basic functionality provided by the sample c
 ![App Screen 1](images/HomeScreen.png)
 
 ## Sample Power Automate flow
-You can find a sample Power Automate flow "ServiceNowCustomConnectorEvaluationfromFlow.zip" in this folder that illustrates how you may use the connector from a flow.
+You can download a sample Power Automate flow "ServiceNowCustomConnectorSampleFlow.zip" [here](https://blogdocuments.blob.core.windows.net/blogdocscontainer/ServiceNowCustomConnectorSampleFlow.zip) that illustrates how you may use the connector from a flow.
 
 To build the flow, you will need to:
 * Deploy the custom connector from GitHub to an environment using steps from above
