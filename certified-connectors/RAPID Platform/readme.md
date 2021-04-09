@@ -1,8 +1,6 @@
 ## RAPID Platform Connector
 The RAPID Platform provides a highly customisable data creation and tracking tools for business. Using this API you can automate business logic based on your own specific needs.
 
-
-
 ## Prerequisites
 You will need the following to proceed:
 * A RAPID Platform site
