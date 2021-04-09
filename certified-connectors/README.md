@@ -1,13 +1,11 @@
 ## ID Analyzer Connector
 ID scan technology to extract and verify data from global ID documents including passport, driver license and identification card, verify remote user age and identity with our digital onboarding solutions.
 
-
 ## Prerequisites
 You will need the following to proceed:
 
 * [Sign Up](https://www.idanalyzer.com/signup.html) for ID Analyzer account.
 * log into ID Analyzer's [web portal](https://portal.idanalyzer.com/) with your account details and click on ```API Credentials``` to get your private API key.
-
 
 ## Supported Operations
 The connector supports the following operations:
@@ -30,7 +28,6 @@ The connector supports the following operations:
 * `Face Search`: Face search allows you to search the entire vault using an image of a person.
 * `Face Search Training`: Before performing face search, you must issue a train command to train the document datasets inside your vault. You may also train your vault data through web portal.  The training task is asynchronous, training time depends on the number of vault entries and images. It could take from several seconds to an hour.
 * `Training Status`: Check whether vault training is still ongoing or has completed.
-
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
