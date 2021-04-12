@@ -15,6 +15,15 @@ The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360
 ### Convert to PDF
 Convert a document to PDF or PDF/A format - https://support.encodian.com/hc/en-gb/articles/360011123574-Convert-to-PDF
 
+### Convert Word
+Convert Microsoft Word documents to PDF, HTML, DOCX, DOC, TXT, TIFF or PNG file formats - https://support.encodian.com/hc/en-gb/articles/360015616117-Convert-Word
+
+### Convert Excel
+Convert Microsoft Excel and CSV documents to PDF, XSLX, HTML, CSV, TIFF, PNG or TXT file formats - https://support.encodian.com/hc/en-gb/articles/360011804178-Convert-Excel
+
+### Convert Mail Message
+Convert an email (EML or MSG file) to PDF - https://support.encodian.com/hc/en-gb/articles/360011566298-Convert-Mail-Message
+
 ### Convert PDF to PDFA
 Convert a PDF document to PDF/A format - https://support.encodian.com/hc/en-gb/articles/360010578413-Convert-PDF-to-PDFA
 
@@ -50,6 +59,12 @@ Perform OCR on an existing PDF document - https://support.encodian.com/hc/en-gb/
 
 ### Split PDF
 Split a PDF Document into multiple PDF Documents - https://support.encodian.com/hc/en-gb/articles/360002953277-Split-PDF
+
+### Split PDF by Text
+Split a PDF Document into multiple PDF Documents using Text Search or Regular Expressions - https://support.encodian.com/hc/en-gb/articles/360012726397-Split-PDF-by-Text
+
+### Split PDF by Barcode
+Split a PDF Document into multiple PDF Documents using barcodes - https://support.encodian.com/hc/en-gb/articles/360013629457-Split-PDF-by-Barcode
 
 ### Convert Word to PDF Form
 Convert the Word document provided (Legacy Form Controls Only) to a PDF form document. - https://support.encodian.com/hc/en-gb/articles/360012307133-Convert-Word-to-PDF-Form
@@ -149,4 +164,10 @@ Extract text from the image provided - https://support.encodian.com/hc/en-gb/art
 
 ### Fill a PDF Form
 Fill the PDF Form provided with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360008556077-Fill-a-PDF-Form
+
+### Create HMAC
+Create a Hash-based message authentication code (HMAC) using a secret key - https://support.encodian.com/hc/en-gb/articles/360012782058-Create-HMAC
+
+### Create Hash Code
+Create a Hashcode / message digest - https://support.encodian.com/hc/en-gb/articles/360013996077-Create-Hash-Code
 
