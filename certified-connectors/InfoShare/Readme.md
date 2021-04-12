@@ -35,5 +35,10 @@ The connector supports the following operations:
 
 ### Search
 * `Document Search`: Search for documents within InfoShare
-* `List processes: Search for processes within InfoShare
+* `List processes`: Search for processes within InfoShare
 
+### User Tables
+* `Get rows from a user table`: Gets some rows from a user table 
+* `Insert rows into a user table`: Insert rows into a user table 
+* `Create a user table`: Creates a user table 
+* `Delete user table rows`: Deletes some rows from a user table 
