@@ -9,11 +9,8 @@ You will need the following to proceed:
 ## Setting up the connector 
 There is two crucial steps to enabling the connector:
 
-### 1. Adding the tenant header as a custom policy to your version of the connector.
-To identify the data associated with your requests, you must include the tenant ID on each request the connector makes.  This is done by defining a custom policy in the connector settings.  Official documentation for this can be found at (https://docs.microsoft.com/en-us/connectors/custom-connectors/policy-templates)[https://docs.microsoft.com/en-us/connectors/custom-connectors/policy-templates].
-
-During that process, you should select the "Set HTTP Header" template, supply your tenant ID and apply the policy to all requests.
-(/tenant_header_custom_policy.png "Custom tenant header policy")
+### 1. Adding the tenant header.
+To identify the data associated with your requests, you must include the tenant ID on each request the connector makes.  During configuration, you will be prompted to add your Tenant name to the connector.  You can find your tenant name as part of your intelliHR domain address, eg https://[tenant-name].intellihr.net.
 
 ### 2. Configuring your API key
 When you first use the connector, you will be prompted to supply an API key.  These can be produced inside your intelliHR account with appopriate levels of access.  It's important to be aware that during the API key input, you are expected to prepend 'Bearer ' (including the space) before your key.
