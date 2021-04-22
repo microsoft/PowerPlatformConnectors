@@ -48,6 +48,3 @@ The connector supports the following operations:
 
 
 
-
-
-
