@@ -4,11 +4,30 @@
     "title": "SignNow",
     "description": "SignNow makes it easy to sign, send, and manage documents anywhere on any device with a simple and secure electronic signature solution.",
     "version": "1.2.1",
+    "contact": {
+      "url": "https://support.signnow.com/",
+      "name": "Help Center",
+      "email": "integrations@pdffiller.com"
+    },
     "x-ms-api-annotation": {
       "status": "Preview"
     }
   },
-  "host": "snflowproxy.azurewebsites.net",
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://signnow.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.signnow.com/privacy_policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Human Resources"
+    }
+  ],
+  "host": "sn-msflow.infrateam.xyz",
   "basePath": "/",
   "schemes": [
     "https"
@@ -50,6 +69,16 @@
             "required": false,
             "type": "boolean",
             "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "excludeDocumentRelations",
+            "x-ms-summary": "Exclude Document Relations",
+            "description": "If true - documents of folder are displayed with short list of document info",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-visibility": "internal",
+            "default": false
           }
         ],
         "description": "Retrieve a list of user's documents"
@@ -122,7 +151,8 @@
               "parameters": {
                 "template": {
                   "parameter": "template"
-                }
+                },
+				        "excludeDocumentRelations": true
               }
             }
           }
@@ -192,7 +222,8 @@
               "value-path": "id",
               "value-title": "document_name",
               "parameters": {
-                "template": true
+                "template": true,
+                "excludeDocumentRelations": true
               }
             }
           },
@@ -281,7 +312,32 @@
               "value-path": "id",
               "value-title": "document_name",
               "parameters": {
-                "template": true
+                "template": true,
+                "excludeDocumentRelations": true
+              }
+            }
+          },
+          {
+            "name": "fields",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetSmartFieldsSchema",
+                "parameters": {
+                  "doc_id": {
+                    "parameter": "doc_id"
+                  }
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetSmartFieldsSchema",
+                "parameters": {
+                  "doc_id": {
+                    "parameterReference": "doc_id"
+                  }
+                }
               }
             }
           }
@@ -330,7 +386,8 @@
                 "includeDefaultTemplate": true,
                 "template": {
                   "parameter": "template"
-                }
+                },
+                "excludeDocumentRelations": true
               }
             }
           },
@@ -438,7 +495,8 @@
               "value-path": "id",
               "value-title": "document_name",
               "parameters": {
-                "template": true
+                "template": true,
+                "excludeDocumentRelations": true
               }
             }
           },
@@ -489,7 +547,8 @@
               "value-path": "id",
               "value-title": "document_name",
               "parameters": {
-                "template": true
+                "template": true,
+                "excludeDocumentRelations": true
               }
             }
           },
@@ -521,6 +580,9 @@
                 "parameters": {
                   "doc_id": {
                     "parameterReference": "template_id"
+                  },
+                  "select": {
+                    "value": "text"
                   }
                 }
               }
@@ -562,7 +624,8 @@
               "value-path": "id",
               "value-title": "document_name",
               "parameters": {
-                "template": true
+                "template": true,
+                "excludeDocumentRelations": true
               }
             }
           },
@@ -612,7 +675,8 @@
               "value-path": "id",
               "value-title": "document_name",
               "parameters": {
-                "template": true
+                "template": true,
+                "excludeDocumentRelations": true
               }
             }
           },
@@ -644,6 +708,9 @@
                 "parameters": {
                   "doc_id": {
                     "parameterReference": "template_id"
+                  },
+                  "select": {
+                    "value": "text"
                   }
                 }
               }
@@ -748,6 +815,103 @@
           "status": "Preview",
           "revision": 2
         }
+      }
+    },
+    "/schema/smartfields": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "properties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "doc_id",
+            "x-ms-summary": "Document ID",
+            "description": "Specify a unique document ID",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "summary": "Get Smart Fields Schema",
+        "description": "Retrieve the OpenAPI Smart Fields schema",
+        "x-ms-visibility": "internal",
+        "operationId": "GetSmartFieldsSchema"
+      }
+    },
+    "/document/{doc_id}/smartfields": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "parameters": [
+          {
+            "name": "template_id",
+            "x-ms-summary": "Template",
+            "description": "Specify a document template to get fields from",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetListDoc",
+              "value-path": "id",
+              "value-title": "document_name",
+              "parameters": {
+                "template": true,
+                "excludeDocumentRelations": true
+              }
+            }
+          },
+		      {
+            "name": "doc_id",
+            "x-ms-summary": "Document ID",
+			      "x-ms-url-encoding": "single",
+            "description": "Specify a unique document ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetSmartFieldsSchema",
+                "parameters": {
+                  "doc_id": {
+                    "parameter": "template_id"
+                  }
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetSmartFieldsSchema",
+                "parameters": {
+                  "doc_id": {
+                    "parameterReference": "template_id"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "summary": "Prefill Smart Field Values",
+        "description": "Prefill Smart Field values for the specified document",
+        "x-ms-visibility": "important",
+		    "consumes": ["application/json"],
+        "operationId": "PrefillSmartFields"
       }
     },
     "/enum/{definitionKey}": {
@@ -1320,7 +1484,7 @@
       "type": "oauth2",
       "flow": "accessCode",
       "authorizationUrl": "https://signnow.com/proxy/index.php/authorize",
-      "tokenUrl": "https://api.signnow.com/oauth2/token",
+      "tokenUrl": "https://sn-msflow.infrateam.xyz/oauth2/token",
       "scopes": {}
     }
   }

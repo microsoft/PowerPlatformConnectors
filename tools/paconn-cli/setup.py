@@ -9,7 +9,7 @@
 import os
 from setuptools import setup
 
-__VERSION__ = '0.0.15'
+__VERSION__ = '0.0.16'
 
 
 def read(fname):

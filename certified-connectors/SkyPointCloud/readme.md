@@ -4,6 +4,8 @@ SkyPoint is a customer data platform that champions privacy and compliance throu
 ## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
+* User credentials from SkyPoint Cloud Application
+
 
 ## Supported Operations
 The connector supports the following operations:
