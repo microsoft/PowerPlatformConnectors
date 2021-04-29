@@ -1,4 +1,4 @@
-## dox42 document generation connector
+## dox42 connector
 dox42 provides a powerful and very extensive REST API. Using dox42 you can automatically generate documents with data from all sources, like D365, SharePoint or others. dox42 uses Azure Active Directory for authentication.
 
 
