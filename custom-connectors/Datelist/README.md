@@ -1,5 +1,5 @@
-# Datelist - Microsoft Flow Connector
-Microsoft flow connector for https://datelist.io 
+# Datelist - Microsoft Power Automate Connector
+Microsoft Power Automate Connector for https://datelist.io 
 Datelist is an online booking system platform that allows customers taking meetings online. 
 
 ## Triggers
