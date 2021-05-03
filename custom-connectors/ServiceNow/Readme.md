@@ -35,7 +35,7 @@ You can read more about this [here](https://docs.servicenow.com/bundle/paris-pla
     - `Client Secret` is generated once you click submit. Save this information to use in later steps while deploying the connector. This is the shared secret string that both the instance and the client application or website use to authorize communications with one another.
 3. Click Submit to create the OAuth endpoint 
 
-![Application Registry interface](images/ApplicationRegistry.png)
+![Application Registry interface](Images/ApplicationRegistry.png)
 
 At this point we have a valid OAuth application endpoint for external client applications to access your ServiceNow instance. The next step is to update the instance details and Client ID in the json files. 
 
@@ -80,7 +80,7 @@ The app provides example use of the basic functionality provided by the sample c
 
         Set(UploadedAttachment, 'ServiceNow[Sample]'.UploadAttachment("incident",[table_sys_id],"Sample File","image/png", UploadedImage2_1.Image).result)
 
-![App Screen 1](images/HomeScreen.png)
+![App Screen 1](Images/HomeScreen.png)
 
 ## Sample Power Automate flow
 You can download a sample Power Automate flow "ServiceNowCustomConnectorSampleFlow.zip" [here](https://blogdocuments.blob.core.windows.net/blogdocscontainer/ServiceNowCustomConnectorSampleFlow.zip) that illustrates how you may use the connector from a flow.
@@ -92,7 +92,7 @@ To build the flow, you will need to:
 
 The sample flow provides example use of basic functionality in the custom connector using Power Automate flow
 
-![Flow screenshot](images/Flow.png)
+![Flow screenshot](Images/Flow.png)
 
 ## Supported Operations
 The connector supports the following operations:
