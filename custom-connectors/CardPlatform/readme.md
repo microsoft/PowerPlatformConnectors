@@ -18,7 +18,7 @@ https://cardplatform.app/plans/
 
 Select the **Trial** plan:
 
-![Trail Plan](images/Trial.png)
+![Trail Plan](Images/Trial.png)
 
 After completing the form, an email will be sent to the address with instructions, and the following instructions on registering with the Actionable Email Developer Dashboard.
 
@@ -28,9 +28,9 @@ To register with the Actionable Email Developer Dashboad, which allow emails to 
 
 1. Navigate to the Actionable Email Developer Dashboad at https://aka.ms/publishoam
 2. On the dashboard, click Add New Provider
-![Add New Provider](images/AddNew.png)
+![Add New Provider](Images/AddNew.png)
 3. On the first section of the form, *New Provider*, enter the following details:
-![New Provider section](images/NewProvider.png)
+![New Provider section](Images/NewProvider.png)
    1. Friendly Name: **CardPlatform**
    2. Sender email address: **card@cardplatform.app**
    3. Target URLs: **Enter the following url:
@@ -38,9 +38,9 @@ To register with the Actionable Email Developer Dashboad, which allow emails to 
    4. Public key: **Insert the public key provided from the email**;
    5. Logo: **Use the logo from https://cardplaform.app/logo**
 4. On the second section of the form, *Scope of Submission*, select **Organization**
-    ![Scope of Submission](images/ScopeOfSubmission.png)
+    ![Scope of Submission](Images/ScopeOfSubmission.png)
 5. On the third section of the form, *Additional Information*, enter:
-   ![Additonal Information](images/AdditionalInformation.png)
+   ![Additonal Information](Images/AdditionalInformation.png)
    1. Additional Email addresses: **Enter any other users who should be notified about this actionable email dashboard submission**
    2. Comments: **Add any comments for the Exchange administrator to approve the request**
 
