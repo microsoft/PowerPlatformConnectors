@@ -31,6 +31,9 @@ The connector supports the following operations:
 * `Face Search Training`: Before performing face search, you must issue a train command to train the document datasets inside your vault. You may also train your vault data through web portal.  The training task is asynchronous, training time depends on the number of vault entries and images. It could take from several seconds to an hour.
 * `Training Status`: Check whether vault training is still ongoing or has completed.
 
+#### AML API
+* `Searching AML Database`: AML API allows you to search ID Analyzer global AML database for sanctions, PEPs and wanted criminals using either a name, document number or both. You may further filter the results with birthday and nationality.
+
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
