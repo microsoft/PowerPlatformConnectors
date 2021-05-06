@@ -1,14 +1,14 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "tyntec-viber",
-    "description": "Send a Viber message using the tyntec Conversation API and retrieve its Status (accepted/delivered/failed) using Status_check.",
+    "title": "tyntec Viber Business",
+    "description": "Provides Viber communication channel using the tyntec Conversations API to expand your customer engagement",
     "contact": {
       "name": "tyntec support",
       "url": "https://www.tyntec.com/get-help-support",
       "email": "support@tyntec.com"
     },
-    "version": "1.0"
+    "version": "2.1"
   },
   "host": "api.tyntec.com",
   "basePath": "/",
@@ -18,17 +18,103 @@
   "consumes": [],
   "produces": [],
   "paths": {
+    "/chat-api/v2/applications/ms-connector/inbound-message-callback": {
+      "x-ms-notification-content": {
+        "description": "Response",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "messageId": {
+              "type": "string",
+              "description": "messageId"
+            },
+            "channel": {
+              "type": "string",
+              "description": "channel"
+            },
+            "from": {
+              "type": "string",
+              "description": "from"
+            },
+            "to": {
+              "type": "string",
+              "description": "to"
+            },
+            "receivedAt": {
+              "type": "string",
+              "description": "receivedAt"
+            },
+            "content": {
+              "type": "object",
+              "properties": {
+                "contentType": {
+                  "type": "string",
+                  "description": "contentType"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "text"
+                },
+                "file": {
+                  "type": "string",
+                  "description": "file"
+                }
+              },
+              "description": "content"
+            },
+            "event": {
+              "type": "string",
+              "description": "event"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "timestamp"
+            }
+          }
+        }
+      },
+      "patch": {
+        "responses": {},
+        "summary": "Incoming message",
+        "description": "Triggers on Incoming message",
+        "operationId": "incoming",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "callbackUrl": {
+                  "type": "string",
+                  "description": "callbackUrl",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": ""
+                }
+              },
+              "required": [
+                "callbackUrl"
+              ]
+            }
+          }
+        ]
+      }
+    },
     "/chat-api/v2/messages/": {
       "post": {
         "responses": {
-          "default": {
+          "202": {
             "description": "default",
             "schema": {
               "type": "object",
               "properties": {
                 "messageId": {
                   "type": "string",
-                  "description": "messageId"
+                  "description": "messageId",
+                  "x-ms-visibility": "important"
                 }
               }
             }
@@ -36,16 +122,8 @@
         },
         "summary": "Send Viber Message",
         "description": "Send Viber Message",
-        "operationId": "Send_Viber",
+        "operationId": "SendViber",
         "parameters": [
-          {
-            "name": "apikey",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "description": "Your tyntec API key with the Viber Service ID enabled.",
-            "x-ms-summary": "A tyntec API key"
-          },
           {
             "name": "body",
             "in": "body",
@@ -62,9 +140,10 @@
                   "type": "array",
                   "items": {
                     "type": "string",
-                    "description": "The tyntec conversation API channel. Use Viber",
+                    "description": "The Conversations API channel",
                     "title": "Channel",
-                    "default": "viber"
+                    "default": "viber",
+                    "x-ms-visibility": "internal"
                   },
                   "description": "channels"
                 },
@@ -73,7 +152,7 @@
                   "properties": {
                     "from": {
                       "type": "string",
-                      "description": "Your Viber Service ID",
+                      "description": "Viber Service ID",
                       "title": "from"
                     },
                     "components": {
@@ -83,9 +162,10 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "description": "The type of your message. Use default text.",
+                            "description": "Message type",
                             "title": "type",
-                            "default": "text"
+                            "default": "text",
+                            "x-ms-visibility": "internal"
                           },
                           "text": {
                             "type": "string",
@@ -99,12 +179,19 @@
                         ]
                       },
                       "description": "components"
+                    },
+                    "messagePurpose" :{
+                      "type": "string",
+                      "description": "Message Purpose",
+                      "title": "Message Purpose",
+                      "default": "promotion"
                     }
                   },
                   "description": "viber",
                   "required": [
                     "components",
-                    "from"
+                    "from",
+                    "messagePurpose"
                   ]
                 }
               },
@@ -121,26 +208,30 @@
     "/chat-api/v2/messages/{id}/status": {
       "get": {
         "responses": {
-          "default": {
-            "description": "default",
+          "202": {
+            "description": "Returned when the operation successfully connects to Conversations API",
             "schema": {
               "type": "object",
               "properties": {
                 "messageId": {
                   "type": "string",
-                  "description": "messageId"
+                  "description": "messageId",
+                  "x-ms-visibility": "important"
                 },
                 "deliveryChannel": {
                   "type": "string",
-                  "description": "deliveryChannel"
+                  "description": "deliveryChannel",
+                  "x-ms-visibility": "important"
                 },
                 "status": {
                   "type": "string",
-                  "description": "status"
+                  "description": "status",
+                  "x-ms-visibility": "important"
                 },
                 "timestamp": {
                   "type": "string",
-                  "description": "timestamp"
+                  "description": "timestamp",
+                  "x-ms-visibility": "important"
                 }
               }
             }
@@ -148,7 +239,7 @@
         },
         "summary": "Status Check",
         "description": "Check for status of your message",
-        "operationId": "Status_Check",
+        "operationId": "StatusCheck",
         "parameters": [
           {
             "name": "id",
@@ -156,20 +247,116 @@
             "required": true,
             "type": "string",
             "description": "Message ID",
-            "x-ms-summary": "ID of the checked Message"
-          },
+            "x-ms-summary": "Message ID",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/chat-api/v2/messages": {
+      "post": {
+        "responses": {
+          "202": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageId": {
+                  "type": "string",
+                  "description": "messageId",
+                  "x-ms-visibility": "important"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send Rich Media",
+        "description": "Sends Rich Media message",
+        "operationId": "SendRichMedia",
+        "parameters": [
           {
-            "name": "apikey",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "description": "Your tyntec API key",
-            "x-ms-summary": "Your tyntec API key"
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "string",
+                  "description": "to"
+                },
+                "channels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "channel",
+                    "title": "channel",
+                    "x-ms-visibility": "internal",
+                    "default": "viber"
+                  },
+                  "description": "channels"
+                },
+                "viber": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "description": "from"
+                    },
+                    "messagePurpose" :{
+                      "type": "string",
+                      "description": "Message Purpose",
+                      "title": "Message Purpose",
+                      "default": "promotion"
+                    },
+                    "components": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "type"
+                          },
+                          "image": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "url"
+                              }
+                            },
+                            "description": "image"
+                          }
+                        }
+                      },
+                      "description": "components"
+                    }
+                  },
+                  "description": "viber"
+                }
+              },
+              "required": [
+                "channels"
+              ]
+            }
           }
         ]
       }
     }
   },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "apikey"
+    }
+  },
+  "security": [],
+  "tags": [],
   "x-ms-connector-metadata": [
     {
       "propertyName": "Website",
@@ -183,11 +370,5 @@
       "propertyName": "Categories",
       "propertyValue": "Communication;Marketing"
     }
-  ],
-  "definitions": {},
-  "parameters": {},
-  "responses": {},
-  "securityDefinitions": {},
-  "security": [],
-  "tags": []
+  ]
 }
