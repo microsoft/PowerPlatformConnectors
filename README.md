@@ -19,6 +19,73 @@ This project welcomes contributions and suggestions.  Most contributions require
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
+### Files to Include
+Please submit the following files: An Open API swagger definition, an API properties file, a README.md, and an Intro.md.
+
+### API Definition (Swagger) File
+
+The API definition, also known as the swagger, describes the API for the custom connector using the OpenAPI specification.
+
+### API Properties File
+
+The API properties file contains some properties for the custom connector. These properties are not part of the API definition. It contains information such as the brand color, authentication information, etc. A typical API properties file looks like the following:
+
+```json
+{
+  "properties": {
+    "capabilities": [],
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "clearText": false,
+            "required": "true",
+            "tabIndex": 2
+          },
+          "description": "The KEY for this API",
+          "displayName": "KEY",
+          "tooltip": "Provide your KEY"
+        }
+      }
+    },
+    "iconBrandColor": "#007EE6",
+    "policyTemplateInstances": [
+      {
+        "title": "MyPolicy",
+        "templateId": "setqueryparameter",
+        "parameters": {
+            "x-ms-apimTemplateParameter.name": "queryParameterName",
+            "x-ms-apimTemplateParameter.value": "queryParameterValue",
+            "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      }
+    ]    
+  }
+}
+```
+
+More information on the each of the properties are given below:
+
+* `properties`: The container for the information.
+
+* `connectionParameters`: Defines the connection parameter for the service.
+
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
+
+* `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
+
+* `policyTemplateInstances`: An optional list of policy template instances and values used in the custom connector.
+
+### README.md
+
+README.md file for your connector includes a description for your connector, any prerequisite customer may need to deploy your connector, how to use your connector and api, how to get credentials, known issues and limiations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/tree/dev/certified-connectors/Lettria%20GDPR%20Compliance).
+
+### INTRO.md
+
+The intention for INTRO.md is to include important information about your connector in the official documentation. Some of information that are part of the README.md can also be a part of INTRO.md. But the difference is that INTRO.md is compiled into the published documentation for the connector. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/certified-connectors/Lettria%20GDPR%20Compliance/intro.md).
+
+
 ### Creating a Fork
 
 To contibute to this open source repository, start by creating a fork on this repository. To do so, select the "fork" button on the upper right corner, and create your own copy of the repository. Next, sync your fork with the remote repository and clone your forked repository to your local machine.
@@ -43,7 +110,7 @@ Verify the upstream links.
 ```git remote -v```
 
 ```
-> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch) 
+> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
 > origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
 > upstream  https://github.com/microsoft/PowerPlatformConnectors.git (fetch)
 > upstream  https://github.com/microsoft/PowerPlatformConnectors.git (push)
