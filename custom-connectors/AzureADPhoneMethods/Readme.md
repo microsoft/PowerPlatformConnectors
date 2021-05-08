@@ -11,16 +11,25 @@ You will need the following to proceed:
 ## Building the connector 
 Since the Azure AD authentication methods APIs are secured by Azure Active Directory (AD), we first need to set up a few things in Azure AD so that our connectors can securely access the phone methods. After that is completed, you can create and test the sample connector.
 
+
+### Set up an Azure AD application for your custom connector
+We first need to register our connector as an application in Azure AD.  This will allow the connector to identify itself to Azure AD so that it can ask for permissions to access Graph API data on behalf of the end user.  You can read more about this [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-scenarios) and follow the steps below:
+
 Check out [this blog post](https://janbakker.tech/prepopulate-phone-methods-using-a-custom-connector-in-power-automate/) for a step-by-step tutorial.
 
 ### Set up an Azure AD application for your custom connector
 We first need to register our connector as an application in Azure AD.  This will allow the connector to identify itself to Azure AD so that it can ask for permissions to access Key Vault data on behalf of the end user.  You can read more about this [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-scenarios) and follow the steps below:
 
-1. Create an Azure AD application
-This Azure AD application will be used to identify the connector to the Microsoft Graph API.  This can be done using [Azure Portal] (https://portal.azure.com), by following the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).  Once created, note down the value of Application (Client) ID.  You will need this later.
 
+1. Create an Azure AD application
+This Azure AD application will be used to identify the connector to the Microsoft Graph API.  This can be done using [Azure Portal](https://portal.azure.com), by following the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).  Once created, note down the value of Application (Client) ID.  You will need this later.
+
+
+2. Configure (Update) your Azure AD application to access the Graph API phone methods data
+=======
 2. Configure (Update) your Azure AD application to access the Azure Key Vault API
 This step will ensure that your application can successfully retrieve an access token to invoke Azure Key Vault on behalf of your users.  To do this, follow the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
+
     - For redirect URI, use “https://global.consent.azure-apim.net/redirect”
     - For the credentials, use a client secret (and not certificates).  Remember to note the secret down, you will need this later and it is shown only once.
     - For API permissions, Graph API **delegated** permissions **UserAuthenticationMethod.ReadWrite.All** needs to be added to the app registration. Don't forget to grant admin access.
@@ -28,9 +37,13 @@ This step will ensure that your application can successfully retrieve an access 
 At this point, we now have a valid Azure AD application that can be used to get permissions from end users and access Azure AD authentication methods.  The next step for us is to create a custom connector.
 
 ### Create the custom connector
-You can install the connector using the paconn CLI tool, or manually upload the file to Power Automate.
+You can install the connector using the Power Automate Import feature, paconn CLI tool, or manually upload the file to Power Automate.
+
+#### Import feature
+Use the [Power Automate Portal](https://flow.microsoft.com) to import the new connetor straight from the Github repository.
 
 #### Using paconn
+
 ```paconn
 paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>
 ```
@@ -58,6 +71,19 @@ The connector supports the following operations:
 * `Get phoneMethod`: Retrieve a single phoneAuthenticationMethod object.
 * `Delete phoneAuthenticationMethod`: Delete a user's phone authentication method.  Note: This removes the phone number from the user and they will no longer be able to use the number for authentication, whether via SMS or voice calls.  Remember that a user cannot have an alternateMobile number without a mobile number. If you want to remove a mobile number from a user that also has an alternateMobile number, first update the mobile number to the new number, then delete the alternateMobile number.  If the phone number is the user's default Azure multi-factor authentication (MFA) authentication method, it cannot be deleted. Have the user change their default authentication method, and then delete the number.
 * `Update phoneAuthenticationMethod`: Update the phone number associated with a phone authentication method.  You can't change a phone's type. To change a phone's type, add a new number of the desired type and then delete the object with the original type.  If a user is enabled by policy to use SMS to sign in and the mobile number is changed, the system will attempt to register the number for use in that system.
+* `Create emailMethod`: Set a user's emailAuthenticationMethod object. Email authentication is a self-service password reset method. A user may only have one email authentication method.
+* `Update emailMethod`: Update a user's emailAuthenticationMethod object. Email authentication is a self-service password reset method. A user may only have one email authentication method.
+* `List emailMethods`: Retrieve a list of a user's email Authentication Method objects and their properties. This call will only return a single object as only one email method can be set on users.
+* `Delete emailMethod`: Deletes a user's emailAuthenticationMethod object. Email authentication is a self-service password reset method. A user may only have one email authentication method.
+* `List fido2Methods`: Retrieve a list of a user's FIDO2 Security Key Authentication Method objects and their properties.
+* `Get fido2Method`: Retrieve a user's single FIDO2 Security Key Authentication Method object.
+* `Delete fido2Method`: Deletes a user's FIDO2 Security Key Authentication Method object.
+* `Get passwordAuthenticationMethod`: Retrieve the properties and relationships of a password authentication method object. This way you can get the password ID.
+* `resetPassword`: Initiate a reset for the password associated with a password authentication method object. This can only be done by an administrator with appropriate permissions and cannot be performed on a user's own account.
+
+This flow writes the new password to Azure Active Directory and pushes it to on-premises Active Directory if configured using password writeback. The admin can either provide a new password or have the system generate one. The user is prompted to change their password on their next sign in.
+
+This reset is a long-running operation and will return a link in the Location header where the caller can periodically check for the status of the reset.
 
 ## Terminology
 
@@ -68,3 +94,5 @@ The connector supports the following operations:
     * 3179e48a-750b-4051-897c-87b9720928f7 (mobile)
     * b6332ec1-7057-4abe-9331-3d72feddfe41 (alternate mobile)
     * e37fc753-ff3b-4958-9484-eaa9425c82bc (office)
+* `PasswordID` : the ID of the password
+* `fidoID` : the ID of the FIDO key
