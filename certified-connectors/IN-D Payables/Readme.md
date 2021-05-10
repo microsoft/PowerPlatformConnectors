@@ -14,7 +14,7 @@ The fields IN-D Payables Connector can extract from an invoice are as follows wi
 - SGST
 - IGST
 - IME1 Number
-- Phone Number
+- Phone Number </br>
 Apart from these attributes, the table data will also get extracted. The type of data that it understands right now includes the following,
 - Description or Item name
 - Quantity
