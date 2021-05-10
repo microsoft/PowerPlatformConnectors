@@ -30,7 +30,7 @@ You will need the following to proceed</br>
 • You need an API key to access the connector which you can get from IN-D One portal.
 
 ### Supported Operations
-• invoice Process : Process invoices to extract only the useful details like invoice numbers, PO number, vendor name, etc., and the line items in the table automatically without a need to input a template.</br>
+* invoice Process : Process invoices to extract only the useful details like invoice numbers, PO number, vendor name, etc., and the line items in the table automatically without a need to input a template.</br>
 * validated batches : The List of batches validated so far</br>
 * Export validated data : Export validated invoice data using particular batch id
 
