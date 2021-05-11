@@ -1,4 +1,4 @@
-﻿
+
 ## Way We Do
 
 Way We Do enables teams to actively use repeatable policies, procedures, processes and playbooks in their day to day workflows to increase efficiency, quality and compliance. This connector offers the ability to integrate your other applications with Way We Do.
