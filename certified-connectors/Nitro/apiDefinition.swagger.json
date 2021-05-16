@@ -43,7 +43,7 @@
         ],
         "x-ms-visibility": "internal",
         "summary": "List the template summaries",
-        "description": "List the current user template summaries.",
+        "description": "List the current user and team template summaries.",
         "operationId": "TemplateSummaries",
         "parameters": [],
         "responses": {
@@ -240,23 +240,136 @@
     "/webhooks": {
       "x-ms-notification-content": {
         "schema": {
-          "properties": {
-            "document": {
-              "format": "byte",
-              "title": "Signed document",
-              "type": "string"
-            }
-          },
+          "type": "object",
           "required": [
             "document"
           ],
-          "type": "object"
+          "properties": {
+            "document": {
+              "type": "string",
+              "format": "byte",
+              "title": "Signed document"
+            }
+          }
+        }
+      },
+      "post": {
+        "deprecated": true,
+        "x-ms-api-annotation": {
+          "revision": 1
+        },
+        "description": "Creates a webhook to notify signed document events",
+        "summary": "Triggers when a document is signed",
+        "operationId": "webhookDocumentSignedTriggetr",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "endpoint",
+                "event"
+              ],
+              "properties": {
+                "endpoint": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
+                "event": {
+                  "type": "string",
+                  "x-ms-visibility": "internal",
+                  "default": "esign.request.completed"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    },
+    "/v2/webhooks": {
+      "x-ms-notification-content": {
+        "x-ms-api-annotation": {
+          "revision": 2
+        },
+        "schema": {
+          "type": "object",
+          "required": [
+            "signedAt",
+            "document",
+            "recipients"
+          ],
+          "properties": {
+            "signedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The date and time when the document was signed",
+              "x-ms-summary": "Signed At"
+            },
+            "document": {
+              "type": "object",
+              "description": "Signed Document attributes",
+              "x-ms-summary": "Signed Document",
+              "required": [
+                "name",
+                "bytes"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Signed document name",
+                  "x-ms-summary": "Name"
+                },
+                "bytes": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "Signed document PDF",
+                  "x-ms-summary": "Bytes"
+                }
+              }
+            },
+            "recipients": {
+              "type": "array",
+              "description": "Recipients that signed the document",
+              "x-ms-summary": "Recipients",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Recipient name",
+                    "x-ms-summary": "Name"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Recipient email",
+                    "x-ms-summary": "Email"
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "post": {
         "description": "Triggers when a signature request is completed by all parties",
         "summary": "When a signature request is completed",
-        "operationId": "webhookDocumentSignedTriggetr",
+        "operationId": "webhookDocumentSignedTriggerV2",
         "x-ms-trigger": "single",
         "parameters": [
           {
