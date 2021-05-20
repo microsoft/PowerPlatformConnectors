@@ -1,6 +1,17 @@
 # Microsoft Power Platform Connectors
 
-Welcome to the Microsoft Power Platform Connectors open source repository. This open source repository contains custom connectors, certified connectors, and related tools to facilitate connector development for Azure Logic Apps, Microsoft Power Apps, and Microsoft Power Automate.
+Welcome to the Microsoft Power Platform Connectors open source repository. This repository contains custom connectors, certified connectors, and related tools to facilitate connector development for Azure Logic Apps, Microsoft Power Apps, and Microsoft Power Automate.
+
+## Custom Connectors
+
+The ```custom-connectors``` folder contains fully functional connector samples which can be deployed to the Power Platform for extension and use. These samples may not be certified connectors, but should be maintained by the open source community to offer useful scenarios or examples of connector concepts.
+
+## Certified Connectors
+
+The ```certified-connectors``` folder contains certified connectors which are already deployed and available out-of-box within the Power Platform for use. 
+A requirement of our [connector certification program](https://docs.microsoft.com/connectors/custom-connectors/submit-certification) is that new certified connectors be open sourced for community contributions. 
+The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform. 
+The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 
 ## Contributing
 
@@ -8,26 +19,157 @@ This project welcomes contributions and suggestions.  Most contributions require
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
-To contibute a connector to the open source repo, please start by creating a fork on the github repo.
-Once you have the fork created, create a new branch on the forked repo. Clone this forked repo on your 
-local machine, and checkout the branch. 
+### Files to Include
+Please submit the following files: An Open API swagger definition, an API properties file, a README.md, and an Intro.md.
 
-For certified connectors, create a folder for your connector under the `certified-connectors` folder and place the connector files in the sub-folder. Otherwise, create a folder for your connector under the `custom-connectors` folder and place your connector files in that sub-folder.
+### API Definition (Swagger) File
 
-Ensure that you have removed any sensitive information, such as Client IDs, from your artifacts before continuing. Any sensitive information can be replaced with fake values for the purpose of your submission.
+The API definition, also known as the swagger, describes the API for the custom connector using the OpenAPI specification.
 
-Next, create a `readme.md` for your connector. An example can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/custom-connectors/AzureKeyVault) connector repository. Include this completed `readme.md` in your connector's folder which contains your artifacts. 
+### API Properties File
 
-Once complete, commit and push the changes to your forked branch. Create a pull request from the forked branch to the main repo to merge your changes into the main repo.
-[Please see this document for more information](https://github.com/CoolProp/CoolProp/wiki/Contributing:-git-development-workflow).
+The API properties file contains some properties for the custom connector. These properties are not part of the API definition. It contains information such as the brand color, authentication information, etc. A typical API properties file looks like the following:
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+```json
+{
+  "properties": {
+    "capabilities": [],
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "clearText": false,
+            "required": "true",
+            "tabIndex": 2
+          },
+          "description": "The KEY for this API",
+          "displayName": "KEY",
+          "tooltip": "Provide your KEY"
+        }
+      }
+    },
+    "iconBrandColor": "#007EE6",
+    "policyTemplateInstances": [
+      {
+        "title": "MyPolicy",
+        "templateId": "setqueryparameter",
+        "parameters": {
+            "x-ms-apimTemplateParameter.name": "queryParameterName",
+            "x-ms-apimTemplateParameter.value": "queryParameterValue",
+            "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      }
+    ]    
+  }
+}
+```
+
+More information on the each of the properties are given below:
+
+* `properties`: The container for the information.
+
+* `connectionParameters`: Defines the connection parameter for the service.
+
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
+
+* `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
+
+* `policyTemplateInstances`: An optional list of policy template instances and values used in the custom connector.
+
+### README.md
+
+README.md file for your connector includes a description for your connector, any prerequisite customer may need to deploy your connector, how to use your connector and api, how to get credentials, known issues and limiations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/tree/dev/certified-connectors/Lettria%20GDPR%20Compliance).
+
+### INTRO.md
+
+The intention for INTRO.md is to include important information about your connector in the official documentation. Some of information that are part of the README.md can also be a part of INTRO.md. But the difference is that INTRO.md is compiled into the published documentation for the connector. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/certified-connectors/Lettria%20GDPR%20Compliance/intro.md).
+
+
+### Creating a Fork
+
+To contibute to this open source repository, start by creating a fork on this repository. To do so, select the "fork" button on the upper right corner, and create your own copy of the repository. Next, sync your fork with the remote repository and clone your forked repository to your local machine.
+
+```git clone https://github.com/YOUR-USERNAME/PowerPlatformConnectors.git```
+
+Check your remote URL.
+
+```git remote -v```
+
+```
+> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
+> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
+```
+
+Add an upstream repository for your clone.
+
+```git remote add upstream https://github.com/microsoft/PowerPlatformConnectors.git```
+
+Verify the upstream links.
+
+```git remote -v```
+
+```
+> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
+> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
+> upstream  https://github.com/microsoft/PowerPlatformConnectors.git (fetch)
+> upstream  https://github.com/microsoft/PowerPlatformConnectors.git (push)
+```
+
+To keep your fork up to date with this repository's updates, run these commands:
+
+```git fetch upstream```
+
+```git checkout master```
+
+```git merge upstream/master```
+
+You are now ready to develop your connector in your own branch.
+
+### Submitting to the Open Source Repository
+
+Contributions to the open source repository are made through pull requests. 
+Prior to submitting a pull request, ensure that your pull request does not contain any sensitive or specific information, for example Client IDs or Client Secrets. 
+Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated. 
+Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions. 
+An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/custom-connectors/AzureKeyVault) connector repository. 
+Include this completed `readme.md` in same connector directory which contains the artifacts. 
+
+#### Custom Connectors
+
+Updates to an existing custom connector can be made through a simple pull request to update the custom connector files.
+
+For new custom connectors, create a directory under the ```custom-connectors``` directory and place the connector files in the sub-folder. Ensure that a clear, structured, readme.md is included. 
+
+#### Certified Connectors
+
+Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner. 
+Once a pull request has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
+
+Updates to an existing custom connector can be made through a simple pull request to the ```dev``` branch to update the custom connector files.
+
+For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
+
+### Tooling and Validation
+
+#### CLA
+
+When a pull request is submitted, a CLA-bot will automatically determine whether you need to provide
+a CLA and annotate the PR appropriately. Simply follow the instructions
+provided by the bot to ensure your pull request can be properly reviewed.
+You will only need to do this once across all repos using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+#### Swagger Validation
+
+A submitted pull request will also be validated against our Swagger Validator tool, which checks the connector files to ensure it is a proper Swagger file and adheres to our connector requirements and guidelines. Any errors or warnings will be added to the PR for both the submitter and the reviewer to understand. We do not accept pull requests with outstanding unresolved Swagger Validator issues. 
+
+#### Breaking Change Detector
+
+Another validation which runs on a submitted pull request is the breaking changes validator. This is to catch any inadvertent, non-backwards-compatible (i.e. breaking) changes which may break a current user experience, for example, deleting a published operation. The Breaking Change Detector compares the previous version of the Swagger with the new submission and raises awareness of any breaking change. The submitter and reviewer must both acknowledge any breaking changes submitted and ensure that no end users are inadvertently negatively affected. 
 
 ## Legal Notices
 

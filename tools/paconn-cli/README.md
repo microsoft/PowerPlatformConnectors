@@ -129,7 +129,7 @@ Login to Power Platform by running:
 
 `paconn login`
 
-This will ask you to login using device code login process. Please follow the prompt for the login.
+This will ask you to login using device code login process. Please follow the prompt for the login. Service Principle authentication is not supported at this point. Please review [a customer workaround posted in the issues page](https://github.com/microsoft/PowerPlatformConnectors/issues/287).
 
 ### Logout
 
@@ -259,6 +259,9 @@ Please test the custom connector and the settings file in a test environment bef
 
 The project is limited to creation, update, and download of custom connector in flow and powerapps environment. When an environment is not specified only the flow envrionments are displayed to choose from. For non-custom connector the swagger file is not returned.
 
+**Stack Owner Property & apiProperties file:**
+
+Currently, there is a limitation that prevents you from updating your connector's artificats in your environment using Paconn when the `stackOwner` property is present in your `apiProperties.json` file. As a workaround to this, create two versions of your connector artifacts: the first being the version that is submitted to certification and contains the `stackOwner` property, the second having the `stackOwner` property omitted to enable updating within your environment. We are working to remove the limitation and will update this section once complete. 
 
 ## Reporting issues and feedback
 

@@ -1,0 +1,389 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Poka",
+    "description": "The Poka connector contains a list of triggers that allow you to interact with the data in your application.",
+    "contact": {
+      "name": "Poka Support",
+      "url": "https://www.poka.io/",
+      "email": "support@poka.io"
+    },
+    "version": "1.0.0"
+  },
+  "host": "api.poka.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/api/v2.2/languages/": {
+      "get": {
+        "summary": "Get Languages",
+        "description": "Get Languages",
+        "operationId": "GetLanguages",
+        "responses": {
+          "200": {
+            "description": "List of active langauges",
+            "schema": {
+              "$ref": "#/definitions/Language"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active",
+            "required": true,
+            "type": "boolean",
+            "default": true,
+            "x-ms-visibility": "internal"
+          }
+        ],
+        "x-ms-visibility": "internal",
+        "security": [
+          {
+            "API Key": []
+          }
+        ]
+      }
+    },
+    "/api/v2.2/web-hooks-items/": {
+      "get": {
+        "summary": "Get Operation Items",
+        "description": "Get Operation Items",
+        "operationId": "GetOperationItems",
+        "responses": {
+          "200": {
+            "description": "List of available operation items",
+            "schema": {
+              "$ref": "#/definitions/OperationItemList"
+            }
+          }
+        },
+        "x-ms-visibility": "internal",
+        "security": [
+          {
+            "API Key": []
+          }
+        ]
+      }
+    },
+    "/api/v2.2/web-hooks-items/{item}/operations/": {
+      "get": {
+        "summary": "Get Operation List",
+        "description": "Get Operation List",
+        "operationId": "GetOperationList",
+        "responses": {
+          "200": {
+            "description": "List of available operations",
+            "schema": {
+              "$ref": "#/definitions/OperationList"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "description": "Item ID",
+            "in": "path",
+            "name": "item",
+            "required": true,
+            "type": "string",
+            "default": "form_templates",
+            "x-ms-visibility": "internal",
+            "x-ms-dynamic-values": {
+              "operationId": "GetOperationItems",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "x-ms-visibility": "internal",
+        "security": [
+          {
+            "API Key": []
+          }
+        ]
+      }
+    },
+    "/api/v2.2/web-hooks-items/{item}/operations/{operation_name}/": {
+      "get": {
+        "summary": "Get operation detail",
+        "description": "Get operation detail",
+        "x-ms-visibility": "internal",
+        "operationId": "GetOperationDetail",
+        "parameters": [
+          {
+            "description": "Item ID",
+            "in": "path",
+            "name": "item",
+            "required": true,
+            "type": "string",
+            "default": "form_templates",
+            "x-ms-visibility": "internal",
+            "x-ms-dynamic-values": {
+              "operationId": "GetOperationItems",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "description": "Operation ID",
+            "in": "path",
+            "name": "operation_name",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a Poka Operation details",
+            "schema": {
+              "$ref": "#/definitions/OperationDetail"
+            }
+          }
+        },
+        "security": [
+          {
+            "API Key": []
+          }
+        ]
+      }
+    },
+    "/api/v2.2/web-hooks/register/{item}/{operation_name}/": {
+      "x-ms-notification-content": {
+        "summary": "Details from webhook",
+        "description": "Details from webhook",
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "GetOperationDetail",
+            "parameters": {
+              "item": {
+                "parameter": "item"
+              },
+              "operation_name": {
+                "parameter": "operation_name"
+              }
+            },
+            "value-path": "schema"
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Webhook created",
+            "schema": {
+              "$ref": "#/definitions/WebHookDetail"
+            }
+          }
+        },
+        "summary": "Add a Poka trigger",
+        "description": "Add a Poka trigger",
+        "operationId": "CreateWebhook",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "Your domain url",
+                  "title": "Your domain url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Select a Language",
+                  "x-ms-summary": "Select a Language",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetLanguages",
+                    "value-path": "code",
+                    "value-title": "name",
+                    "parameters": {
+                      "active": true
+                    }
+                  }
+                }
+              },
+              "required": [
+                "url",
+                "language"
+              ]
+            }
+          },
+          {
+            "in": "path",
+            "name": "item",
+            "required": true,
+            "type": "string",
+            "description": "Select an Item",
+            "x-ms-summary": "Select an Item",
+            "x-ms-dynamic-values": {
+              "operationId": "GetOperationItems",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "in": "path",
+            "name": "operation_name",
+            "required": true,
+            "type": "string",
+            "description": "Select a Trigger Action",
+            "x-ms-summary": "Select a Trigger Action",
+            "x-ms-dynamic-values": {
+              "operationId": "GetOperationList",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "item": {
+                  "parameter": "item"
+                }
+              }
+            },
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "security": [
+          {
+            "API Key": []
+          }
+        ],
+        "consumes": ["application/json"]
+      }
+    },
+    "/api/v2.2/web-hooks/{uuid}/": {
+      "delete": {
+        "summary": "Delete webhook",
+        "description": "Delete a Poka webhook",
+        "x-ms-visibility": "internal",
+        "operationId": "DeleteWebhook",
+        "parameters": [
+          {
+            "description": "Webhook ID",
+            "in": "path",
+            "name": "uuid",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Webhook Deleted"
+          }
+        },
+        "security": [
+          {
+            "API Key": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Language": {
+      "properties": {
+        "code": {
+          "description": "Language Code",
+          "type": "string"
+        },
+        "name": {
+          "description": "Language Name",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "OperationList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/OperationDetail"
+      }
+    },
+    "OperationItemList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "id",
+            "type": "string"
+          },
+          "name": {
+            "description": "name",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "OperationDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "id",
+          "type": "string"
+        },
+        "name": {
+          "description": "name",
+          "type": "string"
+        }
+      }
+    },
+    "WebHookDetail": {
+      "properties": {
+        "uuid": {
+          "description": "Web hook id",
+          "type": "string"
+        },
+        "operation_name": {
+          "description": "Operation Name",
+          "type": "string"
+        },
+        "url": {
+          "description": "Callback URL",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "parameters": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.poka.io/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.poka.io/en/trust#section-compliance"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Collaboration;Data"
+    }
+  ]
+}
