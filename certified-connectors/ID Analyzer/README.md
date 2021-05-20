@@ -15,7 +15,7 @@ The connector supports the following operations:
 
 #### DocuPass API
 * `Creating DocuPass Session`: Create a verification session for every user requiring identity verification.
-* * `Creating DocuPass Signature Session`: Create a signature session where user will review and e-sign legal document without identity verification.
+* `Creating DocuPass Signature Session`: Create a signature session where user will review and e-sign legal document without identity verification.
 * `Validating Callback`: To make sure the data was sent from our server.
 
 #### Vault API
