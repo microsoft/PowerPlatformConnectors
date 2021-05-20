@@ -11,7 +11,32 @@ Create a connection and use the dns subdomain of the environment to connect to (
 ## Supported Operations
 The following operations are supported as part of the AXtension Content Gate connector.
 
+### Execute Query
+Executes a query against an AXtension Content Gate environment. Loads content and business entity information attached to the content items.
+
+| Field                 | Description |
+|-----------------------|-------------|
+| Provider Reference Id | The connector reference id of the business entity that will be used as the query context. |
+| External Type         | The type that is used in the external system for the business entity that will be used as the query context. |
+| External Id           | The identifier that is used in the external system for the business entity that will be used as the query context. |
+| View                  | The view that will be used to execute the query. [optional] |
+
+### Get Content
+Downloads the actual binary content for a given item.
+
+| Field   | Description |
+|---------|-------------|
+| Id      | The identifier of the content item to download. |
+| Mode    | The mode in which the content should be loaded. Leave empty to get the original file. Provide 'pdf' (without quotes) for pdf previews. |
+| Context | The context in which the content should be downloaded. Preview-first-page only works if previewer caching is enabled. (possible values: preview, preview-full, preview-first-page). |
+
+### List Business Entity Connectors
+Lists all the business entity connnectors that are available in the system.
+
+_No additional inputs required_
+
 ### Store Content
+Stores new Content in an AXtension Content Gate environment.
 
 | Field                      | Description |
 |----------------------------|-------------|
