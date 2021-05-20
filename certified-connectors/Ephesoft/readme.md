@@ -13,3 +13,5 @@ Sign up for an Ephesoft Semantik [free trial](https://ephesoft.com/get-trial/) s
 
 ## Supported Operations
 * When a Semantik invoice is processed: Sends invoice data to the Microsoft Power Platform
+* Create document upload request: Retrieves a pre-signed URL to upload a document
+* Update document upload status: Marks a document upload as complete to kick of document processing in Semantik
