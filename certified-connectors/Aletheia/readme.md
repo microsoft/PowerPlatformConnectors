@@ -26,3 +26,5 @@ When you leverage the Aletheia connector for the first time, you will be prompte
 * Get entity information
 * Get filing information
 * List latest transactions for a company or person
+* Get common financial statements
+* Get financial fact trend

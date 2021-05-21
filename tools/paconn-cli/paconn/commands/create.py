@@ -21,6 +21,7 @@ def create(
         api_properties,
         api_definition,
         icon,
+        script,
         powerapps_url,
         powerapps_version,
         client_secret,
@@ -36,6 +37,7 @@ def create(
         api_properties=api_properties,
         api_definition=api_definition,
         icon=icon,
+        script=script,
         connector_id=None,
         powerapps_url=powerapps_url,
         powerapps_version=powerapps_version)
