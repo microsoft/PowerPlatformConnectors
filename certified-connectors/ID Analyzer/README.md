@@ -5,7 +5,7 @@ ID scan technology to extract and verify data from global ID documents including
 You will need the following to proceed:
 
 * [Sign Up](https://www.idanalyzer.com/signup.html) for ID Analyzer account.
-* log into ID Analyzer's [web portal](https://portal.idanalyzer.com/) with your account details and click on ```API Credentials``` to get your private API key.
+* Log into ID Analyzer's [web portal](https://portal.idanalyzer.com/) with your account details and click on ```API Credentials``` to get your private API key.
 
 ## Supported Operations
 The connector supports the following operations:
@@ -15,7 +15,7 @@ The connector supports the following operations:
 
 #### DocuPass API
 * `Creating DocuPass Session`: Create a verification session for every user requiring identity verification.
-* * `Creating DocuPass Signature Session`: Create a signature session where user will review and e-sign legal document without identity verification.
+* `Creating DocuPass Signature Session`: Create a signature session where user will review and e-sign legal document without identity verification.
 * `Validating Callback`: To make sure the data was sent from our server.
 
 #### Vault API
