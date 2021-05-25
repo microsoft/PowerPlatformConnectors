@@ -20,7 +20,7 @@ The connector only support one operation, called *callapi*. To use the connector
 ```
 ClearCollect(dd, { <YOUR-INPUT-PARAM>: TextInput1.Text});
 Set(jdata, JSON(dd, JSONFormat.IncludeBinaryData));
-Set(res, Peltarion.callapi(jdata))
+Set(res, PeltarionAI.callapi(jdata))
 ```
 
 The *res* is an object with three values:
