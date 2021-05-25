@@ -1,5 +1,5 @@
 ### NOTE
-> This is a *sample* connector.  The connector is provided here with the intent to illustrate certain features and functionality around connectors.
+> This is a *sample* connector example.  The connector is provided here with the intent to illustrate certain features and functionality around connectors.
 
 ## Azure Key Vault [Sample] Connector
 Azure Key Vault provides a powerful and very extensive REST API.  Using this API, you can manage your keys, certificates, and secrets in an Azure Key Vault account.  Very often, you may want to leverage those secrets in your application, or in your process automation.
