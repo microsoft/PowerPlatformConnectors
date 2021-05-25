@@ -21,6 +21,7 @@ class Settings:
             api_properties,
             api_definition,
             icon,
+            script,
             powerapps_url,
             powerapps_api_version,
             flow_url=None,
@@ -38,6 +39,7 @@ class Settings:
         self.api_properties = api_properties
         self.api_definition = api_definition
         self.icon = icon
+        self.script = script
 
         # PowerApps RP settings
         self.powerapps_url = powerapps_url or 'https://api.powerapps.com'

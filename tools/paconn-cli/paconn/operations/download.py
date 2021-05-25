@@ -22,9 +22,11 @@ from paconn.operations.json_keys import (
     _API_DEFINITIONS,
     _ORIGINAL_SWAGGER_URL,
     _ICON_URI,
+    _SCRIPT_URI,
     _CONNECTION_PARAMETERS,
     _CONNECTION_PARAMETER_SET,
     _ICON_BRAND_COLOR,
+    _SCRIPT_OPERATIONS,
     _CAPABILITIES,
     _POLICY_TEMPLATE_INSTANCES,
     _PUBLISHER
@@ -65,7 +67,7 @@ def _ensure_overwrite(settings):
     Ensure the files can be overwritten, if exists
     """
     overwrite = False
-    files = [settings.api_properties, settings.api_definition, settings.icon, SETTINGS_FILE]
+    files = [settings.api_properties, settings.api_definition, settings.icon, settings.script, SETTINGS_FILE]
     existing_files = [file for file in files if os.path.exists(file)]
     if len(existing_files) > 0:
         msg = '{} file(s) exist. Do you want to overwrite?'.format(existing_files)
@@ -98,14 +100,12 @@ def download(powerapps_rp, settings, destination, overwrite):
 
     api_properties = api_registration[_PROPERTIES]
 
-    # Save the settings
-    write_settings(settings, overwrite)
-
     # Property whitelist
     property_keys_whitelist = [
         _CONNECTION_PARAMETERS,
         _CONNECTION_PARAMETER_SET,
         _ICON_BRAND_COLOR,
+        _SCRIPT_OPERATIONS,
         _CAPABILITIES,
         _POLICY_TEMPLATE_INSTANCES,
         _PUBLISHER
@@ -158,5 +158,20 @@ def download(powerapps_rp, settings, destination, overwrite):
             file=settings.icon,
             mode='wb'
             ).write(response.content)
+
+    # Write the script
+    if _SCRIPT_URI in api_properties:
+        script_url = api_properties[_SCRIPT_URI]
+        response = requests.get(script_url, allow_redirects=True)
+
+        open(
+            file=settings.script,
+            mode='wb'
+            ).write(response.content)
+    else:
+        settings.script = None
+
+    # Save the settings
+    write_settings(settings, overwrite)
 
     return directory
