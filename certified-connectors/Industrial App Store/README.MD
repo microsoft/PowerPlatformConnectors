@@ -1,22 +1,14 @@
-# Intelligent Plant Industrial App Store Microsoft Power Automate Connector
+# Industrial App Store Connector
 
-![IAS Connector](https://appstore.intelligentplant.com/content/assets/img/AppStore-Automate-Connector-100px.png "Industrial App Store - Microsoft Power Automate (Flow) Connector")
-
-Intelligent Plant’s [Industrial App Store](https://appstore.intelligentplant.com) Microsoft Automate (Flow) Connector enables Microsoft’s powerful analytics and visualizations to be applied to real-time and historical process data. Seamlessly integrate plant and corporate data and share with any colleague on any device, enabling faster, better, real-time decision making. The Industrial App Store Connector connects to Intelligent Plant’s Industrial App Store, while all data **remains** secure and safe on-premises. The plant data may be centralized in a corporate data lake or globally dispersed across many sites and historians. Either way, Industrial App Store Power Automate Connector brings it all together and delivers to your fingertips.
-
-## Industrial App Store - What is it?
-
-Intelligent Plant developed the Industrial App Store which enables interaction with all the different historian data through a unified API. At start of May 2020 Intelligent Plant released an official, Microsoft certified Industrial App Store connector for Power Automate. No more hefty SQL queries or Excel document interrogations with no easy real-time update option or complicated architecture solutions, simply install Industrial App Store connect and out of the box you will be able to connect to Aspentech IP.21, OSIsoft PI, Honeywell Dynamo, OPC DA & HDA, Siemens and many more. This allows our customers to bring data from various sources into Microsoft Automate flows to deliver insights that weren’t possible before. Real-time updates prompt money-saving decisions by engineers that also increase plant safety and efficiency.
-
-## Getting started with Microsoft Power Automate Industrial App Store Connector
-
-To start with Microsoft Power Automate (Flow) check out this article [here](https://docs.microsoft.com/en-us/power-automate/getting-started). To get started with Industrial App Store Connector configure a step and choose an action from the connector.
+The [Industrial App Store](https://appstore.intelligentplant.com) from Intelligent Plant is built on an architecture that enables cloud-based applications and services to interact with on-site Process Data Historians and Alarm & Event Logs. The Industrial App Store Connector for Power Automate allows users to pull Industrial Plant data into their flows.
 
 ### Prerequisites
 
-* You will need App Store Connect to connect to you own data but its not essential if you wish to play around with demo data provided by Intelligent Plant. More info on how to connect your data to Industrial App Store can be found [here](https://community.powerbi.com/t5/Community-Blog/Connecting-industrial-historians-to-Microsoft-Power-BI-One/ba-p/942200 "Connecting industrial historians to Microsoft Power BI. One connector to get them all… ") and [here](https://appstore.intelligentplant.com/wiki/doku.php?id=app_store_connect:app_store_connect "Industrial App Store Wiki").
+* **An [Industrial App Store](https://appstore.intelligentplant.com) Account**
+*Registering is simple and only involves logging in using one of a number of authentication providers.*
 
-* Any kind of Microsoft Power Automate (Flow) subscription is needed in order to create Flows. More info on subscription types can be found [here](http://download.microsoft.com/download/9/5/6/9568EFD0-403D-4AE4-95F0-7FACA2CCB2E4/PowerApps%20and%20Flow%20Licensing%20Guide%20-%20August.pdf).
+* **An Industrial App Store Connector Licence**
+*The "Industrial App Store Connector" is a commercial product. If interested in developing the product, contact support@intelligentplant.com for a developer licence.*
 
 ### Obtaining Credentials
 
@@ -52,7 +44,7 @@ Additional information on API calls made and its parameters can be found [here](
 
 ## Supported Triggers
 
-Coming soon. A workaround at the moment would be to schedule a fequent task.
+Coming soon. A workaround at the moment is to schedule a fequent task.
 
 ## Known Limitations
 
@@ -63,24 +55,10 @@ Coming soon. A workaround at the moment would be to schedule a fequent task.
 * Microsoft Power Automate Connector blog post - [Connecting industrial historians to Microsoft Power Automate. One connector to get them all…](https://powerusers.microsoft.com/t5/Power-Automate-Community-Blog/Connecting-industrial-historians-to-Microsoft-Power-Automate-One/ba-p/525552 "Connecting industrial historians to Microsoft Power Automate. One connector to get them all…").
 * Intelligent Plant Industrial App Store Microsoft Power Automate Connector (YouTube video) - [Act on Industrial data with Microsoft Power Automate (Flow)](https://www.youtube.com/watch?v=T5Aks4A60uI "Act on Industrial data with Microsoft Power Automate - A YouTube video")
 
-## Publications
-
-* A review by Nick Hance from reenhanced - [New in Power Automate: Industrial App Store](https://reenhanced.com/2020/new-in-power-automate-industrial-app-store/)
-
-## Built With
-
-Industrial App Store Connector was built using
-
-* [Industrial App Store API](https://appstore.intelligentplant.com/wiki/doku.php?id=dev:app_store_developers "Intelligent Plant Industrial App Store Developers")
-* [Swagger 2.0](https://swagger.io/docs/specification/2-0/basic-structure/)
-
-## Contributing
-
-Please read [Microsoft Power Platform Connectors - Contributing](https://github.com/Microsoft/PowerPlatformConnectors#contributing) for details on our code of conduct, and the process for submitting pull requests.
-
 ## Useful Links
 
 * [Intelligent Plant](https://www.intelligentplant.com "Intelligent Plant")
+* [Intelligent Plant Git Hub](https://github.com/intelligentplant "Intelligent Plant Git Hub")
 * [Industrial App Store](https://appstore.intelligentplant.com "Industrial App Store")
 * [Industrial App Store Wiki](https://appstore.intelligentplant.com/wiki "Industrial App Store wiki")
 * [Intelligent Plant YouTube channel](https://www.youtube.com/channel/UCGWOUFOjAEk_QW9w1wWWPDw "Intelligent Plant YouTube channel")
@@ -89,12 +67,3 @@ Please read [Microsoft Power Platform Connectors - Contributing](https://github.
 
 For any questions please contact Intelligent Plant Ltd [here](https://www.intelligentplant.com/contactus "Intelligent Plant - Contact Us") or fire an email to support@intelligentplant.com.
 
-## Authors
-
-* Intelligent Plant team.
-
-## Acknowledgments
-
-* Hat tip to anyone who contributed.
-
-![IAS Connector](https://appstore.intelligentplant.com/content/assets/img/Welcome-to-AppStore.png "Intelligent Plant = Industrial App Store")
