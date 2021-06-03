@@ -79,7 +79,7 @@ More information on the each of the properties are given below:
 
 ### README.md
 
-README.md file for your connector includes a description for your connector, any prerequisite customer may need to deploy your connector, how to use your connector and api, how to get credentials, known issues and limiations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/tree/dev/certified-connectors/Lettria%20GDPR%20Compliance).
+README.md file for your connector includes a description for your connector, any prerequisite customer may need to deploy your connector, how to use your connector and api, how to get credentials, known issues and limiations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md).
 
 ### INTRO.md
 
@@ -90,65 +90,62 @@ The intention for INTRO.md is to include important information about your connec
 
 To contibute to this open source repository, start by creating a fork on this repository. To do so, select the "fork" button on the upper right corner, and create your own copy of the repository. Next, sync your fork with the remote repository and clone your forked repository to your local machine.
 
-```git clone https://github.com/YOUR-USERNAME/PowerPlatformConnectors.git```
+Clone Microsoft's Connectors repository
 
-Check your remote URL.
+```git clone https://github.com/microsoft/PowerPlatformConnectors.git```
 
-```git remote -v```
+Pull to make sure the repo is up-to-date
 
-```
-> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
-> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
-```
+```git pull```
 
-Add an upstream repository for your clone.
+Create a new branch for your connector 
 
-```git remote add upstream https://github.com/microsoft/PowerPlatformConnectors.git```
+```git checkout -b YOUR_GITHUB_ACCOUNT_NAME/YOUR_CONNECTOR_NAME```
 
-Verify the upstream links.
+You are now ready to develop your connector in your own branch. Create a folder with your connector name (without spaces) inside 'certified-connectors' or 'custom-connectors' based on your connector type
 
-```git remote -v```
+Stage your connector files
 
-```
-> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
-> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
-> upstream  https://github.com/microsoft/PowerPlatformConnectors.git (fetch)
-> upstream  https://github.com/microsoft/PowerPlatformConnectors.git (push)
-```
+```git add -A```
 
-To keep your fork up to date with this repository's updates, run these commands:
+Make sure that you are adding or updating your connector files only
 
-```git fetch upstream```
+```git status```
 
-```git checkout master```
+Commit your changes
 
-```git merge upstream/master```
+For new connectors: ```git commit -m "[YUOR_CONNECTOR_NAME] New Partner Connector```
 
-You are now ready to develop your connector in your own branch.
+For updates: ```git commit -m "[YUOR_CONNECTOR_NAME] Partner Connector Updates```
+
+Push your branch to origin ore remote
+
+```git push origin YOUR_GITHUB_ACCOUNT_NAME/YOUR_CONNECTOR_NAME```
 
 ### Submitting to the Open Source Repository
 
-Contributions to the open source repository are made through pull requests. 
+Contributions to the open source repository are made through pull requests.
 Prior to submitting a pull request, ensure that your pull request does not contain any sensitive or specific information, for example Client IDs or Client Secrets. 
 Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated. 
 Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions. 
-An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/custom-connectors/AzureKeyVault) connector repository. 
+An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) connector repository. 
 Include this completed `readme.md` in same connector directory which contains the artifacts. 
+
+#### Certified Connectors
+
+For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
+
+Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner. 
+
+Once a pull request has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
+
+Updates to an existing custom connector can be made through a simple pull request to the ```dev``` branch to update the custom connector files.
 
 #### Custom Connectors
 
 Updates to an existing custom connector can be made through a simple pull request to update the custom connector files.
 
 For new custom connectors, create a directory under the ```custom-connectors``` directory and place the connector files in the sub-folder. Ensure that a clear, structured, readme.md is included. 
-
-#### Certified Connectors
-
-Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner. 
-Once a pull request has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
-
-Updates to an existing custom connector can be made through a simple pull request to the ```dev``` branch to update the custom connector files.
-
-For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
 
 ### Tooling and Validation
 
