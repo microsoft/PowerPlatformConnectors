@@ -83,7 +83,7 @@ README.md file for your connector includes a description for your connector, any
 
 ### Creating a Fork
 
-To contibute to this open source repository, start by creating a fork on this repository. To do so, select the "fork" button on the upper right corner, and create your own copy of the repository. Next, sync your fork with the remote repository and clone your forked repository to your local machine.
+To contibute to this open source repository, start by creating a fork on this repository. 
 
 Clone Microsoft's Connectors repository
 
