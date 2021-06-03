@@ -81,11 +81,6 @@ More information on the each of the properties are given below:
 
 README.md file for your connector includes a description for your connector, any prerequisite customer may need to deploy your connector, how to use your connector and api, how to get credentials, known issues and limiations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md).
 
-### INTRO.md
-
-The intention for INTRO.md is to include important information about your connector in the official documentation. Some of information that are part of the README.md can also be a part of INTRO.md. But the difference is that INTRO.md is compiled into the published documentation for the connector. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/certified-connectors/Lettria%20GDPR%20Compliance/intro.md).
-
-
 ### Creating a Fork
 
 To contibute to this open source repository, start by creating a fork on this repository. To do so, select the "fork" button on the upper right corner, and create your own copy of the repository. Next, sync your fork with the remote repository and clone your forked repository to your local machine.
