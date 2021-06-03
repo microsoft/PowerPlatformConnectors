@@ -109,9 +109,9 @@ Make sure that you are adding or updating your connector files only
 
 Commit your changes
 
-For new connectors: ```git commit -m "[YUOR_CONNECTOR_NAME] New Partner Connector```
+For new connectors: ```git commit -m "[YOUR_CONNECTOR_NAME] New Partner Connector```
 
-For updates: ```git commit -m "[YUOR_CONNECTOR_NAME] Partner Connector Updates```
+For updates: ```git commit -m "[YOUR_CONNECTOR_NAME] Partner Connector Updates```
 
 Push your branch to origin ore remote
 
