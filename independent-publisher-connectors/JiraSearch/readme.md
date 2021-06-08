@@ -9,7 +9,7 @@ This connector uses Basic Auth and the account requires sufficient permission to
 ## Supported Operations
 Required. Describe actions, triggers, and other endpoints.​
 ### Searches for issues using JQL
-Returns a list of workspaces for the organization
+Search Jira using JQL language
 
 ## Obtaining Credentials
 This connector uses basic auth. Contact your JIRA administrator to get a suitable account set up. ​
