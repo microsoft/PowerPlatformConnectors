@@ -7,15 +7,15 @@ Jira Software is part of a family of products designed to help teams of all type
 This connector uses Basic Auth and the account requires sufficient permission to access the projects/issues within the scope of search. See Permissions overview for details (https://support.atlassian.com/jira-core-cloud/docs/how-do-jira-permissions-work/) 
 
 ## Supported Operations
-Required. Describe actions, triggers, and other endpoints.​
+
 ### Searches for issues using JQL
-Returns a list of workspaces for the organization
+Search Jira using JQL language
 
 ## Obtaining Credentials
 This connector uses basic auth. Contact your JIRA administrator to get a suitable account set up. ​
 
 ## Known Issues and Limitations
-We shall find out!!
+All listed issues with the Microsoft supplied Jira connector apply. Consult the Known Issues section at https://docs.microsoft.com/en-us/connectors/jira/
 
 ## Frequently Asked Questions
 
