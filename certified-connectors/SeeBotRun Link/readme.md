@@ -2,24 +2,40 @@
 
 # SeeBotRun Link Connector
 
-The SeeBotRun Link connector allows organizations to create and managed short URLs, using the associated domains with their accounts.
+The SeeBotRun Link connector allows organizations to create and managed short URLs, using the associated domains with their accounts.  The connector is powered by the [SeeBotRun Link REST API](https://seebotrun.readme.io/).
 
 
 ## Prerequisites
 
-An existing account with SeeBotRun and access to the Link platform. [Find out how to create an account](https://www.seebot.run/link/)
+You will need the following to proceed:
+- A Microsoft Power Apps or Power Automate plan with custom connector feature.
+- An existing account with SeeBotRun and access to the Link platform. [Find out how to create an account](https://www.seebot.run/link/).
+- The Power platform CLI tools.
 
 
-## How to get credentials?
+## Building the connector
 
+### Account Setup
 - Have an existing account with SeeBotRun (see prerequisites).
 - Once logged in, click the Support link in the header, select Link as the application, and include the message "Requesting API key for Power Automate"
 - An API key, User Token, and User ID will be sent to you via email, securely.  
 
+### Deploying the Sample
+Run the following command and follow the prompts:
+
+```paconn
+paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
+```
+
 
 ## Supported Operations
-- **Create/Update/Delete Links**  Links can be created, updated, and deleted via the connector.  Note: When updating links created outside of the connector, any tag and marketing details will be removed.
-- **Create/Update/Delete Predefined Links** Predefined links (second level links) can be created under a link when the link type is set to `predefined`.  Predefined links are key based; the system will create the link if the key is not already taken and update the link if it is found.
+- `List Domains`: List all domains available to the account.
+- `List Links`: List all links available to the account, for the specified domain.
+- `Create Link`: Create a new link (default or predefined types only).
+- `Update Link`: Update an existing link based on ID.
+- `Delete Link`: Delete an existing link based on ID.
+- `Create/Update Predefined Link`: Create or Update a predefined (second level) link, based on the provided link ID and key.
+- `Delete Predefined Link`: Delete an existing predefined link, based on the provided link ID and key.
 
 
 ## Known issues and limitations
