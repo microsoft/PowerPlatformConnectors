@@ -13,6 +13,10 @@ A requirement of our [connector certification program](https://docs.microsoft.co
 The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform. 
 The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 
+## Independent Publisher Connectors
+
+The ```independent-publisher-connectors``` folder contains connectors that are submitted by publishers that do not own the underlying service behind their connector. Anyone can submit a new connector to this folder, add functionality to connectors in this folder, and resolve issues related to the connectors in this folder. The folder is managed by the Independent Publisher Connector Community, which includes Independent Publishers and Project Coordinators. The master branch is maintained by the Microsoft Connector Certification Team, who ensures that the connector version is identical to that deployed in the Power Platform. The dev branch is maintained by the connector maintainer(s) and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. Click here to view the Independent Publisher Connector Manifesto.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
