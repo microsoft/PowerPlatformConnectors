@@ -1,6 +1,7 @@
 
 ---
-Please check the following conditions for your PR.
+When submitting a connector, please check the following conditions for your PR.
 
-- [ ] `apiDefinition.swagger.json` is validated using `paconn validate` command.
-- [ ] `apiProperties.json` has a valid brand color. Invalid brand colors are `#007ee5` and `#ffffff`.
+- [ ] I attest that the connector works and I verified by deploying and testing all the operations.
+- [ ] I validated the swagger file, `apiDefinition.swagger.json`, by running `paconn validate` command.
+- [ ] I confirm that `apiProperties.json` has a valid brand color and doesn't use an invalid brand color, `#007ee5` or `#ffffff`.
