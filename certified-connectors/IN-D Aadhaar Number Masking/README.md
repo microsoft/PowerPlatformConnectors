@@ -1,4 +1,4 @@
-# IN-D Aadhaar Data Masking
+# IN-D Aadhaar Number Masking
 
 Eliminate risks and ensure compliance by redacting first 8 digits of Aadhaar Number and QR Code from Aadhaar images.
 ## Pre-requisites
