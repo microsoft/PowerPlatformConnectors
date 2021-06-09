@@ -132,11 +132,11 @@ Prior to submitting a pull request, ensure that your pull request does not conta
 Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated. 
 Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions. 
 An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) connector repository. 
-Include this completed `readme.md` in same connector directory which contains the artifacts. 
+Include this completed `readme.md` in same connector directory which contains the artifacts.Add an appropriate tag using the Labels option indicating which connector type you are submitting. Connector type name should match the folder name you are submitting to: custom-connector, certified-connector, or independent-publisher-connector. 
 
 #### Certified Connectors
 
-For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
+For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included and the pull request is tagged as certified-connector. 
 
 Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner. 
 
