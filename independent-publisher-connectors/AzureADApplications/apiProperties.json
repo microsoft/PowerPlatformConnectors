@@ -1,0 +1,145 @@
+{
+  "properties": {
+    "capabilities": [
+      "actions"
+    ],
+    "connectionParameters": {
+      "token": {
+        "oAuthSettings": {
+          "clientId": "<<Please add your clientID here>>",
+          "customParameters": {
+            "authorizationUrlQueryStringTemplate": {
+              "value": "?client_id={ClientId}&response_type=code&redirect_uri={RedirectUrl}&response_mode=query&scope={Scopes}&prompt=login&state={State}"
+            },
+            "authorizationUrlTemplate": {
+              "value": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+            },
+            "refreshBodyTemplate": {
+              "value": "client_id={ClientId}&refresh_token={RefreshToken}&redirect_uri={RedirectUrl}&grant_type=refresh_token&client_secret={ClientSecret}"
+            },
+            "refreshUrlTemplate": {
+              "value": "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+            },
+            "scopeListDelimiter": {
+              "value": " "
+            },
+            "tokenBodyTemplate": {
+              "value": "client_id={ClientId}&code={Code}&redirect_uri={RedirectUrl}&grant_type=authorization_code&client_secret={ClientSecret}"
+            },
+            "tokenUrlTemplate": {
+              "value": "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+            }
+          },
+          "identityProvider": "oauth2generic",
+          "properties": {
+            "IsFirstParty": "False"
+          },
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "scopes": [
+            "Directory.ReadWrite.All",
+            "Group.ReadWrite.All",
+            "User.ReadWrite.All",
+            "offline_access"
+          ]
+        },
+        "type": "oauthSetting",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "Login with your credentials",
+          "displayName": "Login with your credentials",
+          "tooltip": "Login with your credentials"
+        }
+      },
+      "token:TenantId": {
+        "metadata": {
+          "sourceType": "AzureActiveDirectoryTenant"
+        },
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "hidden": "true",
+            "required": "false"
+          },
+          "description": "The tenant ID of for the Azure Active Directory application",
+          "displayName": "Tenant"
+        }
+      }
+    },
+    "iconBrandColor": "#0072C6",
+    "policyTemplateInstances": [
+        {
+          "parameters": {
+            "x-ms-apimTemplate-operationName": [
+              "AddUserToGroup",
+              "AssignManager"
+            ],
+            "x-ms-apimTemplateParameter.newPropertyParentPathTemplate": "@body()",
+            "x-ms-apimTemplateParameter.newPropertySubPathTemplate": "['@odata.id']",
+            "x-ms-apimTemplateParameter.propertyValuePathTemplate": "https://graph.microsoft.com/v1.0/directoryObjects/{@body()['@odata.id']}",
+            "x-ms-apimTemplate-policySection": "Request"
+          },
+          "templateId": "SetProperty",
+          "title": "Append graph url"
+        },
+        {
+          "parameters": {
+            "x-ms-apimTemplate-operationName": [
+              "CreateSecurityGroup",
+              "CreateOffice365Group"
+            ],
+            "x-ms-apimTemplateParameter.newPath": "/v1.0/groups"
+          },
+          "templateId": "routerequesttoendpoint",
+          "title": "Redirect to groups API"
+        },
+        {
+          "parameters": {
+            "x-ms-apimTemplate-operationName": [
+              "CheckMemberGroupsV2"
+            ],
+            "x-ms-apimTemplateParameter.newPath": "v1.0/users/{id}/checkMemberGroups"
+          },
+          "templateId": "routerequesttoendpoint",
+          "title": "Redirect to CheckMemberGroups API"
+        },
+        {
+          "parameters": {
+            "x-ms-apimTemplate-operationName": [
+              "GetMemberGroupsV2"
+            ],
+            "x-ms-apimTemplateParameter.newPath": "/v1.0/users/{id}/getMemberGroups"
+          },
+          "templateId": "routerequesttoendpoint",
+          "title": "Redirect to GetMemberGroups API"
+        },
+        {
+          "parameters": {
+            "x-ms-apimTemplate-operationName": [
+              "GetGroupMembers"
+            ],
+            "x-ms-apimTemplateParameter.nextLinkPropertyName": "@odata.nextLink"
+          },
+          "templateId": "updatenextlink",
+          "title": "Updates next link to make paging work"
+        },
+        {
+          "parameters": {
+            "x-ms-apimTemplateParameter.srcParentPath": "@body()",
+            "x-ms-apimTemplateParameter.srcSubPath": "customProperties",
+            "x-ms-apimTemplateParameter.dstParentPath": "@body()",
+            "x-ms-apimTemplateParameter.dstSubPath": "null",
+            "x-ms-apimTemplateParameter.copyOnlySubProperties": "true",
+            "x-ms-apimTemplate-policySection": "Request",
+            "x-ms-apimTemplate-operationName": [
+              "UpdateUser"
+            ]
+          },
+          "templateId": "moveproperties",
+          "title": "Move Properties on User Update"
+        }
+      ]
+  }
+}
