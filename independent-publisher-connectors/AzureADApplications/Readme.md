@@ -1,6 +1,6 @@
 
 ## Azure Active Directory Connector
-Azure Active Directory provides a powerful and very extensive REST API.  Using this API, you can create and manage objects (e.g. users, groups etc.) in Azure Active Directory. This connector exposes a subset of these APIs as operations in Microsoft Flow and PowerApps.
+Azure Active Directory provides a powerful and very extensive REST API.  Using this API, you can create and manage objects (e.g. users, groups etc.) in Azure Active Directory. This connector exposes the /Applications endpoint in Microsoft Flow and PowerApps. My main intent was to provide an easy way to find client secrets that were expired or near to expiry
 
 
 
@@ -36,19 +36,7 @@ paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
 
 ## Supported Operations
 The connector supports the following operations:
-* `Create Office 365 group`: Create an Office 365 group in your AAD tenant
-* `Create Security group`: Create a security group in your AAD tenant
-* `Get group`: Get details for a group
-* `Get user`: Get details for a user
-* `Get groups of a user`: Get the groups a user is a member of
-* `Create user`: Create a new user in your AAD tenant
-* `Get group members`: Get the users who are members of a group
-* `Remove Member From Group`: Remove Member From Group
-* `Add user to group`: Add a user to a group in this AAD tenant
-* `Check group membership`: If the user is a member of the given group, the result will contain the given id. Otherwise the result will be empty
-* `Assign manager`: Assign a manager for a user
-* `Update user`: Update the info for a user
-
+* `List Applications`: Get the list of applications in this organization
 
 
 
