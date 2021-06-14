@@ -3,7 +3,7 @@
   "info": {
     "title": "Ephesoft Semantik For Invoices",
     "description": "The Ephesoft Semantik for Invoices connector helps organizations extract critical invoice data using cutting edge AI models to automate accounts payable processing.  Semantik Invoice is a point solution that can speed up your invoice processing, reduce compliance errors, and free up your staff to work on more business critical items.",
-    "version": "2.0",
+    "version": "2.1",
     "contact": {
       "name": "Ephesoft Semantik Support",
       "url": "https://docs.ephesoft.net",
@@ -50,29 +50,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "type": "object",
-              "properties": {
-                "configurationId": {
-                  "type": "string",
-                  "description": "Configuration identifier for the webhook."
-                },
-                "integrationId": {
-                  "type": "string",
-                  "description": "The unique webhook identifier."
-                },
-                "integrationName": {
-                  "type": "string",
-                  "description": "Name of the webhook as it appears in Semantik."
-                },
-                "IntegrationType": {
-                  "type": "string",
-                  "description": "The type of integration created in Semantik."
-                },
-                "Enabled": {
-                  "type": "boolean",
-                  "description": "The current state of the webhook in Semantik."
-                }
-              }
+              "$ref": "#/definitions/UploadCreatedResponse"
             }
           }
         },
@@ -115,6 +93,256 @@
             "description": "OK",
             "schema": {
               "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/v1/documents/uploads": {
+      "post": {
+        "description": "Starts the document upload process by retrieving a pre-signed URL where you can upload a file for processing.",
+        "summary": "Create document upload",
+        "operationId": "CreateDocumentUpload",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fileName": {
+                  "type": "string",
+                  "x-ms-summary": "File Name",
+                  "description": "Name of the file to be uploaded."
+                },
+                "type": {
+                  "type": "string",
+                  "x-ms-summary": "Type",
+                  "description": "Type of Semantik upload",
+                  "default": "invoice",
+                  "enum": ["invoice"]
+                }
+              },
+              "required": [
+                "fileName",
+                "type"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "upload": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "x-ms-summary": "Upload Id",
+                          "description": "The unique identifier for this upload."
+                        },
+                        "status": {
+                          "type": "string",
+                          "x-ms-summary": "Upload Status",
+                          "description": "The current status of the upload."
+                        },
+                        "url": {
+                          "type": "string",
+                          "x-ms-summary": "Upload URL",
+                          "description": "The pre-signed URL to upload the document."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/v1/documents/uploads/{uploadId}": {
+      "patch": {
+        "description": "Updates a document upload in Semantik.  Marking an upload 'Completed' will start document processing in Semantik.",
+        "summary": "Update document upload",
+        "operationId": "UpdateDocumentUpload",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "uploadId",
+            "in": "path",
+            "x-ms-summary": "Upload Id",
+            "description": "The unique identifier for the upload to be updated.",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "The status to set on the upload.",
+                  "title": "Status",
+                  "enum": ["completed", "cancelled"],
+                  "default": "completed"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "upload": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "x-ms-summary": "Upload Id",
+                          "description": "The unique identifier for the upload."
+                        },
+                        "status": {
+                          "type": "string",
+                          "x-ms-summary": "Status",
+                          "description": "The current status of the upload."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/v1/vendors/uploads": {
+      "post": {
+        "description": "Starts the vendor upload process by retrieving a pre-signed URL where you can upload a file for processing.",
+        "summary": "Create vendor upload",
+        "operationId": "CreateVendorUpload",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fileName": {
+                  "type": "string",
+                  "x-ms-summary": "File Name",
+                  "description": "Name of the file to be uploaded."
+                }
+              },
+              "required": [
+                "fileName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/UploadCreatedResponse"
+            },
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/v1/vendors/uploads/{uploadId}": {
+      "patch": {
+        "description": "Updates a vendor upload in Semantik.  Marking an upload 'Completed' will begin ingesting the vendor records into the Semantik system.",
+        "summary": "Update vendor upload",
+        "operationId": "UpdateVendorUpload",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "uploadId",
+            "in": "path",
+            "x-ms-summary": "Upload Id",
+            "description": "The unique identifier for the upload to be updated.",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "The status to set on the upload.",
+                  "title": "Status",
+                  "enum": ["completed"],
+                  "default": "completed"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/VendorUploadUpdateResponse"
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "$ref": "#/definitions/VendorUploadUpdateResponse"
             }
           }
         }
@@ -388,6 +616,84 @@
             "VendorTelephone": {
               "type": "string",
               "description": "Vendor's telephone number"
+            }
+          }
+        }
+      }
+    },
+    "UploadCreatedResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "upload": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "x-ms-summary": "Upload Id",
+                  "description": "The unique identifier for this upload."
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Upload Status",
+                  "description": "The current status of the upload."
+                },
+                "url": {
+                  "type": "string",
+                  "x-ms-summary": "Upload URL",
+                  "description": "The pre-signed URL for the upload."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "VendorUploadUpdateResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "upload": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "x-ms-summary": "Upload Id",
+                  "description": "The unique identifier for the upload."
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "The current status of the upload."
+                }
+              }
+            }
+          }
+        },
+        "jobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Job Id",
+                "description": "The unique identifier for the job."
+              },
+              "subjectType": {
+                "type": "string",
+                "x-ms-summary": "Job Subject Type",
+                "description": "Describes what type of resource the job is for."
+              },
+              "status": {
+                "type": "string",
+                "x-ms-summary": "Job Subject Id",
+                "description": "The unique identifier assigned to the subject type for this job."
+              }
             }
           }
         }
