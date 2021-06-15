@@ -1,6 +1,6 @@
 # Powell Teams
 
-Powell Teams API endpoints documentation.
+Powell Teams API endpoints allows you to manage the governance of your teams (creation / update of your teams).
 
 # Prerequisites
 
