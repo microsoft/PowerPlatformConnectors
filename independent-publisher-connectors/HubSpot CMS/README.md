@@ -1,5 +1,5 @@
-# HubSpot CRM
-HubSpot’s CRM platform has all the tools and integrations you need for marketing, sales, content management, and customer service. CMS Hub powers your website with a CMS that makes it easy to grow better. Developers build using flexible themes and content structures. Marketers easily edit and create pages on their own. Customers get a personalized, secure experience.
+# HubSpot CMS
+HubSpot’s CMS platform has all the tools and integrations you need for marketing, sales, content management, and customer service. CMS Hub powers your website with a CMS that makes it easy to grow better. Developers build using flexible themes and content structures. Marketers easily edit and create pages on their own. Customers get a personalized, secure experience.
 
 ## Publisher: Hitachi Solutions
 
