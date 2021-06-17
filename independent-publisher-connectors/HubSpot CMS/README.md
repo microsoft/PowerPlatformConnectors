@@ -6,6 +6,14 @@ HubSpot’s CMS platform has all the tools and integrations you need for marketi
 ## Prerequisites
 A paid or trial HubSpot account.
 
+## Getting Started
+You will need to gather either an API key or OAuth credentials to use with this connector.
+
+## Obtaining Credentials
+A HubSpot account (trial or paid) is needed for API key access. The API key is specific to a HubSpot account, not each user, and only one key is allowed at a time. The key can be found in Account Settings > Account Setup > Integrations > API Keys. More information can be found [here](https://knowledge.hubspot.com/articles/kcs_article/integrations/how-do-i-get-my-hubspot-api-key).
+
+A free HubSpot developer account is needed to install an OAuth app in your account for OAuth 2.0 access. Installed apps can be found in Account Settings > Account Setup > Integrations > Connected Apps. More information can be found [here](https://developers.hubspot.com/docs/api/working-with-oauth).
+
 ## Supported Operations
 
 ### Pages
@@ -29,14 +37,6 @@ Create a new coded template object in Design Manager.
 Updates a template. If not all the fields are included in the body, we will only update the included fields.
 #### Delete the template (V2)
 Marks the selected Template as deleted. The Template can be restored later via a POST to the restore-deleted endpoint.
-
-## Obtaining Credentials
-A HubSpot account (trial or paid) is needed for API key access. The API key is specific to a HubSpot account, not each user, and only one key is allowed at a time. The key can be found in Account Settings > Account Setup > Integrations > API Keys. More information can be found [here](https://knowledge.hubspot.com/articles/kcs_article/integrations/how-do-i-get-my-hubspot-api-key).
-
-A free HubSpot developer account is needed to install an OAuth app in your account for OAuth 2.0 access. Installed apps can be found in Account Settings > Account Setup > Integrations > Connected Apps. More information can be found [here](https://developers.hubspot.com/docs/api/working-with-oauth).
-
-## Getting Started
-No specific instruction required for getting started.
 
 ## Known Issues and Limitations
 No issues and limitations are known at this time.
