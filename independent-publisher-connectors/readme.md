@@ -7,11 +7,17 @@ Connector Certification Team, who ensures that the connector version is identica
 maintainer(s) and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 Click here to read through the Independent Publisher Connector Manifesto.
 
+## Best Practices for Submission
+- You can only submit one connector per PR. This ensures that our validation process runs smoothly.
+- Please add an email to the support email section. This is in case we need to reach out to you! 
+- Please make sure to fill in the privacy policy parameter with the privacy policy for the end service.
+- Please make sure that your operation descriptions are detailed. This ensures that the user can understand your operation.
+
 ## Contributing to this Directory
 
 1. Create a fork to the ```independent-publisher-connectors directory``` and create your connector in the fork.
 
-2. Submit a pull request to the ```dev``` branch. Ensure that the following files are included: apiProperities.json, apiDefinition.swagger.json, and readme.md. Fill out the checkbox to acknowledge that you’ve tested this connector.
+2. Submit a pull request to the ```dev``` branch. Ensure that the following files are included: apiProperities.json, apiDefinition.swagger.json, and readme.md. You can find a sample of a readme.md file [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md). Fill out the checkbox to acknowledge that you’ve tested this connector.
 
 3. Validation processes: The swagger verification and breaking change validation process will automatically run and leave comments. Please address any requested changes by updating the connector.
 
