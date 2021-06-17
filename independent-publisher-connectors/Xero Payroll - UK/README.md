@@ -59,12 +59,8 @@ Allows you to add a reimbursement in a Xero organisation
 ### Action: Retrieve a payroll reimbursement
 Allows you to retrieve details of a reimbursement in a Xero organisation
 
-
 ## Known Issues and Limitations
 There are no known issues at time of publishing.
-
-## Frequently Asked Questions
-
 
 ## Deployment Instructions
 Follow the instructions provided on the [Power Automate blog](https://flow.microsoft.com/en-us/blog/import-a-connector-from-github-as-a-custom-connector/).
