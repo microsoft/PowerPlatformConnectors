@@ -14,7 +14,17 @@ To use this connector, you need the following
 After signing in at [developer.xero.com](https://developer.xero.com/), navigate to the My Apps section and create a new app. Give it a descriptive name and choose Web App as the integration type. Enter your company URL and for the OAuth 2.0 redirect URIs field, use `https://global.consent.azure-apim.net/redirect`. Agree to the terms and conditions and create the app. Copy the client ID created and then generate and copy the client secret - these will be used when configuring the custom connector. If you are going to build triggers for your Xero tenant, that configuration is on the Webhooks tab in this app. Since Xero allows for triggers based on contacts and invoices but only allows one URL per app, best practice is to create a second app to trigger the second object changes.
 
 ## Getting Started
-Follow the guide provided by Xero on [developer.xero.com](https://developer.xero.com/documentation/getting-started/getting-started-guide). In order to use Xero webhooks as triggers in Power Automate, follow this [guide](Getting Started with Xero App Webhooks.md).
+Follow the guide provided by Xero on [developer.xero.com](https://developer.xero.com/documentation/getting-started/getting-started-guide). 
+### Getting Started with Xero App webhooks
+Currently, there is no API available that allows this custom connector to create triggers for flows. Start by creating a new Power Automate cloud flow using the 'When a HTTP request is received' trigger.
+
+![When a HTTP request is received trigger](jNtIA08Isl.png)
+
+After you save the flow, an Azure HTTP POST URL will be created and you will use this with your Xero app webhook. You will then have to use the Xero My Apps UI to [create the webhook(s)](https://developer.xero.com/documentation/webhooks/creating-webhooks).
+
+![Xero app webhook](pCXxjPBIMe.png)
+
+As there is only one notification URL allowed per app, to receive notifications about the second object you will need to create a second app.
 
 ## API Documentation
 [Xero Accounting API](https://developer.xero.com/documentation/api/api-overview)
