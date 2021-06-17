@@ -53,8 +53,5 @@ Allows you to delete a task.
 ## Known Issues and Limitations
 There are no known issues at time of publishing.
 
-## Frequently Asked Questions
-
-
 ## Deployment Instructions
 Follow the instructions provided on the [Power Automate blog](https://flow.microsoft.com/en-us/blog/import-a-connector-from-github-as-a-custom-connector/).
