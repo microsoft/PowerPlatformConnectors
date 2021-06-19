@@ -68,54 +68,6 @@ Perform a partial update of a product identified by {productId}. Provided proper
 #### Delete a product
 Move a product identified by {productId} to the recycling bin.
 
-### Owners
-
-#### List owners
-Return a list of owners.
-#### Get an owner
-Read an owner by given id or userId.
-
-### Pipelines
-
-#### List pipelines
-Return all pipelines for the object type specified by {objectType}.
-#### Create a pipeline
-Create a new pipeline with the provided property values. The entire pipeline object, including its unique ID, will be returned in the response.
-#### Get a pipeline
-Return a single pipeline object identified by its unique {pipelineId}.
-#### Update a pipeline
-Perform a partial update of the pipeline identified by {pipelineId}. The updated pipeline will be returned in the response.
-#### Replace a pipeline
-Replace all the properties of an existing pipeline with the values provided. This will overwrite any existing pipeline stages. The updated pipeline will be returned in the response.
-#### Delete a pipeline
-Move a pipeline identified by {pipelineId} to the recycling bin.
-
-### Pipeline Stages
-
-#### Create a pipeline stage
-Create a new stage associated with the pipeline identified by {pipelineId}. The entire stage object, including its unique ID, will be returned in the response.
-#### Get a pipeline stage
-Return the stage identified by {stageId} associated with the pipeline identified by {pipelineId}.
-#### Update a pipeline stage
-Perform a partial update of the pipeline stage identified by {stageId} associated with the pipeline identified by {pipelineId}. Any properties not included in this update will keep their existing values. The updated stage will be returned in the response.
-#### Replace a pipeline stage
-Replace all the properties of an existing pipeline stage with the values provided. The updated stage will be returned in the response.
-#### Delete a pipeline stage
-Archive the pipeline stage identified by {stageId} associated with the pipeline identified by {pipelineId}.
-
-### Properties
-
-#### List properties
-Read all existing properties for the specified object type and HubSpot account.
-#### Create a property
-Create and return a copy of a new property for the specified object type.
-#### Get a property
-Read a property identified by {propertyName}.
-#### Update a property
-Perform a partial update of a property identified by {propertyName}. Provided fields will be overwritten.
-#### Delete a property
-Move a property identified by {propertyName} to the recycling bin.
-
 ### Line Items
 
 #### List line items
@@ -141,25 +93,6 @@ Read a ticket identified by {ticketId}. {ticketId} refers to the internal object
 Perform a partial update of a ticket identified by {ticketId}. {ticketId} refers to the internal object ID by default, or optionally any unique property value as specified by the idProperty query param. Provided property values will be overwritten. Read-only and non-existent properties will be ignored. Properties values can be cleared by passing an empty string.
 #### Archive a ticket
 Move a ticket identified by {ticketId} to the recycling bin.
-
-### Search
-
-#### Search Companies
-Perform a search across companies.
-#### Search Contacts
-Perform a search across contacts.
-#### Search Deals
-Perform a search across deals.
-#### Search Products
-Perform a search across products.
-#### Search Tickets
-Perform a search across tickets.
-#### Search Line Items
-Perform a search across line items.
-#### Search Quotes
-The CRM search endpoints make getting data more efficient by allowing developers to filter, sort, and search across quotes.
-#### Search Custom Objects
-Perform a search across custom objects.
 
 ## Known Issues and Limitations
 No issues and limitations are known at this time.
