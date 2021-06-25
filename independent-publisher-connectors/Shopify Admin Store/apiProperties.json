@@ -1,0 +1,150 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2generic",
+          "clientId": "",
+          "scopes": [
+            "read_analytics",
+            "read_reports",
+            "write_orders",
+            "read_customers",
+            "write_customers",
+            "write_reports",
+            "read_content",
+            "write_content",
+            "read_product_listings",
+            "read_products",
+            "write_products",
+            "read_checkouts",
+            "write_checkouts",
+            "read_inventory",
+            "write_inventory",
+            "read_marketing_events",
+            "write_marketing_events",
+            "read_shopify_payments_disputes"
+          ],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False"
+          },
+          "customParameters": {
+            "authorizationUrlQueryStringTemplate": {
+              "value": "?client_id={ClientId}&response_type=code&redirect_uri={RedirectUrl}&response_mode=query&scope={Scopes}&prompt=login&state={State}"
+            },
+            "refreshBodyTemplate": {
+              "value": "client_id={ClientId}&refresh_token={RefreshToken}&redirect_uri={RedirectUrl}&grant_type=refresh_token&client_secret={ClientSecret}"
+            },
+            "scopeListDelimiter": {
+              "value": " "
+            },
+            "tokenBodyTemplate": {
+              "value": "client_id={ClientId}&code={Code}&redirect_uri={RedirectUrl}&grant_type=authorization_code&client_secret={ClientSecret}"
+            },
+            "authorizationUrlTemplate": {
+              "value": "{storeURL}/admin/oauth/authorize"
+            },
+            "tokenUrlTemplate": {
+              "value": "{storeURL}/admin/oauth/access_token"
+            },
+            "refreshUrlTemplate": {
+              "value": "{storeURL}/admin/oauth/access_token"
+            }
+          }
+        }
+      },
+      "storeURL": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "Specify the url for your shop. e.g. storename.myshopify.com",
+          "displayName": "Shopify store URL - e.g. storename.myshopify.com",
+          "tooltip": "Provide your Shopify store URL"
+        }
+      },
+      "apiVersion": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "Specify the API Version. eg. 2021-04",
+          "displayName": "Shopify API Version. eg. 2021-04",
+          "tooltip": "Provide your Shopify API Version"
+        }
+      }
+    },
+    "iconBrandColor": "#64943E",
+    "policyTemplateInstances": [
+      {
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('storeURL')/admin/api/@connectionParameters('apiVersion')/"
+        },
+        "templateId": "dynamichosturl",
+        "title": "Route to Shopify store URL"
+      },
+      {
+        "templateId": "pollingtrigger",
+        "title": "PollingTriggerPolicy_7cf48207-28cd-c78a-8585-a10296d6b056",
+        "type": "PollingTrigger",
+        "parameters": {
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "since_id": "@{triggerBody().customers[0].id}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().customers",
+          "x-ms-apimTemplate-operationName": [
+            "CustomerCreated"
+          ]
+        }
+      },
+      {
+        "templateId": "pollingtrigger",
+        "title": "PollingTriggerPolicy_fc0afc25-abb8-4b0a-9cde-a783de2e00f2",
+        "type": "PollingTrigger",
+        "parameters": {
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "since_id": "@{triggerBody().products[0].id}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().products",
+          "x-ms-apimTemplate-operationName": [
+            "ProductCreated"
+          ]
+        }
+      },
+      {
+        "templateId": "pollingtrigger",
+        "title": "PollingTriggerPolicy_cfe5081b-7c3c-367a-0063-bbd8cfcc04dc",
+        "type": "PollingTrigger",
+        "parameters": {
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "since_id": "@{triggerBody().orders[0].id}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().orders",
+          "x-ms-apimTemplate-operationName": [
+            "OrderCreated"
+          ]
+        }
+      },
+      {
+        "templateId": "pollingtrigger",
+        "title": "PollingTriggerPolicy_db0353cd-8a2e-4a12-32fd-a42179679c76",
+        "type": "PollingTrigger",
+        "parameters": {
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "since_id": "@{triggerBody().custom_collections[0].id}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().custom_collections",
+          "x-ms-apimTemplate-operationName": [
+            "CollectionCreated"
+          ]
+        }
+      }
+    ],
+    "publisher": "Vivek Bavishi"
+  }
+}
