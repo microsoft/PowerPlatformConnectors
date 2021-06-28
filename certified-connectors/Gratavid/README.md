@@ -1,5 +1,5 @@
 # Gratavid Connector
-Gratavid is a SaaS service that allows organizations to collect and send personalized videos via email and text message. 
+Gratavid is a SaaS service that allows organizations to collect and send personalized videos.
 
 ## Prerequisites
 
