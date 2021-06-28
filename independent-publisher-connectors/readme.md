@@ -41,7 +41,7 @@ Click here to read through the Independent Publisher Connector Manifesto.
 
 5. If an end service owner reaches out to Microsoft or the Independent Publisher Connector Group and requests that they want ownership of the Independent Publisher connector that connects to their end service, Microsoft reserves the right to provide them with maintainer rights.
 
-Click here to read through the rest of the Independent Publisher Connector Manifesto.
+Click [here](https://github-wiki-see.page/m/microsoft/PowerPlatformConnectors/wiki/Independent-Publisher-Connector-Group-%22Manifesto%22) to read through the rest of the Independent Publisher Connector Manifesto.
 
 ## Top Connector Asks
 
