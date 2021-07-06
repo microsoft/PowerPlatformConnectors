@@ -21,9 +21,9 @@ Click here to read through the Independent Publisher Connector Manifesto.
 
 3. Validation processes: The swagger verification and breaking change validation process will automatically run and leave comments. Please address any requested changes by updating the connector.
 
-4. Once you’ve pushed all necessary changes, leave this comment “certify-connector.” This will trigger the certification process to run automatically. The script will confirm that either the process has started or that there is an error. If there’s an error, the certification team will leave a comment.
+4. Once you’ve pushed all necessary changes, the Certification Team will trigger the certification process to run automatically. The script will confirm that either the process has started or that there is an error. If there’s an error, the certification team will leave a comment. Please address this comment.
 
-5. Microsoft Certification team will release your connector to the testing region and ask you to test your connector. Once you've tested your connector in a preview environment, resolve the comment. Please view our documentation on testing [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-testing). 
+5. Certification team will release your connector to the testing region and ask you to test your connector. Once you've tested your connector in a preview environment, resolve the comment. Please view our documentation on testing [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-testing). 
 
 6. Microsoft Certification team will release your connector to production and a script will sync dev and master branches.
 
