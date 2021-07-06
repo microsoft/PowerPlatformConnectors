@@ -47,7 +47,6 @@ Click [here](https://github-wiki-see.page/m/microsoft/PowerPlatformConnectors/wi
 
 Looking for a connector to build? Here are our top requests today:
 
-- AirTable
 - Autotask
 - Booking
 - Confluence
@@ -56,7 +55,6 @@ Looking for a connector to build? Here are our top requests today:
 - NetSuite
 - Quickbooks
 - Splunk
-- Telegram
 - Toggl
-- Xero
+
 
