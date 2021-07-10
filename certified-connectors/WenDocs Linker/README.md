@@ -21,7 +21,7 @@ You need the following steps:
 Deploying the connector with Power Apps CLI tools:
 
 ```
-paconn create --api-prop apiProperties.json --api-def apiDefinition.swagger.json --icon icon.png
+paconn create --api-prop apiProperties.json --api-def apiDefinition.swagger.json
 ```
 
 ## Known Limitations
