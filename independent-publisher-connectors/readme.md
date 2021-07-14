@@ -17,7 +17,7 @@ Click here to read through the Independent Publisher Connector Manifesto.
 
 1. Create a fork to the ```independent-publisher-connectors directory``` and create your connector in the fork.
 
-2. Submit a pull request to the ```dev``` branch. Ensure that the following files are included: apiProperities.json, apiDefinition.swagger.json, and readme.md. You can find a sample of a readme.md file [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md). Fill out the checkbox to acknowledge that you’ve tested this connector.
+2. Submit a pull request to the ```dev``` branch. Ensure that the following files are included: apiProperities.json, apiDefinition.swagger.json, and readme.md. You can find a sample of a readme.md file [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md). Fill out the checkbox to acknowledge that you’ve tested this connector. In addition to the check box, you need to provide screenshots within the PR template that prove the connector works. Specifically, you need to add show that at least 3 unique operations (actions/triggers) working within a Flow. This can be in one flow or part of multiple flows. For each one of those flows, paste in screenshots of the Flow succeeding. Furthermore, paste in a screenshot from the Test operations section within the Custom Connector UI. We will not accept PRs without these screenshots.
 
 3. Validation processes: The swagger verification and breaking change validation process will automatically run and leave comments. Please address any requested changes by updating the connector.
 
