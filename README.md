@@ -13,6 +13,10 @@ A requirement of our [connector certification program](https://docs.microsoft.co
 The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform. 
 The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 
+## Independent Publisher Connectors
+
+The ```independent-publisher-connectors``` folder contains connectors that are submitted by publishers that do not own the underlying service behind their connector. Anyone can submit a new connector to this folder, add functionality to connectors in this folder, and resolve issues related to the connectors in this folder. The folder is managed by the Independent Publisher Connector Community, which includes Independent Publishers and Project Coordinators. The master branch is maintained by the Microsoft Connector Certification Team, who ensures that the connector version is identical to that deployed in the Power Platform. The dev branch is maintained by the connector maintainer(s) and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. Click here to view the Independent Publisher Connector Manifesto.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
@@ -20,7 +24,7 @@ Contributor License Agreement (CLA) declaring that you have the right to, and ac
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
 
 ### Files to Include
-Please submit the following files: An Open API swagger definition, an API properties file, a README.md, and an Intro.md.
+Please submit the following files: An Open API swagger definition, an API properties file, and a README.md.
 
 ### API Definition (Swagger) File
 
@@ -79,12 +83,7 @@ More information on the each of the properties are given below:
 
 ### README.md
 
-README.md file for your connector includes a description for your connector, any prerequisite customer may need to deploy your connector, how to use your connector and api, how to get credentials, known issues and limiations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/tree/dev/certified-connectors/Lettria%20GDPR%20Compliance).
-
-### INTRO.md
-
-The intention for INTRO.md is to include important information about your connector in the official documentation. Some of information that are part of the README.md can also be a part of INTRO.md. But the difference is that INTRO.md is compiled into the published documentation for the connector. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/certified-connectors/Lettria%20GDPR%20Compliance/intro.md).
-
+README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md).
 
 ### Creating a Fork
 
@@ -132,23 +131,31 @@ Contributions to the open source repository are made through pull requests.
 Prior to submitting a pull request, ensure that your pull request does not contain any sensitive or specific information, for example Client IDs or Client Secrets. 
 Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated. 
 Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions. 
-An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/custom-connectors/AzureKeyVault) connector repository. 
+An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) connector repository. 
 Include this completed `readme.md` in same connector directory which contains the artifacts. 
 
-#### Custom Connectors
-
-Updates to an existing custom connector can be made through a simple pull request to update the custom connector files.
-
-For new custom connectors, create a directory under the ```custom-connectors``` directory and place the connector files in the sub-folder. Ensure that a clear, structured, readme.md is included. 
+Add tags indicating which connector type you are submitting. Connector type name should match the folder name you are submitting to: custom-connector, certified-connector, or independent-publisher-connector.
 
 #### Certified Connectors
 
+For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
+
+Add a tag by selecting the labels option to "certified-connector"
+
 Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner. 
+
 Once a pull request has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
 
 Updates to an existing custom connector can be made through a simple pull request to the ```dev``` branch to update the custom connector files.
 
-For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
+#### Independent Publisher
+
+Follow the same instructions as above on submitting for certification, create a directory under the custom-connector directory and place the connector files in the sub-folder. 
+Add a tag by selecting the labels option to "independent-publisher-connector". 
+
+#### Custom Connector
+
+Follow the same instructions on submitting for certification, create a directory under the independent-publisher-connectors directory and place the connector files in the sub-folder. Add a tag by selecting the labels option to "custom-connector".
 
 ### Tooling and Validation
 
