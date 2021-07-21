@@ -83,7 +83,7 @@ More information on the each of the properties are given below:
 
 ### README.md
 
-README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A sample can be found [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md).
+README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A [template](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/README.template.md) and a [sample](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) in included for reference.
 
 ### Creating a Fork
 
@@ -132,6 +132,7 @@ Prior to submitting a pull request, ensure that your pull request does not conta
 Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated. 
 Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions. 
 An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) connector repository. 
+A [README template](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/README.template.md) is also included for your reference.
 Include this completed `readme.md` in same connector directory which contains the artifacts. 
 
 Add tags indicating which connector type you are submitting. Connector type name should match the folder name you are submitting to: custom-connector, certified-connector, or independent-publisher-connector.
@@ -151,7 +152,7 @@ Updates to an existing custom connector can be made through a simple pull reques
 #### Independent Publisher
 
 Follow the same instructions as above on submitting for certification, create a directory under the custom-connector directory and place the connector files in the sub-folder. 
-Add a tag by selecting the labels option to "independent-publisher-connector". 
+Add a tag by selecting the labels option to "independent-publisher-connector". Your icon color in the API properties file must be set to `#da3b01`, as in `"iconBrandColor": "#da3b01"`. [A sample icon for Independent Publisher connector](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/independent-publisher-icon.png) is included for your reference.
 
 #### Custom Connector
 
