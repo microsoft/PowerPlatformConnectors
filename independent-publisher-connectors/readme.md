@@ -7,6 +7,10 @@ Connector Certification Team, who ensures that the connector version is identica
 maintainer(s) and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 Click here to read through the Independent Publisher Connector Manifesto.
 
+Please note that if you submit an Independent Publisher connector, it is automatically a premium connector. 
+
+If you're considering building and publishing a connector to a Microsoft first party service, email connectorpartnermgmtteam@microsoft.com with an explanation of the connector and its endpoints. We'll work with you to find publishing options.
+
 ## Best Practices for Submission
 - You can only submit one connector per PR. This ensures that our validation process runs smoothly.
 - Please add an email to the support email section. This is in case we need to reach out to you! 
