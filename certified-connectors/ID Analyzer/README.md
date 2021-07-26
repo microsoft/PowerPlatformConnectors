@@ -5,7 +5,7 @@ ID scan technology to extract and verify data from global ID documents including
 You will need the following to proceed:
 
 * [Sign Up](https://www.idanalyzer.com/signup.html) for ID Analyzer account.
-* Log into ID Analyzer's [web portal](https://portal.idanalyzer.com/) with your account details and click on ```API Credentials``` to get your private API key.
+* log into ID Analyzer's [web portal](https://portal.idanalyzer.com/) with your account details and click on ```API Credentials``` to get your private API key.
 
 ## Supported Operations
 The connector supports the following operations:
