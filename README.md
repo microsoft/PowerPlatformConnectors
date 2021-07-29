@@ -151,7 +151,7 @@ Updates to an existing custom connector can be made through a simple pull reques
 
 #### Independent Publisher
 
-Follow the same instructions as above on submitting for certification, create a directory under the custom-connector directory and place the connector files in the sub-folder. 
+Follow the same instructions as above on submitting for certification, create a directory under the "independent-publisher-connectors" directory and place the connector files in the sub-folder. 
 Add a tag by selecting the labels option to "independent-publisher-connector". Your icon color in the API properties file must be set to `#da3b01`, as in `"iconBrandColor": "#da3b01"`. [A sample icon for Independent Publisher connector](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/independent-publisher-icon.png) is included for your reference.
 
 #### Custom Connector
