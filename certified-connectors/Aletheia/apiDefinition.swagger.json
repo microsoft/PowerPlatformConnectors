@@ -3,7 +3,7 @@
   "info": {
     "title": "Aletheia",
     "description": "Aletheia is an online web service providing financial data through an easily accessible HTTP REST API. Access stock data, SEC filings, Insider Trades, earnings calls, and more.",
-    "version": "1.1",
+    "version": "1.5",
     "contact": {
       "name": "Aletheia Support",
       "url": "https://aletheiaapi.com",
@@ -1865,6 +1865,753 @@
             "type": "string",
             "x-ms-summary": "Before date",
             "description": "Filter facts to only before a specific date. YYYYMMDD format."
+          }
+        ]
+      }
+    },
+    "/SubscribeToInsiderTradingWebhook": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "SecEntities": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Cik": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The Central Index Key (SEC-assigned ID) of the company or person",
+                    "title": "CIK"
+                  },
+                  "Name": {
+                    "type": "string",
+                    "description": "Name of the person or company",
+                    "title": "Name"
+                  },
+                  "TradingSymbol": {
+                    "type": "string",
+                    "description": "If this entity is a publicly traded company, the trading symbol of this company",
+                    "title": "Trading Symbol"
+                  }
+                }
+              },
+              "description": "SecEntities"
+            },
+            "SecFilings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Id": {
+                    "type": "string",
+                    "description": "The unique ID of this SEC filing",
+                    "title": "Id"
+                  },
+                  "FilingUrl": {
+                    "type": "string",
+                    "description": "The direct URL to this filing with the SEC",
+                    "title": "Filing URL"
+                  },
+                  "AccessionP1": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The first portion of the 3-part accession number (SEC-assigned unique ID of this filing)",
+                    "title": "Accession Number Part 1"
+                  },
+                  "AccessionP2": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The second portion of the 3-part accession number (SEC-assigned unique ID of this filing)",
+                    "title": "Accession Number Part 2"
+                  },
+                  "AccessionP3": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The third portion of the 3-part accession number (SEC-assigned unique ID of this filing)",
+                    "title": "Accession Number Part 3"
+                  },
+                  "FilingType": {
+                    "type": "integer",
+                    "description": "See https://aletheiaapi.com/docs/#get-filing for filing codes",
+                    "title": "Filing Type Code",
+                    "format": "int32"
+                  },
+                  "ReportedOn": {
+                    "type": "string",
+                    "description": "The date this transaction was reported to the SEC",
+                    "title": "Reported On",
+                    "format": "date"
+                  },
+                  "Issuer": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The Central Index Key of the issuer (company) in this filing",
+                    "title": "Issuer CIK"
+                  },
+                  "_Issuer": {
+                    "type": "string",
+                    "description": "_Issuer",
+                    "title": "",
+                    "x-ms-visibility": "internal"
+                  },
+                  "Owner": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The Central Index Key of the owner (insider) in this transaction",
+                    "title": "Owner CIK"
+                  },
+                  "_Owner": {
+                    "type": "string",
+                    "description": "_Owner",
+                    "title": "",
+                    "x-ms-visibility": "internal"
+                  }
+                }
+              },
+              "description": "SecFilings"
+            },
+            "HeldOfficerPositions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Id": {
+                    "type": "string",
+                    "description": "Unique ID of this held officer position",
+                    "title": "Held Officer Position ID"
+                  },
+                  "Officer": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The CIK of the officer (individual) that this position pertains to",
+                    "title": "Officer CIK"
+                  },
+                  "Company": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The CIK of the company that this title pertains to",
+                    "title": "Company CIK"
+                  },
+                  "PositionTitle": {
+                    "type": "string",
+                    "description": "The title of the named position",
+                    "title": "Position Title"
+                  },
+                  "ObservedOn": {
+                    "type": "string",
+                    "description": "The unique ID of the SEC filing this position was reported on",
+                    "title": "Observed On"
+                  }
+                }
+              },
+              "description": "HeldOfficerPositions"
+            },
+            "SecurityTransactionHoldings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Id": {
+                    "type": "string",
+                    "description": "The unique ID of this reported security transaction or holding",
+                    "title": "Id"
+                  },
+                  "FromFiling": {
+                    "type": "string",
+                    "description": "The unique ID of the SEC filing this transaction originated from (should be included in the body)",
+                    "title": "From Filing"
+                  },
+                  "_FromFiling": {
+                    "type": "string",
+                    "description": "_FromFiling",
+                    "title": "",
+                    "x-ms-visibility": "internal"
+                  },
+                  "EntryType": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "0 = A new transaction (acquisition or disposition), 1 = the insider is just reporting ownership, not a change in ownership",
+                    "title": "Entry Type"
+                  },
+                  "QuantityOwnedFollowingTransaction": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The number of securities that the insider owns following this reported transaction",
+                    "title": "Quantity Owned Following Transaction"
+                  },
+                  "DirectIndirect": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "0 = The owner owns this security directly, 1 = indirect ownership",
+                    "title": "Direct Indirect"
+                  },
+                  "SecurityTitle": {
+                    "type": "string",
+                    "description": "The title of the security being acquired, disposed of, or held",
+                    "title": "Security Title"
+                  },
+                  "SecurityType": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "0 = non-derivative (equity), 1 = derivative",
+                    "title": "Security Type"
+                  },
+                  "AcquiredDisposed": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "0 = Acquired, 1 = Disposed",
+                    "title": "Acquired/Disposed"
+                  },
+                  "Quantity": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The quantity of securities that were acquired, disposed of, or reported",
+                    "title": "Quantity"
+                  },
+                  "PricePerSecurity": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The acquisition or disposition price of the security",
+                    "title": "Price per security"
+                  },
+                  "TransactionDate": {
+                    "type": "string",
+                    "description": "The date this transaction occurred on",
+                    "title": "Transaction Date",
+                    "format": "date"
+                  },
+                  "TransactionCode": {
+                    "type": "integer",
+                    "description": "Specifies the transaction that took place. See http://aletheiaapi.com/docs/#insider-trading-webhook for the list of transaction codes",
+                    "title": "Transaction Code",
+                    "format": "int32"
+                  },
+                  "ConversionOrExercisePrice": {
+                    "type": "number",
+                    "description": "If this security is a derivative, the conversion or exercise price",
+                    "title": "Conversion or Exercise Price",
+                    "format": "float"
+                  },
+                  "ExercisableDate": {
+                    "type": "string",
+                    "description": "If this security is a derivative, the date at which the contract is exercisable",
+                    "title": "Exercisable Date",
+                    "format": "date"
+                  },
+                  "ExpirationDate": {
+                    "type": "string",
+                    "description": "If this security is a derivative, the date at which the security expires",
+                    "title": "Expiration Date",
+                    "format": "date"
+                  },
+                  "UnderlyingSecurityTitle": {
+                    "type": "string",
+                    "description": "If this security is a derivative, the title of the underlying security the derivative is based on",
+                    "title": "Underlying Security Title"
+                  },
+                  "UnderlyingSecurityQuantity": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "If this is a derivative security, the quantity in the underlying contract",
+                    "title": "Underlying Security Quantity"
+                  }
+                }
+              },
+              "description": "SecurityTransactionHoldings"
+            }
+          }
+        }
+      },
+      "post": {
+        "responses": {},
+        "operationId": "InsiderTrading",
+        "summary": "When a new insider trade is reported to the SEC",
+        "description": "Company insiders are required to report their security transactions to the SEC. Be notified within seconds of a new insider transaction in any particular company.",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "endpoint": {
+                  "type": "string",
+                  "description": "endpoint",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": ""
+                },
+                "issuer": {
+                  "type": "string",
+                  "description": "The issuing company of the securities being traded. For example, 'MSFT' for Microsoft or 'AAPL' for Apple.",
+                  "title": "Company"
+                },
+                "owner": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "The CIK of the insider that is trading the securities. For example, the CEO of the company. You must provide the CIK (ID) of the person. You can find the ID for any particular insider with the 'Search Entities' action.",
+                  "title": "Owner"
+                },
+                "transactionType": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Filter to only a specific transaction type, i.e. buys, sells, grants, etc. See http://aletheiaapi.com/docs/#insider-trading-webhook for the list of available transaction type codes.",
+                  "title": "Transaction Type",
+                  "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                  ]
+                },
+                "securityType": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Filter to only a specific security type. 0 = non-derivative, 1 = derivative",
+                  "title": "Security Type",
+                  "enum": [
+                    0,
+                    1
+                  ]
+                }
+              },
+              "required": [
+                "endpoint"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/UnsubscribeWebhook": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "summary": "Unsubscribe Webhook",
+        "description": "Unsubscribe your endpoint from an Aletheia webhook",
+        "operationId": "UnsubscribeWebhook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "endpoint",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/SearchEarningsCalls": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Id": {
+                    "type": "string",
+                    "description": "The unique ID of the earnings call transcript",
+                    "title": "Earnings call transcript ID"
+                  },
+                  "Company": {
+                    "type": "object",
+                    "properties": {
+                      "Id": {
+                        "type": "string",
+                        "description": "The unique ID of the company this earnings call pertains to",
+                        "title": "Company ID"
+                      },
+                      "Name": {
+                        "type": "string",
+                        "description": "Name of the company this earnings call pertains to",
+                        "title": "Company name"
+                      },
+                      "TradingSymbol": {
+                        "type": "string",
+                        "description": "The ticker symbol of the company this earnings call pertains to",
+                        "title": "Trading Symbol"
+                      }
+                    },
+                    "description": "Company"
+                  },
+                  "Period": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "0 = Q1, 1 = Q2, 2 = Q3, 3 = Q4",
+                    "title": "Period"
+                  },
+                  "Year": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The fiscal year in which this earnings call pertains to",
+                    "title": "Fiscal year"
+                  },
+                  "HeldAt": {
+                    "type": "string",
+                    "description": "The date this earnings call was held on",
+                    "title": "Held At",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Search Earnings Call Transcripts",
+        "description": "Search the database for available earnings call transcripts for any publicly traded company",
+        "operationId": "SearchEarningsCalls",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Ticker symbol of the company you are searching for",
+            "x-ms-summary": "Search for an earnings call transcript"
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "The fiscal year of the earnings call you are searching for",
+            "x-ms-summary": "Fiscal year",
+            "format": "int32"
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Q1, Q2, Q3, or Q4. The fiscal quarter of the earnings call you are searching for.",
+            "x-ms-summary": "Fiscal quarter"
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "x-ms-summary": "Max number of results",
+            "format": "int32"
+          }
+        ]
+      }
+    },
+    "/EarningsCall": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "description": "Unique ID of this earnings call",
+                  "title": "Earnings call ID"
+                },
+                "Year": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The fiscal year of this earnings call",
+                  "title": "Fiscal year"
+                },
+                "Period": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "0 = Q1, 1 = Q2, 2 = Q3, 3 = Q4. The fiscal quarter this earnings call pertains to",
+                  "title": "Quarter"
+                },
+                "Company": {
+                  "type": "object",
+                  "properties": {
+                    "Id": {
+                      "type": "string",
+                      "description": "Unique ID of the company this earnings call pertains to",
+                      "title": "Company ID"
+                    },
+                    "Name": {
+                      "type": "string",
+                      "description": "The name of the company this earnings call pertains to",
+                      "title": "Company name"
+                    },
+                    "TradingSymbol": {
+                      "type": "string",
+                      "description": "Ticker symbol of the company this earnings call pertains to",
+                      "title": "Trading Symbol"
+                    }
+                  },
+                  "description": "Company"
+                },
+                "Remarks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "SequenceNumber": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The order in which this remark was spoken, relative to the other remarks",
+                        "title": "Sequence Number"
+                      },
+                      "Remark": {
+                        "type": "string",
+                        "description": "The spoken remark of the call participant (text)",
+                        "title": "Remark"
+                      },
+                      "SpokenBy": {
+                        "type": "object",
+                        "properties": {
+                          "Id": {
+                            "type": "string",
+                            "description": "Unique ID of the call participant who spoke this remark",
+                            "title": "Participant ID"
+                          },
+                          "Name": {
+                            "type": "string",
+                            "description": "Name of the call participant who spoke this remark",
+                            "title": "Participant name"
+                          },
+                          "Title": {
+                            "type": "string",
+                            "description": "The title of the participant who spoke this remark",
+                            "title": "Participant title"
+                          },
+                          "IsExternal": {
+                            "type": "boolean",
+                            "description": "Indicates if the participant who spoke this remark is external to the company (not an employee. For example, an analyst from an investment bank)",
+                            "title": "Is External?",
+                            "enum": [
+                              "true",
+                              "false"
+                            ]
+                          }
+                        },
+                        "description": "SpokenBy"
+                      }
+                    }
+                  },
+                  "description": "Remarks"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Earnings Call Transcript Content",
+        "description": "Get content from an earnings call transcript for any publicly traded company",
+        "operationId": "EarningsCall",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Ticker symbol of the company",
+            "x-ms-summary": "Ticker Symbol"
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Fiscal year of the earnings call you are requesting",
+            "x-ms-summary": "Fiscal year",
+            "format": "int32"
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Q1, Q2, Q3, or Q4. Fiscal period of the earnings call you are requesting",
+            "x-ms-summary": "Fiscal quarter"
+          },
+          {
+            "name": "begin",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Beginning remark to retrieve",
+            "x-ms-summary": "Beginning at",
+            "format": "int32"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Ending remark to retrieve",
+            "x-ms-summary": "Ending at",
+            "format": "int32"
+          }
+        ]
+      }
+    },
+    "/EarningsCallHighlights": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Id": {
+                    "type": "string",
+                    "description": "Unique ID of the spoken remark",
+                    "title": "Remark ID"
+                  },
+                  "Remark": {
+                    "type": "string",
+                    "description": "The spoken remark (what was said)",
+                    "title": "Remark"
+                  },
+                  "SpokenBy": {
+                    "type": "object",
+                    "properties": {
+                      "Id": {
+                        "type": "string",
+                        "description": "Unique ID of the participant who made the remark",
+                        "title": "Participant ID"
+                      },
+                      "Name": {
+                        "type": "string",
+                        "description": "Name of the participant who made this remark",
+                        "title": "Name"
+                      },
+                      "Title": {
+                        "type": "string",
+                        "description": "The title of the participant who spoke this remark",
+                        "title": "Participant Title"
+                      },
+                      "IsExternal": {
+                        "type": "boolean",
+                        "description": "Indicates if the participant who spoke this remark is external to the company (not an employee. For                             example, an analyst from an investment bank)",
+                        "title": "Is External",
+                        "enum": [
+                          "true",
+                          "false"
+                        ]
+                      }
+                    },
+                    "description": "SpokenBy"
+                  },
+                  "Highlights": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "BeginPosition": {
+                          "type": "integer",
+                          "format": "int32",
+                          "description": "BeginPosition"
+                        },
+                        "EndPosition": {
+                          "type": "integer",
+                          "format": "int32",
+                          "description": "EndPosition"
+                        },
+                        "Category": {
+                          "type": "integer",
+                          "format": "int32",
+                          "description": "Category"
+                        },
+                        "Rating": {
+                          "type": "integer",
+                          "format": "int32",
+                          "description": "Rating"
+                        }
+                      }
+                    },
+                    "description": "Highlights"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Earnings Call Highlights",
+        "operationId": "EarningsCallHighlights",
+        "description": "Get the most important and notable remarks that were made on any publicly traded company's earnings call",
+        "parameters": [
+          {
+            "name": "company",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Trading symbol of the company you are reuqesting highlights for",
+            "x-ms-summary": "Trading symbol"
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "description": "Fiscal year of the earnings call you are requesting",
+            "x-ms-summary": "Fiscal year"
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Fiscal quarter of the earnings call you are requesting",
+            "x-ms-summary": "Fiscal quarter"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Category you are requesting highlights for. See https://aletheiaapi.com/docs/#earnings-call-highlights for the available category ID's",
+            "x-ms-summary": "Highlight category",
+            "format": "int32"
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Maximum number of highlights to return",
+            "x-ms-summary": "Max number of highlights",
+            "format": "int32"
           }
         ]
       }
