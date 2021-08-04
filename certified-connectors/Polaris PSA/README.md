@@ -49,6 +49,7 @@ To use Polaris PSA connector, you will need an account with Project Administrato
 ## Deployment Instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
 
+Connect with Polaris Support [here](https://www.replicon.com/polaris/contact-support/ "Polaris Support") for ClientID and Client Secret for authorization
 
 ## Support
 
