@@ -49,7 +49,7 @@ Returns historical current conditions data for a specific location. Current cond
 
 ### [Indices Operations](https://developer.accuweather.com/accuweather-indices-api/apis)
 #### Get Daily Index Values for a Group of Indices
-Returns daily index data for a specific group of indices, by location key.
+Returns daily index data for a specific group of indices, by location key. Not all daily indices' groups data are available for retrieval, check (https://developer.accuweather.com/list-available-daily-indices)
 
 #### Get Daily Index Values for a Specific Index
 Returns daily index data for a specific index, by location key. Not all daily indices data are available for retrieval, check (https://developer.accuweather.com/list-available-daily-indices)
@@ -70,7 +70,8 @@ Returns metadata for all indices in a specified group.
 Visit [AccuWeather APIs reference](https://developer.accuweather.com/apis) page for further details.
 
 ## Known Issues and Limitations
+* Operation "Get Daily Index Values for a Group of Indices"
 * Operation "Get Daily Index Values for a Specific Index"
-Not all daily indices data are available for retrieval, check (https://developer.accuweather.com/list-available-daily-indices)
+Not all daily indices/groups' indices data are available for retrieval, check (https://developer.accuweather.com/list-available-daily-indices)
 
 #### Not all operations provided by AccuWeather are part of the first IP connector submission. I will keep adding/updating/supporting this connector based on your feedback/requests :)
