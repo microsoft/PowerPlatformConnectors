@@ -25,23 +25,6 @@ Using the Connector involves:
 4. Integrate the specific features into your app by using the PUG Gamified Engagement Connector for Dynamics 365.
  
 
-## Supported Operations
-The connector supports the following operations:
-
-* `Get_Player_Accounts`: Gets the list of Player Currency Accounts for a Player
-* `Get_Account_Balance `: Gets the balance of a specific Currency Account for a Player
-* `Add_Points `: Adds a specified amount of Currency to a specific Currency account for a Player
-* `Remove_Points `: Removes a specified amount of Currency from a specific Currency account for a Player
-* `Get_Batch `: Gets a Batch of Items for a Player to select from
-* `Issue_Badge `: Issues a specific Badge to a Player
-* `List_Player_Badges `: Gets a list of Badge instances a Player has
-* `List_Badges `: Gets a list of Badges that are available to be issued to Players
-* `Claim_Instance `: Marks a specific Badge instance as claimed
-* `Get_Badge `: Gets the details of a specific Badge
-* `Get_Badge_Instance `: Gets a Badge instance details that has been given to a Player
-* `Get_Badges_Instances `: Gets a list of Badges instances that has been given to a Player
-* `Add_Item_Instance `: Adds an instance of an item to a player
-
 
 
 
