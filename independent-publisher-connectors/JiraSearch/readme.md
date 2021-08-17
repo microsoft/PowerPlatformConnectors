@@ -15,9 +15,9 @@ Search Jira using JQL language
 This connector uses basic auth. Contact your JIRA administrator to get a suitable account set up. ​
 
 ## Known Issues and Limitations
-All listed issues with the Microsoft supplied Jira connector apply. Consult the Known Issues section at https://docs.microsoft.com/en-us/connectors/jira/
-
 Pay attention to the hostname parameter. You just specify the name of your Jira instance (ie mycompany). You do NOT use a fully qualified domain name (eg mycompany.atlassian.net) 
+
+All listed issues with the Microsoft supplied Jira connector apply. Consult the Known Issues section at https://docs.microsoft.com/en-us/connectors/jira/
 
 ## Frequently Asked Questions
 
