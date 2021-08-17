@@ -16,8 +16,8 @@ Request a doggo with a set width between 1 and 1000. Height will be automaticall
 ### Get a pupper - set width and height
 Request a pupper with a set width and height, both between 1 and 1000.
 
-### Get a pupperino - set width and height with filter
-Request a pupperino with a filter and set width and height, both between 1 and 1000.
+### Get a woofer - set width and height with filter
+Request a woofer with a filter and set width and height, both between 1 and 1000.
 
 ## Known Issues and Limitations
 The random query parameter (?random) will require custom code as it passes no value. This will be added in the future.
