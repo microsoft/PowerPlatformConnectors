@@ -21,9 +21,9 @@ If you're considering building and publishing a connector to a Microsoft first p
 
 ## Contributing to this Directory
 
-1. Develop your connector! View the documentation on how to build a connector [here] https://docs.microsoft.com/en-us/connectors/custom-connectors/define-blank
+1. Develop your connector! View the documentation on how to build a connector [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-blank)
 
-2. Read through [these]https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-submission-ip docs to learn how to prepare your connector artifacts so that you can add them to your PR.
+2. Read through [these](https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-submission-ip) docs to learn how to prepare your connector artifacts so that you can add them to your PR.
 
 3. Create a fork to the ```independent-publisher-connectors directory``` and create your connector in the fork.
 
@@ -61,10 +61,6 @@ Looking for a connector to build? Here are our top requests today:
 - Booking
 - Confluence
 - ConnectWise
-- Etsy
 - NetSuite
 - Quickbooks
 - Splunk
-
-
-
