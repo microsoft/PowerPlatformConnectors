@@ -26,6 +26,7 @@ Following are the internal and external actions used during connection flow to s
 | Set file metadata | Action | /saveMetadataForUpload | Retrieves standard and custom metadata | Important |
 | Create file | Action | /uploadFileFromExternalSystem | Upload a file in Asite project folder. | Important |
 | Get dynamic schema based on project Id and trigger Id || /getFolderAttributesFromTrigger | Get dynamic schema based on project Id and trigger Id | Internal |
+| Select Folder Name || /getSubFolderList | List out all the accessible folders based on your access from the above selected Project. | Internal |
 
 # Reference Link:
 

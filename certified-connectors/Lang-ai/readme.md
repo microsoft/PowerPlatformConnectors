@@ -8,6 +8,7 @@ Lang.ai connector provides a powerful REST API.  Using this API, you can send ne
 ## Prerequisites
 You will need the following to proceed:
 * A Lang.ai susbscription (API token)
+* Selected tenant: `eu.app` (Europe), `us.app` (USA) or `[company]` (Private tenant)
 * At least 1 project created in Lang.ai vía web platform
 
 
