@@ -69,10 +69,13 @@ This connector supports both user account and service principal authentication. 
 ### Service principal
 
 - Assign the new user to Risk_Api role in Dynamics 365 Fraud Protection Application.
+
   - Browse to https://dfp.microsoft.com/
   - Click on "Integration (preview)"
   - Click on "Create new application" in "Step 1: Enable core integration"
+
     ![dfp integration wizard](Images/dfp.png)
+
   - Enter Application display name, select secret option and click on "Create application"
   - In the next screen, copy application (client) ID and Client secret. You need to use these values to configure the connector connection.
 
