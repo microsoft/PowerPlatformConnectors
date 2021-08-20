@@ -55,12 +55,4 @@ Click [here](https://github-wiki-see.page/m/microsoft/PowerPlatformConnectors/wi
 
 ## Top Connector Asks
 
-Looking for a connector to build? Here are our top requests today:
-
-- Autotask
-- Booking
-- Confluence
-- ConnectWise
-- NetSuite
-- Quickbooks
-- Splunk
+Looking for a connector to build? Check out our top requests here: https://github.com/microsoft/PowerPlatformConnectors/wiki/Top-Connector-Asks
