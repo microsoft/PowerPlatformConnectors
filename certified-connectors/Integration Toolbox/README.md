@@ -5,7 +5,7 @@ The Integration Toolbox is an API with a set of operations for integration devel
 ## Prerequisites
 You will need the following to proceed:
 * An Azure subscription or a Microsoft Power Apps or Power Automate plan 
-* An API Key from https://www.integration-toolbox.com
+* An API Key from https://integration-toolbox.com
 
 ## Supported Operations
 The connector supports the following operations:
