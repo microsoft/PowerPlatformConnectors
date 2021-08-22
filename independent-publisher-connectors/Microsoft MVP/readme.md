@@ -10,6 +10,34 @@ Microsoft MVP connector, by an MVP for all MVPs :)
 ## Prerequisites
 You need to be memeber of the [MVP community](https://mvp.microsoft.com/en-us) and you need to subscribe for the [Microsoft MVP API](https://mvpapi.portal.azure-api.net/).
 
+## Authentication
+This connector uses OAuth to authenticate you against your Live ID (hotmail.com) account. 
+To use Microsoft/Office365/Live OAUTH in Power Automate / Power Apps, you must create a application in [(App Registration)](https://portal.azure.com) in Azure.
+
+Follow these steps to create the app registration:
+* Sign in to the Azure portal.
+* If you have access to multiple tenants, in the top menu, use the Directory + subscription filter  to select the tenant in which you want to register an application.
+* Search for and select Azure Active Directory.
+* Under Manage, select App registrations > New registration.
+* Enter a display Name for your application. Users of your application might see the display name when they use the app, for example during sign-in. You can change the display name at any time and multiple app registrations can share the same name. The app registration's automatically generated Application (client) ID, not its display name, uniquely identifies your app within the identity platform.
+* Specify who can use the application, sometimes called its sign-in audience. Select Accounts in any organizational directory and personal Microsoft accounts.
+* Don't enter anything for Redirect URI (optional). We'll configure a redirect URI Later.
+* Select Register to complete the initial app registration.
+* When registration finishes, the Azure portal displays the app registration's Overview pane. You see the Application (client) ID. Also called the client ID, this value uniquely identifies your application in the Microsoft identity platform.
+* To add a redirect URI click on Authentication and under web enter these two URIs:
+** https://login.live.com/oauth20_desktop.srf
+** https://global.consent.azure-apim.net/redirect
+* Make sure that Live SDK support is on under Advanced settings, and click save
+* Finally we need to add a Client Secret (Sometimes called an application password)
+* In the Azure portal, in App registrations, select your application.
+* Select Certificates & secrets > New client secret.
+* Add a description for your client secret.
+* Select an expiration for the secret or specify a custom lifetime.
+* Client secret lifetime is limited to two years (24 months) or less. You can't specify a custom lifetime longer than 24 months.
+* Microsoft recommends that you set an expiration value of less than 12 months.
+* Select Add.
+* Record the secret's value for use in your client application code. This secret value is never displayed again after you leave this page.
+
 ## Supported Operations
 #### Create contribution
 Creates a new Contribution item.
