@@ -30,7 +30,7 @@ The connector supports the following operations:
 
 ## Obtaining credentials
 
-This connector supports both user account and service principal authentication. Typically, this connector is called from Power Automate, so you will need to configure authentication. For more information, see [Dynamics 365 Fraud Protection Samples](https://github.com/microsoft/Dynamics-365-Fraud-Protection-Samples).
+This connector supports both user account and service principal authentication. Typically, this connector is called from Power Automate, so you will need to configure authentication. For more information, see [Dynamics 365 Fraud Protection Samples](https://github.com/microsoft/Dynamics-365-Fraud-Protection-Samples/tree/master/power%20apps%20connector).
 
 ## Host URL
 
@@ -40,8 +40,8 @@ This connector requires host URL. To find the host URL, follow these steps:
 2. Select **Integration (preview)**.
 3. Set the host URL with an API endpoint value.
 
-For more information, see [Dynamics 365 Fraud Protection Samples](https://github.com/microsoft/Dynamics-365-Fraud-Protection-Samples).
+For more information, see [Dynamics 365 Fraud Protection Samples](https://github.com/microsoft/Dynamics-365-Fraud-Protection-Samples/tree/master/power%20apps%20connector).
 
 ## Getting started
 
-For more information about how to get started, see [Dynamics 365 Fraud Protection Samples](https://github.com/microsoft/Dynamics-365-Fraud-Protection-Samples).
+For more information about how to get started, see [Dynamics 365 Fraud Protection Samples](https://github.com/microsoft/Dynamics-365-Fraud-Protection-Samples/tree/master/power%20apps%20connector).
