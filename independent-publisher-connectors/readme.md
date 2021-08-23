@@ -7,27 +7,37 @@ Connector Certification Team, who ensures that the connector version is identica
 maintainer(s) and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 Click here to read through the Independent Publisher Connector Manifesto.
 
+Please note that if you submit an Independent Publisher connector, it is automatically a premium connector. 
+
+If you're considering building and publishing a connector to a Microsoft first party service, email connectorpartnermgmtteam@microsoft.com with an explanation of the connector and its endpoints. We'll work with you to find publishing options.
+
 ## Best Practices for Submission
 - You can only submit one connector per PR. This ensures that our validation process runs smoothly.
+- The PR for your connector should follow the pattern "Connector Name (Independent Publisher)"
 - Please add an email to the support email section. This is in case we need to reach out to you! 
 - Please make sure to fill in the privacy policy parameter with the privacy policy for the end service.
 - Please make sure that your operation descriptions are detailed. This ensures that the user can understand your operation.
+- If your connector uses OAuth, please make sure you provide detailed steps on how to create an app in the readme.md. Otherwise, our team will have to pause certification.
 
 ## Contributing to this Directory
 
-1. Create a fork to the ```independent-publisher-connectors directory``` and create your connector in the fork.
+1. Develop your connector! View the documentation on how to build a connector [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-blank)
 
-2. Submit a pull request to the ```dev``` branch. Ensure that the following files are included: apiProperities.json, apiDefinition.swagger.json, and readme.md. You can find a sample of a readme.md file [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md). Fill out the checkbox to acknowledge that you’ve tested this connector. In addition to the check box, you need to provide screenshots within the PR template that prove the connector works. Specifically, you need to add show that at least 3 unique operations (actions/triggers) working within a Flow. This can be in one flow or part of multiple flows. For each one of those flows, paste in screenshots of the Flow succeeding. Furthermore, paste in a screenshot from the Test operations section within the Custom Connector UI. We will not accept PRs without these screenshots.
+2. Read through [these](https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-submission-ip) docs to learn how to prepare your connector artifacts so that you can add them to your PR.
 
-3. Validation processes: The swagger verification and breaking change validation process will automatically run and leave comments. Please address any requested changes by updating the connector.
+3. Create a fork to the ```independent-publisher-connectors directory``` and create your connector in the fork.
 
-4. Once you’ve pushed all necessary changes, the Certification Team will trigger the certification process to run automatically. The script will confirm that either the process has started or that there is an error. If there’s an error, the certification team will leave a comment. Please address this comment.
+4. Submit a pull request to the ```dev``` branch. Ensure that the following files are included: apiProperities.json, apiDefinition.swagger.json, and readme.md. You can find a sample of a readme.md file [here](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md). Fill out the checkbox to acknowledge that you’ve tested this connector. In addition to the check box, you need to provide screenshots within the PR template that prove the connector works. Specifically, you need to add show that at least 3 unique operations (actions/triggers) working within a Flow. This can be in one flow or part of multiple flows. For each one of those flows, paste in screenshots of the Flow succeeding. Furthermore, paste in a screenshot from the Test operations section within the Custom Connector UI. We will not accept PRs without these screenshots.
 
-5. Certification team will release your connector to the testing region and ask you to test your connector. Once you've tested your connector in a preview environment, resolve the comment. Please view our documentation on testing [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-testing). 
+5. Validation processes: The swagger verification and breaking change validation process will automatically run and leave comments. Please address any requested changes by updating the connector.
 
-6. Microsoft Certification team will release your connector to production and a script will sync dev and master branches.
+6. Once you’ve pushed all necessary changes, the Certification Team will trigger the certification process to run automatically. The script will confirm that either the process has started or that there is an error. If there’s an error, the certification team will leave a comment. Please address this comment.
 
-7. Your GitHub handle will be added to the CODEOWNER file to give you access to submitting PRs directly without having to clone in the future and you will be able to accept changes from other publishers.
+7. Certification team will release your connector to the testing region and ask you to test your connector. Once you've tested your connector in a preview environment, resolve the comment. Please view our documentation on testing [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-testing). 
+
+8. Microsoft Certification team will release your connector to production and a script will sync dev and master branches.
+
+9. Your GitHub handle will be added to the CODEOWNER file to give you access to submitting PRs directly without having to clone in the future and you will be able to accept changes from other publishers.
 
 ## Important Information from the Independent Publisher Connector Manifesto
 
@@ -45,16 +55,4 @@ Click [here](https://github-wiki-see.page/m/microsoft/PowerPlatformConnectors/wi
 
 ## Top Connector Asks
 
-Looking for a connector to build? Here are our top requests today:
-
-- Autotask
-- Booking
-- Confluence
-- ConnectWise
-- Etsy
-- NetSuite
-- Quickbooks
-- Splunk
-- Toggl
-
-
+Looking for a connector to build? Check out our top requests here: https://github.com/microsoft/PowerPlatformConnectors/wiki/Top-Connector-Asks
