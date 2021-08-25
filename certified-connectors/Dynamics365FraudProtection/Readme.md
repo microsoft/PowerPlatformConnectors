@@ -1,10 +1,6 @@
 # Title
 
-Microsoft Dynamics 365 Fraud Protection provides merchants the capability to obtain risk assessment on fraudulent activity associated with e-commerce purchases , fraudulent account sign ups and sign in attempts in their online store front.
-
-## Publisher:
-
-Microsoft
+Microsoft Dynamics 365 Fraud Protection provides merchants the capability to obtain risk assessment on fraudulent activity associated with e-commerce purchases , fraudulent account sign ups and sign in attempts in their online store.
 
 ## Prerequisites
 
