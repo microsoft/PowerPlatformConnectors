@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "title": "Asite",
-    "description": "The Asite connector helps to build a connection between two systems for file exchange. The connector collaborates both systems by uploading and downloading files based on triggers.",
+    "description": "Transform how your teams work together with the Asite connector, the ultimate collaboration solution to build connections between business systems.",
     "version": "1.0.0",
     "contact": {
-      "name": "Asite Solutions Pvt. Ltd.",
+      "name": "Asite Solutions Limited",
       "url": "https://www.asite.com/contact-support",
       "email": "support@asite.com"
     }
@@ -21,7 +21,7 @@
       "propertyName": "Privacy policy",
       "propertyValue": "https://www.asite.com/legal-terms-of-use#privacy"
     },
-    {
+	{
       "propertyName": "Categories",
       "propertyValue": "Collaboration;Content and Files"
     }
@@ -153,6 +153,67 @@
         ]
       }
     },
+    "/getSubFolderList": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK, Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "folder_title": {
+                    "type": "string",
+                    "description": "Please select Folder Name followed by Project name."
+                  },
+                  "folderId": {
+                    "type": "string",
+                    "description": "Unique identification of folder."
+                  },
+                  "folderPath": {
+                    "type": "string",
+                    "description": "Unique identification of folder path."
+                  },
+                  "hasSubFolder": {
+                    "type": "boolean",
+                    "description": "identification of sub-folder."
+                  }
+                }
+              },
+              "description": "There is array of folder data."
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST, Invalid request"
+          }
+        },
+        "summary": "Select Folder Name",
+        "description": "List out all the accessible folders based on your access from the above selected Project.",
+        "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "hasSubFolder",
+            "in": "query",
+            "required": true,
+            "type": "boolean"
+          }
+        ]
+      }
+    },
     "/asitePullDataWebhook": {
       "x-ms-notification-content": {
         "description": "When trigger is initiated in Asite.",
@@ -193,7 +254,7 @@
           }
         },
         "summary": "When an Asite workflow event is triggered",
-        "description": "Workflow triggered to upload a file with metadata and download within the defined folder based on workflow event triggered.",
+        "description": "Triggers a workflow event to upload a file to the project folder.",
         "operationId": "ASITE_TRIGGER_EVENT",
         "x-ms-trigger": "single",
         "consumes": [
@@ -318,8 +379,8 @@
             "description": "BAD REQUEST, Invalid request"
           }
         },
-        "summary": "Download a File",
-        "description": "Download a file by public link via triggered event.",
+        "summary": "Get file content",
+        "description": "Retrieves the file content from Asite.",
         "operationId": "FILE_DOWNLOAD_BY_URL",
         "parameters": [
           {
@@ -471,8 +532,8 @@
             }
           }
         },
-        "summary": "Define File's Metadata",
-        "description": "File's metadata can be defined based on Project and Folder selection. Note: To Upload a file, metadata of file is mandatory to define.",
+        "summary": "Set file metadata",
+        "description": "Retrieves the defined file meta-data and sets the values during the file upload process. Note: it is mandatory to set this action before the Create file action is triggered.",
         "operationId": "SET_FILE_METADATA",
         "parameters": [
           {
@@ -513,17 +574,61 @@
             "type": "string",
             "x-ms-summary": "Folder Name",
             "x-ms-dynamic-values": {
-              "operationId": "GET_ASITE_FOLDER_LIST",
-              "value-collection": "folderData",
+              "capability": "file-picker",
               "value-title": "folder_title",
               "value-path": "folderId",
               "parameters": {
                 "projectId": {
                   "parameter": "projectId"
                 },
-                "isFolderDataReq": true,
-                "isWorkspace": 1,
-                "Accept": "*/*"
+                "fileFilter": [],
+                "hasSubFolder": true
+              }
+            },
+            "x-ms-dynamic-tree": {
+              "settings": {
+                "canSelectParentNodes": true,
+                "canSelectLeafNodes": false
+              },
+              "open": {
+                "operationId": "GET_ASITE_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "itemsPath": "folderData",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "isFolderDataReq": {
+                    "value": true
+                  },
+                  "isWorkspace": {
+                    "value": 1
+                  },
+                  "Accept": {
+                    "value": "*/*"
+            }
+                }
+          },
+              "browse": {
+                "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "folderId": {
+                    "selectedItemValuePath": "folderId"
+                  },
+                  "hasSubFolder": {
+                    "value": true
+                  }
+                }
               }
             }
           },
@@ -611,8 +716,8 @@
             "description": "BAD REQUEST, Invalid request"
           }
         },
-        "summary": "Upload a File",
-        "description": "Upload a file in defined Project and Folder on Asite Platform. Note: Please define metadata of a file before uploading a file.",
+        "summary": "Create file",
+        "description": "Upload a file in Asite project folder.",
         "operationId": "UPLOAD_BINARY_FILE",
         "consumes": [
           "application/json"
@@ -659,17 +764,61 @@
             "type": "string",
             "x-ms-summary": "Folder Name",
             "x-ms-dynamic-values": {
-              "operationId": "GET_ASITE_FOLDER_LIST",
-              "value-collection": "folderData",
+              "capability": "file-picker",
               "value-title": "folder_title",
               "value-path": "folderId",
               "parameters": {
                 "projectId": {
                   "parameter": "projectId"
                 },
-                "isFolderDataReq": true,
-                "isWorkspace": 1,
-                "Accept": "*/*"
+                "fileFilter": [],
+                "hasSubFolder": true
+              }
+            },
+            "x-ms-dynamic-tree": {
+              "settings": {
+                "canSelectParentNodes": true,
+                "canSelectLeafNodes": false
+              },
+              "open": {
+                "operationId": "GET_ASITE_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "itemsPath": "folderData",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "isFolderDataReq": {
+                    "value": true
+                  },
+                  "isWorkspace": {
+                    "value": 1
+                  },
+                  "Accept": {
+                    "value": "*/*"
+            }
+                }
+          },
+              "browse": {
+                "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "folderId": {
+                    "selectedItemValuePath": "folderId"
+                  },
+                  "hasSubFolder": {
+                    "value": true
+                  }
+                }
               }
             }
           },
@@ -765,5 +914,44 @@
       ]
     }
   ],
-  "tags": []
+  "tags": [],
+  "x-ms-capabilities": {
+    "file-picker": {
+      "open": {
+        "operationId": "GET_ASITE_FOLDER_LIST",
+        "parameters": {
+          "projectId": {
+            "parameter": "projectId"
+          },
+          "isFolderDataReq": {
+            "value": true
+          },
+          "isWorkspace": {
+            "value": 1
+          },
+          "Accept": {
+            "value": "*/*"
+          }
+        }
+      },
+      "browse": {
+        "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+        "parameters": {
+          "projectId": {
+            "parameter": "projectId"
+          },
+          "folderId": {
+            "value-property": "folderId"
+          },
+          "hasSubFolder": {
+            "value": true
+          }
+        }
+      },
+      "value-title": "folder_title",
+      "value-path": "folderId",
+      "value-media-property": "MediaType",
+      "value-folder-property": "hasSubFolder"
+    }
+  }
 }
