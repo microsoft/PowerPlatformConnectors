@@ -156,7 +156,7 @@ Add a tag by selecting the labels option to "independent-publisher-connector". Y
 
 #### Custom Connector
 
-Follow the same instructions on submitting for certification, create a directory under the independent-publisher-connectors directory and place the connector files in the sub-folder. Add a tag by selecting the labels option to "custom-connector".
+Follow the same instructions on submitting for certification, create a directory under the custom-connectors directory and place the connector files in the sub-folder. Add a tag by selecting the labels option to "custom-connector".
 
 ### Tooling and Validation
 
