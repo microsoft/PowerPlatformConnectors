@@ -1,10 +1,11 @@
 # Yelp
 The Yelp service allows you to get the best local content, points of interest, and user reviews from millions of businesses across 32 countries.
 
-## Publisher: Ahmad Najjar
+## Publisher
+### Ahmad Najjar
 
 ## Prerequisites
-You need to have an Yelp developer account. You can [sign up](https://www.yelp.com/fusion) for free.
+You need to have n Yelp developer account. You can [sign up](https://www.yelp.com/fusion) for free.
 
 ## Supported Operations
 ### Search Businesses
