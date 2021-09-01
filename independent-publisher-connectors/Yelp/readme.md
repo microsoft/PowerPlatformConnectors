@@ -5,7 +5,7 @@ The Yelp service allows you to get the best local content, points of interest, a
 ### Ahmad Najjar
 
 ## Prerequisites
-You need to have n Yelp developer account. You can [sign up](https://www.yelp.com/fusion) for free.
+You need to have a Yelp developer account. You can [sign up](https://www.yelp.com/fusion) for free.
 
 ## Supported Operations
 ### Search Businesses
