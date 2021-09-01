@@ -1,7 +1,7 @@
 # Yelp
 The Yelp service allows you to get the best local content, points of interest, and user reviews from millions of businesses across 32 countries.
 
-## Publisher 
+## Publisher
 ### Ahmad Najjar
 
 ## Prerequisites
