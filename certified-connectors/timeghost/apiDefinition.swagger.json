@@ -2,14 +2,27 @@
   "swagger": "2.0",
   "info": {
     "title": "timeghost",
-    "description": "timeghost is a dedicated Office 365 solution that integrates perfectly with your work environment. Generate  time reports, invoices and other documents using the timeghost Flow Connector.",
-    "version": "1.0"
+    "description": "timeghost is a dedicated Microsoft 365 / Office 365 solution that integrates perfectly with your work environment. Generate time reports, invoices and other documents using the timeghost connector.",
+    "version": "2.0",
+    "contact": {
+      "name": "timeghost Support",
+      "url": "https://support.timeghost.io",
+      "email": "support@timeghost.io"
+    }
   },
-  "host": "timeghost.azurewebsites.net",
+  "host": "timeghost-api.azurewebsites.net",
   "basePath": "/api",
-  "schemes": ["https"],
-  "consumes": ["application/json", "text/plain"],
-  "produces": ["application/json", "text/plain"],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json",
+    "text/plain"
+  ],
+  "produces": [
+    "application/json",
+    "text/plain"
+  ],
   "paths": {
     "/get/currentuser": {
       "get": {
@@ -25,20 +38,212 @@
             "schema": {}
           }
         },
-        "summary": "Get current User",
-        "description": "Returns the current User.",
-        "operationId": "Get_Currentuser",
+        "summary": "Get Current User",
+        "description": "Returns the current user object with workspaces",
+        "operationId": "Get_Currentuser"
+
+      }
+    },
+    "/get/workspaces/{workspace_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "$ref": "#/definitions/WorkspaceResponse"
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Get Workspace by ID",
+        "description": "Returns the workspace",
+        "operationId": "Get_Workspace_ById",
         "parameters": [
           {
-            "name": "x-functions-key",
+            "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "workspace_id",
+            "x-ms-summary": "Workspace",
+            "description": "Workspace Id",
+            "in": "path",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/get/clients/{clientid}/projects": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProjectsResponse"
+              }
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Get Client Projects",
+        "description": "Get all projects of one client in one workspace.",
+        "operationId": "Get_Client_Projects",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
             "in": "header",
             "required": true,
             "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"]
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "clientid",
+            "x-ms-summary": "Client",
+            "description": "Client (or Client ID)",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Clients",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "required": false,
+            "x-ms-visibility": "advanced",
+            "type": "string",
+            "x-ms-summary": "Filter Query",
+            "description": "An ODATA filter query to restrict the returned projects"
+          }
+        ]
+      }
+    },
+    "/get/projects/{projectid}/tasks": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TasksResponse"
+              }
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Get Project Tasks",
+        "description": "Get all tasks of one project in one workspace.",
+        "operationId": "Get_Project_Tasks",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "clientid",
+            "x-ms-summary": "Client",
+            "description": "Client (or Client ID)",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Clients",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "projectid",
+            "x-ms-summary": "Project",
+            "description": "Project (or Project ID)",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Client_Projects",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "clientid": {
+                  "parameter": "clientid"
+                },
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "Get_Client_Projects",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "parameters": {
+                "clientid": {
+                  "parameterReference": "clientid"
+                },
+                "workspace-id": {
+                  "parameterReference": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "x-ms-visibility": "advanced",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter Query",
+            "description": "An ODATA filter query to restrict the returned tasks"
           }
         ]
       }
@@ -60,30 +265,22 @@
             "schema": {}
           }
         },
-        "summary": "Get projects",
+        "summary": "Get Projects",
         "operationId": "Get_Projects",
         "parameters": [
           {
             "name": "$filter",
             "in": "query",
             "required": false,
+            "x-ms-visibility": "advanced",
             "type": "string",
             "x-ms-summary": "Filter Query",
-            "description": "An ODATA filter query to restrict the returned projects."
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
+            "description": "An ODATA filter query to restrict the returned projects"
           },
           {
             "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
             "in": "header",
             "required": true,
             "type": "string",
@@ -91,16 +288,11 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
-            },
-            "x-ms-summary": "Workspace ID",
-            "description": "Workspace ID"
+              "value-title": "name"
+            }
           }
         ],
-        "description": "Gets projects from a workspace."
+        "description": "Get all projects from a workspace."
       }
     },
     "/add/projects": {
@@ -118,20 +310,9 @@
           }
         },
         "summary": "Add Project",
-        "description": "Adds a project to a workspace.",
+        "description": "Add a project to a workspace.",
         "operationId": "Add_Project",
         "parameters": [
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -141,20 +322,17 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Project"
+              "$ref": "#/definitions/ProjectCreate"
             }
           }
         ]
@@ -175,40 +353,9 @@
           }
         },
         "summary": "Update Project",
-        "description": "Updates a project in a workspace.",
+        "description": "Update a project in a workspace.",
         "operationId": "Update_Project",
         "parameters": [
-          {
-            "name": "ProjectId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "x-ms-url-encoding": "single",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_Projects",
-              "value-path": "id",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>",
-                "workspace-id": {
-                  "parameter": "workspace-id"
-                }
-              }
-            },
-            "description": "Unique id of project to be updated.",
-            "x-ms-summary": "Project ID"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -218,20 +365,36 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "ProjectId",
+            "in": "path",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Projects",
+              "value-path": "id",
               "value-title": "name",
               "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
               }
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Project (or Project ID)",
+            "x-ms-summary": "Project"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Project"
+              "$ref": "#/definitions/ProjectUpdate"
             }
           }
         ]
@@ -255,28 +418,9 @@
           }
         },
         "summary": "Get Times",
-        "description": "Gets times from a workspace.",
+        "description": "Get all times from a workspace.",
         "operationId": "Get_Times",
         "parameters": [
-          {
-            "name": "$filter",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "x-ms-summary": "Filter Query",
-            "description": "An ODATA filter query to restrict the returned projects."
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -286,13 +430,467 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "$filter-date-range",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "today",
+            "x-ms-summary": "Date range",
+            "description": "Filter times by range",
+            "enum": [
+              "today",
+              "yesterday",
+              "this_week",
+              "last_week",
+              "this_month",
+              "last_month",
+              "this_year",
+              "last_year",
+              "all_time"
+            ],
+            "x-ms-enum-values": [
+              {
+                "displayName": "Today",
+                "value": "today"
+              },
+              {
+                "displayName": "Yesterday",
+                "value": "yesterday"
+              },
+              {
+                "displayName": "This Week",
+                "value": "this_week"
+              },
+              {
+                "displayName": "Last Week",
+                "value": "last_week"
+              },
+              {
+                "displayName": "This Month",
+                "value": "this_month"
+              },
+              {
+                "displayName": "Last Month",
+                "value": "last_month"
+              },
+              {
+                "displayName": "This Year",
+                "value": "this_year"
+              },
+              {
+                "displayName": "Last Year",
+                "value": "last_year"
+              },
+              {
+                "displayName": "All-Time",
+                "value": "all_time"
+              }
+            ]
+          },
+          {
+            "name": "$filter-user",
+            "in": "query",
+            "x-ms-summary": "Filter by User",
+            "description": "Filter the times by user",
+            "required": false,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Workspace_ById",
+              "value-path": "id",
               "value-title": "name",
+              "value-collection": "users",
               "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameter": "workspace-id"
+                }
               }
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "x-ms-dynamic-list": {
+              "operationId": "Get_Workspace_ById",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "itemsPath": "users",
+              "parameters": {
+                "workspace-id": {
+                  "parameterReference": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameterReference": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "Filter Query",
+            "description": "An ODATA filter query to restrict the returned times"
+          }
+        ]
+      }
+    },
+    "/get/projects/{projectid}/times": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TimesResponse"
+              }
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Get Project Times",
+        "description": "Get all times of one project in one workspace.",
+        "operationId": "Get_Project_Times",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "clientid",
+            "x-ms-summary": "Client",
+            "description": "Client (or Client ID)",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Clients",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "projectid",
+            "x-ms-summary": "Project",
+            "description": "Project (or Project ID)",
+            "in": "path",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Client_Projects",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "clientid": {
+                  "parameter": "clientid"
+                },
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "Get_Client_Projects",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "parameters": {
+                "clientid": {
+                  "parameterReference": "clientid"
+                },
+                "workspace-id": {
+                  "parameterReference": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "$filter-date-range",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "today",
+            "x-ms-summary": "Date range",
+            "description": "Filter times by range",
+            "enum": [
+              "today",
+              "yesterday",
+              "this_week",
+              "last_week",
+              "this_month",
+              "last_month",
+              "this_year",
+              "last_year",
+              "all_time"
+            ],
+            "x-ms-enum-values": [
+              {
+                "displayName": "Today",
+                "value": "today"
+              },
+              {
+                "displayName": "Yesterday",
+                "value": "yesterday"
+              },
+              {
+                "displayName": "This Week",
+                "value": "this_week"
+              },
+              {
+                "displayName": "Last Week",
+                "value": "last_week"
+              },
+              {
+                "displayName": "This Month",
+                "value": "this_month"
+              },
+              {
+                "displayName": "Last Month",
+                "value": "last_month"
+              },
+              {
+                "displayName": "This Year",
+                "value": "this_year"
+              },
+              {
+                "displayName": "Last Year",
+                "value": "last_year"
+              },
+              {
+                "displayName": "All-Time",
+                "value": "all_time"
+              }
+            ]
+          },
+          {
+            "name": "$filter-user",
+            "in": "query",
+            "x-ms-summary": "Filter by User",
+            "description": "Filter the times by user",
+            "required": false,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Workspace_ById",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "users",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "Get_Workspace_ById",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "itemsPath": "users",
+              "parameters": {
+                "workspace-id": {
+                  "parameterReference": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameterReference": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "Filter Query",
+            "description": "An ODATA filter query to restrict the returned times"
+          }
+        ]
+      }
+    },
+    "/get/clients/{clientid}/times": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TimesResponse"
+              }
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Get Client Times",
+        "description": "Get all times of one client in one workspace.",
+        "operationId": "Get_Client_Times",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "clientid",
+            "x-ms-summary": "Client",
+            "description": "Client (or Client ID)",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Clients",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "$filter-date-range",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "today",
+            "x-ms-summary": "Date range",
+            "description": "Filter times by range",
+            "enum": [
+              "today",
+              "yesterday",
+              "this_week",
+              "last_week",
+              "this_month",
+              "last_month",
+              "this_year",
+              "last_year",
+              "all_time"
+            ],
+            "x-ms-enum-values": [
+              {
+                "displayName": "Today",
+                "value": "today"
+              },
+              {
+                "displayName": "Yesterday",
+                "value": "yesterday"
+              },
+              {
+                "displayName": "This Week",
+                "value": "this_week"
+              },
+              {
+                "displayName": "Last Week",
+                "value": "last_week"
+              },
+              {
+                "displayName": "This Month",
+                "value": "this_month"
+              },
+              {
+                "displayName": "Last Month",
+                "value": "last_month"
+              },
+              {
+                "displayName": "This Year",
+                "value": "this_year"
+              },
+              {
+                "displayName": "Last Year",
+                "value": "last_year"
+              },
+              {
+                "displayName": "All-Time",
+                "value": "all_time"
+              }
+            ]
+          },
+          {
+            "name": "$filter-user",
+            "in": "query",
+            "x-ms-summary": "Filter by User",
+            "description": "Filter the times by user",
+            "required": false,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Workspace_ById",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "users",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "Get_Workspace_ById",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "itemsPath": "users",
+              "parameters": {
+                "workspace-id": {
+                  "parameterReference": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameterReference": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "x-ms-visibility": "advanced",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter Query",
+            "description": "An ODATA filter query to restrict the returned times"
           }
         ]
       }
@@ -312,20 +910,9 @@
           }
         },
         "summary": "Add Time",
-        "description": "Adds a time to a workspace.",
+        "description": "Add a time to a project within a workspace.",
         "operationId": "Add_Time",
         "parameters": [
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -335,20 +922,17 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Time"
+              "$ref": "#/definitions/TimeCreate"
             }
           }
         ]
@@ -369,7 +953,7 @@
           }
         },
         "summary": "Update Time",
-        "description": "Updates a time in a workspace.",
+        "description": "Update a time in a workspace.",
         "operationId": "Update_Time",
         "parameters": [
           {
@@ -378,19 +962,8 @@
             "required": true,
             "x-ms-url-encoding": "single",
             "type": "string",
-            "description": "Unique id of time to be updated.",
+            "description": "Unique ID of time to be updated",
             "x-ms-summary": "Time ID"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
           },
           {
             "name": "workspace-id",
@@ -401,83 +974,20 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Time"
+              "$ref": "#/definitions/TimeUpdate"
             }
           }
         ]
-      }
-    },
-    "/get/tasks": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "200",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/TasksResponse"
-              }
-            }
-          },
-          "default": {
-            "description": "default",
-            "schema": {}
-          }
-        },
-        "summary": "Get Tasks",
-        "parameters": [
-          {
-            "name": "$filter",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "An ODATA filter query to restrict the returned projects.",
-            "x-ms-summary": "Filter Query"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
-          {
-            "name": "workspace-id",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_Currentuser",
-              "value-path": "id",
-              "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
-            },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
-          }
-        ],
-        "description": "Gets tasks from a workspace.",
-        "operationId": "Get_Tasks"
       }
     },
     "/add/tasks": {
@@ -495,20 +1005,9 @@
           }
         },
         "summary": "Add Task",
-        "description": "Adds a task to a workspace.",
+        "description": "Add a task to a workspace.",
         "operationId": "Add_Task",
         "parameters": [
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -518,20 +1017,17 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Task"
+              "$ref": "#/definitions/TaskCreate"
             }
           }
         ]
@@ -552,40 +1048,9 @@
           }
         },
         "summary": "Update Task",
+        "description": "Update a task in a workspace.",
         "operationId": "Update_Task",
-        "description": "Updates a task in a workspace.",
         "parameters": [
-          {
-            "name": "TaskId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "x-ms-url-encoding": "single",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_Tasks",
-              "value-path": "id",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>",
-                "workspace-id": {
-                  "parameter": "workspace-id"
-                }
-              }
-            },
-            "description": "Unique id of task to be updated.",
-            "x-ms-summary": "Task ID"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -595,20 +1060,26 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "TaskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "description": "Unique ID of the task",
+            "x-ms-summary": "Task ID"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Task"
+              "$ref": "#/definitions/TaskUpdate"
             }
           }
         ]
@@ -638,19 +1109,9 @@
             "in": "query",
             "required": false,
             "type": "string",
+            "x-ms-visibility": "advanced",
             "x-ms-summary": "Filter Query",
-            "description": "An ODATA filter query to restrict the returned projects."
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
+            "description": "An ODATA filter query to restrict the returned clients"
           },
           {
             "name": "workspace-id",
@@ -661,16 +1122,13 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           }
         ],
-        "description": "Gets clients from a workspace.",
+        "description": "Get all clients from a workspace.",
         "operationId": "Get_Clients"
       }
     },
@@ -689,20 +1147,9 @@
           }
         },
         "summary": "Add Client",
-        "description": "Adds a client to a workspace.",
+        "description": "Add a client to a workspace.",
         "operationId": "Add_Client",
         "parameters": [
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -712,20 +1159,17 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Client"
+              "$ref": "#/definitions/ClientCreate"
             }
           }
         ]
@@ -746,9 +1190,23 @@
           }
         },
         "summary": "Update Client",
-        "description": "Updates a client in a workspace.",
+        "description": "Update a client in a workspace.",
         "operationId": "Update_Client",
         "parameters": [
+          {
+            "name": "workspace-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
           {
             "name": "ClientId",
             "in": "path",
@@ -760,26 +1218,44 @@
               "value-path": "id",
               "value-title": "name",
               "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>",
                 "workspace-id": {
                   "parameter": "workspace-id"
                 }
               }
             },
-            "x-ms-summary": "Client ID",
-            "description": "Unique id of client to be updated."
+            "x-ms-summary": "Client",
+            "description": "Client (or Client ID)"
           },
           {
-            "name": "x-functions-key",
-            "in": "header",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
+            "schema": {
+              "$ref": "#/definitions/ClientUpdate"
+            }
+          }
+        ]
+      }
+    },
+    "/get/groups": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GroupsResponse"
+              }
+            }
           },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Get Workspace Groups",
+        "parameters": [
           {
             "name": "workspace-id",
             "in": "header",
@@ -789,20 +1265,116 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          }
+        ],
+        "description": "Get all groups from a workspace.",
+        "operationId": "Get_Groups"
+      }
+    },
+    "/add/groups": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "$ref": "#/definitions/GroupsResponse"
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Add Group",
+        "description": "Add a group to a workspace.",
+        "operationId": "Add_Group",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Client"
+              "$ref": "#/definitions/GroupCreate"
+            }
+          }
+        ]
+      }
+    },
+    "/update/groups/{GroupId}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "$ref": "#/definitions/GroupsResponse"
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Update Group",
+        "description": "Update a group in a workspace.",
+        "operationId": "Update_Group",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "GroupId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Groups",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            },
+            "x-ms-summary": "Group",
+            "description": "Group (or Group ID)"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GroupUpdate"
             }
           }
         ]
@@ -825,19 +1397,8 @@
             "schema": {}
           }
         },
-        "summary": "Get Tags",
+        "summary": "Get Time Tags",
         "parameters": [
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -847,17 +1408,27 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "required": true,
+            "x-ms-visibility": "advanced",
+            "type": "string",
+            "default": "tagType eq 1",
+            "x-ms-summary": "Filter Query",
+            "description": "An ODATA filter query to restrict the returned projects",
+            "enum": [
+              "tagType eq 1"
+            ]
           }
         ],
-        "description": "Gets tags from a workspace.",
-        "operationId": "Get_Tags"
+        "description": "Get all time tags from a workspace.",
+        "operationId": "Get_Time_Tags"
       }
     },
     "/add/tags": {
@@ -877,21 +1448,10 @@
             "schema": {}
           }
         },
-        "summary": "Add Tag",
-        "description": "Adds a tag to a workspace.",
-        "operationId": "Add_Tag",
+        "summary": "Add Time Tag",
+        "description": "Add a time tag to a workspace.",
+        "operationId": "Add_Time_Tag",
         "parameters": [
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -901,20 +1461,17 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Tag"
+              "$ref": "#/definitions/TimeTagCreate"
             }
           }
         ]
@@ -937,41 +1494,10 @@
             "schema": {}
           }
         },
-        "summary": "Update Tag",
-        "description": "Updates a tag in a workspace.",
-        "operationId": "Update_Tag",
+        "summary": "Update Time Tag",
+        "description": "Update a time tag in a workspace.",
+        "operationId": "Update_Time_Tag",
         "parameters": [
-          {
-            "name": "TagId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "x-ms-url-encoding": "single",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_Tags",
-              "value-path": "id",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>",
-                "workspace-id": {
-                  "parameter": "workspace-id"
-                }
-              }
-            },
-            "x-ms-summary": "Tag ID",
-            "description": "Unique id of tag to be updated."
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
           {
             "name": "workspace-id",
             "in": "header",
@@ -981,27 +1507,139 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "TagId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Time_Tags",
+              "value-path": "id",
               "value-title": "name",
               "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                },
+                "$filter": "tagType eq 1"
               }
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "x-ms-summary": "Tag",
+            "description": "Tag (or Tag ID)"
           },
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Tag"
+              "$ref": "#/definitions/TimeTagUpdate"
+            }
+          }
+        ]
+      }
+    },
+    "/add/customfeedevent": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "$ref": "#/definitions/CustomFeedEventResponse"
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Add Custom Feed Event",
+        "description": "Add an event to the users feed. Entry is automatically deleted after 180 days.",
+        "operationId": "Add_CustomFeedEvent",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CustomFeedEventCreate"
+            }
+          }
+        ]
+      }
+    },
+    "/update/customfeedevent/{EventId}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "$ref": "#/definitions/CustomFeedEventResponse"
+            }
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Update Custom Feed Event",
+        "description": "Update a custom feed entry in a workspace.",
+        "operationId": "Update_CustomFeedEvent",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "EventId",
+            "in": "path",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "description": "Custom Feed Event ID",
+            "x-ms-summary": "ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CustomFeedEventUpdate"
             }
           }
         ]
       }
     },
     "/delete/{ItemType}/{ItemId}": {
-      "post": {
+      "delete": {
         "responses": {
           "default": {
             "description": "default",
@@ -1009,7 +1647,7 @@
           }
         },
         "summary": "Delete Item",
-        "description": "Deletes an item from a workspace.",
+        "description": "Delete an item from a workspace.",
         "operationId": "Delete_Item",
         "parameters": [
           {
@@ -1018,9 +1656,42 @@
             "required": true,
             "x-ms-url-encoding": "single",
             "type": "string",
-            "enum": ["projects", "tasks", "times", "clients", "tags"],
+            "enum": [
+              "projects",
+              "tasks",
+              "times",
+              "clients",
+              "tags",
+              "customfeedevent"
+            ],
+            "x-ms-enum-values": [
+              {
+                "displayName": "Project",
+                "value": "projects"
+              },
+              {
+                "displayName": "Task",
+                "value": "tasks"
+              },
+              {
+                "displayName": "Time",
+                "value": "times"
+              },
+              {
+                "displayName": "Client",
+                "value": "clients"
+              },
+              {
+                "displayName": "Tag",
+                "value": "tags"
+              },
+              {
+                "displayName": "Custom Feed Event",
+                "value": "customfeedevent"
+              }
+            ],
             "x-ms-summary": "Item Type",
-            "description": "Type of item that will be deleted."
+            "description": "Type of item that will be deleted"
           },
           {
             "name": "ItemId",
@@ -1029,18 +1700,7 @@
             "x-ms-url-encoding": "single",
             "type": "string",
             "x-ms-summary": "Item ID",
-            "description": "ID of the item that will be deleted."
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
+            "description": "ID of the item that will be deleted"
           },
           {
             "name": "workspace-id",
@@ -1051,13 +1711,10 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+              "value-title": "name"
             },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
           }
         ]
       }
@@ -1076,201 +1733,466 @@
             "schema": {}
           }
         },
-        "summary": "Create Excel Report",
+        "summary": "Create Times Excel Report",
         "description": "Returns an Excel file containing a report of the specified time.",
         "operationId": "Create_Excel_Report",
         "parameters": [
           {
-            "name": "startDate",
+            "name": "workspace-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "$filter-date-range",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "Start Date for Excelreport",
+            "default": "today",
+            "x-ms-summary": "Date range",
+            "description": "Filter times by range",
+            "enum": [
+              "today",
+              "yesterday",
+              "this_week",
+              "last_week",
+              "this_month",
+              "last_month",
+              "this_year",
+              "last_year"
+            ],
+            "x-ms-enum-values": [
+              {
+                "displayName": "Today",
+                "value": "today"
+              },
+              {
+                "displayName": "Yesterday",
+                "value": "yesterday"
+              },
+              {
+                "displayName": "This Week",
+                "value": "this_week"
+              },
+              {
+                "displayName": "Last Week",
+                "value": "last_week"
+              },
+              {
+                "displayName": "This Month",
+                "value": "this_month"
+              },
+              {
+                "displayName": "Last Month",
+                "value": "last_month"
+              },
+              {
+                "displayName": "This Year",
+                "value": "this_year"
+              },
+              {
+                "displayName": "Last Year",
+                "value": "last_year"
+              }
+            ]
+          },
+          {
+            "name": "$filter-user",
+            "in": "query",
+            "x-ms-summary": "Filter by User",
+            "description": "Filter the times by user",
+            "required": false,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Workspace_ById",
+              "value-path": "id",
+              "value-title": "name",
+              "value-collection": "users",
+              "parameters": {
+                "workspace-id": {
+                  "parameter": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameter": "workspace-id"
+                }
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "Get_Workspace_ById",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "itemsPath": "users",
+              "parameters": {
+                "workspace-id": {
+                  "parameterReference": "workspace-id"
+                },
+                "workspace_id": {
+                  "parameterReference": "workspace-id"
+                }
+              }
+            }
+          },
+          {
+            "name": "groupedByProject",
+            "in": "query",
+            "required": true,
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Grouped by Project",
+            "description": "Project times are divided into workbooks"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-visibility": "advanced",
+            "description": "Start date for Excel report (overwrites date range) format: yyyy-MM-ddTHH:mm:ss.SSSZ",
             "x-ms-summary": "Start Date"
           },
           {
             "name": "endDate",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "string",
-            "description": "End Date for Excelreport",
+            "x-ms-visibility": "advanced",
+            "description": "End date for Excel report (overwrites date range) format: yyyy-MM-ddTHH:mm:ss.SSSZ",
             "x-ms-summary": "End Date"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "x-ms-visibility": "internal",
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
-          {
-            "name": "workspace-id",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_Currentuser",
-              "value-path": "id",
-              "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
-            },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
           }
         ]
       }
     },
-    "/get/projects/{ProjectID}": {
-      "get": {
+    "/register_webhook/clients": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/ClientsResponse"
+        },
+        "description": "Client"
+      },
+      "post": {
         "responses": {
           "200": {
             "description": "200",
+            "schema": {}
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Client Trigger",
+        "description": "If a client is created, changed or deleted in timeghost, this trigger runs.",
+        "operationId": "ClientChanges",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
+            },
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/ProjectsResponse"
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the webhook so that it can be found in the settings in timeghost.",
+                  "title": "Name of the webhook",
+                  "x-ms-visibility": "advanced",
+                  "default": "Power Automate Client Trigger"
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "entity",
+                  "title": "",
+                  "x-ms-visibility": "internal",
+                  "default": "clients"
+                },
+                "events": {
+                  "description": "Select the events to listen to",
+                  "x-ms-summary": "Run on",
+                  "x-ms-visibility": "advanced",
+                  "type": "array",
+                  "default": [
+                    "add",
+                    "update",
+                    "delete"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "update",
+                      "delete"
+                    ],
+                    "x-ms-enum-values": [
+                      {
+                        "displayName": "New client added",
+                        "value": "add"
+                      },
+                      {
+                        "displayName": "Existing client updated",
+                        "value": "update"
+                      },
+                      {
+                        "displayName": "Client deleted",
+                        "value": "delete"
+                      }
+                    ]
+                  }
+                },
+                "active": {
+                  "type": "boolean",
+                  "description": "active",
+                  "title": "",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "x-ms-visibility": "internal",
+                  "default": true
+                },
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true,
+                      "title": ""
+                    },
+                    "basicAuth": {
+                      "type": "object",
+                      "properties": {
+                        "userName": {
+                          "type": "string",
+                          "description": "userName",
+                          "title": "Basic-Auth: Username",
+                          "x-ms-visibility": "internal"
+                        },
+                        "pass": {
+                          "type": "string",
+                          "description": "pass",
+                          "title": "Basic-Auth: Passwort",
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "description": "basicAuth"
+                    }
+                  },
+                  "description": "config",
+                  "required": [
+                    "url"
+                  ]
+                }
+              },
+              "required": [
+                "config",
+                "active",
+                "entity",
+                "name"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/register_webhook/tags": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/TagsResponse"
+        },
+        "description": "Tag"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {}
+          },
+          "default": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Tag Trigger",
+        "description": "If a tag is created, changed or deleted in timeghost, this trigger runs.",
+        "operationId": "TagChanges",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_Currentuser",
+              "value-path": "id",
+              "value-collection": "workspaces",
+              "value-title": "name"
             }
           },
-          "default": {
-            "description": "default",
-            "schema": {}
-          }
-        },
-        "summary": "Get Project by ID",
-        "operationId": "Get_ProjectByID",
-        "parameters": [
           {
-            "name": "ProjectID",
-            "in": "path",
-            "x-ms-url-encoding": "single",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string",
-            "description": "Unique id of project to be returned.",
-            "x-ms-summary": "Project ID"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
-          {
-            "name": "workspace-id",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "description": "Workspace ID",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_Currentuser",
-              "value-path": "id",
-              "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
-            },
-            "x-ms-summary": "Workspace ID"
-          }
-        ],
-        "description": "Gets project with specified id from a workspace."
-      }
-    },
-    "/get/times/{TimeID}": {
-      "get": {
-        "responses": {
-          "default": {
-            "description": "default",
-            "schema": {}
-          }
-        },
-        "summary": "Get Time by ID",
-        "operationId": "Get_TimeByID",
-        "description": "Gets time with specified id from a workspace.",
-        "parameters": [
-          {
-            "name": "TimeID",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "type": "string",
-            "description": "Unique id of time to be returned.",
-            "x-ms-summary": "Time ID"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "x-ms-visibility": "internal",
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
-          {
-            "name": "workspace-id",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_Currentuser",
-              "value-path": "id",
-              "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the webhook so that it can be found in the settings in timeghost.",
+                  "title": "Name of the webhook",
+                  "x-ms-visibility": "advanced",
+                  "default": "Power-Automate Tag Trigger"
+                },
+                "events": {
+                  "description": "Select the events to listen to",
+                  "x-ms-summary": "Run on",
+                  "x-ms-visibility": "advanced",
+                  "type": "array",
+                  "default": [
+                    "add",
+                    "update",
+                    "delete"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "update",
+                      "delete"
+                    ],
+                    "x-ms-enum-values": [
+                      {
+                        "displayName": "New tag added",
+                        "value": "add"
+                      },
+                      {
+                        "displayName": "Existing tag updated",
+                        "value": "update"
+                      },
+                      {
+                        "displayName": "Tag deleted",
+                        "value": "delete"
+                      }
+                    ]
+                  }
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "entity",
+                  "title": "",
+                  "x-ms-visibility": "internal",
+                  "default": "tags"
+                },
+                "active": {
+                  "type": "boolean",
+                  "description": "active",
+                  "title": "",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "x-ms-visibility": "internal",
+                  "default": true
+                },
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true,
+                      "title": ""
+                    },
+                    "basicAuth": {
+                      "type": "object",
+                      "properties": {
+                        "userName": {
+                          "type": "string",
+                          "description": "userName",
+                          "title": "Basic-Auth: Username",
+                          "x-ms-visibility": "internal"
+                        },
+                        "pass": {
+                          "type": "string",
+                          "description": "pass",
+                          "title": "Basic-Auth: Passwort",
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "description": "basicAuth"
+                    }
+                  },
+                  "description": "config",
+                  "required": [
+                    "url"
+                  ]
+                }
+              },
+              "required": [
+                "config",
+                "active",
+                "entity",
+                "name"
+              ]
             }
           }
         ]
       }
     },
-    "/get/clients/{ClientID}": {
-      "get": {
+    "/register_webhook/projects": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/ProjectsResponse"
+        },
+        "description": "Project"
+      },
+      "post": {
         "responses": {
+          "200": {
+            "description": "200",
+            "schema": {}
+          },
           "default": {
             "description": "default",
             "schema": {}
           }
         },
-        "summary": "Get Client by ID",
-        "description": "Gets client with specified id from a workspace.",
-        "operationId": "Get_ClientByID",
+        "summary": "Project Trigger",
+        "description": "If a project is created, changed or deleted in timeghost, this trigger runs.",
+        "operationId": "ProjectChanges",
+        "x-ms-trigger": "single",
         "parameters": [
           {
-            "name": "ClientID",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Client ID",
-            "description": "Unique id of client to be returned."
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
-          {
             "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
             "in": "header",
             "required": true,
             "type": "string",
@@ -1278,51 +2200,147 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
-            },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the webhook so that it can be found in the settings in timeghost.",
+                  "title": "Name of the webhook",
+                  "x-ms-visibility": "advanced",
+                  "default": "Power-Automate Project Trigger"
+                },
+                "events": {
+                  "description": "Select the events to listen to",
+                  "x-ms-summary": "Run on",
+                  "x-ms-visibility": "advanced",
+                  "type": "array",
+                  "default": [
+                    "add",
+                    "update",
+                    "delete"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "update",
+                      "delete"
+                    ],
+                    "x-ms-enum-values": [
+                      {
+                        "displayName": "New project added",
+                        "value": "add"
+                      },
+                      {
+                        "displayName": "Existing project updated",
+                        "value": "update"
+                      },
+                      {
+                        "displayName": "Project deleted",
+                        "value": "delete"
+                      }
+                    ]
+                  }
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "entity",
+                  "title": "",
+                  "x-ms-visibility": "internal",
+                  "default": "projects"
+                },
+                "active": {
+                  "type": "boolean",
+                  "description": "active",
+                  "title": "",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "x-ms-visibility": "internal",
+                  "default": true
+                },
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true,
+                      "title": ""
+                    },
+                    "basicAuth": {
+                      "type": "object",
+                      "properties": {
+                        "userName": {
+                          "type": "string",
+                          "description": "userName",
+                          "title": "Basic-Auth: Username",
+                          "x-ms-visibility": "internal"
+                        },
+                        "pass": {
+                          "type": "string",
+                          "description": "pass",
+                          "title": "Basic-Auth: Passwort",
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "description": "basicAuth"
+                    }
+                  },
+                  "description": "config",
+                  "required": [
+                    "url"
+                  ]
+                }
+              },
+              "required": [
+                "config",
+                "active",
+                "entity",
+                "name"
+              ]
+            }
           }
         ]
       }
     },
-    "/get/tasks/{TaskID}": {
-      "get": {
+    "/register_webhook/tasks": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/TasksResponse"
+        },
+        "description": "Task"
+      },
+      "post": {
         "responses": {
+          "200": {
+            "description": "200",
+            "schema": {}
+          },
           "default": {
             "description": "default",
             "schema": {}
           }
         },
-        "summary": "Get Task by ID",
-        "description": "Gets task with specified id from a workspace.",
-        "operationId": "Get_TaskByID",
+        "summary": "Task Trigger",
+        "description": "If a task is created, changed or deleted in timeghost, this trigger runs.",
+        "operationId": "TaskChanges",
+        "x-ms-trigger": "single",
         "parameters": [
           {
-            "name": "TaskID",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "type": "string",
-            "description": "Unique id of task to be returned.",
-            "x-ms-summary": "Task ID"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "x-ms-visibility": "internal",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
-          {
             "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
             "in": "header",
             "required": true,
             "type": "string",
@@ -1330,48 +2348,147 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
-            },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the webhook so that it can be found in the settings in timeghost.",
+                  "title": "Name of the webhook",
+                  "x-ms-visibility": "advanced",
+                  "default": "Power-Automate Task Trigger"
+                },
+                "events": {
+                  "description": "Select the events to listen to",
+                  "x-ms-summary": "Run on",
+                  "x-ms-visibility": "advanced",
+                  "type": "array",
+                  "default": [
+                    "add",
+                    "update",
+                    "delete"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "update",
+                      "delete"
+                    ],
+                    "x-ms-enum-values": [
+                      {
+                        "displayName": "New task added",
+                        "value": "add"
+                      },
+                      {
+                        "displayName": "Existing task updated",
+                        "value": "update"
+                      },
+                      {
+                        "displayName": "Task deleted",
+                        "value": "delete"
+                      }
+                    ]
+                  }
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "entity",
+                  "title": "",
+                  "x-ms-visibility": "internal",
+                  "default": "tasks"
+                },
+                "active": {
+                  "type": "boolean",
+                  "description": "active",
+                  "title": "",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "x-ms-visibility": "internal",
+                  "default": true
+                },
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true,
+                      "title": ""
+                    },
+                    "basicAuth": {
+                      "type": "object",
+                      "properties": {
+                        "userName": {
+                          "type": "string",
+                          "description": "userName",
+                          "title": "Basic-Auth: Username",
+                          "x-ms-visibility": "internal"
+                        },
+                        "pass": {
+                          "type": "string",
+                          "description": "pass",
+                          "title": "Basic-Auth: Passwort",
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "description": "basicAuth"
+                    }
+                  },
+                  "description": "config",
+                  "required": [
+                    "url"
+                  ]
+                }
+              },
+              "required": [
+                "config",
+                "active",
+                "entity",
+                "name"
+              ]
+            }
           }
         ]
       }
     },
-    "/get/tags/{TagID}": {
-      "get": {
+    "/register_webhook/times": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/TimesResponse"
+        },
+        "description": "Time"
+      },
+      "post": {
         "responses": {
+          "200": {
+            "description": "200",
+            "schema": {}
+          },
           "default": {
             "description": "default",
             "schema": {}
           }
         },
+        "summary": "Time Trigger",
+        "description": "If a time is created, changed or deleted in timeghost, this trigger runs.",
+        "operationId": "TimeChanges",
+        "x-ms-trigger": "single",
         "parameters": [
           {
-            "name": "TagID",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "type": "string",
-            "description": "Unique id of tag to be returned.",
-            "x-ms-summary": "Tag ID"
-          },
-          {
-            "name": "x-functions-key",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "<<Please add your x-functions-key here>>",
-            "enum": ["<<Please add your x-functions-key here>>"],
-            "x-ms-visibility": "internal",
-            "description": "x-functions-key",
-            "x-ms-summary": "x-functions-key"
-          },
-          {
             "name": "workspace-id",
+            "description": "Enter the workspace (workspace id) in which your data is stored",
+            "x-ms-summary": "Workspace",
             "in": "header",
             "required": true,
             "type": "string",
@@ -1379,18 +2496,118 @@
               "operationId": "Get_Currentuser",
               "value-path": "id",
               "value-collection": "workspaces",
-              "value-title": "name",
-              "parameters": {
-                "x-functions-key": "<<Please add your x-functions-key here>>"
-              }
-            },
-            "description": "Workspace ID",
-            "x-ms-summary": "Workspace ID"
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the webhook so that it can be found in the settings in timeghost.",
+                  "title": "Name of the webhook",
+                  "x-ms-visibility": "advanced",
+                  "default": "Power-Automate Time Trigger"
+                },
+                "events": {
+                  "description": "Select the events to listen to",
+                  "x-ms-summary": "Run on",
+                  "x-ms-visibility": "advanced",
+                  "type": "array",
+                  "default": [
+                    "add",
+                    "update",
+                    "delete"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "update",
+                      "delete"
+                    ],
+                    "x-ms-enum-values": [
+                      {
+                        "displayName": "New time added",
+                        "value": "add"
+                      },
+                      {
+                        "displayName": "Existing time updated",
+                        "value": "update"
+                      },
+                      {
+                        "displayName": "Time deleted",
+                        "value": "delete"
+                      }
+                    ]
+                  }
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "entity",
+                  "title": "",
+                  "x-ms-visibility": "internal",
+                  "default": "times"
+                },
+                "active": {
+                  "type": "boolean",
+                  "description": "active",
+                  "title": "",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "x-ms-visibility": "internal",
+                  "default": true
+                },
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true,
+                      "title": ""
+                    },
+                    "basicAuth": {
+                      "type": "object",
+                      "properties": {
+                        "userName": {
+                          "type": "string",
+                          "description": "userName",
+                          "title": "Basic-Auth: Username",
+                          "x-ms-visibility": "internal"
+                        },
+                        "pass": {
+                          "type": "string",
+                          "description": "pass",
+                          "title": "Basic-Auth: Passwort",
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "description": "basicAuth"
+                    }
+                  },
+                  "description": "config",
+                  "required": [
+                    "url"
+                  ]
+                }
+              },
+              "required": [
+                "config",
+                "active",
+                "entity",
+                "name"
+              ]
+            }
           }
-        ],
-        "summary": "Get Tag by ID",
-        "description": "Gets tag with specified id from a workspace.",
-        "operationId": "Get_TagByID"
+        ]
       }
     }
   },
@@ -1400,107 +2617,476 @@
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "Project ID",
-          "description": "Project ID"
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the project"
         },
         "deleted": {
           "type": "boolean",
           "x-ms-summary": "Deleted",
-          "description": "Deleted"
+          "description": "Indicates whether the project is marked as deleted"
         },
-        "modfied": {
+        "created": {
           "type": "string",
-          "x-ms-summary": "Modfied",
-          "description": "Modfied"
+          "x-ms-summary": "Created",
+          "format": "date-time",
+          "description": "Indicates when the project was created"
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "format": "date-time",
+          "description": "Indicates when the project was changed"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Indicates whether the data record was just created, updated or deleted"
         },
         "name": {
           "type": "string",
-          "x-ms-summary": "Project Name",
-          "description": "Project Name"
+          "x-ms-summary": "Name",
+          "description": "Projects' name"
         },
         "client": {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "Client ID",
-              "description": "Client ID"
+              "x-ms-summary": "ID",
+              "description": "Unique ID of the client of this project"
             },
             "name": {
               "type": "string",
-              "x-ms-summary": "Client Name",
-              "description": "Client Name"
+              "x-ms-summary": "Clients' name",
+              "description": "Clients' name"
+            }
+          }
+        },
+        "timesRecorded": {
+          "type": "object",
+          "properties": {
+            "billable": {
+              "type": "number",
+              "x-ms-summary": "Billable time",
+              "description": "Summary of billable times in this project"
+            },
+            "notBillable": {
+              "type": "number",
+              "x-ms-summary": "Not billable time",
+              "description": "Summary of not billable times in this project"
             }
           }
         },
         "description": {
           "type": "string",
-          "x-ms-summary": "Project Description",
-          "description": "Project Description"
+          "x-ms-summary": "Description",
+          "description": "Description of the project"
+        },
+        "color": {
+          "type": "string",
+          "x-ms-summary": "Color",
+          "description": "Color of the project. eg '#0000FF'"
         },
         "billable": {
           "type": "boolean",
-          "description": "Billable",
-          "title": "Billable"
+          "description": "Indicates whether the project is marked as billable",
+          "x-ms-summary": "Billable"
         },
         "completed": {
           "type": "boolean",
-          "description": "Completed",
-          "title": "Completed"
+          "description": "Indicates whether the project is marked as completed",
+          "x-ms-summary": "Completed"
         },
         "estimation": {
-          "type": "integer",
-          "format": "int32",
-          "description": "Estimation",
-          "title": "Estimation"
+          "type": "number",
+          "format": "double",
+          "description": "The estimated budget of the project",
+          "x-ms-summary": "Estimation"
+        },
+        "taskBasedEstimation": {
+          "type": "boolean",
+          "description": "The budget is task-dependent.",
+          "x-ms-summary": "Task Based Estimation"
+        },
+        "hourly_rate": {
+          "type": "number",
+          "format": "double",
+          "x-ms-summary": "Hourly Rate",
+          "description": "Hourly rate of this project"
+        },
+        "private": {
+          "type": "boolean",
+          "description": "Indicates whether the project is marked as private",
+          "x-ms-summary": "Private"
+        },
+        "users": {
+          "x-ms-summary": "Users",
+          "description": "Users of the project",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "User ID",
+                "description": "Unique ID of the user of this project"
+              },
+              "role": {
+                "type": "string",
+                "x-ms-summary": "Users' role",
+                "description": "Users' role"
+              },
+              "billable_rate": {
+                "type": "number",
+                "format": "double",
+                "x-ms-summary": "Hourly Rate",
+                "description": "Hourly rate of this user in this project"
+              }
+            }
+          }
+        },
+        "groups": {
+          "x-ms-summary": "Groups",
+          "description": "Groups of the project",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Group ID",
+                "description": "Unique ID of the group of this project"
+              },
+              "role": {
+                "type": "string",
+                "x-ms-summary": "Groups' role",
+                "description": "Groups' role"
+              }
+            }
+          }
         }
       }
     },
-    "Project": {
+    "ProjectCreate": {
       "type": "object",
       "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Projects' name",
+          "title": "Name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Description of the project"
+        },
         "client": {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "description": "Client ID",
-              "title": "Client ID"
-            },
-            "name": {
-              "type": "string",
-              "x-ms-summary": "ClientName",
-              "description": "Client_name",
-              "title": "Client name"
+              "x-ms-summary": "ID",
+              "description": "Client (or Client ID)",
+              "title": "Client",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Clients",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              }
             }
           },
-          "description": "client"
+          "description": "The client of this project",
+          "required": [
+            "id"
+          ]
         },
-        "description": {
+        "color": {
           "type": "string",
-          "description": "description"
-        },
-        "name": {
-          "type": "string",
-          "description": "name",
-          "title": "Project name"
+          "x-ms-summary": "Color",
+          "description": "Color of the project eg. '#0000FF'",
+          "default": "#0000FF"
         },
         "billable": {
           "type": "boolean",
-          "description": "billable"
+          "description": "Indicates whether the project is marked as billable",
+          "x-ms-summary": "Billable",
+          "title": "Billable",
+          "default": false
         },
         "completed": {
           "type": "boolean",
-          "description": "completed"
-        },
-        "estimation": {
-          "type": "integer",
-          "format": "int32",
-          "description": "estimation"
+          "description": "Indicates whether the project is marked as completed",
+          "x-ms-summary": "Completed",
+          "title": "Completed",
+          "default": false
         },
         "taskBasedEstimation": {
           "type": "boolean",
-          "description": "taskBasedEstimation"
+          "description": "The budget is task-dependent.",
+          "x-ms-summary": "Task based estimation",
+          "title": "Task Based Estimation",
+          "default": false
+        },
+        "estimation": {
+          "type": "number",
+          "format": "double",
+          "description": "The estimated budget of the project",
+          "x-ms-summary": "Estimation",
+          "default": 0
+        },
+        "private": {
+          "type": "boolean",
+          "description": "Set the project to public or private.",
+          "x-ms-summary": "Private",
+          "default": false
+        },
+        "hourly_rate": {
+          "type": "number",
+          "format": "double",
+          "description": "The hourly rate of the project",
+          "x-ms-summary": "Hourly Rate"
+        },
+        "users": {
+          "x-ms-visibility": "advanced",
+          "title": "Users",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "User ID",
+                "description": "User (or User ID)",
+                "title": "User",
+                "x-ms-dynamic-values": {
+                  "operationId": "Get_Workspace_ById",
+                  "value-path": "id",
+                  "value-title": "name",
+                  "value-collection": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameter": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameter": "workspace-id"
+                    }
+                  }
+                },
+                "x-ms-dynamic-list": {
+                  "operationId": "Get_Workspace_ById",
+                  "itemValuePath": "id",
+                  "itemTitlePath": "name",
+                  "itemsPath": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameterReference": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameterReference": "workspace-id"
+                    }
+                  }
+                }
+              },
+              "role": {
+                "type": "number",
+                "default": 0,
+                "x-ms-summary": "Role in project",
+                "description": "Role in project",
+                "title": "Role",
+                "enum": [
+                  0,
+                  1
+                ],
+                "x-ms-enum-values": [
+                  {
+                    "displayName": "User",
+                    "value": 0
+                  },
+                  {
+                    "displayName": "Manager",
+                    "value": 1
+                  }
+                ]
+              },
+              "hourly_rate": {
+                "type": "number",
+                "format": "double",
+                "description": "The hourly rate of this user in this project",
+                "x-ms-summary": "Hourly Rate"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      },
+      "required": [
+        "client",
+        "completed",
+        "billable",
+        "name",
+        "taskBasedEstimation"
+      ]
+    },
+    "ProjectUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Projects' name",
+          "title": "Name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Description of the project"
+        },
+        "client": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "Client (or Client ID)",
+              "title": "Client",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Clients",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "description": "The client of this project",
+          "required": [
+            "id"
+          ]
+        },
+        "color": {
+          "type": "string",
+          "x-ms-summary": "Color",
+          "description": "Color of the project eg. '#0000FF'"
+        },
+        "billable": {
+          "type": "boolean",
+          "description": "Indicates whether the project is marked as billable",
+          "x-ms-summary": "Billable",
+          "title": "Billable"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Indicates whether the project is marked as completed",
+          "x-ms-summary": "Completed",
+          "title": "Completed"
+        },
+        "taskBasedEstimation": {
+          "type": "boolean",
+          "description": "The budget is task-dependent.",
+          "x-ms-summary": "Task based estimation",
+          "title": "Task Based Estimation"
+        },
+        "estimation": {
+          "type": "number",
+          "format": "double",
+          "description": "The estimated budget of the project",
+          "x-ms-summary": "Estimation"
+        },
+        "private": {
+          "type": "boolean",
+          "description": "Set the project to public or private.",
+          "x-ms-summary": "Private"
+        },
+        "hourly_rate": {
+          "type": "number",
+          "format": "double",
+          "description": "The hourly rate of the project",
+          "x-ms-summary": "Hourly Rate"
+        },
+        "users": {
+          "x-ms-visibility": "advanced",
+          "title": "Users",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "User ID",
+                "description": "User (or User ID)",
+                "title": "User",
+                "x-ms-dynamic-values": {
+                  "operationId": "Get_Workspace_ById",
+                  "value-path": "id",
+                  "value-title": "name",
+                  "value-collection": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameter": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameter": "workspace-id"
+                    }
+                  }
+                },
+                "x-ms-dynamic-list": {
+                  "operationId": "Get_Workspace_ById",
+                  "itemValuePath": "id",
+                  "itemTitlePath": "name",
+                  "itemsPath": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameterReference": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameterReference": "workspace-id"
+                    }
+                  }
+                }
+              },
+              "role": {
+                "type": "number",
+                "default": 0,
+                "x-ms-summary": "Role in project",
+                "description": "Role in project",
+                "title": "Role",
+                "enum": [
+                  0,
+                  1
+                ],
+                "x-ms-enum-values": [
+                  {
+                    "displayName": "User",
+                    "value": 0
+                  },
+                  {
+                    "displayName": "Manager",
+                    "value": 1
+                  }
+                ]
+              },
+              "hourly_rate": {
+                "type": "number",
+                "format": "double",
+                "description": "The hourly rate of this user in this project",
+                "x-ms-summary": "Hourly Rate"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
         }
       }
     },
@@ -1509,37 +3095,92 @@
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "ClientID",
-          "description": "ClientID"
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the client"
         },
         "deleted": {
           "type": "boolean",
-          "description": "deleted"
+          "x-ms-summary": "Deleted",
+          "description": "Indicates whether the client is marked as deleted"
         },
         "name": {
           "type": "string",
-          "description": "ClientName"
+          "x-ms-summary": "Name",
+          "description": "Clients' name"
         },
         "description": {
           "type": "string",
-          "description": "ClientDescription"
+          "x-ms-summary": "Description",
+          "description": "Description of the client"
         },
-        "modfied": {
+        "created": {
           "type": "string",
-          "description": "modfied"
+          "x-ms-summary": "Created",
+          "format": "date-time",
+          "description": "Indicates when the client was created"
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "format": "date-time",
+          "description": "Indicates when the client was changed"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Indicates whether the data record was just created, updated or deleted"
+        },
+        "color": {
+          "type": "string",
+          "x-ms-summary": "Color",
+          "description": "The color of the client"
         }
       }
     },
-    "Client": {
+    "ClientCreate": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string",
-          "description": "ClientName"
+          "x-ms-summary": "Name",
+          "description": "Clients' name",
+          "title": "Name"
         },
         "description": {
           "type": "string",
-          "description": "ClientDescription"
+          "x-ms-summary": "Description",
+          "description": "Description of the client",
+          "title": "Description"
+        },
+        "color": {
+          "type": "string",
+          "x-ms-summary": "Color",
+          "description": "Color of the project. eg '#0000FF'"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "ClientUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Clients' name",
+          "title": "Name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Description of the client",
+          "title": "Description"
+        },
+        "color": {
+          "type": "string",
+          "x-ms-summary": "Color",
+          "description": "Color of the project. eg '#0000FF'"
         }
       }
     },
@@ -1548,29 +3189,36 @@
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "TimeID",
-          "description": "TimeID"
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the time"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name of the time",
+          "description": "Name of the time"
         },
         "deleted": {
           "type": "boolean",
-          "description": "deleted"
+          "x-ms-summary": "Deleted",
+          "description": "Indicates whether the time is marked as deleted"
         },
         "billable": {
           "type": "boolean",
-          "description": "billable"
+          "description": "Indicates whether the time is marked as billable",
+          "x-ms-summary": "Billable"
         },
         "client": {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "ClientID",
-              "description": "ClientID"
+              "x-ms-summary": "Client ID",
+              "description": "Unique ID of the client of this time"
             },
             "name": {
               "type": "string",
-              "x-ms-summary": "ClientName",
-              "description": "ClientName"
+              "x-ms-summary": "Clients' name",
+              "description": "Clients' name"
             }
           }
         },
@@ -1579,23 +3227,13 @@
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "ProjectID",
-              "description": "ProjectID"
+              "x-ms-summary": "Project ID",
+              "description": "Unique ID of the project of this time"
             },
             "name": {
               "type": "string",
-              "x-ms-summary": "ProjectName",
-              "description": "ProjectName"
-            }
-          }
-        },
-        "workspace": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "x-ms-summary": "WorkspaceID",
-              "description": "WorkspaceID"
+              "x-ms-summary": "Projects' name",
+              "description": "Projects' name"
             }
           }
         },
@@ -1604,13 +3242,13 @@
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "TaskID",
-              "description": "TaskID"
+              "x-ms-summary": "Task ID",
+              "description": "Unique ID of the task of this time"
             },
             "name": {
               "type": "string",
-              "x-ms-summary": "TaskName",
-              "description": "TaskName"
+              "x-ms-summary": "Tasks' name",
+              "description": "Tasks' name"
             }
           }
         },
@@ -1619,27 +3257,32 @@
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "UserID",
-              "description": "UserID"
+              "x-ms-summary": "User ID",
+              "description": "Unique ID of the user of this time"
             },
             "name": {
               "type": "string",
-              "x-ms-summary": "UserName",
-              "description": "UserName"
+              "x-ms-summary": "Users' name",
+              "description": "Users' name"
             }
           }
         },
         "timeDiff": {
           "type": "number",
-          "description": "TimeDiff"
+          "x-ms-summary": "Duration",
+          "description": "The duration of the time entry"
         },
         "start": {
           "type": "string",
-          "description": "Start"
+          "x-ms-summary": "Start",
+          "format": "date-time",
+          "description": "The start-date and start-time of the time entry"
         },
         "end": {
           "type": "string",
-          "description": "End"
+          "x-ms-summary": "End",
+          "format": "date-time",
+          "description": "The end-date and end-time of the time entry"
         },
         "tags": {
           "type": "array",
@@ -1648,105 +3291,392 @@
             "properties": {
               "id": {
                 "type": "string",
-                "x-ms-summary": "TagID",
-                "description": "TagID"
+                "x-ms-summary": "Tag ID",
+                "description": "Unique ID of the tag of this time"
               },
               "name": {
                 "type": "string",
-                "x-ms-summary": "TagName",
-                "description": "TagName"
+                "x-ms-summary": "Tags' name",
+                "description": "Tags' name"
               }
             }
           }
         },
-        "modfied": {
+        "created": {
           "type": "string",
-          "description": "modfied"
+          "x-ms-summary": "Created",
+          "format": "date-time",
+          "description": "Indicates when the time was created"
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "format": "date-time",
+          "description": "Indicates when the time was changed"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Indicates whether the data record was just created, updated or deleted"
+        },
+        "timeZone": {
+          "type": "string",
+          "x-ms-summary": "Timezone",
+          "format": "date-time",
+          "description": "Indicates in which timezone the time was created"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "description": "The earnings of the time entry",
+          "x-ms-summary": "Earning"
+        },
+        "cost": {
+          "type": "number",
+          "format": "double",
+          "description": "The labor cost of the time entry",
+          "x-ms-summary": "Cost"
         }
       }
     },
-    "Time": {
+    "TimeCreate": {
       "type": "object",
       "properties": {
-        "billable": {
-          "type": "boolean",
-          "description": "billable"
-        },
-        "start": {
-          "type": "string",
-          "description": "Start"
-        },
-        "end": {
-          "type": "string",
-          "description": "End"
-        },
         "client": {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "ClientID",
-              "description": "ClientID",
-              "title": "ClientID"
-            },
-            "name": {
-              "type": "string",
-              "x-ms-summary": "ClientName",
-              "description": "ClientName"
+              "x-ms-summary": "ID",
+              "description": "Client (or Client ID)",
+              "title": "Client",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Clients",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              }
             }
-          }
+          },
+          "description": "The client of this time",
+          "required": [
+            "id"
+          ]
         },
         "project": {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "ProjectID",
-              "description": "ProjectID",
-              "title": "ProjectID"
-            },
-            "name": {
-              "type": "string",
-              "x-ms-summary": "ProjectName",
-              "description": "ProjectName"
+              "x-ms-summary": "ID",
+              "description": "Project (or Project ID)",
+              "title": "Project",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Client_Projects",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameter": "client.id"
+                  },
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Client_Projects",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameterReference": "body/client/id"
+                  },
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
             }
-          }
+          },
+          "description": "The projet of this time",
+          "required": [
+            "id"
+          ]
         },
-        "task": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "x-ms-summary": "TaskID",
-              "description": "TaskID",
-              "title": "TaskID"
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The name of this time entry (task name)"
+        },
+        "start": {
+          "type": "string",
+          "x-ms-summary": "Start",
+          "format": "date-time",
+          "description": "The start-date and start-time of the time entry"
+        },
+        "end": {
+          "type": "string",
+          "x-ms-summary": "End",
+          "format": "date-time",
+          "description": "The end-date and end-time of the time entry"
+        },
+        "billable": {
+          "type": "boolean",
+          "description": "Indicates whether the time is marked as billable",
+          "default": false,
+          "x-ms-summary": "Billable"
+        },
+        "tags": {
+          "x-ms-summary": "Tags",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "ID",
+                "description": "Tag (or Tag ID)",
+                "title": "Tag",
+                "x-ms-dynamic-values": {
+                  "operationId": "Get_Time_Tags",
+                  "value-path": "id",
+                  "value-title": "name",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameter": "workspace-id"
+                    },
+                    "$filter": "tagType eq 1"
+                  }
+                }
+              }
             },
-            "name": {
-              "type": "string",
-              "x-ms-summary": "TaskName",
-              "description": "TaskName"
-            }
+            "description": "The tag of this time",
+            "required": [
+              "id"
+            ]
           }
         },
         "user": {
+          "x-ms-visibility": "advanced",
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "UserID",
-              "description": "UserID",
-              "title": "UserID"
-            },
-            "name": {
-              "type": "string",
-              "x-ms-summary": "UserName",
-              "description": "UserName"
+              "x-ms-summary": "ID",
+              "description": "User (or User ID) - if blank, current user is set",
+              "title": "User",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Workspace_ById",
+                "value-path": "id",
+                "value-title": "name",
+                "value-collection": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Workspace_ById",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "itemsPath": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
             }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      "required": [
+        "client",
+        "project",
+        "name",
+        "start",
+        "end",
+        "billable"
+      ]
+    },
+    "TimeUpdate": {
+      "type": "object",
+      "properties": {
+        "client": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "Client (or Client ID)",
+              "title": "Client",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Clients",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "description": "The client of this time",
+          "required": [
+            "id"
+          ]
+        },
+        "project": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "Project (or Project ID)",
+              "title": "Project",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Client_Projects",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameter": "client.id"
+                  },
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Client_Projects",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameterReference": "body/client/id"
+                  },
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "description": "The projet of this time",
+          "required": [
+            "id"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The name of this time entry (task name)"
+        },
+        "start": {
+          "type": "string",
+          "x-ms-summary": "Start",
+          "format": "date-time",
+          "description": "The start-date and start-time of the time entry"
+        },
+        "end": {
+          "type": "string",
+          "x-ms-summary": "End",
+          "format": "date-time",
+          "description": "The end-date and end-time of the time entry"
+        },
+        "billable": {
+          "type": "boolean",
+          "description": "Indicates whether the time is marked as billable",
+          "x-ms-summary": "Billable"
+        },
+        "tags": {
+          "x-ms-summary": "Tags",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "ID",
+                "description": "Tag (or Tag ID)",
+                "title": "Tag",
+                "x-ms-dynamic-values": {
+                  "operationId": "Get_Time_Tags",
+                  "value-path": "id",
+                  "value-title": "name",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameter": "workspace-id"
+                    },
+                    "$filter": "tagType eq 1"
+                  }
+                }
+              }
+            },
+            "description": "The tag of this time",
+            "required": [
+              "id"
+            ]
           }
         },
-        "timeDiff": {
-          "type": "number",
-          "description": "TimeDiff"
+        "user": {
+          "x-ms-visibility": "advanced",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "User (or User ID) - if blank, current user is set",
+              "title": "User",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Workspace_ById",
+                "value-path": "id",
+                "value-title": "name",
+                "value-collection": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Workspace_ById",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "itemsPath": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "id"
+          ]
         }
       }
     },
@@ -1755,33 +3685,68 @@
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "TaskID",
-          "description": "TaskID"
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the task"
         },
         "deleted": {
           "type": "boolean",
-          "description": "deleted"
+          "x-ms-summary": "Deleted",
+          "description": "Indicates whether the task is marked as deleted"
         },
-        "modfied": {
+        "created": {
           "type": "string",
-          "description": "modfied"
+          "x-ms-summary": "Created",
+          "format": "date-time",
+          "description": "Indicates when the task was created"
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "format": "date-time",
+          "description": "Indicates when the task was changed"
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Indicates whether the task is marked as completed",
+          "x-ms-summary": "Completed"
+        },
+        "timesRecorded": {
+          "type": "object",
+          "properties": {
+            "billable": {
+              "type": "number",
+              "x-ms-summary": "Billable time",
+              "description": "Summary of billable times in this task"
+            },
+            "notBillable": {
+              "type": "number",
+              "x-ms-summary": "Not billable time",
+              "description": "Summary of not billable times in this task"
+            }
+          }
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Indicates whether the data record was just created, updated or deleted"
         },
         "name": {
           "type": "string",
-          "description": "ProjectName"
+          "x-ms-summary": "Name",
+          "description": "Tasks' Name"
         },
         "client": {
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "ClientID",
-              "description": "ClientID"
+              "x-ms-summary": "Client ID",
+              "description": "Unique ID of the client of this task"
             },
             "name": {
               "type": "string",
-              "x-ms-summary": "ClientName",
-              "description": "ClientName"
+              "x-ms-summary": "Clients' Name",
+              "description": "Clients' Name"
             }
           }
         },
@@ -1790,64 +3755,351 @@
           "properties": {
             "id": {
               "type": "string",
-              "x-ms-summary": "ProjectID",
-              "description": "ProjectID"
+              "x-ms-summary": "Project ID",
+              "description": "Unique ID of the project of this task"
             },
             "name": {
               "type": "string",
-              "x-ms-summary": "ProjectName",
-              "description": "ProjectName"
+              "x-ms-summary": "Projects' name",
+              "description": "Projects' name"
             }
           }
         },
         "estimation": {
-          "type": "integer",
-          "format": "int32",
-          "description": "estimation"
+          "type": "number",
+          "format": "double",
+          "description": "The estimated budget of the task",
+          "x-ms-summary": "Estimation"
         }
       }
     },
-    "Task": {
+    "TaskCreate": {
+      "type": "object",
+      "properties": {
+        "client": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "Client (or Client ID)",
+              "title": "Client",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Clients",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "description": "The client of this task",
+          "required": [
+            "id"
+          ]
+        },
+        "project": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "Project (or Project ID)",
+              "title": "Project",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Client_Projects",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameter": "client.id"
+                  },
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Client_Projects",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameterReference": "body/client/id"
+                  },
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "description": "The projet of this task",
+          "required": [
+            "id"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Tasks' name",
+          "title": "Name"
+        },
+        "estimation": {
+          "type": "number",
+          "format": "double",
+          "description": "The estimated budget of the task",
+          "x-ms-summary": "Estimation (hours)",
+          "default": 0
+        }
+      },
+      "required": [
+        "client",
+        "project",
+        "name"
+      ]
+    },
+    "TaskUpdate": {
+      "type": "object",
+      "properties": {
+        "client": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "Client (or Client ID)",
+              "title": "Client",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Clients",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "description": "The client of this task",
+          "required": [
+            "id"
+          ]
+        },
+        "project": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "Project (or Project ID)",
+              "title": "Project",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Client_Projects",
+                "value-path": "id",
+                "value-title": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameter": "client.id"
+                  },
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Client_Projects",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "parameters": {
+                  "clientid": {
+                    "parameterReference": "body/client/id"
+                  },
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "description": "The projet of this task",
+          "required": [
+            "id"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Tasks' name",
+          "title": "Name"
+        },
+        "estimation": {
+          "type": "number",
+          "format": "double",
+          "description": "The estimated budget of the task",
+          "x-ms-summary": "Estimation (hours)"
+        }
+      }
+    },
+    "GroupsResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the group"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Tags' name"
+        },
+        "synchronizedGroup": {
+          "type": "boolean",
+          "description": "Indicates whether the group is synchonized",
+          "x-ms-summary": "Synchronized"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "User ID",
+                "description": "Unique ID of the user"
+              },
+              "name": {
+                "type": "string",
+                "x-ms-summary": "Name",
+                "description": "User-Name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GroupCreate": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string",
-          "description": "ProjectName"
+          "x-ms-summary": "Name",
+          "description": "Group name"
         },
-        "client": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "x-ms-summary": "ClientID",
-              "description": "ClientID"
+        "users": {
+          "type": "array",
+          "x-ms-summary": "User",
+          "description": "User",
+          "title": "User",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "ID",
+                "description": "User (or User ID)",
+                "title": "User",
+                "x-ms-dynamic-values": {
+                  "operationId": "Get_Workspace_ById",
+                  "value-path": "id",
+                  "value-title": "name",
+                  "value-collection": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameter": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameter": "workspace-id"
+                    }
+                  }
+                },
+                "x-ms-dynamic-list": {
+                  "operationId": "Get_Workspace_ById",
+                  "itemValuePath": "id",
+                  "itemTitlePath": "name",
+                  "itemsPath": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameterReference": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameterReference": "workspace-id"
+                    }
+                  }
+                }
+              }
             },
-            "name": {
-              "type": "string",
-              "x-ms-summary": "ClientName",
-              "description": "ClientName"
-            }
+            "required": [
+              "id"
+            ]
           }
+        }
+      },
+      "required": [
+        "name",
+        "users"
+      ]
+    },
+    "GroupUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Group name"
         },
-        "project": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "x-ms-summary": "ProjectID",
-              "description": "ProjectID"
+        "users": {
+          "type": "array",
+          "x-ms-summary": "User",
+          "description": "User",
+          "title": "User",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "ID",
+                "description": "User (or User ID)",
+                "title": "User",
+                "x-ms-dynamic-values": {
+                  "operationId": "Get_Workspace_ById",
+                  "value-path": "id",
+                  "value-title": "name",
+                  "value-collection": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameter": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameter": "workspace-id"
+                    }
+                  }
+                },
+                "x-ms-dynamic-list": {
+                  "operationId": "Get_Workspace_ById",
+                  "itemValuePath": "id",
+                  "itemTitlePath": "name",
+                  "itemsPath": "users",
+                  "parameters": {
+                    "workspace-id": {
+                      "parameterReference": "workspace-id"
+                    },
+                    "workspace_id": {
+                      "parameterReference": "workspace-id"
+                    }
+                  }
+                }
+              }
             },
-            "name": {
-              "type": "string",
-              "x-ms-summary": "ProjectName",
-              "description": "ProjectName"
-            }
+            "required": [
+              "id"
+            ]
           }
-        },
-        "estimation": {
-          "type": "integer",
-          "format": "int32",
-          "description": "estimation"
         }
       }
     },
@@ -1856,56 +4108,359 @@
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "TagID",
-          "description": "TagID"
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the tag"
         },
         "deleted": {
           "type": "boolean",
-          "description": "deleted"
+          "x-ms-summary": "Deleted",
+          "description": "Indicates whether the tag is marked as deleted"
         },
-        "modfied": {
+        "created": {
           "type": "string",
-          "description": "modfied"
+          "x-ms-summary": "Created",
+          "format": "date-time",
+          "description": "Indicates when the tag was created"
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "format": "date-time",
+          "description": "Indicates when the tag was changed"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Indicates whether the data record was just created, updated or deleted"
         },
         "name": {
           "type": "string",
-          "description": "ProjectName"
+          "x-ms-summary": "Name",
+          "description": "Tags' name"
         }
       }
     },
-    "Tag": {
+    "TimeTagCreate": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string",
-          "description": "ProjectName"
+          "x-ms-summary": "Name",
+          "description": "Tags' name"
+        },
+        "tagType": {
+          "type": "integer",
+          "x-ms-summary": "Name",
+          "description": "tagType",
+          "title": "tagType",
+          "format": "int32",
+          "x-ms-visibility": "internal",
+          "default": 1,
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "tagType"
+      ]
+    },
+    "TimeTagUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Tags' name"
+        },
+        "tagType": {
+          "type": "integer",
+          "x-ms-summary": "Name",
+          "description": "tagType",
+          "title": "tagType",
+          "format": "int32",
+          "x-ms-visibility": "internal",
+          "default": 1,
+          "enum": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "tagType"
+      ]
+    },
+    "CustomFeedEventCreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Entries' name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Entries' description"
+        },
+        "user": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "User (or User ID)",
+              "title": "User",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Workspace_ById",
+                "value-path": "id",
+                "value-title": "name",
+                "value-collection": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Workspace_ById",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "itemsPath": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "x-ms-summary": "Start",
+          "format": "date-time",
+          "description": "The start-date and start-time of the feed entry"
+        },
+        "end": {
+          "type": "string",
+          "x-ms-summary": "End",
+          "format": "date-time",
+          "description": "The end-date and end-time of the feed entry"
+        },
+        "imageUrl": {
+          "type": "string",
+          "x-ms-summary": "Icon Url",
+          "description": "An icon Url, which is displayed in the feed entry. Best use 96px96px and https."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Url",
+          "description": "Url to an external address. E.g. a detail page. This link in the feed can be opened via the context menu."
+        },
+        "category": {
+          "type": "string",
+          "x-ms-summary": "Category",
+          "description": "Use a value that can be filtered later in the interface. For example 'Planner'."
+        }
+      },
+      "required": [
+        "name",
+        "start",
+        "end",
+        "user"
+      ]
+    },
+    "CustomFeedEventUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Entries' name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Entries' description"
+        },
+        "user": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "ID",
+              "description": "User (or User ID)",
+              "title": "User",
+              "x-ms-dynamic-values": {
+                "operationId": "Get_Workspace_ById",
+                "value-path": "id",
+                "value-title": "name",
+                "value-collection": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameter": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameter": "workspace-id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "Get_Workspace_ById",
+                "itemValuePath": "id",
+                "itemTitlePath": "name",
+                "itemsPath": "users",
+                "parameters": {
+                  "workspace-id": {
+                    "parameterReference": "workspace-id"
+                  },
+                  "workspace_id": {
+                    "parameterReference": "workspace-id"
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "start": {
+          "type": "string",
+          "x-ms-summary": "Start",
+          "format": "date-time",
+          "description": "The start-date and start-time of the feed entry"
+        },
+        "end": {
+          "type": "string",
+          "x-ms-summary": "End",
+          "format": "date-time",
+          "description": "The end-date and end-time of the feed entry"
+        },
+        "imageUrl": {
+          "type": "string",
+          "x-ms-summary": "Icon Url",
+          "description": "An icon Url, which is displayed in the feed entry. Best use 96px96px and https."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Url",
+          "description": "Url to an external address. E.g. a detail page. This link in the feed can be opened via the context menu."
+        },
+        "category": {
+          "type": "string",
+          "x-ms-summary": "Category",
+          "description": "Use a value that can be filtered later in the interface. For example 'Planner'."
+        }
+      }
+    },
+    "CustomFeedEventResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the custom feed event"
+        },
+        "deleted": {
+          "type": "boolean",
+          "x-ms-summary": "Deleted",
+          "description": "Indicates whether the custom feed event is marked as deleted"
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created",
+          "format": "date-time",
+          "description": "Indicates when the custom feed event was created"
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "format": "date-time",
+          "description": "Indicates when the custom feed event was changed"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Indicates whether the data record was just created, updated or deleted"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Custom Feed Events' name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Entries' description"
+        },
+        "start": {
+          "type": "string",
+          "x-ms-summary": "Start",
+          "format": "date-time",
+          "description": "The start-date and start-time of the feed entry"
+        },
+        "end": {
+          "type": "string",
+          "x-ms-summary": "End",
+          "format": "date-time",
+          "description": "The end-date and end-time of the feed entry"
+        },
+        "imageUrl": {
+          "type": "string",
+          "x-ms-summary": "Icon Url",
+          "description": "An icon Url, which is displayed in the feed entry. Best use 96px96px and https."
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Url",
+          "description": "Url to an external address. E.g. a detail page. This link in the feed can be opened via the context menu."
+        },
+        "category": {
+          "type": "string",
+          "x-ms-summary": "Category",
+          "description": "This value can be used to filter the feeds in the interface."
         }
       }
     },
     "ExcelResponse": {
       "type": "string",
-      "x-ms-summary": "ExcelContent",
-      "description": "ExcelContent"
+      "x-ms-summary": "Excel file",
+      "description": "Excel file"
     },
     "UserResponse": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
-          "x-ms-summary": "UserID",
-          "description": "UserID"
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the user"
         },
         "deleted": {
           "type": "boolean",
-          "description": "deleted"
+          "x-ms-summary": "Deleted",
+          "description": "Indicates whether the tag is marked as deleted"
         },
         "email": {
           "type": "string",
-          "description": "UserEmail"
+          "x-ms-summary": "E-Mail",
+          "description": "User's email adress"
         },
         "defaultWorkspace": {
           "type": "string",
-          "description": "UserDefaultWorkspace"
+          "x-ms-summary": "Default workspace ID",
+          "description": "The workspace Id of the default workspace of the user"
         },
         "workspaces": {
           "type": "array",
@@ -1914,18 +4469,167 @@
             "properties": {
               "id": {
                 "type": "string",
-                "x-ms-summary": "WorkspaceID",
-                "description": "WorkspaceID"
+                "x-ms-summary": "Workspace ID",
+                "description": "Unique ID of the workspace"
               },
               "name": {
                 "type": "string",
-                "x-ms-summary": "WorkspaceName",
-                "description": "WorkspaceName"
+                "x-ms-summary": "Workspace-Name",
+                "description": "Workspace-Name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "WorkspaceResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "ID",
+          "description": "Unique ID of the user"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Workspace name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Workspace description"
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "isNewProjectBillable": {
+              "type": "boolean",
+              "x-ms-summary": "New projects are billable as default",
+              "description": "Indicates if new projects are billable as default"
+            },
+            "hourly_rate": {
+              "type": "number",
+              "format": "double",
+              "description": "The default hourly rate of this workspace",
+              "x-ms-summary": "Hourly Rate"
+            },
+            "currency": {
+              "type": "string",
+              "x-ms-summary": "Currency",
+              "description": "The currency name of this project"
+            },
+            "allowFutureTimeTracking": {
+              "type": "boolean",
+              "x-ms-summary": "Future time tracking allowed?",
+              "description": "Indicates if future time trackis is allowed"
+            }
+          }
+        },
+        "subscription": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "x-ms-summary": "Status",
+              "description": "The status of the workspace subscription"
+            },
+            "end": {
+              "type": "string",
+              "x-ms-summary": "End",
+              "format": "date-time",
+              "description": "The end time of the subscription"
+            },
+            "quantity": {
+              "type": "number",
+              "format": "double",
+              "description": "The quantity of licences in this workspace",
+              "x-ms-summary": "Quantity"
+            },
+            "recurringInterval": {
+              "type": "string",
+              "x-ms-summary": "Recurring interval",
+              "description": "The recurring interval of the subscription"
+            },
+            "currency": {
+              "type": "string",
+              "x-ms-summary": "Currency",
+              "description": "The currency of the workspace subscription"
+            }
+          }
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "User ID",
+                "description": "Unique ID of the user"
               },
-              "default": {
+              "name": {
+                "type": "string",
+                "x-ms-summary": "Name",
+                "description": "User-Name"
+              },
+              "email": {
+                "type": "string",
+                "x-ms-summary": "E-Mail",
+                "description": "Users' email"
+              },
+              "admin": {
                 "type": "boolean",
-                "x-ms-summary": "WorkspaceDefault",
-                "description": "WorkspaceDefault"
+                "x-ms-summary": "Is admin",
+                "description": "Indicates if the user has a admin role in the workspace"
+              },
+              "billable_rate": {
+                "type": "number",
+                "format": "double",
+                "description": "The hourly rate of the user in this workspace",
+                "x-ms-summary": "Hourly Rate"
+              },
+              "labor_cost": {
+                "type": "number",
+                "format": "double",
+                "description": "The labor cost of the user in this workspace",
+                "x-ms-summary": "Labor Cost"
+              }
+            }
+          }
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "User ID",
+                "description": "Unique ID of the group"
+              },
+              "name": {
+                "type": "string",
+                "x-ms-summary": "Name",
+                "description": "Group-Name"
+              },
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "x-ms-summary": "User ID",
+                      "description": "Unique ID of the user"
+                    },
+                    "name": {
+                      "type": "string",
+                      "x-ms-summary": "Name",
+                      "description": "User-Name"
+                    }
+                  }
+                }
               }
             }
           }
@@ -1949,5 +4653,19 @@
       "oauth2_auth": []
     }
   ],
-  "tags": []
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://timeghost.io"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://timeghost.io/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Business Intelligence"
+    }
+  ]
 }

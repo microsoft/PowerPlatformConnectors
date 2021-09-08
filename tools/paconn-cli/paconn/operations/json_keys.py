@@ -11,14 +11,20 @@ Defines constants for JSON keys.
 # All
 _PROPERTIES = 'properties'
 _ICON_URI = 'iconUri'
+_SCRIPT_URI = 'scriptDefinitionUrl'
 _CONNECTION_PARAMETERS = 'connectionParameters'
+_CONNECTION_PARAMETER_SET = 'connectionParameterSets'
+_PARAMETERS = 'parameters'
+_VALUES = 'values'
 
 # Save
 _API_DEFINITIONS = 'apiDefinitions'
 _ORIGINAL_SWAGGER_URL = 'originalSwaggerUrl'
 _ICON_BRAND_COLOR = 'iconBrandColor'
+_SCRIPT_OPERATIONS = 'scriptOperations'
 _CAPABILITIES = 'capabilities'
 _POLICY_TEMPLATE_INSTANCES = 'policyTemplateInstances'
+_PUBLISHER = 'publisher'
 
 # Create update
 _OPEN_API_DEFINITION = 'openApiDefinition'
@@ -33,7 +39,8 @@ _DESCRIPTION = 'description'
 _INFO = 'info'
 _TITLE = 'title'
 _TOKEN = 'token'
-_OAUTH_SETTINGS = 'oAuthSettings'
+_OAUTH_SETTINGS = 'oauthSettings'
 _CLIENT_SECRET = 'clientSecret'
 _DISPLAY_NAME = 'displayName'
 _NAME = 'name'
+_STACKOWNER = 'stackOwner'
