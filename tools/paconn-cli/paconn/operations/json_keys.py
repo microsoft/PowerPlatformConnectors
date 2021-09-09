@@ -14,6 +14,8 @@ _ICON_URI = 'iconUri'
 _SCRIPT_URI = 'scriptDefinitionUrl'
 _CONNECTION_PARAMETERS = 'connectionParameters'
 _CONNECTION_PARAMETER_SET = 'connectionParameterSets'
+_PARAMETERS = 'parameters'
+_VALUES = 'values'
 
 # Save
 _API_DEFINITIONS = 'apiDefinitions'
@@ -41,3 +43,4 @@ _OAUTH_SETTINGS = 'oauthSettings'
 _CLIENT_SECRET = 'clientSecret'
 _DISPLAY_NAME = 'displayName'
 _NAME = 'name'
+_STACKOWNER = 'stackOwner'
