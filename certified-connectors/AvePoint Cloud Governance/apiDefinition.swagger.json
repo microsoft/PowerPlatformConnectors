@@ -1992,6 +1992,64 @@
         "x-ms-visibility": "internal"
       }
     },
+    "/flow/schema/workspace/actions": {
+      "get": {
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Get workspace actions schema",
+        "description": "Get schema for workspace actions.",
+        "operationId": "Flow_GetWorkspaceActionsSchema",
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceType",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "Site",
+              "Group",
+              "Teams"
+            ],
+            "x-ms-summary": "Workspace Type",
+            "description": "Select a workspace type."
+          },
+          {
+            "in": "query",
+            "name": "workspaceAction",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "RestartRenewal"
+            ],
+            "x-ms-summary": "Action Type",
+            "description": "Choose how to manage a workspace."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/FlowSchemaResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
     "/flow/services": {
       "get": {
         "tags": [
@@ -2186,6 +2244,179 @@
           }
         }
       }
+    },
+    "/flow/workspace/actionobjecttypes": {
+      "get": {
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Get workspace action object types",
+        "description": "Get workspace action object types.",
+        "operationId": "Flow_GetWorkspaceActionObjectTypes",
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StringModel"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/flow/workspace/actions": {
+      "post": {
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Manage a workspace",
+        "description": "Manage an AvePoint Cloud Governance managed workspace.",
+        "operationId": "Flow_WorkspaceActions",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceType",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Flow_GetWorkspaceActionObjectTypes",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Workspace Type",
+            "description": "Select a workspace type."
+          },
+          {
+            "in": "query",
+            "name": "workspaceAction",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Flow_GetWorkspaceActionTypes",
+              "value-path": "id",
+              "parameters": {
+                "workspaceType": {
+                  "parameter": "workspaceType"
+                }
+              },
+              "value-title": "name"
+            },
+            "x-ms-summary": "Action Type",
+            "description": "Choose how to manage a workspace."
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "Flow_GetWorkspaceActionsSchema",
+                "value-path": "schema",
+                "parameters": {
+                  "workspaceType": {
+                    "parameter": "workspaceType"
+                  },
+                  "workspaceAction": {
+                    "parameter": "workspaceAction"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/flow/workspace/actiontypes": {
+      "get": {
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Get workspace action types",
+        "description": "Get workspace action types.",
+        "operationId": "Flow_GetWorkspaceActionTypes",
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceType",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "Site",
+              "Group",
+              "Teams"
+            ],
+            "x-ms-summary": "Workspace Type",
+            "description": "Select a workspace type."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StringModel"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
     }
   },
   "definitions": {
@@ -2296,6 +2527,11 @@
           "type": "string",
           "x-ms-summary": "Site URL",
           "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
         }
       }
     },
@@ -2361,6 +2597,11 @@
           "type": "string",
           "x-ms-summary": "Site URL",
           "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
         }
       }
     },
@@ -2416,6 +2657,11 @@
           "type": "string",
           "x-ms-summary": "Site URL",
           "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
         }
       }
     },
@@ -2523,6 +2769,11 @@
           "type": "string",
           "x-ms-summary": "Site URL",
           "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
         }
       }
     },
@@ -2995,6 +3246,11 @@
           "type": "string",
           "x-ms-summary": "Inactivity Threshold Time",
           "description": "Inactivity threshold time of the workspace."
+        },
+        "LastRenewalTime": {
+          "type": "string",
+          "x-ms-summary": "Last Renewal Time",
+          "description": "Last renewal time of the workspace."
         }
       },
       "additionalProperties": {
