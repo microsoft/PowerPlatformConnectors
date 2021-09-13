@@ -1,9 +1,11 @@
 ## Zellis Intelligence Platform Connector
-An official connector working with the Zellis Intelligence Platform.
+The Zellis Intelligence Platform connector brings to life your ResourceLink data within the Microsoft Power Platform apps.  The connector allows you to access Zellis intelligence Platform data and notifications through Microsoft Power Automate.  You can develop business process flows driven from your ResourceLink data.
 
 ## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan
+* You need to be Zellis HCM customer
+* For Zellis customers, a user guide is available through the Zellis customer portal and will guide you through the configuration of the connector
 
 ## Supported Operations
 The connector supports the following operations:
