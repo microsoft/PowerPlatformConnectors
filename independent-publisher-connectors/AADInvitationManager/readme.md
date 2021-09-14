@@ -1,8 +1,8 @@
-## Graph API Azure Active Directory (AAD) Invitation Manager Connector
+## Azure AD Identity and Access
 
 The Graph API is a powerful and very extensive REST API. Using this API, you can create and manage objects (e.g. users, groups etc.) in Azure Active Directory, create Microsoft Teams teams, and a lot more.
 
-This connector exposes the /invitations endpoint in Microsoft Power Apps & Power Automate. With this connector you can invite a guest user and then give them access to resources like Microsoft Teams & SharePoint.
+This connector exposes the Identity and Access resources of the Graph API in the Microsoft Power Platform.
 
 ## Pre-requisites
 
