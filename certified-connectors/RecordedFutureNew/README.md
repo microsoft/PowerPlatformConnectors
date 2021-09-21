@@ -1,8 +1,12 @@
 The Recorded Future integration allows real-time security intelligence to be integrated into popular Microsoft services like Sentinel, Defender ATP, and others. This empowers our clients to maximize their existing security investments, ensuring they have real-time intelligence to secure their cloud environments and reduce risk to the organization. The Recorded Future connector for Microsoft Azure enables access to dedicated actions for pulling Recorded Future indicators (IP, Domain, URL, Hash, Vulnerabilities), associated context (Risk Score, Risk Rules, High Confidence Links, and an Intelligence Card Link), and Recorded Future alerts.
 
-## What new?
+## Whats new?
 
-This new version of the connector improves the enrichment actions by replacing the Related Entity section with High Confidence Evidence Based Links. (More details on links can be found here: https://support.recordedfuture.com/hc/en-us/articles/1500006698521-Links) 
+This new version of the connector improves the enrichment actions by replacing the Related Entity section with High Confidence Evidence Based Links. (More details on links can be found here: https://support.recordedfuture.com/hc/en-us/articles/1500006698521-Links).
+
+## Why a new connector?
+
+This connector uses a new underlying API specifically built to serve the connector. The new API requires different API tokens for authentication and we do not want to break usage for existing clients.
 
 ## Prerequisites
 
