@@ -46,8 +46,6 @@ Known Issues and Limitations
 No known issues or limitations at this point.
 
 Deployment Instructions
-1. paconn login
-2. paconn create --api-prop [Path to apiProperties.json] --api-def [Path to apiDefinition.swagger.json] --icon [Path to icon.png]
 
 Once connector has been downloaded to environment create connection using authentication token by
 •	Edit connector
