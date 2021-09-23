@@ -12,38 +12,38 @@ Required. Describe actions, triggers, and other endpoints.​
 Description of operation 1.
 
 The connector supports the following operations:
-*`GetPortfolios`: Get all portfolios 
-*`GetSites`: Get all sites 
-*`GetBuildings`: Get all buildings 
-*`GetFloors`: Get all floors 
-*`GetRoofs`: Get all roofs 
-*`GetFacades`: Get all facades 
-*`GetOutsideareas`: Get all outside areas  
-*`GetSubareas`: Get all sub areas 
-*`GetLands`: Get all lands 
-*`GetSpaces`: Get all spaces 
-*`GetPortfolioById`: Gets a portfolio with the given ID 
-*`GetSiteById`: Gets a site with the given ID 
-*`GetBuildingById`: Gets a buildings with the given ID 
-*`GetFloorById`: Gets a floor with the given ID 
-*`GetRoofById`: Gets a roof with the given ID 
-*`GetFacadeById`: Gets a facade with the given ID 
-*`GetOutsideareaById`: Gets an outside aread with the given ID 
-*`GetSubareaById`: Gets a suba area with the given ID 
-*`GetLandById`: Gets a land with the given ID 
-*`GetSpaceById`: Gets a  space with the given ID 
-*`CheckForChildrenOnPortfolio`: Gets a site with the given ID 
-*`CheckForChildrenOnSite`: Gets the information about the existence of children on a site
-*`CheckForChildrenOnBuilding`: Gets the information about the existence of children on a building
-*`CheckForChildrenOnFloor`:Gets the information about the existence of children on a floor
-*`CheckForChildrenOnRoof`: Gets the information about the existence of children on a roof
-*`CheckForChildrenOnFacade`: Gets the information about the existence of children on a facade
-*`CheckForChildrenOnOutsidearea`: Gets the information about the existence of children on an outside area
-*`CheckForChildrenOnSubarea`: Gets the information about the existence of children on a sub area
-*`CheckForChildrenOnLand`: Gets the information about the existence of children on a land
-*`CheckForChildrenOnSpace`: Gets the information about the existence of children on a space
-*`GetAssociatedSpacesForSpace`:  Get the list of associated entities
-*`GetUnassociatedSpaces`: Get the list of not associated entities
+* `GetPortfolios`: Get all portfolios 
+* `GetSites`: Get all sites 
+* `GetBuildings`: Get all buildings 
+* `GetFloors`: Get all floors 
+* `GetRoofs`: Get all roofs 
+* `GetFacades`: Get all facades 
+* `GetOutsideareas`: Get all outside areas  
+* `GetSubareas`: Get all sub areas 
+* `GetLands`: Get all lands 
+* `GetSpaces`: Get all spaces 
+* `GetPortfolioById`: Gets a portfolio with the given ID 
+* `GetSiteById`: Gets a site with the given ID 
+* `GetBuildingById`: Gets a buildings with the given ID 
+* `GetFloorById`: Gets a floor with the given ID 
+* `GetRoofById`: Gets a roof with the given ID 
+* `GetFacadeById`: Gets a facade with the given ID 
+* `GetOutsideareaById`: Gets an outside aread with the given ID 
+* `GetSubareaById`: Gets a suba area with the given ID 
+* `GetLandById`: Gets a land with the given ID 
+* `GetSpaceById`: Gets a  space with the given ID 
+* `CheckForChildrenOnPortfolio`: Gets a site with the given ID 
+* `CheckForChildrenOnSite`: Gets the information about the existence of children on a site
+* `CheckForChildrenOnBuilding`: Gets the information about the existence of children on a building
+* `CheckForChildrenOnFloor`:Gets the information about the existence of children on a floor
+* `CheckForChildrenOnRoof`: Gets the information about the existence of children on a roof
+* `CheckForChildrenOnFacade`: Gets the information about the existence of children on a facade
+* `CheckForChildrenOnOutsidearea`: Gets the information about the existence of children on an outside area
+* `CheckForChildrenOnSubarea`: Gets the information about the existence of children on a sub area
+* `CheckForChildrenOnLand`: Gets the information about the existence of children on a land
+* `CheckForChildrenOnSpace`: Gets the information about the existence of children on a space
+* `GetAssociatedSpacesForSpace`:  Get the list of associated entities
+* `GetUnassociatedSpaces`: Get the list of not associated entities
 
 
 ## Obtaining Credentials
