@@ -1,6 +1,5 @@
-## PowerBI Robots - API Connector
-PowerBI Robots connector to execute the internal API across the multiple Power Platform products
-
+## DevScope PowerBI Robots
+DevScope PowerBI Robots is a connector to execute the internal API across the multiple Power Platform products
 
 ## Prerequisites
 You will need the following to proceed:
