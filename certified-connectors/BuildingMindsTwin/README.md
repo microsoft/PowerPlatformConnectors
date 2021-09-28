@@ -45,7 +45,6 @@ The connector supports the following operations:
 * `GetAssociatedSpacesForSpace`:  Get the list of associated entities
 * `GetUnassociatedSpaces`: Get the list of not associated entities
 
-
 ## Obtaining Credentials
 Please contact us under: ​https://buildingminds.com/services/customer-support or support@buildingminds.com
 
