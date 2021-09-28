@@ -7,6 +7,25 @@ IT Glue is an IT documentation software for MSPs, co-managed IT teams, as well a
 To use this connector, you need the following
 
 - API Key from ITGlue Portal
+- Account Region base Url
+
+The base URL for all endpoints and methods is: 
+
+```
+https://api.itglue.com
+```
+
+Partners with an account in the EU data center will use:
+
+```
+https://api.eu.itglue.com
+```
+
+Partners with an account in the Australia data center will use:
+
+```
+https://api.au.itglue.com
+```
 
 
 ## Obtaining Credentials
