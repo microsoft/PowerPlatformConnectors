@@ -93,7 +93,5 @@ Detailed info about a Starlink satellite and orbit.
 ### Query Starlink sats
 Detailed info about queried Starlink satellites and orbits.
 
-## Known Issues and Limitations
-
 #### Launch dates
 Why does the date appear wrong? This is usually due to the way partial dates are stored and displayed in the API. For example, a launch scheduled for July 2020 would be represented as 2020-07-01T00:00:00.000Z. In this case, the field date_precision would be set as month, meaning the date is only valid to the month level, or 2020-07.
