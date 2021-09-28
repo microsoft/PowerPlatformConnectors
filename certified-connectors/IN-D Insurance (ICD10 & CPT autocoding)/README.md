@@ -1,4 +1,4 @@
-# IN-D Insurance (ICD10/CPT autocoding)
+# IN-D Insurance (ICD10 & CPT)
 
 IN-D Insurance does ICD10 and CPT auto-coding by understanding the disease name and the respective diagnosis by extracting the information from the discharge summary uploaded without a need to set up any template.
 
