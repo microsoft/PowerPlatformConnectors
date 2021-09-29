@@ -10,6 +10,19 @@ To use this connector, you need the following
 4. The Client ID and Client Secret from your App on your Dexcom account  
 5. Ensure that you have clicked ['Apply for Upgrade'](https://developer.dexcom.com/user/me/apps) on your Dexcom App Account to use production data.
 
+## Obtaining Credentials
+
+To obtain the credentials you need to firstly create an app on the  [Dexcom Developer API](https://developer.dexcom.com/overview) website. 
+
+1. Open the ['My Apps'](https://developer.dexcom.com/user/me/apps) page
+2. Click 'Add an App'
+3. Provide a name for your App
+4. Click Create
+5. Add a redirect URL of: https://global.consent.azure-apim.net/redirect
+6. Click 'Save'
+
+Your authentication credentials are now listed under 'Authentication'.
+
 ## API documentation
 [Dexcom Rest API Documentation](https://developer.dexcom.com/overview)
 
