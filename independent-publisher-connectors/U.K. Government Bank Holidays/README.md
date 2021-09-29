@@ -10,7 +10,7 @@ There are no prerequisities for this connector.
 There are no individual operations. Using the connector itself provides the list of Bank Holidays.
 
 ## Obtaining Credentials
-Credentials are not requied for this connector.
+Credentials are not required for this connector.
 
 ## Getting Started
 Just adding the connector to your Power Automate to access the holidays. 
