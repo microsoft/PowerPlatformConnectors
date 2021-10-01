@@ -25,10 +25,10 @@ Apply the styles from one document to another word document
 ### Extract Content from Word
 Extract content from a word document into a new empty document
 
-### Extract Content by Title and/or Style
+### Extract Content by Title and/or Style from Word
 Extract Content by text and/or the style of that text (For example Heading 1 with a title of "Introduction" extracts the section with that title and style)
 
-### Extract Content by Style Only
+### Extract Content by Style Only from Word
 Extract Content of a document into several sub documents with subdividing by Style types. (For example Heading 1 could break the document in sub documents at the heading 1 level)
 
 ### Excel Get Cell
