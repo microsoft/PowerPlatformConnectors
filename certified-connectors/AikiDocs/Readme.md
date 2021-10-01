@@ -11,7 +11,7 @@
 ## Encodian Power Automate Action Documentation
 The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
 
-## Supported Operations
+## Supported Operations 
 
 ### Append Word Docs
 Append word documents together to generate one new combined document
