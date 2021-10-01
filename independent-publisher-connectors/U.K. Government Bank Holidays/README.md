@@ -1,5 +1,5 @@
 # U.K. Government Bank Holidays
-This connector presents the UK Goverment's Bank Holidays list in JSON format
+This connector presents the UK Goverment's Bank Holidays list in JSON format.
 
 ## Publisher: Martyn Lesbirel
 
