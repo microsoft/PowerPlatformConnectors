@@ -1,5 +1,5 @@
 # r/SpaceX
-r/SpaceX is an open Source REST API for SpaceX launch, rocket, core, capsule, Starlink, launchpad, and landing pad data. r/SpaceX is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Space Exploration Technologies Corp (SpaceX), or any of its subsidiaries or its affiliates. The names SpaceX as well as related names, marks, emblems and images are registered trademarks of their respective owners.
+r/SpaceX is an open source REST API for SpaceX launch, rocket, core, capsule, Starlink, launchpad, and landing pad data. r/SpaceX is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Space Exploration Technologies Corp (SpaceX), or any of its subsidiaries or its affiliates. The names SpaceX as well as related names, marks, emblems and images are registered trademarks of their respective owners.
 
 ## Publisher: Troy Taylor, Hitachi Solutions
 
