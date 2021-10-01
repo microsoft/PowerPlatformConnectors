@@ -7,7 +7,7 @@ You will need the following to proceed:
 •	A Zoom Account
 
 ## Supported Operations
-Currently there are two actions:
+Currently there are three actions:
 * `Create Meeting` : This Action will help to create Meeting with few inputs required for the Meeting. You will get a Response which contains all the Meeting Details Ex: Meeting URL, Meeting ID
 * `Get Meetings` : This Action will get the Meetings that you have in Zoom Platform. The Response you will get will contain all the Meeting details for every Meeting that you created.
 * `Meeting Details` : This Action will help the get the details for a specific Meeting. The Response will contain all the Meeting details that you requested. 
@@ -21,6 +21,21 @@ Building Connector requires the following:
 * Create an App.
 * Note down the Client Id and Client Secret.
 * Add the Redirect URL in the Zoom Marketplace Website.
+
+## Obtaining Credentials 
+<b>Creating App:</b>
+* Go to Zoom Developer Portal.
+* Sign In with your Account.
+* Then to Develop Tab and Build App.
+* Choose App as OAuth to create.
+* Enter Name and select Account-level app. Turn off the toggle.
+
+<b>Getting Credentials:</b>
+* In My Dashboard Go to Created Apps.
+* Select App Name
+* Here are your Credentials.
+* In "Redirect URL for OAuth" and "Add Allow List" add the Redirect URL of Custom Connector.
+* In "Add Allow List" insert https://us.flow.microsoft.com/en-us/
 
 ## Known Issues and Limitations
 No issues and limitations are known at this time
