@@ -4,7 +4,7 @@
 
 ## Setup
 - [Register](https://www.aiki-mind.com/Account/Register) for an Aiki-Mind Account
-- [Request A Trial Key](https://www.aiki-mind.com/Account/TrialRequest) to manage your existing Encodian Subscription
+- [Request A Trial Key](https://www.aiki-mind.com/Account/TrialRequest) to manage your existing AikiMind Subscription
 - [Purchase](https://www.aiki-mind.com/Products) a License Key
 - [Create](https://flow.microsoft.com) a Flow using the AikiDocs Connector in Microsoft Power Automate
 
