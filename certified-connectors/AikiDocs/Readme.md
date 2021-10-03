@@ -8,9 +8,6 @@
 - [Purchase](https://www.aiki-mind.com/Products) a License Key
 - [Create](https://flow.microsoft.com) a Flow using the AikiDocs Connector in Microsoft Power Automate
 
-## Encodian Power Automate Action Documentation
-The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
-
 ## Supported Operations 
 
 ### Append Word Docs
