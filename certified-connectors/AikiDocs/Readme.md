@@ -8,6 +8,9 @@
 - [Purchase](https://www.aiki-mind.com/Products) a License Key
 - [Create](https://flow.microsoft.com) a Flow using the AikiDocs Connector in Microsoft Power Automate
 
+## Test Harness
+You can utilize the [test harness](https://www.aiki-mind.com/APIManagement/Harness) from your account to understand all the services and test them with your documents.
+
 ## Supported Operations 
 
 ### Append Word Docs
