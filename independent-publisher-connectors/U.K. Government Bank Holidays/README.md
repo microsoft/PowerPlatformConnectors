@@ -16,7 +16,7 @@ Credentials are not required for this connector.
 Just adding the connector to your Power Automate to access the holidays. 
 
 **Note**
-No compose is used on the output of the connector. For example to get the count of each kingdom's holidays a string variable can be initialised. The count is obtained by refering to the connector output body.
+No compose is used on the output of the connector. For example to get the count of each kingdom's holidays a string variable can be initialised. The count is obtained by referring to the connector output body.
 
 For example to count the Scotish Bank Holiday the instruction is 
 
