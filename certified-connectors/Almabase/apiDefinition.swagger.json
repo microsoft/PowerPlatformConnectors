@@ -695,7 +695,9 @@
         "status",
         "mode",
         "currency",
-        "splits"
+        "splits",
+        "donor_email",
+        "page"
       ],
       "type": "object"
     },
@@ -1130,20 +1132,6 @@
       },
       "type": "object"
     },
-    "v1.GivingApi.GivingPageAdd": {
-      "description": "Giving Page",
-      "properties": {
-        "name": {
-          "description": "Name of the giving page",
-          "type": "string",
-          "x-ms-summary": "Name"
-        }
-      },
-      "required": [
-        "name"
-      ],
-      "type": "object"
-    },
     "v1.GivingApi.GivingPageAssociatedWithGift": {
       "description": "The giving page associated with the gift.",
       "properties": {
@@ -1355,7 +1343,7 @@
       "x-ms-summary": "Online Transaction"
     },
     "v1.AlmasightsApi.RecordRead": {
-      "description": "Record",
+      "description": "Record on Almabase.",
       "properties": {
         "external_database_id": {
           "description": "A system assigned unique ID for the record by the external database. e.g. System Record ID for Raiser Edge NXT, Contact Id for Salesforce\n",
@@ -1401,10 +1389,12 @@
           "x-ms-summary": "Link"
         }
       },
-      "type": "object"
+      "type": "object",
+      "x-ms-summary": "Record",
+      "x-ms-visibility": "important"
     },
     "v1.AlmasightsApi.RecordAddOrEdit": {
-      "description": "Record",
+      "description": "Record on Almabase.",
       "properties": {
         "id": {
           "description": "System generated ID to uniquely identify a record.",
@@ -1413,7 +1403,9 @@
           "x-ms-summary": "ID"
         }
       },
-      "type": "object"
+      "type": "object",
+      "x-ms-summary": "Record",
+      "x-ms-visibility": "important"
     },
     "v1.AlmasightsApi.TouchpointCustomObjectAdd": {
       "description": "Touchpoint body to create a new touchpoint",
@@ -1426,15 +1418,7 @@
           "x-ms-visibility": "important"
         },
         "mapped_profile": {
-          "description": "Record on Almabase.",
-          "properties": {
-            "schema": {
-              "$ref": "#/definitions/v1.AlmasightsApi.RecordAddOrEdit"
-            }
-          },
-          "type": "object",
-          "x-ms-summary": "Record",
-          "x-ms-visibility": "important"
+          "$ref": "#/definitions/v1.AlmasightsApi.RecordAddOrEdit"
         },
         "recorded_at": {
           "description": "The timestamp of the activity.",
@@ -1531,15 +1515,7 @@
           "x-ms-summary": "Is New Email?"
         },
         "mapped_profile": {
-          "description": "Record on Almabase.",
-          "properties": {
-            "schema": {
-              "$ref": "#/definitions/v1.AlmasightsApi.RecordRead"
-            }
-          },
-          "type": "object",
-          "x-ms-summary": "Record",
-          "x-ms-visibility": "important"
+          "$ref": "#/definitions/v1.AlmasightsApi.RecordRead"
         },
         "recorded_at": {
           "description": "The timestamp of the activity.",
@@ -1609,13 +1585,13 @@
       },
       "type": "object"
     },
-    "v1.RecordApi.RecordEditOrAdd": {
+    "v1.RecordApi.RecordAdd": {
       "description": "Record",
       "properties": {
         "email_addresses": {
           "description": "List of email addresses of a profile",
           "items": {
-            "$ref": "#/definitions/v1.RecordApi.EmailAddressAdd"
+            "$ref": "#/definitions/v1.RecordApi.EmailAddressAssociatedWithRecordAdd"
           },
           "type": "array",
           "x-ms-summary": "Email Addresses",
@@ -1647,7 +1623,8 @@
         }
       },
       "required": [
-        "last_name"
+        "last_name",
+        "first_name"
       ],
       "type": "object"
     },
@@ -1710,9 +1687,17 @@
       ],
       "type": "object"
     },
-    "v1.RecordApi.EmailAddressEdit": {
+    "v1.RecordApi.EmailAddressAssociatedWithRecordAdd": {
       "description": "Email Address",
       "properties": {
+        "address": {
+          "description": "The email address",
+          "format": "email",
+          "maxLength": 254,
+          "type": "string",
+          "x-ms-summary": "Address",
+          "x-ms-visibility": "important"
+        },
         "is_login_email": {
           "default": true,
           "description": "Indicates if the user are allowed to login to the Platform using this email address.",
@@ -1726,8 +1711,54 @@
           "x-ms-summary": "Is Primary?",
           "x-ms-visibility": "important"
         },
+        "source": {
+          "description": "The source indicate how the email is added to the database.",
+          "maxLength": 32,
+          "type": "string",
+          "x-ms-summary": "Source",
+          "x-ms-visibility": "advanced"
+        },
         "status": {
           "default": "unknown",
+          "description": "Status of the email address",
+          "enum": [
+            "unknown",
+            "hard_bounce",
+            "soft_bounce",
+            "marked_spam",
+            "invalid",
+            "contactable"
+          ],
+          "type": "string",
+          "x-ms-summary": "Status",
+          "x-ms-visibility": "advanced"
+        },
+        "type": {
+          "description": "The type of the email",
+          "maxLength": 32,
+          "type": "string",
+          "x-ms-summary": "Type",
+          "x-ms-visibility": "important"
+        }
+      },
+      "type": "object"
+    },
+    "v1.RecordApi.EmailAddressEdit": {
+      "description": "Email Address",
+      "properties": {
+        "is_login_email": {
+          "description": "Indicates if the user are allowed to login to the Platform using this email address.",
+          "type": "boolean",
+          "x-ms-summary": "Use for Login?",
+          "x-ms-visibility": "advanced"
+        },
+        "is_primary": {
+          "description": "A primary email is used to send the automated emails triggered by the System. It is also used to send the bulk email to the profile. It's mandatory that only one email is set as primary.\n",
+          "type": "boolean",
+          "x-ms-summary": "Is Primary?",
+          "x-ms-visibility": "important"
+        },
+        "status": {
           "description": "Status of the email address",
           "enum": [
             "unknown",
@@ -1777,7 +1808,7 @@
           "x-ms-summary": "Use for Login?"
         },
         "is_primary": {
-          "description": "A primary email is used to send the automated emails triggered by the System. It is also used to send the bulk email to the profile. It's mandatory that only one email is set as primary.\n",
+          "description": "A primary email is used to send the automated emails triggered by the System. It is also used to send the bulk email to the record. It's mandatory that only one email is set as primary.\n",
           "type": "boolean",
           "x-ms-summary": "Is Primary?"
         },
@@ -1806,6 +1837,36 @@
           "description": "The type of the email",
           "type": "string",
           "x-ms-summary": "Type"
+        }
+      },
+      "type": "object"
+    },
+    "v1.RecordApi.RecordEdit": {
+      "description": "Record",
+      "properties": {
+        "external_database_id": {
+          "description": "A system assigned unique ID for the record by the external database. e.g. System Record ID for Raiser Edge NXT, Contact Id for Salesforce\n",
+          "type": "string",
+          "x-ms-summary": "External Database ID",
+          "x-ms-visibility": "important"
+        },
+        "external_database_lookup_id": {
+          "description": "A custom user-defined lookup ID for the record in the external database. e.g. Constituent ID\n",
+          "type": "string",
+          "x-ms-summary": "External Database Lookup ID",
+          "x-ms-visibility": "advanced"
+        },
+        "first_name": {
+          "description": "First name of the record.",
+          "type": "string",
+          "x-ms-summary": "First Name",
+          "x-ms-visibility": "important"
+        },
+        "last_name": {
+          "description": "Last name of the record.",
+          "type": "string",
+          "x-ms-summary": "Last Name",
+          "x-ms-visibility": "important"
         }
       },
       "type": "object"
@@ -2828,32 +2889,6 @@
         "tags": [
           "Giving Page"
         ]
-      },
-      "post": {
-        "description": "Creates a new giving page.",
-        "operationId": "CreateGivingPage",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1.GivingApi.GivingPageAdd"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returned when the operation succeeds.",
-            "schema": {
-              "$ref": "#/definitions/v1.GivingApi.GivingPageRead"
-            }
-          }
-        },
-        "summary": "Create a giving page",
-        "tags": [
-          "Gift Page"
-        ]
       }
     },
     "/v1/givingx/pages/{id}/": {
@@ -2995,7 +3030,8 @@
         "summary": "List programs",
         "tags": [
           "Touchpoint Program"
-        ]
+        ],
+        "x-ms-visibility": "internal"
       }
     },
     "/v1/almasights/types/": {
@@ -3075,10 +3111,11 @@
         "summary": "List touchpoint types",
         "tags": [
           "Touchpoint Type"
-        ]
+        ],
+        "x-ms-visibility": "internal"
       }
     },
-    "/v1/profiles/": {
+    "/v1/profiles": {
       "get": {
         "description": "Returns a list of records.",
         "operationId": "ListRecords",
@@ -3193,7 +3230,7 @@
                   "x-ms-summary": "Total Records"
                 },
                 "value": {
-                  "description": "List of records of a profile returned for the given filters.",
+                  "description": "List of records of a record returned for the given filters.",
                   "items": {
                     "$ref": "#/definitions/v1.RecordApi.RecordRead"
                   },
@@ -3222,7 +3259,7 @@
             "name": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1.RecordApi.RecordEditOrAdd"
+              "$ref": "#/definitions/v1.RecordApi.RecordAdd"
             }
           }
         ],
@@ -3240,7 +3277,7 @@
         ]
       }
     },
-    "/v1/profiles/{id}/": {
+    "/v1/profiles/{id}": {
       "get": {
         "description": "Returns information about a record.",
         "operationId": "GetRecord",
@@ -3303,7 +3340,7 @@
             "name": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1.RecordApi.RecordEditOrAdd"
+              "$ref": "#/definitions/v1.RecordApi.RecordEdit"
             }
           }
         ],
@@ -3321,7 +3358,7 @@
         ]
       }
     },
-    "/v1/profiles/{record_id}/email_addresses/": {
+    "/v1/profiles/{record_id}/email_addresses": {
       "get": {
         "description": "Returns a list of email addresses for a record.",
         "operationId": "ListRecordEmailAddresses",
@@ -3400,7 +3437,7 @@
                   "x-ms-summary": "Total Email Addresses"
                 },
                 "value": {
-                  "description": "List of email address of a profile returned for the given filters. The results are paginated.\n",
+                  "description": "List of email address of a record returned for the given filters. The results are paginated.\n",
                   "items": {
                     "$ref": "#/definitions/v1.RecordApi.EmailAddressRead"
                   },
@@ -3458,7 +3495,7 @@
         ]
       }
     },
-    "/v1/records/{record_id}/email_addresses/{email_id}/": {
+    "/v1/profiles/{record_id}/email_addresses/{email_id}": {
       "get": {
         "description": "Returns information about an email address of a record.",
         "operationId": "GetRecordEmailAddress",
