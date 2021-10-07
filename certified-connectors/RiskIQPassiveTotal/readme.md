@@ -1,6 +1,6 @@
 # RiskIQ Illuminate
 
-RiskIQ Illuminate® reveals cyber threats relevant to your critical assets through connected digital relationships. It is the only security intelligence solution with tailored attack surface intelligence to uncover exposures, risks, and threats against your unique digital footprint, pinpointing what’s relevant to you—all in one place.
+RiskIQ Illuminate reveals cyber threats relevant to your critical assets through connected digital relationships. It is the only security intelligence solution with tailored attack surface intelligence to uncover exposures, risks, and threats against your unique digital footprint, pinpointing what’s relevant to you—all in one place.
 
 ## Pre-requisites
 
