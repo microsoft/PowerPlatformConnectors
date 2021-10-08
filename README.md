@@ -75,7 +75,7 @@ More information on the each of the properties are given below:
 
 * `connectionParameters`: Defines the connection parameter for the service.
 
-* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector. Independent Publisher connectors must set the color to "#da3b01".
 
 * `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
 
