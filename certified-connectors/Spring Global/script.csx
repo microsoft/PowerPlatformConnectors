@@ -2,7 +2,7 @@
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        // Use the context to forward/send an HTTP request
+        // Use the context to forward/send an HTTP request. Turn of caching
         var cacheControlHeader = new CacheControlHeaderValue(){NoStore=true, NoCache=true};
         this.Context.Request.Headers.CacheControl = cacheControlHeader;
         HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
@@ -11,24 +11,25 @@
 
         try 
         {
-            // Do the transformation if the response was successful, otherwise return error responses as-is
             JObject surveyJson;
             string newResponceContent = responseString;
-            bool contentChanged = false; 
-            
+            bool contentChanged = false;
+
             if (this.Context.OperationId == "GetSurveyPublicationSchema")
             {
                 var arrayResponse = JArray.Parse(responseString);
                 surveyJson = arrayResponse.First as JObject;
                 newResponceContent = this.GetSurveySchema(surveyJson);
                 contentChanged = true;
-            } 
-            else if (this.Context.OperationId == "GetExecutionById") 
+            }
+            else if (this.Context.OperationId == "GetExecutionById")
             {
                 newResponceContent = this.GetSurveyData(responseString);
                 contentChanged = true;
-            } else {
-                //throw new Exception($"Unknown method {this.Context.OperationId}");
+            }
+            else 
+            { 
+                //Don`t do any thing for other operations
             }
 
             if (contentChanged)
@@ -37,16 +38,17 @@
                 response.StatusCode = HttpStatusCode.OK;
             }
         }
-        catch //(Exception ex)
+        catch
         {
-            //throw new Exception($"{(int)(response.StatusCode)}-'{response.StatusCode}', {responseString}", ex);
+            //Don`t to transformation
         }
-
-        //throw new Exception($"PN Error {response.StatusCode}");
 
         return response;
     }
 
+    /// <summary>
+    ///  The method transforms data from WebAPI to more plain structure, that suitable for Flows
+    /// </summary>
     public string GetSurveyData(string surveyExecutionData)
     {
         JArray surveyExecutionArrayJson = JArray.Parse(surveyExecutionData);
@@ -101,6 +103,9 @@
         return result;
     }
 
+    /// <summary>
+    /// The method generate a schema of survey to support Flow Designer
+    /// </summary>
     public string GetSurveySchema(JObject surveyJson)
     {
         JObject resultJson = new JObject();
