@@ -15,18 +15,11 @@ After deploying this connector to your cloud tenant, you must modify the followi
 2.	Replace the "Host" value with your D365 on-premises address using the format in the example (NOTE: D365 CE on-premise does not need to be internet-facing i.e. IFD)
 3.	Replace the "Base URL" value with your D365 on-premises org name (get this value from Customizations > Developer Resources > Service Root URL)
 
-![image](https://user-images.githubusercontent.com/86677937/136863626-19735c08-41cc-45a0-8073-6238075b9fb1.png)
-
 On the Security tab, ensure Windows Authentication is selected.
-
-![image](https://user-images.githubusercontent.com/86677937/136863693-bf9ccacb-6395-40ca-a6ed-35f430b56797.png)
 
 Update the Connector in the upper right corner to save your changes.
 
 On the Test tab, create a new connection.  In the authentication screen, enter the Windows Authentication credentials required by the on-premises environment and choose your gateway.  Manually input a contact GUID from the D365 CE online environment and test the service.  Navigate to the on-premises environment and validate that the contact has been created with the same GUID.
-
-![image](https://user-images.githubusercontent.com/86677937/136863761-00d9b197-0b33-4443-bf67-ae6a7a7f5b28.png)
-![image](https://user-images.githubusercontent.com/86677937/136863851-7422f844-74ef-4081-a783-df923bce4740.png)
 
 Perform another test with the same GUID, using different data (update scenario).  Validate the the existing contact on-premises reflects your change.
 
