@@ -85,7 +85,7 @@ Currently only the following lead data points are available to update on-premise
 3.	telephone1
 
 ## API Documentation
-Visit the MS Docs site for D365 CE API usage. https://docs.microsoft.com/en-us/powerapps/developer/data-platform/webapi/update-delete-entities-using-web-api#upsert-a-table
+Visit the Microsoft Docs site for D365 CE API usage. https://docs.microsoft.com/en-us/powerapps/developer/data-platform/webapi/update-delete-entities-using-web-api#upsert-a-table
 
 ## Known Issues and Limitations
 None.
