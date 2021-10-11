@@ -5,7 +5,10 @@ The OpenCage Geocoding API provides reverse (latitude/longitude to text) and for
 ### Ahmad Najjar
 
 ## Prerequisites
-You need to have an account on [OpenCage Geocoding](https://opencagedata.com/).
+Sign up with an account on [OpenCage Geocoding](https://opencagedata.com/) to get your free trial API Key (limited to 2500 requests per day). Please see all [the rate limiting details](https://opencagedata.com/api#rate-limiting). 
+You can use the free trial as long as you like, but please bear in mind that it is designed to be used as a way to test if our service meets your needs. 
+Please do NOT run production services on a free trial. If you want to depend on our service please upgrade to a paid package.
+You can find more details about pricing [here](https://opencagedata.com/faq#pricing).
 
 ## Supported Operations
 ### Reverse Geocoding
