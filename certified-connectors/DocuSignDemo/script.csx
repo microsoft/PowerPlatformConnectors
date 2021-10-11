@@ -36,12 +36,26 @@ public class Script : ScriptBase
         }
         catch (JsonReaderException ex)
         {
-            _ = isRequest ?? throw new ConnectorException(HttpStatusCode.BadRequest, "Unable to parse the request body", ex) : throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse the response body", ex);
+            if (isRequest)
+            {
+                throw new ConnectorException(HttpStatusCode.BadRequest, "Unable to parse the request body", ex);
+            }
+            else
+            {
+                throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse the response body", ex);
+            }
         }
 
         if (body == null)
         {
-            _ = isRequest ?? throw new ConnectorException(HttpStatusCode.BadRequest, "The request body is empty", ex) : throw new ConnectorException(HttpStatusCode.BadGateway, "The response body is empty", ex);
+            if (isRequest)
+            {
+                throw new ConnectorException(HttpStatusCode.BadRequest, "The request body is empty");
+            }
+            else
+            {
+                throw new ConnectorException(HttpStatusCode.BadGateway, "The response body is empty");
+            }
         }
 
         return body;
