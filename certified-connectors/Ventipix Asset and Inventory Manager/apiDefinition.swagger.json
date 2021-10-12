@@ -1,0 +1,213 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Ventipix Asset and Inventory",
+    "description": "This connector enables you to add asset or inventory data to your account, or for use with other flows.",
+	"contact": {
+      "name": "Ventipix Support",
+      "url": "https://kb.ventipix.com/",
+      "email": "support@ventipix.com"
+    }
+  },  
+  "x-ms-connector-metadata": [
+      {
+        "propertyName": "Website",
+        "propertyValue": "https://ai.ventipix.com/"
+      },
+      {
+        "propertyName": "Privacy policy",
+        "propertyValue": "https://ai.ventipix.com/privacy-policy.php"
+      },
+      {
+        "propertyName": "Categories",
+        "propertyValue": "Business Management;Productivity" 
+      }
+  ],  
+  "host": "ai.ventipix.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "query"
+    }
+  },
+  "paths": {
+    "/app/flow/services": {
+      "get": {
+        "description": "Select an asset or inventory service.",
+        "summary": "Services",
+        "operationId": "GetLists",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetLists"
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/app/flow/schema/{listID}": {
+      "get": {
+        "description": "Data capture fields from the selected service.",
+        "summary": "Data capture fields",
+        "operationId": "GetListSchema",
+        "parameters": [
+          {
+            "name": "listID",
+            "type": "string",
+            "in": "path",
+            "description": "Select a service for the correct custom fields to be displayed.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Select a service"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/app/flow/fetchsert/{listID-dynamic}": {
+      "get": {
+        "description": "This operation will enable you to retrieve data from an existing asset or inventory service.",
+        "summary": "Retrieve an asset or inventory record",
+        "operationId": "GetListItems",
+        "parameters": [
+          {
+            "name": "listID-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select a service for the correct custom fields to be displayed.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Select a service",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "barcode_value",
+            "type": "string",
+            "required": true,            
+            "x-ms-summary": "Barcode/NFC Tag value",
+            "description": "The barcode or NFC Tag value for the asset or inventory"
+          },
+          {
+            "in": "query",
+            "name": "location",
+            "type": "string",
+            "required": false,           
+            "x-ms-summary": "Location",
+            "description": "For inventory, if applicable"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DynamicResponseGetListSchema"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "This operation will enable you to create an asset or inventory record in your account, based on the selected service.",
+        "summary": "Create an asset or inventory record",
+        "operationId": "CreateListItem",
+        "parameters": [
+          {
+            "name": "listID-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select a service",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Services",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "dynamicListSchema",
+            "in": "body",
+            "description": "Dynamic Schema of items in selected list",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetListSchema",
+                "parameters": {
+                  "listID": {
+                    "parameter": "listID-dynamic"
+                  }
+                },
+                "value-path": "items"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GetLists": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "DynamicResponseGetListSchema": {
+      "type": "object",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetListSchema",
+        "parameters": {
+          "listID": {
+            "parameter": "listID-dynamic"
+          }
+        },
+        "value-path": "items"
+      }
+    }
+  }
+}

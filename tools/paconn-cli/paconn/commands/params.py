@@ -47,6 +47,10 @@ ICON = 'icon'
 ICON_OPTIONS = ['--icon', '-i']
 ICON_HELP = 'Location for the icon file.'
 
+SCRIPT = 'script'
+SCRIPT_OPTIONS = ['--script', '-x']
+SCRIPT_HELP = 'Location for the script file.'
+
 
 # pylint: disable=unused-argument
 def load_arguments(self, command):
@@ -167,6 +171,12 @@ def load_arguments(self, command):
             required=False,
             help=ICON_HELP)
         arg_context.argument(
+            SCRIPT,
+            options_list=SCRIPT_OPTIONS,
+            type=str,
+            required=False,
+            help=SCRIPT_HELP)
+        arg_context.argument(
             POWERAPPS_URL,
             options_list=POWERAPPS_URL_OPTIONS,
             type=str,
@@ -225,6 +235,12 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help=ICON_HELP)
+        arg_context.argument(
+            SCRIPT,
+            options_list=SCRIPT_OPTIONS,
+            type=str,
+            required=False,
+            help=SCRIPT_HELP)
         arg_context.argument(
             CONNECTOR_ID,
             options_list=CONNECTOR_ID_OPTIONS,

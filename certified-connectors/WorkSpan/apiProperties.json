@@ -1,0 +1,190 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2generic",
+          "clientId": "{{CLIENT_ID}}",
+          "scopes": [
+            "read",
+            "write"
+          ],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False"
+          },
+          "customParameters": {
+            "authorizationUrlTemplate": {
+              "value": "{env}/oauth/authorize"
+            },
+            "refreshBodyTemplate": {
+              "value": "client_id={AppUserId}&code={Code}&redirect_uri={RedirectUrl}&grant_type=client_credentials&client_secret={AppUserSecret}&refresh_token_type=dummy&operation=refresh"
+            },
+            "refreshUrlTemplate": {
+              "value": "{env}/oauth/token"
+            },
+            "refreshUrlQueryStringTemplate": {
+              "value": "?x-ws-env={HostName}"
+            },
+            "scopeListDelimiter": {
+              "value": " "
+            },
+            "tokenBodyTemplate": {
+              "value": "client_id={AppUserId}&code={Code}&redirect_uri={RedirectUrl}&grant_type=client_credentials&client_secret={AppUserSecret}&refresh_token_type=dummy&operation=token"
+            },
+            "tokenUrlTemplate": {
+              "value": "{env}/oauth/token"
+            },
+            "tokenUrlQueryStringTemplate": {
+              "value": "?x-ws-env={HostName}"
+            }
+          }
+        },
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 4,
+            "required": "true"
+          },
+          "description": "Login with your credentials",
+          "displayName": "Login with your credentials",
+          "tooltip": "Login with your credentials"
+        }
+      },
+      "token:env": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "allowedValues": [
+              {
+                "text": "Production",
+                "value": "https://api.workspan.com"
+              },
+              {
+                "text": "Sandbox",
+                "value": "https://api-sandbox.workspan.com"
+              }
+            ],
+            "tabIndex": 2,
+            "required": "true"
+          },
+          "description": "Sandbox environment or production environment",
+          "displayName": "Environment: Sandbox or Production",
+          "tooltip": "Select sandbox environment or production environment"
+        }
+      },
+      "token:AppUserId": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 3,
+            "required": "true"
+          },
+          "description": "Id of WorkSpan Application User",
+          "displayName": "Application User Id",
+          "tooltip": "Id assigned to Application User on WorkSpan"
+        }
+      },
+      "token:AppUserSecret": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 4,
+            "required": "true"
+          },
+          "description": "Application User Secret",
+          "displayName": "Application User Secret",
+          "tooltip": "Secret of Application User"
+        }
+      },
+      "token:HostName": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 5,
+            "required": "true"
+          },
+          "description": "Enter Host Name (without https) Example: demo.workspan.com / app.workspan.com",
+          "displayName": "WorkSpan App Hostname. Example: demo.workspan.com /app.workspan.com",
+          "tooltip": "Enter WorkSpan Hostname. For production system - enter app.workspan.com"
+        }
+      },
+      "token:notes": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 6,
+            "required": "true"
+          },
+          "description": "Notes for connection",
+          "displayName": "Notes",
+          "tooltip": "Save your notes about this connection"
+        }
+      }
+    },
+    "iconBrandColor": "#c5dcff",
+    "publisher": "WorkSpan",
+    "stackOwner": "WorkSpan",
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route subscribe request",
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "SubscribeObjectEvent"
+          ],
+          "x-ms-apimTemplateParameter.newPath": "/event/v1/subscriber"
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route Submit to Partner Center event subscriber to common subscribe endpoint",
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "SubmitToPartnerCenterObjectEvent"
+          ],
+          "x-ms-apimTemplateParameter.newPath": "/event/v1/subscriber"
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route bulkload_opportunity request for fileupload",
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "BulkloadOpportunityFileAttachment"
+          ],
+          "x-ms-apimTemplateParameter.newPath": "/bulk/v1/bulkload_opportunity"
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route bulkload_data in attachment request for fileupload",
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "BulkloadDataFileAttachment"
+          ],
+          "x-ms-apimTemplateParameter.newPath": "/bulk/v1/bulkload"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set env header to redirect to sandbox host",
+        "parameters": {
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplateParameter.name": "x-ws-env",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('token:HostName','')",
+          "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      },
+      {
+        "templateId": "dynamichosturl",
+        "title": "Choose Host for connection",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "@connectionParameters('token:env')"
+        }
+      }
+    ]
+  }
+}
