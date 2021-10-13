@@ -2,7 +2,7 @@
 
 FreeAgent is a cloud based accounting system. It brings everything together, from invoice and expense management to project management and sales tax. FreeAgent made specifically for freelancers, small business owners and their accountants. This Connector helps you to retrieve and update data in your FreeAgent Account. This connectors supports only core operations dealing with Invoice, Recurring Invoice and Contacts.
 
-
+ 
 ## Publisher: Nirmal
 
 ## Prerequisites
