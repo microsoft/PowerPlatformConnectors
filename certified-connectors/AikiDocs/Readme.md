@@ -4,14 +4,14 @@
 
 ## Setup
 - [Register](https://www.aiki-mind.com/Account/Register) for an Aiki-Mind Account
-- [Request A Trial Key](https://www.aiki-mind.com/Account/TrialRequest) to manage your existing Encodian Subscription
+- [Request A Trial Key](https://www.aiki-mind.com/Account/TrialRequest) to manage your existing AikiMind Subscription
 - [Purchase](https://www.aiki-mind.com/Products) a License Key
 - [Create](https://flow.microsoft.com) a Flow using the AikiDocs Connector in Microsoft Power Automate
 
-## Encodian Power Automate Action Documentation
-The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
+## Test Harness
+You can utilize the [test harness](https://www.aiki-mind.com/APIManagement/Harness) from your account to understand all the services and test them with your documents.
 
-## Supported Operations
+## Supported Operations 
 
 ### Append Word Docs
 Append word documents together to generate one new combined document
@@ -25,10 +25,11 @@ Apply the styles from one document to another word document
 ### Extract Content from Word
 Extract content from a word document into a new empty document
 
-### Extract Content by Title and/or Style
+### Extract Content by Title and/or Style from Word
 Extract Content by text and/or the style of that text (For example Heading 1 with a title of "Introduction" extracts the section with that title and style)
 
-### Extract Content by Style Only
+### Extract Content by Style Only from Word
+
 Extract Content of a document into several sub documents with subdividing by Style types. (For example Heading 1 could break the document in sub documents at the heading 1 level)
 
 ### Excel Get Cell
