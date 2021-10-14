@@ -4,12 +4,12 @@
 
 ## Setup
 - [Register](https://www.aiki-mind.com/Account/Register) for an Aiki-Mind Account
-- [Request A Trial Key](https://www.aiki-mind.com/Account/TrialRequest) to manage your existing Encodian Subscription
+- [Request A Trial Key](https://www.aiki-mind.com/Account/TrialRequest) to manage your existing AikiMind Subscription
 - [Purchase](https://www.aiki-mind.com/Products) a License Key
 - [Create](https://flow.microsoft.com) a Flow using the AikiDocs Connector in Microsoft Power Automate
 
-## Encodian Power Automate Action Documentation
-The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
+## Test Harness
+You can utilize the [test harness](https://www.aiki-mind.com/APIManagement/Harness) from your account to understand all the services and test them with your documents.
 
 ## Supported Operations 
 
