@@ -1,14 +1,13 @@
 # New York Times
-The New York Times allows anyone to search articles by keyword, date, section, and popularity.  This connector allows a Power Platform user to pull this data into their app, flow, or report.
+The New York Times allows anyone to search articles by keyword, date, section, and popularity.  This connector allows a user to pull this data into their app, flow, or report.
 
-## Publisher
-Roy Paar
+## Publisher: Roy Paar
 
 ## Prerequisites
 This API uses an API key.  Register on the NYTimes Developer Portal (https://developer.nytimes.com/) for a free account.  Then create an application.  Then add the following three APIs to the application.  Copy and paste the API key into the Power Platform connection.
-1. Article Search API
-2. Top Stories API
-3. Most Popular API
+1. Article Search API - Use the Article Search API to look up NYTimes articles by keyword.
+2. Top Stories API - The Top Stories API returns an array of NYTimes articles currently on the specified section.
+3. Most Popular API - The Most Popular API returns the most popular articles on NYTimes.com based on views.
 
 ## Supported Operations
 ### Article Search
