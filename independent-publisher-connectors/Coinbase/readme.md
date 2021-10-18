@@ -1,8 +1,7 @@
 # Coinbase
-The Coinbase platform allows anyone to get crypto exchange rates, currencies, and current crypto market rates at a point in time.  This connector allows a Power Platform user to pull this data into their app, flow, or report.
+The Coinbase platform allows anyone to get crypto exchange rates, currencies, and current crypto market rates at a point in time.  This connector allows a user to pull this data into their app, flow, or report.
 
-## Publisher
-Roy Paar
+## Publisher: Roy Paar
 
 ## Prerequisites
 None.
