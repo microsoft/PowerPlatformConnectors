@@ -11,7 +11,7 @@ This API uses an API key.  Register on the NYTimes Developer Portal (https://dev
 3. Most Popular API
 
 ## Supported Operations
-### Artitcle Search
+### Article Search
 Get a list of articles by keyword.  Enter a keyword into the 'q' field and optionally filter by begin_date or end_date.
 
 ### Top Stories
