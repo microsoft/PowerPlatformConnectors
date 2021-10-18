@@ -1,8 +1,7 @@
 # The Weather Channel
-The Weather Channel allows anyone to search weather events by geocode and time.  This connector allows a Power Platform user to pull this data into their app, flow, or report.
+The Weather Channel allows anyone to search weather events by geocode and time.  This connector allows a user to pull this data into their app, flow, or report.
 
-## Publisher
-Roy Paar
+## Publisher: Roy Paar
 
 ## Prerequisites
 This API uses an API key.  Register on the IBM call for code portal (https://developer.ibm.com/callforcode/tools/weather/) in order to request an API key.
