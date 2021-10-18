@@ -4,7 +4,7 @@ Clearbit is the marketing data platform behind the fastest-growing B2B companies
 ## Publisher: Troy Taylor, Hitachi Solutions
 
 ## Prerequisites
-Clearbit provides access to the Logo API with no account or authentication needed.
+Clearbit provides access to the Logo API with no account or authentication needed. Information about the API can be found [here](https://clearbit.com/docs#logo-api).
 
 ## Obtaining Credentials
 There are no credentials required to use the Logo API.
