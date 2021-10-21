@@ -1,0 +1,1168 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "LibreBor",
+    "description": "Librebor allows you to retrieve specific company details from the Spanish Register, information such as adquisitions, incorporations, NIF validation and more",
+    "version": "1.0",
+    "contact": {
+      "email": "mario@trueba.co.uk",
+      "name" : "Mario Trueba Cantero & Marco Amoedo"
+    }
+  },
+
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://librebor.me/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://librebor.me/terminos-y-condiciones/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Data"
+    }
+  ],
+
+  "host": "api.librebor.me",
+  "basePath": "/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/company/search/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Company results including name, slug and province. Use the slug to retrieve all the information for a company.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "companies": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/CompanySearchResult"
+                  }
+                },
+                "count_results": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Number of results that the user wants displayed by page."
+                },
+                "total_results": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Total number of results retrieved."
+                },
+                "next_page": {
+                  "type": "string",
+                  "description": "Endpoint to retrieve the next page of content."
+                }
+              }
+            }
+          }
+        },
+        "summary": "Search for a company",
+        "description": "Retrieve list of companies that match the keywords in their name. The number of results is limited to 200. Use the 'page' parameter to retrieve more results.",
+        "operationId": "Libreborme_search_company",
+        "parameters": [
+          {
+            "name": "query",
+            "x-ms-summary": "query",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description" : "Query to search, preferable the name of the company"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description" : "In case you want to retrieve a specific page only",
+            "x-ms-summary": "page"
+          },
+          {
+            "name": "province",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "province",
+            "description" : "Province where the company is located, this parameter is optional."
+          }
+        ]
+      }
+    },
+    "/company/by-slug/{slug}/": {
+      "get": {
+        "tags": [
+          "Companies"
+        ],
+        "summary": "Get company information by Slug",
+        "description": "Retrieve company information for specified Slug, a slug is a concatenation of key words that represent the company",
+        "operationId": "Libreborme-company_by_slug",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "x-ms-summary": "slug",
+            "required": true,
+            "description": "Company Slug used to retrieve the company information",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete company information hosted in the Spanish Register",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "company": {
+                  "$ref": "#/definitions/Company"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Company not found",
+            "schema": {
+              "$ref": "#/definitions/ResponseCompanyNotFound"
+            }
+          },
+          "500": {
+            "description": "The system is overloaded or significantly impaired.",
+            "schema": {
+              "$ref": "#/definitions/ResponseError"
+            }
+          }
+        }
+      }
+    },
+    "/company/by-nif/{nif}/": {
+      "get": {
+        "tags": [
+          "Companies"
+        ],
+        "summary": "Get company information by NIF",
+        "description": "Retrieve company information for specified NIF.",
+        "operationId": "Libreborme-company_by_nif",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nif",
+            "x-ms-summary": "nif",
+            "required": true,
+            "description": "Company NIF used to retrieve the info.",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete company information hosted in the Spanish Register",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "company": {
+                  "$ref": "#/definitions/Company"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "NIF is not valid",
+            "schema": {
+              "$ref": "#/definitions/ResponseInvalidNIF"
+            }
+          },
+          "404": {
+            "description": "Company not found",
+            "schema": {
+              "$ref": "#/definitions/ResponseCompanyNotFound"
+            }
+          },
+          "500": {
+            "description": "The system is overloaded or significantly impaired.",
+            "schema": {
+              "$ref": "#/definitions/ResponseError"
+            }
+          }
+        }
+      }
+    },
+    "/person/search/": {
+      "get": {
+        "tags": [
+          "People"
+        ],
+        "summary": "Search for a person",
+        "description": "Retrieve list of people that match the keywords in their name. The number of results is limited to 200. Use the 'page' parameter to retrieve more results.",
+        "operationId": "Libreborme-search_person",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "x-ms-summary": "query",
+            "description": "Query to search, preferable the name of the individual",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "$ref": "#/parameters/Page"
+          },
+          {
+            "$ref": "#/parameters/ProvinceOptional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "People results including name, slug and province. Use the slug to retrieve all the information for a person.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "people": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PersonSearchResult"
+                  }
+                },
+                "count_results": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Number of results that the user wants displayed by page."
+                },
+                "total_results": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Total number of results retrieved."
+                },
+                "next_page": {
+                  "type": "string",
+                  "description": "Endpoint to retrieve the next page of content."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The system is overloaded or significantly impaired.",
+            "schema": {
+              "$ref": "#/definitions/ResponseError"
+            }
+          }
+        }
+      }
+    },
+    "/person/by-slug/{slug}/": {
+      "get": {
+        "tags": [
+          "People"
+        ],
+        "summary": "Get person information (slug)",
+        "description": "Retrieve person information for specified Slug.",
+        "operationId": "Libreborme-person_by_slug",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "x-ms-summary": "slug",
+            "required": true,
+            "description": "Person slug used to retrieve the personal information",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Person information held in the register",
+            "schema": {
+              "$ref": "#/definitions/Person"
+            }
+          },
+          "404": {
+            "description": "Person not found",
+            "schema": {
+              "$ref": "#/definitions/ResponsePersonNotFound"
+            }
+          },
+          "500": {
+            "description": "The system is overloaded or significantly impaired.",
+            "schema": {
+              "$ref": "#/definitions/ResponseError"
+            }
+          }
+        }
+      }
+    },
+
+    "/utils/nif-info/{nif}/": {
+      "get": {
+        "tags": [
+          "Utils"
+        ],
+        "summary": "Validate NIF",
+        "description": "Check whether a NIF is valid or not and return information that can be infered from a NIF number, such as the legal form, company type and register province.",
+        "operationId": "Libreborme-nif_info",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/NIF"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "NIF information and validation",
+            "schema": {
+              "$ref": "#/definitions/NIFInfo"
+            }
+          },
+          "500": {
+            "description": "The system is overloaded or significantly impaired.",
+            "schema": {
+              "$ref": "#/definitions/ResponseError"
+            }
+          }
+        }
+      }
+    },
+
+    "/company/by-slug/{slug}/incorporation/": {
+      "get": {
+        "tags": [
+          "Custom endpoints"
+        ],
+        "summary": "Get company incorporation information by Slug",
+        "description": "Retrieve company incorporation information for specified Slug.",
+        "operationId": "Libreborme-company_incorporation_by_slug",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "x-ms-summary": "slug",
+            "required": true,
+            "description": "Company slug to check the incorporation information",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Company information regarding incorporation to the register",
+            "schema": {
+              "$ref": "#/definitions/CompanyIncorporation"
+            }
+          },
+          "404": {
+            "description": "Company not found",
+            "schema": {
+              "$ref": "#/definitions/ResponseCompanyNotFound"
+            }
+          },
+          "500": {
+            "description": "The system is overloaded or significantly impaired.",
+            "schema": {
+              "$ref": "#/definitions/ResponseError"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Act": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "example": "Revocaciones"
+        },
+        "announcement": {
+          "type": "object",
+          "properties": {
+            "branch": {
+              "type": "string",
+              "example": ""
+            },
+            "date": {
+              "type": "string",
+              "format": "date",
+              "example": "2008-12-18"
+            },
+            "number": {
+              "type": "integer",
+              "example": 96
+            },
+            "office": {
+              "type": "string",
+              "example": ""
+            },
+            "registry_data": {
+              "type": "string",
+              "example": "T 2459 , F 85, S 8, H A 18613, I/A 25"
+            },
+            "year": {
+              "type": "integer",
+              "example": 2009
+            }
+          }
+        },
+        "borme": {
+          "$ref": "#/definitions/Borme"
+        },
+        "positions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slug_person": {
+                "type": "string",
+                "example": "pepito-juan"
+              },
+              "name_person": {
+                "type": "string",
+                "example": "Pepito Juan"
+              },
+              "role": {
+                "type": "string",
+                "example": "Apoderado"
+              },
+              "type": {
+                "$ref": "#/definitions/PositionType"
+              }
+            }
+          }
+        },
+        "total_positions": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "ActInAnnouncement": {
+      "type": "object",
+      "description": "DEPRECATED: this model will be remove in the future",
+      "properties": {
+        "label": {
+          "type": "string",
+          "example": "Revocaciones"
+        },
+        "positions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slug_person": {
+                "type": "string",
+                "example": "pepito-juan"
+              },
+              "name_person": {
+                "type": "string",
+                "example": "Pepito Juan"
+              },
+              "role": {
+                "type": "string",
+                "example": "Apoderado"
+              },
+              "type": {
+                "$ref": "#/definitions/PositionType"
+              }
+            }
+          }
+        },
+        "total_positions": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "Announcement": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "example": 1
+        },
+        "year": {
+          "type": "integer",
+          "example": 2018
+        },
+        "registry_data": {
+          "type": "string",
+          "example": "T 1659, L 1220, F 191, S 8, H CS 36998, I/A 4 (12.03.18)."
+        },
+        "branch": {
+          "type": "string",
+          "example": ""
+        },
+        "office": {
+          "type": "string",
+          "example": ""
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "example": "2018-03-12"
+        },
+        "acts": {
+          "description": "DEPRECATED: this field will be remove in the future",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActInAnnouncement"
+          }
+        },
+        "borme": {
+          "$ref": "#/definitions/Borme"
+        }
+      }
+    },
+    "Borme": {
+      "type": "object",
+      "properties": {
+        "cve": {
+          "type": "string",
+          "example": "BORME-A-2019-249-03"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-12-31"
+        },
+        "province": {
+          "$ref": "#/definitions/ProvinceName"
+        },
+        "url": {
+          "type": "string",
+          "example": "https://www.boe.es/borme/dias/2019/12/31/pdfs/BORME-A-2019-249-03.pdf"
+        }
+      }
+    },
+    "PositionType": {
+      "type": "string",
+      "enum": [
+        "Company",
+        "Person"
+      ],
+      "example": "Person"
+    },
+    "Company": {
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "example": "gowex-malaga"
+        },
+        "name": {
+          "type": "string",
+          "example": "Gowex Malaga SL"
+        },
+        "nif": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "province": {
+          "$ref": "#/definitions/ProvinceName"
+        },
+        "status": {
+          "$ref": "#/definitions/CompanyStatus"
+        },
+        "last_update": {
+          "type": "string",
+          "format": "date"
+        },
+        "address": {
+          "type": "string",
+          "example": "C/ CALLE DE EJEMPLO 12 2B (MALAGA).",
+          "x-nullable": true
+        },
+        "begin_activity": {
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        },
+        "capital": {
+          "type": "integer",
+          "example": 3000,
+          "x-nullable": true
+        },
+        "purpose": {
+          "type": "string",
+          "example": "Servicios comerciales, telemarketing y postventa para empresa del sector de la automocion.",
+          "x-nullable": true
+        },
+        "date_creation": {
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        },
+        "date_dissolution": {
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        },
+        "date_extinction": {
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        },
+        "reason_dissolution": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Act"
+          }
+        },
+        "total_actions": {
+          "type": "integer",
+          "example": 3
+        },
+        "announcements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Announcement"
+          }
+        },
+        "total_announcements": {
+          "type": "integer",
+          "example": 1
+        },
+        "bormes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Borme"
+          }
+        },
+        "total_bormes": {
+          "type": "integer",
+          "example": 1
+        },
+        "active_positions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PersonPosition"
+          }
+        },
+        "total_active_positions": {
+          "type": "integer",
+          "example": 1
+        },
+        "inactive_positions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PersonPosition"
+          }
+        },
+        "total_inactive_positions": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "CompanyIncorporation": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "incorporation_registry_data": {
+          "type": "string",
+          "example": "T 1239, L 1010, F 169, S 8, H CS 334468, I/A 1"
+        },
+        "slug": {
+          "type": "string",
+          "example": "gowex-malaga"
+        },
+        "name": {
+          "type": "string",
+          "example": "Gowex Malaga SL"
+        },
+        "nif": {
+          "type": "string",
+          "example": "B46999991"
+        }
+      }
+    },
+    "CompanySearchResult": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Gowex Malaga SL"
+        },
+        "slug": {
+          "type": "string",
+          "example": "gowex-malaga"
+        },
+        "province": {
+          "$ref": "#/definitions/ProvinceName"
+        },
+        "status": {
+          "$ref": "#/definitions/CompanyStatus"
+        },
+        "last_update": {
+          "type": "string",
+          "format": "date",
+          "example": "2020-04-20"
+        }
+      }
+    },
+    "CompanySummaryResult": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Gowex Malaga SL"
+        },
+        "slug": {
+          "type": "string",
+          "example": "gowex-malaga"
+        },
+        "address": {
+          "type": "string",
+          "example": "C/ CALLE DE EJEMPLO 12 2B (MALAGA)."
+        },
+        "capital": {
+          "type": "integer",
+          "example": 3000
+        },
+        "purpose": {
+          "type": "string",
+          "example": "Servicios comerciales, telemarketing y postventa para empresa del sector de la automocion."
+        }
+      }
+    },
+    "CompanyStatus": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "dissolved",
+        "renamed",
+        "transformed"
+      ],
+      "example": "active"
+    },
+    "NIF": {
+      "type": "string",
+      "example": "B86007945"
+    },
+    "NIFInfo": {
+      "type": "object",
+      "properties": {
+        "nif": {
+          "$ref": "#/definitions/NIF"
+        },
+        "nif_data": {
+          "type": "object",
+          "properties": {
+            "company_type": {
+              "type": "string",
+              "enum": [
+                "Sociedad Anonima",
+                "Sociedad de Responsabilidad Limitada",
+                "Sociedad Colectiva",
+                "Sociedad Comanditaria",
+                "Comunidad de Bienes",
+                "Sociedad Cooperativa",
+                "Asociacion",
+                "Comunidad de Propietarios en Regimen de Propiedad Horizontal",
+                "Sociedad civil",
+                "Sociedad extranjera",
+                "Corporacion local",
+                "Organismo Publico",
+                "Congregacion o institucion religiosa",
+                "Organo de la Administracion General del Estado o de las Comunidades Autonomas",
+                "Union Temporal de Empresas",
+                "Sociedad Agraria de Transformacion",
+                "Establecimiento permanente de entidad no residente en Espana"
+              ],
+              "example": "Sociedad de Responsabilidad Limitada"
+            },
+            "register_province": {
+              "$ref": "#/definitions/ProvinceName"
+            },
+            "type": {
+              "$ref": "#/definitions/NIFType"
+            }
+          }
+        },
+        "valid": {
+          "type": "boolean",
+          "example": true
+        }
+      }
+    },
+    "NIFType": {
+      "type": "string",
+      "enum": [
+        "COMPANY",
+        "PERSON"
+      ],
+      "example": "COMPANY"
+    },
+    "Person": {
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "example": "jorge-jesus-maldonado"
+        },
+        "name": {
+          "type": "string",
+          "example": "Jorge Jesus Maldonado"
+        },
+        "province": {
+          "$ref": "#/definitions/ProvinceName"
+        },
+        "last_update": {
+          "type": "string",
+          "format": "date",
+          "example": "2020-04-20"
+        },
+        "acts": {
+          "description": "DEPRECATED: use actions field instead",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Act"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Act"
+          }
+        },
+        "total_actions": {
+          "type": "integer",
+          "example": 3
+        },
+        "announcements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Announcement"
+          }
+        },
+        "total_announcements": {
+          "type": "integer",
+          "example": 1
+        },
+        "bormes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Borme"
+          }
+        },
+        "total_bormes": {
+          "type": "integer",
+          "example": 5
+        },
+        "active_positions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PersonPosition"
+          }
+        },
+        "total_active_positions": {
+          "type": "integer",
+          "example": 1
+        },
+        "inactive_positions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PersonPosition"
+          }
+        },
+        "total_inactive_positions": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "PersonSearchResult": {
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "example": "jorge-jesus-maldonado"
+        },
+        "name": {
+          "type": "string",
+          "example": "Jorge Jesus Maldonado"
+        },
+        "province": {
+          "$ref": "#/definitions/ProvinceName"
+        },
+        "last_update": {
+          "type": "string",
+          "format": "date",
+          "example": "2020-04-20"
+        }
+      }
+    },
+    "ProvinceName": {
+      "type": "string",
+      "example": "Madrid"
+    },
+    "SummaryNewCompanies": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cve": {
+                "type": "string",
+                "example": "BORME-A-2019-249-03"
+              },
+              "new_companies": {
+                "$ref": "#/definitions/CompanySummaryResult"
+              },
+              "province": {
+                "$ref": "#/definitions/ProvinceName"
+              },
+              "total_new_companies": {
+                "type": "integer",
+                "example": 42
+              }
+            }
+          }
+        }
+      }
+    },
+    "ResponseError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Internal Server Error"
+            },
+            "code": {
+              "type": "string",
+              "example": "BACKEND_FAILED"
+            }
+          }
+        }
+      }
+    },
+    "ResponseError400": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Missing province parameter."
+            },
+            "code": {
+              "type": "string",
+              "example": "MISSING_PARAMETER"
+            }
+          }
+        }
+      }
+    },
+    "ResponseCompanyNotFound": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Company not found"
+            },
+            "code": {
+              "type": "string",
+              "example": "NOT_FOUND"
+            }
+          }
+        }
+      }
+    },
+    "ResponseInvalidNIF": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Invalid NIF"
+            },
+            "code": {
+              "type": "string",
+              "example": "INVALID_NIF"
+            }
+          }
+        }
+      }
+    },
+    "ResponsePersonNotFound": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Person not found"
+            },
+            "code": {
+              "type": "string",
+              "example": "NOT_FOUND"
+            }
+          }
+        }
+      }
+    },
+    "ResponseSummaryNotFound": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Summary not found"
+            },
+            "code": {
+              "type": "string",
+              "example": "NOT_FOUND"
+            }
+          }
+        }
+      }
+    },
+    "CompanyPosition": {
+      "type": "object",
+      "properties": {
+        "slug_company": {
+          "type": "string",
+          "example": "gowex-malaga"
+        },
+        "name_company": {
+          "type": "string",
+          "example": "Gowex Malaga SL"
+        },
+        "role": {
+          "type": "string",
+          "example": "Adm.Unico"
+        },
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "example": "2020-01-02",
+          "x-nullable": true
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "example": "2020-04-20",
+          "x-nullable": true
+        },
+        "type": {
+          "type": "string",
+          "example": "Company"
+        }
+      }
+    },
+    "PersonPosition": {
+      "type": "object",
+      "properties": {
+        "slug_person": {
+          "type": "string",
+          "example": "aguilar-concepcion"
+        },
+        "name_person": {
+          "type": "string",
+          "example": "Aguilar Concepcion"
+        },
+        "role": {
+          "type": "string",
+          "example": "Apoderado"
+        },
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "example": "2020-01-02",
+          "x-nullable": true
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "example": "2020-04-20",
+          "x-nullable": true
+        },
+        "type": {
+          "type": "string",
+          "example": "Person"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "NIF": {
+      "description": "Company or Person NIF",
+      "in": "path",
+      "name": "nif",
+      "type": "string",
+      "required": true,
+      "x-ms-summary": "NIF",
+      "x-ms-url-encoding": "single"
+    },
+    "ProvinceOptional": {
+      "name": "province",
+      "in": "query",
+      "type": "integer",
+      "description": "Province code",
+      "required": false,
+      "minimum": 1,
+      "maximum": 52,
+      "x-ms-summary": "Province"
+    },
+    "Page": {
+      "name": "page",
+      "in": "query",
+      "type": "integer",
+      "description": "Results pagination",
+      "required": false,
+      "x-ms-summary": "Page"
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "basic_auth": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "basic_auth": []
+    }
+  ],
+  "tags": []
+}
