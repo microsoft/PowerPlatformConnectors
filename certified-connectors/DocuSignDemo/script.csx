@@ -197,7 +197,7 @@ public class Script : ScriptBase
         return body;
     }
 
-    private JObject CreateEnvelopeFromTemplateBodyTransformation(JObject body)
+    private JObject SendEnvelopeBodyTransformation(JObject body)
     {
         var templateRoles = new JArray();
         var signer = new JObject();
@@ -210,6 +210,7 @@ public class Script : ScriptBase
 
             if (key.Contains(" Name"))
             {
+                // Take substring key variable to set the roleName.
                 signer["roleName"] = key.Substring(0, key.Length - 5);
                 signer["name"] = value;
             }
@@ -219,6 +220,7 @@ public class Script : ScriptBase
                 signer["email"] = value;
             }
 
+            // Include every other signer into templateRoles JArray.
             if (count % 2 != 0)
             {
                 templateRoles.Add(signer);
@@ -232,26 +234,10 @@ public class Script : ScriptBase
         var newBody = new JObject()
         {
             ["templateRoles"] = templateRoles,
-            ["templateId"] = query.Get("templateId")
+            ["templateId"] = query.Get("templateId"),
+            ["status"] = query.Get("status"),
         };
-
-        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-        uriBuilder.Path = uriBuilder.Path.Replace("envelopes/createFromTemplate", "/envelopes");
-        this.Context.Request.RequestUri = uriBuilder.Uri;
-
         return newBody;
-    }
-
-    private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
-    {
-        var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-        body["emailSubject"] = query.Get("emailSubject");
-
-        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-        uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createBlankEnvelope", "/envelopes");
-        this.Context.Request.RequestUri = uriBuilder.Uri;
-
-        return body;
     }
 
     private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
@@ -266,6 +252,8 @@ public class Script : ScriptBase
         }
 
         var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+        // Unescapes the URI's query parameters, and then converts any plus characters ("+") into spaces.
+        // Many Web browsers escape spaces inside of URIs into plus ("+") characters
         signers[0]["name"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeName")).Replace("+", " ");
         signers[0]["email"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeEmail")).Replace("+", " ");
         if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
@@ -325,18 +313,8 @@ public class Script : ScriptBase
     private async Task TransformRequestJsonBody(Func<JObject, JObject> transformationFunction)
     {
         var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-        var body = new JObject();
-        if (!String.IsNullOrWhiteSpace(content))
-        {
-            body = transformationFunction(ParseContentAsJObject(content, true));
-        }
-        else
-        {
-            body = transformationFunction(body);
-        }
-
-        this.Context.Request.Content = CreateJsonContent(body.ToString());
+        var newBody = transformationFunction(ParseContentAsJObject(content, true));
+        this.Context.Request.Content = CreateJsonContent(newBody.ToString());
     }
 
     private async Task UpdateRequest()
@@ -353,14 +331,9 @@ public class Script : ScriptBase
             await this.TransformRequestJsonBody(this.CreateHookEnvelopeBodyTransformation).ConfigureAwait(false);
         }
 
-        if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
-            await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
-        }
-
-        if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
-        {
-            await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateBodyTransformation).ConfigureAwait(false);
+            await this.TransformRequestJsonBody(this.SendEnvelopeBodyTransformation).ConfigureAwait(false);
         }
 
         if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
