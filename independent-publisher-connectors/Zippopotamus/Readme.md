@@ -14,7 +14,7 @@ Action returns location details for a given country and postal code.
 Action returns location details for a given country, state and city.
 
 ## Obtaining Credentials
-No credentials needed.
+No credentials needed. 
 
 ## Known Issues and Limitations
 No issues or limitations at the moment of api creation.
