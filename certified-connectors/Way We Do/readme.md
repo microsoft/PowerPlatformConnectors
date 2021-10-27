@@ -21,6 +21,9 @@ The connector supports the following operations:
 - `Find Checklist Instance` : Search for a checklist instance by title.
 - `Find Checklist Step` : Find a step of a checklist instance
 - `Find User` : Search for a user by name or email.
+- `Get A Checklist Instance` : Retrieve a specific checklist instance by ID
+- `Get A Checklist Step` : Retrieve a specific checklist step by ID
+- `Get A Checklist Or Procedure` : Retrieve a specific checklist or procedure by ID
 - `Get Checklist Instance Activity` : Retrieve all activity for a checklist instance
 
 
