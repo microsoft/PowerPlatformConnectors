@@ -3,7 +3,7 @@
   "info": {
     "version": "v1",
     "title": "Plumsail Forms",
-    "description": "This API allows you to subscribe to Plumsail Forms submissions",
+    "description": "This API allows you to process Plumsail Forms submissions and their attachments.",
     "contact": {
       "name": "Plumsail Team",
       "url": "https://plumsail.com",
@@ -18,6 +18,75 @@
   "consumes": [],
   "produces": [],
   "paths": {
+    "/api/attachments": {
+      "get": {
+        "tags": [
+          "Attachments"
+        ],
+        "operationId": "DownloadAttachment",
+        "consumes": [],
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "fileUrl",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "File URL",
+            "description": "File URL"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The contents of the attachment",
+            "schema": {
+              "format": "binary",
+              "title": "Result file",
+              "description": "The contents of the attachment",
+              "type": "string"
+            }
+          }
+        },
+        "x-ms-visibility": "important",
+        "summary": "Download attachment",
+        "description": "Downloads an attachment by its URL"
+      },
+      "delete": {
+        "tags": [
+          "Attachments"
+        ],
+        "operationId": "DeleteAttachment",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "fileUrl",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "File URL",
+            "description": "File URL"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        },
+        "x-ms-visibility": "important",
+        "summary": "Delete attachment",
+        "description": "Deletes an attachment by its URL"
+      }
+    },
     "/api/v{version}/designer/forms": {
       "get": {
         "tags": [
@@ -69,6 +138,51 @@
         "description": "Returns an array of public forms"
       }
     },
+    "/api/forms/{formId}/submissions/{submissionId}": {
+      "delete": {
+        "tags": [
+          "FormSubmissions"
+        ],
+        "operationId": "DeleteSubmission",
+        "consumes": [],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-dynamic-values": {
+              "operationId": "GetPublicForms",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "version": "2"
+              }
+            },
+            "x-ms-summary": "Form",
+            "description": "The form which submission you want to delete."
+          },
+          {
+            "name": "submissionId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission ID",
+            "description": "Submission ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        },
+        "x-ms-visibility": "important",
+        "summary": "Delete submission",
+        "description": "Deletes an form submission by its ID"
+      }
+    },
     "/api/flow/schema/form": {
       "get": {
         "tags": [
@@ -85,7 +199,7 @@
             "type": "string",
             "format": "uuid",
             "x-ms-summary": "Form ID",
-            "description": ""
+            "description": "ID of the form"
           }
         ],
         "responses": {
@@ -210,6 +324,18 @@
         },
         "name": {
           "type": "string"
+        },
+        "type": {
+          "format": "int32",
+          "enum": [
+            0,
+            1
+          ],
+          "type": "integer"
+        },
+        "modified": {
+          "format": "date-time",
+          "type": "string"
         }
       }
     },
@@ -278,6 +404,27 @@
       "type": "oauth2"
     }
   },
-  "security": [ { "oauth2": [] } ],
-  "tags": []
+  "security": [
+    {
+      "oauth2": [
+        "openid",
+        "offline_access"
+      ]
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://plumsail.com/forms/public-forms"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://plumsail.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Content and Files"
+    }
+  ]
 }
