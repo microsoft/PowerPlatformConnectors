@@ -2,7 +2,7 @@
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        if (this.Context.OperationId == "AirmeetTriggers")
+    if (this.Context.OperationId == "AirmeetTriggers")
     {
         await this.UpdateNameRequest().ConfigureAwait(false);
     }else{
