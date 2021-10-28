@@ -1,22 +1,33 @@
-## allGeo Connector
+## Name of connector 
+allGeo
 
-Example: Product Team needs to fill information.
-Azure Key Vault provides a powerful and very extensive REST API.  Using this API, you can manage your keys, certificates, and secrets in an Azure Key Vault account.  Very often, you may want to leverage those secrets in your application, or in your process automation.
+## Description
+allGeo is a leading provider of field service management for mid-size enterprise
+businesses to achieve excellence in field service operations by providing tools to improve
+operationspayroll processes. The allGeo platform enables businesses to create various
+custom field service workflows according to their business needs. allGeo adds value for field
+businesses by adding enabling capabilities such as Scheduling, Time Clock, Tracking
+Monitoring, Mileage, Dispatch Messaging, Mobile Forms, Events based alerts, and
+Reporting. The allGeo platform can readily integrate with your CRM, ERP and payroll
+systems to enable easy flow of data from the field to your back-office systems.
 
 ## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
 
-## Building the connector 
-Example: Product Team needs to fill information.
-Since Key Vault APIs are secured by Azure Active Directory (AD), we first need to set up a few thing in Azure AD so that our connectors can securely access the Key Vault.  After that is completed, you can create and test the sample connector.
-
+## Building the connector
+Below is an overview of how fields in your Microsoft Dynamics will be mapped in the allGeo
+system.
 
 ## Supported Operations
 The connector supports the following operations:
-* `Login`: Login into allGeo platform
-* `Create Work Orders`: Creates work order on allGeo platform
-* `Create Job-Site`: Explanation needed
-* `Create Time Clock`: Explanation needed
-* `Update Time Clock`: Explanation needed
-* `Delete Job-Site`: Explanation needed
+* `Login`: Logs in to allGeo platform.
+* `Create Work Orders`: Work orders are created on the allGeo platform. A Work Order is a
+set of scheduled tasks(s) assigned to one or more of your field employees.
+* `Create Job-Site`: Job-Site(s) are created on allGeo platform. A job-site is where the field
+employee will execute the assigned task.
+* `Create Time Clock`: The various time clock stages of your field employees are registered
+in the allGeo system.
+* `Update Time Clock`: The various time clock stages of your field employees are updated in
+real time in the allGeo system.
+* `Delete Job-Site`: Job-Site(s) is deleted on allGeo platform.
