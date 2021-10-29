@@ -34,8 +34,10 @@ Building Connector requires the following:
 * In My Dashboard Go to Created Apps.
 * Select App Name
 * Here are your Credentials.
-* In "Redirect URL for OAuth" and "Add Allow List" add the Redirect URL of Custom Connector.
-* In "Add Allow List" insert https://us.flow.microsoft.com/en-us/
+* In "Redirect URL for OAuth" https://us.flow.microsoft.com/en-us/.
+* In "Add Allow List" insert https://us.flow.microsoft.com/en-us/ and https://global.consent.azure-apim.net/redirect.
+* In Information Tab Add Contact Details, Short Description and Long Description.
+* In Scopes Add the necessary scopes based on your requirement.
 
 ## Known Issues and Limitations
 No issues and limitations are known at this time
