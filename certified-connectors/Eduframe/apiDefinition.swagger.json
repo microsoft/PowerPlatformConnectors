@@ -4,8 +4,26 @@
     "version": "1.0",
     "description": "Eduframe is a complete solution for commercial training providers & business schools to attract more students, manage & automate the course administration, and deliver the ultimate learning experience. Eduframe seamlessly integrates with Canvas LMS. The connector opens up the opportunity to easily integrate your existing software applications with Eduframe, like your CRM and accounting software.",
     "title": "Eduframe",
-    "x-copyright": null
+    "contact": {
+      "name": "Eduframe Development Team",
+      "url": "https://eduframe.co",
+      "email": "dev@drieam.nl"
+    }
   },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://eduframe.co"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://drieam.com/security-and-privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data"
+    }
+  ],
   "basePath": "/api/v1",
   "produces": [],
   "security": [
@@ -40,7 +58,7 @@
         },
         "email": {
           "type": "string",
-          "description": "A string representing the billing e-mail of the account"
+          "description": "A string representing the billing e-mail of the account."
         },
         "account_type": {
           "type": "string",
@@ -54,6 +72,10 @@
         "address": {
           "$ref": "#/definitions/address"
         },
+        "phone": {
+          "type": "string",
+          "description": "A string representing the phone number of the account."
+        },
         "updated_at": {
           "type": "string",
           "description": "Timestamp of last update.",
@@ -62,6 +84,14 @@
         "created_at": {
           "type": "string",
           "description": "Timestamp of creation.",
+          "readOnly": true
+        },
+        "signup_answers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/customField"
+          },
+          "description": "List of signup answers for this account.",
           "readOnly": true
         }
       },
@@ -123,6 +153,28 @@
       },
       "additionalProperties": false
     },
+    "customField": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Unique identifier of the signup answer.",
+          "readOnly": true
+        },
+        "value": {
+          "type": "string",
+          "description": "The formatted value of the answer."
+        },
+        "signup_question_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Unique identifier of the question.",
+          "readOnly": true
+        }
+      },
+      "additionalProperties": false
+    },
     "category": {
       "type": "object",
       "required": [
@@ -148,7 +200,8 @@
         "slug": {
           "type": "string",
           "description": "Friendly identifier of a category.",
-          "x-ms-visibility": "advanced"
+          "x-ms-visibility": "internal",
+          "readOnly": true
         },
         "position": {
           "description": "Sorting position of the category. Lower is higher.",
@@ -158,7 +211,12 @@
         "parent_id": {
           "description": "Unique identifier of the parent category",
           "type": "number",
-          "x-ms-visibility": "advanced"
+          "x-ms-visibility": "advanced",
+          "x-ms-dynamic-values": {
+            "operationId": "Get_categories",
+            "value-path": "id",
+            "value-title": "name"
+          }
         },
         "avatar": {
           "description": "URL to the category avatar.",
@@ -168,7 +226,9 @@
         "is_published": {
           "title": "Published",
           "description": "If the category should be published on the website.",
-          "type": "boolean"
+          "type": "boolean",
+          "x-ms-visibility": "advanced",
+          "default": true
         },
         "courses_count": {
           "description": "Number of courses directly linked to this category.",
@@ -183,12 +243,12 @@
         "meta_title": {
           "description": "The meta title of the category, used for SEO (Search Engine Optimisation) purposes.",
           "type": "string",
-          "x-ms-visibility": "advanced"
+          "x-ms-visibility": "internal"
         },
         "meta_description": {
           "description": "The meta description of the category, used for SEO (Search Engine Optimisation) purposes.",
           "type": "string",
-          "x-ms-visibility": "advanced"
+          "x-ms-visibility": "internal"
         },
         "updated_at": {
           "description": "Timestamp of last update.",
@@ -199,31 +259,27 @@
           "description": "Timestamp of creation.",
           "type": "string",
           "readOnly": true
+        },
+        "avatar_url": {
+          "description": "URL to a resized avatar image (300x200^).",
+          "type": "string",
+          "readOnly": true
         }
       }
     },
     "course": {
       "type": "object",
       "required": [
-        "id",
         "category_id",
-        "position",
-        "starting_price",
-        "signup_url",
-        "slug",
-        "slug_history",
-        "avatar",
-        "website_url",
         "name",
-        "code",
-        "updated_at",
-        "created_at"
+        "code"
       ],
       "properties": {
         "id": {
           "type": "integer",
           "format": "int64",
-          "description": "Unique identifier of the course"
+          "description": "Unique identifier of the course",
+          "readOnly": true
         },
         "name": {
           "type": "string",
@@ -231,66 +287,79 @@
         },
         "position": {
           "type": "number",
-          "description": "Sorting position of the course. Lower is higher."
+          "description": "Sorting position of the course. Lower is higher.",
+          "x-ms-visibility": "advanced"
         },
         "starting_price": {
           "type": "string",
-          "description": "Lowest price of all of its planned courses."
+          "description": "Lowest price of all of its planned courses.",
+          "x-ms-visibility": "internal"
         },
         "signup_url": {
           "type": "string",
-          "description": "URL to the signup page for this course."
+          "description": "URL to the signup page for this course.",
+          "readOnly": true
         },
         "slug": {
           "type": "string",
-          "description": "Human readable identifier, unique per educator."
+          "description": "Human readable identifier, unique per educator.",
+          "x-ms-visibility": "internal",
+          "readOnly": true
         },
         "slug_history": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "List of old slugs, old calls will be redirected."
+          "description": "List of old slugs, old calls will be redirected.",
+          "readOnly": true,
+          "x-ms-visibility": "internal"
         },
         "avatar": {
           "type": "string",
-          "description": "URL to the original avatar image file."
+          "description": "URL to a resized avatar image (300x200^).",
+          "readOnly": true
+        },
+        "avatar_thumb_url": {
+          "type": "string",
+          "description": "URL to a resized avatar image (748x296^).",
+          "readOnly": true,
+          "x-ms-visibility": "internal"
         },
         "website_url": {
           "type": "string",
-          "description": "Expected URL of the course on the educator website."
+          "description": "Expected URL of the course on the educator website.",
+          "readOnly": true,
+          "x-ms-visibility": "internal"
         },
         "certificate_template_id": {
           "type": "number",
-          "description": "Identifier of the optionally linked certificate template."
+          "description": "Identifier of the optionally linked certificate template.",
+          "x-ms-visibility": "advanced"
         },
         "category_id": {
+          "title": "Category",
           "type": "number",
-          "description": "Identifier of the category of the course."
+          "description": "Identifier of the category of the course.",
+          "x-ms-dynamic-values": {
+            "operationId": "Get_categories",
+            "value-path": "id",
+            "value-title": "name"
+          }
         },
         "code": {
           "type": "string",
           "description": "The code of the course."
         },
-        "duration": {
-          "type": "string",
-          "description": "The duration of the course."
-        },
-        "level": {
-          "type": "string",
-          "description": "A string indicating the level of the course."
-        },
         "meta_title": {
           "type": "string",
-          "description": "Meta title of the course for SEO purposes."
+          "description": "Meta title of the course for SEO purposes.",
+          "x-ms-visibility": "internal"
         },
         "meta_description": {
           "type": "string",
-          "description": "Meta description of the course for SEO purposes."
-        },
-        "result": {
-          "type": "string",
-          "description": "The result of the course"
+          "description": "Meta description of the course for SEO purposes.",
+          "x-ms-visibility": "internal"
         },
         "cost": {
           "type": "string",
@@ -308,23 +377,18 @@
         },
         "is_published": {
           "type": "boolean",
-          "description": "Boolean representing the publishable status of the course."
-        },
-        "program": {
-          "type": "string",
-          "description": "The value of the property."
-        },
-        "conditions": {
-          "type": "string",
-          "description": "The conditions of the course."
+          "description": "Boolean representing the publishable status of the course.",
+          "default": true
         },
         "updated_at": {
           "type": "string",
-          "description": "Timestamp of last update."
+          "description": "Timestamp of last update.",
+          "readOnly": true
         },
         "created_at": {
           "type": "string",
-          "description": "Timestamp of creation."
+          "description": "Timestamp of creation.",
+          "readOnly": true
         }
       },
       "additionalProperties": false
@@ -378,13 +442,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/label"
-          }
+          },
+          "readOnly": true
         },
         "slug": {
           "description": "The human readable unique identifier, you can also use this to fetch the user.",
           "type": "string",
           "readOnly": true,
-          "x-ms-visibility": "advanced"
+          "x-ms-visibility": "internal"
         },
         "wants_newsletter": {
           "title": "Subscribe for newsletter",
@@ -396,6 +461,19 @@
           "title": "Create authentication",
           "description": "Create an authentication for the user, such that the user is able to login.",
           "type": "boolean",
+          "x-ms-visibility": "advanced"
+        },
+        "locale": {
+          "type": "string",
+          "enum": [
+            "nl",
+            "en",
+            "is",
+            "es",
+            "en-US",
+            "en_GB"
+          ],
+          "description": "The locale of the user.",
           "x-ms-visibility": "advanced"
         },
         "address": {
@@ -413,6 +491,7 @@
         "teacher_headline": {
           "description": "Short description of the user.",
           "type": "string",
+          "readOnly": true,
           "x-ms-visibility": "internal"
         },
         "description": {
@@ -423,6 +502,7 @@
         "teacher_description": {
           "description": "Long description of the user. (same as description)",
           "type": "string",
+          "readOnly": true,
           "x-ms-visibility": "internal"
         },
         "avatar_url": {
@@ -430,6 +510,17 @@
           "description": "The relative url path to the avatar.",
           "type": "string",
           "readOnly": true
+        },
+        "notes_user": {
+          "type": "string",
+          "description": "Short note about the user.",
+          "x-ms-visibility": "internal"
+        },
+        "teacher_enrollments_count": {
+          "type": "number",
+          "description": "Number of assigned planned courses as a teacher.",
+          "readOnly": true,
+          "x-ms-visibility": "internal"
         },
         "updated_at": {
           "description": "Timestamp of last update.",
@@ -457,6 +548,11 @@
           "type": "integer",
           "format": "int64",
           "description": "Unique identifier of the invoice.",
+          "readOnly": true
+        },
+        "reference_id": {
+          "description": "Reference id of the Invoice. Is used to find the invoice.",
+          "type": "string",
           "readOnly": true
         },
         "account_id": {
@@ -501,6 +597,12 @@
           "description": "The date when the invoice status was changed to open.",
           "readOnly": true
         },
+        "invoice_set_id": {
+          "title": "Invoice set",
+          "type": "number",
+          "description": "Add this invoice to an invoice set by giving the identifier of the invoice set.",
+          "x-ms-visibility": "internal"
+        },
         "description": {
           "type": "string",
           "description": "Human readable description of the invoice.",
@@ -531,6 +633,11 @@
           "description": "The total cost of the invoice excluding VAT.",
           "readOnly": true
         },
+        "total_open": {
+          "type": "string",
+          "description": "The open cost of the invoice including VAT.",
+          "readOnly": true
+        },
         "pdf_url": {
           "type": "string",
           "description": "Url to the download path of the invoice in PDF format.",
@@ -555,7 +662,8 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/invoice_item"
-          }
+          },
+          "readOnly": true
         },
         "updated_at": {
           "type": "string",
@@ -610,6 +718,16 @@
             "value-title": "name"
           }
         },
+        "catalog_variant_id": {
+          "title": "Catalog Variant",
+          "type": "number",
+          "description": "Identifier of the catalog variant.",
+          "x-ms-dynamic-values": {
+            "operationId": "Get_catalog_variants",
+            "value-path": "id",
+            "value-title": "name"
+          }
+        },
         "updated_at": {
           "description": "Timestamp of last update.",
           "type": "string",
@@ -648,6 +766,80 @@
       },
       "additionalProperties": false
     },
+    "catalog_variant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Unique identifier of the catalog variant",
+          "readOnly": true
+        },
+        "product_id": {
+          "type": "number",
+          "description": "Unique identifier of the catalog product",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the course."
+        },
+        "cost_scheme": {
+          "type": "string",
+          "enum": [
+            "student",
+            "order",
+            "tbd",
+            "free"
+          ],
+          "description": "How should the catalog variant be paid by default."
+        },
+        "cost": {
+          "type": "string",
+          "description": "The price to be paid for this catalog variant."
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "EUR",
+            "ISK",
+            "USD",
+            "GBP"
+          ],
+          "description": "The currency of the catalog variant."
+        },
+        "variantable_type": {
+          "type": "string",
+          "enum": [
+            "PlannedCourse",
+            "Program::Edition"
+          ],
+          "description": "The currency of the invoice."
+        },
+        "variantable_id": {
+          "type": "number",
+          "description": "Unique identifier of the variantable.",
+          "readOnly": true
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "Timestamp of last update.",
+          "readOnly": true
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Timestamp of creation.",
+          "readOnly": true
+        },
+        "is_published": {
+          "title": "Published",
+          "description": "If the category should be published on the website.",
+          "type": "boolean",
+          "x-ms-visibility": "advanced",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
     "label": {
       "type": "object",
       "required": [
@@ -664,17 +856,25 @@
         "name": {
           "title": "Name",
           "type": "string",
-          "description": "The name of the label"
+          "description": "The name of the label."
         },
         "color": {
           "title": "Color",
           "type": "string",
-          "description": "Hex code of the color of the label"
+          "description": "Hex code of the color of the label."
         },
         "model_type": {
           "title": "Model",
           "type": "string",
-          "description": "The model type for which this label is made available"
+          "enum": [
+            "Lead",
+            "Order",
+            "Catalog::Product",
+            "User",
+            "Account",
+            "Teacher"
+          ],
+          "description": "The model type for which this label is made available."
         },
         "updated_at": {
           "type": "string",
@@ -691,102 +891,131 @@
     },
     "webhook": {
       "type": "object",
+      "required": [
+        "url",
+        "events"
+      ],
       "properties": {
         "id": {
-          "type": "number",
-          "description": "Unique identifier of the webhook."
-        },
-        "plugin_id": {
-          "type": "number",
-          "description": "Unique identifier of the linked plugin."
+          "type": "string",
+          "description": "Unique identifier of the webhook. (a UUID).",
+          "readOnly": true
         },
         "url": {
           "type": "string",
-          "description": "The callback url for Eduframe to send a HTTP POST payload to."
+          "description": "The callback url for Eduframe to send a HTTP POST payload to.",
+          "x-ms-visibility": "internal"
         },
         "active": {
           "type": "boolean",
-          "description": "State of webhook."
+          "description": "State of webhook.",
+          "default": true
         },
-        "webhook_triggers": {
-          "type": "array",
+        "events": {
           "items": {
-            "type": "object",
-            "required": [
-              "event",
-              "klass"
-            ],
-            "properties": {
-              "id": {
-                "type": "number",
-                "description": "Unique identifier for the Webhook Trigger"
-              },
-              "event": {
-                "type": "string",
-                "enum": [
-                  "update",
-                  "create"
-                ],
-                "description": "On which event Webhook will be fired"
-              },
-              "klass": {
-                "type": "string",
-                "enum": [
-                  "Category",
-                  "Course",
-                  "Educator",
-                  "Enrollment",
-                  "Lead",
-                  "Meeting",
-                  "MeetingLocation",
-                  "Order",
-                  "Payment",
-                  "PlannedCourse",
-                  "Plugins::EducatorPlugin",
-                  "Invoice",
-                  "InvoiceItem",
-                  "Settings::CourseLocation",
-                  "Settings::CourseVariant",
-                  "Settings::InvoiceVat",
-                  "TeacherEnrollment",
-                  "User"
-                ],
-                "description": "On which klass event be caught"
-              },
-              "updated_at": {
-                "type": "string",
-                "description": "Timestamp of last update"
-              },
-              "created_at": {
-                "type": "string",
-                "description": "Timestamp of creation"
-              }
-            },
-            "additionalProperties": false
-          }
+            "type": "string",
+            "enum": [
+              "account.created",
+              "account.deleted",
+              "account.updated",
+              "category.created",
+              "category.deleted",
+              "category.updated",
+              "course.created",
+              "course.deleted",
+              "course.updated",
+              "course_location.created",
+              "course_location.deleted",
+              "course_location.updated",
+              "course_variant.created",
+              "course_variant.deleted",
+              "course_variant.updated",
+              "educator.created",
+              "educator.deleted",
+              "educator.updated",
+              "enrollment.created",
+              "enrollment.deleted",
+              "enrollment.updated",
+              "invoice.created",
+              "invoice.deleted",
+              "invoice.updated",
+              "invoice_vat.created",
+              "invoice_vat.deleted",
+              "invoice_vat.updated",
+              "lead.created",
+              "lead.deleted",
+              "lead.updated",
+              "meeting.created",
+              "meeting.deleted",
+              "meeting.updated",
+              "meeting.teacher_attendees_changed",
+              "meeting_location.created",
+              "meeting_location.deleted",
+              "meeting_location.updated",
+              "order.created",
+              "order.deleted",
+              "order.updated",
+              "payment.created",
+              "payment.deleted",
+              "payment.updated",
+              "planned_course.created",
+              "planned_course.deleted",
+              "planned_course.updated",
+              "planning_event.created",
+              "planning_event.deleted",
+              "planning_event.updated",
+              "planning_event.teacher_attendees_changed",
+              "teacher_role.created",
+              "teacher_role.deleted",
+              "teacher_role.updated",
+              "user.created",
+              "user.deleted",
+              "user.updated"
+            ]
+          },
+          "type": "array",
+          "description": "Array of events that should trigger this webhook."
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "Timestamp of last update.",
+          "readOnly": true
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Timestamp of creation.",
+          "readOnly": true
         }
       },
       "additionalProperties": false
     },
     "webhook_payload": {
       "type": "object",
-      "required": [
-        "educator",
-        "model_type",
-        "model_id"
-      ],
       "properties": {
         "educator": {
-          "type": "number",
-          "description": "Unique identifier of the webhook."
+          "type": "string",
+          "description": "Slug of the educator.",
+          "readOnly": true
         },
-        "model_type": {
-          "type": "number",
-          "description": "Unique identifier of the linked plugin."
+        "event": {
+          "type": "string",
+          "description": "Type of event that triggerd the webhook.",
+          "readOnly": true
         },
-        "model_id": {
+        "entity_type": {
+          "type": "string",
+          "description": "Type of the model that triggerd the webhook.",
+          "readOnly": true
+        },
+        "entity_id": {
           "type": "number",
-          "description": "The callback url for Eduframe to send a HTTP POST payload to."
+          "description": "Unique identifier of the model that triggerd the webhook.",
+          "readOnly": true
+        },
+        "tenant_id": {
+          "type": "string",
+          "description": "UUID of the educator.",
+          "readOnly": true
         }
       },
       "additionalProperties": false
@@ -797,7 +1026,7 @@
       "post": {
         "operationId": "Post_accounts",
         "summary": "Add an account",
-        "description": "Add a account to your administration",
+        "description": "Add an account to your administration.",
         "tags": [
           "accounts"
         ],
@@ -820,10 +1049,19 @@
                 },
                 "email": {
                   "type": "string",
-                  "description": "A string representing the billing e-mail of the account"
+                  "description": "A string representing the billing e-mail of the account."
                 },
                 "address_attributes": {
                   "$ref": "#/definitions/address"
+                },
+                "phone": {
+                  "type": "string",
+                  "description": "A string representing the phone number of the account."
+                },
+                "visible": {
+                  "type": "boolean",
+                  "description": "Boolean whether this account should be visible (i.e. business or multiple users or any orders).",
+                  "x-ms-visibility": "internal"
                 }
               },
               "additionalProperties": false
@@ -855,20 +1093,6 @@
           },
           {
             "$ref": "#/parameters/PerPage"
-          },
-          {
-            "items": {
-              "enum": [
-                "address",
-                "labels"
-              ],
-              "type": "string"
-            },
-            "type": "array",
-            "x-ms-summary": "Includes",
-            "description": "Include relations in the results",
-            "in": "query",
-            "name": "include"
           }
         ],
         "responses": {
@@ -882,7 +1106,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -894,7 +1118,7 @@
       "get": {
         "operationId": "Get_accounts_id",
         "summary": "Get an account",
-        "description": "Get an account by id",
+        "description": "Get an account by id.",
         "tags": [
           "accounts"
         ],
@@ -910,7 +1134,7 @@
             "required": true,
             "x-ms-url-encoding": "single",
             "x-ms-summary": "Account id",
-            "description": "Identifier of the account"
+            "description": "Identifier of the account."
           }
         ],
         "responses": {
@@ -927,7 +1151,7 @@
       "post": {
         "operationId": "Post_categories",
         "summary": "Add a category",
-        "description": "Add a category to your administration",
+        "description": "Add a category to your administration.",
         "tags": [
           "categories"
         ],
@@ -939,59 +1163,7 @@
             "in": "body",
             "name": "body",
             "schema": {
-              "type": "object",
-              "required": [
-                "name"
-              ],
-              "properties": {
-                "name": {
-                  "title": "Name",
-                  "type": "string",
-                  "description": "Title of the category."
-                },
-                "description": {
-                  "title": "Description",
-                  "type": "string",
-                  "description": "The description of the category."
-                },
-                "slug": {
-                  "type": "string",
-                  "description": "Friendly identifier of a category.",
-                  "x-ms-visibility": "advanced"
-                },
-                "position": {
-                  "description": "Sorting position of the category. Lower is higher.",
-                  "type": "number",
-                  "x-ms-visibility": "advanced"
-                },
-                "parent_id": {
-                  "title": "Parent",
-                  "description": "The parent category",
-                  "type": "number",
-                  "x-ms-visibility": "advanced",
-                  "x-ms-dynamic-values": {
-                    "operationId": "Get_categories",
-                    "value-path": "id",
-                    "value-title": "name"
-                  }
-                },
-                "is_published": {
-                  "title": "Published",
-                  "description": "If the category should be published on the website.",
-                  "type": "boolean",
-                  "default": false
-                },
-                "meta_title": {
-                  "description": "The meta title of the category, used for SEO (Search Engine Optimisation) purposes.",
-                  "type": "string",
-                  "x-ms-visibility": "advanced"
-                },
-                "meta_description": {
-                  "description": "The meta description of the category, used for SEO (Search Engine Optimisation) purposes.",
-                  "type": "string",
-                  "x-ms-visibility": "advanced"
-                }
-              }
+              "$ref": "#/definitions/category"
             }
           }
         ],
@@ -1046,7 +1218,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -1074,7 +1246,7 @@
             "required": true,
             "x-ms-url-encoding": "single",
             "x-ms-summary": "Category Id",
-            "description": "Identifier of the category"
+            "description": "Identifier of the category."
           }
         ],
         "responses": {
@@ -1091,7 +1263,7 @@
       "post": {
         "operationId": "Post_courses",
         "summary": "Add a course",
-        "description": "Add a course to your administration",
+        "description": "Add a course to your administration.",
         "tags": [
           "courses"
         ],
@@ -1103,86 +1275,7 @@
             "in": "body",
             "name": "body",
             "schema": {
-              "type": "object",
-              "required": [
-                "category_id",
-                "name",
-                "code"
-              ],
-              "properties": {
-                "category_id": {
-                  "title": "Category",
-                  "type": "number",
-                  "description": "Identifier of the category of the course.",
-                  "x-ms-dynamic-values": {
-                    "operationId": "Get_categories",
-                    "value-path": "id",
-                    "value-title": "name"
-                  }
-                },
-                "name": {
-                  "type": "string",
-                  "description": "The name of the course."
-                },
-                "code": {
-                  "type": "string",
-                  "description": "The code of the course."
-                },
-                "cost_scheme": {
-                  "type": "string",
-                  "enum": [
-                    "student",
-                    "order",
-                    "tbd",
-                    "free"
-                  ],
-                  "description": "How should the course be paid by default."
-                },
-                "cost": {
-                  "type": "string",
-                  "description": "The price to be paid for this course."
-                },
-                "is_published": {
-                  "type": "boolean",
-                  "description": "Boolean representing the publishable status of the course.",
-                  "default": false
-                },
-                "duration": {
-                  "type": "string",
-                  "description": "The duration of the course.",
-                  "x-ms-visibility": "advanced"
-                },
-                "level": {
-                  "type": "string",
-                  "description": "A string indicating the level of the course.",
-                  "x-ms-visibility": "advanced"
-                },
-                "program": {
-                  "type": "string",
-                  "description": "The value of the property.",
-                  "x-ms-visibility": "advanced"
-                },
-                "conditions": {
-                  "type": "string",
-                  "description": "The conditions of the course.",
-                  "x-ms-visibility": "advanced"
-                },
-                "result": {
-                  "type": "string",
-                  "description": "The result of the course"
-                },
-                "meta_title": {
-                  "type": "string",
-                  "description": "Meta title of the course for SEO purposes.",
-                  "x-ms-visibility": "advanced"
-                },
-                "meta_description": {
-                  "type": "string",
-                  "description": "Meta description of the course for SEO purposes.",
-                  "x-ms-visibility": "advanced"
-                }
-              },
-              "additionalProperties": false
+              "$ref": "#/definitions/course"
             }
           }
         ],
@@ -1200,7 +1293,7 @@
         "summary": "List all courses",
         "description": "Get all courses.",
         "tags": [
-          "users"
+          "courses"
         ],
         "consumes": [
           "application/json"
@@ -1237,7 +1330,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -1251,7 +1344,7 @@
         "summary": "Get a course",
         "description": "Get a single course by id",
         "tags": [
-          "users"
+          "courses"
         ],
         "consumes": [
           "application/json"
@@ -1265,7 +1358,7 @@
             "required": true,
             "x-ms-url-encoding": "single",
             "x-ms-summary": "Course id",
-            "description": "Identifier of the course"
+            "description": "Identifier of the course."
           }
         ],
         "responses": {
@@ -1282,7 +1375,7 @@
       "post": {
         "operationId": "Post_users",
         "summary": "Add a user",
-        "description": "Add a user to your administration",
+        "description": "Add a user to your administration.",
         "tags": [
           "users"
         ],
@@ -1340,8 +1433,40 @@
                   "default": true,
                   "x-ms-visibility": "advanced"
                 },
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "nl",
+                    "en",
+                    "is",
+                    "es",
+                    "en-US",
+                    "en_GB"
+                  ],
+                  "description": "The locale of the user.",
+                  "x-ms-visibility": "advanced"
+                },
+                "label_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "x-ms-dynamic-values": {
+                      "parameters": {
+                        "model_type": "User"
+                      },
+                      "operationId": "Get_labels",
+                      "value-path": "id",
+                      "value-title": "name"
+                    }
+                  }
+                },
                 "address_attributes": {
                   "$ref": "#/definitions/address"
+                },
+                "notes_user": {
+                  "type": "string",
+                  "description": "Short note about the user.",
+                  "x-ms-visibility": "advanced"
                 }
               },
               "additionalProperties": false
@@ -1356,7 +1481,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -1379,22 +1504,6 @@
           },
           {
             "$ref": "#/parameters/PerPage"
-          },
-          {
-            "items": {
-              "enum": [
-                "address",
-                "labels",
-                "signup_answers.signup_question",
-                "signup_answers"
-              ],
-              "type": "string"
-            },
-            "type": "array",
-            "x-ms-summary": "Includes",
-            "description": "Include relations in the results",
-            "in": "query",
-            "name": "include"
           },
           {
             "items": {
@@ -1423,7 +1532,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -1435,7 +1544,7 @@
       "get": {
         "operationId": "Get_users_id",
         "summary": "Get a user",
-        "description": "Get a single user by id",
+        "description": "Get a single user by id.",
         "tags": [
           "users"
         ],
@@ -1451,23 +1560,7 @@
             "required": true,
             "x-ms-url-encoding": "single",
             "x-ms-summary": "User id",
-            "description": "Identifier of the user"
-          },
-          {
-            "name": "include",
-            "x-ms-summary": "Includes",
-            "description": "Include relations in the results",
-            "in": "query",
-            "type": "array",
-            "items": {
-              "enum": [
-                "address",
-                "labels",
-                "signup_answers.signup_question",
-                "signup_answers"
-              ],
-              "type": "string"
-            }
+            "description": "Identifier of the user."
           }
         ],
         "responses": {
@@ -1484,7 +1577,7 @@
       "post": {
         "operationId": "Post_invoices",
         "summary": "Add an invoice",
-        "description": "Add an invoice to your administration",
+        "description": "Add an invoice to your administration.",
         "tags": [
           "invoices"
         ],
@@ -1513,6 +1606,16 @@
                     "value-title": "name"
                   }
                 },
+                "invoice_set_id": {
+                  "title": "Invoice set",
+                  "type": "number",
+                  "description": "Add this invoice to an invoice set by giving the identifier of the invoice set."
+                },
+                "account_name": {
+                  "type": "string",
+                  "description": "The name of the account that is paying. Is copied to the invoice and is thus not automatically updated if the account name changes.",
+                  "x-ms-visibility": "advanced"
+                },
                 "currency": {
                   "type": "string",
                   "enum": [
@@ -1539,7 +1642,8 @@
                   "description": "The note displayed at the bottom of the invoice.",
                   "x-ms-visibility": "advanced"
                 }
-              }
+              },
+              "additionalProperties": false
             }
           }
         ],
@@ -1568,20 +1672,6 @@
           },
           {
             "$ref": "#/parameters/PerPage"
-          },
-          {
-            "items": {
-              "enum": [
-                "invoice_items",
-                "payments"
-              ],
-              "type": "string"
-            },
-            "type": "array",
-            "x-ms-summary": "Include relations",
-            "description": "Include relations in the results",
-            "in": "query",
-            "name": "include"
           }
         ],
         "responses": {
@@ -1595,7 +1685,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -1607,7 +1697,7 @@
       "get": {
         "operationId": "Get_invoices_id",
         "summary": "Get an invoice",
-        "description": "Get a single invoice by id",
+        "description": "Get a single invoice by id.",
         "tags": [
           "invoices"
         ],
@@ -1623,20 +1713,7 @@
             "required": true,
             "x-ms-url-encoding": "single",
             "x-ms-summary": "Invoice id",
-            "description": "Identifier of the invoice"
-          },
-          {
-            "name": "include",
-            "x-ms-summary": "Includes",
-            "description": "Include relations in the results",
-            "in": "query",
-            "type": "array",
-            "items": {
-              "enum": [
-                "invoice_items"
-              ],
-              "type": "string"
-            }
+            "description": "Identifier of the invoice."
           }
         ],
         "responses": {
@@ -1679,7 +1756,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -1689,7 +1766,7 @@
       "post": {
         "operationId": "Post_invoice_vats",
         "summary": "Add an invoice vat",
-        "description": "Add an invoice vat which can be used on the invoice",
+        "description": "Add an invoice vat which can be used on the invoice.",
         "tags": [
           "invoices"
         ],
@@ -1701,22 +1778,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "Name of the invoice vat."
-                },
-                "percentage": {
-                  "type": "string",
-                  "description": "Number representing the VAT percentage."
-                }
-              },
-              "additionalProperties": false,
-              "required": [
-                "name",
-                "percentage"
-              ]
+              "$ref": "#/definitions/invoice_vat"
             }
           }
         ],
@@ -1725,6 +1787,44 @@
             "description": "Created",
             "schema": {
               "$ref": "#/definitions/invoice_vat"
+            }
+          }
+        }
+      }
+    },
+    "/catalog/variants": {
+      "get": {
+        "operationId": "Get_catalog_variants",
+        "summary": "Get all catalog variants",
+        "description": "Get all catalog variants.",
+        "tags": [
+          "catalog"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/Page"
+          },
+          {
+            "$ref": "#/parameters/PerPage"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/catalog_variant"
+              },
+              "type": "array"
+            },
+            "headers": {
+              "total": {
+                "description": "Total number of records.",
+                "type": "integer"
+              }
             }
           }
         }
@@ -1747,6 +1847,21 @@
           },
           {
             "$ref": "#/parameters/PerPage"
+          },
+          {
+            "in": "query",
+            "name": "model_type",
+            "type": "string",
+            "enum": [
+              "Lead",
+              "Order",
+              "Catalog::Product",
+              "User",
+              "Account",
+              "Teacher"
+            ],
+            "description": "Filter labels based on model type.",
+            "x-ms-summary": "Filter on model type of the label"
           }
         ],
         "responses": {
@@ -1760,7 +1875,7 @@
             },
             "headers": {
               "total": {
-                "description": "Total number of records",
+                "description": "Total number of records.",
                 "type": "integer"
               }
             }
@@ -1778,7 +1893,7 @@
       "post": {
         "operationId": "Post_webhooks",
         "summary": "Subscribe to a webhook",
-        "description": "Subscribe to a webhook to get notified on record updates",
+        "description": "Subscribe to a webhook to get notified on record updates.",
         "x-ms-trigger": "single",
         "tags": [
           "webhooks"
@@ -1793,68 +1908,94 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": [
-                "url"
-              ],
-              "properties": {
-                "url": {
-                  "type": "string",
-                  "description": "The callback url for Eduframe to send a HTTP POST payload to.",
-                  "x-ms-notification-url": true,
-                  "x-ms-visibility": "internal"
-                },
-                "active": {
-                  "type": "boolean",
-                  "description": "State of webhook.",
-                  "default": true
-                },
-                "webhook_triggers_attributes": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "event",
-                      "klass"
-                    ],
-                    "properties": {
-                      "event": {
-                        "type": "string",
-                        "enum": [
-                          "update",
-                          "create"
-                        ],
-                        "description": "On which event webhook will be fired"
-                      },
-                      "klass": {
-                        "type": "string",
-                        "enum": [
-                          "Category",
-                          "Course",
-                          "Educator",
-                          "Enrollment",
-                          "Lead",
-                          "Meeting",
-                          "MeetingLocation",
-                          "Order",
-                          "Payment",
-                          "PlannedCourse",
-                          "Plugins::EducatorPlugin",
-                          "Invoice",
-                          "InvoiceItem",
-                          "Settings::CourseLocation",
-                          "Settings::CourseVariant",
-                          "Settings::InvoiceVat",
-                          "TeacherEnrollment",
-                          "User"
-                        ],
-                        "description": "On which klass event be caught"
-                      }
-                    },
-                    "additionalProperties": false
-                  }
-                }
-              },
-              "additionalProperties": false
+      "required": [
+        "url",
+        "events"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the webhook. (a UUID).",
+          "readOnly": true
+        },
+        "url": {
+          "type": "string",
+          "description": "The callback url for Eduframe to send a HTTP POST payload to.",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "State of webhook.",
+          "default": true
+        },
+        "events": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "account.created",
+              "account.deleted",
+              "account.updated",
+              "category.created",
+              "category.deleted",
+              "category.updated",
+              "course.created",
+              "course.deleted",
+              "course.updated",
+              "course_location.created",
+              "course_location.deleted",
+              "course_location.updated",
+              "course_variant.created",
+              "course_variant.deleted",
+              "course_variant.updated",
+              "educator.created",
+              "educator.deleted",
+              "educator.updated",
+              "enrollment.created",
+              "enrollment.deleted",
+              "enrollment.updated",
+              "invoice.created",
+              "invoice.deleted",
+              "invoice.updated",
+              "invoice_vat.created",
+              "invoice_vat.deleted",
+              "invoice_vat.updated",
+              "lead.created",
+              "lead.deleted",
+              "lead.updated",
+              "meeting.created",
+              "meeting.deleted",
+              "meeting.updated",
+              "meeting.teacher_attendees_changed",
+              "meeting_location.created",
+              "meeting_location.deleted",
+              "meeting_location.updated",
+              "order.created",
+              "order.deleted",
+              "order.updated",
+              "payment.created",
+              "payment.deleted",
+              "payment.updated",
+              "planned_course.created",
+              "planned_course.deleted",
+              "planned_course.updated",
+              "planning_event.created",
+              "planning_event.deleted",
+              "planning_event.updated",
+              "planning_event.teacher_attendees_changed",
+              "teacher_role.created",
+              "teacher_role.deleted",
+              "teacher_role.updated",
+              "user.created",
+              "user.deleted",
+              "user.updated"
+            ]
+          },
+          "type": "array",
+          "description": "Array of events that should trigger this webhook."
+        }
+      },
+      "additionalProperties": false
             }
           }
         ],
@@ -1887,7 +2028,7 @@
   "parameters": {
     "Page": {
       "x-ms-summary": "Page number",
-      "description": "Page number to get",
+      "description": "Page number to get.",
       "name": "page",
       "in": "query",
       "type": "integer",
@@ -1895,7 +2036,7 @@
     },
     "PerPage": {
       "x-ms-summary": "Records per page",
-      "description": "Number of records per page",
+      "description": "Number of records per page.",
       "name": "per_page",
       "in": "query",
       "type": "integer",
