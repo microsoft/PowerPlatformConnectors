@@ -1,7 +1,9 @@
 # Mensagia
 Mensagia offer reliable SMS, Email and Voice for business automation communication.
 
-## Publisher: Sinergyne Global Communications, S.L.
+## Publisher: Sistemes Informàtics ICON, S.L.
+
+## Stack Owner: Sinergyne Global Communications, S.L.
 
 ## Prerequisites
 You will need the following to proceed:
