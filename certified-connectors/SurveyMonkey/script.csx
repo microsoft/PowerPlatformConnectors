@@ -76,30 +76,24 @@ public class Script : ScriptBase
         var triggerState = originalQuery.Get("triggerstate");
         if (items != null && triggerState != null)
         {
-            switch (this.Context.OperationId.ToLower())
-            {
-                case "onnewresponseaddedcollector":
-                case "onnewresponseaddedsurvey":
-                    string serializedExcludeIds = string.Empty;
-                    JArray newResponse = null;
-                    var triggerStateExcludes = originalQuery.Get("triggerstate_exclude_ids");
-                    if (triggerStateExcludes != null)
-                    {
-                        serializedExcludeIds = triggerStateExcludes;
-                    }
-                    if (serializedExcludeIds != string.Empty)
-                    {
-                        var excludeIds = new HashSet<string>(serializedExcludeIds.Split(new char[] { ',' }));
-                        newResponse = new JArray(items.Where(x => !excludeIds.Contains(x["id"].ToString())));
-                    }
-                    items = (newResponse.Count > 0 ? newResponse : new JArray());
-                    break;
+            var listOfOperations = new List<string>() { "OnNewResponseAddedCollector", "OnNewResponseAddedSurvey" };
 
-                default:
-                    break;
+            if (listOfOperations.Contains(this.Context.OperationId, StringComparer.OrdinalIgnoreCase))
+            {
+                string serializedExcludeIds = string.Empty;
+                var triggerStateExcludes = originalQuery.Get("triggerstate_exclude_ids");
+                if (triggerStateExcludes != null)
+                {
+                    serializedExcludeIds = triggerStateExcludes;
+                }
+                if (serializedExcludeIds != string.Empty)
+                {
+                    var excludeIds = new HashSet<string>(serializedExcludeIds.Split(new char[] { ',' }));
+                    items = new JArray(items.Where(x => !excludeIds.Contains(x["id"].ToString())));
+                }
+                items = (items?.Count > 0 ? items : new JArray());
             }
         }
-
         return items;
     }
 
@@ -109,10 +103,7 @@ public class Script : ScriptBase
         string excludeIds = string.Empty;
         var listOfOperations = new List<string>() { "OnNewResponseAddedCollector", "OnNewResponseAddedSurvey" };
 
-        if (listOfOperations.Contains(
-                this.Context.OperationId,
-                StringComparer.OrdinalIgnoreCase)
-            && newItems != null)
+        if (listOfOperations.Contains(this.Context.OperationId, StringComparer.OrdinalIgnoreCase) && newItems != null)
         {
             if (newItems.Count > 0)
             {
@@ -229,7 +220,6 @@ public class Script : ScriptBase
                 response.Content = null;
                 response.StatusCode = HttpStatusCode.Accepted;
             }
-
             response.Headers.Location = SetLocationHeader(triggerState, excludeIds);
         }
     }
