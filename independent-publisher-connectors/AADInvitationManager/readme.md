@@ -4,6 +4,8 @@ The Graph API is a powerful and very extensive REST API. Using this API, you can
 
 This connector exposes the Identity and Access resources of the Graph API in the Microsoft Power Platform.
 
+## Publisher: Daniel Laskewitz | Sogeti
+
 ## Pre-requisites
 
 You will need the following to proceed:
