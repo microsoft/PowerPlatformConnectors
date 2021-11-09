@@ -1,6 +1,8 @@
 # Ideanote
 Ideanote is the next-generation innovation software that has everything you need to collect, develop, prioritize and act on more of the right ideas. This connector exposes actions that enable you to invite and update users as well as list missions, ideas and comments. The connector also makes it possible with triggers to subscribe to various important events.
 
+## Publisher: Ideanote ApS
+
 ## Prerequisites
 An Ideanote account. Create a new account at https://ideanote.io/.
 
