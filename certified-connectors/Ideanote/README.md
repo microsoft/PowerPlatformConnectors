@@ -1,34 +1,40 @@
-## Ideanote Connector
-
-Ideanote is the next-generation innovation software that has everything you need to collect, develop, prioritize and act on more of the right ideas.
+# Ideanote
+Ideanote is the next-generation innovation software that has everything you need to collect, develop, prioritize and act on more of the right ideas. This connector exposes actions that enable you to invite and update users as well as list missions, ideas and comments. The connector also makes it possible with triggers to subscribe to various important events.
 
 ## Prerequisites
-
 An Ideanote account. Create a new account at https://ideanote.io/.
 
-## How to get credentials?
+## Supported Operations
 
-Please follow these steps:
+### Supported Triggers
+
+* `NewComment`: When a comment is created
+* `NewIdea`: When an idea is created
+* `NewUser`: When a user is created
+* `NewLike`: When an idea or comment is liked
+* `FinishRating`: When someone rates an idea
+* `UpdatedIdeaPhase`: When the phase of an idea changes
+* `UpdatedIdeaStatus`: When the status of an idea changes
+
+### Supported Actions
+
+* `CreateUser`: Create user
+* `UpdateUser`: Update user
+* `ListMissions`: List all missions
+* `ListIdeas`: List all ideas
+* `ListIdeasForMission`: List all ideas for a mission
+* `ListCommentsForIdea`: List all comments for an idea
+
+## Obtaining Credentials
+Please follow these steps to obtain credentials:
 
 1. Login to Ideanote
 2. Go to settings/integrations and click `Power Automate`
 3. Copy the `API Token` from the dialog
 
-## Supported Triggers
+## Known Issues and Limitations
+- It is not currently possible to create new missions, ideas or comments.
+- It is not currently possible to access dynamic data using the `NewIdea` trigger.
 
-* When a comment is created
-* When an idea is created
-* When a user is created
-* When an idea or comment is liked
-* When someone rates an idea
-* When the phase of an idea changes
-* When the status of an idea changes
-
-## Supported Actions
-
-* Create user
-* Update user
-* List all missions
-* List all ideas
-* List all ideas for a mission
-* List all comments for an idea
+## Deployment Instructions
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
