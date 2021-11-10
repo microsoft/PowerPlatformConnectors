@@ -2,10 +2,10 @@
 Required. One paragraph, two to three sentences about the service and the connector​.
 
 ## Publisher: Publisher's Name
-Required for Independent-Publisher-Connector and should be a first and last name of an individual or it can be a company name. ​If there is more than one publisher, please separate the names with a comma.​
+Required. For Independent-Publisher-Connector, it should be a first and last name of an individual or it can be a company name. ​If there is more than one publisher, please separate the names with a comma.​
 
 ## Prerequisites
-Required. Any plans or licenses, tools requried from the connector.​
+Required. Any plans or licenses, tools required from the connector.​
 
 ## Supported Operations
 Required. Describe actions, triggers, and other endpoints.​
@@ -14,7 +14,6 @@ Description of operation 1.
 
 ### Operation 2
 Description of operation 2.
-
 
 ## Obtaining Credentials
 Required. Explain the authentication method and how to get the credentials.​
