@@ -78,7 +78,7 @@ The output will be the updated availability settings.
 - `form`: The internal form name or Id
 - `start`: The datetime at which the form should become available.
 - `end`: The datetime at which the form should no longer be available.
-- `messsage`: The message which should be shown to users who try to access the form when outside of the availability period.
+- `message`: The message which should be shown to users who try to access the form when outside of the availability period.
 
 #### GetFile
 
