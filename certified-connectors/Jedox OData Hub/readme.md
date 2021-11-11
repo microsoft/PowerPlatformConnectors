@@ -2,6 +2,8 @@
 ## Jedox OData Hub Connector
 The Jedox OData Hub exposes functionality from different Jedox components into a powerful REST Api using the OData V4 standard.
 
+## Publisher: Jedox GmbH
+
 ## Prerequisites
 You will need the following to proceed:
 * An active Jedox Instance
@@ -39,6 +41,12 @@ The connector supports the following operations:
 * `Get transforms`: Get a list of transforms in the given integrator project.
 * `Get transform by name`: Get the transform with the given name in the given integrator project.
 * `Get transform Rows`: Stream the rows of the transform with the given name in the given integrator project.
+
+## Obtaining Credentials
+This connector uses basic authentication. To sign in use your credentials of the corresponding Jedox instance. SAML users are currently not supported.
+
+## Known Issues and Limitations
+- SAML users are currently not supported.
 
 ## More Information
 You can find more information in [our Knowledgebase](https://knowledgebase.jedox.com/integration/odata-hub/odata-powerplatform.htm).
