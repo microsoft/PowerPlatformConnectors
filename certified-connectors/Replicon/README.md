@@ -10,10 +10,10 @@ In order to use this connector, you will need following:
 ## Supported Operations
 
 ### BulkGetProjectDetails3
-Use this operation to get detils of Project from Replicon
+Get detils of Project from Replicon
 
 ### CreateProjectOrApplyModifications
-Use this operation to create or update a project in Replicon. Create/ Update is done based on target parameter provided.
+Create or update a project in Replicon. Create/ Update is done based on target parameter provided.
 
 ### UserListServiceGetData
 Get Users present in Replicon.
