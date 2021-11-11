@@ -42,6 +42,12 @@ Get tenant end point details of the connected Replicon instance.
 ### WebhookSubscriptionsRestAPI
 Subscribe to the Timesheet Events in Replicon to get notification about timesheet events in Replicon.
 
+### PutProjectTeamMemberAssignments
+Rewrite Team Member assignment of a project in Replicon
+
+### PutResourceAssignments
+Rewrite Resource Assignment of a task in Replicon
+
 ## Obtaining Credentials
 To use Replicon connector, you will need an account with Project Administrator access in Replicon. You will be taken to Replicon sign in process to complete connection.
 
