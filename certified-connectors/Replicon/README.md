@@ -1,6 +1,6 @@
-## Replicon TBP
+## Replicon
 
-Use Replicon TBP connector to connect to your Replicon tenant and create update project/ task / resource assignments in Replicon.
+Use Replicon connector to connect to your Replicon tenant and create update project/ task / resource assignments in Replicon.
 
 ## Prerequisites
 In order to use this connector, you will need following:
@@ -24,8 +24,8 @@ Get Hierarchy of tasks present inside a project / task
 ### CreateTaskHierarchyOrApplyModifications
 Create a task / task hierarchy in Replicon
 
-### Move Task
-Update Hierarchy of a Task in Polaris
+### MoveTask
+Update Hierarchy of a Task in Replicon
 
 ### TaskListServiceGetData
 Get task list for a project from Replicon
