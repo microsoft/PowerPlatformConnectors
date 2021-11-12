@@ -1,8 +1,7 @@
+# Azure Active Directory Connector
+Azure Active Directory provides a powerful and very extensive REST API.  Using this API, you can create and manage objects (e.g. users, groups etc.) in Azure Active Directory. This connector exposes the /Applications endpoint in Microsoft Flow and PowerApps. My main intent was to provide an easy way to find client secrets that were expired or near to expiry. 
 
-## Azure Active Directory Connector
-Azure Active Directory provides a powerful and very extensive REST API.  Using this API, you can create and manage objects (e.g. users, groups etc.) in Azure Active Directory. This connector exposes the /Applications endpoint in Microsoft Flow and PowerApps. My main intent was to provide an easy way to find client secrets that were expired or near to expiry
-
-
+## Publisher: Paul Culmsee
 
 ## Pre-requisites
 You will need the following to proceed:
@@ -10,7 +9,14 @@ You will need the following to proceed:
 * An Azure subscription
 * The Power platform CLI tools
 
-## Building the connector 
+## Supported Operations
+The connector supports the following operations:
+### `List Applications`: Get the list of applications in this organization
+
+### Operation description
+Description here
+
+## Obtaining Credentials 
 Since the APIs used by the connector are secured by Azure Active Directory (AD), we first need to set up a few thing in Azure AD for connector to securely access  them.  After this setup, you can create and test the connector.
 
 ### Set up an Azure AD application for your custom connector
@@ -27,16 +33,17 @@ This step will ensure that your application can successfully retrieve an access 
    
 At this point, we now have a valid Azure AD application that can be used to get permissions from end users and access Azure Active Directory.  The next step for us is to create a custom connector.
 
-### Deploying the sample
-Run the following commands and follow the prompts:
+## Known Issues and Limitations
+Required. Include any known issues and limitations a user may encounter.
 
-```paconn
-paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>
-```
+## Frequently Asked Questions
+Optional. Include frequently asked questions by your customer.
+### Question 1
+Answer to question 1
+### Question 2
+Answer to question 2
 
-## Supported Operations
-The connector supports the following operations:
-* `List Applications`: Get the list of applications in this organization
-
+## Deployment Instructions
+Required. Add instructions on how to deploy this connector as custom connector.
 
 
