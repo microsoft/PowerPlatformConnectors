@@ -1,22 +1,22 @@
 ﻿
 
 ## Assently E-Sign Connector
-The Assently E-Sign connector makes functionality of the Assently E-Sign API available for use in Power Automate.
+The Assently E-Sign Connector makes functionality of Assently E-Sign available for use in Microsoft Power Automate (Flow).
 
 
 ## Pre-requisites
-An Assently E-Sign account with Miscrosoft Flow license. [Create a free trial account](https://app.assently.com/user/signup)
+An Assently E-Sign Account with Microsoft Flow add-on. [Create a free Assently E-Sign Trial Account](https://app.assently.com/user/signup).
 
 
 ## How to get credentials
-After the Microsoft Flow feature is enabled by the admin on your Assently account, a personal access token can be generated under your user profile.
+When the Microsoft Flow add-on is enabled by the Administrator on your Assently E-Sign Account, a Personal Access Token can be generated under your user profile.
 
 
-## API documentation
-The API documentation can be found [here](https://app.assently.com/api)
+## API Documentation
+See Assently E-Sign's [API Documentation](https://app.assently.com/api).
 
-## Deployment instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
+## Deployment Instructions
+Please use the [instructions on Microsoft Power Platform Connectors CLI](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate (Flow) and Power Apps.
 
 ## Supported Operations
 
