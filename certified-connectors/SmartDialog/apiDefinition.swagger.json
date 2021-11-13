@@ -205,6 +205,23 @@
                   "type": "string",
                   "description": "Attachment Uri to be used when sending WhatsApp message that contains an attachment.",
                   "title": "Attachment Uri"
+                },
+                "CustomerData": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Billing/grouping data for this message, optional",
+                  "title": "Customer Data"
+                },
+                "AdMessage": {
+                  "type": "boolean",
+                  "description": "Optional overriding flag for marking the message as an ad message",
+                  "title": "Ad Message"
+                },
+                "DlrUrl": {
+                  "type": "string",
+                  "description": "Url for Delivery status callback via http-get. You may add querystring values to url, they will be preserved.",
+                  "example": "https://api.company.com/Dlr",
+                  "title": "Dlr Url"
                 }
               },
               "required": [
@@ -493,6 +510,263 @@
         ],
         "x-ms-visibility": "internal"
       }
+    },
+    "/whatsapp/templates/{Customer-Id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The Template name.",
+                    "title": "Template Name",
+                    "x-ms-visibility": "internal"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "description": "The template Displayname.",
+                    "title": "Displayname"
+                  },
+                  "extensionParameters": {
+                    "type": "object",
+                    "properties": {
+                      "rawContent": {
+                        "type": "string",
+                        "description": "The Templace content.",
+                        "title": "Template Content",
+                        "x-ms-visibility": "internal"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetCustomerWhatsAppTemplates",
+        "summary": "Get Customer WhatsApp Templates",
+        "description": "Get the selected Customer's WhatsApp templates.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "Customer-Id",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/messages/templates/whatsapp": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageId": {
+                  "type": "string",
+                  "description": "Newly created message's identifier.",
+                  "title": "Message Id"
+                },
+                "messagePartCount": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Approximated number of message parts for this message.",
+                  "title": "Message Part Count"
+                },
+                "recipients": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "address": {
+                        "type": "string",
+                        "description": "Recipient address (phone number/email/user id etc.).",
+                        "title": "Recipient Address"
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "Recipient identifier used for receiving delivery status information.",
+                        "title": "Recipient Id"
+                      }
+                    }
+                  },
+                  "description": "recipients"
+                }
+              }
+            }
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "operationId": "SendWhatsappTemplateMessage",
+        "x-ms-visibility": "important",
+        "summary": "Send WhatsApp Message",
+        "description": "Send WhatsApp template message.",
+        "parameters": [
+          {
+            "name": "Customer-Id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The Customer to use for sending.",
+            "x-ms-summary": "Customer",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetUserCustomers",
+              "value-path": "customerId",
+              "value-collection": "customerUsers",
+              "value-title": "customerName"
+            }
+          },
+          {
+            "name": "Service-Id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The Service to use for sending.",
+            "x-ms-summary": "Service",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetCustomerServices",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "Customer-Id": {
+                  "parameter": "Customer-Id"
+                },
+                "ServiceType": "OneWay"
+              }
+            }
+          },
+          {
+            "name": "Request Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TemplateName": {
+                  "type": "string",
+                  "description": "The Template to use for sending.",
+                  "title": "WhatsApp Template",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetCustomerWhatsAppTemplates",
+                    "value-path": "id",
+                    "value-title": "extensionParameters/rawContent",
+                    "parameters": {
+                      "Customer-Id": {
+                        "parameter": "Customer-Id"
+                      }
+                    }
+                  }
+                },
+                "Recipients": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Address": {
+                        "type": "string",
+                        "description": "Message recipient address.",
+                        "title": "Address"
+                      }
+                    },
+                    "required": [
+                      "Address"
+                    ]
+                  },
+                  "description": "Recipients"
+                },
+                "BodyParameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Array of string parameters to be used in the body of the selected template.",
+                    "title": "Template Body Parameters",
+                    "x-ms-visibility": "important"
+                  },
+                  "description": "BodyParameters"
+                },
+                "HeaderParameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Array of string parameters to be used in the header of the selected template.",
+                    "title": "Template Header Parameters"
+                  },
+                  "description": "HeaderParameters"
+                },
+                "Buttons": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Type": {
+                        "type": "string",
+                        "description": "The button type. Only one type per template, may contain multiple of the same type.",
+                        "title": "Type",
+                        "enum": [
+                          "Call",
+                          "QuickReply",
+                          "Url"
+                        ]
+                      },
+                      "Data": {
+                        "type": "string",
+                        "description": "The text of the button.",
+                        "title": "Text"
+                      }
+                    }
+                  },
+                  "description": "Buttons"
+                },
+                "SendDateTime": {
+                  "type": "string",
+                  "description": "The date and time to send the message. Leave empty to send instantly.",
+                  "title": "Send Datetime"
+                },
+                "AttachmentUri": {
+                  "type": "string",
+                  "description": "The Attachment Uri if the template contains an attachment.",
+                  "title": "Attachment Uri"
+                },
+                "UseSmsFallback": {
+                  "type": "boolean",
+                  "description": "Should SMS be used as fallback.",
+                  "title": "Use SMS Fallback"
+                },
+                "DlrUrl": {
+                  "type": "string",
+                  "description": "Delivery report Url that will recieve a callback when the sendprocess completes.",
+                  "title": "Dlr Url"
+                },
+                "CustomerData": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Billing/grouping data for this message, optional",
+                  "title": "Customer Data"
+                }
+              },
+              "required": [
+                "TemplateName",
+                "Recipients",
+                "BodyParameters"
+              ]
+            }
+          }
+        ]
+      }
     }
   },
   "x-ms-connector-metadata": [
@@ -519,14 +793,14 @@
       "authorizationUrl": "https://arenafi.b2clogin.com/arenafi.onmicrosoft.com/B2C_1A_SmartDialog_Integrations/oauth2/v2.0/authorize",
       "tokenUrl": "https://arenafi.b2clogin.com/arenafi.onmicrosoft.com/B2C_1A_SmartDialog_Integrations/oauth2/v2.0/token",
       "scopes": {
-        "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management": "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management"
+        "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management https://arenafi.onmicrosoft.com/smartdialog-integrations-api/WhatsApp": "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management https://arenafi.onmicrosoft.com/smartdialog-integrations-api/WhatsApp"
       }
     }
   },
   "security": [
     {
       "oauth2_auth": [
-        "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management"
+        "offline_access https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Gateway.Send https://arenafi.onmicrosoft.com/smartdialog-integrations-api/Customer.Services https://arenafi.onmicrosoft.com/smartdialog-integrations-api/User.Customers https://arenafi.onmicrosoft.com/smartdialog-integrations-api/TwoWay.Management https://arenafi.onmicrosoft.com/smartdialog-integrations-api/WhatsApp"
       ]
     }
   ],
