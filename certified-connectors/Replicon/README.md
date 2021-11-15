@@ -2,6 +2,9 @@
 
 Use Replicon connector to connect to your Replicon tenant and create update project/ task / resource assignments in Replicon.
 
+## Publisher: Replicon Inc.
+
+
 ## Prerequisites
 In order to use this connector, you will need following:
 
