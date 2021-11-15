@@ -27,5 +27,6 @@ This connector supports the following operations:
 
 ## Supported Triggers
 
-* `When an item is created,updated or deleted`: Trigger when an item is created,updated or deleted.	
+* `When an item is created,updated or deleted`: Trigger when an item is created,updated or deleted.
+	
 For more information on parameters accepted/required by the connector's operations, please contact us at www.resco.net/contact-support.
