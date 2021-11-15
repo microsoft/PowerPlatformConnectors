@@ -1,9 +1,11 @@
-## Cognito Forms
+# Cognito Forms
 Cognito Forms lets you easily build powerful online forms, such as surveys, order forms, registration forms and more. For free.
 Please see our [support documentation](https://www.cognitoforms.com/support/63/data-integration/microsoft-power-automate) 
 or [contact us](https://www.cognitoforms.com/supportrequest/) for help with our public Power Automate connector.
 
-## Building the connector 
+## Publisher: Cognito Forms
+
+## Deployment Instructions
 Cognito Forms requires a valid `Client id` and `Client secret` to create a connector.
 These properties can be found in the key vault and should only be set in the custom connector's authentication settings.
 
