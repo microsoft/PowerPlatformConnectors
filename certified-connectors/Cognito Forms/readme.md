@@ -120,7 +120,7 @@ queued events have been sent.
 - `module`: The webhook's module. This should be set to "forms", as this connector only supports that module.
 
 ## Obtaining Credentials
-Owners of the organization must log into Cognito Forms and authorize the connection.
+An owner of the organization must log into Cognito Forms and authorize the connection.
 
 ## Known Issues
 None
