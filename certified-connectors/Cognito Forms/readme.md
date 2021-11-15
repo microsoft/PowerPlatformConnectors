@@ -1,21 +1,12 @@
-## Cognito Forms
+# Cognito Forms
 Cognito Forms lets you easily build powerful online forms, such as surveys, order forms, registration forms and more. For free.
 Please see our [support documentation](https://www.cognitoforms.com/support/63/data-integration/microsoft-power-automate) 
 or [contact us](https://www.cognitoforms.com/supportrequest/) for help with our public Power Automate connector.
 
-## Building the connector 
-Cognito Forms requires a valid `Client id` and `Client secret` to create a connector.
-These properties can be found in the key vault and should only be set in the custom connector's authentication settings.
+## Publisher: Cognito Forms
 
-1. Run:
-	```paconn
-	paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
-	```
-
-2. Login to PowerAutomate
-3. Navigate to the new connector
-4. Under "Security" update the `Client id` and `Client secret`
-5. Update the connector
+## Prerequisites
+A paid subscription is required.
 
 ## Supported Operations
 
@@ -127,3 +118,23 @@ queued events have been sent.
 ##### Parameters:
 - `id`: The Id of the webhook that should be unsubscribed.
 - `module`: The webhook's module. This should be set to "forms", as this connector only supports that module.
+
+## Obtaining Credentials
+An owner of the organization must log into Cognito Forms and authorize the connection.
+
+## Known Issues
+None
+
+## Deployment Instructions
+Cognito Forms requires a valid `Client id` and `Client secret` to create a connector.
+These properties can be found in the key vault and should only be set in the custom connector's authentication settings.
+
+1. Run:
+	```paconn
+	paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
+	```
+
+2. Login to PowerAutomate
+3. Navigate to the new connector
+4. Under "Security" update the `Client id` and `Client secret`
+5. Update the connector
