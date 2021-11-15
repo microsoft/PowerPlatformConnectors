@@ -26,5 +26,6 @@ This connector supports the following operations:
 * `Get current user`: Get current user record associated with login credentials.
 
 ## Supported Triggers
+
 * `When an item is created,updated or deleted`: Trigger when an item is created,updated or deleted.	
 For more information on parameters accepted/required by the connector's operations, please contact us at www.resco.net/contact-support.
