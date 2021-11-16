@@ -212,7 +212,7 @@ public class Script : ScriptBase
             }
             if (newItems != null && newItems.HasValues)
             {
-                response.Content = new StringContent(newItems.ToString());
+                response.Content = new StringContent(newItems.ToString(), Encoding.UTF8, "application/json");
                 response.StatusCode = HttpStatusCode.OK;
             }
             else
