@@ -6,6 +6,8 @@ Chuck Norris facts have spread around the world, leading not only to translated 
 
 [chucknorris.io](https://chucknorris.io) is a free JSON API for hand curated Chuck Norris facts.
 
+## Publisher: Daniel Laskewitz | Sogeti
+
 ## Prerequisites
 
 The [chucknorris.io](https://chucknorris.io) connector doesn't require authentication.
@@ -17,6 +19,14 @@ The connector supports the following operations:
 - `Get random Chuck Norris fact`: This action will give you a random Chuck Norris fact.
 - `Search for Chuck Norris facts`: This action will let you search for Chuck Norris fact by a keyword.
 
+## Obtaining Credentials
+
+No credentials needed.
+
 ## Known issues and limitations
 
 There are no known issues and limitations.
+
+## Deployment Instructions
+
+Upload the connector and choose no authentication as the authentication type.
