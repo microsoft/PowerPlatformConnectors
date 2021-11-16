@@ -4,6 +4,8 @@ SurveyMonkey is the world's leading provider of web-based survey solutions. Thes
 ## Prerequisites
 To use this integration, you will need a SurveyMonkey account. 
 
+## Publisher: Microsoft
+
 ## Obtaining Credentials
 A SurveyMonkey account (trial or paid) is needed to register an application. You can start a trial [here](https://www.surveymonkey.com/). After that you can go to the [developer page](https://developer.surveymonkey.com/api/v3/#registering-an-app) and register your application there. From there you can grab the app key and secret.
 
