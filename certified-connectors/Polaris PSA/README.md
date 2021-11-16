@@ -24,6 +24,9 @@ Get Hierarchy of tasks present inside a Project / task
 ### CreateTaskHierarchyOrApplyModifications
 Create a task / task hierarchy in Polaris
 
+### Move Task
+Update Hierarchy of a Task in Polaris
+
 ### TaskListServiceGetData
 Get task list for a project from Polaris
 
@@ -38,6 +41,9 @@ Get summary of time entered by all users against a project/ task in Polaris
 
 ### WebhookSubscriptionsRestAPI
 Subscribe to the Timesheet Events in Polaris to get notification about timesheet events in Polaris.
+
+### GetMyTenantEndpointDetails
+Get tenant end point details of the connected instance.
 
 ## Obtaining Credentials
 To use Polaris PSA connector, you will need an account with Project Administrator access in Polaris. You will be taken to Polaris sign in process to complete connection.

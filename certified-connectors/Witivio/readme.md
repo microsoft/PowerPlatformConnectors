@@ -1,16 +1,16 @@
-﻿
+
 ### NOTE
-> This is Witivio connector, the enterprise chatbot platform for the digital workplace
+> This is Virtual Agent Studio connector, the enterprise chatbot platform for the digital workplace
 
 
 ## Pre-requisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Microsoft Power Automate plan with custom connector feature
-* A Witivio subscription
+* A Virtual Agent Studio subscription
 * An active chatbot
 
-## Set up an Witivio account
-https://app.witivio.com
+## Set up a Virtual Agent Studio account
+Simply open your browser and login with your enterprise credentials to https://app.virtualagentstudio.com
 
 
 
