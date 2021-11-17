@@ -8,7 +8,7 @@
       "url": "https://www.tyntec.com/get-help-support",
       "email": "support@tyntec.com"
     },
-    "version": "1.1"
+    "version": "2.1"
   },
   "host": "api.tyntec.com",
   "basePath": "/",
@@ -18,32 +18,108 @@
   "consumes": [],
   "produces": [],
   "paths": {
+    "/chat-api/v2/applications/ms-connector/inbound-message-callback": {
+      "x-ms-notification-content": {
+        "description": "Response",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "messageId": {
+              "type": "string",
+              "description": "messageId"
+            },
+            "channel": {
+              "type": "string",
+              "description": "channel"
+            },
+            "from": {
+              "type": "string",
+              "description": "from"
+            },
+            "to": {
+              "type": "string",
+              "description": "to"
+            },
+            "receivedAt": {
+              "type": "string",
+              "description": "receivedAt"
+            },
+            "content": {
+              "type": "object",
+              "properties": {
+                "contentType": {
+                  "type": "string",
+                  "description": "contentType"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "text"
+                },
+                "file": {
+                  "type": "string",
+                  "description": "file"
+                }
+              },
+              "description": "content"
+            },
+            "event": {
+              "type": "string",
+              "description": "event"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "timestamp"
+            }
+          }
+        }
+      },
+      "patch": {
+        "responses": {},
+        "summary": "Incoming message",
+        "description": "Triggers on Incoming message",
+        "operationId": "incoming",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "callbackUrl": {
+                  "type": "string",
+                  "description": "callbackUrl",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": ""
+                }
+              },
+              "required": [
+                "callbackUrl"
+              ]
+            }
+          }
+        ]
+      }
+    },
     "/chat-api/v2/messages/": {
       "post": {
         "responses": {
-        "202": {
-          "description": "Returned when the operation successfully connects to Conversations API",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "messageId": {
-                "type": "string",
-                "description": "messageId",
-                "x-ms-visibility": "important"
+          "202": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageId": {
+                  "type": "string",
+                  "description": "messageId",
+                  "x-ms-visibility": "important"
+                }
               }
             }
           }
         },
-        "400": {
-          "description": "There was an issue with your channel."
-        },
-        "401": {
-          "description": "The Viber Service ID or WhatsApp Business Account Number is not authorized with used API key."
-        },
-        "403" :{
-          "description":"You attempting to use a number that is not assigned to your account"
-        }
-      },
         "summary": "Send Viber Message",
         "description": "Send Viber Message",
         "operationId": "SendViber",
@@ -103,12 +179,19 @@
                         ]
                       },
                       "description": "components"
+                    },
+                    "messagePurpose" :{
+                      "type": "string",
+                      "description": "Message Purpose",
+                      "title": "Message Purpose",
+                      "default": "promotion"
                     }
                   },
                   "description": "viber",
                   "required": [
                     "components",
-                    "from"
+                    "from",
+                    "messagePurpose"
                   ]
                 }
               },
@@ -152,12 +235,6 @@
                 }
               }
             }
-          },
-          "404":{
-            "description": "No message was found on given ID"
-          },
-          "403":{
-            "description": "Invalid authentication credentials"
           }
         },
         "summary": "Status Check",
@@ -172,6 +249,97 @@
             "description": "Message ID",
             "x-ms-summary": "Message ID",
             "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/chat-api/v2/messages": {
+      "post": {
+        "responses": {
+          "202": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageId": {
+                  "type": "string",
+                  "description": "messageId",
+                  "x-ms-visibility": "important"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send Rich Media",
+        "description": "Sends Rich Media message",
+        "operationId": "SendRichMedia",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "string",
+                  "description": "to"
+                },
+                "channels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "channel",
+                    "title": "channel",
+                    "x-ms-visibility": "internal",
+                    "default": "viber"
+                  },
+                  "description": "channels"
+                },
+                "viber": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "description": "from"
+                    },
+                    "messagePurpose" :{
+                      "type": "string",
+                      "description": "Message Purpose",
+                      "title": "Message Purpose",
+                      "default": "promotion"
+                    },
+                    "components": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "type"
+                          },
+                          "image": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "url"
+                              }
+                            },
+                            "description": "image"
+                          }
+                        }
+                      },
+                      "description": "components"
+                    }
+                  },
+                  "description": "viber"
+                }
+              },
+              "required": [
+                "channels"
+              ]
+            }
           }
         ]
       }
@@ -203,5 +371,4 @@
       "propertyValue": "Communication;Marketing"
     }
   ]
-
 }

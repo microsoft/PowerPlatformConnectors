@@ -1,0 +1,1454 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "2.0",
+    "title": "COSMO Bot",
+    "description": "COSMO Bot increases your business success through more efficiency in everyday life. If you answer a standard question today, you are wasting time. In contact with your customers, this is often a good opportunity to get to know each other and establish a relationship. But internally, from employee to employee, or when there is simply too much to do, it is a luxury that not everyone can allow themselves. This connector allows you to extend the bot's functionality and integrate other systems.",
+    "contact": {
+      "name": "COSMO CONSULT Support",
+      "url": "https://de.cosmoconsult.com/service/support/",
+      "email": "support.west@cosmoconsult.com"
+    }
+  },
+  "host": "cc-bot-master-server.azurewebsites.net",
+  "basePath": "/api/v1",
+  "schemes": [
+    "https"
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://cosma.link/cc-bot"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.cosmoconsult.com/data-protection/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Communication"
+    }
+  ],
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-ApiKey"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/global-settings": {
+      "get": {
+        "summary": "Get global settings",
+        "operationId": "GetGlobalSettings",
+        "description": "Gets the global settings from the connected instance.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetGlobalSettingsSchema",
+                "parameters": {},
+                "value-path": "schema"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/global-settings/schema": {
+      "get": {
+        "summary": "Get global settings schema",
+        "operationId": "GetGlobalSettingsSchema",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "required": [
+                "schema"
+              ],
+              "properties": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask": {
+      "post": {
+        "summary": "Ask COSMO Bot a question",
+        "operationId": "AskQuestion",
+        "description": "The bot will search through the knowledgebase and return the answer with the best match. Also returns the score.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "question"
+              ],
+              "properties": {
+                "question": {
+                  "title": "Question",
+                  "type": "string",
+                  "example": "What is COSMO Bot?"
+                },
+                "scoreThreshold": {
+                  "title": "Score Threshold",
+                  "description": "Minimum score of an answer for it to be returned.",
+                  "type": "integer",
+                  "example": 70,
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "userEmail": {
+                  "title": "User Email",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found a matching answer.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "foundAnswer"
+              ],
+              "properties": {
+                "foundAnswer": {
+                  "title": "Found Answer",
+                  "description": "Whether COSMO Bot found an answer that matched the question.",
+                  "type": "boolean"
+                },
+                "isSubAnswer": {
+                  "title": "Is Shadow-Answer",
+                  "description": "Whether the returned answer is a sub answer.",
+                  "type": "boolean"
+                },
+                "isTranslated": {
+                  "title": "Was Question Translated",
+                  "description": "Whether the question and returned answer was translated.",
+                  "type": "boolean"
+                },
+                "answer": {
+                  "$ref": "#/definitions/Answer"
+                },
+                "score": {
+                  "title": "Score",
+                  "description": "How confident the bot is that the returned answer is correct.",
+                  "type": "integer",
+                  "example": 90
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parse": {
+      "post": {
+        "summary": "Convert COSMO Bot Script",
+        "operationId": "ParseText",
+        "description": "Run the given text through the COSMO Bot Script parser.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "inputText",
+                "outputFormat"
+              ],
+              "properties": {
+                "inputText": {
+                  "title": "Input Text",
+                  "type": "string"
+                },
+                "outputFormat": {
+                  "title": "Output Format",
+                  "type": "string",
+                  "default": "markdown",
+                  "enum": [
+                    "markdown",
+                    "html",
+                    "plain"
+                  ],
+                  "x-ms-editor-options": {
+                    "items": [
+                      {
+                        "title": "Markdown",
+                        "value": "markdown"
+                      },
+                      {
+                        "title": "HTML",
+                        "value": "html"
+                      },
+                      {
+                        "title": "Plain text",
+                        "value": "plain"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response",
+            "schema": {
+              "type": "object",
+              "required": [
+                "outputText"
+              ],
+              "properties": {
+                "outputText": {
+                  "title": "Output Text",
+                  "description": "The parsed text returned by the COSMO Bot Script Parser.",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/translate": {
+      "post": {
+        "summary": "Translate (markdown friendly)",
+        "operationId": "Translate",
+        "description": "Translate the given text while respecting the COSMO Bot dialect Markdown syntax.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "targetLanguageCode",
+                "inputText"
+              ],
+              "properties": {
+                "targetLanguageCode": {
+                  "title": "Target Language",
+                  "description": "The target language code (example: fr).",
+                  "type": "string"
+                },
+                "inputText": {
+                  "title": "Text",
+                  "description": "The text to translate.",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response",
+            "schema": {
+              "type": "object",
+              "required": [
+                "outputText"
+              ],
+              "properties": {
+                "outputText": {
+                  "title": "Translated Text",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-all-topics": {
+      "get": {
+        "summary": "Get all topics",
+        "operationId": "GetAllTopics",
+        "description": "Gets all topics from the connected bot instance.",
+        "parameters": [
+          {
+            "name": "filterByExpert",
+            "in": "query",
+            "description": "Filter by Expert",
+            "x-ms-summary": "Filter by Expert",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of topics.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "topics"
+              ],
+              "properties": {
+                "topics": {
+                  "title": "Topics",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-topic": {
+      "get": {
+        "summary": "Get topic",
+        "operationId": "GetTopic",
+        "description": "Gets a specific topic from the connected instance.",
+        "parameters": [
+          {
+            "name": "topicName",
+            "in": "query",
+            "description": "Topic Name",
+            "x-ms-summary": "Topic Name",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a topic.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "topic"
+              ],
+              "properties": {
+                "topic": {
+                  "title": "Topic",
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "description"
+                  ],
+                  "properties": {
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "description": {
+                      "title": "Description",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-all-answers": {
+      "get": {
+        "summary": "Get all question-answer sets",
+        "operationId": "GetAllAnswers",
+        "description": "Gets all answers from the connected instance.",
+        "parameters": [
+          {
+            "name": "filterByTopic",
+            "in": "query",
+            "description": "Filter by Topic (contains)",
+            "x-ms-summary": "Filter by Topic (contains)",
+            "type": "string"
+          },
+          {
+            "name": "filterByShortDescription",
+            "in": "query",
+            "description": "Filter by Short Description (contains)",
+            "x-ms-summary": "Filter by Short Description (contains)",
+            "type": "string"
+          },
+          {
+            "name": "filterByQuestionText",
+            "in": "query",
+            "description": "Filter by Question Text (contains)",
+            "x-ms-summary": "Filter by Question Text (contains)",
+            "type": "string"
+          },
+          {
+            "name": "filterByAnswerText",
+            "in": "query",
+            "description": "Filter by Answer Text (contains)",
+            "x-ms-summary": "Filter by Answer Text (contains)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of answers.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "answers"
+              ],
+              "properties": {
+                "answers": {
+                  "title": "Answers",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Answer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-experts": {
+      "get": {
+        "summary": "Get experts for a topic",
+        "operationId": "GetExperts",
+        "description": "Gets all expoerts from the connected instance.",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "query",
+            "description": "Topic",
+            "x-ms-summary": "Topic",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of experts.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "expertEmails"
+              ],
+              "properties": {
+                "expertEmails": {
+                  "title": "Experts",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add-expert": {
+      "post": {
+        "summary": "Add an expert to a topic",
+        "operationId": "AddExpert",
+        "description": "The bot will add the expert to the provided topic.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "topic",
+                "expertEmail"
+              ],
+              "properties": {
+                "topic": {
+                  "title": "Topic",
+                  "type": "string"
+                },
+                "expertEmail": {
+                  "title": "Expert Email",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/remove-expert": {
+      "post": {
+        "summary": "Remove an expert from a topic",
+        "operationId": "RemoveExpert",
+        "description": "The bot will remove an expert from the provided topic. If no topic is given, the expert will be removed from all topics.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "expertEmail"
+              ],
+              "properties": {
+                "expertEmail": {
+                  "title": "Expert Email",
+                  "type": "string"
+                },
+                "topic": {
+                  "title": "Topic",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/add-topic": {
+      "post": {
+        "summary": "Add a new topic",
+        "operationId": "AddTopic",
+        "description": "Adds a new topic to the connected instance.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "description",
+                "expertEmails"
+              ],
+              "properties": {
+                "name": {
+                  "title": "Topic Name",
+                  "type": "string"
+                },
+                "description": {
+                  "title": "Description",
+                  "type": "string"
+                },
+                "expertEmails": {
+                  "title": "Expert Emails",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/rename-topic": {
+      "post": {
+        "summary": "Rename an existing topic",
+        "description": "Rename a existing topic from the connected instance.",
+        "operationId": "RenameTopic",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "newName"
+              ],
+              "properties": {
+                "name": {
+                  "title": "Topic Name",
+                  "description": "The name of the existing topic to be renamed.",
+                  "type": "string"
+                },
+                "newName": {
+                  "title": "New Topic Name",
+                  "description": "The name that the topic will be renamed to.",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/add-answer": {
+      "post": {
+        "summary": "Add a new question-answer set",
+        "description": "Adds a new question-answer set to the connected instance.",
+        "operationId": "AddAnswer",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "topic",
+                "shortDescription",
+                "questions",
+                "answerText"
+              ],
+              "properties": {
+                "topic": {
+                  "title": "Topic",
+                  "type": "string"
+                },
+                "shortDescription": {
+                  "title": "Short Description",
+                  "type": "string"
+                },
+                "questions": {
+                  "title": "Questions",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "answerText": {
+                  "title": "Answer Text",
+                  "type": "string"
+                },
+                "userEmail": {
+                  "title": "User Email",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/edit-answer": {
+      "post": {
+        "summary": "Edit an existing question-answer set",
+        "description": "Edit an existing question-answer set from the connected instance.",
+        "operationId": "EditAnswer",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "shortDescription"
+              ],
+              "properties": {
+                "shortDescription": {
+                  "title": "Short Description of the Existing Set",
+                  "type": "string"
+                },
+                "newTopic": {
+                  "title": "Updated Topic",
+                  "type": "string"
+                },
+                "newShortDescription": {
+                  "title": "Updated Short Description",
+                  "type": "string"
+                },
+                "newQuestions": {
+                  "title": "Updated Questions",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "newAnswerText": {
+                  "title": "Updated Answer Text",
+                  "type": "string"
+                },
+                "userEmail": {
+                  "title": "User Email",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/delete-answer": {
+      "post": {
+        "summary": "Delete a question-answer set",
+        "operationId": "DeleteAnswer",
+        "description": "Delete an existing question-answer set from the connected instance.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "shortDescription"
+              ],
+              "properties": {
+                "shortDescription": {
+                  "title": "Short Description",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/add-subanswer": {
+      "post": {
+        "summary": "Create a shadow copy of a question-answer set",
+        "operationId": "AddSubAnswer",
+        "description": "Adds a new shadow copy for the question-answer set specified by the short description. Careful! These shadow copies are deleted when the answer is updated. It is therefore recommended to automatically call this action using the \"when a question-answer set is updated\" trigger.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "shortDescription",
+                "subShortDescription",
+                "subQuestions",
+                "subAnswerText"
+              ],
+              "properties": {
+                "shortDescription": {
+                  "title": "Original Answer's Short Description",
+                  "type": "string"
+                },
+                "subShortDescription": {
+                  "title": "Shadow Copy's Short Description",
+                  "type": "string"
+                },
+                "subQuestions": {
+                  "title": "Questions",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "subAnswerText": {
+                  "title": "Answer Text",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/get-tickets": {
+      "get": {
+        "summary": "Get open tickets",
+        "operationId": "GetOpenTickets",
+        "description": "Gets all open tickets from the connected instance.",
+        "parameters": [
+          {
+            "name": "filterByHoursSinceOpened",
+            "in": "query",
+            "description": "Only get tickets that have been open for **longer** than x hours.",
+            "x-ms-summary": "Filter by Open Duration (minimum)",
+            "type": "integer"
+          },
+          {
+            "name": "filterByHoursSinceOpenedMax",
+            "in": "query",
+            "description": "Only get tickets that have been open for **less** than x hours.",
+            "x-ms-summary": "Filter by Open Duration (maximum)",
+            "type": "integer"
+          },
+          {
+            "name": "filterByTopic",
+            "in": "query",
+            "description": "Filter by Topic",
+            "x-ms-summary": "Filter by Topic",
+            "type": "string"
+          },
+          {
+            "name": "filterByExpertEmail",
+            "in": "query",
+            "description": "Filter by Expert",
+            "x-ms-summary": "Filter by Expert",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of tickets.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "tickets"
+              ],
+              "properties": {
+                "tickets": {
+                  "title": "Tickets",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Ticket"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open-ticket-question": {
+      "post": {
+        "summary": "Open a ticket (question)",
+        "operationId": "OpenTicketQuestion",
+        "description": "Open a new ticket on the connected instance.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "userEmail",
+                "queryText"
+              ],
+              "properties": {
+                "userEmail": {
+                  "title": "User Email",
+                  "type": "string"
+                },
+                "queryText": {
+                  "title": "Question that was asked by the user",
+                  "type": "string"
+                },
+                "topic": {
+                  "title": "Topic that this question likely belongs to",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "required": [
+                "ticket"
+              ],
+              "properties": {
+                "ticket": {
+                  "$ref": "#/definitions/Ticket"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/open-ticket-feedback": {
+      "post": {
+        "summary": "Open a ticket (feedback)",
+        "operationId": "OpenTicketFeedback",
+        "description": "Open a new ticket of type feedback on the connected instance.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "userEmail",
+                "queryText",
+                "answerShortDescription",
+                "feedbackText"
+              ],
+              "properties": {
+                "userEmail": {
+                  "title": "User Email",
+                  "type": "string"
+                },
+                "queryText": {
+                  "title": "Question that was asked by the user",
+                  "type": "string"
+                },
+                "answerShortDescription": {
+                  "title": "Short description of the answer",
+                  "type": "string"
+                },
+                "feedbackText": {
+                  "title": "Feedback regarding the answer",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "required": [
+                "ticket"
+              ],
+              "properties": {
+                "ticket": {
+                  "$ref": "#/definitions/Ticket"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/close-ticket": {
+      "post": {
+        "summary": "Close a ticket",
+        "operationId": "CloseTicket",
+        "description": "Closes an open ticket on the connected instance.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "ticketId",
+                "editorEmail",
+                "editorComment"
+              ],
+              "properties": {
+                "ticketId": {
+                  "title": "Unique Ticket ID",
+                  "type": "string"
+                },
+                "editorEmail": {
+                  "title": "Email of the user that processed the ticket",
+                  "type": "string"
+                },
+                "editorComment": {
+                  "title": "Comment that will be sent to the user",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/webhooks/{id}": {
+      "delete": {
+        "summary": "Delete a webhook",
+        "operationId": "DeleteTrigger",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "integer",
+            "required": true,
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default"
+          }
+        }
+      }
+    },
+    "/webhooks/new-ticket": {
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "type": "object",
+          "required": [
+            "ticket"
+          ],
+          "properties": {
+            "ticket": {
+              "$ref": "#/definitions/Ticket"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "When a new ticket is created",
+        "operationId": "OnNewTicket",
+        "description": "When a new Ticket is created.",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook Created"
+          }
+        }
+      }
+    },
+    "/webhooks/resolved-ticket": {
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "type": "object",
+          "required": [
+            "ticket",
+            "editorEmail",
+            "editorComment",
+            "queryUrl"
+          ],
+          "properties": {
+            "ticket": {
+              "$ref": "#/definitions/Ticket"
+            },
+            "editorEmail": {
+              "title": "Editor Email",
+              "type": "string"
+            },
+            "editorComment": {
+              "title": "Editor Comment",
+              "type": "string"
+            },
+            "queryUrl": {
+              "title": "Deep link to original query",
+              "type": "string"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "When a ticket is resolved",
+        "operationId": "OnResolvedTicket",
+        "description": "When a existing Ticket is resolved.",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook Created"
+          }
+        }
+      }
+    },
+    "/webhooks/updated-ticket-topic": {
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "type": "object",
+          "required": [
+            "ticket"
+          ],
+          "properties": {
+            "ticket": {
+              "$ref": "#/definitions/Ticket"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "When a ticket's topic is updated",
+        "description": "When a topic of an existing Ticket is updated.",
+        "operationId": "OnUpdatedTicketTopic",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook Created"
+          }
+        }
+      }
+    },
+    "/webhooks/new-answer": {
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "type": "object",
+          "required": [
+            "answer"
+          ],
+          "properties": {
+            "answer": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "When a new question-answer set is created",
+        "description": "When a new question-answer set is created.",
+        "operationId": "OnNewAnswer",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook Created"
+          }
+        }
+      }
+    },
+    "/webhooks/update-answer": {
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "type": "object",
+          "required": [
+            "answer"
+          ],
+          "properties": {
+            "answer": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "When a question-answer set is created or modified",
+        "description": "When a question-answer set is created or modified.",
+        "operationId": "OnUpdateAnswer",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook Created"
+          }
+        }
+      }
+    },
+    "/webhooks/asked-question": {
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "type": "object",
+          "required": [
+            "userEmail",
+            "queryText",
+            "foundAnswer"
+          ],
+          "properties": {
+            "userEmail": {
+              "title": "User Email",
+              "type": "string"
+            },
+            "queryText": {
+              "title": "Question that was asked by the user",
+              "type": "string"
+            },
+            "foundAnswer": {
+              "title": "Found Answer",
+              "description": "Whether COSMO Bot found an answer that matched the user's question.",
+              "type": "boolean"
+            },
+            "answer": {
+              "$ref": "#/definitions/Answer"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "When a user asks a question",
+        "description": "When a user asks a question.",
+        "operationId": "OnAskedQuestion",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "required": true,
+            "name": "Request body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook Created"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Answer": {
+      "title": "Answer",
+      "type": "object",
+      "required": [
+        "topic",
+        "shortDescription",
+        "questions",
+        "answerText",
+        "modifiedAt"
+      ],
+      "properties": {
+        "topic": {
+          "title": "Topic",
+          "type": "string",
+          "example": "COSMO Bot"
+        },
+        "shortDescription": {
+          "title": "Short Description",
+          "type": "string",
+          "example": "The COSMO Bot"
+        },
+        "questions": {
+          "title": "Questions",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "answerText": {
+          "title": "Answer Text",
+          "type": "string",
+          "example": "COSMO Bot is a knowledge manager chatbot."
+        },
+        "modifiedAt": {
+          "title": "Date and time that this answer was last modified at",
+          "type": "string",
+          "format": "date-time"
+        },
+        "modifiedBy": {
+          "title": "Modified by",
+          "type": "string"
+        }
+      }
+    },
+    "Ticket": {
+      "title": "Ticket",
+      "type": "object",
+      "required": [
+        "ticketId",
+        "topic",
+        "ticketUrl",
+        "requesterEmail",
+        "expertEmails",
+        "queryText",
+        "feedbackText",
+        "answerShortDescription",
+        "answerText",
+        "createdAt"
+      ],
+      "properties": {
+        "ticketId": {
+          "title": "Unique Ticket ID",
+          "type": "string"
+        },
+        "topic": {
+          "title": "Topic",
+          "type": "string"
+        },
+        "ticketUrl": {
+          "title": "Deep link to process the ticket",
+          "type": "string"
+        },
+        "requesterEmail": {
+          "title": "Requester Email",
+          "type": "string"
+        },
+        "expertEmails": {
+          "title": "Expert Emails",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "queryText": {
+          "title": "Question that was asked by the user",
+          "type": "string"
+        },
+        "feedbackText": {
+          "title": "Feedback that was submitted by the user",
+          "description": "This is empty if this ticket is not feedback.",
+          "type": "string"
+        },
+        "answerShortDescription": {
+          "title": "Short description of the answer that the user received after asking their question",
+          "description": "This is empty if this ticket is not feedback.",
+          "type": "string"
+        },
+        "answerText": {
+          "title": "Answer that the user received after asking their question",
+          "description": "This is empty if this ticket is not feedback.",
+          "type": "string"
+        },
+        "createdAt": {
+          "title": "Date and time that the ticket was created at",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
