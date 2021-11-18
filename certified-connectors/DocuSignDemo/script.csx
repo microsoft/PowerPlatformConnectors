@@ -277,6 +277,27 @@ public class Script : ScriptBase
     return body;
   }
 
+  private string Base64Encode(string fileContent)
+  {
+    var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(fileContent);
+    return System.Convert.ToBase64String(plainTextBytes);
+  }
+
+  private JObject AddDocumentsToEnvelopeBodyTransformation(JObject body)
+  {
+    var documents = body["documents"] as JArray;
+
+    for (var i = 0; i < documents.Count; i++)
+    {
+      documents[i]["documentId"] = $"{i + 1}";
+      string content = documents[i]["documentBase64"][@"$content"]?.ToString();
+      documents[i]["documentBase64"] = Base64Encode(content);
+    }
+
+    body["documents"] = documents;
+    return body;
+  }
+
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
@@ -366,6 +387,11 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddDocumentsToEnvelopeBodyTransformation).ConfigureAwait(false);
     }
 
     if ("RemoveRecipientFromEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
