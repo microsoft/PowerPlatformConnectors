@@ -25,10 +25,7 @@ Step 2 is required for the connector. The values from this step will be used whe
 -	Client Secret: OAUTH_CLIENT_SECRET
 -	Resource URI: Application ID URI
 6. Go to **Step 3: Definition** and click "Create Connector."
-7. In GitHub, open up the files within the Snwoflake folder and find the one titled "script.cs." Open the file and copy the contents of the file.
-8. Go to **Step 4: Code (Preview)**, click the "Code Disabled" toggle so that it turns to "Code Enabled," and paste in the contents of "script.cs."
-9. Click "Update connector" on the top right of the menu.
-10. 
+7.
 
 ## Sample Flow
 
