@@ -1,5 +1,5 @@
 # InEight Connector
-InEight Connector provides an API to work with InEight objects.
+The InEight Connector provides a mechanism to create new data in InEight or extract data from InEight. It can be used to integrate other systems with InEight.
 
 ## Publisher: InEight
 
