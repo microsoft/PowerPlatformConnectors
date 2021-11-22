@@ -20,12 +20,13 @@ Step 2 is required for the connector. The values from this step will be used whe
 2. Wait for the page to load. Then, click **+New custom connector**. 
 3. From the dropdown, select **Import from GitHub**. For **Connector Type**, choose **Custom**. For **Branch**, choose **dev**. For **Connector**, choose **Snowflake**.
 4. Click **Continue.** You will now be taken the the Custom Connector UI, which will populate the connector files, including the code file, into the UI.
-5. Go to **Step 2: Security** and choose **OAuth 2.0** from the dropdown. Then, fill in the following fields from the values in Pre-requisities:
+5. In **Step 1: General**, make sure to replace the "YourInstance" in the **Host URL** field with your own instance.
+6. Go to **Step 2: Security** and choose **OAuth 2.0** from the dropdown. Then, fill in the following fields from the values in Pre-requisities:
 -	Client ID: OAUTH_CLIENT_ID
 -	Client Secret: OAUTH_CLIENT_SECRET
 -	Resource URI: Application ID URI
-6. Go to **Step 3: Definition** and click "Create Connector."
-7.
+7. Go to **Step 3: Definition** and click "Create Connector."
+8.
 
 ## Sample Flow
 
