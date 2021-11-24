@@ -10,7 +10,7 @@ The DocumentsCorePack Connector brings this functionality to Power Automate and 
 
 ## Pre-requisites
 
-You need to have a Dynamics 365 or CDS environment. 
+You need to have a Dynamics 365 or Dataverse environment. 
 
 First of all, you need to [Create an Account](https://www.mscrm-addons.com/My-Account?returnurl=https%3A%2F%2Fwww.mscrm-addons.com%2FMy-Account).
 
