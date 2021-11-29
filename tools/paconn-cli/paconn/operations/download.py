@@ -29,7 +29,8 @@ from paconn.operations.json_keys import (
     _SCRIPT_OPERATIONS,
     _CAPABILITIES,
     _POLICY_TEMPLATE_INSTANCES,
-    _PUBLISHER
+    _PUBLISHER,
+    _STACKOWNER
 )
 
 
@@ -108,7 +109,8 @@ def download(powerapps_rp, settings, destination, overwrite):
         _SCRIPT_OPERATIONS,
         _CAPABILITIES,
         _POLICY_TEMPLATE_INSTANCES,
-        _PUBLISHER
+        _PUBLISHER,
+        _STACKOWNER
     ]
 
     # Remove the keys that aren't present in the property JSON
