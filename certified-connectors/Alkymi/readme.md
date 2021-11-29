@@ -53,3 +53,9 @@ The user can also create, modify, or delete specific records within a document a
   parsing before using downstream in the workflow.
 [Documentation Reference](https://alkymi-api.readme.io/reference#get-record-detail)
 - `Upload Document File`: Uploads a file to a Data Inbox tenant for processing.
+
+##Test Screenshot
+![TestScreenshot](./TestScreenshot.png)
+
+ ##Successful Run Screenshot
+![TestScreenshot](./FlowRunScreenshot.png)
