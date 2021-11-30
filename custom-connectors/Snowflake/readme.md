@@ -1,4 +1,4 @@
-This is the private preview version of the Snowflake connector based on the new Snowflake REST API. It is based on OAUTH with Azure AD but it should also work with other OAUTH providers when the configuration parameters are adapted manually. The connector provides the rows of the resultset as objects with properties for each column rather and not as array of strings. 
+This is the private preview version of the Snowflake connector based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html). It is based on OAUTH with Azure AD, but it should also work with other OAUTH providers when the configuration parameters are adapted manually. The connector provides the rows of the resultset as objects with properties for each column rather and not as array of strings. 
 
 ## Supported Operations
 The connector supports the following operations:
