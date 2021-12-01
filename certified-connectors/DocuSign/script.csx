@@ -197,7 +197,7 @@ public class Script : ScriptBase
         return body;
     }
 
-    private JObject SendEnvelopeBodyTransformation(JObject body)
+    private JObject CreateEnvelopeFromTemplateBodyTransformation(JObject body)
     {
         var templateRoles = new JArray();
         var signer = new JObject();
@@ -232,10 +232,26 @@ public class Script : ScriptBase
         var newBody = new JObject()
         {
             ["templateRoles"] = templateRoles,
-            ["templateId"] = query.Get("templateId"),
-            ["status"] = query.Get("status"),
+            ["templateId"] = query.Get("templateId")
         };
+
+        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+        uriBuilder.Path = uriBuilder.Path.Replace("envelopes/createFromTemplate", "/envelopes");
+        this.Context.Request.RequestUri = uriBuilder.Uri;
+
         return newBody;
+    }
+
+    private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
+    {
+        var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+        body["emailSubject"] = query.Get("emailSubject");
+
+        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+        uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createBlankEnvelope", "/envelopes");
+        this.Context.Request.RequestUri = uriBuilder.Uri;
+
+        return body;
     }
 
     private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
@@ -264,7 +280,7 @@ public class Script : ScriptBase
     private async Task UpdateApiEndpoint()
     {
         string content = string.Empty;
-        using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://account.docusign.com/oauth/userinfo");
+        using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://account-d.docusign.com/oauth/userinfo");
 
         // Access token is in the authorization header already
         userInfoRequest.Headers.Authorization = this.Context.Request.Headers.Authorization;
@@ -309,8 +325,18 @@ public class Script : ScriptBase
     private async Task TransformRequestJsonBody(Func<JObject, JObject> transformationFunction)
     {
         var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-        var newBody = transformationFunction(ParseContentAsJObject(content, true));
-        this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+
+        var body = new JObject();
+        if (!String.IsNullOrWhiteSpace(content))
+        {
+            body = transformationFunction(ParseContentAsJObject(content, true));
+        }
+        else
+        {
+            body = transformationFunction(body);
+        }
+
+        this.Context.Request.Content = CreateJsonContent(body.ToString());
     }
 
     private async Task UpdateRequest()
@@ -327,9 +353,14 @@ public class Script : ScriptBase
             await this.TransformRequestJsonBody(this.CreateHookEnvelopeBodyTransformation).ConfigureAwait(false);
         }
 
-        if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
-            await this.TransformRequestJsonBody(this.SendEnvelopeBodyTransformation).ConfigureAwait(false);
+            await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
+        }
+
+        if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        {
+            await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateBodyTransformation).ConfigureAwait(false);
         }
 
         if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
