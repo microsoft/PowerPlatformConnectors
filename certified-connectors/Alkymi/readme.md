@@ -9,6 +9,15 @@ in the Microsoft PowerApps ecosystem.
 You will need to have an active `alkymi.io` domain and API key to leverage this connector. 
 
 https://github.com/microsoft/PowerPlatformConnectors.git
+
+##Building The Connector
+
+Once you have your alkymi.io account configured, you can navigate to the `{YOUR_DOMAIN}alkymi.io/admin` page to create 
+and / or access your API key. Once you have the required login information, you can deploy the sample connector by 
+running the following command:
+
+```paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json```  
+
 ##Supported Operations
 ####Triggers
 - `When an Alkymi event triggers`: This trigger is executed when any of the selected Alkymi events occur. When a 
