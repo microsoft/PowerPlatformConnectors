@@ -15,8 +15,6 @@
   "schemes": [
     "https"
   ],
-  "consumes": [],
-  "produces": [],
   "paths": {
     "/flow/hooks/{id}": {
       "delete": {
@@ -55,13 +53,120 @@
         "x-ms-visibility": "internal"
       }
     },
-    "/flow/hooks/errortask/created": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when an error task is generated.",
-        "schema": {
-          "$ref": "#/definitions/FlowErrorTaskCreatedHookMessage"
-        }
+    "/flow/hooks/common": {
+      "post": {
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Conditional Trigger",
+        "description": "This operation triggers when the selected event occurs.",
+        "operationId": "Flow_CreateHookForCommon",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "flowTriggerType",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "Flow_GetTriggerActionTypes",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Trigger Event",
+            "description": "Select a trigger event."
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "url"
+              ],
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Trigge Url",
+                  "description": "Url of trigger.",
+                  "x-ms-notification-url": true
+                },
+                "triggerType": {
+                  "enum": [
+                    "None",
+                    "RequestSubmitted",
+                    "RequestCompleted",
+                    "RequestCancelled",
+                    "TaskCreated",
+                    "TaskApproved",
+                    "TaskRejected",
+                    "ErrorTaskCreated",
+                    "TaskRetried",
+                    "TaskSkipped",
+                    "RenewalSuccess",
+                    "RenewalException",
+                    "RenewalOverdue",
+                    "FullyAutoImportSuccess",
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
+                  ],
+                  "type": "string",
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Trigger Type",
+                  "description": "Type of trigger."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "x-ms-trigger": "single"
       },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when the selected event occurs.",
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "Flow_GetTriggerSchema",
+            "value-path": "schema",
+            "parameters": {
+              "flowTriggerType": {
+                "parameter": "flowTriggerType"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/flow/hooks/errortask/created": {
       "post": {
         "tags": [
           "Flow"
@@ -110,7 +215,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -140,15 +249,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when an error task is generated.",
+        "schema": {
+          "$ref": "#/definitions/FlowErrorTaskCreatedHookMessage"
+        }
       }
     },
     "/flow/hooks/errortask/retried": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when the retry action is performed on an error task.",
-        "schema": {
-          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -197,7 +306,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -227,15 +340,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when the retry action is performed on an error task.",
+        "schema": {
+          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
+        }
       }
     },
     "/flow/hooks/request/cancelled": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when a request is canceled.",
-        "schema": {
-          "$ref": "#/definitions/FlowRequestHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -284,7 +397,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -314,15 +431,15 @@
           }
         },
         "x-ms-trigger": "single"
-      }
-    },
-    "/flow/hooks/request/completed": {
+      },
       "x-ms-notification-content": {
-        "description": "This operation triggers when a request is completed.",
+        "description": "This operation triggers when a request is canceled.",
         "schema": {
           "$ref": "#/definitions/FlowRequestHookMessage"
         }
-      },
+      }
+    },
+    "/flow/hooks/request/completed": {
       "post": {
         "tags": [
           "Flow"
@@ -371,7 +488,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -401,15 +522,15 @@
           }
         },
         "x-ms-trigger": "single"
-      }
-    },
-    "/flow/hooks/request/submitted": {
+      },
       "x-ms-notification-content": {
-        "description": "This operation triggers when a request is submitted.",
+        "description": "This operation triggers when a request is completed.",
         "schema": {
           "$ref": "#/definitions/FlowRequestHookMessage"
         }
-      },
+      }
+    },
+    "/flow/hooks/request/submitted": {
       "post": {
         "tags": [
           "Flow"
@@ -458,7 +579,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -488,15 +613,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when a request is submitted.",
+        "schema": {
+          "$ref": "#/definitions/FlowRequestHookMessage"
+        }
       }
     },
     "/flow/hooks/task/approved": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when a request is approved.",
-        "schema": {
-          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -545,7 +670,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -575,15 +704,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when a request is approved.",
+        "schema": {
+          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
+        }
       }
     },
     "/flow/hooks/task/autoimport": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when an import process with pre-defined governance details is completed.",
-        "schema": {
-          "$ref": "#/definitions/FlowAutoImportHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -632,7 +761,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -662,15 +795,15 @@
           }
         },
         "x-ms-trigger": "single"
-      }
-    },
-    "/flow/hooks/task/confirm": {
+      },
       "x-ms-notification-content": {
-        "description": "This operation triggers when an end user completes a governance details confirmation task for a workspace.",
+        "description": "This operation triggers when an import process with pre-defined governance details is completed.",
         "schema": {
           "$ref": "#/definitions/FlowAutoImportHookMessage"
         }
-      },
+      }
+    },
+    "/flow/hooks/task/confirm": {
       "post": {
         "tags": [
           "Flow"
@@ -719,7 +852,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -749,15 +886,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when an end user completes a governance details confirmation task for a workspace.",
+        "schema": {
+          "$ref": "#/definitions/FlowAutoImportHookMessage"
+        }
       }
     },
     "/flow/hooks/task/created": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when an approval task is assigned.",
-        "schema": {
-          "$ref": "#/definitions/FlowTaskCreatedHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -806,7 +943,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -836,15 +977,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when an approval task is assigned.",
+        "schema": {
+          "$ref": "#/definitions/FlowTaskCreatedHookMessage"
+        }
       }
     },
     "/flow/hooks/task/rejected": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when a request is rejected.",
-        "schema": {
-          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -893,7 +1034,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -923,15 +1068,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when a request is rejected.",
+        "schema": {
+          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
+        }
       }
     },
     "/flow/hooks/task/renewal/completed": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when a renewal task is completed.",
-        "schema": {
-          "$ref": "#/definitions/FlowRenewalHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -980,7 +1125,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -1010,15 +1159,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when a renewal task is completed.",
+        "schema": {
+          "$ref": "#/definitions/FlowRenewalHookMessage"
+        }
       }
     },
     "/flow/hooks/task/renewal/exception": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when a renewal process encounters an exception.",
-        "schema": {
-          "$ref": "#/definitions/FlowRenewalExceptionHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -1067,7 +1216,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -1097,15 +1250,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when a renewal process encounters an exception.",
+        "schema": {
+          "$ref": "#/definitions/FlowRenewalExceptionHookMessage"
+        }
       }
     },
     "/flow/hooks/task/renewal/overdue": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when a renewal task is overdue.",
-        "schema": {
-          "$ref": "#/definitions/FlowRenewalTaskHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -1154,7 +1307,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -1184,15 +1341,15 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when a renewal task is overdue.",
+        "schema": {
+          "$ref": "#/definitions/FlowRenewalTaskHookMessage"
+        }
       }
     },
     "/flow/hooks/task/skipped": {
-      "x-ms-notification-content": {
-        "description": "This operation triggers when the skip action is performed on an error task.",
-        "schema": {
-          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
-        }
-      },
       "post": {
         "tags": [
           "Flow"
@@ -1241,7 +1398,11 @@
                     "RenewalException",
                     "RenewalOverdue",
                     "FullyAutoImportSuccess",
-                    "ConfirmDetailSuccess"
+                    "ConfirmDetailSuccess",
+                    "ElectionCompleted",
+                    "LifecycleInactiveTaskCreated",
+                    "LifecycleLeaseTaskCreated",
+                    "ElectionOverdue"
                   ],
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -1271,6 +1432,12 @@
           }
         },
         "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "This operation triggers when the skip action is performed on an error task.",
+        "schema": {
+          "$ref": "#/definitions/FlowTaskCompletedHookMessage"
+        }
       }
     },
     "/flow/objectstatus": {
@@ -1766,7 +1933,14 @@
             "type": "string",
             "enum": [
               "CustomService",
-              "CreateTeams"
+              "CreateTeams",
+              "CreateSite",
+              "SiteLifecycle",
+              "TeamLifecycle",
+              "GroupLifecycle",
+              "ChangeSiteSetting",
+              "ChangeGroupSetting",
+              "ChangeTeamSetting"
             ],
             "x-ms-summary": "Service Type",
             "description": "Type of the service."
@@ -1820,7 +1994,14 @@
             "type": "string",
             "enum": [
               "CustomService",
-              "CreateTeams"
+              "CreateTeams",
+              "CreateSite",
+              "SiteLifecycle",
+              "TeamLifecycle",
+              "GroupLifecycle",
+              "ChangeSiteSetting",
+              "ChangeGroupSetting",
+              "ChangeTeamSetting"
             ],
             "x-ms-summary": "Service Type",
             "description": "Type of the service."
@@ -1874,10 +2055,79 @@
             "type": "string",
             "enum": [
               "CustomService",
-              "CreateTeams"
+              "CreateTeams",
+              "CreateSite",
+              "SiteLifecycle",
+              "TeamLifecycle",
+              "GroupLifecycle",
+              "ChangeSiteSetting",
+              "ChangeGroupSetting",
+              "ChangeTeamSetting"
             ],
             "x-ms-summary": "Service Type",
             "description": "Type of the service."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/FlowSchemaResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/flow/schema/trigger": {
+      "get": {
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Get trigger schema",
+        "description": "Get schema for trigger.",
+        "operationId": "Flow_GetTriggerSchema",
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "flowTriggerType",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "RequestSubmitted",
+              "RequestCompleted",
+              "RequestCancelled",
+              "TaskCreated",
+              "TaskApproved",
+              "TaskRejected",
+              "ErrorTaskCreated",
+              "TaskRetried",
+              "TaskSkipped",
+              "RenewalSuccess",
+              "RenewalException",
+              "RenewalOverdue",
+              "FullyAutoImportSuccess",
+              "ConfirmDetailSuccess",
+              "ElectionCompleted",
+              "LifecycleInactiveTaskCreated",
+              "LifecycleLeaseTaskCreated",
+              "ElectionOverdue"
+            ],
+            "x-ms-summary": "Flow_TitleCase_TriggerActionType",
+            "description": "Flow_TriggerActionType_Des"
           }
         ],
         "responses": {
@@ -1919,7 +2169,8 @@
             "required": true,
             "type": "string",
             "enum": [
-              "UpdateSiteExternalDomain"
+              "UpdateSiteExternalDomain",
+              "UpdateSiteUrl"
             ],
             "x-ms-summary": "Flow_TitleCase_Office365ActionType",
             "description": "Flow_Office365ActionType_Des"
@@ -1961,6 +2212,7 @@
           {
             "in": "query",
             "name": "workspaceType",
+            "required": true,
             "type": "string",
             "enum": [
               "All",
@@ -2066,10 +2318,18 @@
           {
             "in": "query",
             "name": "serviceType",
+            "required": true,
             "type": "string",
             "enum": [
               "CustomService",
-              "CreateTeams"
+              "CreateTeams",
+              "CreateSite",
+              "SiteLifecycle",
+              "TeamLifecycle",
+              "GroupLifecycle",
+              "ChangeSiteSetting",
+              "ChangeGroupSetting",
+              "ChangeTeamSetting"
             ],
             "x-ms-summary": "Service Type",
             "description": "Type of the service."
@@ -2106,6 +2366,41 @@
         "summary": "Get service types",
         "description": "Get supported service types.",
         "operationId": "Flow_GetServiceTypes",
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StringModel"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/flow/trigger/actiontypes": {
+      "get": {
+        "tags": [
+          "Flow"
+        ],
+        "summary": "Get trigger action types",
+        "description": "Get trigger action types.",
+        "operationId": "Flow_GetTriggerActionTypes",
         "produces": [
           "text/plain",
           "application/json"
@@ -2186,8 +2481,8 @@
             "type": "string",
             "default": "",
             "x-ms-visibility": "advanced",
-            "x-ms-summary": "Workspace URL or E-mail Address",
-            "description": "Filter by the workspace URL or e-mail address."
+            "x-ms-summary": "Workspace URL or Email Address",
+            "description": "Filter by the workspace URL or email address."
           },
           {
             "in": "query",
@@ -2420,41 +2715,64 @@
     }
   },
   "definitions": {
-    "CreateWebHookModel": {
-      "required": [
-        "url"
-      ],
+    "ApiError": {
       "type": "object",
       "properties": {
-        "url": {
-          "type": "string",
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Trigge Url",
-          "description": "Url of trigger.",
-          "x-ms-notification-url": true
+        "code": {
+          "type": "string"
         },
-        "triggerType": {
-          "enum": [
-            "None",
-            "RequestSubmitted",
-            "RequestCompleted",
-            "RequestCancelled",
-            "TaskCreated",
-            "TaskApproved",
-            "TaskRejected",
-            "ErrorTaskCreated",
-            "TaskRetried",
-            "TaskSkipped",
-            "RenewalSuccess",
-            "RenewalException",
-            "RenewalOverdue",
-            "FullyAutoImportSuccess",
-            "ConfirmDetailSuccess"
-          ],
+        "message": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "date": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    },
+    "FlowAutoImportHookMessage": {
+      "type": "object",
+      "properties": {
+        "autoImportProfileName": {
           "type": "string",
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Trigger Type",
-          "description": "Type of trigger."
+          "x-ms-summary": "Automatic Import Profile",
+          "description": "Name of the automatic import profile."
+        },
+        "objectTitle": {
+          "type": "string",
+          "x-ms-summary": "Workspace Name",
+          "description": "Name of the workspace."
+        },
+        "objectType": {
+          "type": "string",
+          "x-ms-summary": "Workspace Type",
+          "description": "Type of workspace."
+        },
+        "groupEmail": {
+          "type": "string",
+          "x-ms-summary": "Workspace Email Address",
+          "description": "Email address of the workspace."
+        },
+        "triggerTime": {
+          "type": "string",
+          "x-ms-summary": "Trigger Time",
+          "description": "The time that this trigger works."
+        },
+        "objectUrl": {
+          "type": "string",
+          "x-ms-summary": "Site URL",
+          "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
         }
       }
     },
@@ -2535,6 +2853,345 @@
         }
       }
     },
+    "FlowHookMessage": {
+      "type": "object",
+      "properties": {
+        "triggerTime": {
+          "type": "string",
+          "x-ms-summary": "Trigger Time",
+          "description": "The time that this trigger works."
+        },
+        "objectUrl": {
+          "type": "string",
+          "x-ms-summary": "Site URL",
+          "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
+        }
+      }
+    },
+    "FlowRenewalExceptionHookMessage": {
+      "type": "object",
+      "properties": {
+        "objectTitle": {
+          "type": "string",
+          "x-ms-summary": "Workspace Name",
+          "description": "Name of the workspace."
+        },
+        "objectType": {
+          "type": "string",
+          "x-ms-summary": "Workspace Type",
+          "description": "Type of workspace."
+        },
+        "groupEmail": {
+          "type": "string",
+          "x-ms-summary": "Workspace Email Address",
+          "description": "Email address of the workspace."
+        },
+        "phaseStartTime": {
+          "type": "string",
+          "x-ms-summary": "Renewal Process Start Time",
+          "description": "Start time of the renewal process."
+        },
+        "dueDate": {
+          "type": "string",
+          "x-ms-summary": "Renewal Process Due Date",
+          "description": "Due date of the renewal process."
+        },
+        "assigneeDisplayName": {
+          "type": "string",
+          "x-ms-summary": "Renewal Task Assignee Display Name",
+          "description": "Display name of the renewal task assignee."
+        },
+        "assigneeIdentityName": {
+          "type": "string",
+          "x-ms-summary": "Renewal Task Assignee Username",
+          "description": "Username of the renewal task assignee."
+        },
+        "renewalProfileName": {
+          "type": "string",
+          "x-ms-summary": "Renewal Profile",
+          "description": "Name of the renewal profile."
+        },
+        "taskLink": {
+          "type": "string",
+          "x-ms-summary": "Renewal Task Link",
+          "description": "Link of the renewal task."
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Renewal Error Details",
+          "description": "Details of the renewal exception."
+        },
+        "triggerTime": {
+          "type": "string",
+          "x-ms-summary": "Trigger Time",
+          "description": "The time that this trigger works."
+        },
+        "objectUrl": {
+          "type": "string",
+          "x-ms-summary": "Site URL",
+          "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
+        }
+      }
+    },
+    "FlowRenewalHookMessage": {
+      "type": "object",
+      "properties": {
+        "objectTitle": {
+          "type": "string",
+          "x-ms-summary": "Workspace Name",
+          "description": "Name of the workspace."
+        },
+        "objectType": {
+          "type": "string",
+          "x-ms-summary": "Workspace Type",
+          "description": "Type of workspace."
+        },
+        "groupEmail": {
+          "type": "string",
+          "x-ms-summary": "Workspace Email Address",
+          "description": "Email address of the workspace."
+        },
+        "phaseStartTime": {
+          "type": "string",
+          "x-ms-summary": "Renewal Process Start Time",
+          "description": "Start time of the renewal process."
+        },
+        "renewalProfileName": {
+          "type": "string",
+          "x-ms-summary": "Renewal Profile",
+          "description": "Name of the renewal profile."
+        },
+        "triggerTime": {
+          "type": "string",
+          "x-ms-summary": "Trigger Time",
+          "description": "The time that this trigger works."
+        },
+        "objectUrl": {
+          "type": "string",
+          "x-ms-summary": "Site URL",
+          "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
+        }
+      }
+    },
+    "FlowRenewalTaskHookMessage": {
+      "type": "object",
+      "properties": {
+        "objectTitle": {
+          "type": "string",
+          "x-ms-summary": "Workspace Name",
+          "description": "Name of the workspace."
+        },
+        "objectType": {
+          "type": "string",
+          "x-ms-summary": "Workspace Type",
+          "description": "Type of workspace."
+        },
+        "groupEmail": {
+          "type": "string",
+          "x-ms-summary": "Workspace Email Address",
+          "description": "Email address of the workspace."
+        },
+        "phaseStartTime": {
+          "type": "string",
+          "x-ms-summary": "Renewal Process Start Time",
+          "description": "Start time of the renewal process."
+        },
+        "dueDate": {
+          "type": "string",
+          "x-ms-summary": "Renewal Process Due Date",
+          "description": "Due date of the renewal process."
+        },
+        "assigneeDisplayName": {
+          "type": "string",
+          "x-ms-summary": "Renewal Task Assignee Display Name",
+          "description": "Display name of the renewal task assignee."
+        },
+        "assigneeIdentityName": {
+          "type": "string",
+          "x-ms-summary": "Renewal Task Assignee Username",
+          "description": "Username of the renewal task assignee."
+        },
+        "renewalProfileName": {
+          "type": "string",
+          "x-ms-summary": "Renewal Profile",
+          "description": "Name of the renewal profile."
+        },
+        "taskLink": {
+          "type": "string",
+          "x-ms-summary": "Renewal Task Link",
+          "description": "Link of the renewal task."
+        },
+        "triggerTime": {
+          "type": "string",
+          "x-ms-summary": "Trigger Time",
+          "description": "The time that this trigger works."
+        },
+        "objectUrl": {
+          "type": "string",
+          "x-ms-summary": "Site URL",
+          "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
+        }
+      }
+    },
+    "FlowRequest": {
+      "required": [
+        "serviceType"
+      ],
+      "type": "object",
+      "properties": {
+        "serviceId": {
+          "type": "string",
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Service Id",
+          "description": "Id of the requested service."
+        },
+        "serviceType": {
+          "format": "int32",
+          "default": 0,
+          "type": "integer",
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Service Type",
+          "description": "Type of the requested service."
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string",
+          "readOnly": true,
+          "x-ms-summary": "Request ID",
+          "description": "Unique ID of the request."
+        },
+        "ticketNumber": {
+          "format": "int32",
+          "default": 0,
+          "type": "integer",
+          "readOnly": true,
+          "x-ms-summary": "Request Ticket Number",
+          "description": "Ticket number of the request."
+        },
+        "requester": {
+          "type": "string",
+          "readOnly": true,
+          "x-ms-summary": "Requester Username",
+          "description": "Username of the requester."
+        },
+        "requesterDisplayName": {
+          "type": "string",
+          "readOnly": true,
+          "x-ms-summary": "Requester Display Name",
+          "description": "Requester Display Name"
+        },
+        "summary": {
+          "maxLength": 255,
+          "type": "string",
+          "x-ms-summary": "Request Summary",
+          "description": "Summary of the request."
+        },
+        "notesToApprovers": {
+          "maxLength": 1000,
+          "type": "string",
+          "x-ms-visibility": "advanced",
+          "x-ms-summary": "Notes to Approvers",
+          "description": "Additional notes to approvers."
+        }
+      },
+      "additionalProperties": { }
+    },
+    "FlowRequestHookMessage": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "x-ms-summary": "Request Summary",
+          "description": "Summary of the request."
+        },
+        "requestId": {
+          "type": "string",
+          "x-ms-summary": "Request Ticket Number",
+          "description": "Ticket number of the request."
+        },
+        "requestGuid": {
+          "type": "string",
+          "x-ms-summary": "Request ID",
+          "description": "Unique ID of the request."
+        },
+        "requesterIdentityName": {
+          "type": "string",
+          "x-ms-summary": "Requester Username",
+          "description": "Username of the requester."
+        },
+        "requester": {
+          "type": "string",
+          "x-ms-summary": "Requester Display Name",
+          "description": "Display name of the requester."
+        },
+        "serviceType": {
+          "type": "string",
+          "x-ms-summary": "Service Type",
+          "description": "Type of the service."
+        },
+        "serviceName": {
+          "type": "string",
+          "x-ms-summary": "Service Name",
+          "description": "Name of the service."
+        },
+        "serviceId": {
+          "type": "string",
+          "x-ms-summary": "Service ID",
+          "description": "Unique ID of the service."
+        },
+        "triggerTime": {
+          "type": "string",
+          "x-ms-summary": "Trigger Time",
+          "description": "The time that this trigger works."
+        },
+        "objectUrl": {
+          "type": "string",
+          "x-ms-summary": "Site URL",
+          "description": "URL of the site."
+        },
+        "objectId": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "Unique ID of the workspace."
+        }
+      }
+    },
+    "FlowSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "FlowSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "$ref": "#/definitions/FlowSchema"
+        }
+      }
+    },
     "FlowTaskCompletedHookMessage": {
       "type": "object",
       "properties": {
@@ -2602,106 +3259,6 @@
           "type": "string",
           "x-ms-summary": "Workspace ID",
           "description": "Unique ID of the workspace."
-        }
-      }
-    },
-    "FlowRequestHookMessage": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "x-ms-summary": "Request Summary",
-          "description": "Summary of the request."
-        },
-        "requestId": {
-          "type": "string",
-          "x-ms-summary": "Request Ticket Number",
-          "description": "Ticket number of the request."
-        },
-        "requestGuid": {
-          "type": "string",
-          "x-ms-summary": "Request ID",
-          "description": "Unique ID of the request."
-        },
-        "requesterIdentityName": {
-          "type": "string",
-          "x-ms-summary": "Requester Username",
-          "description": "Username of the requester."
-        },
-        "requester": {
-          "type": "string",
-          "x-ms-summary": "Requester Display Name",
-          "description": "Display name of the requester."
-        },
-        "serviceType": {
-          "type": "string",
-          "x-ms-summary": "Service Type",
-          "description": "Type of the service."
-        },
-        "serviceName": {
-          "type": "string",
-          "x-ms-summary": "Service Name",
-          "description": "Name of the service."
-        },
-        "serviceId": {
-          "type": "string",
-          "x-ms-summary": "Service ID",
-          "description": "Unique ID of the service."
-        },
-        "triggerTime": {
-          "type": "string",
-          "x-ms-summary": "Trigger Time",
-          "description": "The time that this trigger works."
-        },
-        "objectUrl": {
-          "type": "string",
-          "x-ms-summary": "Site URL",
-          "description": "URL of the site."
-        },
-        "objectId": {
-          "type": "string",
-          "x-ms-summary": "Workspace ID",
-          "description": "Unique ID of the workspace."
-        }
-      }
-    },
-    "FlowAutoImportHookMessage": {
-      "type": "object",
-      "properties": {
-        "autoImportProfileName": {
-          "type": "string",
-          "x-ms-summary": "Automatic Import Profile",
-          "description": "Name of the automatic import profile."
-        },
-        "objectId": {
-          "type": "string",
-          "x-ms-summary": "Workspace ID",
-          "description": "Unique ID of the workspace."
-        },
-        "objectTitle": {
-          "type": "string",
-          "x-ms-summary": "Workspace Name",
-          "description": "Name of the workspace."
-        },
-        "objectType": {
-          "type": "string",
-          "x-ms-summary": "Workspace Type",
-          "description": "Type of workspace."
-        },
-        "groupEmail": {
-          "type": "string",
-          "x-ms-summary": "Workspace E-mail Address",
-          "description": "E-mail address of the workspace."
-        },
-        "triggerTime": {
-          "type": "string",
-          "x-ms-summary": "Trigger Time",
-          "description": "The time that this trigger works."
-        },
-        "objectUrl": {
-          "type": "string",
-          "x-ms-summary": "Site URL",
-          "description": "URL of the site."
         }
       }
     },
@@ -2777,186 +3334,6 @@
         }
       }
     },
-    "FlowRenewalHookMessage": {
-      "type": "object",
-      "properties": {
-        "objectId": {
-          "type": "string",
-          "x-ms-summary": "Workspace ID",
-          "description": "Unique ID of the workspace."
-        },
-        "objectTitle": {
-          "type": "string",
-          "x-ms-summary": "Workspace Name",
-          "description": "Name of the workspace."
-        },
-        "objectType": {
-          "type": "string",
-          "x-ms-summary": "Workspace Type",
-          "description": "Type of workspace."
-        },
-        "groupEmail": {
-          "type": "string",
-          "x-ms-summary": "Workspace E-mail Address",
-          "description": "E-mail address of the workspace."
-        },
-        "phaseStartTime": {
-          "type": "string",
-          "x-ms-summary": "Renewal Process Start Time",
-          "description": "Start time of the renewal process."
-        },
-        "renewalProfileName": {
-          "type": "string",
-          "x-ms-summary": "Renewal Profile",
-          "description": "Name of the renewal profile."
-        },
-        "triggerTime": {
-          "type": "string",
-          "x-ms-summary": "Trigger Time",
-          "description": "The time that this trigger works."
-        },
-        "objectUrl": {
-          "type": "string",
-          "x-ms-summary": "Site URL",
-          "description": "URL of the site."
-        }
-      }
-    },
-    "FlowRenewalExceptionHookMessage": {
-      "type": "object",
-      "properties": {
-        "objectId": {
-          "type": "string",
-          "x-ms-summary": "Workspace ID",
-          "description": "Unique ID of the workspace."
-        },
-        "objectTitle": {
-          "type": "string",
-          "x-ms-summary": "Workspace Name",
-          "description": "Name of the workspace."
-        },
-        "objectType": {
-          "type": "string",
-          "x-ms-summary": "Workspace Type",
-          "description": "Type of workspace."
-        },
-        "groupEmail": {
-          "type": "string",
-          "x-ms-summary": "Workspace E-mail Address",
-          "description": "E-mail address of the workspace."
-        },
-        "phaseStartTime": {
-          "type": "string",
-          "x-ms-summary": "Renewal Process Start Time",
-          "description": "Start time of the renewal process."
-        },
-        "dueDate": {
-          "type": "string",
-          "x-ms-summary": "Renewal Process Due Date",
-          "description": "Due date of the renewal process."
-        },
-        "assigneeDisplayName": {
-          "type": "string",
-          "x-ms-summary": "Renewal Task Assignee Display Name",
-          "description": "Display name of the renewal task assignee."
-        },
-        "assigneeIdentityName": {
-          "type": "string",
-          "x-ms-summary": "Renewal Task Assignee Username",
-          "description": "Username of the renewal task assignee."
-        },
-        "renewalProfileName": {
-          "type": "string",
-          "x-ms-summary": "Renewal Profile",
-          "description": "Name of the renewal profile."
-        },
-        "taskLink": {
-          "type": "string",
-          "x-ms-summary": "Renewal Task Link",
-          "description": "Link of the renewal task."
-        },
-        "message": {
-          "type": "string",
-          "x-ms-summary": "Renewal Error Details",
-          "description": "Details of the renewal exception."
-        },
-        "triggerTime": {
-          "type": "string",
-          "x-ms-summary": "Trigger Time",
-          "description": "The time that this trigger works."
-        },
-        "objectUrl": {
-          "type": "string",
-          "x-ms-summary": "Site URL",
-          "description": "URL of the site."
-        }
-      }
-    },
-    "FlowRenewalTaskHookMessage": {
-      "type": "object",
-      "properties": {
-        "objectId": {
-          "type": "string",
-          "x-ms-summary": "Workspace ID",
-          "description": "Unique ID of the workspace."
-        },
-        "objectTitle": {
-          "type": "string",
-          "x-ms-summary": "Workspace Name",
-          "description": "Name of the workspace."
-        },
-        "objectType": {
-          "type": "string",
-          "x-ms-summary": "Workspace Type",
-          "description": "Type of workspace."
-        },
-        "groupEmail": {
-          "type": "string",
-          "x-ms-summary": "Workspace E-mail Address",
-          "description": "E-mail address of the workspace."
-        },
-        "phaseStartTime": {
-          "type": "string",
-          "x-ms-summary": "Renewal Process Start Time",
-          "description": "Start time of the renewal process."
-        },
-        "dueDate": {
-          "type": "string",
-          "x-ms-summary": "Renewal Process Due Date",
-          "description": "Due date of the renewal process."
-        },
-        "assigneeDisplayName": {
-          "type": "string",
-          "x-ms-summary": "Renewal Task Assignee Display Name",
-          "description": "Display name of the renewal task assignee."
-        },
-        "assigneeIdentityName": {
-          "type": "string",
-          "x-ms-summary": "Renewal Task Assignee Username",
-          "description": "Username of the renewal task assignee."
-        },
-        "renewalProfileName": {
-          "type": "string",
-          "x-ms-summary": "Renewal Profile",
-          "description": "Name of the renewal profile."
-        },
-        "taskLink": {
-          "type": "string",
-          "x-ms-summary": "Renewal Task Link",
-          "description": "Link of the renewal task."
-        },
-        "triggerTime": {
-          "type": "string",
-          "x-ms-summary": "Trigger Time",
-          "description": "The time that this trigger works."
-        },
-        "objectUrl": {
-          "type": "string",
-          "x-ms-summary": "Site URL",
-          "description": "URL of the site."
-        }
-      }
-    },
     "StringModel": {
       "type": "object",
       "properties": {
@@ -2965,107 +3342,6 @@
         },
         "name": {
           "type": "string"
-        }
-      }
-    },
-    "Office365FlowSetting": {
-      "required": [
-        "actionType"
-      ],
-      "type": "object",
-      "properties": {
-        "actionType": {
-          "format": "int32",
-          "default": 0,
-          "type": "integer",
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Action Type",
-          "description": "Specify an action type."
-        }
-      }
-    },
-    "FlowRequest": {
-      "required": [
-        "serviceType"
-      ],
-      "type": "object",
-      "properties": {
-        "serviceId": {
-          "type": "string",
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Service Id",
-          "description": "Id of the requested service."
-        },
-        "serviceType": {
-          "format": "int32",
-          "default": 0,
-          "type": "integer",
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Service Type",
-          "description": "Type of the requested service."
-        },
-        "id": {
-          "format": "uuid",
-          "type": "string",
-          "readOnly": true,
-          "x-ms-summary": "Request ID",
-          "description": "Unique ID of the request."
-        },
-        "ticketNumber": {
-          "format": "int32",
-          "type": "integer",
-          "readOnly": true,
-          "x-ms-summary": "Request Ticket Number",
-          "description": "Ticket number of the request."
-        },
-        "requester": {
-          "type": "string",
-          "readOnly": true,
-          "x-ms-summary": "Requester Username",
-          "description": "Username of the requester."
-        },
-        "requesterDisplayName": {
-          "type": "string",
-          "readOnly": true,
-          "x-ms-summary": "Requester Display Name",
-          "description": "Requester Display Name"
-        },
-        "summary": {
-          "maxLength": 255,
-          "type": "string",
-          "x-ms-summary": "Request Summary",
-          "description": "Summary of the request."
-        },
-        "department": {
-          "type": "string",
-          "x-ms-summary": "Department",
-          "description": "Department that the request belongs to."
-        },
-        "notesToApprovers": {
-          "maxLength": 1000,
-          "type": "string",
-          "x-ms-visibility": "advanced",
-          "x-ms-summary": "Notes to Approvers",
-          "description": "Additional notes to approvers."
-        }
-      },
-      "additionalProperties": {
-        "type": "object"
-      }
-    },
-    "FlowSchema": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string"
-        }
-      }
-    },
-    "FlowSchemaResponse": {
-      "type": "object",
-      "properties": {
-        "schema": {
-          "$ref": "#/definitions/FlowSchema"
         }
       }
     },
@@ -3104,8 +3380,8 @@
         },
         "Email": {
           "type": "string",
-          "x-ms-summary": "Workspace E-mail Address",
-          "description": "E-mail address of the workspace."
+          "x-ms-summary": "Workspace Email Address",
+          "description": "Email address of the workspace."
         },
         "PolicyName": {
           "type": "string",
@@ -3251,11 +3527,24 @@
           "type": "string",
           "x-ms-summary": "Last Renewal Time",
           "description": "Last renewal time of the workspace."
+        },
+        "LastRenewalBy": {
+          "type": "string",
+          "x-ms-summary": "Last Renewed By",
+          "description": "The user who performed the latest workspace renewal."
+        },
+        "LastRenewalByDisplayName": {
+          "type": "string",
+          "x-ms-summary": "Last Renewed By (Display Name)",
+          "description": "The display name of the user who performed the latest workspace renewal."
+        },
+        "Sensitivity": {
+          "type": "string",
+          "x-ms-summary": "Sensitivity Label",
+          "description": "Select a sensitivity label for the workspace."
         }
       },
-      "additionalProperties": {
-        "type": "object"
-      }
+      "additionalProperties": { }
     },
     "WorkspacePageResult": {
       "type": "object",
@@ -3274,8 +3563,6 @@
       }
     }
   },
-  "parameters": {},
-  "responses": {},
   "securityDefinitions": {
     "Basic": {
       "type": "basic",
@@ -3284,10 +3571,9 @@
   },
   "security": [
     {
-      "Basic": []
+      "Basic": [ ]
     }
   ],
-  "tags": [],
   "x-ms-connector-metadata": [
     {
       "propertyName": "Website",
