@@ -15,19 +15,19 @@ The connector supports the following operations:
 
 A quick overview:
 
-* `Get Tables` : Returns a list of the tables visible to the database user.
+* `GetTables` : Returns a list of the tables visible to the database user.
 
-* `Get Rows` : Returns the rows from a table (based on filter conditions).
+* `GetRows` : Returns the rows from a table (based on filter conditions).
 
-* `Insert Row` : Insert a row into a table.
+* `InsertRow` : Insert a row into a table.
 
-* `Update Rows` : Update row(s) within a table.
+* `UpdateRows` : Update row(s) within a table.
 
-* `Delete Rows` : Delete row(s) within a table.
+* `DeleteRows` : Delete row(s) within a table.
 
-* `Execute Query` : Run a custom query to fetch data, for more advanced scenarios.
+* `ExecuteQuery` : Run a custom query to fetch data, for more advanced scenarios.
 
-* `Execute Non Query` : Run a custom command, for more advanced scenarios.
+* `ExecuteNonQuery` : Run a custom command, for more advanced scenarios.
 
 ## Support and documentation
 
