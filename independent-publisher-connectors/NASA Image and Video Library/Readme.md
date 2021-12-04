@@ -1,9 +1,6 @@
 # NASA Image and Video Library
 NASA Image and Video Library: API to access the NASA Image and Video Library site at images.nasa.gov
 
-- Providing a curated source of continuously updated natural event metadata.
-- Providing a service that links those natural events to thematically-related web service-enabled image sources (e.g., via WMS, WMTS, etc.).
-
 ## Publisher: Paul Culmsee, Seven Sigma
 
 ## Prerequisites
@@ -31,5 +28,3 @@ Retrieving a video asset’s captions location.
 
 ## Known Issues and Limitations
 There is an hourly rate limit of 1,000 requests per hour. If you exceed this limit, your key will be blocked for an hour.
-
-You do not need to authenticate in order to explore the NASA data. However, if you will be intensively using the APIs to, say, support a mobile application, then you should sign up for a NASA developer key.
