@@ -1,5 +1,5 @@
 # CO2 Signal Connector
-Get the most recent carbon intensity numbers for any country on the map. CO2 API allows you to get access to information about
+Get the most recent carbon intensity numbers for any country on the map. CO2 Signal API allows you to get access to information about
 
 * where the electricity in a specific region comes from
 * how it was produced
