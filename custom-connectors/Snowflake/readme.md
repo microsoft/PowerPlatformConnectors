@@ -21,6 +21,7 @@ C. Replace the Audience List URL in line 7 with Application ID URI from Step 1. 
 D. If your Snowflake account uses the same email address as your Microsoft Azure account, then replace login_name in line 9 with email_address. If not, keep it as is and do not type in your login name. Keep the quotation marks. 
 E. Now you can execute your query. 
 
+```
 create security integration connector
        type = external_oauth
        enabled = true
@@ -31,6 +32,7 @@ create security integration connector
        external_oauth_token_user_mapping_claim = 'upn'
        external_oauth_snowflake_user_mapping_attribute = 'login_name'
        external_oauth_any_role_mode = 'ENABLE';
+```
 
 Steps 1, 3, and 4 are setup configuration required on the Snowflake server. 
 Step 2 is required for the connector. The values from this step will be used when setting up the connector.
