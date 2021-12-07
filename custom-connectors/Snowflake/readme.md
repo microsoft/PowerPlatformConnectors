@@ -19,7 +19,7 @@ A. Replace the `AZURE_AD_ISSUER` in line 5 with the value from step 3 that is si
 B. Replace the Keys URL in line 6 with the value from Step 3 that is similar to `https://login.microsoftonline.com/90288a9b-97df-4c6d-b025-95713f21cef9/discovery/v2.0/keys`. Keep the quotation marks.  
 C. Replace the Audience List URL in line 7 with `Application ID URI` from Step 1. Keep the quotation marks.   
 D. If your Snowflake account uses the same email address as your Microsoft Azure account, then replace `login_name` in line 9 with `email_address`. If not, keep it as is and do not type in your login name. Keep the quotation marks.  
-E. Now you can execute your query.  
+E. Make sure you've set your role as `ACCOUNTADMIN`. Now you can execute your query.  
 
 ```
 create security integration connector
