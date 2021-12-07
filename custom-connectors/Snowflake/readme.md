@@ -15,7 +15,7 @@ Set up Azure AD authentication for Snowflake by following these steps:
 2. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-?.
 3. Follow [Step 3: Collect Azure AD Information for Snowflake](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-3-collect-azure-ad-information-for-snowflake) entirely. 
 4. Copy and paste the text below into your worksheet, which is where you execute your queries in Snowflake. Before you execute the query, make sure you make the following replacements.  
-A. Replace the `AZURE_AD_ISSUER` in line 5 with the value from step 3 that is similar to `https://sts.windows.net/90288a9b-97df-4c6d-b025-95713f21cef9/`. Keep the quotation marks.  
+A. Replace the `AZURE_AD_ISSUER` in line 5 with the value from step 3 that is similar to `https://sts.windows.net/90288a9b-97df-4c6d-b025-95713f21cef9/`. Keep the quotation marks and make sure you have a `/` before the last quotation mark.  
 B. Replace the Keys URL in line 6 with the value from Step 3 that is similar to `https://login.microsoftonline.com/90288a9b-97df-4c6d-b025-95713f21cef9/discovery/v2.0/keys`. Keep the quotation marks.  
 C. Replace the Audience List URL in line 7 with `Application ID URI` from Step 1. Keep the quotation marks.   
 D. If your Snowflake account uses the same email address as your Microsoft Azure account, then replace `login_name` in line 9 with `email_address`. If not, keep it as is and do not type in your login name. Keep the quotation marks.  
