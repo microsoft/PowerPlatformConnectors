@@ -3,7 +3,7 @@
   "info": {
     "title": "IA-Connect Dynamic Code",
     "description": "IA-Connect is a Robotic Process Automation (RPA) platform which adds RPA functionality from the Cloud to on-premises virtual machines or over Citrix or Microsoft Remote Desktop (RDS) connections. This is the module for developing dynamic code modules.",
-    "version": "9.0",
+    "version": "9.1",
     "contact": {
       "name": "Ultima Labs",
       "url": "https://www.ultima.com/ultima-labs",
@@ -309,12 +309,13 @@
               "properties": {
                 "PowerShellScriptContents": {
                   "type": "string",
-                  "title": "PowerShell script contents"
+                  "title": "PowerShell script contents",
+                  "description": "The contents of the PowerShell script to execute. IA-Connect will execute this script as-is by passing directly to the PowerShell automation engine. No PowerShell script is actually created on-disk."
                 },
                 "ComputerName": {
                   "type": "string",
                   "title": "Computer name",
-                  "description": "The name of the computer to run the PowerShell script on. If left blank, the script will be ran on the computer where the IA-Connect Agent is running."
+                  "description": "The name of the computer to run the PowerShell script on. If left blank, the script will be run on the computer where the IA-Connect Agent is running."
                 },
                 "IsNoResultAnError": {
                   "type": "boolean",
@@ -354,7 +355,15 @@
                 "AuthenticationMechanism": {
                   "type": "string",
                   "title": "Authentication mechanism",
-                  "description": "The authentication mechanism to be used if connecting to a remote computer or running the script as an alternative user. Supported values are 'Basic', 'Credssp', 'Default', 'Digest', 'Kerberos' and 'Negotiate'."
+                  "description": "The authentication mechanism to be used if connecting to a remote computer or running the script as an alternative user. Supported values are 'Basic', 'Credssp', 'Default', 'Digest', 'Kerberos' and 'Negotiate'.",
+                  "enum": [
+                    "Basic",
+                    "Credssp",
+                    "Default",
+                    "Digest",
+                    "Kerberos",
+                    "Negotiate"
+                  ]
                 },
                 "ConnectionAttempts": {
                   "type": "integer",
@@ -397,7 +406,7 @@
               "properties": {
                 "PowerShellJSONOutput": {
                   "type": "string",
-                  "title": "Powershell output JSON",
+                  "title": "PowerShell output JSON",
                   "description": "The output of the PowerShell script, formatted as JSON."
                 }
               }
@@ -405,6 +414,2079 @@
           }
         },
         "operationId": "RunPowerShellAutomationScript"
+      }
+    },
+    "/DynamicCode/CreateJSONFromInputVariables": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Create JSON from input variables",
+        "description": "Takes an array of input variables and returns in JSON format and optionally as a JSON table.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "CreateJSONFromInputVariables",
+            "description": "Inputs for IA-Connect CreateJSONFromInputVariables action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputVariables": {
+                  "type": "array",
+                  "title": "Input variables",
+                  "description": "An input array of variable names, their data type and their values.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "PropertyName": {
+                        "type": "string",
+                        "title": "Property name"
+                      },
+                      "DataType": {
+                        "type": "string",
+                        "title": "Property data type",
+                        "default": "String",
+                        "enum": [
+                          "String",
+                          "Integer",
+                          "Float",
+                          "Boolean"
+                        ]
+                      },
+                      "Value": {
+                        "type": "string",
+                        "title": "Property value"
+                      }
+                    }
+                  }
+                },
+                "ReturnAsJSONTable": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Return as JSON table",
+                  "description": "If set to true, the JSON will be returned in a table / datatable format (i.e. in the format [{}]). If set to false, the JSON will be returned as a single entity (i.e. in the format {}). Which format to use depends on what you are doing with the JSON. Most IA-Connect actions expect datatable format."
+                }
+              },
+              "required": [
+                "InputVariables",
+                "ReturnAsJSONTable"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSON": {
+                  "type": "string",
+                  "title": "Output JSON",
+                  "description": "The variables and their values encoded in JSON format."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "CreateJSONFromInputVariables"
+      }
+    },
+    "/DynamicCode/GetJSONTableFromStringArray": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get JSON table from string array",
+        "description": "Takes an input array of string items and returns as a JSON table.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetJSONTableFromStringArray",
+            "description": "Inputs for IA-Connect GetJSONTableFromStringArray action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputArray": {
+                  "type": "array",
+                  "title": "Input array",
+                  "description": "The input array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ColumnName": {
+                  "type": "string",
+                  "title": "Column name",
+                  "description": "The name to use for the table column."
+                },
+                "DropEmptyItems": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Drop empty items",
+                  "description": "Set to true to ignore (drop) empty items in the array. Set to false to include all items."
+                }
+              },
+              "required": [
+                "InputArray",
+                "ColumnName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table (should always be 1)."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetJSONTableFromStringArray"
+      }
+    },
+    "/DynamicCode/FilterJSONTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Filter JSON table",
+        "description": "Takes an input JSON table, filters the table (using .NET DataView rowfilter syntax) and returns a new JSON table. If you want to filter an actual table (i.e. not in JSON format), use the action 'Filter table'. If you want to filter a string array, use the action 'Filter string array'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "FilterJSONTable",
+            "description": "Inputs for IA-Connect FilterJSONTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "Filter": {
+                  "type": "string",
+                  "title": "Filter",
+                  "description": "The filter in .NET DataView rowfilter syntax. For example: [Name] like '*Element'."
+                },
+                "SortColumnName": {
+                  "type": "string",
+                  "title": "Sort column name",
+                  "description": "An optional column name to sort by, after applying the filter. If you wish to sort by multiple columns then list the columns comma separated."
+                },
+                "Ascending": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending",
+                  "description": "Set to true to sort in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName2": {
+                  "type": "string",
+                  "title": "Sort column name 2",
+                  "description": "An optional second column name to sort by (after sorting by the first column)."
+                },
+                "Ascending2": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 2",
+                  "description": "Set to true to sort the second column name in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName3": {
+                  "type": "string",
+                  "title": "Sort column name 3",
+                  "description": "An optional third column name to sort by (after sorting by the first and second columns)."
+                },
+                "Ascending3": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 3",
+                  "description": "Set to true to sort the third column name in an ascending order. Set to false to sort in a descending order."
+                }
+              },
+              "required": [
+                "JSONTable",
+                "Filter"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "FilterJSONTable"
+      }
+    },
+    "/DynamicCode/FilterTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Filter table",
+        "description": "Takes an input table, filters the table (using .NET DataView rowfilter syntax) and returns a new table. If you want to filter a table in JSON format, use the action 'Filter JSON table'. If you want to filter a string array, use the action 'Filter string array'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "FilterTable",
+            "description": "Inputs for IA-Connect FilterTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputTable": {
+                  "type": "array",
+                  "title": "Input table",
+                  "description": "The input table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "Filter": {
+                  "type": "string",
+                  "title": "Filter",
+                  "description": "The filter in .NET DataView rowfilter syntax. For example: [Name] like '*Element'."
+                },
+                "SortColumnName": {
+                  "type": "string",
+                  "title": "Sort column name",
+                  "description": "An optional column name to sort by, after applying the filter. If you wish to sort by multiple columns then list the columns comma separated."
+                },
+                "Ascending": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending",
+                  "description": "Set to true to sort in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName2": {
+                  "type": "string",
+                  "title": "Sort column name 2",
+                  "description": "An optional second column name to sort by (after sorting by the first column)."
+                },
+                "Ascending2": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 2",
+                  "description": "Set to true to sort the second column name in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName3": {
+                  "type": "string",
+                  "title": "Sort column name 3",
+                  "description": "An optional third column name to sort by (after sorting by the first and second columns)."
+                },
+                "Ascending3": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 3",
+                  "description": "Set to true to sort the third column name in an ascending order. Set to false to sort in a descending order."
+                }
+              },
+              "required": [
+                "InputTable",
+                "Filter"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "FilterTable"
+      }
+    },
+    "/DynamicCode/SortTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Sort table",
+        "description": "Takes an input table, sorts one or more rows and returns a new table. If you want to sort a table in JSON format, use the action 'Sort JSON table'. If you want to sort a string array, use the action 'Sort string array'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "SortTable",
+            "description": "Inputs for IA-Connect SortTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputTable": {
+                  "type": "array",
+                  "title": "Input table",
+                  "description": "The input table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "SortColumnName": {
+                  "type": "string",
+                  "title": "Sort column name",
+                  "description": "The column name to sort by. If you wish to sort by multiple columns then list the columns comma separated."
+                },
+                "Ascending": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending",
+                  "description": "Set to true to sort in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName2": {
+                  "type": "string",
+                  "title": "Sort column name 2",
+                  "description": "An optional second column name to sort by (after sorting by the first column)."
+                },
+                "Ascending2": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 2",
+                  "description": "Set to true to sort the second column name in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName3": {
+                  "type": "string",
+                  "title": "Sort column name 3",
+                  "description": "An optional third column name to sort by (after sorting by the first and second columns)."
+                },
+                "Ascending3": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 3",
+                  "description": "Set to true to sort the third column name in an ascending order. Set to false to sort in a descending order."
+                }
+              },
+              "required": [
+                "InputTable",
+                "SortColumnName",
+                "Ascending"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "SortTable"
+      }
+    },
+    "/DynamicCode/SortJSONTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Sort JSON table",
+        "description": "Takes an input JSON table, sorts the table and returns a new JSON table. If you want to sort an actual table (i.e. not in JSON format), use the action 'Sort table'. If you want to sort a string array, use the action 'Sort string array'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "SortJSONTable",
+            "description": "Inputs for IA-Connect SortJSONTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "SortColumnName": {
+                  "type": "string",
+                  "title": "Sort column name",
+                  "description": "The column name to sort by."
+                },
+                "Ascending": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending",
+                  "description": "Set to true to sort in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName2": {
+                  "type": "string",
+                  "title": "Sort column name 2",
+                  "description": "An optional second column name to sort by (after sorting by the first column)."
+                },
+                "Ascending2": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 2",
+                  "description": "Set to true to sort the second column name in an ascending order. Set to false to sort in a descending order."
+                },
+                "SortColumnName3": {
+                  "type": "string",
+                  "title": "Sort column name 3",
+                  "description": "An optional third column name to sort by (after sorting by the first and second columns)."
+                },
+                "Ascending3": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending 3",
+                  "description": "Set to true to sort the third column name in an ascending order. Set to false to sort in a descending order."
+                }
+              },
+              "required": [
+                "JSONTable",
+                "SortColumnName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "SortJSONTable"
+      }
+    },
+    "/DynamicCode/GetTableFromStringArray": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get table from string array",
+        "description": "Takes an input array of string items and returns as a table.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetTableFromStringArray",
+            "description": "Inputs for IA-Connect GetTableFromStringArray action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputArray": {
+                  "type": "array",
+                  "title": "Input array",
+                  "description": "The input array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ColumnName": {
+                  "type": "string",
+                  "title": "Column name",
+                  "description": "The name to use for the table column."
+                },
+                "DropEmptyItems": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Drop empty items",
+                  "description": "Set to true to ignore (drop) empty items in the array. Set to false to include all items."
+                }
+              },
+              "required": [
+                "InputArray",
+                "ColumnName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table (should always be 1)."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetTableFromStringArray"
+      }
+    },
+    "/DynamicCode/GetTableFromJSON": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get table from JSON",
+        "description": "Takes an input table in JSON format and returns as a table. This is known as deserialization.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetTableFromJSON",
+            "description": "Inputs for IA-Connect GetTableFromJSON action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "StartRowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "minimum": 1,
+                  "title": "Start row index",
+                  "description": "The index of the first row to retrieve. Use 1 to start at the first row, N to start at the Nth row."
+                },
+                "NumberOfRowsToRetrieve": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows to retrieve",
+                  "description": "The number of rows to retrieve. Use 0 (or leave blank) to retrieve all rows."
+                },
+                "StartColumnIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "minimum": 1,
+                  "title": "Start column index",
+                  "description": "The index of the first column to retrieve. Use 1 to start at the first column, N to start at the Nth column. If you wish to specify the first column to retrieve by name, leave this input blank and use the input 'Start column name' instead."
+                },
+                "StartColumnName": {
+                  "type": "string",
+                  "title": "Start column name",
+                  "description": "The optional name of the first column to retrieve. If you wish to retrieve columns by index, leave this input blank and use the input 'Start column index' instead."
+                },
+                "NumberOfColumnsToRetrieve": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns to retrieve",
+                  "description": "The number of columns to retrieve. Use 0 (or leave blank) to retrieve all columns."
+                }
+              },
+              "required": [
+                "JSONTable",
+                "StartRowIndex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table (should always be 1)."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetTableFromJSON"
+      }
+    },
+    "/DynamicCode/SortStringArray": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Sort string array",
+        "description": "Takes an input array of string items, sorts the array and returns a new array. If you want to sort a table, use the action 'Sort table'. If you want to sort a table in JSON format, use the action 'Sort JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "SortStringArray",
+            "description": "Inputs for IA-Connect SortStringArray action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputArray": {
+                  "type": "array",
+                  "title": "Input array",
+                  "description": "The input array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "Ascending": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Sort ascending",
+                  "description": "Set to true to sort in an ascending order. Set to false to sort in a descending order."
+                },
+                "CaseSensitive": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Case sensitive",
+                  "description": "Set to true for a case sensitive sort (i.e. upper and lower case sorted separately). Set to false for a case insensitive sort."
+                }
+              },
+              "required": [
+                "InputArray"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "title": "Sorted output array",
+                  "description": "The sorted output array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "NumberOfItems": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of items",
+                  "description": "The number of items in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "SortStringArray"
+      }
+    },
+    "/DynamicCode/FilterStringArray": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Filter string array",
+        "description": "Takes an input array of string items, filters the array (using .NET DataView rowfilter syntax) and returns a new array. If you want to filter a table, use the action 'Filter table'. If you want to filter a table in JSON format, use the action 'Filter JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "FilterStringArray",
+            "description": "Inputs for IA-Connect FilterStringArray action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputArray": {
+                  "type": "array",
+                  "title": "Input array",
+                  "description": "The input array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ColumnName": {
+                  "type": "string",
+                  "title": "Column name",
+                  "description": "The name to use for the table column holding the array during the filter operation. This name can then be used as the column name in the .NET DataView rowfilter syntax. For example MyColumn which can then be referred to as [MyColumn]."
+                },
+                "Filter": {
+                  "type": "string",
+                  "title": "Filter",
+                  "description": "The filter in .NET DataView rowfilter syntax. For example: [Name] like '*Element'."
+                }
+              },
+              "required": [
+                "InputArray",
+                "ColumnName",
+                "Filter"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "title": "Filtered output array",
+                  "description": "The filtered output array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "NumberOfItems": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of items",
+                  "description": "The number of items in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "FilterStringArray"
+      }
+    },
+    "/DynamicCode/InsertRowInStringArray": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Insert a row into a string array",
+        "description": "Takes an input array of string items, inserts a row at a specified position and returns a new array. If you want to insert a row into a table, use the action 'Insert a row into a table'. If you want to insert a row into a table in JSON format, use the action 'Insert a row into a JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "InsertRowInStringArray",
+            "description": "Inputs for IA-Connect InsertRowInStringArray action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputArray": {
+                  "type": "array",
+                  "title": "Input array",
+                  "description": "The input array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "RowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": -1,
+                  "title": "Row index",
+                  "description": "The index of the row to insert at. Use 0 to insert at the start of the array, 1 to insert after row 1, N to insert after row N. -1 or any number equal to or higher than the number of items in the array to insert at the end of the array (useful if you don't know how long the array is)."
+                },
+                "ValueToInsert": {
+                  "type": "string",
+                  "title": "Value to insert",
+                  "description": "The string value to insert in the new row. Leave blank if you want to insert an empty row."
+                }
+              },
+              "required": [
+                "InputArray",
+                "RowIndex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "title": "Output array",
+                  "description": "The output array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "NumberOfItems": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of items",
+                  "description": "The number of items in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "InsertRowInStringArray"
+      }
+    },
+    "/DynamicCode/InsertRowInTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Insert a row into a table",
+        "description": "Takes an input table, inserts a row at a specified position and returns a new table. If you want to insert a row into a string array, use the action 'Insert a row into a string array'. If you want to insert a row into a table in JSON format, use the action 'Insert a row into a JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "InsertRowInTable",
+            "description": "Inputs for IA-Connect InsertRowInTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputTable": {
+                  "type": "array",
+                  "title": "Input table",
+                  "description": "The input table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "RowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": -1,
+                  "title": "Row index",
+                  "description": "The index of the row to insert at. Use 0 to insert at the start of the table, 1 to insert after row 1, N to insert after row N. -1 or any number equal to or higher than the number of items in the table to insert at the end of the table (useful if you don't know how long the table is)."
+                },
+                "RowToInsertJSON": {
+                  "type": "string",
+                  "title": "JSON row to insert",
+                  "description": "The contents of the row to insert in JSON format. Leave blank if you want to insert an empty row. For example: To insert 'Simon' into the column 'Name' use {\"Name\":\"Simon\"} and to additionally insert 'England' into the column 'Country' use {\"Name\":\"Simon\",\"Country\":\"England\"}."
+                }
+              },
+              "required": [
+                "InputTable",
+                "RowIndex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "InsertRowInTable"
+      }
+    },
+    "/DynamicCode/InsertRowInJSONTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Insert a row into a JSON table",
+        "description": "Takes an input table in JSON format, inserts a row at a specified position and returns a new table in JSON format. If you want to insert a row into an actual table (i.e. not in JSON format), use the action 'Insert a row into a table'. If you want to insert a row into a string array, use the action 'Insert a row into a string array'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "InsertRowInJSONTable",
+            "description": "Inputs for IA-Connect InsertRowInJSONTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "RowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": -1,
+                  "title": "Row index",
+                  "description": "The index of the row to insert at. Use 0 to insert at the start of the table, 1 to insert after row 1, N to insert after row N. -1 or any number equal to or higher than the number of items in the table to insert at the end of the table (useful if you don't know how long the table is)."
+                },
+                "RowToInsertJSON": {
+                  "type": "string",
+                  "title": "JSON row to insert",
+                  "description": "The contents of the row to insert in JSON format. Leave blank if you want to insert an empty row. For example: To insert 'Simon' into the column 'Name' use {\"Name\":\"Simon\"} and to additionally insert 'England' into the column 'Country' use {\"Name\":\"Simon\",\"Country\":\"England\"}."
+                }
+              },
+              "required": [
+                "JSONTable",
+                "RowIndex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "InsertRowInJSONTable"
+      }
+    },
+    "/DynamicCode/InsertRowInJSONTableFromInputVariables": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Insert a row of input variables into a JSON table",
+        "description": "Takes an input table in JSON format, inserts a row created from input variables at a specified position and returns a new table in JSON format. The input row schema should match that of the input table (i.e. Use the same property names and data types). If you want to insert a row into an actual table (i.e. not in JSON format), use the action 'Insert a row into a table'. If you want to insert a string into a string array, use the action 'Insert a row into a string array'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "InsertRowInJSONTableFromInputVariables",
+            "description": "Inputs for IA-Connect InsertRowInJSONTableFromInputVariables action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "RowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": -1,
+                  "title": "Row index",
+                  "description": "The index of the row to insert at. Use 0 to insert at the start of the table, 1 to insert after row 1, N to insert after row N. -1 or any number equal to or higher than the number of items in the table to insert at the end of the table (useful if you don't know how long the table is)."
+                },
+                "RowToInsertInputVariables": {
+                  "type": "array",
+                  "title": "Input variables",
+                  "description": "An input array of variable names, their data type and their values to be added as an additional row to the input table. The schema should match that of the input table (i.e. Use the same property names and data types).",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "PropertyName": {
+                        "type": "string",
+                        "title": "Property name"
+                      },
+                      "DataType": {
+                        "type": "string",
+                        "title": "Property data type",
+                        "default": "String",
+                        "enum": [
+                          "String",
+                          "Integer",
+                          "Float",
+                          "Boolean"
+                        ]
+                      },
+                      "Value": {
+                        "type": "string",
+                        "title": "Property value"
+                      }
+                    }
+                  }
+                }
+              },
+              "required": [
+                "JSONTable",
+                "RowIndex",
+                "RowToInsertInputVariables"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "InsertRowInJSONTableFromInputVariables"
+      }
+    },
+    "/DynamicCode/DeleteItemsInStringArray": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Delete items from a string array",
+        "description": "Takes an input array of string items, deletes an item or items at a specified position and returns a new array. If you want to delete a row or rows from a table, use the action 'Delete a row from a table'. If you want to delete a row or rows from a table in JSON format, use the action 'Delete a row from a JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "DeleteItemsInStringArray",
+            "description": "Inputs for IA-Connect DeleteItemsInStringArray action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputArray": {
+                  "type": "array",
+                  "title": "Input array",
+                  "description": "The input array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "StartItemIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Start item index",
+                  "description": "The index of the item to start deleting at. Use 1 to delete the first item, N to delete the Nth item."
+                },
+                "NumberOfItemsToDelete": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "minimum": 1,
+                  "title": "Number of items to delete",
+                  "description": "The number of items to delete."
+                }
+              },
+              "required": [
+                "InputArray",
+                "StartItemIndex",
+                "NumberOfItemsToDelete"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "title": "Output array",
+                  "description": "The output array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "NumberOfItems": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of items",
+                  "description": "The number of items in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "DeleteItemsInStringArray"
+      }
+    },
+    "/DynamicCode/DeleteRowsInTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Delete rows from a table",
+        "description": "Takes an input table, deletes a row or rows at a specified position and returns a new table. If you want to delete a row or rows from a string array, use the action 'Delete a row from a string array'. If you want to delete a row or rows from a table in JSON format, use the action 'Delete a row from a JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "DeleteRowsInTable",
+            "description": "Inputs for IA-Connect DeleteRowsInTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputTable": {
+                  "type": "array",
+                  "title": "Input table",
+                  "description": "The input table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "StartRowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Start row index",
+                  "description": "The index of the row to start deleting at. Use 1 to delete the first row, N to delete the Nth row."
+                },
+                "NumberOfRowsToDelete": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "minimum": 1,
+                  "title": "Number of rows to delete",
+                  "description": "The number of rows to delete."
+                }
+              },
+              "required": [
+                "InputTable",
+                "StartRowIndex",
+                "NumberOfRowsToDelete"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "DeleteRowsInTable"
+      }
+    },
+    "/DynamicCode/DeleteRowsInJSONTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Delete rows from a JSON table",
+        "description": "Takes an input table in JSON format, deletes a row or rows at a specified position and returns a new table in JSON format. If you want to delete a row or rows from an actual table (i.e. not in JSON format), use the action 'Delete a row from a table'. If you want to delete a row or rows from a string array, use the action 'Delete a row from a string array'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "DeleteRowsInJSONTable",
+            "description": "Inputs for IA-Connect DeleteRowsInJSONTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "StartRowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Start row index",
+                  "description": "The index of the row to start deleting at. Use 1 to delete the first row, N to delete the Nth row."
+                },
+                "NumberOfRowsToDelete": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "minimum": 1,
+                  "title": "Number of rows to delete",
+                  "description": "The number of rows to delete."
+                }
+              },
+              "required": [
+                "JSONTable",
+                "StartRowIndex",
+                "NumberOfRowsToDelete"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "DeleteRowsInJSONTable"
+      }
+    },
+    "/DynamicCode/RenameColumnInTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Rename a column in a table",
+        "description": "Takes an input table, renames a specified column and returns a new table. If you want to rename a column from a table in JSON format, use the action 'Rename a column in a JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "RenameColumnInTable",
+            "description": "Inputs for IA-Connect RenameColumnInTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputTable": {
+                  "type": "array",
+                  "title": "Input table",
+                  "description": "The input table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "SourceColumnName": {
+                  "type": "string",
+                  "title": "Source column name",
+                  "description": "The name of the column to rename."
+                },
+                "NewColumnName": {
+                  "type": "string",
+                  "title": "New column name",
+                  "description": "The new name for the column."
+                }
+              },
+              "required": [
+                "InputTable",
+                "SourceColumnName",
+                "NewColumnName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "RenameColumnInTable"
+      }
+    },
+    "/DynamicCode/RenameColumnInJSONTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Rename a column in a JSON table",
+        "description": "Takes an input table in JSON format, renames a specified column and returns a new table in JSON format. If you want to rename a column from an actual table (i.e. not in JSON format), use the action 'Rename a column in a table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "RenameColumnInJSONTable",
+            "description": "Inputs for IA-Connect RenameColumnInJSONTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "SourceColumnName": {
+                  "type": "string",
+                  "title": "Source column name",
+                  "description": "The name of the column to rename."
+                },
+                "NewColumnName": {
+                  "type": "string",
+                  "title": "New column name",
+                  "description": "The new name for the column."
+                }
+              },
+              "required": [
+                "JSONTable",
+                "SourceColumnName",
+                "NewColumnName"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "RenameColumnInJSONTable"
+      }
+    },
+    "/DynamicCode/DeleteColumnsInTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Delete columns from a table",
+        "description": "Takes an input table, deletes a column or columns and returns a new table. If you want to delete columns from a table in JSON format, use the action 'Delete columns from a JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "DeleteColumnsInTable",
+            "description": "Inputs for IA-Connect DeleteColumnsInTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputTable": {
+                  "type": "array",
+                  "title": "Input table",
+                  "description": "The input table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "StartColumnIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Start column index",
+                  "description": "The index of the column to start deleting at. Use 1 to delete the first column, N to delete the Nth column. If you wish to delete a column by name, leave this input blank and use the input 'Column name to delete' instead."
+                },
+                "ColumnNameToDelete": {
+                  "type": "string",
+                  "title": "Column name to delete",
+                  "description": "The optional name of the column to delete. If you wish to delete a column by index, leave this input blank and use the input 'Start column index' instead."
+                },
+                "NumberOfColumnsToDelete": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "minimum": 1,
+                  "title": "Number of columns to delete",
+                  "description": "The number of columns to delete, starting at the specified index or name."
+                }
+              },
+              "required": [
+                "InputTable",
+                "NumberOfColumnsToDelete"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputTable": {
+                  "type": "array",
+                  "title": "Output table",
+                  "description": "The output table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "DeleteColumnsInTable"
+      }
+    },
+    "/DynamicCode/DeleteColumnsInJSONTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Delete columns from a JSON table",
+        "description": "Takes an input table in JSON format, deletes a column or columns and returns a new table in JSON format. If you want to delete columns from a actual table (i.e. not in JSON format), use the action 'Delete columns from a table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "DeleteColumnsInJSONTable",
+            "description": "Inputs for IA-Connect DeleteColumnsInJSONTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "StartColumnIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Start column index",
+                  "description": "The index of the column to start deleting at. Use 1 to delete the first column, N to delete the Nth column. If you wish to delete a column by name, leave this input blank and use the input 'Column name to delete' instead."
+                },
+                "ColumnNameToDelete": {
+                  "type": "string",
+                  "title": "Column name to delete",
+                  "description": "The optional name of the column to delete. If you wish to delete a column by index, leave this input blank and use the input 'Start column index' instead."
+                },
+                "NumberOfColumnsToDelete": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "minimum": 1,
+                  "title": "Number of columns to delete",
+                  "description": "The number of columns to delete, starting at the specified index or name."
+                }
+              },
+              "required": [
+                "JSONTable",
+                "NumberOfColumnsToDelete"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputJSONTable": {
+                  "type": "string",
+                  "title": "Output JSON table",
+                  "description": "The output table in JSON format."
+                },
+                "NumberOfRows": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows",
+                  "description": "The number of rows in the output table."
+                },
+                "NumberOfColumns": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of columns",
+                  "description": "The number of columns in the output table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "DeleteColumnsInJSONTable"
+      }
+    },
+    "/DynamicCode/GetStringArrayFromTableColumn": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get string array from table column",
+        "description": "Takes an input table and returns a specified column as a string array. If you want to get a string array from a table in JSON format, use the action 'Get array from JSON table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetStringArrayFromTableColumn",
+            "description": "Inputs for IA-Connect GetStringArrayFromTableColumn action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputTable": {
+                  "type": "array",
+                  "title": "Input table",
+                  "description": "The input table.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "ColumnIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Column index",
+                  "description": "The index of the column to return as an array. Use 1 for the first column, N for the Nth column. If you wish to retrieve a column by name, leave this input blank and use the input 'Column name' instead."
+                },
+                "ColumnName": {
+                  "type": "string",
+                  "title": "Column name",
+                  "description": "The optional name of the column to return as an array. If you wish to retrieve a column by index, leave this input blank and use the input 'Column index' instead."
+                }
+              },
+              "required": [
+                "InputTable"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "title": "Output array",
+                  "description": "The output array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "NumberOfItems": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of items",
+                  "description": "The number of items in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetStringArrayFromTableColumn"
+      }
+    },
+    "/DynamicCode/GetStringArrayFromJSONTableColumn": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get string array from JSON table column",
+        "description": "Takes an input table in JSON format and returns a specified column as a string array. If you want to get a string array from an actual table (i.e. not in JSON format), use the action 'Get array from table'.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetStringArrayFromJSONTableColumn",
+            "description": "Inputs for IA-Connect GetStringArrayFromJSONTableColumn action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "ColumnIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Column index",
+                  "description": "The index of the column to return as an array. Use 1 for the first column, N for the Nth column. If you wish to retrieve a column by name, leave this input blank and use the input 'Column name' instead."
+                },
+                "ColumnName": {
+                  "type": "string",
+                  "title": "Column name",
+                  "description": "The optional name of the column to return as an array. If you wish to retrieve a column by index, leave this input blank and use the input 'Column index' instead."
+                }
+              },
+              "required": [
+                "JSONTable"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "title": "Output array",
+                  "description": "The output array of strings.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "NumberOfItems": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of items",
+                  "description": "The number of items in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetStringArrayFromJSONTableColumn"
+      }
+    },
+    "/DynamicCode/GetStringFromJSONTableCell": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get string from JSON table cell",
+        "description": "Takes an input table in JSON format and returns a specified cell as a string.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetStringFromJSONTableCell",
+            "description": "Inputs for IA-Connect GetStringFromJSONTableCell action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "JSONTable": {
+                  "type": "string",
+                  "title": "Input JSON table",
+                  "description": "The input table in JSON format."
+                },
+                "RowIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Row index",
+                  "description": "The index of the row containing the cell to retrieve. Use 1 for the first row, N for the Nth row."
+                },
+                "ColumnIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1,
+                  "title": "Column index",
+                  "description": "The index of the column containing the cell to retrieve. Use 1 for the first column, N for the Nth column. If you wish to retrieve a column by name, leave this input blank and use the input 'Column name' instead."
+                },
+                "ColumnName": {
+                  "type": "string",
+                  "title": "Column name",
+                  "description": "The optional name of the column containing the cell to retrieve. If you wish to retrieve a column by index, leave this input blank and use the input 'Column index' instead."
+                }
+              },
+              "required": [
+                "JSONTable"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputString": {
+                  "type": "string",
+                  "title": "Output string",
+                  "description": "The output cell contents as a string."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetStringFromJSONTableCell"
+      }
+    },
+    "/DynamicCode/GetStringBetween": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get string between",
+        "description": "Takes an input string and returns the first instance of a string that is located between two specified strings or between a string and the end of the line.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetStringBetween",
+            "description": "Inputs for IA-Connect GetStringBetween action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputString": {
+                  "type": "string",
+                  "title": "Input string",
+                  "description": "The input string upon which the search is performed."
+                },
+                "StartSearchString": {
+                  "type": "string",
+                  "title": "Start search string",
+                  "description": "The start search string."
+                },
+                "EndSearchString": {
+                  "type": "string",
+                  "title": "End search string",
+                  "description": "The end search string or leave blank if searching to the end of the line."
+                },
+                "SearchLineByLine": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Search line by line",
+                  "description": "Set to true if you want to search the input string line by line and for the result to only contain the matching string in the current line. Set to false to treat the input string as a single item."
+                },
+                "ThrowExceptionIfNotFound": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Throw exception if not found",
+                  "description": "Set to true if you want an exception raised if the search string was not found, or set to false if the action should return 'String between found'=false when the search string was not found."
+                },
+                "TrimResult": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Trim result",
+                  "description": "Set to true if you want spaces or tabs before or after the result to be trimmed."
+                },
+                "SearchIsRegularExpression": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Search is regular expression",
+                  "description": "Set to true if the search strings are regular expressions. Set to false if the search strings are normal text."
+                },
+                "CaseSensitiveSearch": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Case sensitive search",
+                  "description": "Set to true if the search should be case sensitive. Set to false for case insensitive searches."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "SearchStringFound": {
+                  "type": "boolean",
+                  "title": "Search string found",
+                  "description": "If 'Throw exception if not found' is set to false then this output is set to true if the search string was found, false if not."
+                },
+                "StringBetween": {
+                  "type": "string",
+                  "title": "String between",
+                  "description": "The string found between the specified strings."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetStringBetween"
       }
     }
   },
