@@ -12,9 +12,11 @@ If you have any issues, requests for functionality, or have general feedback, pl
 ## Pre-requisites for Using the Connector
 Set up Azure AD authentication for Snowflake by following these steps:
 1. In [Step 1: Configure the OAuth Resource in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-1-configure-the-oauth-resource-in-azure-ad), follow steps 1-10 and define the scope as `SESSION:ROLE-ANY` by following these [instructions](https://docs.snowflake.com/en/user-guide/oauth-azure.html#using-any-role-with-external-oauth).
-2. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-13.
-3. Follow [Step 3: Collect Azure AD Information for Snowflake](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-3-collect-azure-ad-information-for-snowflake) entirely. 
-4. Copy and paste the text below into your worksheet, which is where you execute your queries in Snowflake. Before you execute the query, make sure you make the following replacements.  
+2. Navigate to **Authentication** -> **Platform configurations** -> **Add a platform** -> **Add** "https://global.consent.azure-apim.net/redirect" -> Click **Save**
+3. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-13.
+4. Go to the resource created in Step 1 and go to **Expose an API** -> **Add a client application** -> **Add** your `APPLICATION_CLIENT_ID` from earlier in step 3 above -> Click **Save**
+5. Follow [Step 3: Collect Azure AD Information for Snowflake](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-3-collect-azure-ad-information-for-snowflake) entirely. 
+6. Copy and paste the text below into your worksheet, which is where you execute your queries in Snowflake. Before you execute the query, make sure you make the following replacements.  
 A. Replace the `AZURE_AD_ISSUER` in line 5 with the value from step 3 that is similar to `https://sts.windows.net/90288a9b-97df-4c6d-b025-95713f21cef9/`. Keep the quotation marks and make sure you have a `/` before the last quotation mark.  
 B. Replace the Keys URL in line 6 with the value from Step 3 that is similar to `https://login.microsoftonline.com/90288a9b-97df-4c6d-b025-95713f21cef9/discovery/v2.0/keys`. Keep the quotation marks.  
 C. Replace the Audience List URL in line 7 with `Application ID URI` from Step 1. Keep the quotation marks.   
