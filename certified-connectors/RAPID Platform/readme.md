@@ -14,15 +14,15 @@ Since RAPID Platform APIs are secured by Azure Active Directory (AD), we first n
 We first need to register our connector as an application in Azure AD.  This will allow the connector to identify itself to Azure AD so that it can ask for permissions to access RAPID Platform on behalf of the end user.  You can read more about this [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-scenarios) and follow the steps below:
 
 1. Create an Azure AD application
-This Azure AD application will be used to identify the connector to Azure Key Vault.  This can be done using [Azure Portal] (https://portal.azure.com), by following the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).  Once created, note down the value of Application (Client) ID.  You will need this later.
+This Azure AD application will be used to identify the connector to RAPID Platform.  This can be done using [Azure Portal] (https://portal.azure.com), by following the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).  Once created, note down the value of Application (Client) ID.  You will need this later.
 
-2. Configure (Update) your Azure AD application to access the Azure Key Vault API
+2. Configure (Update) your Azure AD application to access the RAPID Platform API
 This step will ensure that your application can successfully retrieve an access token to invoke Azure Key Vault on behalf of your users.  To do this, follow the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
     - For redirect URI, use “https://global.consent.azure-apim.net/redirect”
     - For the credentials, use a client secret (and not certificates).  Remember to note the secret down, you will need this later and it is shown only once.
     - For API permissions, make sure the RAPID Platform permissions are added to your app "cd5db0ec-1419-4ae6-9434-21cfb83fc42d"
    
-At this point, we now have a valid Azure AD application that can be used to get permissions from end users and access RAPDI Platform.  The next step for us is to create a custom connector.
+At this point, we now have a valid Azure AD application that can be used to get permissions from end users and access RAPID Platform.  The next step for us is to create a custom connector.
 
 ### Deploying the sample
 Run the following commands and follow the prompts:
