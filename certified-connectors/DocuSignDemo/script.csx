@@ -277,6 +277,19 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject AddDocumentsToEnvelopeBodyTransformation(JObject body)
+  {
+    var documents = body["documents"] as JArray;
+
+    for (var i = 0; i < documents.Count; i++)
+    {
+      documents[i]["documentId"] = $"{i + 1}";
+    }
+
+    body["documents"] = documents;
+    return body;
+  }
+
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
@@ -366,6 +379,11 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddDocumentsToEnvelopeBodyTransformation).ConfigureAwait(false);
     }
 
     if ("RemoveRecipientFromEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))

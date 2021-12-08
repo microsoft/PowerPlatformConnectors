@@ -32,6 +32,7 @@ The available actions can be grouped into different groups
 |                                     | [Get Package List](https://documentation-archive.connective.eu/en-us/eSignatures5.5/api/Packagelist.html) |
 | Miscellaneous actions               | [Skip Signers](https://documentation-archive.connective.eu/en-us/eSignatures5.5/api/SkipSigners.html) |
 |                                     | [Download Package](https://documentation-archive.connective.eu/en-us/eSignatures5.5/api/DownloadPackage.html) |
+|                                     | [Download Document from Package](https://documentation-archive.connective.eu/en-us/eSignatures5.5/api/DownloadDocumentfromPackage.html) |
 |                                     | [Package Expiry Extension](https://documentation-archive.connective.eu/en-us/eSignatures5.5/api/PackageExpiryExtension.html) |
 |                                     | [Send Package Reminder](https://documentation-archive.connective.eu/en-us/eSignatures5.5/api/SendPackageReminders.html) |
 |                                     | [Delete Package](https://documentation-archive.connective.eu/en-us/eSignatures5.5/api/SendPackageReminders.html) |
