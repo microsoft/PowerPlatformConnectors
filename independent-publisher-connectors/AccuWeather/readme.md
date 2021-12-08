@@ -66,6 +66,12 @@ Returns metadata for all index groups.
 #### Get List of Indices in a Specific Group
 Returns metadata for all indices in a specified group.
 
+#### Search by location key
+Returns information about a specific location, by location key.
+
+#### Search location by IP address
+Returns information about a specific location, by IP Address.
+
 ## API Documentation
 Visit [AccuWeather APIs reference](https://developer.accuweather.com/apis) page for further details.
 

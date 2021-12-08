@@ -1,6 +1,6 @@
-# RiskIQ PassiveTotal
+# RiskIQ Illuminate
 
-RiskIQ PassiveTotal aggregates data from the whole internet, absorbing intelligence to identify threats and attacker infrastructure, and leverages machine learning to scale threat hunting and response. With PassiveTotal, you get context on who is attacking you, their tools and systems, and indicators of compromise outside the firewall—enterprise and third party.
+RiskIQ Illuminate reveals cyber threats relevant to your critical assets through connected digital relationships. It is the only security intelligence solution with tailored attack surface intelligence to uncover exposures, risks, and threats against your unique digital footprint, pinpointing what’s relevant to you—all in one place.
 
 ## Pre-requisites
 
@@ -147,6 +147,25 @@ The connector supports the following operations:
 
 ### Reputation
 * `Get reputation` : Retrieves reputation for given query.
+### Attack Surface Intelligence
+* `Get attack surface` : Finds the Attack Surface information of the given account.
+* `Get attack surface priority detail by level` : Finds the Attack Surface Priority Information given the level (low, medium, high) associated to the given account.
+* `Get attack surface insight by insight Id` : Finds the Attack Surface Insight Information given the insight ID for the given account
+* `Get attack surface third party by vendor Id` : Finds vendors associated with the given vendor id for given account account
+* `Get all third party vendors` : Finds all vendors associated with the given account
+* `Get attack surface third party priority detail by vendor Id and level` : Finds vendors associated with the given vendor id and priority level for given account account
+* `Get attack surface third party insight by vendor Id and insight Id` : Finds vendors associated with the given vendor id and insight ID for given account account
+* `Get attack surface vulnerable components` : Finds the Attack Surface Vulnerable Components for the primary vendor.
+* `Get attack surface third party vulnerable components` : Finds the Attack Surface Third-Party Vulnerable Components given the vendor ID.
+* `Get attack surface vulnerable information` : Finds the Attack Surface Vulnerability Information for the primary vendor for the given account.
+* `Get attack surface third party vulnerabilities` : Finds the Attack Surface Third-Party Vulnerability Information given the vendor ID.
+* `Get attack surface vulnerability observations` : Finds the Attack Surface Vulnerability Observations for the primary vendor given a CVE.
+* `Get attack surface third party vulnerability observations` : Finds the Attack Surface Third-Party Vulnerability Observations given the vendor ID and CVE.
+### Intel Profiles
+* `Get profile details` : Retrieves the details for the given profile.
+* `Get all indicators for given profile` : Retrieves the indicators for the given profile id.
+* `Get all profiles` : Retrieves all profiles.
+* `Get all profiles by indicator` : Retrieves all profiles containing the given indicator.
  
 ## How to get credentials
 
