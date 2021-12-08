@@ -52,7 +52,7 @@ Step 2 is required for the connector. The values from this step will be used whe
 -	Client Secret: `OAUTH_CLIENT_SECRET`
 -	Resource URI: `Application ID URI`
 9. Go to **Step 3: Definition** and review the operations. Then, go to **Step 4: Code** to view the code, which should already be enabled. Now, click "Create Connector."
-10. Now, you can go to test your connector in **Step 5: Test**, if you'd like.
+10. Now, you can go to test your connector in **Step 5: Test** and create a new connection.
 11. Begin using your custom connector in your environment to build apps and flows! 
 
 ## Sample Flow
