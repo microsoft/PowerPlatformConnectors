@@ -24,6 +24,9 @@ This connector supports the following operations:
 * `Delete record`: Delete record by specific ID.
 * `Update record`: Update record by specific ID.
 * `Get current user`: Get current user record associated with login credentials.
+* `List questionnaires`: Get list of questionnaires.
+* `Get questionnaire`: Get questionnaire by specific ID.
+* `Generate report`: Generate report into the selected format.
 
 ## Supported Triggers
 
