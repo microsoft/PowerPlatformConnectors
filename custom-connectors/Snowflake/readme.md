@@ -13,7 +13,7 @@ If you have any issues, requests for functionality, or have general feedback, pl
 Set up Azure AD authentication for Snowflake by following these steps:
 1. In [Step 1: Configure the OAuth Resource in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-1-configure-the-oauth-resource-in-azure-ad), follow steps 1-10 and define the scope as `SESSION:ROLE-ANY` by following these [instructions](https://docs.snowflake.com/en/user-guide/oauth-azure.html#using-any-role-with-external-oauth).
 2. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-13.
-3. Navigate to **Authentication** -> **Platform configurations** -> **Add a platform** -> **Add** "https://global.consent.azure-apim.net/redirect" -> Click **Save**
+3. Navigate to **Authentication** -> **Platform configurations** -> **Add a platform** -> **Add** "https://global.consent.azure-apim.net/redirect" -> Click **Save**. Ensure that the redirect URL is set in the Snowflake OAuth Client and not the Snowflake OAuth Resource.
 4. Go to the resource created in Step 1 and go to **Expose an API** -> **Add a client application** -> **Add** your `APPLICATION_CLIENT_ID` from earlier in step 3 above -> Click **Save**
 5. Follow [Step 3: Collect Azure AD Information for Snowflake](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-3-collect-azure-ad-information-for-snowflake) entirely. 
 6. Copy and paste the text below into your worksheet, which is where you execute your queries in Snowflake. Before you execute the query, make sure you make the following replacements.  
@@ -35,9 +35,6 @@ create security integration connector
        external_oauth_snowflake_user_mapping_attribute = 'login_name'
        external_oauth_any_role_mode = 'ENABLE';
 ```
-
-Steps 1, 3, and 4 are setup configuration required on the Snowflake server. 
-Step 2 is required for the connector. The values from this step will be used when setting up the connector.
 
 ## Using the Connector
 1. Make sure you've followed the pre-requisites.
