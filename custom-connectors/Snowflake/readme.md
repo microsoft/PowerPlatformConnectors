@@ -12,8 +12,8 @@ If you have any issues, requests for functionality, or have general feedback, pl
 ## Pre-requisites for Using the Connector
 Set up Azure AD authentication for Snowflake by following these steps:
 1. In [Step 1: Configure the OAuth Resource in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-1-configure-the-oauth-resource-in-azure-ad), follow steps 1-10 and define the scope as `SESSION:ROLE-ANY` by following these [instructions](https://docs.snowflake.com/en/user-guide/oauth-azure.html#using-any-role-with-external-oauth).
-2. Navigate to **Authentication** -> **Platform configurations** -> **Add a platform** -> **Add** "https://global.consent.azure-apim.net/redirect" -> Click **Save**
-3. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-13.
+2. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-13.
+3. Navigate to **Authentication** -> **Platform configurations** -> **Add a platform** -> **Add** "https://global.consent.azure-apim.net/redirect" -> Click **Save**
 4. Go to the resource created in Step 1 and go to **Expose an API** -> **Add a client application** -> **Add** your `APPLICATION_CLIENT_ID` from earlier in step 3 above -> Click **Save**
 5. Follow [Step 3: Collect Azure AD Information for Snowflake](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-3-collect-azure-ad-information-for-snowflake) entirely. 
 6. Copy and paste the text below into your worksheet, which is where you execute your queries in Snowflake. Before you execute the query, make sure you make the following replacements.  
@@ -54,7 +54,3 @@ Step 2 is required for the connector. The values from this step will be used whe
 9. Go to **Step 3: Definition** and review the operations. Then, go to **Step 4: Code** to view the code, which should already be enabled. Now, click "Create Connector."
 10. Now, you can go to test your connector in **Step 5: Test** and create a new connection.
 11. Begin using your custom connector in your environment to build apps and flows! 
-
-## Sample Flow
-
-
