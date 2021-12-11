@@ -3,28 +3,36 @@ This API provides the information regarding '2019 Novel Coronavirus (covid-19)'.
 
 ## Publisher: Woong Choi
 
-## Prerequisites
-N/A
-
 ## Supported Operations
-### List Records
-List records in the table.
+### Get current data
+Get all data from all the reportedly affected countries
 
-### Create a Record
-Create a record in a table.
+### Get total data
+Get the total numbers of Confirmed, Deaths, and Recovered
 
-### Retrieve a Record
-Get a record details in a table.
+### Get confirmed cases
+Get the total number of Confirmed cases
 
-### Delete a Record
-Delete a record in a table.
+### Get deaths
+Get the total number of Deaths
 
-### Update a Record
-Update a record in a table.
+### Get recovered cases
+Get the total number of Recovered cases
 
+### Get active cases
+Get the total number of Active cases (Excluding Deaths and Recovered)
+
+### Get a country data
+Search a country by an [ISO country code (alpha2)]
+
+### Get time series
+Get the time series: global, confirmed, deaths, recovered
+
+### Get current (US)
+Get all data from USA's current situation
 
 ## Getting Started
 Visit [COVID-19 API](https://nuttaphat.com/covid19-api/) page for further details.
 
-## Known Issues and Limitations
-N/A
+## Reference
+Source Data - https://github.com/CSSEGISandData/COVID-19
