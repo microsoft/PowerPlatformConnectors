@@ -51,3 +51,7 @@ create security integration connector
 9. Go to **Step 3: Definition** and review the operations. Then, go to **Step 4: Code** to view the code, which should already be enabled. Now, click "Create Connector."
 10. Now, you can go to test your connector in **Step 5: Test** and create a new connection.
 11. Begin using your custom connector in your environment to build apps and flows! 
+
+## Known Issues
+1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
+2. If you get a 401 response and your **Host** field in Step 1 follows this format "orgname-accountname," replace the **Host** field with your "locator" URL. 
