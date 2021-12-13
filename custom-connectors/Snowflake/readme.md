@@ -45,12 +45,14 @@ create security integration connector
 6. In **Step 1: General**, make sure to replace the "YourInstance" in the **Host URL** field with your own instance. You can learn more about this field [here](https://docs.snowflake.com/en/user-guide/client-redirect.html#introduction-to-client-redirect).
 7. Go to **Step 2: Security** and choose **OAuth 2.0** from the dropdown. Then, in the OAuth 2.0 section, choose **Azure Active Directory** from the **Identity Provider** dropdown. 
 8. Fill in the following fields from the values in Pre-requisities:
--	Client ID: `OAUTH_CLIENT_ID`
--	Client Secret: `OAUTH_CLIENT_SECRET`
--	Resource URI: `Application ID URI`
-9. Go to **Step 3: Definition** and review the operations. Then, go to **Step 4: Code** to view the code, which should already be enabled. Now, click "Create Connector."
-10. Now, you can go to test your connector in **Step 5: Test** and create a new connection.
-11. Begin using your custom connector in your environment to build apps and flows! 
+-	**Client ID**: `OAUTH_CLIENT_ID`
+-	**Client Secret**: `OAUTH_CLIENT_SECRET`
+-	**Resource URI**: `Application ID URI`
+The **Redirect UR**L will be blank for now.
+10. Go to **Step 3: Definition** and review the operations. Then, go to **Step 4: Code** to view the code, which should already be enabled. Now, click "Create Connector."
+11. Go back to **Step 2: Security** and copy the value in **Redirect URL**. In the Microsoft Azure portal, go to your app registrations and select the Snowflake OAuth Client app. On the left sidebar, click on **Authentication** > **+Add a platform** > Paste your value into the **Redirect URIs field** >> Click **Configure**.
+12. Now, you can go to test your connector in **Step 5: Test** and create a new connection.
+13. Begin using your custom connector in your environment to build apps and flows! 
 
 ## Known Issues
 1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
