@@ -7,7 +7,7 @@ The connector supports the following operations:
 - Cancel the Execution of a Statement
 
 ## Getting Help or Providing Feedback
-If you have any issues, requests for functionality, or have general feedback, please fill out this [form](http://aka.ms/snowflakeconnector) and we will get back to you. 
+If you have any issues, requests for functionality, or have general feedback, please fill out this [form](http://aka.ms/snowflakeconnectorfeedback) and we will get back to you. 
 
 ## Pre-requisites for Using the Connector
 Set up Azure AD authentication for Snowflake by following these steps:
