@@ -12,7 +12,7 @@ You will need these credentials to proceed:
 - A Microsoft Power Automate plan with custom connector feature
 - A TrueDialog Account and Plan and TrueDialog API access. Click [HERE](https://www.truedialog.com/register-free-15-day-trial/) to register.
 
-\*\*Please contact our Client Services team when you register for TrueDialog because API access will need to be provided to you.  Our world class Client Services team will walk you through registration and choosing the best account for your company’s needs.
+\*\*When you register for TrueDialog, the API key and Secret Code will be in your credentials email. For help getting started, please contact our team. Our world class Client Services team will walk you through registration and choosing the best account for your company’s needs. 
 
 CONTACT US:
 
