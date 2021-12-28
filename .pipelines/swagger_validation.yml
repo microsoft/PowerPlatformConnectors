@@ -85,3 +85,88 @@ steps:
       swaggerValidator: "$(ValidatorUrl)/ValidateSwagger"
       changeValidator: "$(ValidatorUrl)/ValidateChange"
       token: $(token)
+
+#Api Properties Validator     
+  - pwsh:
+      $errorsTotal = 0
+      $warningsTotal = 0
+
+      # Get the list of files for the given PR
+      $currentLocation = Get-Location
+      $files = git diff HEAD~1 --name-only
+      $ApiPropertiesFiles = $files | where {$_ -match '.+?apiProperties.json$'}
+
+      $Headers = @{
+        Authorization = $env:token
+      }
+
+      foreach ($file in $apiPropertiesFiles) { 
+        $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
+        $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
+
+        $newFileContent = Get-Content $file -Raw
+
+        # Validate apiProperties json
+        $isCertValidation = $file -Like "*certified-connectors/*" -Or $file -Like "*independent-publisher-connectors/*"
+        $apiPropertiesValidatorUri = "$($env:apiPropertiesValidator)?IsCertificationValidation=$isCertValidation"
+        $results = Invoke-RestMethod -Uri $apiPropertiesValidatorUri -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body $newFileContent
+        
+        $errors = $results.Errors
+        $warnings = $results.Warnings
+
+        if ($errors) {
+          $errorsTotal += $errors.Count
+          $errors | foreach { Write-Host "##vso[task.logissue type=error;]$_" }
+        } # If Api Properties Error
+        
+        if ($warnings) {
+          $warningsTotal += $warnings.Count
+          $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;]$_" }
+        } # If Api Properties Warnings
+
+        # Check for breaking changes when previous commit exits
+        # And there is NO api properties validation error
+        if ($previousCommitHash -AND -NOT $errors) {
+          $oldApiProperties = git show "$($previousCommitHash):$($file)" | Out-String | ConvertFrom-Json
+          $newApiProperties = $newFileContent | ConvertFrom-Json
+
+          $changeValidation = @{
+            OldApiProperties = $oldApiProperties
+            NewApiProperties = $newApiProperties
+          }
+
+          $changeValidationJson = ConvertTo-Json $changeValidation -Depth 100 -Compress
+
+          # Validate changes
+          $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body $changeValidationJson
+
+          $errors = $results.Errors
+          $warnings = $results.Warnings
+
+          if ($errors) {
+              $errorsTotal += $errors.Count
+              $errors | foreach { Write-Host "##vso[task.LogIssue type=error;]$_" }
+          } # If there are any errors
+
+          if ($warnings) {
+              $warningsTotal += $warnings.Count
+              $warnings | foreach { Write-Host "##vso[task.LogIssue type=warning;sourcepath=$file;]$_" }
+          } # If there are any warnings
+
+        } # If previous commit exists perform breaking change validation
+
+      } # For each file
+
+      if ($errorsTotal -gt 0) {
+          Write-Host "##vso[task.complete result=Failed;]Errors encountered."
+      }
+      elseif ($warningsTotal -gt 0) {
+          Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
+      }
+      else {
+          Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
+      }
+    env:
+      apiPropertiesValidator: "$(ValidatorUrl)/ValidateApiProperties"
+      changeValidator: "$(ValidatorUrl)/ValidateChange"
+      token: $(token)
