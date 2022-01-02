@@ -11,7 +11,7 @@ You can create a new Zoho Sign account by clicking [here](https://zoho.com/sign)
 
 **How to get credentials**
 
-Since Zoho-Sign API uses OAuth2 to authenticate, no secondary authentication is needed once the account has been setup.
+Since Zoho-Sign API uses OAuth 2 to authenticate, no secondary authentication is needed once the account has been setup.
 
 **Supported Operations**
 

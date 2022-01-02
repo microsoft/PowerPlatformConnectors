@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "DocJuris",
-    "version": "v3",
+    "version": "v3.1",
     "description": "DocJuris is a contract negotiation workspace that empowers legal and business teams to close deals with speed and accuracy.",
     "contact": {
       "name": "DocJuris Support",
@@ -158,7 +158,8 @@
               "completedWithMarkup",
               "completedClean",
               "original",
-              "imported"
+              "imported",
+              "screeningReport"
             ]
           }
         ],
@@ -220,7 +221,8 @@
               "completedWithMarkup",
               "completedClean",
               "original",
-              "imported"
+              "imported",
+              "screeningReport"
             ]
           }
         ],
@@ -369,6 +371,81 @@
         }
       }
     },
+    "/v1/playbooks": {
+      "get": {
+        "tags": [
+          "Playbooks"
+        ],
+        "summary": "Get playbooks",
+        "description": "Get available playbooks.",
+        "operationId": "GetPlaybook",
+        "produces": [
+          "text/plain",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "skip",
+            "x-ms-summary": "Skip",
+            "description": "Skip N types. Default 0.",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "take",
+            "x-ms-summary": "Take",
+            "description": "Take N types. Default 200.",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "x-ms-summary": "Sort Field",
+            "description": "Sort field.",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "x-ms-summary": "Filter",
+            "description": "Filter to names including given string.",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "simpleResponse",
+            "description": "Return short version",
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "default": "true",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/PlaybookListApiStandardResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ApiStandardResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ApiStandardResponse"
+            }
+          }
+        }
+      }
+    },
     "/v1/subscriptions/{id}": {
       "delete": {
         "description": "Deletes a subscription",
@@ -409,9 +486,9 @@
     },
     "/v1/subscriptions/turnCompleted": {
       "x-ms-notification-content": {
-        "description": "TurnCreatedMessage",
+        "description": "TurnCompletedMessage",
         "schema": {
-          "$ref": "#/definitions/SubscriptionMessage"
+          "$ref": "#/definitions/TurnSubscriptionMessage"
         }
       },
       "post": {
@@ -473,7 +550,7 @@
       "x-ms-notification-content": {
         "description": "TurnCreatedMessage",
         "schema": {
-          "$ref": "#/definitions/SubscriptionMessage"
+          "$ref": "#/definitions/TurnSubscriptionMessage"
         }
       },
       "post": {
@@ -535,7 +612,7 @@
       "x-ms-notification-content": {
         "description": "TurnCreatedMessage",
         "schema": {
-          "$ref": "#/definitions/SubscriptionMessage"
+          "$ref": "#/definitions/TurnSubscriptionMessage"
         }
       },
       "post": {
@@ -568,6 +645,68 @@
         "summary": "Turn Created",
         "description": "Turn Created",
         "operationId": "TurnCreatedTrigger",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webhookUrl": {
+                  "type": "string",
+                  "description": "webhookUrl",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": ""
+                }
+              },
+              "required": [
+                "webhookUrl"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v1/subscriptions/turnMention": {
+      "x-ms-notification-content": {
+        "description": "TurnMentionMessage",
+        "schema": {
+          "$ref": "#/definitions/TurnMentionSubscriptionMessage"
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SubscriptionApiStandardResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ApiStandardResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ApiStandardResponse"
+            }
+          }
+        },
+        "summary": "Mention in Turn",
+        "description": "Mention in Turn",
+        "operationId": "TurnMentionTrigger",
         "x-ms-trigger": "single",
         "parameters": [
           {
@@ -792,7 +931,8 @@
               "completedWithMarkup",
               "completedClean",
               "original",
-              "imported"
+              "imported",
+              "screeningreport"
             ]
           }
         ],
@@ -865,7 +1005,8 @@
               "completedWithMarkup",
               "completedClean",
               "original",
-              "imported"
+              "imported",
+              "screeningreport"
             ]
           }
         ],
@@ -920,36 +1061,54 @@
     },
     "Contract": {
       "type": "object",
+      "title": "Contract",
       "properties": {
         "description": {
+          "title": "Description",
           "type": "string"
         },
         "id": {
+          "title": "Id",
           "format": "uuid",
-          "type": "string"
+          "type": "string",
+          "x-ms-visibility": "important"
         },
         "latestTurnId": {
+          "title": "Latest Turn Id",
           "format": "uuid",
           "type": "string"
         },
         "lastModified": {
+          "title": "Last Modified Date",
           "format": "date-time",
           "type": "string"
         },
         "name": {
+          "title": "Name",
           "type": "string"
         },
         "type": {
-          "$ref": "#/definitions/ContractType"
+          "title": "Type",
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "ID",
+              "format": "int32",
+              "type": "integer"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "description": {
+              "title": "Description",
+              "type": "string"
+            }
+          }
         },
         "counterParty": {
+          "title": "Counterparty",
           "$ref": "#/definitions/CounterParty"
-        },
-        "turns": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Turn"
-          }
         },
         "extendedData": {
           "$ref": "#/definitions/ExtendedData"
@@ -989,6 +1148,28 @@
             "operationId": "GetContractType",
             "value-path": "id",
             "value-title": "name"
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "GetContractType",
+            "itemValuePath": "id",
+            "itemTitlePath": "name"
+          }
+        },
+        "playbookId": {
+          "title": "Playbook",
+          "format": "int32",
+          "description": "Playbook for contract",
+          "type": "integer",
+          "x-ms-summary": "Playbook form",
+          "x-ms-dynamic-values": {
+            "operationId": "GetPlaybook",
+            "value-path": "id",
+            "value-title": "title"
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "GetPlaybook",
+            "itemValuePath": "id",
+            "itemTitlePath": "title"
           }
         },
         "counterPartyName": {
@@ -1010,12 +1191,17 @@
           "title": "Contract file name",
           "maxLength": 300,
           "type": "string"
+        },
+        "owningUserEmail": {
+          "title": "Owning User's Email Address",
+          "type": "string",
+          "maxLength": 300
         }
       }
     },
     "ContractType": {
       "type": "object",
-      "title": "Contract type",
+      "title": "Contract Type",
       "properties": {
         "id": {
           "title": "ID",
@@ -1187,6 +1373,64 @@
         }
       }
     },
+    "Playbook": {
+      "type": "object",
+      "title": "Playbook",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "format": "int32",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Title",
+          "type": "string"
+        },
+        "contractType": {
+          "$ref": "#/definitions/ContractType"
+        }
+      }
+    },
+    "PlaybookListApiStandardResponse": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/definitions/ApiStandardResponseMeta"
+        },
+        "response": {
+          "$ref": "#/definitions/PlaybookList"
+        }
+      }
+    },
+    "PlaybookList": {
+      "type": "object",
+      "properties": {
+        "totalCount": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "skip": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "take": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "filter": {
+          "type": "string"
+        },
+        "sortBy": {
+          "type": "string"
+        },
+        "playbooks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Playbook"
+          }
+        }
+      }
+    },
     "StagedImport": {
       "type": "object",
       "properties": {
@@ -1280,7 +1524,7 @@
         }
       }
     },
-    "SubscriptionMessage": {
+    "TurnSubscriptionMessage": {
       "type": "object",
       "properties": {
         "messageId": {
@@ -1304,7 +1548,7 @@
           "description": "type"
         },
         "url": {
-          "title": "DocJuris URL",
+          "title": "URL to DocJuris",
           "type": "string",
           "description": "url"
         },
@@ -1329,6 +1573,122 @@
                 "type": "string",
                 "description": "description"
               }
+            }
+          }
+        }
+      }
+    },
+    "TurnMentionSubscriptionMessage": {
+      "type": "object",
+      "properties": {
+        "messageId": {
+          "title": "Message ID",
+          "type": "string",
+          "description": "id"
+        },
+        "turnId": {
+          "title": "Turn ID",
+          "type": "string",
+          "description": "id"
+        },
+        "contractId": {
+          "title": "Contract ID",
+          "type": "string",
+          "description": "contractId"
+        },
+        "type": {
+          "title": "Event type",
+          "type": "string",
+          "description": "type"
+        },
+        "url": {
+          "title": "URL to DocJuris",
+          "type": "string",
+          "description": "url"
+        },
+        "tags": {
+          "type": "array",
+          "title": "Tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "title": "ID",
+                "type": "string",
+                "description": "id"
+              },
+              "name": {
+                "title": "Name",
+                "type": "string",
+                "description": "name"
+              },
+              "description": {
+                "title": "Description",
+                "type": "string",
+                "description": "description"
+              }
+            }
+          }
+        },
+        "mention": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "title": "Text",
+              "type": "string",
+              "description": "text"
+            },
+            "mentioningUser": {
+              "title": "Mentioning User",
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "title": "First Name",
+                  "type": "string",
+                  "description": "firstName"
+                },
+                "lastName": {
+                  "title": "Last Name",
+                  "type": "string",
+                  "description": "lastName"
+                },
+                "userName": {
+                  "title": "Username",
+                  "type": "string",
+                  "description": "userName"
+                }
+              }
+            },
+            "mentionedUser": {
+              "title": "Mentioned User",
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "title": "First Name",
+                  "type": "string",
+                  "description": "firstName"
+                },
+                "lastName": {
+                  "title": "Last Name",
+                  "type": "string",
+                  "description": "lastName"
+                },
+                "userName": {
+                  "title": "Username",
+                  "type": "string",
+                  "description": "userName"
+                }
+              }
+            },
+            "commentId": {
+              "title": "Commend ID",
+              "type": "string",
+              "description": "commentId"
+            },
+            "url": {
+              "title": "Link to comment in DocJuris",
+              "type": "string",
+              "description": "url"
             }
           }
         }
@@ -1402,7 +1762,7 @@
       "type": "object",
       "properties": {
         "source": {
-          "description": "A string that describes who this turn is from (i.e. internal dept., outside counsel, etc.). If this turn is from the counter party leave this blank.",
+          "description": "A string that describes who this turn is from (i.e. internal dept., outside counsel, etc.). If this turn is from the counterparty leave this blank.",
           "type": "string"
         },
         "description": {
@@ -1446,10 +1806,10 @@
     },
     "Urls": {
       "type": "object",
-      "title": "Urls",
+      "title": "Url",
       "properties": {
         "app": {
-          "title": "(Docjuris App)",
+          "title": "to DocJuris",
           "type": "string"
         }
       }
