@@ -1,16 +1,20 @@
-##Alkymi Connector
+## Alkymi Connector
 
-Alkymi provides an external API which allows you to easily access the data extracted from unstructured documents 
-processed by the Alkymi app. This connector will allow you to easily pipe data from the external API to any of the apps 
-in the Microsoft PowerApps ecosystem.
+Alkymi transforms enterprise workflows by placing machine learning and automation technology into the hands of business 
+users, turning operational data headaches into a source of efficiency. Alkymi’s core products—Data Inbox and Patterns—
+allow businesses to extract, analyze, and take action on critical business data in emails and documents.
 
-##Prerequisites
+The Alkymi connector allows you to easily access the data extracted from unstructured documents processed by the Alkymi 
+app. This connector will allow you to easily pipe data from the external API to any of the apps in the Microsoft 
+PowerApps ecosystem.
+
+## Prerequisites
 
 You will need to have an active `alkymi.io` domain and API key to leverage this connector. 
 
 https://github.com/microsoft/PowerPlatformConnectors.git
 
-##Building The Connector
+## Building The Connector
 
 Once you have your alkymi.io account configured, you can navigate to the `{YOUR_DOMAIN}alkymi.io/admin` page to create 
 and / or access your API key. Once you have the required login information, you can deploy the sample connector by 
@@ -18,8 +22,8 @@ running the following command:
 
 ```paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json```  
 
-##Supported Operations
-####Triggers
+## Supported Operations
+#### Triggers
 - `When an Alkymi event triggers`: This trigger is executed when any of the selected Alkymi events occur. When a 
 document is submitted to Data Inbox, it is first uploaded and then processed by the system. A document may, at rare 
 time, error out upon processing. A user then has the ability to mark the document as reviewed or removed from the UI. 
@@ -35,7 +39,7 @@ The user can also create, modify, or delete specific records within a document a
     - `record_delete`: triggers on record deletion and subsequent save.
     - `record_modified`: triggers on alteration of record field data and subsequent save.
     
-####Actions
+#### Actions
 - `List All Datasets`: Lists all of the datasets available on the tenant. 
   [Documentation Reference](https://alkymi-api.readme.io/reference#get-dataset-list)
 - `List All Documents`: Lists all of the documents available on the tenant.
@@ -63,8 +67,8 @@ The user can also create, modify, or delete specific records within a document a
 [Documentation Reference](https://alkymi-api.readme.io/reference#get-record-detail)
 - `Upload Document File`: Uploads a file to a Data Inbox tenant for processing.
 
-##Test Screenshot
+## Test Screenshot
 ![TestScreenshot](./TestScreenshot.png)
 
- ##Successful Run Screenshot
+ ## Successful Run Screenshot
 ![TestScreenshot](./FlowRunScreenshot.png)
