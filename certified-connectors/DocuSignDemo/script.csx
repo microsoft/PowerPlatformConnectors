@@ -256,25 +256,36 @@ public class Script : ScriptBase
 
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
-    var signers = body["signers"] as JArray;
-    if (signers == null || signers.Count == 0)
-    {
-      signers = new JArray
-            {
-                new JObject(),
-            };
-    }
-
+    var signers = new JArray
+      {
+        new JObject(),
+      };
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["name"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeName")).Replace("+", " ");
-    signers[0]["email"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeEmail")).Replace("+", " ");
+    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
+    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
     if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
     {
       signers[0]["recipientId"] = Guid.NewGuid();
     }
+    if(body["routingOrder"] != null) 
+    {
+      signers[0]["routingOrder"] = body["routingOrder"];
+    }
+    if(body["roleName"] != null) 
+    {
+      signers[0]["roleName"] = body["roleName"];
+    }
 
     body["signers"] = signers;
     return body;
+  }
+
+  private int GenerateDocumentId() 
+  {
+    DateTimeOffset now = DateTimeOffset.UtcNow;
+    DateTime midnight = DateTime.Now.Date;
+    TimeSpan ts = now.Subtract(midnight);
+    return (int)ts.TotalMilliseconds;
   }
 
   private JObject AddDocumentsToEnvelopeBodyTransformation(JObject body)
@@ -283,7 +294,7 @@ public class Script : ScriptBase
 
     for (var i = 0; i < documents.Count; i++)
     {
-      documents[i]["documentId"] = $"{i + 1}";
+      documents[i]["documentId"] = $"{GenerateDocumentId()}";
     }
 
     body["documents"] = documents;
