@@ -6,8 +6,6 @@ pool:
   - pwsh:
       $errorsTotal = 0
       $warningsTotal = 0
-      
-      $suppressWarnings = true;
 
       # Get the list of files for the given PR
       $currentLocation = Get-Location
@@ -31,6 +29,8 @@ pool:
         
         $errors = $results.Errors
         $warnings = $results.Warnings
+        
+        $suppressWarnings = true
 
         if ($errors) {
           $errorsTotal += $errors.Count
@@ -56,7 +56,10 @@ pool:
           $changeValidationJson = ConvertTo-Json $changeValidation -Depth 100 -Compress
 
           # Validate changes
-          $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body $changeValidationJson
+          $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body @{
+                                                                                                                                                        changeValidationJson = $changeValidationJson
+                                                                                                                                                        suppressWarnings = $suppressWarnings
+                                                                                                                                                       }
 
           $errors = $results.Errors
           $warnings = $results.Warnings
