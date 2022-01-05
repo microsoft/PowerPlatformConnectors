@@ -2,10 +2,10 @@
 Viafirma lets you to sign and send documents anywhere. Automate processes with customers, suppliers and employees with our eSignature solution.
 
 ## Prerequisites
-You will need a [Viafirma account] (https://www.viafirma.com/en/contact/) to proceed.
+You will need a [Viafirma account](https://www.viafirma.com/en/contact/) to proceed.
 
 ## Documentation 
-You can have have a look at our [documentation website] (https://doc.viafirma.com/documents/api/latest/en/) for further information or reach out to the support team at support@viafirma.com
+You can have have a look at our [documentation website](https://doc.viafirma.com/documents/api/latest/en/) for further information or reach out to the support team at support@viafirma.com
 
 ## I need help with connector implementation. Can I contact you?
 Of course, just send us a message at support@viafirma.com
