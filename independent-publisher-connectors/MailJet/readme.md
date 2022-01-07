@@ -11,9 +11,7 @@ The connector supports the following operations:
 * `Send Email v3.1`: Send an email message via Send API v3.1.
 * `Send Email v3`: Send an email message via Send API v3.
 * `Get Messages`: Get a list of messages with specific information on the type of content, tracking, sending and delivery.
-* `Get Message by ID`: Retrieve specific information on the type of content, tracking, sending and delivery for a specific processed message.
 * `Get Messages Information`: Retrieve sending / size / spam information about all messages.
-* `Get Message Information By ID`: Retrieve sending / size / spam information about a specific message ID.
 * `Get Contacts`: Retrieve a list of all contacts. Includes information about contact status and creation / activity timestamps.
 * `Create  Contact`: Add a new unique contact to your global contact list and select its exclusion status.
 * `Get Contact By ID`: Retrieve a specific contact.
