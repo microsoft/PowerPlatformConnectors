@@ -1,6 +1,8 @@
 ## Viafirma Connector
 Viafirma lets you to sign and send documents anywhere. Automate processes with customers, suppliers and employees with our eSignature solution.
 
+## Publisher: Viafirma
+
 ## Prerequisites
 You will need a [Viafirma account](https://www.viafirma.com/en/contact/) to proceed.
 
