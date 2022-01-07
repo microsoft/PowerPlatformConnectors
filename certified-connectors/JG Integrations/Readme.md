@@ -1,7 +1,7 @@
 # JG Integrations Flow Connector
 This connector was designed with our clients in mind however it provides a diverse range of tools that benefit all users.
 
-## JG Software Solutions Limited
+## Publisher: JG Software Solutions Limited
 JG Software Solutions are experts in cloud automation and integration and we specialise in the Microsoft Power Automate ecosystem.
 
 If you would like to request an update to this connector please reach out - [flowconnector@jgsolutions.co.nz](mailto:flowconnector@jgsolutions.co.nz?subject=Request%20new%20Feature)
