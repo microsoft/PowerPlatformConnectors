@@ -25,7 +25,10 @@ steps:
         # Validate apiProperties json
         $isCertValidation = $file -Like "*certified-connectors/*" -Or $file -Like "*independent-publisher-connectors/*"
         $apiPropertiesValidatorUri = "$($env:apiPropertiesValidator)?IsCertificationValidation=$isCertValidation"
-        $results = Invoke-RestMethod -Uri $apiPropertiesValidatorUri -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body $newFileContent $suppressWarnings
+        $results = Invoke-RestMethod -Uri $apiPropertiesValidatorUri -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body @{
+                                                                                                                                                            newFileContent = $newFileContent
+                                                                                                                                                            suppressWarnings = $suppressWarnings
+                                                                                                                                                          }
         
         $errors = $results.Errors
         $warnings = $results.Warnings
@@ -56,10 +59,8 @@ steps:
           $changeValidationJson = ConvertTo-Json $changeValidation -Depth 100 -Compress
 
           # Validate changes
-          $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body @{
-                                                                                                                                                        changeValidationJson = $changeValidationJson
-                                                                                                                                                        suppressWarnings = $suppressWarnings
-                                                                                                                                                       }
+          $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body $changeValidationJson
+                                                                                                                                                       
 
           $errors = $results.Errors
           $warnings = $results.Warnings
@@ -88,6 +89,6 @@ steps:
           Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
       }
     env:
-      apiPropertiesValidator: "$(ConnectorsRP)/ValidateApiProperties"
+      apiPropertiesValidator: "$(ConnectorsRP)/ValidateApiProperties" // TODO - Connect to connectors RP service 
       changeValidator: "$(ConnectorsRP)/ValidateChange"
       token: $(token)
