@@ -60,7 +60,8 @@ Get the profile URL for your account.
 
 ## Obtaining Credentials
 
-!TODO
+For authorization put the API token associated with your account in a header field 'Authorization' with value 'Token MY-TOKEN'.
+You can find your API token at the bottom of: [getrevue.co/app/integrations](https://getrevue.co/app/integrations)
 
 ## Known Issues and Limitations
 
