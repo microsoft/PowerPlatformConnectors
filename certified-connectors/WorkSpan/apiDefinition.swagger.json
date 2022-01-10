@@ -3,7 +3,7 @@
   "info": {
     "title": "WorkSpan",
     "description": "WorkSpan is a collaborative platform to plan, execute, and drive revenue with partners. Manage your partner programs and partner initiatives on WorkSpan, and connect seamlessly with internal and partner applications. You can integrate your CRM, Partner Center, Collaboration tools and Productivity tools to WorkSpan.",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "contact": {
       "name": "WorkSpan API Support",
       "url": "https://support.workspan.com",
@@ -32,9 +32,9 @@
   "securityDefinitions": {
     "workspan_auth": {
       "type": "oauth2",
+      "flow": "accessCode",
       "authorizationUrl": "https://api.workspan.com/oauth/authorize",
       "tokenUrl": "https://api.workspan.com/oauth/token",
-      "flow": "accessCode",
       "scopes": {}
     }
   },
@@ -293,14 +293,14 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "successful operation"
+          },
           "400": {
             "description": "Invalid ID supplied"
           },
           "404": {
             "description": "subscriber not found"
-          },
-          "200": {
-            "description": "successful operation"
           }
         },
         "x-ms-visibility": "internal"
@@ -354,6 +354,12 @@
       }
     },
     "/event/v1/subscriber/object_integration_event": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/wsobject_event_payload"
+        },
+        "description": "Schema of object event"
+      },
       "post": {
         "operationId": "SubscribeObjectEvent",
         "x-ms-trigger": "single",
@@ -401,7 +407,8 @@
                       "object.update",
                       "object.delete",
                       "object.stage_change",
-                      "object.partner_center_referral_submit"
+                      "object.partner_center_referral_submit",
+                      "report.submit"
                     ]
                   }
                 },
@@ -462,15 +469,15 @@
             "description": "Error when subscribing to event"
           }
         }
-      },
+      }
+    },
+    "/event/v1/subscriber/submit_to_partner_center": {
       "x-ms-notification-content": {
         "schema": {
           "$ref": "#/definitions/wsobject_event_payload"
         },
         "description": "Schema of object event"
-      }
-    },
-    "/event/v1/subscriber/submit_to_partner_center": {
+      },
       "post": {
         "operationId": "SubmitToPartnerCenterObjectEvent",
         "x-ms-trigger": "single",
@@ -558,12 +565,6 @@
             "description": "Error when subscribing to event"
           }
         }
-      },
-      "x-ms-notification-content": {
-        "schema": {
-          "$ref": "#/definitions/wsobject_event_payload"
-        },
-        "description": "Schema of object event"
       }
     },
     "/event/v1/metadata/integration/{integration_id}": {
@@ -1118,6 +1119,119 @@
           "application/json"
         ]
       }
+    },
+    "/report/v1/list": {
+      "post": {
+        "operationId": "GetReportList",
+        "summary": "Get list of reports",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "number"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "size"
+                    }
+                  },
+                  "description": "page"
+                }
+              }
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "List Report Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "id"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "name"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "API Error"
+          },
+          "404": {
+            "description": "report not defined"
+          }
+        },
+        "description": "List reports",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/report/v1/{reportId}/data": {
+      "post": {
+        "operationId": "GetReportData",
+        "summary": "Read report data",
+        "description": "Read report data",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reportId",
+            "required": true,
+            "format": "int64",
+            "type": "integer",
+            "x-ms-url-encoding": "single",
+            "description": "Report Id",
+            "x-ms-summary": "Report Id"
+          },
+          {
+            "name": "request_body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ReportDataRequest"
+            },
+            "description": "Request body for report read request"
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Read Report Success",
+            "schema": {
+              "$ref": "#/definitions/ReportDataResponse"
+            }
+          },
+          "400": {
+            "description": "API Error"
+          },
+          "404": {
+            "description": "report not defined"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1521,6 +1635,235 @@
         "field_name": "partner_center.integration_status",
         "status_code": "LINKED"
       }
+    },
+    "ReportListRequest": {
+      "properties": {
+        "page": {
+          "$ref": "#/definitions/ReportPageDto"
+        }
+      },
+      "type": "object"
+    },
+    "PageDto": {
+      "properties": {
+        "number": {
+          "format": "int64",
+          "minimum": 0,
+          "type": "integer",
+          "default": 0
+        },
+        "size": {
+          "format": "int64",
+          "maximum": 10000,
+          "minimum": 1,
+          "type": "integer",
+          "default": 500
+        }
+      },
+      "required": [
+        "number",
+        "size"
+      ],
+      "type": "object"
+    },
+    "ReportListResponse": {
+      "properties": {
+        "endOfList": {
+          "type": "boolean"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/definitions/ReportBaseDto"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "PersonBaseDto": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "ReportBaseDto": {
+      "properties": {
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "createdBy": {
+          "$ref": "#/definitions/PersonBaseDto"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "modifiedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "modifiedBy": {
+          "$ref": "#/definitions/PersonBaseDto"
+        },
+        "name": {
+          "type": "string"
+        },
+        "reportStatus": {
+          "enum": [
+            "DRAFT",
+            "PUBLISHED"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    },
+    "ReportPageDto": {
+      "properties": {
+        "number": {
+          "format": "int64",
+          "minimum": 0,
+          "type": "integer",
+          "default": 0
+        },
+        "size": {
+          "format": "int64",
+          "maximum": 10000,
+          "minimum": 1,
+          "type": "integer",
+          "default": 500
+        }
+      },
+      "required": [
+        "number",
+        "size"
+      ],
+      "type": "object"
+    },
+    "ReportDataRequest": {
+      "properties": {
+        "filters": {
+          "$ref": "#/definitions/ReportFilterContainer"
+        },
+        "page": {
+          "$ref": "#/definitions/ReportPageDto"
+        }
+      },
+      "type": "object"
+    },
+    "ReportDataResponse": {
+      "properties": {
+        "endOfList": {
+          "type": "boolean"
+        },
+        "results": {
+          "items": {
+            "additionalProperties": true
+          },
+          "type": "array"
+        },
+        "version": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "ReportFieldFilter": {
+      "properties": {
+        "colId": {
+          "type": "string"
+        },
+        "filter": {
+          "$ref": "#/definitions/ReportFilter"
+        },
+        "type": {
+          "enum": [
+            "TEXT",
+            "TEXT_REPEATED",
+            "TEXT_PG_ARRAY",
+            "BOOLEAN",
+            "NUMBER",
+            "DECIMAL",
+            "DATE",
+            "DATE_OFFSET",
+            "DATE_TIME",
+            "DATE_TIME_OFFSET",
+            "CURRENCY"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ReportFilter": {
+      "properties": {
+        "negate": {
+          "type": "boolean",
+          "title": "",
+          "enum": [
+            true,
+            false
+          ]
+        },
+        "op": {
+          "enum": [
+            "EQUAL_TO",
+            "IS_EMPTY",
+            "CONTAIN",
+            "START_WITH",
+            "END_WITH",
+            "IN",
+            "GREATER_THAN",
+            "LESS_THAN",
+            "GREATER_THAN_OR_EQUAL_TO",
+            "LESS_THAN_OR_EQUAL_TO",
+            "BETWEEN",
+            "OFFSET"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ReportFilterContainer": {
+      "properties": {
+        "fieldFilters": {
+          "items": {
+            "$ref": "#/definitions/ReportFieldFilter"
+          },
+          "type": "array"
+        },
+        "op": {
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
     }
-  }
+  },
+  "security": [
+    {
+      "oauth2_auth": []
+    }
+  ]
 }
