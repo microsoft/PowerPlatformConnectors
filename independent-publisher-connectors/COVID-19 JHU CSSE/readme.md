@@ -1,4 +1,4 @@
-# COVID-19 API
+# COVID-19 JHU CSSE
 This API provides the information regarding '2019 Novel Coronavirus (covid-19)'. It contains a number of confirmed, death, and recovered cases based on the data provided by the Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE).
 
 ## Publisher: Woong Choi
