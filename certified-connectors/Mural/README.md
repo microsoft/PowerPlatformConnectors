@@ -2,6 +2,8 @@
 
 MURAL is a digital workspace for visual collaboration. Enables innovative teams to think and collaborate visually to solve important problems.
 
+## Publisher: MURAL
+
 ## Prerequisites
 
 You will need the following to proceed:
@@ -12,7 +14,13 @@ You will need the following to proceed:
 
 * The Power platform CLI tools
 
-## Deploying the sample
+## Obtaining Credentials
+
+You need to register on https://app.mural.co/
+
+And need to create a new application on this page https://app.mural.co/me/apps
+
+## Deployment Instructions
 
 > paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>
 
@@ -23,3 +31,7 @@ The connector supports the following operations:
 * Create Mural
 
 * Create Sticky-note
+
+## Known Issues and Limitations
+
+N/A
