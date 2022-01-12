@@ -1,13 +1,13 @@
-# Actsoft Mobile Workforce Plus
-Mobile Workforce Plus allows you to create and capture digital form information, capture employee timekeeping information, and manage work orders with a dispatching system.
+# Actsoft TeamWherx
+TeamWherx allows you to create and capture digital form information, capture employee timekeeping information, and manage work orders with a dispatching system.
 
-This connector uses the [Mobile Workforce Plus APIs]( https://developer.wfmplatform.com/) to make it easy to interact with information captured using the application.  You can utilize various triggers or actions in the connector to easily extract data from Mobile Workforce Plus and integrate with other applications.
+This connector uses the [TeamWherx APIs]( https://developer.wfmplatform.com/) to make it easy to interact with information captured using the application.  You can utilize various triggers or actions in the connector to easily extract data from TeamWherx and integrate with other applications.
 
 # Prerequisites
 In order to use this connector, you will need the following:
 
-- An active Mobile Workforce Plus Account
-- Mobile Workforce Plus API Key
+- An active TeamWherx Account
+- TeamWherx API Key
 - Microsoft Power Apps or Power Automate plan
 
 
@@ -84,9 +84,9 @@ In order to use this connector, you will need the following:
 
 
 ## Obtaining Credentials
-Developer API portal credentials are managed in the Mobile Workforce Plus web application. Please contact the application administrator for access.
+Developer API portal credentials are managed in the TeamWherx web application. Please contact the application administrator for access.
 
-After credentials are created, the developer portal can be accessed at: [Mobile Workforce Plus APIs](https://developer.wfmplatform.com/)
+After credentials are created, the developer portal can be accessed at: [TeamWherx APIs](https://developer.wfmplatform.com/)
 
 
 
