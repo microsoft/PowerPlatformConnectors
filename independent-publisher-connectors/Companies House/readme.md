@@ -17,7 +17,7 @@ The connector supports the following operations:
 * `List Person of Significant Control`: List Persons of Significant Control by Company Number
 * `List Statements for Person of Significant Control`: List Statements for Person of Significant Control
 * `Individual PSC`: Find information about a Person of Significan Control by Company Number and PCS ID
-* `UK Establishments`: Encrypts an arbitrary sequence of bytes using an encryption key
+* `UK Establishments`: Lists UK Establishment Companies
 * `Officer Appointment by Officer Id`: Officer Appointment by Officer Id
 * `Filing History By Number and Id`: Filing History By Number and Id
 * `Charges By Company Number`: Company Charges By Company Number
@@ -33,7 +33,7 @@ An API key is required for this connector to work. You can sign up for free with
 
 ## Known issues and limitations
 
-There are no known issues and limitations.
+There are no known issues with this connector. There are functions in the API not implemented in this connector and I will continue to work on these if I can resolve the functions/syntax.
 
 ## Deployment Instructions
 
