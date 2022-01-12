@@ -8,6 +8,10 @@ The Alkymi connector allows you to easily access the data extracted from unstruc
 app. This connector will allow you to easily pipe data from the external API to any of the apps in the Microsoft 
 PowerApps ecosystem.
 
+## Publisher
+
+Alkymi (https://www.alkymi.io/)
+
 ## Prerequisites
 
 You will need to have an active `alkymi.io` domain and API key to leverage this connector. 
