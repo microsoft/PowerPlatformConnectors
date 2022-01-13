@@ -4,7 +4,7 @@ Tribal Edge modules, such as Tribal Admissions, provide staff and students the t
 
 ## Prerequisites
 1. Sign in to create a connection using your Tribal account to define the following:
-- Environment such as pre-production or production.
+- Environment such as Live, Test or Development.
 - Region such as APAC or EMEA.
 - Edge Tenant ID as supplied by Tribal.
 - Service Name such as Admissions.
@@ -22,44 +22,34 @@ Tribal Edge modules, such as Tribal Admissions, provide staff and students the t
 
 ### Triggers
 
-`When an entity is created`
+- `When an entity is created`: Triggers anytime an entity is changed within a Tribal Edge module.
 
-`When an entity is updated`
+- `When an entity is updated`: Triggers anytime an entity is updated within a Tribal Edge module.
 
-`When an entity is deleted`
+- `When an entity is deleted`: Triggers anytime an entity is deleted within a Tribal Edge module.
 
-`When an event is triggered on an entity`  
-Use this trigger for custom event types like Status changed, Cancel interview, Request visa and so on.
+- `When an event is triggered on an entity`: Use this trigger for custom event types like Status changed, Cancel interview, Request visa and so on.
 
-`When a long running operation is performed on an entity`   
-Use this trigger as a consecutive trigger on flow where the first trigger is one of the above.
+- `When a long running operation is performed on an entity`: Use this trigger as a consecutive trigger on flow where the first trigger is one of the above.
 
 ### Actions
 
-`Create an entity`
+- `Create an entity`: Creates an entity within a Tribal Edge module
 
-`Create a child entity`
+- `Create a child entity`: Creates an entity which is a child of another entity within a Tribal Edge module
 
-`Update a child entity`
+- `Read an entity`: Reads an entity within a Tribal Edge module
 
-`Update an entity`
+- `Read a child entity`: Creates an entity which is a child of another entity within a Tribal Edge module
 
-`Delete a child entity`
+- `Read entity collection`: Reads a collection of entities within a Tribal Edge module. Additional filtering is available for the records using Open Data Protocol syntax.  
 
-`Delete an entity`
+- `Read child entity collection`:  Reads a collection of entities which are children of another entity within a Tribal Edge module. Additional filtering is available for the records using Open Data Protocol syntax.
 
-`Read a child entity`
+- `Update an entity`: Updates an entity within a Tribal Edge module
 
-`Read an entity`
+- `Update a child entity`: Updates an entity which is a child of another entity within a Tribal Edge module
 
-`Read child entity collection`  
-Additional filtering is available for the records using Open Data Protocol syntax.
+- `Delete an entity`: Deletes an entity within a Tribal Edge module
 
-`Read parent entity collection`  
-Additional filtering is available for the records using Open Data Protocol syntax.
-
-## Deployment instructions
-Deploy the Tribal Connector as a custom connector in Microsoft Power Automate and Power Apps as detailed in [Microsoft Power Platform Connectors CLI](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli)
-
-## Support
-For support, contact us at servicedesk@tribalgroup.com.
+- `Delete a child entity`: Deletes an entity which is a child of another entity within a Tribal Edge module
