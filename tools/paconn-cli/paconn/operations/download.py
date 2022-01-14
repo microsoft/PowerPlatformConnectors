@@ -34,7 +34,7 @@ from paconn.operations.json_keys import (
 )
 
 
-def _prepare_directory(destination, overwrite, connector_id):
+def _prepare_directory(destination, connector_id):
     """
     Create directory for saving a connector.
     """
@@ -84,8 +84,7 @@ def download(powerapps_rp, settings, destination, overwrite):
     """
     # Prepare folders
     directory = _prepare_directory(
-        destination=destination,
-        overwrite=overwrite,
+        destination=destination,        
         connector_id=settings.connector_id)
 
     # Check if files could be overwritten
