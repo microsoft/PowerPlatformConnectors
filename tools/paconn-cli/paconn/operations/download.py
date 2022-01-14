@@ -34,7 +34,7 @@ from paconn.operations.json_keys import (
 )
 
 
-def _prepare_directory(destination, connector_id):
+def _prepare_directory(destination, overwrite, connector_id):
     """
     Create directory for saving a connector.
     """
@@ -47,9 +47,8 @@ def _prepare_directory(destination, connector_id):
     # Create a sub-directory in the current directory
     # when a destination isn't provided
     else:
-        if os.path.isdir(connector_id):
-            error = '{} directory already exists. Please remove the directory before continuing.'
-            raise CLIError(error.format(connector_id))
+        if os.path.isdir(connector_id):            
+            destination = connector_id
         else:
             os.mkdir(connector_id)
             destination = connector_id
@@ -86,6 +85,7 @@ def download(powerapps_rp, settings, destination, overwrite):
     # Prepare folders
     directory = _prepare_directory(
         destination=destination,
+        overwrite=overwrite,
         connector_id=settings.connector_id)
 
     # Check if files could be overwritten
