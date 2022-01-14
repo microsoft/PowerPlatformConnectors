@@ -22,7 +22,7 @@ Tribal Edge modules, such as Tribal Admissions, provide staff and students the t
 
 ### Triggers
 
-- `When an entity is created`: Triggers anytime an entity is changed within a Tribal Edge module.
+- `When an entity is created`: Triggers anytime an entity is created within a Tribal Edge module.
 
 - `When an entity is updated`: Triggers anytime an entity is updated within a Tribal Edge module.
 
@@ -40,7 +40,7 @@ Tribal Edge modules, such as Tribal Admissions, provide staff and students the t
 
 - `Read an entity`: Reads an entity within a Tribal Edge module
 
-- `Read a child entity`: Creates an entity which is a child of another entity within a Tribal Edge module
+- `Read a child entity`: Reads an entity which is a child of another entity within a Tribal Edge module
 
 - `Read entity collection`: Reads a collection of entities within a Tribal Edge module. Additional filtering is available for the records using Open Data Protocol syntax.  
 
