@@ -47,11 +47,9 @@ def _prepare_directory(destination, connector_id):
     # Create a sub-directory in the current directory
     # when a destination isn't provided
     else:
-        if os.path.isdir(connector_id):            
-            destination = connector_id
-        else:
+        if not os.path.isdir(connector_id):
             os.mkdir(connector_id)
-            destination = connector_id
+        destination = connector_id
 
     if os.path.isdir(destination):
         os.chdir(destination)
@@ -84,7 +82,7 @@ def download(powerapps_rp, settings, destination, overwrite):
     """
     # Prepare folders
     directory = _prepare_directory(
-        destination=destination,        
+        destination=destination,
         connector_id=settings.connector_id)
 
     # Check if files could be overwritten
