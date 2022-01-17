@@ -24,11 +24,33 @@ You will need the following to proceed:
  - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
  - **from** - your Viber Service ID
  - **text** - text of your Viber message
+
+- **Send Rich Media** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+ - To make a successful request, please, populate the followings fields:
+ - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
+ - **from** - your Viber Service ID
+ - **components type - 1**  - type of sent media (an image)
+ - **components url - 1** - url to given media (the link to image)
+
 - **Status Check**
  - To make a successful status check, please, provide the connector with the following values
 
  - **id** - messageID of your message (_returned after each request_)
 
+
+
+## Supported Triggers
+- **Incoming Message** Trigger any flow on new incoming messages
+    - **Response Fields**
+        - **messageId** (the message ID)
+        - **channel** - the channel on which the message was received (viber, whatsapp or sms)
+        - **from** - the sender's phone number
+        - **to** - the reciever's phone number (you)
+        - **receivedAt** - when was the message received
+        - **text** - the text of the message
+        - **file** - any attached file to the message
+        - **event** - on which event the webhook was triggered
+        - **timestamp** - the timestamp of the message
 
 ## How to get API key 
 Please [sign up for a free account](https://www.tyntec.com/create-account). In your account, select the [API settings](http://my.tyntec.com/api-settings) and copy your API key.

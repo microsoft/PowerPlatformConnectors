@@ -57,6 +57,11 @@ The API properties file contains some properties for the custom connector. These
       }
     },
     "iconBrandColor": "#007EE6",
+    "scriptOperations": [
+        "getCall",
+        "postCall",
+        "putCall"
+    ],
     "policyTemplateInstances": [
       {
         "title": "MyPolicy",
@@ -80,6 +85,8 @@ More information on the each of the properties are given below:
 
 * `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
 
+* `scriptOperations`: A list of the operations that are executed with the script file. An empty scriptOperations list indicates that all operations are executed with the script file.
+
 * `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
 
 * `policyTemplateInstances`: An optional list of policy template instances and values used in the custom connector.
@@ -87,6 +94,10 @@ More information on the each of the properties are given below:
 ### Icon File
 
 The icon is icon image file for the custom connector.
+
+### Script File
+
+The script is a CSX script file that is deployed for the custom connector and executed for every call to a subset of the connector's operations.
 
 ### Settings File
 
@@ -99,6 +110,7 @@ Instead of providing the arguments in the command line, a `settings.json` file c
   "apiProperties": "apiProperties.json",
   "apiDefinition": "apiDefinition.swagger.json",
   "icon": "icon.png",
+  "script": "script.csx",
   "powerAppsApiVersion": "2016-11-01",
   "powerAppsUrl": "https://api.powerapps.com"
 }
@@ -116,6 +128,8 @@ In the settings file the following items are expected. If an option is missing b
 
 * `icon`: The path to the optional icon file. The create and update operations will use the default icon when this parameter is no specified. When this option is present during the download operation, the file in the given location will be written to, otherwise it will be saved as `icon.png`.
 
+* `script`: The path to the optional script file. The create and update operations will use only the value within the specified parameter. When this option is present during the download operation, the file in the given location will be written to, otherwise it will be saved as `script.csx`.
+
 * `powerAppsUrl`: The API URL for PowerApps. This is optional and set to `https://api.powerapps.com` by default.
 
 * `powerAppsApiVersion`: The API version to use for PowerApps. This is optional and set to `2016-11-01` by default.
@@ -129,7 +143,7 @@ Login to Power Platform by running:
 
 `paconn login`
 
-This will ask you to login using device code login process. Please follow the prompt for the login.
+This will ask you to login using device code login process. Please follow the prompt for the login. Service Principle authentication is not supported at this point. Please review [a customer workaround posted in the issues page](https://github.com/microsoft/PowerPlatformConnectors/issues/287).
 
 ### Logout
 
@@ -188,6 +202,7 @@ Arguments
    --api-prop    : Location for the API properties JSON document.
    --env -e      : Power Platform environment ID.
    --icon        : Location for the icon file.
+   --script -x   : Location for the script file.
    --pau -u      : Power Platform URL.
    --pav -v      : Power Platform API version.
    --secret -r   : The OAuth2 client secret for the connector.
@@ -218,6 +233,7 @@ Arguments
    --cid -c      : The custom connector ID.
    --env -e      : Power Platform environment ID.
    --icon        : Location for the icon file.
+   --script -x   : Location for the script file.
    --pau -u      : Power Platform URL.
    --pav -v      : Power Platform API version.
    --secret -r   : The OAuth2 client secret for the connector.

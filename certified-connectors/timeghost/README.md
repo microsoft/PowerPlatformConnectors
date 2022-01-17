@@ -1,6 +1,6 @@
 # timeghost
 
-timeghost is a dedicated Microsoft 365 / Office 365 solution that integrates perfectly with your work environment. Generate time reports, invoices and other documents using the timeghost Flow Connector.
+timeghost is a dedicated Microsoft 365 / Office 365 solution that integrates perfectly with your work environment. Generate time reports, invoices and other documents using the timeghost connector.
 
 ## Pre-requisites
 

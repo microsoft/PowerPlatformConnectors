@@ -20,6 +20,7 @@ def update(
         api_properties,
         api_definition,
         icon,
+        script,
         connector_id,
         powerapps_url,
         powerapps_version,
@@ -35,6 +36,7 @@ def update(
         api_properties=api_properties,
         api_definition=api_definition,
         icon=icon,
+        script=script,
         connector_id=connector_id,
         powerapps_url=powerapps_url,
         powerapps_version=powerapps_version)
