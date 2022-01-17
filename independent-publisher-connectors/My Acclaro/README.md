@@ -9,9 +9,16 @@ You will need the following to proceed:
 * A My Acclaro account
 
 ## Obtaining Credentials 
-You need to be provided with a username and password for My Acclaro.
+You need to be provided with a username and password for [My Acclaro](https://my.acclaro.com). To request the credentials, please contact support@acclaro.com
 
 Once you have been set up, log into the Portal and get your API key (a bearer token).
+
+### Steps to obtain the token
+1. Log into the portal: https://my.acclaro.com
+2. On the top menu, go to 'API > Token'
+3. On the new screen you will find a field called 'Your Web Token', you can copy it to the clipboard
+4. Add the token preceeded by the word 'Bearer: '
+  e.g. if your token is "abcd1234ZXYF", then you should input the API key at PowerAutomate as "Bearer: abcd1234ZXYF".
 
 ## Supported Operations
 The connector supports the following operations:
