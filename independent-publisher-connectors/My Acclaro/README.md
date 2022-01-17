@@ -44,7 +44,7 @@ The connector supports the following operations:
 ### Working with strings:
 * **post string:** Posts a string for translation.
 * **get string info:** Gets the string information and the translated string once completed.
-* **get strint:** Gets a string based on its ID.
+* **get string:** Gets a string based on its ID.
 ### Working with quotes:
 * **request quote:** Requests a quote for the Order.
 * **get quote details:** Gets the Quote status and details for the Order.
@@ -77,4 +77,5 @@ Once you have been set up, log into the Portal and get your API key (a bearer to
 *Acclaro provides a sandbox API environment which you can make API requests to. To access this environment you can change the endpoint to 'apisandbox.acclaro.com' and obtain a Bearer token for this environment accordingly. If you would like to change back to the production endpoint you will need to change to 'my.acclaro.com'.*
 
 2. Does Acclaro charge any fees for using the My Acclaro Portal?
+
 *No, Acclaro charges for the services requested through the portal My Acclaro, but the use of the portal and its API is free for all Acclaro customers.*
