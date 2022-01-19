@@ -301,6 +301,23 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject AddRecipientTabsBodyTransformation(JObject body)
+  {
+    var res_tabs = new JArray();
+    var tabs = body["tabs"] as JArray;
+
+    for (var i = 0; i < tabs.Count; i++)
+    {
+        JObject tab = tabs[i] as JObject;
+        tab["locked"] = "false";
+        res_tabs.Add(tab);
+    }
+
+    body["textTabs"] = res_tabs;
+
+    return body;
+  }
+
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
@@ -395,6 +412,11 @@ public class Script : ScriptBase
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddDocumentsToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("AddRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
     }
 
     if ("RemoveRecipientFromEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
