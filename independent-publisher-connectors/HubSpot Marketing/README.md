@@ -1,4 +1,4 @@
-# HubSpot CRM
+# HubSpot Marketing
 HubSpot’s CRM platform has all the tools and integrations you need for marketing, sales, content management, and customer service. With Marketing Hub, all your marketing tools and data are on one easy-to-use, powerful platform. You’ll save valuable time and get all the context you need to provide a personalized experience that attracts and converts the right customers at scale.
 
 ## Publisher: Hitachi Solutions

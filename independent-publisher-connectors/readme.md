@@ -15,15 +15,17 @@ If you're considering building and publishing a connector to a Microsoft first p
 - You can only submit one connector per PR. This ensures that our validation process runs smoothly.
 - The PR for your connector should follow the pattern "Connector Name (Independent Publisher)"
 - Please add an email to the support email section. This is in case we need to reach out to you! 
+- All Independent Publisher connectors must set iconBrandColor to "#da3b01".
 - Please make sure to fill in the privacy policy parameter with the privacy policy for the end service.
 - Please make sure that your operation descriptions are detailed. This ensures that the user can understand your operation.
 - If your connector uses OAuth, please make sure you provide detailed steps on how to create an app in the readme.md. Otherwise, our team will have to pause certification.
+- Please make sure that you add response schemas to your actions, unless the response schema is dynamic. This will ensure that your connector gets more usage :)
 
 ## Contributing to this Directory
 
-1. Develop your connector! View the documentation on how to build a connector [here] https://docs.microsoft.com/en-us/connectors/custom-connectors/define-blank
+1. Develop your connector! View the documentation on how to build a connector [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/define-blank)
 
-2. Read through [these]https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-submission-ip docs to learn how to prepare your connector artifacts so that you can add them to your PR.
+2. Read through [these](https://docs.microsoft.com/en-us/connectors/custom-connectors/certification-submission-ip) docs to learn how to prepare your connector artifacts so that you can add them to your PR.
 
 3. Create a fork to the ```independent-publisher-connectors directory``` and create your connector in the fork.
 
@@ -55,16 +57,4 @@ Click [here](https://github-wiki-see.page/m/microsoft/PowerPlatformConnectors/wi
 
 ## Top Connector Asks
 
-Looking for a connector to build? Here are our top requests today:
-
-- Autotask
-- Booking
-- Confluence
-- ConnectWise
-- Etsy
-- NetSuite
-- Quickbooks
-- Splunk
-
-
-
+Looking for a connector to build? Check out our top requests here: https://github.com/microsoft/PowerPlatformConnectors/wiki/Top-Connector-Asks
