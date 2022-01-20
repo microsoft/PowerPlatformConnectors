@@ -587,9 +587,9 @@
             "type": "string"
           },
           {
-            "name": "AddRecipientToEnvelopeName",
+            "name": "recipientName",
             "in": "query",
-            "description": "The name of the recipient.",
+            "description": "Name of the recipient.",
             "required": true,
             "x-ms-summary": "Signer Name",
             "x-ms-test-value": "test name",
@@ -597,9 +597,9 @@
             "type": "string"
           },
           {
-            "name": "AddRecipientToEnvelopeEmail",
+            "name": "recipientEmail",
             "in": "query",
-            "description": "The email of the recipient.",
+            "description": "Email of the recipient.",
             "required": true,
             "x-ms-summary": "Signer Email",
             "x-ms-test-value": "test@email.com",
@@ -607,14 +607,15 @@
             "type": "string"
           },
           {
-            "name": "newRecipient",
+            "name": "additionalRecipientData",
             "in": "body",
-            "description": "New recipient",
-            "required": true,
+            "description": "Additional recipient data.",
+            "required": false,
             "schema": {
-              "$ref": "#/definitions/AddRecipientToEnvelopeRequest"
+                "$ref": "#/definitions/AdditionalRecipientData"
             },
-            "x-ms-summary": "Data for a recipient"
+            "x-ms-summary": "Additional recipient data",
+            "x-ms-visibility": "advanced"
           }
         ],
         "responses": {
@@ -1005,6 +1006,95 @@
         },
         "deprecated": false,
         "x-ms-visibility": "internal"
+      },
+      "put": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Add documents",
+        "description": "Add documents.",
+        "operationId": "AddDocumentsToEnvelope",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Envelope id",
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "documents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "documentBase64",
+                      "fileExtension",
+                      "name"
+                    ],
+                    "properties": {
+                      "documentBase64": {
+                        "type": "string",
+                        "x-ms-summary": "Base64 *",
+                        "description": "Base64 of document content"
+                      },
+                      "fileExtension": {
+                        "type": "string",
+                        "enum": ["pdf", "docx", "doc", "xlsx", "xls", "jpg"],
+                        "x-ms-summary": "type *",
+                        "description": "pdf, docx etc."
+                      },
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "name *",
+                        "description": "document name"
+                      },
+                      "order": {
+                        "type": "string",
+                        "x-ms-summary": "order",
+                        "description": "1"
+                      }
+                    }
+                  },
+                  "x-ms-summary": "document"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AddDocumentsResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important"
       }
     },
     "/signers/accounts/{accountId}/templates/{templateId}/recipients": {
@@ -1306,45 +1396,19 @@
         "value-path": "Schema/Items"
       }
     },
-    "AddRecipientToEnvelopeRequest": {
+    "AdditionalRecipientData": {
       "type": "object",
       "properties": {
-        "signers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SignerRequest"
+          "routingOrder": {
+              "description": "The signing order of the recipient in the document.",
+              "type": "string",
+              "x-ms-summary": "Signing Order"
           },
-          "x-ms-summary": "Signer",
-          "x-ms-visibility": "advanced"
-        }
-      },
-      "x-ms-test-value": {
-        "signers": [
-          {
-            "name": "test name",
-            "email": "clconn@microsoft.com",
-            "routingOrder": "1",
-            "roleName": "manager",
-            "recipientId": "insert recipientId"
+          "roleName": {
+              "description": "The role of the signer.",
+              "type": "string",
+              "x-ms-summary": "Role"
           }
-        ]
-      }
-    },
-    "SignerRequest": {
-      "type": "object",
-      "properties": {
-        "routingOrder": {
-          "description": "The signing order of the recipient in the document.",
-          "type": "string",
-          "x-ms-summary": "Signing Order",
-          "x-ms-visibility": "important"
-        },
-        "roleName": {
-          "description": "The role of the signer.",
-          "type": "string",
-          "x-ms-summary": "Role",
-          "x-ms-visibility": "important"
-        }
       }
     },
     "OnEnvelopeStatusChangesResponse": {
@@ -1621,6 +1685,26 @@
     "ListDocumentsResponse": {
       "type": "object",
       "properties": {
+        "envelopeDocuments": {
+          "description": "The documents attached to the envelope.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnvelopeDocument"
+          },
+          "x-ms-summary": "Envelope documents",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "AddDocumentsResponse": {
+      "type": "object",
+      "properties": {
+        "envelopeId": {
+          "description": "The id of the envelope.",
+          "type": "string",
+          "x-ms-summary": "Envelope Id",
+          "x-ms-visibility": "advanced"
+        },
         "envelopeDocuments": {
           "description": "The documents attached to the envelope.",
           "type": "array",
