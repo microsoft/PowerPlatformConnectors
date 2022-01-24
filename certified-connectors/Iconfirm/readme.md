@@ -115,3 +115,4 @@ Customers
 
 ## Help, Feedback and Additional documentation
 For additional information, feedback or help, have a look at our [website](https://www.iconfirm.eu/en/) and/or contact support through there.
+For additional information, feedback or help, have a look at our [website](https://www.iconfirm.eu/en/) and/or contact support through there.
