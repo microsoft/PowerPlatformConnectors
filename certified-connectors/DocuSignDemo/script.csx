@@ -294,7 +294,7 @@ public class Script : ScriptBase
 
     for (var i = 0; i < documents.Count; i++)
     {
-      documents[i]["documentId"] = $"{GenerateDocumentId()}";
+      documents[i]["documentId"] = $"{GenerateDocumentId()+i}";
     }
 
     body["documents"] = documents;
