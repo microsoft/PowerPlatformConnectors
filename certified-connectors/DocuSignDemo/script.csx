@@ -10,6 +10,13 @@ public class Script : ScriptBase
         return new HttpResponseMessage(HttpStatusCode.OK);
       }
 
+      if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
+      {
+        var staticResponse = new HttpResponseMessage();
+        staticResponse.Content = GetStaticResponse(this.Context.OperationId);
+        return staticResponse;
+      }
+
       await this.UpdateRequest().ConfigureAwait(false);
       var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
       if (response.IsSuccessStatusCode)
@@ -25,6 +32,29 @@ public class Script : ScriptBase
       response.Content = CreateJsonContent(ex.Message);
       return response;
     }
+  }
+
+  private static StringContent GetStaticResponse(string operationId)
+  {
+    var response = new JObject();
+
+    if (operationId.StartsWith("StaticResponseForDocumentTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var docTypesArray = new JArray();
+      string[] docTypes = { "pdf", "docx", "doc", "xlsx", "xls", "jpg" };
+      foreach (var docType in docTypes)
+      {
+        var docTypeObject = new JObject()
+        {
+          ["name"] = docType
+        };
+        docTypesArray.Add(docTypeObject);
+      }
+
+      response["documentTypes"] = docTypesArray;
+    }
+
+    return CreateJsonContent(response.ToString());
   }
 
   private static JObject ParseContentAsJObject(string content, bool isRequest)
