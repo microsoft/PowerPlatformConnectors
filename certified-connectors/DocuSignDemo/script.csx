@@ -564,6 +564,20 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var newBody = new JObject();
+      
+      foreach (var signer in (body["signers"] as JArray) ?? new JArray())
+      {
+        newBody = signer as JObject;
+        break;
+      }
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("OnEnvelopeStatusChanges".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var originalQuery = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
