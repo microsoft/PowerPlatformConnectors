@@ -1,0 +1,382 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "YakChat",
+    "description": "Connector to send and receive SMS and MMS using your YakChat numbers. YakChat adds SMS and MMS to Microsoft Teams so that you can connect instantly with your customers and co-workers using text messaging.",
+    "version": "1.0",
+	"contact": {
+		"name": "YakChat Ltd.",
+		"url": "https://www.yakchat.com/",
+		"email": "support@yakchat.com"
+	}
+  },
+  "host": "api.yakchat.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/Automation/SendMessage": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Result": {
+                  "type": "string",
+                  "description": "The response result",
+                  "title": "Result"
+                },
+                "Message": {
+                  "type": "string",
+                  "description": "The response message",
+                  "title": "Message"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send an SMS",
+        "description": "Send an SMS message using YakChat",
+        "operationId": "SendMessage",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InboxEmail": {
+                  "type": "string",
+                  "description": "Specify the YakChat Inbox/Phone number the SMS will be sent from",
+                  "title": "From Inbox/Number",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetDynamicInboxes",
+                    "value-path": "Value",
+                    "value-collection": "$values",
+                    "value-title": "DisplayName"
+                  }
+                },
+                "MessageTo": {
+                  "type": "string",
+                  "description": "Specify the phone number the SMS will be sent to",
+                  "title": "To Number"
+                },
+                "MessageText": {
+                  "type": "string",
+                  "description": "Specify the message text to be sent",
+                  "title": "Message Text"
+                }
+              },
+              "required": [
+                "InboxEmail",
+                "MessageText",
+                "MessageTo"
+              ]
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ]
+      }
+    },
+    "/Automation/DynamicInboxes": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "$values": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DisplayName": {
+                        "type": "string",
+                        "description": "The display name of the option",
+                        "title": "Display Name"
+                      },
+                      "Value": {
+                        "type": "string",
+                        "description": "The value of the option",
+                        "title": "Value"
+                      }
+                    }
+                  },
+                  "description": "$values"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Dynamic Inboxes",
+        "description": "(Private) Gets the YakChat Inboxes for a user to populate dynamic dropdowns",
+        "operationId": "GetDynamicInboxes",
+        "x-ms-visibility": "internal",
+        "parameters": []
+      }
+    },
+    "/Automation/InboundMessageNotification": {
+      "x-ms-notification-content": {
+        "description": "Incoming message event",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "Direction": {
+              "type": "string",
+              "description": "Whether the message is inbound or outbound",
+              "title": "Direction"
+            },
+            "ToNumber": {
+              "type": "string",
+              "description": "The number the message was sent to",
+              "title": "To"
+            },
+            "FromNumber": {
+              "type": "string",
+              "description": "The number from which the message was sent",
+              "title": "From"
+            },
+            "Text": {
+              "type": "string",
+              "description": "The text of the message",
+              "title": "Text"
+            },
+            "MediaUrl": {
+              "type": "string",
+              "description": "The URL for any attached media, if the message was an MMS message",
+              "title": "Message Media URL"
+            },
+            "TimeStamp": {
+              "type": "string",
+              "description": "Timestamp of when the message was receieved",
+              "title": "Time Stamp"
+            },
+            "InboxEmail": {
+              "type": "string",
+              "description": "The YakChat inbox that received the message",
+              "title": "Inbox"
+            }
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "response",
+            "schema": {}
+          }
+        },
+        "summary": "When a message is received",
+        "description": "This operation triggers when a message is received in a YakChat inbox",
+        "operationId": "InboundMessage",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InboxEmail": {
+                  "type": "string",
+                  "description": "Specify the YakChat Inbox/Phone number that will trigger this operation",
+                  "title": "Inbox/Number",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetDynamicInboxes",
+                    "value-path": "Value",
+                    "value-collection": "$values",
+                    "value-title": "DisplayName"
+                  }
+                },
+                "TargetUrl": {
+                  "type": "string",
+                  "description": "The callback url of the webhook event",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "Callback Url"
+                }
+              },
+              "required": [
+                "TargetUrl",
+                "InboxEmail"
+              ]
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ]
+      }
+    },
+    "/Automation/UnregisterWebhook/{uid}/{tid}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "response",
+            "schema": {}
+          }
+        },
+        "summary": "Delete a Webhook registration",
+        "description": "(Private) Delete a Webhook registration",
+        "operationId": "UnregisterWebhook",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The user id for the webhook being unregistered",
+            "x-ms-summary": "UserId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "tid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Unique identifier for the webhook registration being removed",
+            "x-ms-summary": "TransactionId",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/Automation/OutboundMessageNotification": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "Direction": {
+              "type": "string",
+              "description": "Whether the message is inbound or outbound",
+              "title": "Direction"
+            },
+            "FromNumber": {
+              "type": "string",
+              "description": "The number from which the message   was sent",
+              "title": "From"
+            },
+            "InboxEmail": {
+              "type": "string",
+              "description": "The YakChat inbox that sent the message",
+              "title": "Inbox"
+            },
+            "MediaUrl": {
+              "type": "string",
+              "description": "The URL for any attached media, if the message was an MMS message",
+              "title": "Message Media URL"
+            },
+            "Text": {
+              "type": "string",
+              "description": "The text of the message",
+              "title": "Text"
+            },
+            "TimeStamp": {
+              "type": "string",
+              "description": "Timestamp of when the message was sent",
+              "title": "Time Stamp"
+            },
+            "ToNumber": {
+              "type": "string",
+              "description": "The number the message was sent to",
+              "title": "To"
+            }
+          }
+        },
+        "description": "Message"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "response",
+            "schema": {}
+          }
+        },
+        "summary": "When a message is sent",
+        "description": "This operation triggers when a message is sent from a YakChat inbox",
+        "operationId": "OutboundMessage",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InboxEmail": {
+                  "type": "string",
+                  "description": "Specify the YakChat Inbox/Phone number that will trigger this operation",
+                  "title": "Inbox/Number",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetDynamicInboxes",
+                    "value-path": "Value",
+                    "value-collection": "$values",
+                    "value-title": "DisplayName"
+                  }
+                },
+                "TargetUrl": {
+                  "type": "string",
+                  "description": "The callback url of the webhook",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "Callback Url"
+                }
+              },
+              "required": [
+                "TargetUrl",
+                "InboxEmail"
+              ]
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ]
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.windows.net/common/oauth2/authorize",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.yakchat.com/"
+    },
+    {
+      "propertyName": "Privacy Policy",
+      "propertyValue": "https://www.yakchat.com/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Collaboration;Productivity"
+    }
+  ]
+}
