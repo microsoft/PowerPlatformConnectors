@@ -78,7 +78,7 @@ More information on each of the properties are given below:
 
 * `connectionParameters`: Defines the connection parameter for the service.
 
-* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector. Independent Publisher connectors must set the color to "#da3b01".
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector. Independent Publisher connectors must set the color to `"#da3b01"`.
 
 * `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
 
@@ -88,7 +88,7 @@ For further details, see the [apiProperties.json](schemas/paconn-apiProperties.s
 
 ### README.md
 
-README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A good example is the [Azure Key Vault](custom-connectors/AzureKeyVault/readme.md) custom connector.
+README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A good example is the [Azure Key Vault](custom-connectors/AzureKeyVault/Readme.md) custom connector.
 A readme.md template for [Certified Connectors](templates/certified-connectors/readme.md) and [Independent Publisher Connectors](templates/Independent%20Publisher/readme.md) is also included for your reference. If you are submitting an Independent Publisher connector that requires OAuth, please make sure to explain how to create the OAuth app. The Microsoft Certification Team will use those instructions to create the app, so please make sure they are detailed and accurate.
 
 ### Creating a Fork
@@ -157,7 +157,7 @@ Updates to an existing custom connector can be made through a simple pull reques
 #### Independent Publisher Connectors
 
 Follow the same instructions as above on submitting for certification, create a directory under the "independent-publisher-connectors" directory and place the connector files in the sub-folder.
-The `"iconBrandColor":` in the API properties file must be set to `#da3b01`.
+The `"iconBrandColor":` in the API properties file must be set to `"#da3b01"`.
 Set your pull request title to "Connector Name (Independent Publisher)."
 Paste in screenshots from the Test operations section and 3 unique operations (actions/triggers) working within a Flow. This can be in one flow or part of multiple flows. For each one of those flows, I have pasted in screenshots of the Flow succeeding.
 Add a tag by selecting the labels option to "independent-publisher-connector."
