@@ -125,7 +125,7 @@ To keep your fork up to date with this repository's updates, run these commands:
 
 ```git fetch upstream```
 
-```git checkout origin/master```
+```git checkout master```
 
 ```git merge upstream/master```
 
