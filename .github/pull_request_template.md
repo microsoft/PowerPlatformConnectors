@@ -2,6 +2,8 @@
 ---
 ### When submitting a connector, please make sure that you follow the requirements below, otherwise your PR might be rejected. We want to make you have a well-built connector, a smooth certification experience, and your users are happy :) 
 
+If this is your first time submitting to GitHub and you need some help, please sign up for this [session](https://forms.office.com/pages/responsepage.aspx?id=KtIy2vgLW0SOgZbwvQuRaXDXyCl9DkBHq4A2OG7uLpdUMTFJWFFGVUxBNUFZQjZWRUdaOE5BMFkwNS4u). 
+
 - [ ] I attest that the connector works and I verified by deploying and testing all the operations. 
 - [ ] I attest that I have added detailed descriptions for all operations and parameters in the swagger file.
 - [ ] I attest that I have added response schemas to my actions, unless the response schema is dynamic. 
