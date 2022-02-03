@@ -75,7 +75,7 @@ More information on the each of the properties are given below:
 
 * `connectionParameters`: Defines the connection parameter for the service.
 
-* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector.
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector. Independent Publisher connectors must set the color to "#da3b01".
 
 * `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
 
@@ -83,7 +83,7 @@ More information on the each of the properties are given below:
 
 ### README.md
 
-README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A [template](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/README.template.md) and a [sample](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) is included for reference. If you are submitting an Independent Publisher connector that requires OAuth, please make sure to explain how to create the OAuth app. The Microsoft Certification Team will use those instructions to create the app, so please make sure they are detailed and accurate.
+README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A [template](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/readme.md) and a [sample](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) is included for reference. If you are submitting an Independent Publisher connector that requires OAuth, please make sure to explain how to create the OAuth app. The Microsoft Certification Team will use those instructions to create the app, so please make sure they are detailed and accurate.
 
 ### Creating a Fork
 
