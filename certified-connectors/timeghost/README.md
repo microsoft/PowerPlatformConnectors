@@ -41,6 +41,8 @@ The connector supports the following operations:
 - `Update Time Tag` : Updates a time tag in a workspace.
 - `Update project Tag` : Updates a project tag in a workspace.
 - `Update Tags of an Project` : Updates the tags of an existing project in a workspace.
+- `Update Users of an Project` : Updates the users and theire roles of an existing project in a workspace.
+- `Update Groups of an Project` : Updates the groups and theire roles of an existing project in a workspace.
 - `Update Tags of an Time` : Updates the tags of an existing time in a workspace.
 - `Client Trigger` : If a client is created, changed or deleted in timeghost, this trigger runs.
 - `Project Trigger` : If a project is created, changed or deleted in timeghost, this trigger runs.
