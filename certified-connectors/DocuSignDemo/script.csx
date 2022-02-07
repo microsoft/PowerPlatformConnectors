@@ -38,7 +38,7 @@ public class Script : ScriptBase
   {
     var response = new JObject();
 
-    if (operationId.StartsWith("StaticResponseForDocumentTypes", StringComparison.OrdinalIgnoreCase))
+    if (operationId.Equals("StaticResponseForDocumentTypes", StringComparison.OrdinalIgnoreCase))
     {
       var docTypesArray = new JArray();
       string[] docTypes = { "pdf", "docx", "doc", "xlsx", "xls", "jpg" };
@@ -52,6 +52,35 @@ public class Script : ScriptBase
       }
 
       response["documentTypes"] = docTypesArray;
+    }
+
+    if (operationId.Equals("StaticResponseForAnchorTabSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "array",
+        ["items"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["anchorString"] = new JObject
+            {
+              ["type"] = "string",
+              ["x-ms-summary"] = "anchor string *",
+              ["description"] = "Anchor string to match"
+            },
+            ["value"] = new JObject
+            {
+              ["type"] = "string",
+              ["x-ms-summary"] = "value",
+              ["description"] = "Value for the tab"
+            }
+          }
+        }
+      };
     }
 
     return CreateJsonContent(response.ToString());
@@ -297,11 +326,11 @@ public class Script : ScriptBase
     {
       signers[0]["recipientId"] = Guid.NewGuid();
     }
-    if(body["routingOrder"] != null) 
+    if (body["routingOrder"] != null)
     {
       signers[0]["routingOrder"] = body["routingOrder"];
     }
-    if(body["roleName"] != null) 
+    if (body["roleName"] != null)
     {
       signers[0]["roleName"] = body["roleName"];
     }
@@ -310,7 +339,7 @@ public class Script : ScriptBase
     return body;
   }
 
-  private int GenerateDocumentId() 
+  private int GenerateDocumentId()
   {
     DateTimeOffset now = DateTimeOffset.UtcNow;
     DateTime midnight = DateTime.Now.Date;
@@ -324,7 +353,7 @@ public class Script : ScriptBase
 
     for (var i = 0; i < documents.Count; i++)
     {
-      documents[i]["documentId"] = $"{GenerateDocumentId()+i}";
+      documents[i]["documentId"] = $"{GenerateDocumentId() + i}";
     }
 
     body["documents"] = documents;
@@ -338,9 +367,9 @@ public class Script : ScriptBase
 
     for (var i = 0; i < tabs.Count; i++)
     {
-        JObject tab = tabs[i] as JObject;
-        tab["locked"] = "false";
-        res_tabs.Add(tab);
+      JObject tab = tabs[i] as JObject;
+      tab["locked"] = "false";
+      res_tabs.Add(tab);
     }
 
     body["textTabs"] = res_tabs;
@@ -568,7 +597,7 @@ public class Script : ScriptBase
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var newBody = new JObject();
-      
+
       foreach (var signer in (body["signers"] as JArray) ?? new JArray())
       {
         newBody = signer as JObject;
