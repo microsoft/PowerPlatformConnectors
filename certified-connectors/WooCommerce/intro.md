@@ -8,6 +8,6 @@ Once installed, you will need to configure a user that will be used by Power Aut
 
 ## How to get credentials
 
-You can download the WordPress plugin and purchase a license to use from here: https://www.buildbettersoftware.com/products/powoorcommerce/
+You can download the WordPress plugin and purchase a license to use from here: https://www.buildbettersoftware.com/products/woopower/
 
 You will need a valid license to use this connector.
