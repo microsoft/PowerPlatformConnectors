@@ -16,6 +16,8 @@ steps:
         Authorization = $env:token
       }
 
+      $suppressWarnings = false
+      
       foreach ($file in $apiPropertiesFiles) { 
         $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
         $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
@@ -24,10 +26,9 @@ steps:
 
         # Validate apiProperties json
         $isCertValidation = $file -Like "*certified-connectors/*" -Or $file -Like "*independent-publisher-connectors/*"
-        $apiPropertiesValidatorUri = "$($env:apiPropertiesValidator)?IsCertificationValidation=$isCertValidation"
+        $apiPropertiesValidatorUri = "$($env:apiPropertiesValidator)?suppressWarnings=$suppressWarnings"
         $results = Invoke-RestMethod -Uri $apiPropertiesValidatorUri -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body @{
                                                                                                                                                             newFileContent = $newFileContent
-                                                                                                                                                            suppressWarnings = $suppressWarnings
                                                                                                                                                           }
         
         $errors = $results.Errors
@@ -40,7 +41,7 @@ steps:
           $errors | foreach { Write-Host "##vso[task.logissue type=error;]$_" }
         } # If Api Properties Error
         
-        if ($warnings -AND -NOT $suppressWarnings) {
+        if ($warnings) {
           $warningsTotal += $warnings.Count
           $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;]$_" }
         } # If Api Properties Warnings
