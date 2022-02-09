@@ -54,29 +54,52 @@ public class Script : ScriptBase
       response["documentTypes"] = docTypesArray;
     }
 
+    if (operationId.Equals("StaticResponseForTabTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var tabTypesArray = new JArray();
+      string[] tabTypes = { "signature tab", "date signed tab", "text tab", "name tab", "initial tab"};
+      foreach (var tabType in tabTypes)
+      {
+        var tabTypeObject = new JObject()
+        {
+          ["name"] = tabType
+        };
+        tabTypesArray.Add(tabTypeObject);
+      }
+
+      response["tabTypes"] = tabTypesArray;
+    }
+
     if (operationId.Equals("StaticResponseForAnchorTabSchema", StringComparison.OrdinalIgnoreCase))
     {
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
       response["schema"] = new JObject
       {
-        ["type"] = "array",
-        ["items"] = new JObject
+        ["type"] = "object",
+        ["properties"] = new JObject
         {
-          ["type"] = "object",
-          ["properties"] = new JObject
+          ["tabs"] = new JObject
           {
-            ["anchorString"] = new JObject
+            ["type"] = "array",
+            ["items"] = new JObject
             {
-              ["type"] = "string",
-              ["x-ms-summary"] = "anchor string *",
-              ["description"] = "Anchor string to match"
-            },
-            ["value"] = new JObject
-            {
-              ["type"] = "string",
-              ["x-ms-summary"] = "value",
-              ["description"] = "Value for the tab"
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "anchor string *",
+                  ["description"] = "Anchor string to match"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "value",
+                  ["description"] = "Value for the tab"
+                }
+              }
             }
           }
         }
