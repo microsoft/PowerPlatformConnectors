@@ -1,5 +1,5 @@
 # Rarible
-The Rarible Multichain Protocol is a blockchain-agnostic and decentralized tool to query, issue, and trade NFTs.  This connector specifically uses the Ethereum netowrk and allows a user to pull this data into their app, flow, or report.
+The Rarible Multichain Protocol is a blockchain-agnostic and decentralized tool to query, issue, and trade NFTs.  This connector specifically uses the Ethereum network and allows a user to pull this data into their app, flow, or report.
 
 ## Publisher: Roy Paar
 
