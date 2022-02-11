@@ -19,8 +19,6 @@ steps:
       $suppressWarnings = false
       
       foreach ($file in $apiPropertiesFiles) { 
-        $currentFilePath = Join-Path $currentLocation ($file.Replace('/', '\'))
-        $previousCommitHash = git log --max-count=1 --skip=1 --first-parent --pretty=format:%H $currentFilePath
 
         $newFileContent = Get-Content $file -Raw
 
@@ -40,6 +38,18 @@ steps:
           $warningsTotal += $warnings.Count
           $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;]$_" }
         } # If Api Properties Warnings
+        
+      } # For each file
+      
+      if ($errorsTotal -gt 0) {
+          Write-Host "##vso[task.complete result=Failed;]Errors encountered."
+      }
+      elseif ($warningsTotal -gt 0) {
+          Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
+      }
+      else {
+          Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
+      }
     env:
       apiPropertiesValidator: "$(apiPropertiesValidatorUrl)"
       token: $(token)
