@@ -31,4 +31,5 @@ The connector supports the following operations:
 * `Get a invoice`: Get a invoice by id.
 * `List all invoice vats`: List all the invoice vats in the administration.
 * `Add a invoice vat`: Add an invoice vat to your administration.
+* `List all catalog variants`: List all the catalog variants in the administration.
 * `List all labels`: List all the labels in the administration.
