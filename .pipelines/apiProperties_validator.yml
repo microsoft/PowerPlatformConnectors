@@ -29,8 +29,8 @@ steps:
         $apiPropertiesValidatorUri = "$($env:apiPropertiesValidator)?suppressWarnings=$suppressWarnings"
         $results = Invoke-RestMethod -Uri $apiPropertiesValidatorUri -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body @($newFileContent)
                                                                                                                                                              
-        $errors = $results.Errors
-        $warnings = $results.Warnings
+        $errors = $results | Where-Object -FilterScript { $_.level -eq "Critical" -OR $_.Level = "Error" }
+        $warnings = $results | Where-Object -FilterScript { $_.level -eq "Warning" }
         
         if ($errors) {
           $errorsTotal += $errors.Count
@@ -59,8 +59,8 @@ steps:
           $results = Invoke-RestMethod -Uri $env:changeValidator -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body $changeValidationJson
                                                                                                                                                        
 
-          $errors = $results | Where-Object -FilterScript { $_.level -eq "Critical" -OR $_.Level = "Error" }
-          $warnings =  $results | Where-Object -FilterScript { $_.level -eq "Warning" }
+          $errors = $results.Errors
+          $warnings =  $results.Warnings
 
           if ($errors) {
               $errorsTotal += $errors.Count
