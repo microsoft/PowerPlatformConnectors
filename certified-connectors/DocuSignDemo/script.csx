@@ -10,14 +10,15 @@ public class Script : ScriptBase
         return new HttpResponseMessage(HttpStatusCode.OK);
       }
 
+      await this.UpdateRequest().ConfigureAwait(false);
+
       if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
       {
         var staticResponse = new HttpResponseMessage();
-        staticResponse.Content = GetStaticResponse(this.Context.OperationId);
+        staticResponse.Content = GetStaticResponse(this.Context);
         return staticResponse;
       }
 
-      await this.UpdateRequest().ConfigureAwait(false);
       var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
       if (response.IsSuccessStatusCode)
       {
@@ -34,9 +35,10 @@ public class Script : ScriptBase
     }
   }
 
-  private static StringContent GetStaticResponse(string operationId)
+  private static StringContent GetStaticResponse(IScriptContext context)
   {
     var response = new JObject();
+    string operationId = context.OperationId;
 
     if (operationId.Equals("StaticResponseForDocumentTypes", StringComparison.OrdinalIgnoreCase))
     {
@@ -57,7 +59,7 @@ public class Script : ScriptBase
     if (operationId.Equals("StaticResponseForTabTypes", StringComparison.OrdinalIgnoreCase))
     {
       var tabTypesArray = new JArray();
-      string[] tabTypes = { "signature tab", "date signed tab", "text tab", "name tab", "initial tab"};
+      string[] tabTypes = { "signHereTabs", "dateSignedTabs", "textTabs", "fullNameTabs", "initialHereTabs"};
       foreach (var tabType in tabTypes)
       {
         var tabTypeObject = new JObject()
@@ -72,38 +74,73 @@ public class Script : ScriptBase
 
     if (operationId.Equals("StaticResponseForAnchorTabSchema", StringComparison.OrdinalIgnoreCase))
     {
-      response["name"] = "dynamicSchema";
-      response["title"] = "dynamicSchema";
-      response["schema"] = new JObject
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var tabType = query.Get("tabType");
+
+      if (string.IsNullOrEmpty(tabType) || tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
       {
-        ["type"] = "object",
-        ["properties"] = new JObject
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
         {
-          ["tabs"] = new JObject
+          ["type"] = "object",
+          ["properties"] = new JObject
           {
-            ["type"] = "array",
-            ["items"] = new JObject
+            ["tabs"] = new JObject
             {
-              ["type"] = "object",
-              ["properties"] = new JObject
+              ["type"] = "array",
+              ["items"] = new JObject
               {
-                ["anchorString"] = new JObject
+                ["type"] = "object",
+                ["properties"] = new JObject
                 {
-                  ["type"] = "string",
-                  ["x-ms-summary"] = "anchor string *",
-                  ["description"] = "Anchor string to match"
-                },
-                ["value"] = new JObject
-                {
-                  ["type"] = "string",
-                  ["x-ms-summary"] = "value",
-                  ["description"] = "Value for the tab"
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "anchor string *",
+                    ["description"] = "Anchor string to match"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "value",
+                    ["description"] = "Value for the tab"
+                  }
                 }
               }
             }
           }
-        }
-      };
+        };
+      }
+      else
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "anchor string *",
+                    ["description"] = "Anchor string to match"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
     }
 
     return CreateJsonContent(response.ToString());
@@ -387,15 +424,20 @@ public class Script : ScriptBase
   {
     var res_tabs = new JArray();
     var tabs = body["tabs"] as JArray;
-
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var tabType = query.Get("tabType");
+    
     for (var i = 0; i < tabs.Count; i++)
     {
       JObject tab = tabs[i] as JObject;
-      tab["locked"] = "false";
+      if (tabType.Equals("textTabs"))
+      {
+        tab["locked"] = "false";
+      }
       res_tabs.Add(tab);
     }
 
-    body["textTabs"] = res_tabs;
+    body[tabType] = res_tabs;
 
     return body;
   }
@@ -700,7 +742,7 @@ public class Script : ScriptBase
         error.AppendLine($"Inner exception {level}: {inner.Message}");
         inner = inner.InnerException;
       }
-
+         
       error.AppendLine($"Stack trace: {this.StackTrace}");
       return error.ToString();
     }
