@@ -4,20 +4,86 @@ Welcome to the Microsoft Power Platform Connectors open source repository. This 
 
 ## Custom Connectors
 
-The ```custom-connectors``` folder contains fully functional connector samples which can be deployed to the Power Platform for extension and use. These samples may not be certified connectors, but should be maintained by the open source community to offer useful scenarios or examples of connector concepts.
+The ```custom-connectors``` folder contains fully functional connector samples which can be deployed to the Power Platform for extension and use. If you are looking to publish a connector to the Power Platform, please explore Certified Connectors and Independent Publisher Connectors. 
 
 ## Certified Connectors
 
-The ```certified-connectors``` folder contains certified connectors which are already deployed and available out-of-box within the Power Platform for use. 
-A requirement of our [connector certification program](https://docs.microsoft.com/connectors/custom-connectors/submit-certification) is that new certified connectors be open sourced for community contributions. 
+The ```certified-connectors``` folder contains certified connectors which are built by partners who own the end service of their connector. These connectors are deployed and available out-of-box within the Power Platform for use. 
+One requirement of our [connector certification program](https://docs.microsoft.com/connectors/custom-connectors/submit-certification) is that new certified connectors be open sourced for community contributions. 
 The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform. 
 The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. 
 
+## Independent Publisher Connectors
+
+The ```independent-publisher-connectors``` folder contains connectors that are submitted by publishers (MVPs, developers, and companies) that do not own the underlying service behind their connector. These connectors are deployed and available out-of-box within the Power Platform as premium connectors. Anyone can submit a new connector to this folder, add functionality to connectors in this folder, and resolve issues related to the connectors in this folder. The folder is managed by the Independent Publisher Connector Community, which includes Independent Publishers and Project Coordinators. The master branch is maintained by the Microsoft Connector Certification Team, who ensures that the connector version is identical to that deployed in the Power Platform. The dev branch is maintained by the connector maintainer(s) and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. Click here to view the [Independent Publisher Connector Manifesto](https://github.com/microsoft/PowerPlatformConnectors/wiki/Independent-Publisher-Connector-Group-%22Manifesto%22).
+
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
+Contributor License Agreement (CLA), which declares that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.microsoft.com.
+
+### Files to Include
+Please submit the following files: An Open API 2.0 swagger definition, an API properties file, and a README.md.
+
+### API Definition (Swagger) File
+
+The API definition, also known as the swagger, describes the API for the custom connector using the OpenAPI specification.
+
+### API Properties File
+
+The API properties file contains some properties for the custom connector. These properties are not part of the API definition. It contains information such as the brand color, authentication information, etc. A typical API properties file looks like the following:
+
+```json
+{
+  "properties": {
+    "capabilities": [],
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "clearText": false,
+            "required": "true",
+            "tabIndex": 2
+          },
+          "description": "The KEY for this API",
+          "displayName": "KEY",
+          "tooltip": "Provide your KEY"
+        }
+      }
+    },
+    "iconBrandColor": "#007EE6",
+    "policyTemplateInstances": [
+      {
+        "title": "MyPolicy",
+        "templateId": "setqueryparameter",
+        "parameters": {
+            "x-ms-apimTemplateParameter.name": "queryParameterName",
+            "x-ms-apimTemplateParameter.value": "queryParameterValue",
+            "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      }
+    ]    
+  }
+}
+```
+
+More information on the each of the properties are given below:
+
+* `properties`: The container for the information.
+
+* `connectionParameters`: Defines the connection parameter for the service.
+
+* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector. Independent Publisher connectors must set the color to "#da3b01".
+
+* `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
+
+* `policyTemplateInstances`: An optional list of policy template instances and values used in the custom connector.
+
+### README.md
+
+README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A [template](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/readme.md) and a [sample](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) is included for reference. If you are submitting an Independent Publisher connector that requires OAuth, please make sure to explain how to create the OAuth app. The Microsoft Certification Team will use those instructions to create the app, so please make sure they are detailed and accurate.
 
 ### Creating a Fork
 
@@ -43,7 +109,7 @@ Verify the upstream links.
 ```git remote -v```
 
 ```
-> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch) 
+> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
 > origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
 > upstream  https://github.com/microsoft/PowerPlatformConnectors.git (fetch)
 > upstream  https://github.com/microsoft/PowerPlatformConnectors.git (push)
@@ -62,26 +128,39 @@ You are now ready to develop your connector in your own branch.
 ### Submitting to the Open Source Repository
 
 Contributions to the open source repository are made through pull requests. 
-Prior to submitting a pull request, ensure that your pull request does not contain any sensitive or specific information, for example Client IDs or Client Secrets. 
+Prior to submitting a pull request, ensure that 1) you have thoroughly tested the connector 2) you have provided response schemas unless the responses are dynamic, and 3) that your pull request does not contain any sensitive or specific information, for example client ids or client secrets. 
 Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated. 
 Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions. 
-An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/tree/master/custom-connectors/AzureKeyVault) connector repository. 
+An example of a clear, structured, readme.md can be found in the [Azure Key Vault](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/custom-connectors/AzureKeyVault/Readme.md) connector repository. 
+A [README template](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/README.template.md) is also included for your reference.
 Include this completed `readme.md` in same connector directory which contains the artifacts. 
-
-#### Custom Connectors
-
-Updates to an existing custom connector can be made through a simple pull request to update the custom connector files.
-
-For new custom connectors, create a directory under the ```custom-connectors``` directory and place the connector files in the sub-folder. Ensure that a clear, structured, readme.md is included. 
+Add tags indicating which connector type you are submitting. Connector type name should match the folder name you are submitting to: custom-connector, certified-connector, or independent-publisher-connector.
 
 #### Certified Connectors
 
+For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
+
+Add a tag by selecting the labels option to "certified-connector"
+
 Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner. 
+
 Once a pull request has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```. 
 
 Updates to an existing custom connector can be made through a simple pull request to the ```dev``` branch to update the custom connector files.
 
-For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included. 
+#### Independent Publisher
+
+Follow the same instructions as above on submitting for certification, create a directory under the "independent-publisher-connectors" directory and place the connector files in the sub-folder. 
+Your icon color in the API properties file must be set to `#da3b01`, as in `"iconBrandColor": "#da3b01"`. [A sample icon for Independent Publisher connector](https://github.com/microsoft/PowerPlatformConnectors/blob/dev/templates/independent-publisher-icon.png) is included for your reference. 
+Set your pull request title to "Connector Name (Independent Publisher)."
+Paste in screenshots from the Test operations section and 3 unique operations (actions/triggers) working within a Flow. This can be in one flow or part of multiple flows. For each one of those flows, I have pasted in screenshots of the Flow succeeding. 
+Add a tag by selecting the labels option to "independent-publisher-connector."
+If the connector uses OAuth, I have provided detailed steps on how to create an app in the readme.md.
+
+
+#### Custom Connector
+
+Follow the same instructions on submitting for certification, create a directory under the custom-connectors directory and place the connector files in the sub-folder. Add a tag by selecting the labels option to "custom-connector".
 
 ### Tooling and Validation
 

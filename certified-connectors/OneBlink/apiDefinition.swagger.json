@@ -1,21 +1,23 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0",
+    "version": "1.1.0",
     "title": "OneBlink",
-    "description": "Empowers business users to create and deploy digital forms for enterprise and government organisations as web and native apps, while allowing developers to customise, extend, or harness the forms through their own custom apps. Connect your forms with Power Automate to allow easy submission of your form data into your backend systems or databases without the need to write complex integration code."
+    "description": "Empowers business users to create and deploy digital forms for enterprise and government organisations as web and native apps, while allowing developers to customise, extend, or harness the forms through their own custom apps. Connect your forms with this connector to allow easy submission of your form data into your backend systems or databases without the need to write complex integration code.",
+    "contact": {
+      "name": "OneBlink Support",
+      "url": "https://support.oneblink.io/support/home",
+      "email": "support@oneblink.io"
+    },
+    "x-ms-api-annotation": {
+      "status": "Preview"
+    }
   },
   "host": "auth-api.blinkm.io",
   "basePath": "/",
-  "schemes": [
-    "https"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
     "/form-submission-meta/web-hooks": {
       "x-ms-notification-content": {
@@ -37,9 +39,7 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": [
-                "callbackUrl"
-              ],
+              "required": ["callbackUrl"],
               "properties": {
                 "callbackUrl": {
                   "type": "string",
@@ -199,7 +199,144 @@
             }
           },
           "401": {
-            "description": "Unauthorised",
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/submissions/{formId}/attachments/{attachmentId}": {
+      "get": {
+        "description": "Allows for Form Submission attachments to be retrieved",
+        "summary": "Retrieve Form Submission Attachment",
+        "operationId": "GetFormSubmissionAttachment",
+        "x-ms-visibility": "important",
+        "produces": ["*/*"],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "description": "ID of the form the attachment was uploaded with",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Form Id"
+          },
+          {
+            "name": "attachmentId",
+            "in": "path",
+            "description": "ID of the uploaded attachment",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Attachment Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "file",
+              "x-ms-summary": "Attachment Content"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/forms/{formId}/submissions/{submissionId}/pdf-document": {
+      "post": {
+        "description": "Allows for Form Submission PDF to be generated",
+        "summary": "Generate Form Submission PDF",
+        "operationId": "GenerateFormSubmissionPDF",
+        "x-ms-visibility": "important",
+        "produces": ["application/pdf"],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "description": "ID of the form that was submitted",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Form Id"
+          },
+          {
+            "name": "submissionId",
+            "in": "path",
+            "description": "ID of the form submission",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission Id"
+          },
+          {
+            "name": "includeSubmissionIdInPdf",
+            "in": "query",
+            "description": "The submission identifier can be included at the bottom of each page in the PDF",
+            "required": true,
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Include Submission Identifier In Pdf"
+          },
+          {
+            "name": "X-OneBlink-Target-Group",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "oneblink-simple-pdf-prod",
+            "x-ms-visibility": "internal"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "file",
+              "x-ms-summary": "Form Submission PDF Content"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
             "schema": {
               "$ref": "#/definitions/APIErrorPayload"
             }
@@ -231,7 +368,6 @@
       "type": "object",
       "properties": {
         "error": {
-          "type": "string",
           "x-ms-summary": "Error Title"
         },
         "message": {
@@ -263,9 +399,7 @@
     },
     "FormSubmissionMetaWebhook-POST": {
       "type": "object",
-      "required": [
-        "callbackUrl"
-      ],
+      "required": ["callbackUrl"],
       "properties": {
         "callbackUrl": {
           "type": "string",
@@ -470,269 +604,6 @@
           }
         }
       }
-    },
-    "Form": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "organisationId": {
-          "type": "string"
-        },
-        "elements": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/FormElement"
-          }
-        },
-        "isAuthenticated": {
-          "type": "boolean"
-        },
-        "submissionEvents": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "CALLBACK",
-                  "PDF",
-                  "SPOTTO",
-                  "ONEBLINK_API"
-                ]
-              },
-              "configuration": {
-                "type": "object"
-              }
-            }
-          }
-        },
-        "isPublished": {
-          "type": "boolean"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "isMultiPage": {
-          "type": "boolean"
-        },
-        "postSubmissionAction": {
-          "type": "string"
-        },
-        "redirectUrl": {
-          "type": "string"
-        }
-      }
-    },
-    "FormElement": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "camera",
-            "checkboxes",
-            "date",
-            "datetime",
-            "heading",
-            "location",
-            "number",
-            "radio",
-            "select",
-            "draw",
-            "text",
-            "textarea",
-            "time",
-            "repeatableSet",
-            "html",
-            "barcodeScanner",
-            "captcha",
-            "page",
-            "email",
-            "phone",
-            "autocomplete",
-            "file",
-            "files"
-          ]
-        },
-        "label": {
-          "type": "string"
-        },
-        "required": {
-          "type": "boolean"
-        },
-        "readOnly": {
-          "type": "boolean"
-        },
-        "conditionallyShow": {
-          "type": "boolean"
-        },
-        "conditionallyShowOptions": {
-          "type": "boolean"
-        },
-        "conditionallyShowPredicates": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "elementId": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "optionIds": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        },
-        "requiresAllConditionallyShowPredicates": {
-          "type": "boolean"
-        },
-        "defaultValue": {},
-        "buttons": {
-          "type": "boolean"
-        },
-        "multi": {
-          "type": "boolean"
-        },
-        "minNumber": {
-          "type": "number"
-        },
-        "maxNumber": {
-          "type": "number"
-        },
-        "headingType": {
-          "type": "number",
-          "enum": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        "fromDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "toDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "options": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "value": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              },
-              "colour": {
-                "type": "string"
-              },
-              "attributes": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "elementId": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "optionIds": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "format": "uuid"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "conditionallyShowOptionsElementIds": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "attributesMapping": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "attribute": {
-                "type": "string"
-              },
-              "elementId": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          }
-        },
-        "minSetEntries": {
-          "type": "integer"
-        },
-        "maxSetEntries": {
-          "type": "integer"
-        },
-        "elements": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/FormElement"
-          }
-        },
-        "restrictBarcodeTypes": {
-          "type": "boolean"
-        },
-        "restrictedBarcodeTypes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "minEntries": {
-          "type": "integer"
-        },
-        "maxEntries": {
-          "type": "integer"
-        }
-      }
     }
   },
   "parameters": {},
@@ -745,5 +616,19 @@
     }
   },
   "security": [],
-  "tags": []
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "http://oneblink.io/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "http://oneblink.io/legal/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Data"
+    }
+  ]
 }

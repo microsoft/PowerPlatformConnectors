@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2",
+          "clientId": "[[DUMMY]]",
+          "scopes": [
+            "boards:read boards:write"
+          ],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False",
+            "IsOnbehalfofLoginSupported": false
+          },
+          "customParameters": {
+            "authorizationUrl": {
+              "value": "https://miro.com/oauth/authorize"
+            },
+            "tokenUrl": {
+              "value": "https://api.miro.com/v1/oauth/token"
+            },
+            "refreshUrl": {
+              "value": "https://api.miro.com/v1/oauth/token"
+            }
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#da3b01",
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "setvaluefromurl",
+        "title": "Set TeamId header for the team where the application was authorized",
+        "parameters": {
+          "x-ms-apimTemplateParameter.parameterTemplate": "@headers('TeamId')",
+          "x-ms-apimTemplateParameter.httpMethod": "GET",
+          "x-ms-apimTemplateParameter.parameterValueUrl": "/oauth-token",
+          "x-ms-apimTemplateParameter.parameterValuePathTemplate": "@body().team.id",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "GetBoards"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Redirect to a specific team id",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/teams/@headers('TeamId')/boards",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "GetBoards"
+          ]
+        }
+      },
+      {
+        "templateId": "setproperty",
+        "title": "Append widget type",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPropertyParentPathTemplate": "body()",
+          "x-ms-apimTemplateParameter.newPropertySubPathTemplate": "type",
+          "x-ms-apimTemplateParameter.propertyValuePathTemplate": "card",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "CreateCard"
+          ]
+        }
+      }
+    ],
+    "publisher": "Michal Romiszewski",
+    "stackOwner": "Miro"
+  }
+}
