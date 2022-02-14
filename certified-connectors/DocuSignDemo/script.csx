@@ -59,12 +59,13 @@ public class Script : ScriptBase
     if (operationId.Equals("StaticResponseForTabTypes", StringComparison.OrdinalIgnoreCase))
     {
       var tabTypesArray = new JArray();
-      string[] tabTypes = { "signHereTabs", "dateSignedTabs", "textTabs", "fullNameTabs", "initialHereTabs"};
-      foreach (var tabType in tabTypes)
+      string [,] tabTypes = { { "signHereTabs", "Signature" }, { "dateSignedTabs", "Date Signed" }, { "textTabs", "Text" }, { "fullNameTabs", "Name" }, { "initialHereTabs", "Initial" } };
+      for (var i = 0; i < tabTypes.GetLength(0); i++)
       {
         var tabTypeObject = new JObject()
         {
-          ["name"] = tabType
+          ["type"] = tabTypes[i,0],
+          ["name"] = tabTypes[i,1]
         };
         tabTypesArray.Add(tabTypeObject);
       }
