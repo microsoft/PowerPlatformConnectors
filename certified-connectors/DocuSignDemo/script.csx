@@ -78,68 +78,40 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var tabType = query.Get("tabType");
 
-      if (string.IsNullOrEmpty(tabType) || tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
       {
-        response["name"] = "dynamicSchema";
-        response["title"] = "dynamicSchema";
-        response["schema"] = new JObject
+        ["type"] = "object",
+        ["properties"] = new JObject
         {
-          ["type"] = "object",
-          ["properties"] = new JObject
+          ["tabs"] = new JObject
           {
-            ["tabs"] = new JObject
+            ["type"] = "array",
+            ["items"] = new JObject
             {
-              ["type"] = "array",
-              ["items"] = new JObject
+              ["type"] = "object",
+              ["properties"] = new JObject
               {
-                ["type"] = "object",
-                ["properties"] = new JObject
+                ["anchorString"] = new JObject
                 {
-                  ["anchorString"] = new JObject
-                  {
-                    ["type"] = "string",
-                    ["x-ms-summary"] = "anchor string *",
-                    ["description"] = "Anchor string to match"
-                  },
-                  ["value"] = new JObject
-                  {
-                    ["type"] = "string",
-                    ["x-ms-summary"] = "value",
-                    ["description"] = "Value for the tab"
-                  }
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "anchor string *",
+                  ["description"] = "Anchor string to match"
                 }
               }
             }
           }
-        };
-      }
-      else
+        }
+      };
+
+      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
       {
-        response["name"] = "dynamicSchema";
-        response["title"] = "dynamicSchema";
-        response["schema"] = new JObject
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
         {
-          ["type"] = "object",
-          ["properties"] = new JObject
-          {
-            ["tabs"] = new JObject
-            {
-              ["type"] = "array",
-              ["items"] = new JObject
-              {
-                ["type"] = "object",
-                ["properties"] = new JObject
-                {
-                  ["anchorString"] = new JObject
-                  {
-                    ["type"] = "string",
-                    ["x-ms-summary"] = "anchor string *",
-                    ["description"] = "Anchor string to match"
-                  }
-                }
-              }
-            }
-          }
+          ["type"] = "string",
+          ["x-ms-summary"] = "value",
+          ["description"] = "Value for the tab"
         };
       }
     }
