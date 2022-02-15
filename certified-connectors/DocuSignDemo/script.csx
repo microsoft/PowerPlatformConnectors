@@ -59,7 +59,18 @@ public class Script : ScriptBase
     if (operationId.Equals("StaticResponseForTabTypes", StringComparison.OrdinalIgnoreCase))
     {
       var tabTypesArray = new JArray();
-      string [,] tabTypes = { { "signHereTabs", "Signature" }, { "dateSignedTabs", "Date Signed" }, { "textTabs", "Text" }, { "fullNameTabs", "Name" }, { "initialHereTabs", "Initial" } };
+      string [,] tabTypes = { 
+        { "signHereTabs", "Signature" }, 
+        { "dateSignedTabs", "Date Signed" }, 
+        { "textTabs", "Text" }, 
+        { "fullNameTabs", "Name" },
+        { "initialHereTabs", "Initial" },
+        { "checkboxTabs", "Checkbox" },
+        { "titleTabs", "Title" },
+        { "signerAttachmentTabs", "Attachment" },
+        { "emailTabs", "Email" },
+        { "approveTabs", "Approval" }
+      };
       for (var i = 0; i < tabTypes.GetLength(0); i++)
       {
         var tabTypeObject = new JObject()
