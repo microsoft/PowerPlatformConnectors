@@ -23,6 +23,10 @@ The connector supports the following operations:
 * `Retrieve SSL certificate information for IP address`: Retrieve SSL certificate enrichment data for IP address.
 * `Retrieve Device Geo information for IPv4 address`: Retrieve Device Geo enrichment data for IPv4 address.
 * `Retrieve Device Geo information for IPv6 address`: Retrieve Device Geo enrichment data for IPv6 address.
+* `Retrieve C2 Attribution information for Domain`: Retrieve C2 Attribution enrichment data for Domain.
+* `Retrieve C2 Attribution information for IP address`: Retrieve C2 Attribution enrichment data for IP address.
+* `Retrieve C2 Attribution information for SHA256`: Retrieve C2 Attribution enrichment data for SHA256.
+* `Retrieve C2 Attribution information for Email address`: Retrieve C2 Attribution enrichment data for Email address.
 
 ## Support and documentation: 
 For all the support requests and general queries you can contact support@hyas.com or visit [contact-us](https://www.hyas.com/contact)
