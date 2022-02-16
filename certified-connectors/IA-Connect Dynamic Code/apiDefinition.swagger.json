@@ -3,7 +3,7 @@
   "info": {
     "title": "IA-Connect Dynamic Code",
     "description": "IA-Connect is a Robotic Process Automation (RPA) platform which adds RPA functionality from the Cloud to on-premises virtual machines or over Citrix or Microsoft Remote Desktop (RDS) connections. This is the module for developing dynamic code modules.",
-    "version": "9.1",
+    "version": "9.2",
     "contact": {
       "name": "Ultima Labs",
       "url": "https://www.ultima.com/ultima-labs",
@@ -349,8 +349,8 @@
                 },
                 "PropertiesToReturnAsCollectionJSON": {
                   "type": "string",
-                  "title": "Properties to return as collection JSON",
-                  "description": "Some members (in the PowerShell return results) are collections of values (often Deserialized). This variable allows you to specify which ones are returned as a collection (within the return JSON, if possible)."
+                  "title": "Properties to return as collection",
+                  "description": "Some properties (in the PowerShell return results) are collections of values (e.g. an array or table) and by default are not returned in the IA-Connect PowerShell response. This option allows you to specify which properties IA-Connect should attempt to return as a collection and can be entered in JSON or CSV format. For example: To return the EmailAddresses and MemberOf array properties, enter [{\"PropertyName\": \"EmailAddresses\"}, {\"PropertyName\": \"MemberOf\"}] (JSON format) or EmailAddresses,MemberOf (CSV format)."
                 },
                 "AuthenticationMechanism": {
                   "type": "string",
@@ -414,6 +414,395 @@
           }
         },
         "operationId": "RunPowerShellAutomationScript"
+      }
+    },
+    "/DynamicCode/GetRegexMatch": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get regular expression match",
+        "description": "Performs a regular expression (regex) match on an input string and returns whether the string matched the expression and details of the match.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetRegexMatch",
+            "description": "Inputs for IA-Connect GetRegexMatch action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TextToMatch": {
+                  "type": "string",
+                  "title": "Input text to match",
+                  "description": "The input text to match against the regular expression."
+                },
+                "Regex": {
+                  "type": "string",
+                  "title": "Regular expression",
+                  "description": "The regular expression to match the input text against."
+                },
+                "SearchIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "title": "Search index",
+                  "description": "The index of the match result to retrieve, starting at 1. If you want to match the first result (the default behaviour), enter 1. For example: If an input string is expected to match the regular expression in 5 places and you are interested in the 4th match, enter 4."
+                },
+                "CaseSensitive": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Case sensitive match",
+                  "description": "Set to true (the default) for a case-sensitive match (e.g. A is not a) or set to false for a case-insensitive match (e.g. A and a are treated as identical)."
+                },
+                "RegexTimeoutInSeconds": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 60,
+                  "title": "Regex timeout in seconds",
+                  "description": "The maximum number of seconds the regular expression can be processed before timing-out. This stops infinite loops caused by certain regular expressions.",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "TextToMatch",
+                "Regex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "SuccessfulMatch": {
+                  "type": "boolean",
+                  "title": "Successful match",
+                  "description": "True if there was a successful match (at the specified search index) or false if there was not."
+                },
+                "MatchStringValue": {
+                  "type": "string",
+                  "title": "Match string value",
+                  "description": "If there was a successful match, this string value holds the text from the input text which matched the regular expression."
+                },
+                "MatchIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Match position index",
+                  "description": "If there was a successful match, this value holds the position within the input text to match where the match is located. This value starts at 0 which represents the very start of the input text string."
+                },
+                "MatchStringLength": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Match string length",
+                  "description": "If there was a successful match, this value holds the length of the text from the input text which matched the regular expression (i.e. the length of the output value 'Match string value')."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetRegexMatch"
+      }
+    },
+    "/DynamicCode/GetRegexMatches": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get regular expression matches",
+        "description": "Performs a regular expression (regex) match on an input string and returns all matches in a string array. The array will be empty if there were no matches.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetRegexMatches",
+            "description": "Inputs for IA-Connect GetRegexMatches action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TextToMatch": {
+                  "type": "string",
+                  "title": "Input text to match",
+                  "description": "The input text to match against the regular expression."
+                },
+                "Regex": {
+                  "type": "string",
+                  "title": "Regular expression",
+                  "description": "The regular expression to match the input text against."
+                },
+                "MaximumMatches": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "title": "Maximum matches to perform",
+                  "description": "The maximum amount of regular expression matches to perform. For an unlimited number of matches (i.e. keep matching until there are no more matches) enter no value or a value of 0 (the default). This input is designed to avoid infinite regular expression loops by putting a limit on the number of matches."
+                },
+                "CaseSensitive": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Case sensitive match",
+                  "description": "Set to true (the default) for a case-sensitive match (e.g. A is not a) or set to false for a case-insensitive match (e.g. A and a are treated as identical)."
+                },
+                "TrimResults": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Trim results",
+                  "description": "Set to true (the default) if each individual output array element should be trimmed."
+                },
+                "RemoveEmptyResults": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Remove empty results",
+                  "description": "Set to true if empty output array elements should be removed from the output array (i.e. you don't want empty results)."
+                },
+                "RegexTimeoutInSeconds": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 60,
+                  "title": "Regex timeout in seconds",
+                  "description": "The maximum number of seconds the regular expression can be processed before timing-out. This stops infinite loops caused by certain regular expressions.",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "TextToMatch",
+                "Regex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "title": "Output array",
+                  "description": "The output string array which contains the individual regular expression matches."
+                },
+                "NumberOfElementsInOutput": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of elements in output",
+                  "description": "The number of elements in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetRegexMatches"
+      }
+    },
+    "/DynamicCode/GetRegexSplit": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Split string using a regular expression",
+        "description": "Splits an input string using a regular expression (regex) match and returns the individual split components of the string as a string array.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetRegexSplit",
+            "description": "Inputs for IA-Connect GetRegexSplit action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TextToSplit": {
+                  "type": "string",
+                  "title": "Input text to split",
+                  "description": "The input text to split against the regular expression."
+                },
+                "Regex": {
+                  "type": "string",
+                  "title": "Regular expression",
+                  "description": "The regular expression to split the input text against."
+                },
+                "CaseSensitive": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Case sensitive split",
+                  "description": "Set to true (the default) for a case-sensitive split (e.g. A is not a) or set to false for a case-insensitive split (e.g. A and a are treated as identical)."
+                },
+                "TrimResults": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Trim results",
+                  "description": "Set to true (the default) if each individual output array element should be trimmed."
+                },
+                "RemoveEmptyResults": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Remove empty results",
+                  "description": "Set to true if empty output array elements should be removed from the output array (i.e. you don't want empty results)."
+                },
+                "RegexTimeoutInSeconds": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 60,
+                  "title": "Regex timeout in seconds",
+                  "description": "The maximum number of seconds the regular expression can be processed before timing-out. This stops infinite loops caused by certain regular expressions.",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "TextToSplit",
+                "Regex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputArray": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "title": "Output array",
+                  "description": "The output string array which contains the individual components of the string, split using the regular expression."
+                },
+                "NumberOfElementsInOutput": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of elements in output",
+                  "description": "The number of elements in the output array."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetRegexSplit"
+      }
+    },
+    "/DynamicCode/GetRegexGroupMatches": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get regular expression group matches",
+        "description": "Performs a regular expression (regex) match on an input string and returns a list of matched group names and values.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetRegexGroupMatches",
+            "description": "Inputs for IA-Connect GetRegexGroupMatches action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TextToMatch": {
+                  "type": "string",
+                  "title": "Input text to match",
+                  "description": "The input text to match against the regular expression."
+                },
+                "Regex": {
+                  "type": "string",
+                  "title": "Regular expression",
+                  "description": "The regular expression to match the input text against."
+                },
+                "GroupsToRetrieve": {
+                  "type": "array",
+                  "title": "Groups to retrieve",
+                  "description": "A string array containing the names of the regular expression groups to retrieve. If a blank array is provided, all groups are retrieved. For example: If a regular expression contains (?<NeedsUpdating>(Yes|No)) and you specify that the 'NeedsUpdating' group should be retrieved, then the matched value of that named group will be returned.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "SearchIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "title": "Search index",
+                  "description": "The index of the match result to retrieve, starting at 1. If you want to match the first result (the default behaviour), enter 1. For example: If an input string is expected to match the regular expression in 5 places and you are interested in the 4th match, enter 4."
+                },
+                "CaseSensitive": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Case sensitive match",
+                  "description": "Set to true (the default) for a case-sensitive match (e.g. A is not a) or set to false for a case-insensitive match (e.g. A and a are treated as identical)."
+                },
+                "RegexTimeoutInSeconds": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "minimum": 1,
+                  "maximum": 60,
+                  "title": "Regex timeout in seconds",
+                  "description": "The maximum number of seconds the regular expression can be processed before timing-out. This stops infinite loops caused by certain regular expressions.",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "TextToMatch",
+                "Regex"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "RegexGroups": {
+                  "type": "array",
+                  "title": "Regular expression groups",
+                  "description": "An array containing the names and values of the regular expression groups matched against the input string.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Property": {
+                        "type": "string"
+                      },
+                      "Value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "NumberOfRegexGroups": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of groups",
+                  "description": "The number of regular expression groups."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetRegexGroupMatches"
       }
     },
     "/DynamicCode/CreateJSONFromInputVariables": {
@@ -1381,7 +1770,7 @@
           "application/json"
         ],
         "summary": "Insert a row into a table",
-        "description": "Takes an input table, inserts a row at a specified position and returns a new table. If you want to insert a row into a string array, use the action 'Insert a row into a string array'. If you want to insert a row into a table in JSON format, use the action 'Insert a row into a JSON table'.",
+        "description": "Takes an input table, inserts a row at a specified position and returns a new table. If you want to insert a string into a string array, use the action 'Insert a row into a string array'. If you want to insert a row into a table in JSON format, use the action 'Insert a row into a JSON table'.",
         "parameters": [
           {
             "in": "body",
@@ -1461,7 +1850,7 @@
           "application/json"
         ],
         "summary": "Insert a row into a JSON table",
-        "description": "Takes an input table in JSON format, inserts a row at a specified position and returns a new table in JSON format. If you want to insert a row into an actual table (i.e. not in JSON format), use the action 'Insert a row into a table'. If you want to insert a row into a string array, use the action 'Insert a row into a string array'.",
+        "description": "Takes an input table in JSON format, inserts a row at a specified position and returns a new table in JSON format. If you want to insert a row into an actual table (i.e. not in JSON format), use the action 'Insert a row into a table'. If you want to insert a string into a string array, use the action 'Insert a row into a string array'.",
         "parameters": [
           {
             "in": "body",
@@ -2487,6 +2876,438 @@
           }
         },
         "operationId": "GetStringBetween"
+      }
+    },
+    "/DynamicCode/LoadIAConnectLookupTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Load IA-Connect lookup table",
+        "description": "Loads an IA-Connect lookup table from the computer where the IA-Connect Agent is running. These lookup tables can be used by further IA-Connect actions to perform data lookups.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "LoadIAConnectLookupTable",
+            "description": "Inputs for IA-Connect LoadIAConnectLookupTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Path": {
+                  "type": "string",
+                  "title": "Lookup table path",
+                  "description": "The full path to the lookup table. This must be accessible from the session where the IA-Connect Agent is running. If a folder is specified then all files beneath that folder are processed."
+                },
+                "RaiseExceptionIfAnyTableFailsToLoad": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Raise exception if any table fails to load",
+                  "description": "If set to true and any IA-Connect lookup table fails to load (for example if there is a problem in the table) then an exception will be raised. This is the default because if any table fails to load, this will usually result in an exception later in the process. If set to false then problem lookup tables will be ignored and only usable lookup tables will be loade3d."
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "Path",
+                "RaiseExceptionIfAnyTableFailsToLoad",
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "NumberOfLookupTablesLoaded": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of lookup tables loaded",
+                  "description": "The number of lookup tables which were successfully loaded."
+                },
+                "NumberOfLookupTablesFailedToLoad": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of lookup tables failed to load",
+                  "description": "The number of lookup tables which failed to load. This will only be set if 'Raise exception if any table fails to load' is set to false, since otherwise there will be an exception."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "LoadIAConnectLookupTable"
+      }
+    },
+    "/DynamicCode/GetIAConnectLookupTableSummary": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get IA-Connect lookup table summary",
+        "description": "Retrieves a summary of the lookup tables currently loaded into the IA-Connect Agent.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetIAConnectLookupTableSummary",
+            "description": "Inputs for IA-Connect GetIAConnectLookupTableSummary action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "LookupTablesJSON": {
+                  "type": "array",
+                  "title": "Lookup tables JSON",
+                  "description": "The lookup tables loaded into the IA-Connect Agent.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string"
+                      },
+                      "ThenColumnIndex": {
+                        "type": "integer"
+                      },
+                      "NumberOfRows": {
+                        "type": "integer"
+                      },
+                      "NumberOfColumns": {
+                        "type": "integer"
+                      },
+                      "NumberOfUniqueHeaderProperties": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "NumberOfLookupTables": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of lookup tables",
+                  "description": "The number of lookup tables currently loaded into the IA-Connect Agent."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetIAConnectLookupTableSummary"
+      }
+    },
+    "/DynamicCode/RemoveIAConnectLookupTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Remove IA-Connect lookup table",
+        "description": "Removes a lookup table currently loaded into the IA-Connect Agent.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "RemoveIAConnectLookupTable",
+            "description": "Inputs for IA-Connect RemoveIAConnectLookupTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "LookupTableName": {
+                  "type": "string",
+                  "title": "Lookup table name",
+                  "description": "The name of the lookup table loaded into the IA-Connect Agent."
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "LookupTableName",
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {}
+          }
+        },
+        "operationId": "RemoveIAConnectLookupTable"
+      }
+    },
+    "/DynamicCode/RemoveAllIAConnectLookupTables": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Remove all IA-Connect lookup tables",
+        "description": "Removes all lookup tables currently loaded into the IA-Connect Agent.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "RemoveAllIAConnectLookupTables",
+            "description": "Inputs for IA-Connect RemoveAllIAConnectLookupTables action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {}
+          }
+        },
+        "operationId": "RemoveAllIAConnectLookupTables"
+      }
+    },
+    "/DynamicCode/LookupValueFromIAConnectLookupTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Lookup value from IA-Connect lookup table",
+        "description": "Retrieves a value from a lookup table currently loaded into the IA-Connect Agent.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "LookupValueFromIAConnectLookupTable",
+            "description": "Inputs for IA-Connect LookupValueFromIAConnectLookupTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "LookupTableName": {
+                  "type": "string",
+                  "title": "Lookup table name",
+                  "description": "The name of the lookup table loaded into the IA-Connect Agent."
+                },
+                "InputDataJSON": {
+                  "type": "string",
+                  "title": "Input data JSON",
+                  "description": "Input data to use for the lookup, in JSON format."
+                },
+                "SearchResultValueColumnName": {
+                  "type": "string",
+                  "title": "Search result value column name",
+                  "description": "The column in the lookup table which holds the return value to read."
+                },
+                "SearchResultValueColumnIndex": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "title": "Search result value column index",
+                  "description": "If set to 1 (the default), the value from the first result column matching the requested name will be returned. Set to a higher value (N) to return the Nth matching column."
+                },
+                "RaiseExceptionIfNoMatch": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Raise exception if no match",
+                  "description": "Set to true (the default) to raise an exception if the lookup matches no data. Set to false to return a blank string if the lookup matches no data."
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "LookupTableName",
+                "SearchResultValueColumnName",
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputLookupValue": {
+                  "type": "string",
+                  "title": "Output lookup value",
+                  "description": "The output value from the specified lookup table column, obtained by looking up the input data against the IA-Connect lookup table."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "LookupValueFromIAConnectLookupTable"
+      }
+    },
+    "/DynamicCode/LookupColumnsFromIAConnectLookupTable": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Lookup columns from IA-Connect lookup table",
+        "description": "Retrieves one or more columns with a common name from a lookup table currently loaded into the IA-Connect Agent and returns as a table. For example, the lookup table could contain multiple output columns named 'AD group' to represent multiple AD groups and they will be returned as separate rows in the output table.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "LookupColumnsFromIAConnectLookupTable",
+            "description": "Inputs for IA-Connect LookupColumnsFromIAConnectLookupTable action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "LookupTableName": {
+                  "type": "string",
+                  "title": "Lookup table name",
+                  "description": "The name of the lookup table loaded into the IA-Connect Agent."
+                },
+                "InputDataJSON": {
+                  "type": "string",
+                  "title": "Input data JSON",
+                  "description": "Input data to use for the lookup, in JSON format."
+                },
+                "SearchResultTableColumnName": {
+                  "type": "string",
+                  "title": "Search result table column name",
+                  "description": "The name of one or more columns in the lookup table which hold the values to return in the output table."
+                },
+                "RaiseExceptionIfNoMatch": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Raise exception if no match",
+                  "description": "Set to true (the default) to raise an exception if the lookup matches no data. Set to false to return a blank string if the lookup matches no data."
+                },
+                "ReturnBlankCells": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Return blank cells",
+                  "description": "Set to true if you want to include blank cells in the return table. Set to false (the default) to only include cells with values."
+                },
+                "ReturnFormat": {
+                  "type": "string",
+                  "default": "JSON",
+                  "title": "Return format",
+                  "description": "The format to use when returning the results.",
+                  "enum": [
+                    "JSON",
+                    "Array",
+                    "Table"
+                  ]
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "LookupTableName",
+                "SearchResultTableColumnName",
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputLookupTableJSON": {
+                  "type": "string",
+                  "title": "Output lookup table JSON",
+                  "description": "The output table read from the one or more lookup table columns with the specified name, obtained by looking up the input data against the IA-Connect lookup table. The output table will have one column (matching the requested result table column name) and one or more rows, in JSON format."
+                },
+                "OutputLookupTable": {
+                  "type": "array",
+                  "title": "Output lookup table",
+                  "description": "The output table read from the one or more lookup table columns with the specified name, obtained by looking up the input data against the IA-Connect lookup table. The output table will have one column (matching the requested result table column name) and one or more rows.",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "OutputLookupArray": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "title": "Output lookup array",
+                  "description": "The output array read from the one or more lookup table columns with the specified name, obtained by looking up the input data against the IA-Connect lookup table. The output array is a single column with one or more rows."
+                },
+                "NumberOfRowsInOutput": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of rows in output",
+                  "description": "The number of rows in the output."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "LookupColumnsFromIAConnectLookupTable"
       }
     }
   },
