@@ -23,7 +23,7 @@ Get the diff of a branch, tag, or commit in a project.
 Create a new branch in the repository.
 
 ### Create a Commit
-Create a commit by posting a JSON payload
+Create a commit by posting a JSON payload.
 
 ### Create a Merge Request
 Create a new merge request.
