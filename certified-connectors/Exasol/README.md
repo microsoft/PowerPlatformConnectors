@@ -49,7 +49,7 @@ The connector itself takes 2 parameters when creating a new connection:
 
 Note: You can still edit these 2 values afterwards.
 
-Please see the user guide for more detailed instructions and a full tutorial [here](https://github.com/exasol/power-apps-connector#readme).
+Please see the user guide for more detailed instructions and a full tutorial [here](https://github.com/exasol/power-apps-connector/blob/main/doc/user_guide/user_guide.md).
 
 ## Known Issues and Limitations
 Using a on-premises data gateway is currently not supported.
