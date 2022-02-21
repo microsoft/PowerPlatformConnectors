@@ -34,7 +34,9 @@ Run a custom query to fetch data, for more advanced scenarios.
 
 ### `ExecuteNonQuery`
 Run a custom command, for more advanced scenarios.
-
+## Obtaining Credentials
+Currently the connector uses an API Key as the default authentication method.   
+The API key(s) can be set in the Exasol REST API which you're also required to set up to use this connector.
 ## Getting Started
 You should first set up the Exasol REST API (see: https://github.com/exasol/exasol-rest-api).
 
@@ -47,11 +49,8 @@ The connector itself takes 2 parameters when creating a new connection:
 
 Note: You can still edit these 2 values afterwards.
 
-Please see the user guide for more detailed instructions [here](https://github.com/exasol/power-apps-connector#readme).
+Please see the user guide for more detailed instructions and a full tutorial [here](https://github.com/exasol/power-apps-connector#readme).
 
-## Obtaining Credentials
-Currently the connector uses an API Key as the default authentication method.   
-The API key(s) can be set in the Exasol REST API which you're also required to set up to use this connector.
 ## Known Issues and Limitations
 Using a on-premises data gateway is currently not supported.
 
@@ -59,6 +58,6 @@ Using a on-premises data gateway is currently not supported.
 Please follow [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector within Microsoft Power Automate and Power Apps.
 
 ## Further support and documentation
-You can find the detailed documentation and a user guide here [here](https://github.com/exasol/power-apps-connector#readme).
+
 
 Questions and issues can be filed [here](https://github.com/exasol/power-apps-connector/issues).
