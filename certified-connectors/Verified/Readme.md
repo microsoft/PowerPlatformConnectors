@@ -5,8 +5,8 @@ Verified is a Software as a Service provider of electronic identification and di
 You will need the following to proceed:
 * [Sign-up](https://verified.eu/en/) for a verified account
 
-## Supported Actions
-The connector supports the following actions:
+## Supported Operations
+The connector supports the following operations:
 * `Generate security token`: Generates an authentication Token from the Verified API.
 * `Get company by id`: Gets the Company Information of a given company.
 * `Get all envelope recipients`: Gets all recipients of a given envelope.
