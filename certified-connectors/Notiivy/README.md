@@ -2,7 +2,7 @@
 
 Many organisations currently suffer from email fatigue whereby their email channel is being exhausted for mundane everyday notifications and alerts within a department or the business. 
 By using browser notifications, this is an effective way to avoid email fatigue and spam when using applications like Dynamics 365 and PowerApps. 
-Notiivy is completely integrated with the Microsoft Power Platform allowing users, both internal and external to the organisation, to receive rich persistent notifications based on triggers and data within the common data service and its data connectors.
+Notiivy is completely integrated with the Microsoft Power Platform allowing users, both internal and external to the organisation, to receive rich persistent notifications based on triggers and data within Dataverse and its data connectors.
 
 ## Prerequisites
 

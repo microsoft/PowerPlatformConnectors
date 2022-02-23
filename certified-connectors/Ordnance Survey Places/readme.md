@@ -7,10 +7,10 @@ OS Places API is the UK’s most trusted, most comprehensive online address data
 
 ## Prerequisites
 OS Places API requires an active license with Ordnance Survey. Customers must either sign up for a free trial or premium  subscriptions to generate access key required login to the API Connector. 
-* Subscription plan options can be found here: https://developer.ordnancesurvey.co.uk/content/contact-us
+* Subscription plan options can be found here: https://osdatahub.os.uk/plans
 
 ## API Documentation
-The API documentation can be found here https://apidocs.os.uk/docs/os-places-overview
+The API documentation can be found here https://osdatahub.os.uk/docs/places/overview
 
 ## Data specification
 The data behind the API is Ordnance Survey's AddressBase Premium. The documentation about this addressing data can be found here: 
