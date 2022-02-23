@@ -1,6 +1,9 @@
 ## Verified Connector
 Verified is a Software as a Service provider of electronic identification and digital signing. This connector makes it possible to integrate to the API of verified to create suffisticated signing flows within your application.
 
+## Publisher: CRM Konsulterna i Sverige AB
+The publisher for this connector is [CRM Konsulterna i Sverige AB](https://crmkonsutlerna.se) on behalf of [Verified](https://verified.eu).
+
 ## Prerequisites
 You will need the following to proceed:
 * [Sign-up](https://verified.eu/en/) for a verified account
@@ -41,8 +44,14 @@ The connector supports the following operations:
 * `Get default descriptor`: Gets descriptor information of the default descriptor.
 * `Send notification`: Sends a notification to a given recipient.
 
-## Supported Triggers
-Currently the conncetor does not provide any triggers.
+## Obtaining Credentials
+This connector uses Basic Authentication. The user has to present username, password and company ID when creating a connection. Username and password are the same you use to login to the Verified portal.
+To get the company Id you have to log in to the Verified portal, select the correct company if you have several and copy the company Id from the URL.
+
+## Known Issues and Limitations
+The following limitations are currently known.
+- In the beginngin of every flow one has to create an authentication token to be reused in every following step.
+- To add a document one has to send a HTTP request to a certain url.
 
 ## Good to know
 There are a few things in how the Verified API works and answers that need some extra handling in Power Automate.
