@@ -35,7 +35,7 @@ public class Script : ScriptBase
     }
   }
 
-  private static StringContent GetStaticResponse(IScriptContext context)
+  private StringContent GetStaticResponse(IScriptContext context)
   {
     var response = new JObject();
     string operationId = context.OperationId;
@@ -107,8 +107,17 @@ public class Script : ScriptBase
                 ["anchorString"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "anchor string *",
-                  ["description"] = "Anchor string to match"
+                  ["x-ms-summary"] = "anchor string *"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "X offset (pixels)"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "Y offset (pixels)"
                 }
               }
             }
@@ -121,8 +130,32 @@ public class Script : ScriptBase
         response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "value",
-          ["description"] = "Value for the tab"
+          ["x-ms-summary"] = "value"
+        };
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["font"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "font"
+        };
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontColor"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "fontColor"
+        };
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontSize"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "fontSize"
+        }; 
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "bold"
+        };
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["italic"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "italic"
         };
       }
     }
@@ -348,7 +381,14 @@ public class Script : ScriptBase
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
     body["emailSubject"] = query.Get("emailSubject");
+    var emailBody = query.Get("emailBody");
+
+    if (!string.IsNullOrEmpty(emailBody))
+    {
+      body["emailBlurb"] = emailBody;
+    }
 
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createBlankEnvelope", "/envelopes");
@@ -373,10 +413,6 @@ public class Script : ScriptBase
     if (body["routingOrder"] != null)
     {
       signers[0]["routingOrder"] = body["routingOrder"];
-    }
-    if (body["roleName"] != null)
-    {
-      signers[0]["roleName"] = body["roleName"];
     }
 
     body["signers"] = signers;
