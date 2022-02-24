@@ -132,6 +132,14 @@ public class Script : ScriptBase
           ["type"] = "string",
           ["x-ms-summary"] = "value"
         };
+      }
+
+      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("dateSignedTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("fullNameTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("titleTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("emailTabs", StringComparison.OrdinalIgnoreCase))
+      {
         response["schema"]["properties"]["tabs"]["items"]["properties"]["font"] = new JObject
         {
           ["type"] = "string",
@@ -140,12 +148,12 @@ public class Script : ScriptBase
         response["schema"]["properties"]["tabs"]["items"]["properties"]["fontColor"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "fontColor"
+          ["x-ms-summary"] = "font color"
         };
         response["schema"]["properties"]["tabs"]["items"]["properties"]["fontSize"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "fontSize"
+          ["x-ms-summary"] = "font size"
         }; 
         response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
         {
