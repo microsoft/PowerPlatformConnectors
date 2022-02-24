@@ -84,6 +84,23 @@ public class Script : ScriptBase
       response["tabTypes"] = tabTypesArray;
     }
 
+    if (operationId.StartsWith("StaticResponseForFont", StringComparison.OrdinalIgnoreCase))
+    {
+      var fontNamesArray = new JArray();
+      string[] fontNames = getFontNames(operationId);
+
+      foreach (var fontName in fontNames)
+      {
+        var fontNameObject = new JObject()
+        {
+          ["name"] = fontName
+        };
+        fontNamesArray.Add(fontNameObject);
+      }
+
+      response["fontNames"] = fontNamesArray;
+    }
+
     if (operationId.Equals("StaticResponseForAnchorTabSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
@@ -143,16 +160,37 @@ public class Script : ScriptBase
         response["schema"]["properties"]["tabs"]["items"]["properties"]["font"] = new JObject
         {
           ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "StaticResponseForFontFaces",
+              ["value-collection"] = "fontNames",
+              ["value-path"] = "name",
+              ["value-title"] = "name"
+            },
           ["x-ms-summary"] = "font"
         };
         response["schema"]["properties"]["tabs"]["items"]["properties"]["fontColor"] = new JObject
         {
           ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+          {
+            ["operationId"] = "StaticResponseForFontColors",
+            ["value-collection"] = "fontNames",
+            ["value-path"] = "name",
+            ["value-title"] = "name"
+          },
           ["x-ms-summary"] = "font color"
         };
         response["schema"]["properties"]["tabs"]["items"]["properties"]["fontSize"] = new JObject
         {
           ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+          {
+            ["operationId"] = "StaticResponseForFontSizes",
+            ["value-collection"] = "fontNames",
+            ["value-path"] = "name",
+            ["value-title"] = "name"
+          },
           ["x-ms-summary"] = "font size"
         }; 
         response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
@@ -169,6 +207,29 @@ public class Script : ScriptBase
     }
 
     return CreateJsonContent(response.ToString());
+  }
+
+  private string [] getFontNames(string operationId)
+  {
+    string[] fontNames = null;
+
+    if (operationId.Equals("StaticResponseForFontFaces", StringComparison.OrdinalIgnoreCase))
+    {
+      fontNames = new string[] { "Default","Arial","ArialNarrow","Calibri","CourierNew","Garamond","Georgia",
+        "Helvetica","LucidaConsole","MSGothic","MSMincho","OCR-A","Tahoma","TimesNewRoman","Trebuchet","Verdana"};
+    }
+    else if (operationId.Equals("StaticResponseForFontColors", StringComparison.OrdinalIgnoreCase))
+    {
+      fontNames = new string[] { "Black","BrightBlue","BrightRed","DarkGreen","DarkRed","Gold","Green",
+        "NavyBlue","Purple","White" };
+    }
+    else if (operationId.Equals("StaticResponseForFontSizes", StringComparison.OrdinalIgnoreCase))
+    {
+      fontNames = new string[] { "Size7","Size8","Size9","Size10","Size11","Size12","Size14","Size16","Size18",
+        "Size20","Size22","Size24","Size26","Size28","Size36","Size48","Size72" };
+    }
+
+    return fontNames;
   }
 
   private static JObject ParseContentAsJObject(string content, bool isRequest)
