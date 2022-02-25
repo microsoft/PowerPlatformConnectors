@@ -341,7 +341,7 @@
             "description": "Account id",
             "required": true,
             "x-ms-summary": "Account",
-            "x-ms-test-value": "ecac7b95-ba75-43dd-b1cd-f2db80a0af40",
+            "x-ms-test-value": "insert account id",
             "x-ms-dynamic-values": {
               "operationId": "GetLoginAccounts",
               "value-collection": "loginAccounts",
@@ -546,7 +546,7 @@
           "DocuSign"
         ],
         "summary": "Add recipient to an envelope",
-        "description": "Add recipient to an envelope",
+        "description": "Add recipient to an envelope.",
         "operationId": "AddRecipientToEnvelope",
         "consumes": [
           "application/json",
@@ -587,9 +587,9 @@
             "type": "string"
           },
           {
-            "name": "AddRecipientToEnvelopeName",
+            "name": "recipientName",
             "in": "query",
-            "description": "The name of the recipient.",
+            "description": "Name of the recipient.",
             "required": true,
             "x-ms-summary": "Signer Name",
             "x-ms-test-value": "test name",
@@ -597,9 +597,9 @@
             "type": "string"
           },
           {
-            "name": "AddRecipientToEnvelopeEmail",
+            "name": "recipientEmail",
             "in": "query",
-            "description": "The email of the recipient.",
+            "description": "Email of the recipient.",
             "required": true,
             "x-ms-summary": "Signer Email",
             "x-ms-test-value": "test@email.com",
@@ -607,21 +607,22 @@
             "type": "string"
           },
           {
-            "name": "newRecipient",
+            "name": "additionalRecipientData",
             "in": "body",
-            "description": "New recipient",
-            "required": true,
+            "description": "Additional recipient data.",
+            "required": false,
             "schema": {
-              "$ref": "#/definitions/AddRecipientToEnvelopeRequest"
+              "$ref": "#/definitions/AdditionalRecipientData"
             },
-            "x-ms-summary": "Data for a recipient"
+            "x-ms-summary": "Additional recipient data",
+            "x-ms-visibility": "advanced"
           }
         ],
         "responses": {
           "201": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ListRecipientsResponse"
+              "$ref": "#/definitions/Signer"
             }
           }
         },
@@ -1049,30 +1050,41 @@
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": [
+                      "documentBase64",
+                      "fileExtension",
+                      "name"
+                    ],
                     "properties": {
                       "documentBase64": {
                         "type": "string",
-                        "description": "documentBase64"
-                      },
-                      "documentId": {
-                        "type": "string",
-                        "description": "documentId"
+                        "x-ms-summary": "Base64 *",
+                        "description": "Base64 of document content"
                       },
                       "fileExtension": {
                         "type": "string",
-                        "description": "fileExtension"
+                        "x-ms-dynamic-values": {
+                          "operationId": "StaticResponseForDocumentTypes",
+                          "value-collection": "documentTypes",
+                          "value-path": "name",
+                          "value-title": "name"
+                        },
+                        "x-ms-summary": "type *",
+                        "description": "pdf, docx etc."
                       },
                       "name": {
                         "type": "string",
-                        "description": "name"
+                        "x-ms-summary": "name *",
+                        "description": "document name"
                       },
                       "order": {
                         "type": "string",
-                        "description": "order"
+                        "x-ms-summary": "order",
+                        "description": "1"
                       }
                     }
                   },
-                  "description": "documents"
+                  "x-ms-summary": "document"
                 }
               }
             }
@@ -1135,6 +1147,107 @@
         },
         "deprecated": false,
         "x-ms-no-generic-test": true,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/tabs": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Add tabs for a recipient",
+        "description": "Add tabs for a recipient.",
+        "operationId": "AddRecipientTabs",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Envelope id",
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id"
+          },
+          {
+            "name": "recipientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Recipient id",
+            "x-ms-summary": "Recipient",
+            "x-ms-test-value": "insert recipient id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/AnchorTabSchema"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AddRecipientTabsResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important"
+      }
+    },
+    "/document_types": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get document types.",
+        "operationId": "StaticResponseForDocumentTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DocumentTypesResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/anchortab_schema": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get schema for a specific anchor tab.",
+        "operationId": "StaticResponseForAnchorTabSchema",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "deprecated": false,
         "x-ms-visibility": "internal"
       }
     }
@@ -1389,44 +1502,27 @@
         "value-path": "Schema/Items"
       }
     },
-    "AddRecipientToEnvelopeRequest": {
+    "AnchorTabSchema": {
+      "description": "An object that represents the schema for a specific anchor tab.",
       "type": "object",
-      "properties": {
-        "signers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SignerRequest"
-          },
-          "x-ms-summary": "Signer",
-          "x-ms-visibility": "advanced"
-        }
-      },
-      "x-ms-test-value": {
-        "signers": [
-          {
-            "name": "test name",
-            "email": "clconn@microsoft.com",
-            "routingOrder": "1",
-            "roleName": "manager",
-            "recipientId": "insert recipientId"
-          }
-        ]
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "StaticResponseForAnchorTabSchema",
+        "value-path": "Schema/Items"
       }
     },
-    "SignerRequest": {
+    "AdditionalRecipientData": {
       "type": "object",
       "properties": {
         "routingOrder": {
           "description": "The signing order of the recipient in the document.",
           "type": "string",
-          "x-ms-summary": "Signing Order",
-          "x-ms-visibility": "important"
+          "x-ms-summary": "Signing Order"
         },
         "roleName": {
           "description": "The role of the signer.",
           "type": "string",
-          "x-ms-summary": "Role",
-          "x-ms-visibility": "important"
+          "x-ms-summary": "Role"
         }
       }
     },
@@ -1606,6 +1702,30 @@
         }
       }
     },
+    "DocumentTypesResponse": {
+      "type": "object",
+      "properties": {
+        "documentTypes": {
+          "description": "Document types",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DocumentType"
+          },
+          "x-ms-summary": "Document types",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "DocumentType": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The type of a document.",
+          "type": "string",
+          "x-ms-summary": "Type"
+        }
+      }
+    },
     "ListTemplatesResponse": {
       "type": "object",
       "properties": {
@@ -1719,7 +1839,10 @@
       "type": "object",
       "properties": {
         "envelopeId": {
-          "type": "string"
+          "description": "The id of the envelope.",
+          "type": "string",
+          "x-ms-summary": "Envelope Id",
+          "x-ms-visibility": "advanced"
         },
         "envelopeDocuments": {
           "description": "The documents attached to the envelope.",
@@ -1728,6 +1851,20 @@
             "$ref": "#/definitions/EnvelopeDocument"
           },
           "x-ms-summary": "Envelope documents",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "AddRecipientTabsResponse": {
+      "type": "object",
+      "properties": {
+        "recipientTabs": {
+          "description": "The tabs added to a recipient.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RecipientTab"
+          },
+          "x-ms-summary": "Recipient tabs",
           "x-ms-visibility": "advanced"
         }
       }
@@ -1745,6 +1882,23 @@
           "description": "The name of the document.",
           "type": "string",
           "x-ms-summary": "Name",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "RecipientTab": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "description": "The id of the tab.",
+          "type": "string",
+          "x-ms-summary": "Tab Id",
+          "x-ms-visibility": "advanced"
+        },
+        "tabType": {
+          "description": "The type of the tab.",
+          "type": "string",
+          "x-ms-summary": "Tab Type",
           "x-ms-visibility": "advanced"
         }
       }

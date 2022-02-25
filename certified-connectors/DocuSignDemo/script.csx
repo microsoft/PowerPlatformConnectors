@@ -10,6 +10,13 @@ public class Script : ScriptBase
         return new HttpResponseMessage(HttpStatusCode.OK);
       }
 
+      if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
+      {
+        var staticResponse = new HttpResponseMessage();
+        staticResponse.Content = GetStaticResponse(this.Context.OperationId);
+        return staticResponse;
+      }
+
       await this.UpdateRequest().ConfigureAwait(false);
       var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
       if (response.IsSuccessStatusCode)
@@ -25,6 +32,58 @@ public class Script : ScriptBase
       response.Content = CreateJsonContent(ex.Message);
       return response;
     }
+  }
+
+  private static StringContent GetStaticResponse(string operationId)
+  {
+    var response = new JObject();
+
+    if (operationId.Equals("StaticResponseForDocumentTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var docTypesArray = new JArray();
+      string[] docTypes = { "pdf", "docx", "doc", "xlsx", "xls", "jpg" };
+      foreach (var docType in docTypes)
+      {
+        var docTypeObject = new JObject()
+        {
+          ["name"] = docType
+        };
+        docTypesArray.Add(docTypeObject);
+      }
+
+      response["documentTypes"] = docTypesArray;
+    }
+
+    if (operationId.Equals("StaticResponseForAnchorTabSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "array",
+        ["items"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["anchorString"] = new JObject
+            {
+              ["type"] = "string",
+              ["x-ms-summary"] = "anchor string *",
+              ["description"] = "Anchor string to match"
+            },
+            ["value"] = new JObject
+            {
+              ["type"] = "string",
+              ["x-ms-summary"] = "value",
+              ["description"] = "Value for the tab"
+            }
+          }
+        }
+      };
+    }
+
+    return CreateJsonContent(response.ToString());
   }
 
   private static JObject ParseContentAsJObject(string content, bool isRequest)
@@ -256,24 +315,65 @@ public class Script : ScriptBase
 
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
-    var signers = body["signers"] as JArray;
-    if (signers == null || signers.Count == 0)
-    {
-      signers = new JArray
-            {
-                new JObject(),
-            };
-    }
-
+    var signers = new JArray
+      {
+        new JObject(),
+      };
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["name"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeName")).Replace("+", " ");
-    signers[0]["email"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeEmail")).Replace("+", " ");
+    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
+    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
     if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
     {
       signers[0]["recipientId"] = Guid.NewGuid();
     }
+    if (body["routingOrder"] != null)
+    {
+      signers[0]["routingOrder"] = body["routingOrder"];
+    }
+    if (body["roleName"] != null)
+    {
+      signers[0]["roleName"] = body["roleName"];
+    }
 
     body["signers"] = signers;
+    return body;
+  }
+
+  private int GenerateDocumentId()
+  {
+    DateTimeOffset now = DateTimeOffset.UtcNow;
+    DateTime midnight = DateTime.Now.Date;
+    TimeSpan ts = now.Subtract(midnight);
+    return (int)ts.TotalMilliseconds;
+  }
+
+  private JObject AddDocumentsToEnvelopeBodyTransformation(JObject body)
+  {
+    var documents = body["documents"] as JArray;
+
+    for (var i = 0; i < documents.Count; i++)
+    {
+      documents[i]["documentId"] = $"{GenerateDocumentId() + i}";
+    }
+
+    body["documents"] = documents;
+    return body;
+  }
+
+  private JObject AddRecipientTabsBodyTransformation(JObject body)
+  {
+    var res_tabs = new JArray();
+    var tabs = body["tabs"] as JArray;
+
+    for (var i = 0; i < tabs.Count; i++)
+    {
+      JObject tab = tabs[i] as JObject;
+      tab["locked"] = "false";
+      res_tabs.Add(tab);
+    }
+
+    body["textTabs"] = res_tabs;
+
     return body;
   }
 
@@ -366,6 +466,16 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddDocumentsToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("AddRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
     }
 
     if ("RemoveRecipientFromEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -479,6 +589,20 @@ public class Script : ScriptBase
           },
         },
       };
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var newBody = new JObject();
+
+      foreach (var signer in (body["signers"] as JArray) ?? new JArray())
+      {
+        newBody = signer as JObject;
+        break;
+      }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
