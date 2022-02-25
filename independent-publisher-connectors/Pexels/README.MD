@@ -18,7 +18,7 @@ You will be asked to enter the following details to generate an API key.
    * Brief description on how you are going to use the API
    * URL of your website (optional)
 
-Afterm entering the details, click on "Generate API Key" which will then display your API key.
+After entering the details, click on "Generate API Key" which will then display your API key.
 
 
 ## Supported Operations
