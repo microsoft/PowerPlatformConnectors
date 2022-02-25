@@ -24,12 +24,12 @@ Afterm entering the details, click on "Generate API Key" which will then display
 ## Supported Operations
 
 ### Photo
-   * Search for Photos
-   * List Curated Photos
-   * Get Photo
+   * Search for Photos: Search Pexels for any photos that you would like. 
+   * List Curated Photos: Retrieve a list of real-time photos curated by the Pexels team.
+   * Get Photo: Get a Photo by it's id.
 
 ### Video
-   * Search for Videos
-   * List Popular Videos
-   * Get Video
+   * Search for Videos: Search Pexels for any videos that you would like.
+   * List Popular Videos: Retrieve a list of the current popular videos.
+   * Get Video: Get a Video by it's id.
 
