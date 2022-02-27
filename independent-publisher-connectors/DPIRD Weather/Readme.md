@@ -1,5 +1,5 @@
 
-## DPIRD West Australia Weather Connector
+## DPIRD Weather Connector for Western Australia
 The Department of Primary Industries and Regional Development's (DPIRD) Agriculture and Food branch has implemented and manages over 185 weather stations throughout Western Australia. These weather stations provide timely, relevant and local weather data to assist growers and regional communities make more informed decisions.
 
 The data includes air temperature, humidity, rainfall, wind speed wind direction, and most stations also measure incoming solar radiation to calculate evaporation and evapotranspiration (ETo). Averages, totals, minimum and maximum values are calculated and the data is summarised into hourly, daily, monthly and yearly data.
