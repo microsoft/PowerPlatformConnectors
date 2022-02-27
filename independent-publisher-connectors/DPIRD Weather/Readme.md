@@ -14,21 +14,18 @@ You will need the following to proceed
 
 ## Authentication
 To create a connection from this connector, you need to register for an API key, which will be added to a custom HTTP header called 'api-key'. The custom header you send will allow access to all of the public available API's (provided the API Key is valid).
+
 If you would like an API key, please fill out the [DPIRD API Registration Form](https://www.agric.wa.gov.au/form/dpird-api-registration)
 
 ## Publisher: Paul Culmsee
 
 ## Building the connector 
-paconn
 paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
 
 ## Supported Operations
 The connector supports the following operations
 ### Get Weather Stations 
 Returns a list of stations and their metadata.
-
-### Get Flat Data 
-Gets data in a flattened structure with each item corresponding to a single data point. Data is restricted to within a single measure category and can be optionally filtered by measure, reporting unit type and reporting dates. Matching within each filter is by logical disjunction (OR) and matching across filters is by logical conjunction (AND). NOTE: There is currently a pagination restriction on this query that restricts requests to a maximum of 1000 results. Use skip and top to control this pagination. Sorting is not currently available
 
 ### Get Weather Stations Availability 
 Gets the availability metadata for weather stations
