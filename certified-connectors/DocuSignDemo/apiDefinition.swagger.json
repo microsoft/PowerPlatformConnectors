@@ -341,7 +341,7 @@
             "description": "Account id",
             "required": true,
             "x-ms-summary": "Account",
-            "x-ms-test-value": "ecac7b95-ba75-43dd-b1cd-f2db80a0af40",
+            "x-ms-test-value": "insert account id",
             "x-ms-dynamic-values": {
               "operationId": "GetLoginAccounts",
               "value-collection": "loginAccounts",
@@ -546,7 +546,7 @@
           "DocuSign"
         ],
         "summary": "Add recipient to an envelope",
-        "description": "Add recipient to an envelope",
+        "description": "Add recipient to an envelope.",
         "operationId": "AddRecipientToEnvelope",
         "consumes": [
           "application/json",
@@ -612,7 +612,7 @@
             "description": "Additional recipient data.",
             "required": false,
             "schema": {
-                "$ref": "#/definitions/AdditionalRecipientData"
+              "$ref": "#/definitions/AdditionalRecipientData"
             },
             "x-ms-summary": "Additional recipient data",
             "x-ms-visibility": "advanced"
@@ -622,7 +622,7 @@
           "201": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ListRecipientsResponse"
+              "$ref": "#/definitions/Signer"
             }
           }
         },
@@ -1063,7 +1063,12 @@
                       },
                       "fileExtension": {
                         "type": "string",
-                        "enum": ["pdf", "docx", "doc", "xlsx", "xls", "jpg"],
+                        "x-ms-dynamic-values": {
+                          "operationId": "StaticResponseForDocumentTypes",
+                          "value-collection": "documentTypes",
+                          "value-path": "name",
+                          "value-title": "name"
+                        },
                         "x-ms-summary": "type *",
                         "description": "pdf, docx etc."
                       },
@@ -1142,6 +1147,107 @@
         },
         "deprecated": false,
         "x-ms-no-generic-test": true,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/tabs": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Add tabs for a recipient",
+        "description": "Add tabs for a recipient.",
+        "operationId": "AddRecipientTabs",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Envelope id",
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id"
+          },
+          {
+            "name": "recipientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Recipient id",
+            "x-ms-summary": "Recipient",
+            "x-ms-test-value": "insert recipient id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/AnchorTabSchema"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AddRecipientTabsResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important"
+      }
+    },
+    "/document_types": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get document types.",
+        "operationId": "StaticResponseForDocumentTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DocumentTypesResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/anchortab_schema": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get schema for a specific anchor tab.",
+        "operationId": "StaticResponseForAnchorTabSchema",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "deprecated": false,
         "x-ms-visibility": "internal"
       }
     }
@@ -1396,19 +1502,28 @@
         "value-path": "Schema/Items"
       }
     },
+    "AnchorTabSchema": {
+      "description": "An object that represents the schema for a specific anchor tab.",
+      "type": "object",
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "StaticResponseForAnchorTabSchema",
+        "value-path": "Schema/Items"
+      }
+    },
     "AdditionalRecipientData": {
       "type": "object",
       "properties": {
-          "routingOrder": {
-              "description": "The signing order of the recipient in the document.",
-              "type": "string",
-              "x-ms-summary": "Signing Order"
-          },
-          "roleName": {
-              "description": "The role of the signer.",
-              "type": "string",
-              "x-ms-summary": "Role"
-          }
+        "routingOrder": {
+          "description": "The signing order of the recipient in the document.",
+          "type": "string",
+          "x-ms-summary": "Signing Order"
+        },
+        "roleName": {
+          "description": "The role of the signer.",
+          "type": "string",
+          "x-ms-summary": "Role"
+        }
       }
     },
     "OnEnvelopeStatusChangesResponse": {
@@ -1587,6 +1702,30 @@
         }
       }
     },
+    "DocumentTypesResponse": {
+      "type": "object",
+      "properties": {
+        "documentTypes": {
+          "description": "Document types",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DocumentType"
+          },
+          "x-ms-summary": "Document types",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "DocumentType": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The type of a document.",
+          "type": "string",
+          "x-ms-summary": "Type"
+        }
+      }
+    },
     "ListTemplatesResponse": {
       "type": "object",
       "properties": {
@@ -1716,6 +1855,20 @@
         }
       }
     },
+    "AddRecipientTabsResponse": {
+      "type": "object",
+      "properties": {
+        "recipientTabs": {
+          "description": "The tabs added to a recipient.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RecipientTab"
+          },
+          "x-ms-summary": "Recipient tabs",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
     "EnvelopeDocument": {
       "type": "object",
       "properties": {
@@ -1729,6 +1882,23 @@
           "description": "The name of the document.",
           "type": "string",
           "x-ms-summary": "Name",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "RecipientTab": {
+      "type": "object",
+      "properties": {
+        "tabId": {
+          "description": "The id of the tab.",
+          "type": "string",
+          "x-ms-summary": "Tab Id",
+          "x-ms-visibility": "advanced"
+        },
+        "tabType": {
+          "description": "The type of the tab.",
+          "type": "string",
+          "x-ms-summary": "Tab Type",
           "x-ms-visibility": "advanced"
         }
       }
