@@ -3,15 +3,24 @@
   "info": {
     "title": "Tallyfy",
     "description": "Tallyfy is beautiful workflow software that helps you create, track and scale any repeatable process. It helps you eliminate the use of flowcharts, forms and emails by digitizing manual business processes and approval workflows.",
+    "contact": {
+      "name": "Tallyfy",
+      "url": "https://tallyfy.com",
+      "email": "support@tallyfy.com"
+    },
     "version": "2.0.0"
   },
-  "host": "api.tallyfy.com",
-  "basePath": "/",
+  "host": "go.tallyfy.com",
+  "basePath": "/api",
   "schemes": [
     "https"
   ],
-  "consumes": [],
-  "produces": [],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
     "/organizations/{org}/users": {
       "get": {
@@ -20,6 +29,9 @@
         ],
         "description": "Get all users belonging to an organization",
         "operationId": "Get_Organization_Users",
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -30,7 +42,14 @@
             "required": true,
             "type": "string",
             "description": "Organization Id",
-            "x-ms-summary": "Organization"
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
           }
         ],
         "responses": {
@@ -194,6 +213,42 @@
         "x-ms-visibility": "internal"
       }
     },
+    "/organizations/{org}/guests": {
+      "get": {
+        "tags": [
+          "Account",
+          "Guest"
+        ],
+        "description": "Get guests in an organization",
+        "operationId": "Get_Guests",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-summary": "Organization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Get guests in an organization",
+        "x-ms-visibility": "internal"
+      }
+    },
     "/me/organizations": {
       "get": {
         "tags": [
@@ -201,6 +256,9 @@
         ],
         "description": "Get user's organizations",
         "operationId": "Get_User_Organizations",
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -456,6 +514,9 @@
         ],
         "description": "Get all tasks that belong to a specific member",
         "operationId": "Get_User_Tasks",
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -985,7 +1046,7 @@
         "summary": "Invite a new member to your organization",
         "description": "Invite a new member to your organization",
         "operationId": "Invite_User_To_Organization",
-        "x-ms-visibility": "advanced",
+        "x-ms-visibility": "important",
         "parameters": [
           {
             "name": "org",
@@ -1026,13 +1087,31 @@
                   "description": "invitee's work email address",
                   "title": "Email",
                   "x-ms-visibility": "important"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Message to add",
+                  "title": "Message",
+                  "x-ms-visibility": "important"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Role",
+                  "title": "Role",
+                  "enum": [
+                    "standard",
+                    "admin"
+                  ],
+                  "x-ms-visibility": "important"
                 }
               },
               "x-ms-visibility": "important",
               "required": [
                 "email",
                 "first_name",
-                "last_name"
+                "last_name",
+                "message",
+                "role"
               ]
             },
             "x-ms-visibility": "important"
@@ -1040,180 +1119,13 @@
         ]
       }
     },
-    "/organizations/{org}/tasks": {
-      "post": {
-        "tags": [
-          "Task"
-        ],
-        "description": "Create Task",
-        "operationId": "Create_Task",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "org",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Organization Id",
-            "x-ms-dynamic-values": {
-              "operationId": "Get_User_Organizations",
-              "value-path": "id",
-              "value-collection": "data",
-              "value-title": "name"
-            },
-            "x-ms-summary": "Organization",
-            "x-ms-visibility": "important"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "owners": {
-                  "type": "object",
-                  "properties": {
-                    "users": {
-                      "type": "array",
-                      "items": {
-                        "type": "integer",
-                        "format": "int32",
-                        "description": "Users to assign the task to",
-                        "title": "Users",
-                        "x-ms-visibility": "important",
-                        "x-ms-dynamic-values": {
-                          "operationId": "Get_Organization_Users",
-                          "value-path": "id",
-                          "value-collection": "data",
-                          "value-title": "full_name",
-                          "parameters": {
-                            "org": {
-                              "parameter": "org"
-                            }
-                          }
-                        }
-                      },
-                      "description": "users"
-                    },
-                    "guests": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "title": "Guests",
-                        "x-ms-visibility": "important",
-                        "description": "guest emails to assign the task to (separate emails by comma)"
-                      },
-                      "description": "guests"
-                    }
-                  },
-                  "description": "owners"
-                },
-                "task_type": {
-                  "type": "string",
-                  "description": "Task type",
-                  "title": "Task type",
-                  "x-ms-visibility": "internal",
-                  "enum": [
-                    "standard",
-                    "accept_decline"
-                  ],
-                  "default": "standard"
-                },
-                "deadline": {
-                  "type": "string",
-                  "description": "task deadline, in date-time format",
-                  "title": "Task deadline",
-                  "format": "date-time",
-                  "x-ms-visibility": "important",
-                  "default": "@{addDays(utcNow(), 1, 'yyyy-MM-dd HH:mm:ss')}"
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Task's description",
-                  "title": "Task description",
-                  "x-ms-visibility": "important"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "task name",
-                  "title": "Task name",
-                  "x-ms-visibility": "important"
-                }
-              },
-              "required": [
-                "task_type",
-                "deadline",
-                "name"
-              ],
-              "x-ms-visibility": "important"
-            },
-            "x-ms-visibility": "important"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success response",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Unique identifier for the created Task",
-                      "title": "Task ID",
-                      "x-ms-visibility": "important"
-                    },
-                    "title": {
-                      "type": "string",
-                      "description": "Title of the created Task",
-                      "title": "Task Title",
-                      "x-ms-visibility": "important"
-                    },
-                    "alias": {
-                      "type": "string",
-                      "description": "unique alias of the created Task",
-                      "title": "Task alias",
-                      "x-ms-visibility": "internal"
-                    },
-                    "deadline": {
-                      "type": "string",
-                      "description": "Deadline of the created Task in date-time format",
-                      "title": "Task Deadline",
-                      "x-ms-visibility": "important"
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "Description of the created Task",
-                      "title": "Task Description",
-                      "x-ms-visibility": "important"
-                    },
-                    "owner_id": {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "Unique identifier for the creator of the Task",
-                      "title": "Creator ID",
-                      "x-ms-visibility": "internal"
-                    }
-                  },
-                  "description": "data"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Create a task",
-        "x-ms-visibility": "important"
-      }
-    },
     "/organizations/{org}/checklists": {
       "get": {
         "tags": [
           "Template"
+        ],
+        "consumes": [
+          "application/json"
         ],
         "produces": [
           "application/json"
@@ -1248,7 +1160,7 @@
               "statistics",
               "runs,statistics,steps,runs.collaborators"
             ],
-            "format": "int10"
+            "format": "int32"
           }
         ],
         "responses": {
@@ -1410,6 +1322,9 @@
         "tags": [
           "Process"
         ],
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -1446,20 +1361,9 @@
                 },
                 "checklist_id": {
                   "type": "string",
-                  "description": "ID of the Blueprint to start the process from",
-                  "title": "Blueprint",
-                  "x-ms-visibility": "important",
-                  "x-ms-dynamic-values": {
-                    "operationId": "Get_Checklists",
-                    "value-path": "id",
-                    "value-collection": "data",
-                    "value-title": "title",
-                    "parameters": {
-                      "org": {
-                        "parameter": "org"
-                      }
-                    }
-                  }
+                  "description": "ID of the Blueprint to start the process",
+                  "title": "Blueprint ID",
+                  "x-ms-visibility": "important"
                 },
                 "summary": {
                   "type": "string",
@@ -1723,6 +1627,784 @@
           }
         },
         "summary": "Launch a Process",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/organizations/{org}/completed-tasks": {
+      "post": {
+        "tags": [
+          "Task",
+          "One off task",
+          "Complete task"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "description": "Complete one off task",
+        "operationId": "Completed_One_Off_Task",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "title": "Task ID",
+                  "type": "string",
+                  "description": "Task ID",
+                  "x-ms-visibility": "important"
+                },
+                "is_approved": {
+                  "title": "Is Approved",
+                  "type": "boolean",
+                  "description": "starred",
+                  "x-ms-visibility": "important"
+                }
+              },
+              "x-ms-visibility": "important",
+              "required": [
+                "task_id"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Complete One Off Task",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/organizations/{org}/completed-tasks/{task}": {
+      "delete": {
+        "tags": [
+          "Task",
+          "One off task",
+          "Reopen task"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "description": "Reopen one off task",
+        "operationId": "Reopen_One_Off_Task",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Task Id",
+            "x-ms-summary": "Task Id",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Reopen One Off Task",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/organizations/{org}/runs/{run}/completed-tasks": {
+      "post": {
+        "tags": [
+          "Process Task",
+          "Complete task"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "description": "Complete process task",
+        "operationId": "Completed_Process_Task",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "run",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Run Id",
+            "x-ms-summary": "Run Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "title": "Task ID",
+                  "type": "string",
+                  "description": "Task ID"
+                },
+                "is_approved": {
+                  "title": "Is Approved",
+                  "type": "boolean",
+                  "description": "starred"
+                }
+              },
+              "x-ms-visibility": "important",
+              "required": [
+                "task_id"
+              ]
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Complete process task",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/organizations/{org}/runs/{run}/completed-tasks/{task}": {
+      "post": {
+        "tags": [
+          "Process Task",
+          "Reopen task"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "description": "Reopen process task",
+        "operationId": "Reopen_Process_Task",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "run",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Run Id",
+            "x-ms-summary": "Run Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Task Id",
+            "x-ms-summary": "Task",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Reopen process Task",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/organizations/{org}/tasks/{task}/comment": {
+      "post": {
+        "tags": [],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "description": "task deadline, in date-time format",
+        "operationId": "Comment_Task",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Task Id",
+            "x-ms-summary": "Task",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "title": "Content",
+                  "type": "string",
+                  "description": "Comment content",
+                  "x-ms-visibility": "important"
+                },
+                "label": {
+                  "title": "Comment Label",
+                  "type": "string",
+                  "description": "Comment label",
+                  "x-ms-visibility": "important",
+                  "default": "comment",
+                  "enum": [
+                    "comment",
+                    "problem",
+                    "resolve"
+                  ]
+                }
+              },
+              "x-ms-visibility": "important",
+              "required": [
+                "content",
+                "label"
+              ]
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Add comment, report issue, resolve issue on a task",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/processes/micro-functions/organizations/{org}/tasks": {
+      "post": {
+        "tags": [
+          "Task"
+        ],
+        "description": "Create Task",
+        "operationId": "Create_Task",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "owners": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Users to assign the task to",
+                        "title": "Users",
+                        "x-ms-visibility": "important",
+                        "x-ms-dynamic-values": {
+                          "operationId": "Get_Organization_Users",
+                          "value-path": "id",
+                          "value-collection": "data",
+                          "value-title": "full_name",
+                          "parameters": {
+                            "org": {
+                              "parameter": "org"
+                            }
+                          }
+                        }
+                      },
+                      "description": "users"
+                    },
+                    "guests": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "title": "Guests",
+                        "x-ms-visibility": "important",
+                        "description": "guest emails to assign the task to (separate emails by comma)"
+                      },
+                      "description": "guests"
+                    }
+                  },
+                  "description": "owners"
+                },
+                "task_type": {
+                  "type": "string",
+                  "description": "Task type",
+                  "title": "Task type",
+                  "x-ms-visibility": "important",
+                  "enum": [
+                    "task",
+                    "approval",
+                    "email",
+                    "expiring"
+                  ],
+                  "default": "task"
+                },
+                "deadline": {
+                  "type": "string",
+                  "description": "task deadline, in date-time format",
+                  "title": "Task deadline",
+                  "format": "date-time",
+                  "x-ms-visibility": "important",
+                  "default": "addDays(utcNow(), 1, 'yyyy-MM-dd HH:mm:ss')"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Task's description",
+                  "title": "Task description",
+                  "x-ms-visibility": "important"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "task name",
+                  "title": "Task name",
+                  "x-ms-visibility": "important"
+                }
+              },
+              "required": [
+                "task_type",
+                "deadline",
+                "name"
+              ],
+              "x-ms-visibility": "important"
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for the created Task",
+                      "title": "Task ID",
+                      "x-ms-visibility": "important"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Title of the created Task",
+                      "title": "Task Title",
+                      "x-ms-visibility": "important"
+                    },
+                    "alias": {
+                      "type": "string",
+                      "description": "unique alias of the created Task",
+                      "title": "Task alias",
+                      "x-ms-visibility": "internal"
+                    },
+                    "deadline": {
+                      "type": "string",
+                      "description": "Deadline of the created Task in date-time format",
+                      "title": "Task Deadline",
+                      "x-ms-visibility": "important"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description of the created Task",
+                      "title": "Task Description",
+                      "x-ms-visibility": "important"
+                    },
+                    "owner_id": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Unique identifier for the creator of the Task",
+                      "title": "Creator ID",
+                      "x-ms-visibility": "internal"
+                    }
+                  },
+                  "description": "data"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a task",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/processes/micro-functions/organizations/{org}/tasks/{task}/edit-deadline": {
+      "put": {
+        "tags": [
+          "Task",
+          "Edit",
+          "Deadline"
+        ],
+        "description": "Edit deadline of a task",
+        "operationId": "Edit_Task_Deadline",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Task id",
+            "x-ms-summary": "Task Id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Deadline": {
+                  "title": "New Task Deadline",
+                  "type": "string",
+                  "description": "New task deadline",
+                  "x-ms-visibility": "important"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Edit task deadline",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/processes/micro-functions/organizations/{org}/tasks/{task}/remove-guest/{guest}": {
+      "put": {
+        "tags": [
+          "Task",
+          "Edit",
+          "Guest"
+        ],
+        "description": "Remove guest of a task",
+        "operationId": "Remove_Guest",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Task id",
+            "x-ms-summary": "Task id"
+          },
+          {
+            "name": "guest",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Guest email",
+            "x-ms-summary": "Guest Email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Remove guest assigned",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/processes/micro-functions/organizations/{org}/tasks/{task}/remove-assignee/{member}": {
+      "put": {
+        "tags": [
+          "Task",
+          "Edit",
+          "Assignee"
+        ],
+        "description": "Remove assignee of a task",
+        "operationId": "Remove_Assignee",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/text"
+        ],
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Task id",
+            "x-ms-summary": "Task Id"
+          },
+          {
+            "name": "member",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Member id",
+            "x-ms-summary": "Member Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Remove assignee",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/processes/micro-functions/organizations/{org}/blueprints/{blueprint}/steps/{step}/edit-step-type": {
+      "put": {
+        "tags": [
+          "Blueprint",
+          "Step",
+          "Edit",
+          "Step Type"
+        ],
+        "description": "Edit step type",
+        "operationId": "Edit_Step_Type",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/text"
+        ],
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Organization Id",
+            "x-ms-dynamic-values": {
+              "operationId": "Get_User_Organizations",
+              "value-path": "id",
+              "value-collection": "data",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Organization",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "blueprint",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Blueprint id",
+            "x-ms-summary": "Blueprint Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "step",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Step id",
+            "x-ms-summary": "Step Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stepType": {
+                  "title": "New step type",
+                  "type": "string",
+                  "enum": [
+                    "all",
+                    "any"
+                  ],
+                  "description": "New step type",
+                  "x-ms-visibility": "important"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Edit step type",
         "x-ms-visibility": "important"
       }
     }
@@ -2411,7 +3093,7 @@
         },
         "type": {
           "type": "string",
-          "example": "Run"
+          "example": "Run Id"
         }
       }
     },
@@ -3943,6 +4625,20 @@
     {
       "name": "Groups",
       "description": "Group ops"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://tallyfy.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://tallyfy.com/policy-management/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management"
     }
   ]
 }

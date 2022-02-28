@@ -4,7 +4,7 @@ It’s easy to e-sign and send your documents on any device with our secure elec
 
 ## Prerequisites
 
-In order use this connector you must have a paid for E-Sign account on the E-Sign platform. You can setup an account here https://app.e-sign.co.uk/#/register/11. 
+In order use this connector you must have a paid for E-Sign account on the E-Sign platform. You can setup an account here https://www.e-sign.co.uk/register. 
 
 How to get credentials
 

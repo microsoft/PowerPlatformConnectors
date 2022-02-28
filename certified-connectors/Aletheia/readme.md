@@ -16,6 +16,7 @@ When you leverage the Aletheia connector for the first time, you will be prompte
 ## Consuming the Aletheia Service
 ### Available Triggers
 * When a new SEC filing is filed
+* When a new insider trade is reported to the SEC
 
 ### Available Actions
 * Get stock data

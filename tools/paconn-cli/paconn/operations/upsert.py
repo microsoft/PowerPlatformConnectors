@@ -31,6 +31,9 @@ from paconn.operations.json_keys import (
     _BASE_PATH,
     _DISPLAY_NAME,
     _CONNECTION_PARAMETERS,
+    _CONNECTION_PARAMETER_SET,
+    _PARAMETERS,
+    _VALUES,
     _TOKEN,
     _OAUTH_SETTINGS,
     _CLIENT_SECRET,
@@ -82,7 +85,7 @@ def upsert(powerapps_rp, settings, client_secret, is_update, overwrite_settings)
     # Get the property object
     properties = property_definition[_PROPERTIES]
 
-    # Add secret
+    # Add secret in connection parameter
     token_property = properties.get(_CONNECTION_PARAMETERS, {}).get(_TOKEN, None)
     if token_property:
         oauth_settings = token_property.get(_OAUTH_SETTINGS, None)
@@ -90,6 +93,17 @@ def upsert(powerapps_rp, settings, client_secret, is_update, overwrite_settings)
             oauth_settings[_CLIENT_SECRET] = client_secret
         elif oauth_settings and not client_secret and not is_update:
             raise CLIError('Please provide OAuth2 client secret using the --secret argument.')
+
+    # Add secret in connection parameter set
+    multi_auth = properties.get(_CONNECTION_PARAMETER_SET, {}).get(_VALUES, [])
+    for auth in multi_auth:
+        token_property = auth.get(_PARAMETERS).get(_TOKEN)
+        if token_property:
+            oauth_settings = token_property.get(_OAUTH_SETTINGS, None)
+            if oauth_settings and client_secret:
+                oauth_settings[_CLIENT_SECRET] = client_secret
+            elif oauth_settings and not client_secret and not is_update:
+                raise CLIError('Please provide OAuth2 client secret using the --secret argument.')
 
     # Load swagger definition
     with open(settings.api_definition, 'r') as file:
