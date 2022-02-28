@@ -10,6 +10,13 @@ public class Script : ScriptBase
         return new HttpResponseMessage(HttpStatusCode.OK);
       }
 
+      if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
+      {
+        var staticResponse = new HttpResponseMessage();
+        staticResponse.Content = GetStaticResponse(this.Context.OperationId);
+        return staticResponse;
+      }
+
       await this.UpdateRequest().ConfigureAwait(false);
 
       if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
