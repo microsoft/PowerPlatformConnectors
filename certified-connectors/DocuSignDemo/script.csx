@@ -18,6 +18,14 @@ public class Script : ScriptBase
       }
 
       await this.UpdateRequest().ConfigureAwait(false);
+
+      if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
+      {
+        var staticResponse = new HttpResponseMessage();
+        staticResponse.Content = GetStaticResponse(this.Context);
+        return staticResponse;
+      }
+
       var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
       if (response.IsSuccessStatusCode)
       {
@@ -34,9 +42,10 @@ public class Script : ScriptBase
     }
   }
 
-  private static StringContent GetStaticResponse(string operationId)
+  private StringContent GetStaticResponse(IScriptContext context)
   {
     var response = new JObject();
+    string operationId = context.OperationId;
 
     if (operationId.Equals("StaticResponseForDocumentTypes", StringComparison.OrdinalIgnoreCase))
     {
@@ -54,36 +63,180 @@ public class Script : ScriptBase
       response["documentTypes"] = docTypesArray;
     }
 
+    if (operationId.Equals("StaticResponseForTabTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var tabTypesArray = new JArray();
+      string [,] tabTypes = { 
+        { "signHereTabs", "Signature" }, 
+        { "dateSignedTabs", "Date Signed" }, 
+        { "textTabs", "Text" }, 
+        { "fullNameTabs", "Name" },
+        { "initialHereTabs", "Initial" },
+        { "checkboxTabs", "Checkbox" },
+        { "titleTabs", "Title" },
+        { "signerAttachmentTabs", "Attachment" },
+        { "emailTabs", "Email" },
+        { "approveTabs", "Approval" }
+      };
+      for (var i = 0; i < tabTypes.GetLength(0); i++)
+      {
+        var tabTypeObject = new JObject()
+        {
+          ["type"] = tabTypes[i,0],
+          ["name"] = tabTypes[i,1]
+        };
+        tabTypesArray.Add(tabTypeObject);
+      }
+
+      response["tabTypes"] = tabTypesArray;
+    }
+
+    if (operationId.StartsWith("StaticResponseForFont", StringComparison.OrdinalIgnoreCase))
+    {
+      var fontNamesArray = new JArray();
+      string[] fontNames = getFontNames(operationId);
+
+      foreach (var fontName in fontNames)
+      {
+        var fontNameObject = new JObject()
+        {
+          ["name"] = fontName
+        };
+        fontNamesArray.Add(fontNameObject);
+      }
+
+      response["fontNames"] = fontNamesArray;
+    }
+
     if (operationId.Equals("StaticResponseForAnchorTabSchema", StringComparison.OrdinalIgnoreCase))
     {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var tabType = query.Get("tabType");
+
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
       response["schema"] = new JObject
       {
-        ["type"] = "array",
-        ["items"] = new JObject
+        ["type"] = "object",
+        ["properties"] = new JObject
         {
-          ["type"] = "object",
-          ["properties"] = new JObject
+          ["tabs"] = new JObject
           {
-            ["anchorString"] = new JObject
+            ["type"] = "array",
+            ["items"] = new JObject
             {
-              ["type"] = "string",
-              ["x-ms-summary"] = "anchor string *",
-              ["description"] = "Anchor string to match"
-            },
-            ["value"] = new JObject
-            {
-              ["type"] = "string",
-              ["x-ms-summary"] = "value",
-              ["description"] = "Value for the tab"
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "anchor string *"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "X offset (pixels)"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "Y offset (pixels)"
+                }
+              }
             }
           }
         }
       };
+
+      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "value"
+        };
+      }
+
+      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("dateSignedTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("fullNameTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("titleTabs", StringComparison.OrdinalIgnoreCase) ||
+          tabType.Equals("emailTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["font"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "StaticResponseForFontFaces",
+              ["value-collection"] = "fontNames",
+              ["value-path"] = "name",
+              ["value-title"] = "name"
+            },
+          ["x-ms-summary"] = "font"
+        };
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontColor"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+          {
+            ["operationId"] = "StaticResponseForFontColors",
+            ["value-collection"] = "fontNames",
+            ["value-path"] = "name",
+            ["value-title"] = "name"
+          },
+          ["x-ms-summary"] = "font color"
+        };
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontSize"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+          {
+            ["operationId"] = "StaticResponseForFontSizes",
+            ["value-collection"] = "fontNames",
+            ["value-path"] = "name",
+            ["value-title"] = "name"
+          },
+          ["x-ms-summary"] = "font size"
+        }; 
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "bold"
+        };
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["italic"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "italic"
+        };
+      }
     }
 
     return CreateJsonContent(response.ToString());
+  }
+
+  private string [] getFontNames(string operationId)
+  {
+    string[] fontNames = null;
+
+    if (operationId.Equals("StaticResponseForFontFaces", StringComparison.OrdinalIgnoreCase))
+    {
+      fontNames = new string[] { "Default","Arial","ArialNarrow","Calibri","CourierNew","Garamond","Georgia",
+        "Helvetica","LucidaConsole","MSGothic","MSMincho","OCR-A","Tahoma","TimesNewRoman","Trebuchet","Verdana"};
+    }
+    else if (operationId.Equals("StaticResponseForFontColors", StringComparison.OrdinalIgnoreCase))
+    {
+      fontNames = new string[] { "Black","BrightBlue","BrightRed","DarkGreen","DarkRed","Gold","Green",
+        "NavyBlue","Purple","White" };
+    }
+    else if (operationId.Equals("StaticResponseForFontSizes", StringComparison.OrdinalIgnoreCase))
+    {
+      fontNames = new string[] { "Size7","Size8","Size9","Size10","Size11","Size12","Size14","Size16","Size18",
+        "Size20","Size22","Size24","Size26","Size28","Size36","Size48","Size72" };
+    }
+
+    return fontNames;
   }
 
   private static JObject ParseContentAsJObject(string content, bool isRequest)
@@ -304,7 +457,14 @@ public class Script : ScriptBase
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
     body["emailSubject"] = query.Get("emailSubject");
+    var emailBody = query.Get("emailBody");
+
+    if (!string.IsNullOrEmpty(emailBody))
+    {
+      body["emailBlurb"] = emailBody;
+    }
 
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createBlankEnvelope", "/envelopes");
@@ -329,10 +489,6 @@ public class Script : ScriptBase
     if (body["routingOrder"] != null)
     {
       signers[0]["routingOrder"] = body["routingOrder"];
-    }
-    if (body["roleName"] != null)
-    {
-      signers[0]["roleName"] = body["roleName"];
     }
 
     body["signers"] = signers;
@@ -364,15 +520,20 @@ public class Script : ScriptBase
   {
     var res_tabs = new JArray();
     var tabs = body["tabs"] as JArray;
-
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var tabType = query.Get("tabType");
+    
     for (var i = 0; i < tabs.Count; i++)
     {
       JObject tab = tabs[i] as JObject;
-      tab["locked"] = "false";
+      if (tabType.Equals("textTabs"))
+      {
+        tab["locked"] = "false";
+      }
       res_tabs.Add(tab);
     }
 
-    body["textTabs"] = res_tabs;
+    body[tabType] = res_tabs;
 
     return body;
   }
@@ -677,7 +838,7 @@ public class Script : ScriptBase
         error.AppendLine($"Inner exception {level}: {inner.Message}");
         inner = inner.InnerException;
       }
-
+         
       error.AppendLine($"Stack trace: {this.StackTrace}");
       return error.ToString();
     }

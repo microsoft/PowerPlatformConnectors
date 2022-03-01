@@ -14,7 +14,7 @@
     }
   },
   "host": "demo.docusign.net",
-  "basePath": "/restapi/v2",
+  "basePath": "/restapi/v2.1",
   "schemes": [
     "https"
   ],
@@ -293,9 +293,18 @@
           {
             "name": "emailSubject",
             "in": "query",
-            "description": "Subject of the Email.",
+            "description": "Subject of the email.",
             "required": true,
             "x-ms-summary": "Email subject",
+            "x-ms-visibility": "important",
+            "type": "string"
+          },
+          {
+            "name": "emailBody",
+            "in": "query",
+            "description": "Body of the email.",
+            "required": false,
+            "x-ms-summary": "Email body",
             "x-ms-visibility": "important",
             "type": "string"
           }
@@ -452,7 +461,7 @@
         },
         "deprecated": false,
         "x-ms-no-generic-test": true,
-        "x-ms-visibility": "advanced"
+        "x-ms-visibility": "important"
       }
     },
     "/accounts/{accountId}/envelopes/{envelopeId}/recipients": {
@@ -627,7 +636,7 @@
           }
         },
         "deprecated": false,
-        "x-ms-visibility": "advanced",
+        "x-ms-visibility": "important",
         "x-ms-no-generic-test": true
       },
       "delete": {
@@ -1011,8 +1020,8 @@
         "tags": [
           "DocuSign"
         ],
-        "summary": "Add documents",
-        "description": "Add documents.",
+        "summary": "Add documents to an envelope",
+        "description": "Add documents to an envelope.",
         "operationId": "AddDocumentsToEnvelope",
         "parameters": [
           {
@@ -1193,12 +1202,30 @@
             "x-ms-test-value": "insert recipient id"
           },
           {
-            "name": "body",
+            "name": "tabType",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Tab type",
+            "x-ms-summary": "Tab type",
+            "x-ms-test-value": "select tab type",
+            "x-ms-dynamic-values": {
+              "operationId": "StaticResponseForTabTypes",
+              "value-collection": "tabTypes",
+              "value-path": "type",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "tabDetails",
             "in": "body",
-            "required": false,
+            "description": "The details of the selected anchor tab.",
+            "x-ms-visibility": "important",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/AnchorTabSchema"
-            }
+            },
+            "x-ms-summary": "tab details"
           }
         ],
         "responses": {
@@ -1232,6 +1259,25 @@
         "x-ms-visibility": "internal"
       }
     },
+    "/tab_types": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get tab types.",
+        "operationId": "StaticResponseForTabTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TabTypesResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
     "/anchortab_schema": {
       "get": {
         "tags": [
@@ -1239,11 +1285,77 @@
         ],
         "description": "Get schema for a specific anchor tab.",
         "operationId": "StaticResponseForAnchorTabSchema",
+        "parameters": [
+          {
+            "name": "tabType",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "tab type"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
               "type": "object"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/font_faces": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get font faces.",
+        "operationId": "StaticResponseForFontFaces",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FontNamesResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/font_colors": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get font colors.",
+        "operationId": "StaticResponseForFontColors",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FontNamesResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/font_sizes": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get font sizes.",
+        "operationId": "StaticResponseForFontSizes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FontNamesResponse"
             }
           }
         },
@@ -1508,7 +1620,12 @@
       "properties": {},
       "x-ms-dynamic-schema": {
         "operationId": "StaticResponseForAnchorTabSchema",
-        "value-path": "Schema/Items"
+        "parameters": {
+          "tabType": {
+            "parameter": "tabType"
+          }
+        },
+        "value-path": "Schema"
       }
     },
     "AdditionalRecipientData": {
@@ -1518,11 +1635,6 @@
           "description": "The signing order of the recipient in the document.",
           "type": "string",
           "x-ms-summary": "Signing Order"
-        },
-        "roleName": {
-          "description": "The role of the signer.",
-          "type": "string",
-          "x-ms-summary": "Role"
         }
       }
     },
@@ -1716,6 +1828,34 @@
         }
       }
     },
+    "TabTypesResponse": {
+      "type": "object",
+      "properties": {
+        "tabTypes": {
+          "description": "Tab types",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TabType"
+          },
+          "x-ms-summary": "Tab types",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "FontNamesResponse": {
+      "type": "object",
+      "properties": {
+        "fontNames": {
+          "description": "Font names",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FontName"
+          },
+          "x-ms-summary": "Font names",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
     "DocumentType": {
       "type": "object",
       "properties": {
@@ -1723,6 +1863,31 @@
           "description": "The type of a document.",
           "type": "string",
           "x-ms-summary": "Type"
+        }
+      }
+    },
+    "TabType": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Display name of the tab.",
+          "type": "string",
+          "x-ms-summary": "Name"
+        },
+        "type": {
+          "description": "Type of the tab.",
+          "type": "string",
+          "x-ms-summary": "Type"
+        }
+      }
+    },
+    "FontName": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of a font metadata.",
+          "type": "string",
+          "x-ms-summary": "Name"
         }
       }
     },
