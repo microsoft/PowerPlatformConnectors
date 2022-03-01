@@ -203,12 +203,14 @@ public class Script : ScriptBase
         response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "bold"
+          ["x-ms-summary"] = "bold",
+          ["description"] = "true/false"
         };
         response["schema"]["properties"]["tabs"]["items"]["properties"]["italic"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "italic"
+          ["x-ms-summary"] = "italic",
+          ["description"] = "true/false"
         };
       }
     }
