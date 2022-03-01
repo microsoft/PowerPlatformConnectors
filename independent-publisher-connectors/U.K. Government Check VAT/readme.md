@@ -1,4 +1,4 @@
-# GOV.UK Check VAT
+# U.K. Government Check VAT
 GOV.UK's Check VAT API provides validation of registered VAT numbers and information about used name and address of the given business. With the growing need for verified and quality customer data, businesses and consumers can count on GOV.UK Check VAT API.
 
 ## Publisher: Fördős András
@@ -17,3 +17,5 @@ Allows the retrieval of name and address of a VAT registered company while provi
 
 ## Known Issues and Limitations
 There are no known issues at this time.
+
+Be aware that the source API is currently in BETA version, so breaking changes can be expected.
