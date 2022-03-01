@@ -14,13 +14,15 @@ Iconfirm offers a suite of tools and functionality to help organizations comply 
 
 For more information about what we offer, have a look at our [website](https://www.iconfirm.eu/en/) or request a [demon](https://info.iconfirm.eu/en/demonstration-iconfirm).
 
+## Publisher: Iconfirm AS
+
 ## Prerequisites
 You will need the following to proceed:
 * An Iconfirm subscription
 * An API user configured on your Iconfirm subscription
 
 
-### Set up your Iconfirm subscription for use with the connector
+## Obtaining Credentials
 In order to get your Api-key for authorizing the connector to communicate with Iconfirm, you would need to follow these simple steps:
 * 1: Sign in to your Iconfirm account
 * 2: Navigate to `Access control` and select `Users`
@@ -29,7 +31,7 @@ In order to get your Api-key for authorizing the connector to communicate with I
 * 5: Hit `Generate new API key`, ensure to copy and save this somewhere safe, as the API key is only generated and displayed once and overwritten if generated again.
 * 6: Ready to go, the above API key can now be used with our connector in the configuration steps when setting up your app/flow
 
-## Supported Actions
+## Supported operations
 The connector supports the following operations:
 
 Verify login/Healthcheck
@@ -56,7 +58,7 @@ Records
 * `Get record status`: Returns the status for a single record.
 * `Get changes`: Returns a list of changes within a given time period.
 
-### Additional actions for controllers
+### Additional operations for controllers
 Records
 * `Register record`: Registers a new record.
 * `Update citizen`: Updates the registered data of the record to ensure data is always up to date.
@@ -100,7 +102,16 @@ Incidents
 * `Find incidents`: Returns a list of all registered incidents.
 * `Get incident by Id`: Returns a single incident.
 
-### Additional actions for global systems
+### Additional operations for global systems
 Customers
 * `Find customers`: Returns a list of all registered customers.
 * `Get customer by Id`: Returns a single customer.
+
+
+## Known Issues and Limitations
+* All operations listed as 'additional operations' will require your organization to be within the above mentioned context 'Controller' or 'Global System' 
+* All register/update operations needs to contain all information for the object in question, all non-included parameters will be overwritten
+* Not all elements of the solution is available through our API and this Connector for requests or suggestions for additional operations and functionality please contact Iconfirm support.
+
+## Help, Feedback and Additional documentation
+For additional information, feedback or help, have a look at our [website](https://www.iconfirm.eu/en/) and/or contact support through there.
