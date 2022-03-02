@@ -1,6 +1,6 @@
 # App Power Forms Connector
 
-Forms Connector from [App Power LLC](https://apppower.net) provides a suite of actions and triggers to easily include external stakeholders in your business processes. The connector makes it very easy and straight forward to create a form within the designer resulting in a URL that you can send to the external party. 
+Forms Connector from [App Power Solutions LLC](https://apppower.net) provides a suite of actions and triggers to easily include external stakeholders in your business processes. The connector makes it very easy and straight forward to create a form within the designer resulting in a URL that you can send to the external party. 
 
 There are two different ways you can create the form. 
 
