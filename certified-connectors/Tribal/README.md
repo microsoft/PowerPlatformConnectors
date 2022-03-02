@@ -1,8 +1,11 @@
 # Tribal Connector
 
+## Tribal
+
 Tribal Edge modules, such as Tribal Admissions, provide staff and students the tools they need to succeed in the world of education. Connect to Tribal Edge modules using the Tribal Connector to manage information, create clearance checks for applications, and much more.
 
 ## Prerequisites
+
 1. Sign in to create a connection using your Tribal account to define the following:
 - Environment such as Live, Test or Development.
 - Region such as APAC or EMEA.
@@ -14,10 +17,12 @@ Tribal Edge modules, such as Tribal Admissions, provide staff and students the t
 - Connect to the web hooks
 
 ## Documentation
+
 [EMEA Documentation](https://help.tribaledge.com/emea/edge/EdgeEducation.htm)  
 [APAC Documentation](https://help.tribaledge.com/apac/edge/EdgeEducation.htm)
 
 ## Supported Operations
+
 **Entity** refers to one of the available business entities in Tribal like such as Person, Schools, Desks, Applications etc.
 
 ### Triggers
@@ -53,3 +58,11 @@ Tribal Edge modules, such as Tribal Admissions, provide staff and students the t
 - `Delete an entity`: Deletes an entity within a Tribal Edge module
 
 - `Delete a child entity`: Deletes an entity which is a child of another entity within a Tribal Edge module
+
+## Known Issues and Limitations
+
+- Currently limited for use within the admissions service
+
+## Deployment instructions
+
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
