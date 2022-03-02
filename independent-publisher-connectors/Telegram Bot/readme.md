@@ -4,14 +4,21 @@ This is to control Telegram Bot
 ## Publisher: Woong Choi
 
 ## Supported Operations
-### getMe
-Get Bot data
 
-### sendPhoto
+### Get Updates
+Use this method to receive incoming updates using long polling
 
-### sendMessage
+### Get Me
+Returns basic information about the bot in form of a User object. A simple method for testing your bot's auth token.
 
-### getUpdates
+### Send Message
+Use this method to send text messages
+
+### Send Photo
+Use this method to send photos
+
+### Get Chat
+Use this method to get up to date information about the chat
 
 ## Getting Started
 Visit [Telegram Bot API](https://core.telegram.org/bots/api) page for further details.
