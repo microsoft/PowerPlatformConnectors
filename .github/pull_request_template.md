@@ -2,9 +2,9 @@
 ---
 ### When submitting a connector, please make sure that you follow the requirements below, otherwise your PR might be rejected. We want to make you have a well-built connector, a smooth certification experience, and your users are happy :) 
 
-#### Important: Our certification engineer, Srikanth, is currently on emergency leave. Please expect a delay with your PR. He will return January 31st, 2022. We apologize for any inconveniences.
-
 If this is your first time submitting to GitHub and you need some help, please sign up for this [session](https://forms.office.com/pages/responsepage.aspx?id=KtIy2vgLW0SOgZbwvQuRaXDXyCl9DkBHq4A2OG7uLpdUMTFJWFFGVUxBNUFZQjZWRUdaOE5BMFkwNS4u). 
+
+Please note that we are experiencing a significant delay due to COVID delays, unanticipated team leaves, and high volume of connector submissions. 
 
 - [ ] I attest that the connector works and I verified by deploying and testing all the operations. 
 - [ ] I attest that I have added detailed descriptions for all operations and parameters in the swagger file.
