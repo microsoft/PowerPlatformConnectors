@@ -70,6 +70,7 @@ Retrieve recent activities from members of a specific club. The authenticated at
 
 [Sign up](https://www.strava.com/register) and/or [Login](https://www.strava.com/login).
 Go to the [Strava Api settings](https://www.strava.com/settings/api) page and create an app.
+
 You should see the “My API Application” page now. Here is what everything means:
 
 - Category: The category you chose for your application
@@ -82,6 +83,12 @@ You should see the “My API Application” page now. Here is what everything me
 - Authorization Callback Domain: When building your app, change “Authorization Callback Domain” to localhost or any domain. When taking your app live, change “Authorization Callback Domain” to a real domain.
 
 From the following page you can grab your client ID and client secret. The callback domain should be the following: "global.consent.azure-apim.net".
+
+When your finished your api application page should look somehting like this:
+![api settings](https://imgur.com/a/AwaOUu8)
+
+For more information see the following page: [Link](https://developers.strava.com/docs/getting-started/#account)
+
 
 ## Known Issues and Limitations
 
