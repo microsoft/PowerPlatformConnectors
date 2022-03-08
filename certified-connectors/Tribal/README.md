@@ -1,8 +1,10 @@
 # Tribal Connector
 
+Tribal Edge modules, such as Tribal Admissions, provide staff and students the tools they need to succeed in the world of education. Connect to Tribal Edge modules using the Tribal Connector to manage information, create clearance checks for applications, and much more.
+
 ## Tribal
 
-Tribal Edge modules, such as Tribal Admissions, provide staff and students the tools they need to succeed in the world of education. Connect to Tribal Edge modules using the Tribal Connector to manage information, create clearance checks for applications, and much more.
+We provide the expertise, software and services required to underpin student success.
 
 ## Prerequisites
 
