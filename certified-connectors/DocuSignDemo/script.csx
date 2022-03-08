@@ -10,13 +10,6 @@ public class Script : ScriptBase
         return new HttpResponseMessage(HttpStatusCode.OK);
       }
 
-      if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
-      {
-        var staticResponse = new HttpResponseMessage();
-        staticResponse.Content = GetStaticResponse(this.Context.OperationId);
-        return staticResponse;
-      }
-
       await this.UpdateRequest().ConfigureAwait(false);
 
       if (this.Context.OperationId.StartsWith("StaticResponse", StringComparison.OrdinalIgnoreCase))
@@ -203,12 +196,14 @@ public class Script : ScriptBase
         response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "bold"
+          ["x-ms-summary"] = "bold",
+          ["description"] = "true/false"
         };
         response["schema"]["properties"]["tabs"]["items"]["properties"]["italic"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "italic"
+          ["x-ms-summary"] = "italic",
+          ["description"] = "true/false"
         };
       }
     }
