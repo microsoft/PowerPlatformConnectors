@@ -19,3 +19,7 @@ Allows the retrieval of name and address of a VAT registered company while provi
 There are no known issues at this time.
 
 Be aware that the source API is currently in BETA version, so breaking changes can be expected.
+
+## Example
+
+![Example with Microsoft UK](example.png "Example")
