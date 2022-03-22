@@ -21,6 +21,12 @@ Required. Describe actions, triggers, and other endpoints.​
 
 ### Stores
 
+#### List Marketplaces
+Lists the marketplaces that can be integrated with ShipStation.
+
+#### List Stores
+Retrieve the list of installed stores on the account.
+
 #### Refresh Stores
 Initiates a store refresh.
 
