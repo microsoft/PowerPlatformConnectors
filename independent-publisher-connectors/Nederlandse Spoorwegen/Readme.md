@@ -1,6 +1,6 @@
 # Nederlandse Spoorwegen
 
-Nederlandse Spoorwegen (NS) is the main railway operator within the Netherlands.
+Nederlandse Spoorwegen (NS) is the main railway operator within the Netherlands. 
 
 ## Publisher: Miguel Verweij
 
@@ -15,12 +15,17 @@ The product to choose for this connection is [Ns-App](https://apiportal.ns.nl/pr
 
 ## Supported Operations
 
-The connector supports the following operations:
-- `Departures`: List of departures for a specific station.
-- `Arrivals`: List of arrivals for a specific station.
-- `Stations`: List of stations.
-- `Station disruptions`: List of disruptions relevant for the current station.
+### Arrivals
+List of arrivals for a specific station. [More info](https://apiportal.ns.nl/docs/services/reisinformatie-api/operations/getArrivals?)
 
+### Departures
+List of departures for a specific station. [More info](https://apiportal.ns.nl/docs/services/reisinformatie-api/operations/getDepartures?)
+
+### Stations
+List of stations. [More info](https://apiportal.ns.nl/docs/services/reisinformatie-api/operations/getStations?)
+
+### Station Disruptions
+List of disruptions relevant for the current station. [More info](https://apiportal.ns.nl/docs/services/reisinformatie-api/operations/getStationDisruptions_v3?)
 
 ## Known Issues and Limitations
 
