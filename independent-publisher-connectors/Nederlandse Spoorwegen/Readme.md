@@ -16,18 +16,11 @@ The product to choose for this connection is [Ns-App](https://apiportal.ns.nl/pr
 ## Supported Operations
 
 The connector supports the following operations:
-- `Departures`: List of departures for a specific station
-- `Arrivals`: List of arrivals for a specific station
-- `Journey details`: Returns information about a specific journey
-- `Single trip`: Returns a single trip, based on the given parameters
-- `Calamities`: List of calamities. This operation is deprecated. Use /api/v3/disruptions instead
-- `International prices`: Returns price information for international trips
-- `Domestic prices`: Returns price information for domestic trips
-- `Stations`: List of stations
-- `Trips`: Returns a travel advice for the given parameters
-- `Station disruptions`: List of disruptions relevant for the current station
-- `Single disruption`: Returns information on a single disruption/maintenance/calamity
-- `Disruptions`: List of calamities/disruptions/maintenance
+- `Departures`: List of departures for a specific station.
+- `Arrivals`: List of arrivals for a specific station.
+- `Stations`: List of stations.
+- `Station disruptions`: List of disruptions relevant for the current station.
+
 
 ## Known Issues and Limitations
 
