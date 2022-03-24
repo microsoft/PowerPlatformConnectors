@@ -24,6 +24,7 @@ To get a **Client ID** and **Client Secret**, you will need to create your app i
 ## Supported Operations
 The connector supports the following operations:
 ### Boards
+- `Get boards`: Get all boards available to the user.
 - `Create a board`: Create a new board.
 - `Get a board`: Get a specific board by its unique identifier.
 - `Update a board`: Update a specific board by its unique identifier.
