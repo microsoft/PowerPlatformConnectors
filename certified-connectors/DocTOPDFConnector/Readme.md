@@ -1,4 +1,4 @@
-Title
+Word to PDF Converter
 This connector provides you with the ability to generate a PDF from a Word document while maintaining the fidelity of the images, charts or graphs included in the source document.
 Publisher
 Spot Solutions Ltd.
@@ -35,4 +35,3 @@ Known Issues and Limitations
 This connector does not convert Excel or PowerPoint files to PDF
 Deployment Instructions
 Once the Connector is downloaded and the APIkey requested enter the provided key into the provided connector fields to active the connector for the workflow.
-
