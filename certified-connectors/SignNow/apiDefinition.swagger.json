@@ -35,6 +35,235 @@
   "consumes": [],
   "produces": [],
   "paths": {
+    "/documentgroups": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DocumentGroupsResponse"
+            }
+          }
+        },
+        "summary": "Get Document Groups",
+        "operationId": "GetListDocGroups",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "template",
+            "x-ms-summary": "Template",
+            "description": "Specify if document groups or group templates should be retrieved",
+            "in": "query",
+            "type": "boolean",
+            "required": true,
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "limit",
+            "x-ms-summary": "Limit",  
+            "description": "Total number of items returned (between 1 and 50)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "offset",
+            "x-ms-summary": "Offset",  
+            "description": "The (zero-based) offset of the first item in the collection to return",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 0,
+            "x-ms-visibility": "important"
+          }
+        ],
+        "description": "Retrieve a list of user's document groups"
+      }
+    },
+    "/documentgroups/{doc_group_id}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/DocumentGroupId"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "doc_group_id",
+            "x-ms-summary": "Group Template",
+            "x-ms-url-encoding": "single",
+            "description": "Select the group template from the list",
+            "x-ms-visibility": "important",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetListDocGroups",
+              "value-path": "group_id",
+              "value-title": "group_name",
+              "value-collection" : "document_groups",
+              "parameters": {
+                "template": true
+              }
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "group_name": {
+                  "type": "string",
+                  "x-ms-summary": "Document Group Name",
+                  "description": "Enter new name for the document group",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "summary": "Create Document Group from the Group Template",
+        "description": "Create the document group from a selected group template",
+        "x-ms-visibility": "important",
+        "consumes": ["application/json"],
+        "operationId": "CreateFromTemplateGroup"
+      }
+    },
+    "/v2/schema/documentgroup/fields": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "properties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "doc_group_id",
+            "x-ms-summary": "Document Group ID",
+            "description": "Specify a unique document group ID",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "select",
+            "x-ms-summary": "Field type filter",
+            "description": "Separate with a comma what field types you'd like to retrieve",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "operationId": "GetDocGroupSchema",
+        "summary": "Get Document Group schema",
+        "x-ms-visibility": "internal",
+        "description": "Retrieve the OpenAPI document group schema",
+        "x-ms-api-annotation": {
+          "family": "DocGroupSchemaFields",
+          "status": "Preview",
+          "revision": 1
+        }
+      }
+    },
+    "/documentgroup/{doc_group_id}/fields": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/DocumentGroupId"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "template_group_id",
+            "x-ms-summary": "Template",
+            "description": "Specify a document group template to get fields from",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetListDocGroups",
+              "value-path": "group_id",
+              "value-title": "group_name",
+              "value-collection" : "document_groups",
+              "parameters": {
+                "template": true
+              }
+            }
+          },
+          {
+            "name": "doc_group_id",
+            "x-ms-summary": "Document Group ID",
+            "x-ms-url-encoding": "single",
+            "description": "Specify a unique document group ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetDocGroupSchema",
+                "parameters": {
+                  "doc_group_id": {
+                    "parameter": "template_group_id"
+                  },
+                  "select": "text,enumeration"
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetDocGroupSchema",
+                "parameters": {
+                  "doc_group_id": {
+                    "parameterReference": "template_group_id"
+                  },
+                  "select": {
+                    "value": "text,enumeration"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "summary": "Prefill Document Group Field Values",
+        "description": "Automatically populate fillable fields in the documents with specific values",
+        "operationId": "UpdateGroupFieldValues",
+        "x-ms-visibility": "important",
+		    "consumes": ["application/json"]
+      }
+    },
     "/document": {
       "get": {
         "responses": {
@@ -590,7 +819,34 @@
         "consumes": ["application/json"],
         "x-ms-visibility": "advanced"
       }
-    },    
+    },  
+	"/document/{doc_id}/invite-cancel": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "doc_id",
+            "x-ms-summary": "Document Id",
+            "description": "Specify document id for signature invite cancellation",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "summary": "Cancel invite",
+        "description": "Signature invite cancellation",
+        "operationId": "CancelInvite",
+        "x-ms-visibility": "important"
+      }
+    },	
     "/document/{doc_id}/download": {
       "get": {
         "responses": {
@@ -1612,6 +1868,12 @@
           "description": "true if document is template.",
           "x-ms-summary": "Is template"
         },
+        "status": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "description": "Document Status",
+          "x-ms-summary": "Document Status"
+        },
         "roles": {
           "type": "array",
           "items": {
@@ -1640,10 +1902,76 @@
         }
       }
     },
+    "DocumentGroupsResponse": {
+      "type": "object",
+      "properties": {
+        "document_groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DocumentGroupProperties"
+          }
+        },
+        "document_group_total_count": {
+          "type": "integer",
+          "x-ms-visibility": "important",
+          "x-ms-summary": "Document Groups Total Count",
+          "description": "The total number of Document Groups in the SignNow account"
+        }
+      }
+    },
+    "DocumentGroupProperties": {    
+      "type": "object",
+      "properties": {
+        "group_id": {
+          "$ref": "#/definitions/DocumentGroupId"
+        },
+        "group_name": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "description": "Document Group Name",
+          "x-ms-summary": "Document Group Name"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DocumentGroupDocumentProperties"
+          },
+          "x-ms-visibility": "important",
+          "x-ms-summary": "Documents",
+          "description": "Documents"
+        }
+      }
+    },
+    "DocumentGroupDocumentProperties": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/DocumentId"
+        },
+        "document_name": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "description": "Document file name without extension",
+          "x-ms-summary": "Document Name"
+        },
+        "origin_document_id": {
+          "type": "string",
+          "x-ms-visibility": "advanced",
+          "description": "Template document ID (if any)",
+          "x-ms-summary": "Template ID"
+        }
+      }
+    },
     "DocumentId": {
       "type": "string",
       "description": "Unique document ID",
       "x-ms-summary": "Document ID",
+      "x-ms-visibility": "important"
+    },
+    "DocumentGroupId": {
+      "type": "string",
+      "description": "Unique Document Group ID",
+      "x-ms-summary": "Document Group ID",
       "x-ms-visibility": "important"
     }
   },
