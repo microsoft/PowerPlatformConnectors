@@ -27,8 +27,8 @@ List of stations. [More info](https://apiportal.ns.nl/docs/services/reisinformat
 ### Station Disruptions
 List of disruptions relevant for the current station. [More info](https://apiportal.ns.nl/docs/services/reisinformatie-api/operations/getStationDisruptions_v3?)
 
-## Deployment instructions
-Upload the connector and authorize by filling the API key. 
+## Deployment Instructions
+Upload the connector and authorize by providing your API key. 
 
 ## Known Issues and Limitations
 
