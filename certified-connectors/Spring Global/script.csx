@@ -252,7 +252,7 @@
         }
 
         firstLevelJson["properties"] = resultBodyJson;
-        resultJson["properties"] = firstLevelJson;
+        resultJson["schemaDefinition"] = firstLevelJson;
         return resultJson.ToString();
     }
 
