@@ -2,7 +2,7 @@
 ## DPIRD Weather Connector for Western Australia
 The Department of Primary Industries and Regional Development's (DPIRD) allows you to integrate the RADAR estimated rainfall data within your applications.
 
-You can see what information is available from the API, and how you can filter and search for specific information, by exploring the [interactive home page](https://www.agric.wa.gov.au/weather-api-20).
+You can see what information is available from the API, and how you can filter and search for specific information, by exploring the [interactive home page](https://api.dpird.wa.gov.au/v2/radar/openapi/).
 
 ## Prerequisites
 You will need the following to proceed
@@ -25,19 +25,19 @@ The connector supports the following operations
 ### Get Radars 
 Returns a list of radars and their metadata.
 
-### Get Radars Nearby 
+### Get Nearby Radar 
 Get nearest radar points to a latitude and longitude
 
-### Get Single Radar 
+### Get Radar 
 Get the metadata for a specific radar
 
 ### Get Radar Rainfall
 Get the rainfall for a specific radar
 
-### Get Radar Daily Summary 
+### Get Radar Daily Summaries 
 Get the daily summaries for a latitude and longitude based on the closest radar point
 
-### Get Radar Monthly Summary 
+### Get Radar Monthly Summaries 
 Get the monthly summaries for a latitude and longitude based on the closest radar point
 
 ## Notes
