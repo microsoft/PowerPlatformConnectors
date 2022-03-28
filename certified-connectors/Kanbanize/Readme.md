@@ -29,4 +29,5 @@ The connector supports the following actions:
 
 ## Supported Triggers
 The connector supports the following triggers:
-* `General Trigger`: Triggers for any action on the board. Use Control/Condition or Control/Switch to manage flow for different triggers. Here is partial list of supported event types: "Card created", "Card moved", "Card details changed", "Card deleted", "Card blocked"
+* `General Trigger`: Triggers for any action on the board. Use Control/Condition or Control/Switch to manage flow for different triggers. Here is partial list of supported event types: 
+"Card created", "Card moved", "Card details changed", "Card deleted", "Card blocked"
