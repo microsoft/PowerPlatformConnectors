@@ -1,5 +1,5 @@
 
-## DPIRD Weather Connector for Western Australia
+## DPIRD Radar Connector for Western Australia
 The Department of Primary Industries and Regional Development's (DPIRD) allows you to integrate the RADAR estimated rainfall data within your applications.
 
 You can see what information is available from the API, and how you can filter and search for specific information, by exploring the [interactive home page](https://api.dpird.wa.gov.au/v2/radar/openapi/).
