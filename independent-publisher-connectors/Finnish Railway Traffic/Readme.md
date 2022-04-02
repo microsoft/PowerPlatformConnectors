@@ -1,4 +1,4 @@
-# Finnish Trailway Traffic
+# Finnish Railway Traffic
 This API provides information about data of trains operating in Finland. The service is operated by Fintraffic. The data is sourced from the following applications used in traffic controlling and capacity management:
 - Liike
 - Reaali
