@@ -17,7 +17,7 @@ The **Hue Remote API** is a definition of an app that you will use to authorize 
 
 ### HUE application key
 
-**HUE application key** is mandatory to provide during connection creation. Without the valid application key you won't be able to access any data from your acount. The HUE application key must be generated once and it is not expiring. **The process consist of two steps**. You need to perform first a PUT request and then POST request to generate it:
+**HUE application key** is mandatory to provide during connection creation. Without the valid application key you won't be able to access any data from your account. The HUE application key must be generated once and it is not expiring. **The process consist of two steps**. You need to perform first a PUT request and then POST request to generate it:
 
 1. Download and install Postman application from [here](https://www.postman.com/downloads/). You can as well use any other software allowing you to make HTTP calls.
 2. Import **PUT request** to Postman:
@@ -44,7 +44,7 @@ The **Hue Remote API** is a definition of an app that you will use to authorize 
 
 5. Execute PUT request and after that POST request. **Copy "username" value** returned by POST request.
 
-You're now ready to create a connection for Philips HUE conector in Power Automate.
+You're now ready to create a connection for Philips HUE connector in Power Automate.
 
 ## Supported Operations
 
