@@ -6,6 +6,9 @@ GitLab is an alternative to GitHub and Azure DevOps.  GitLab offers a robust sui
 ## Prerequisites
 You must provision an API Key within your GitLab account.
 
+## Obtaining Credentials
+You must provision an API Key within your GitLab account.
+
 ## Supported Operations
 ### Get Version
 Retrieve version information for this GitLab instance. Responds 200 OK for authenticated users.
