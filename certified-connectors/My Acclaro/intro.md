@@ -20,9 +20,8 @@ After generating a web token, you will be presented a string of approximately 10
 
 ### Presenting Tokens with Requests
 
-Each API request must present a valid token. This is placed in the “Authorization” HTTP header with the “Bearer” schema, in a format such as:
+Each API request must present a valid token. This is placed in the “Authorization” HTTP header with the “Bearer” schema.
 
-`Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidmVyIjoiMSJ9.zOrp1SSnBGwlCQMxlEz9rjh-ddThYVuroD9JJmxOgBw+`
 
 ### Token Revocation
 
