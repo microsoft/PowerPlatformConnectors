@@ -6,6 +6,9 @@ The Binance platform allows anyone to get crypto market rates and historical tra
 ## Prerequisites
 None.
 
+## Obtaining Credentials
+No credentials are required for this connector.
+
 ## Supported Operations
 ### Get Live Ticker Price
 Latest price for a symbol. If the symbol is not sent, prices for all symbols will be returned in an array.  Enter two three-digit currency codes with no separation i.e. BTCUSD to see the market rate of the first currency in the denomination of the second.
