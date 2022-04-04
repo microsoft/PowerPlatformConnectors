@@ -6,6 +6,9 @@ Nifty Gateway if a platform for buying and selling NFTs.  This connector allows 
 ## Prerequisites
 None.
 
+## Obtaining Credentials
+No credentials are required for this connector.
+
 ## Supported Operations
 ### Nifties for User
 Returns information about all nifties owned by the given user.
