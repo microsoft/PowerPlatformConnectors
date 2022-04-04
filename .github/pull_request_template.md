@@ -4,7 +4,7 @@
 
 If this is your first time submitting to GitHub and you need some help, please sign up for this [session](https://forms.office.com/pages/responsepage.aspx?id=KtIy2vgLW0SOgZbwvQuRaXDXyCl9DkBHq4A2OG7uLpdUMTFJWFFGVUxBNUFZQjZWRUdaOE5BMFkwNS4u). 
 
-Please note that we are experiencing a significant delay due to COVID delays, unanticipated team leaves, and high volume of connector submissions. 
+Please note that we are experiencing a significant delay due to a high volume of connector submissions. It may take 1-2 weeks for us to provide comments for your connector.
 
 - [ ] I attest that the connector works and I verified by deploying and testing all the operations. 
 - [ ] I attest that I have added detailed descriptions for all operations and parameters in the swagger file.
