@@ -180,6 +180,6 @@ Following steps are required to deploy this connector:
 4. Select **Import an OpenAPI file**
 5. Add a name for the connector
 6. Select **Import**
-7. Select this Swagger API definition file
+7. Select Swagger API definition file (`apiDefinition.swagger.json`)
 8. Click **Continue**
 9. Share connector with users and/or editors
