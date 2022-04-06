@@ -6,6 +6,9 @@ The Decentraland platform is a metaverse where people can create avatars, purcha
 ## Prerequisites
 None.
 
+## Obtaining Credentials
+An API Key is not required to use this connector.
+
 ## Supported Operations
 ### Get Districts
 Get a list of all districts within Decentraland.  Returns all parcels within each district with x, y coordinates.
