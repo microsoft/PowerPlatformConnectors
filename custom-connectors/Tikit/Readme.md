@@ -35,7 +35,8 @@ The connector supports the following operations:
 Since Tikit is a ticket management system and is secured by api key do first of all you need an api key to interact with it.You will find more information about this [here](https://tikit/azurewebsites.net) and follow the steps below:
 
 1. Get your API Key by registering yourself on [official](https://tikit.azurewebsites.net) website as an user.
-2. Setup power automate and power apps for use with the tikit api.
+2. Add your [API Key](https://tikit.azurewebsites.net/APIKey) after registering as an user. 
+3. Setup power automate and power apps for use with the tikit api.
 
 At this point you will be able to access the connector with the api key previously acquired by the website.
 
