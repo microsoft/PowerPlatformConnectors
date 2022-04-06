@@ -1,6 +1,6 @@
 # Clockify
 
-Clockify is a popular, easy to use, free time tracking software solution (http://clockify.me). This connector helps to connect to your Clockify to the Power Platform so you can pull data like Workspaces, Project, Tasks, Time Entries etc.
+Clockify is a popular, easy to use, free time tracking software solution. This connector helps to connect your Clockify account to the Power Platform so you can pull data like Workspaces, Projects, Tasks and TimeEntries.
 
 ## Publisher: Dr Adrian Colquhoun (Strategik)
 
