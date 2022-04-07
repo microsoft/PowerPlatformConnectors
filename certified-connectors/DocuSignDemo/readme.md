@@ -11,6 +11,9 @@ To try the connector, please use a DEMO account:
 
 These are different than free trials in that they never expire, have 90% of our paid account features, and none of the documents sent through DEMO are legally binding ((https://support.docusign.com/en/articles/Free-account-vs-Developer-account).
 
+## Connector Documentation
+For detailed documentation around the connector please refer to
+https://support.docusign.com/en/guides/DocuSign-eSignature-for-Microsoft-Power-Automate
 
 ## Known Issues and Limitations
 For issues with DocuSign please try this link first: https://support.docusign.com/en/articles/How-Do-I-Open-a-Case-in-the-DocuSign-Support-Center.
