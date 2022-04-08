@@ -171,14 +171,15 @@ When environment or connector ID is not specified the command will prompt for th
 
 ```
 Arguments
-   --cid -c      : The custom connector ID.
-   --dest -d     : Destination directory.
-   --env -e      : Power Platform environment ID.
-   --pau -u      : Power Platform URL.
-   --pav -v      : Power Platform API version.
-   --settings -s : A settings file containing required parameters.
-                   When a settings file is specified some command 
-                   line parameters are ignored.
+   --cid -c       : The custom connector ID.
+   --dest -d      : Destination directory.   
+   --env -e       : Power Platform environment ID.
+   --overwrite -w : Overwrite all the existing connector and settings files.
+   --pau -u       : Power Platform URL.
+   --pav -v       : Power Platform API version.
+   --settings -s  : A settings file containing required parameters.
+                    When a settings file is specified some command 
+                    line parameters are ignored.
 ```
 ### Create a New Custom Connector
 
