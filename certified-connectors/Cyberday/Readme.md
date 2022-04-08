@@ -32,3 +32,14 @@ In order to use this connector you will need your organisation's API key from yo
 4. Copy the key shown below 
 
 ![](https://uploads-ssl.webflow.com/5ebe2d9ae83a62f96fed82de/623aef556f0b8deaefb0c849_Screenshot%202022-03-23%20at%2011.54.57.png)
+
+## Known issues and limitations
+
+The connector is currently limited to the most important data assets in Cyberday, but will be expanded to more documentation according to user feedback.
+
+## Deploying the connector
+Run the following command and follow the prompts:
+
+```paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json```
+
+You can find more details about deploying this as custom connector in Microsoft Power Automate and Power Apps [at the following page](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli).
