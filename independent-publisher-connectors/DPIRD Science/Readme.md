@@ -14,7 +14,7 @@ You will need the following to proceed
 * The Power platform CLI tools
 * An [API key](https://www.agric.wa.gov.au/form/dpird-api-registration) from DPIRD in accordance with [terms and conditions](https://www.agric.wa.gov.au/apis/api-terms-and-conditions)
 
-## Authentication
+## Obtaining Credentials
 To create a connection from this connector, you need to register for an API key, which will be added to a custom HTTP header called 'api-key'. The custom header you send will allow access to all of the public available API's (provided the API Key is valid).
 
 If you would like an API key, please fill out the [DPIRD API Registration Form](https://www.agric.wa.gov.au/form/dpird-api-registration)
@@ -45,7 +45,7 @@ Returns the potential yield values as calculated using the French & Schultz pote
 * Stored soil water at the start of the growing season is estimated as one third of summer rainfall.
 * More information on the model available at the [Potential Yield Tool on the DPIRD website](https://www.agric.wa.gov.au/climate-weather/potential-yield-tool)
 
-### Get Soil Wster
+### Get Soil Water
 Returns the amount of water in the soil depending on the rainfall recieved and the type of soil.
 
 ### Get Yellow Spot
