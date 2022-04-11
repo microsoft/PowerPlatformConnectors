@@ -9,6 +9,9 @@ A Pexels account.
 ## Getting Started
 Visit pexels.com and create an account to obtain an API Key.
 
+## Known Issues and Limitations
+None
+
 ## Obtaining Credentials
 Once you have a Pexels.com account, login to your account and generate an API Key.
 
