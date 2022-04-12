@@ -1,6 +1,6 @@
 
 ## DPIRD Science Connector for Western Australia
-This API provides the ‘back end’ to the [Rainfall to Date](https://www.agric.wa.gov.au/climate-weather/rainfall-date-tool-western-australia/), [Potential Yield](https://www.agric.wa.gov.au/climate-weather/potential-yield-tool/), and [Soil Water](https://www.agric.wa.gov.au/climate-weather/soil-water-tool/#?station=10115&soil=3&groundCover=1) tools already available on the DPIRD website. These online climate forecasting tools assist grain growers to optimise their crop potential.
+This API provides the ‘back end’ to the [Rainfall to Date](https://www.agric.wa.gov.au/climate-weather/rainfall-date-tool-western-australia/), [Potential Yield](https://www.agric.wa.gov.au/climate-weather/potential-yield-tool/), and [Soil Water](https://www.agric.wa.gov.au/climate-weather/soil-water-tool/#?station=10115&soil=3&groundCover=1) tools already available on the DPIRD website. These online climate forecasting tools assist grain growers to optimize their crop potential.
 
 * The [Soil Water tool](https://www.agric.wa.gov.au/climate-weather/soil-water-tool/#?station=10115&soil=3&groundCover=1) models how rainfall moves through the layers of different soil types to identify how much water is available for plant roots to take up.
 * The [Rainfall to Date](https://www.agric.wa.gov.au/climate-weather/rainfall-date-tool-western-australia/) tool allow growers to select the beginning and end of the season to better determine available soil water for crop use.
@@ -46,7 +46,7 @@ Returns the potential yield values as calculated using the French & Schultz pote
 * More information on the model available at the [Potential Yield Tool on the DPIRD website](https://www.agric.wa.gov.au/climate-weather/potential-yield-tool)
 
 ### Get Soil Water
-Returns the amount of water in the soil depending on the rainfall recieved and the type of soil.
+Returns the amount of water in the soil depending on the rainfall received and the type of soil.
 
 ### Get Yellow Spot
 Run the Moin or Chris Yellow Spot model.
