@@ -11,7 +11,7 @@ http://apps365ltd.com/support
 
 ## Supported Operations
 The connector supports the following operations:
-* ```Create Short URL```: This operation allows you to create a Short URL/tiny links for any specified Long URL based on your subscribed license.
+* ```dsf```: This operation allows you to create a Short URL/tiny links for any specified Long URL based on your subscribed license.
 * ```Modify Short URL properties```: This operation allows you to update properties of a created Short URL.
 * ```Delete Short URL```: This operation allows you to delete Short URL which is not  in use anymore or if you do not want that ShortURL should be accessible  by anyone.
 * ```Get All Short URL```: This operation allows you to get all Short URLs using specified Username and License Key. You can also filter the Short URL by the user specified at the time of the Short URL creation.
