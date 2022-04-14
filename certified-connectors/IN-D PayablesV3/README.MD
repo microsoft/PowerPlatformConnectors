@@ -1,4 +1,4 @@
-# IN-D PayablesV3
+# IN-D Payables
 IN-D Payables process invoices to extract key attributes like invoice numbers, vendor name, etc., and the table line items without setting up a template. When it feels less confident about the extraction, it prompts the user to validate the results extracted with an intuitive UI. IN-D Payables continuously learn over time and does support stamped/crumpled invoices, multi-page invoices and multiple invoices in batches.
 
 ## Prerequisites
