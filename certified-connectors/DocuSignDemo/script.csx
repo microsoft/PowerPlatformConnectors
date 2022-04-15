@@ -386,7 +386,7 @@ public class Script : ScriptBase
   private JObject CreateHookEnvelopeBodyTransformation(JObject original)
   {
     var body = new JObject();
-
+    
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
@@ -399,7 +399,21 @@ public class Script : ScriptBase
     body["requiresAcknowledgement"] = "true";
     body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
     body["name"] = original["name"]?.ToString();
-    body["envelopeEvents"] = original["envelopeEvents"]?.ToString();
+
+    var envelopeEvent = original["envelopeEvents"]?.ToString();
+    var envelopeEventsArray = new JArray();
+    envelopeEventsArray.Add(envelopeEvent);
+    body["envelopeEvents"] = envelopeEventsArray;
+
+    body["configurationType"] = "custom";
+    body["deliveryMode"] = "sim";
+    body["restv21"] = "true";
+    body["eventData"] = new JObject
+    {
+        ["version"] = "restv2.1",
+        ["format"] = "",
+        ["includeData"] = new JArray()
+    };
     body["includeSenderAccountasCustomField"] = "true";
     return body;
   }
