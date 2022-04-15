@@ -4,12 +4,11 @@ AMEE provides free APIs to provide easy access to sustainability at scale, makin
 ## Publisher: Paul Culmsee, Seven Sigma Business Solutions
 
 ## Prerequisites
-* You will need to generate an API key to access the AMEE Open Business API on the [AMEE API Documentation Page](https://www.amee.com/api#/documentation).
-* Access to the API is via preemptive HTTP Basic Authorization, with your API key as the username and your API secret as the password.
 * Usage of this API is subject to [AMEE Terms and Conditions](https://www.amee.com/terms-and-conditions)
 
 ## Obtaining Credentials
-Once you have signed up for an account, you will receive an email with an API Key.
+* You will need to generate an API key to access the AMEE Open Business API on the [AMEE API Documentation Page](https://www.amee.com/api#/documentation).
+* Access to the API is via preemptive HTTP Basic Authorization, with your API key as the username and your API secret as the password.
 
 ## Supported Operations
 ### Get Companies
