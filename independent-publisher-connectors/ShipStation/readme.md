@@ -32,3 +32,5 @@ Initiates a store refresh.
 
 ## Obtaining Credentials
 Use your ShipStation API Key as the username and API Secret as the password. You can find your API Key as the username and API Secret under Settings.
+
+## Known Issues and Limitations
