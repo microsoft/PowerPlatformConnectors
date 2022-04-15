@@ -84,6 +84,33 @@ public class Script : ScriptBase
       response["tabTypes"] = tabTypesArray;
     }
 
+    if (operationId.Equals("StaticResponseForRecipientTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var recipientTypesArray = new JArray();
+      string [,] recipientTypes = { 
+        { "agent", "Agent" }, 
+        { "carbonCopy", "Receives Carbon Copy" }, 
+        { "certifiedDelivery", "Certifies Delivery" }, 
+        { "editor", "Editor" },
+        { "inPersonSigner", "In Person Signer" },
+        { "intermediaries", "Intermediary" },
+        { "seal", "Seal" },
+        { "signer", "Signer" },
+        { "witness", "Witness" }
+      };
+      for (var i = 0; i < recipientTypes.GetLength(0); i++)
+      {
+        var recipientTypeObject = new JObject()
+        {
+          ["type"] = recipientTypes[i,0],
+          ["name"] = recipientTypes[i,1]
+        };
+        recipientTypesArray.Add(recipientTypeObject);
+      }
+
+      response["recipientTypes"] = recipientTypesArray;
+    }
+
     if (operationId.StartsWith("StaticResponseForFont", StringComparison.OrdinalIgnoreCase))
     {
       var fontNamesArray = new JArray();
@@ -476,7 +503,9 @@ public class Script : ScriptBase
       };
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
-    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
+    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail"));
+    signers[0]["recipientType"] = Uri.UnescapeDataString(query.Get("recipientType"));
+    
     if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
     {
       signers[0]["recipientId"] = Guid.NewGuid();
