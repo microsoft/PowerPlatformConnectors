@@ -46,7 +46,6 @@ namespace Oneflow.PowerApps.CustomCode
                 ["Individual"] = Constants.IndividualPartyDynamicSchema
             };
         }
-
         #endregion
 
         public override async Task<HttpResponseMessage> ExecuteAsync()
@@ -148,7 +147,6 @@ namespace Oneflow.PowerApps.CustomCode
         private async Task<HttpResponseMessage> HandlePartyCreate(IScriptContext ctx)
         {
             StringBuilder debugInfo = new StringBuilder();
-            //contract_id
             try
             {
               var req = ctx.Request;
@@ -166,7 +164,6 @@ namespace Oneflow.PowerApps.CustomCode
                   return await CreateParty(req, contractId, inputParty, ctx);
               }
 
-
               // call getParties
               debugInfo.AppendLine("trying to get existing parties.");
               var getPartiesRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(string.Format(Constants.Requests.PartyEndpoint, contractId)));
@@ -182,9 +179,7 @@ namespace Oneflow.PowerApps.CustomCode
               var getPartiesResponseJson = await getPartiesResponse.Content.ReadAsStringAsync();
               
               var existingParties = JsonConvert.DeserializeObject<Responses.GetPartiesResponse>(getPartiesResponseJson);
-              
-              
-              
+
               int matchingPartyId = 0;
               foreach (Models.Party existingParty in existingParties.data){
                 if (existingParty.Equals(inputParty)) {
@@ -273,8 +268,7 @@ namespace Oneflow.PowerApps.CustomCode
             {
                 copyTo.Headers.Add(header.Key, header.Value);
             }
-        }
-        
+        }        
         #endregion
 
         #region additional classes
@@ -613,8 +607,6 @@ namespace Oneflow.PowerApps.CustomCode
                     hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(country_code);
                     hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(identification_number);
                     hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
-                    hashCode = hashCode * -1521134295 + EqualityComparer<List<Participant>>.Default.GetHashCode(participants);
-                    hashCode = hashCode * -1521134295 + EqualityComparer<Participant>.Default.GetHashCode(participant);
                     hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(type);
                     return hashCode;
                 }
