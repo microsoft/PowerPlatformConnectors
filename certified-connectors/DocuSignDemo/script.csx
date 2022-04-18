@@ -411,7 +411,7 @@ public class Script : ScriptBase
     body["eventData"] = new JObject
     {
         ["version"] = "restv2.1",
-        ["format"] = "",
+        ["format"] = "json",
         ["includeData"] = new JArray()
     };
     body["includeSenderAccountasCustomField"] = "true";
