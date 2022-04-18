@@ -27,6 +27,7 @@ Visit [the OpenAI documentation page](https://beta.openai.com/docs/api-reference
 ## Known issues and limitations
 
 When entering your API key in the Power Platform, you need to type it as: "Bearer YOUR_API_KEY" (the word "Bearer" a blank and the actual API_KEY)
+Only the "Completion" action is supported right now, feel free to add other actions.
 
 ## Deployment Instructions
 
