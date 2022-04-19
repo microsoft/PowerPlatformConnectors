@@ -7,7 +7,7 @@ An advanced web scraper API with rotating IPs from 170+ countries.
 The use of this API requires an account on [APILayer](https://apilayer.com/) and a subscription to the Advanced Scraper API.
 
 ## Obtaining Credentials
-You can find you API key on your account page for APILayer.
+You can find your API key on your APILayer account page.
 
 ## Supported Operations
 ### Scrape a remote URL
