@@ -1,6 +1,9 @@
-## BttnV2 Connector
+## Bttn ONE Connector
 The magical bttn that automates your business, improves your customer experience, and so much more…   
 This connector is for the bttn ONE. The next generation of Internet of Things buttons.
+
+## How to get a Bttn
+Visit bt.tn for more information and how to order one of our unique IoT buttons!
 
 ## Prerequisites
 You will need the following to proceed:
