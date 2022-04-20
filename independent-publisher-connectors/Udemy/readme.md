@@ -27,7 +27,9 @@ To create an Affiliate API client, Sign up on [Udemy](www.udemy.com) and go to t
 Visit [Udemy Affiliate API](https://www.udemy.com/developers/affiliate/) documentation page for further details. You may need to sign in to Udemy to view it.
 
 ## Known Issues and Limitations
-There are no known issues at this time.
+Udemy Affiliate APIs are protected with [Cloudflare](https://www.cloudflare.com/) captcha solution. The API requests from the Custom Connector UI and Power Apps might get blocked due to this. To overcome this limitation, you may consider [using Privacy Pass with Cloudflare](https://support.cloudflare.com/hc/en-us/articles/115001992652-Using-Privacy-Pass-with-Cloudflare).
+
+On the other hand, the connector works fine with Power Automate.
 
 ## Deployment Instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
