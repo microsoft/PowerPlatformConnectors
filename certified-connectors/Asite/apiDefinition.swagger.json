@@ -153,9 +153,70 @@
         ]
       }
     },
+    "/getSubFolderList": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK, Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "folder_title": {
+                    "type": "string",
+                    "description": "Please select Folder Name followed by Project name."
+                  },
+                  "folderId": {
+                    "type": "string",
+                    "description": "Unique identification of folder."
+                  },
+                  "folderPath": {
+                    "type": "string",
+                    "description": "Unique identification of folder path."
+                  },
+                  "hasSubFolder": {
+                    "type": "boolean",
+                    "description": "identification of sub-folder."
+                  }
+                }
+              },
+              "description": "There is array of folder data."
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST, Invalid request"
+          }
+        },
+        "summary": "Select Folder Name",
+        "description": "List out all the accessible folders based on your access from the above selected Project.",
+        "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "hasSubFolder",
+            "in": "query",
+            "required": true,
+            "type": "boolean"
+          }
+        ]
+      }
+    },
     "/asitePullDataWebhook": {
       "x-ms-notification-content": {
-        "description": "When trigger is initiated in Asite.",
+        "description": "When a workflow is triggered on file(s)",
         "schema": {
           "type": "object",
           "x-ms-dynamic-schema": {
@@ -192,8 +253,8 @@
             "description": "Created"
           }
         },
-        "summary": "When an Asite workflow event is triggered",
-        "description": "Triggers a workflow event to upload a file to the project folder.",
+        "summary": "When a workflow is triggered on file(s)",
+        "description": "This operation triggers a flow when a file is uploaded/updated on the project. The trigger is fired to include sub-folders based on the workflow configuration.",
         "operationId": "ASITE_TRIGGER_EVENT",
         "x-ms-trigger": "single",
         "consumes": [
@@ -382,6 +443,12 @@
             "in": "query",
             "required": true,
             "type": "integer"
+          },
+          {
+            "name": "namespaceId",
+            "in": "query",
+            "required": false,
+            "type": "integer"
           }
         ]
       }
@@ -513,17 +580,61 @@
             "type": "string",
             "x-ms-summary": "Folder Name",
             "x-ms-dynamic-values": {
-              "operationId": "GET_ASITE_FOLDER_LIST",
-              "value-collection": "folderData",
+              "capability": "file-picker",
               "value-title": "folder_title",
               "value-path": "folderId",
               "parameters": {
                 "projectId": {
                   "parameter": "projectId"
                 },
-                "isFolderDataReq": true,
-                "isWorkspace": 1,
-                "Accept": "*/*"
+                "fileFilter": [],
+                "hasSubFolder": true
+              }
+            },
+            "x-ms-dynamic-tree": {
+              "settings": {
+                "canSelectParentNodes": true,
+                "canSelectLeafNodes": false
+              },
+              "open": {
+                "operationId": "GET_ASITE_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "itemsPath": "folderData",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "isFolderDataReq": {
+                    "value": true
+                  },
+                  "isWorkspace": {
+                    "value": 1
+                  },
+                  "Accept": {
+                    "value": "*/*"
+            }
+                }
+          },
+              "browse": {
+                "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "folderId": {
+                    "selectedItemValuePath": "folderId"
+                  },
+                  "hasSubFolder": {
+                    "value": true
+                  }
+                }
               }
             }
           },
@@ -659,17 +770,61 @@
             "type": "string",
             "x-ms-summary": "Folder Name",
             "x-ms-dynamic-values": {
-              "operationId": "GET_ASITE_FOLDER_LIST",
-              "value-collection": "folderData",
+              "capability": "file-picker",
               "value-title": "folder_title",
               "value-path": "folderId",
               "parameters": {
                 "projectId": {
                   "parameter": "projectId"
                 },
-                "isFolderDataReq": true,
-                "isWorkspace": 1,
-                "Accept": "*/*"
+                "fileFilter": [],
+                "hasSubFolder": true
+              }
+            },
+            "x-ms-dynamic-tree": {
+              "settings": {
+                "canSelectParentNodes": true,
+                "canSelectLeafNodes": false
+              },
+              "open": {
+                "operationId": "GET_ASITE_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "itemsPath": "folderData",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "isFolderDataReq": {
+                    "value": true
+                  },
+                  "isWorkspace": {
+                    "value": 1
+                  },
+                  "Accept": {
+                    "value": "*/*"
+            }
+                }
+          },
+              "browse": {
+                "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+                "itemValuePath": "folderId",
+                "itemTitlePath": "folder_title",
+                "itemFullTitlePath": "folderPath",
+                "itemIsParent": "true",
+                "parameters": {
+                  "projectId": {
+                    "parameterReference": "projectId"
+                  },
+                  "folderId": {
+                    "selectedItemValuePath": "folderId"
+                  },
+                  "hasSubFolder": {
+                    "value": true
+                  }
+                }
               }
             }
           },
@@ -742,6 +897,199 @@
         ],
         "x-ms-visibility": "internal"
       }
+    },
+    "/asitePullAppFormDataWebhook": {
+      "x-ms-notification-content": {
+        "description": "When a workflow is triggered on App(s)",
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "GET_DYNAMIC_SCHEMA_PROJECTID_TRIGGERID_FOR_FORM",
+            "parameters": {
+              "projectId": {
+                "parameter": "projectId"
+              },
+              "triggerId": {
+                "parameter": "resourceId"
+              },
+              "Accept": "*/*"
+            }
+          },
+          "x-ms-dynamic-properties": {
+            "operationId": "GET_DYNAMIC_SCHEMA_PROJECTID_TRIGGERID_FOR_FORM",
+            "parameters": {
+              "projectId": {
+                "parameterReference": "projectId"
+              },
+              "triggerId": {
+                "parameterReference": "body/resourceId"
+              },
+              "Accept": {
+                "value": "*/*"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "When a workflow is triggered on App(s)",
+        "description": "This operation triggers a flow when a form is created/updated on the project. Configure separate flows for each App.",
+        "operationId": "ASITE_TRIGGER_EVENT_APP_FORM",
+        "x-ms-trigger": "single",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "default": "*/*"
+          },
+          {
+            "name": "projectId",
+            "type": "string",
+            "required": true,
+            "in": "query",
+            "description": "Select a Project",
+            "x-ms-dynamic-values": {
+              "operationId": "GET_ASITE_PROJECT_LIST",
+              "value-title": "projectName",
+              "value-path": "cloudUrl",
+              "parameters": {
+                "getJsonResult": true,
+                "Accept": "*/*"
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GET_ASITE_PROJECT_LIST",
+              "itemValuePath": "cloudUrl",
+              "itemTitlePath": "projectName",
+              "parameters": {
+                "getJsonResult": {
+                  "value": true
+                },
+                "Accept": {
+                  "value": "*/*"
+                }
+              }
+            },
+            "x-ms-summary": "Project Name"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webhookUrl": {
+                  "type": "string",
+                  "description": "Webhook URL",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Webhook URL"
+                },
+                "resourceId": {
+                  "type": "string",
+                  "description": "Select a Trigger configured for selected project",
+                  "x-ms-summary": "Trigger Name",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ASITE_TRIGGER_LIST",
+                    "value-title": "triggerName",
+                    "value-path": "triggerId",
+                    "parameters": {
+                      "projectId": {
+                        "parameter": "projectId"
+                      },
+                      "ruleContext": 3,
+                      "namespaceId": 2
+                    }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "ASITE_TRIGGER_LIST",
+                    "itemValuePath": "triggerId",
+                    "itemTitlePath": "triggerName",
+                    "parameters": {
+                      "projectId": {
+                        "parameterReference": "projectId"
+                      },
+                      "ruleContext": {
+                        "value": 3
+                      },
+                      "namespaceId": {
+                        "value": 2
+                      }
+                    }
+                  }
+                },
+                "resourceType": {
+                  "type": "integer",
+                  "description": "Resource Type",
+                  "x-ms-summary": "Resource Type",
+                  "x-ms-visibility": "internal",
+                  "default": 1
+                }
+              },
+              "required": [
+                "webhookUrl",
+                "resourceId",
+                "resourceType"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/getFormAttributesFromTrigger": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK, Success",
+            "schema": {}
+          }
+        },
+        "summary": "Get dynamic schema based on project Id and trigger Id",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "triggerId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "description": "Get dynamic schema based on project Id and trigger Id",
+        "operationId": "GET_DYNAMIC_SCHEMA_PROJECTID_TRIGGERID_FOR_FORM",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "x-ms-visibility": "internal"
+      }
     }
   },
   "definitions": {},
@@ -765,5 +1113,44 @@
       ]
     }
   ],
-  "tags": []
+  "tags": [],
+  "x-ms-capabilities": {
+    "file-picker": {
+      "open": {
+        "operationId": "GET_ASITE_FOLDER_LIST",
+        "parameters": {
+          "projectId": {
+            "parameter": "projectId"
+          },
+          "isFolderDataReq": {
+            "value": true
+          },
+          "isWorkspace": {
+            "value": 1
+          },
+          "Accept": {
+            "value": "*/*"
+          }
+        }
+      },
+      "browse": {
+        "operationId": "GET_ASITE_SUB_FOLDER_LIST",
+        "parameters": {
+          "projectId": {
+            "parameter": "projectId"
+          },
+          "folderId": {
+            "value-property": "folderId"
+          },
+          "hasSubFolder": {
+            "value": true
+          }
+        }
+      },
+      "value-title": "folder_title",
+      "value-path": "folderId",
+      "value-media-property": "MediaType",
+      "value-folder-property": "hasSubFolder"
+    }
+  }
 }
