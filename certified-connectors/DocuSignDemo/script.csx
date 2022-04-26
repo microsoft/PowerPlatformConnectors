@@ -398,11 +398,7 @@ public class Script : ScriptBase
     }
 
     var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-    var doc = new XmlDocument();
-    doc.LoadXml(content);
-
-    var jsonContent = JsonConvert.SerializeXmlNode(doc);
-    var notificationContent = TransformWebhookNotificationBody(jsonContent);
+    var notificationContent = TransformWebhookNotificationBody(content);
 
     using var logicAppsRequest = new HttpRequestMessage(HttpMethod.Post, logicAppsUri);
     logicAppsRequest.Content = CreateJsonContent(notificationContent);
@@ -433,7 +429,7 @@ public class Script : ScriptBase
     body["envelopeEvents"] = envelopeEventsArray;
 
     body["configurationType"] = "custom";
-    body["deliveryMode"] = "sim";
+    body["deliveryMode"] = "aggregate";
     body["restv21"] = "true";
     body["eventData"] = new JObject
     {
