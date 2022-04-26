@@ -1,6 +1,6 @@
 # DomainTools Iris Enrich
 
-Receive immediate context to indicators to bolster triage, response, and defense.
+Enrich On-Network Indicators at Scale: The DomainTools Iris Enrich API supports high query volumes of domain name attributes including Whois, DNS, SSL certificate, and risk scoring elements to help build out the needed context for appropriate disposition of indicators. It provides actionable insights-at-scale with enterprise-scale ingestion of DomainTools data on Microsoft Sentinel.
 
 ## Pre-requisites
 You will need the following to proceed:
