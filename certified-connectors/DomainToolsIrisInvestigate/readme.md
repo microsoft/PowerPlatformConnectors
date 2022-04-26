@@ -1,6 +1,6 @@
 # DomainTools Iris investigate
 
-Identify threats, map adversary infrastructure, and streamline investigations.
+Map connected infrastructure to get ahead of threats. The Iris Investigate API delivers dozens of domain name attributes on every result including Risk Score, DNS, Whois, SSL, and more. It enables easy pivoting through different domain name attributes and exposes meaningful insights with connection counts on most data fields. It is best suited for human-scale interactions.
 
 ## Pre-requisites
 You will need the following to proceed:
