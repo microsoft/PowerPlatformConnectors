@@ -520,17 +520,81 @@ public class Script : ScriptBase
     signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail"));
     signers[0]["recipientType"] = Uri.UnescapeDataString(query.Get("recipientType"));
     
-    if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
-    {
-      signers[0]["recipientId"] = Guid.NewGuid();
-    }
+
+
+    AddCoreRecipientParams(signers, body);
+    body["signers"] = signers;
+    return body;
+  }
+
+  private void AddCoreRecipientParams(JArray signers, JObject body) 
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    signers[0]["recipientId"] = Guid.NewGuid();
+    
     if (body["routingOrder"] != null)
     {
       signers[0]["routingOrder"] = body["routingOrder"];
     }
 
-    body["signers"] = signers;
-    return body;
+    if (!string.IsNullOrEmpty(query.Get("customFields")))
+    {
+      var customFields = JArray.FromObject(query.Get("customFields").Split("[],".ToCharArray()));
+      signers[0]["customFields"] = customFields;
+    }
+
+    var emailNotification = new JObject();
+    var emailNotificationSet = false;
+
+    if (!string.IsNullOrEmpty(query.Get("emailNotificationSubject")))
+    {
+      emailNotification["emailSubject"] = query.Get("emailNotificationSubject");
+      emailNotificationSet = true;
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("emailNotificationBody")))
+    {
+      emailNotification["emailBody"] = query.Get("emailNotificationBody");
+      emailNotificationSet = true;
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("emailNotificationLanguage")))
+    {
+      var language = query.Get("emailNotificationLanguage").Split("()".ToCharArray())[1];
+      emailNotification["supportedLanguage"] = language;
+      emailNotificationSet = true;
+    }
+
+    if(emailNotificationSet)
+    {
+      signers[0]["emailNotification"] = emailNotification;
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("note")))
+    {
+      signers[0]["note"] = query.Get("note");
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("roleName")))
+    {
+      signers[0]["roleName"] = query.Get("roleName");
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("templateAccessCodeRequired")))
+    {
+      signers[0]["templateAccessCodeRequired"] = bool.Parse(query.Get("templateAccessCodeRequired"));
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("templateLocked")))
+    {
+      signers[0]["templateLocked"] = bool.Parse(query.Get("templateLocked"));
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("templateRequired")))
+    {
+      signers[0]["templateRequired"] = bool.Parse(query.Get("templateRequired"));
+    }
   }
 
   private int GenerateDocumentId()
