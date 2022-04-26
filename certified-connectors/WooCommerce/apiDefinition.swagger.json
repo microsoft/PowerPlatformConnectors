@@ -2,7 +2,7 @@
   "consumes": ["application/json"],
   "swagger": "2.0",
   "info": {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "title": "WooCommerce",
     "description": "WooCommerce is a free, open-source commerce platform for WordPress. It empowers anyone, anywhere, to sell anything – with unlimited extensibility, flexibility, and control.",
     "contact": {
@@ -26,7 +26,7 @@
     }
   ],
   "host": "we.buildbettersoftware.com",
-  "basePath": "/woo",
+  "basePath": "/wp-json/wc-powerautomate/v1",
   "responses": {
     "400": {
       "description": "Bad Request"
@@ -45,10 +45,9 @@
     }
   },
   "securityDefinitions": {
-    "API Key": {
-      "type": "apiKey",
-      "in": "header",
-      "name": "License-Authorization"
+    "basic": {
+      "type": "basic",
+      "description": "Basic Authorization header."
     }
   },
   "schemes": [
@@ -59,42 +58,11 @@
   ],
   "security": [
     {
-      "API Key": []
+      "basic": []
     }
   ],
   "paths": {
-    "/domains": {
-      "get": {
-        "summary": "(private) Get list of domains",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "schema": {
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "id": {
-                    "format": "int32",
-                    "type": "integer"
-                  }
-                }
-              },
-              "type": "array"
-            },
-            "description": "List of licensed domains"
-          }
-        },
-        "x-ms-visibility": "internal",
-        "operationId": "GetDomains",
-        "description": "Returns licensed domains"
-      }
-    },
-    "/proxy/woopower/v1/resources": {
+    "/resources": {
       "get": {
         "operationId": "GetResources",
         "summary": "Get a list of resource types we can work with",
@@ -114,7 +82,7 @@
                   "name": {
                     "type": "string"
                   },
-                  "schema_path": {
+                  "resource": {
                     "type": "string"
                   }
                 }
@@ -124,7 +92,7 @@
         }
       }
     },
-    "/proxy/woopower/v1/webhook_topics": {
+    "/webhook_topics": {
       "get": {
         "operationId": "GetTriggerTopics",
         "summary": "Get a list of trigger options",
@@ -132,7 +100,7 @@
         "x-ms-visibility": "internal",
         "parameters": [
           {
-            "name": "schema_path",
+            "name": "resource",
             "in": "query",
             "description": "Specify the type of resource to work with",
             "required": false,
@@ -160,14 +128,14 @@
         }
       }
     },
-    "/proxy/{schema_path}/{id}": {
+    "/resources/{resource}/{id}": {
       "get": {
         "operationId": "GetResourceById",
         "summary": "Get a single item of the selected type",
         "description": "Fetchs an item of the selected type from the store",
         "parameters": [
           {
-            "name": "schema_path",
+            "name": "resource",
             "in": "path",
             "type": "string",
             "x-ms-summary": "Resource Type",
@@ -178,11 +146,11 @@
             "x-ms-dynamic-values": {
               "operationId": "GetResources",
               "value-title": "name",
-              "value-path": "schema_path"
+              "value-path": "resource"
             },
             "x-ms-dynamic-list": {
               "operationId": "GetResources",
-              "itemValuePath": "schema_path",
+              "itemValuePath": "resource",
               "itemTitlePath": "name"
             }
           },
@@ -201,17 +169,11 @@
             "description": "ok",
             "schema": {
               "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
+                "operationId": "ResourceMemberSchema",
                 "itemValuePath": "schema",
                 "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "parameterReference": "schema_path"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
+                  "resource": {
+                    "parameterReference": "resource"
                   }
                 }
               }
@@ -225,7 +187,7 @@
         "description": "Deletes an item of the specified type and id",
         "parameters": [
           {
-            "name": "schema_path",
+            "name": "resource",
             "in": "path",
             "type": "string",
             "x-ms-summary": "Resource Type",
@@ -236,11 +198,11 @@
             "x-ms-dynamic-values": {
               "operationId": "GetResources",
               "value-title": "name",
-              "value-path": "schema_path"
+              "value-path": "resource"
             },
             "x-ms-dynamic-list": {
               "operationId": "GetResources",
-              "itemValuePath": "schema_path",
+              "itemValuePath": "resource",
               "itemTitlePath": "name"
             }
           },
@@ -289,7 +251,7 @@
             "type": "number"
           },
           {
-            "name": "schema_path",
+            "name": "resource",
             "in": "path",
             "x-ms-url-encoding": "single",
             "type": "string",
@@ -300,11 +262,11 @@
             "x-ms-dynamic-values": {
               "operationId": "GetResources",
               "value-title": "name",
-              "value-path": "schema_path"
+              "value-path": "resource"
             },
             "x-ms-dynamic-list": {
               "operationId": "GetResources",
-              "itemValuePath": "schema_path",
+              "itemValuePath": "resource",
               "itemTitlePath": "name"
             }
           },
@@ -313,17 +275,11 @@
             "in": "body",
             "schema": {
               "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
+                "operationId": "ResourceMemberSchema",
+                "itemValuePath": "patch",
                 "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "parameterReference": "schema_path"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
+                  "resource": {
+                    "parameterReference": "resource"
                   }
                 }
               }
@@ -338,14 +294,8 @@
                 "operationId": "ResourceSchema",
                 "itemValuePath": "schema",
                 "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "parameterReference": "schema_path"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
+                  "resource": {
+                    "parameterReference": "resource"
                   }
                 }
               }
@@ -354,176 +304,18 @@
         }
       }
     },
-    "/proxy/{schema_path}": {
-      "get": {
-        "operationId": "GetItemsByResource",
-        "summary": "Find a list of the selected item type",
-        "description": "Gets a list of items of the selected type from the store",
-        "parameters": [
-          {
-            "name": "schema_path",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "type": "string",
-            "x-ms-summary": "Resource Type",
-            "description": "Specify the type of resource to work with",
-            "x-ms-visibility": "important",
-            "required": true,
-            "x-ms-dynamic-values": {
-              "operationId": "GetResources",
-              "value-title": "name",
-              "value-path": "schema_path"
-            },
-            "x-ms-dynamic-list": {
-              "operationId": "GetResources",
-              "itemValuePath": "schema_path",
-              "itemTitlePath": "name"
-            }
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "parameterReference": "schema_path"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "type": "array",
-              "items": {
-                "x-ms-dynamic-properties": {
-                  "operationId": "ResourceSchema",
-                  "itemValuePath": "schema",
-                  "parameters": {
-                    "x-reenhanced-proxy-action": {
-                      "value": "schema-converter"
-                    },
-                    "schema_path": {
-                      "parameterReference": "schema_path"
-                    },
-                    "x-reenhanced-proxy-method": {
-                      "value": "options"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "CreateResource",
-        "summary": "Create a new item of the specified type",
-        "description": "Creates an item using specified parameters",
-        "parameters": [
-          {
-            "name": "schema_path",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "type": "string",
-            "x-ms-summary": "Resource Type",
-            "description": "Specify the type of resource to work with",
-            "x-ms-visibility": "important",
-            "required": true,
-            "x-ms-dynamic-values": {
-              "operationId": "GetResources",
-              "value-title": "name",
-              "value-path": "schema_path"
-            },
-            "x-ms-dynamic-list": {
-              "operationId": "GetResources",
-              "itemValuePath": "schema_path",
-              "itemTitlePath": "name"
-            }
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "parameterReference": "schema_path"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "parameterReference": "schema_path"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+    "/resources/{resource}/1": {
       "options": {
-        "operationId": "ResourceSchema",
-        "summary": "Retrieve schema for the resource type given",
-        "description": "This is where the magic happens",
+        "operationId": "ResourceMemberSchema",
+        "summary": "Retrieve schema for the member resource type given",
+        "description": "This is where the magic happens for member objects",
         "x-ms-visibility": "internal",
         "parameters": [
           {
-            "name": "schema_path",
+            "name": "resource",
             "in": "path",
             "x-ms-url-encoding": "single",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "x-reenhanced-proxy-action",
-            "in": "header",
-            "type": "string",
-            "default": "schema-converter",
-            "enum": [
-              "schema-converter"
-            ],
-            "required": true
-          },
-          {
-            "name": "x-reenhanced-proxy-method",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -555,21 +347,277 @@
         }
       }
     },
-    "/proxy/woopower/v1/webhooks": {
+    "/resources/{resource}": {
+      "get": {
+        "operationId": "GetItemsByResource",
+        "summary": "Find a list of the selected item type",
+        "description": "Gets a list of items of the selected type from the store",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "x-ms-summary": "Resource Type",
+            "description": "Specify the type of resource to work with",
+            "x-ms-visibility": "important",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetResources",
+              "value-title": "name",
+              "value-path": "resource"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetResources",
+              "itemValuePath": "resource",
+              "itemTitlePath": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "x-ms-dynamic-properties": {
+                "operationId": "ResourceSchema",
+                "itemValuePath": "get",
+                "parameters": {
+                  "resource": {
+                    "parameterReference": "resource"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "type": "array",
+              "items": {
+                "x-ms-dynamic-properties": {
+                  "operationId": "ResourceSchema",
+                  "itemValuePath": "schema",
+                  "parameters": {
+                    "resource": {
+                      "parameterReference": "resource"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateResource",
+        "summary": "Create a new item of the specified type",
+        "description": "Creates an item using specified parameters",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "x-ms-summary": "Resource Type",
+            "description": "Specify the type of resource to work with",
+            "x-ms-visibility": "important",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetResources",
+              "value-title": "name",
+              "value-path": "resource"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetResources",
+              "itemValuePath": "resource",
+              "itemTitlePath": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "x-ms-dynamic-properties": {
+                "operationId": "ResourceSchema",
+                "itemValuePath": "post",
+                "parameters": {
+                  "resource": {
+                    "parameterReference": "resource"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "x-ms-dynamic-properties": {
+                "operationId": "ResourceSchema",
+                "itemValuePath": "schema",
+                "parameters": {
+                  "resource": {
+                    "parameterReference": "resource"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "ResourceSchema",
+        "summary": "Retrieve schema for the resource type given",
+        "description": "This is where the magic happens",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "get": {
+                  "type": "object"
+                },
+                "post": {
+                  "type": "object"
+                },
+                "schema": {
+                  "type": "object"
+                },
+                "delete": {
+                  "type": "object"
+                },
+                "patch": {
+                  "type": "object"
+                }
+              }
+            }
+
+          }
+        }
+      }
+    },
+    "/resources/{resource}/batch": {
+      "options": {
+        "operationId": "BatchSchema",
+        "summary": "Retrieve schema for the member resource type given",
+        "description": "This is where the magic happens for member objects",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "get": {
+                  "type": "object"
+                },
+                "post": {
+                  "type": "object"
+                },
+                "schema": {
+                  "type": "object"
+                },
+                "delete": {
+                  "type": "object"
+                },
+                "patch": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "BatchResource",
+        "summary": "Perform a batch operation",
+        "description": "Completes an operation on a number of WooCommerce items",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "x-ms-summary": "Resource Type",
+            "description": "Specify the type of resource to work with",
+            "x-ms-visibility": "important",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetResources",
+              "value-title": "name",
+              "value-path": "resource"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetResources",
+              "itemValuePath": "resource",
+              "itemTitlePath": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "x-ms-dynamic-properties": {
+                "operationId": "BatchSchema",
+                "itemValuePath": "post",
+                "parameters": {
+                  "resource": {
+                    "parameterReference": "resource"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "x-ms-dynamic-properties": {
+                "operationId": "BatchSchema",
+                "itemValuePath": "schema",
+                "parameters": {
+                  "resource": {
+                    "parameterReference": "resource"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks": {
       "x-ms-notification-content": {
         "schema": {
           "x-ms-dynamic-properties": {
             "operationId": "ResourceSchema",
             "itemValuePath": "schema",
             "parameters": {
-              "schema_path": {
+              "resource": {
                 "parameterReference": "body/webhook_resource_schema"
-              },
-              "x-reenhanced-proxy-action": {
-                "value": "schema-converter"
-              },
-              "x-reenhanced-proxy-method": {
-                "value": "options"
               }
             }
           },
@@ -602,11 +650,11 @@
                   "x-ms-dynamic-values": {
                     "operationId": "GetResources",
                     "value-title": "name",
-                    "value-path": "schema_path"
+                    "value-path": "resource"
                   },
                   "x-ms-dynamic-list": {
                     "operationId": "GetResources",
-                    "itemValuePath": "schema_path",
+                    "itemValuePath": "resource",
                     "itemTitlePath": "name"
                   }
                 },
@@ -618,7 +666,7 @@
                     "itemValuePath": "key",
                     "itemTitlePath": "name",
                     "parameters": {
-                      "schema_path": {
+                      "resource": {
                         "parameterReference": "body/webhook_resource_schema"
                       }
                     }
@@ -640,909 +688,29 @@
         }
       }
     },
-    "/proxy/woopower/v1/products": {
-      "get": {
-        "operationId": "GetProducts",
-        "summary": "Fetch a list of products",
-        "description": "Fetchs a list of products from the store",
+    "/webhooks/{hook_id}": {
+      "delete": {
+        "operationId": "DeleteTrigger",
+        "x-ms-visibility": "internal",
+        "description": "Deletes the trigger when a flow is removed",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/products"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "type": "array",
-              "items": {
-                "x-ms-dynamic-properties": {
-                  "operationId": "ResourceSchema",
-                  "itemValuePath": "schema",
-                  "parameters": {
-                    "x-reenhanced-proxy-action": {
-                      "value": "schema-converter"
-                    },
-                    "schema_path": {
-                      "value": "/woopower/v1/products"
-                    },
-                    "x-reenhanced-proxy-method": {
-                      "value": "options"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "CreateProduct",
-        "summary": "Create a new Product",
-        "description": "Creates a product using specified parameters",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/products"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/products"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/woopower/v1/products/{id}": {
-      "get": {
-        "operationId": "GetAProduct",
-        "summary": "Get a single product",
-        "description": "Gets a product from the store",
-        "parameters": [
-          {
-            "name": "id",
+            "name": "hook_id",
             "in": "path",
-            "x-ms-url-encoding": "single",
-            "x-ms-summary": "Product Id",
+            "description": "ID of the Hook being deleted",
             "required": true,
-            "description": "Enter the ID of the product",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/products/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
+            "type": "integer"
           }
         ],
         "responses": {
           "200": {
-            "description": "ok",
-            "schema": {
-              "type": "array",
-              "items": {
-                "x-ms-dynamic-properties": {
-                  "operationId": "ResourceSchema",
-                  "itemValuePath": "schema",
-                  "parameters": {
-                    "x-reenhanced-proxy-action": {
-                      "value": "schema-converter"
-                    },
-                    "schema_path": {
-                      "value": "/woopower/v1/products/1"
-                    },
-                    "x-reenhanced-proxy-method": {
-                      "value": "options"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "OK"
           }
         }
-      },
-      "post": {
-        "operationId": "UpdateAProduct",
-        "summary": "Update an existing Product",
-        "description": "Make changes to a product using specified parameters",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "x-ms-summary": "Product Id",
-            "description": "Enter the ID of the Product",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/products"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/products"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/woopower/v1/customers": {
-      "get": {
-        "operationId": "GetCustomers",
-        "summary": "Fetch a list of customers",
-        "description": "Fetchs a list of customers from the store",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/customers"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "type": "array",
-              "items": {
-                "x-ms-dynamic-properties": {
-                  "operationId": "ResourceSchema",
-                  "itemValuePath": "schema",
-                  "parameters": {
-                    "x-reenhanced-proxy-action": {
-                      "value": "schema-converter"
-                    },
-                    "schema_path": {
-                      "value": "/woopower/v1/customers"
-                    },
-                    "x-reenhanced-proxy-method": {
-                      "value": "options"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "CreateCustomer",
-        "summary": "Create a new Customer",
-        "description": "Creates a customer using specified parameters",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/customers"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/customers"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/woopower/v1/customers/{id}": {
-      "get": {
-        "operationId": "GetACustomer",
-        "summary": "Get a single customer",
-        "description": "Gets a customer from the store",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "x-ms-summary": "Customer Id",
-            "required": true,
-            "description": "Enter the ID of the customer",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/customers/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/customers/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "UpdateACustomer",
-        "summary": "Update an existing Customer",
-        "description": "Make changes to a customer using specified parameters",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "x-ms-summary": "Customer Id",
-            "description": "Enter the ID of the Customer",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/customers/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/customers/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/woopower/v1/orders": {
-      "get": {
-        "operationId": "GetOrders",
-        "summary": "Fetch a list of orders",
-        "description": "Fetchs a list of orders from the store",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/orders"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "type": "array",
-              "items": {
-                "x-ms-dynamic-properties": {
-                  "operationId": "ResourceSchema",
-                  "itemValuePath": "schema",
-                  "parameters": {
-                    "x-reenhanced-proxy-action": {
-                      "value": "schema-converter"
-                    },
-                    "schema_path": {
-                      "value": "/woopower/v1/orders"
-                    },
-                    "x-reenhanced-proxy-method": {
-                      "value": "options"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "CreateOrder",
-        "summary": "Create a new Order",
-        "description": "Creates an order using specified parameters",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/orders"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/orders"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/woopower/v1/orders/{id}": {
-      "get": {
-        "operationId": "GetAnOrder",
-        "summary": "Get a single order",
-        "description": "Gets an order from the store",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "x-ms-summary": "Order Id",
-            "required": true,
-            "description": "Enter the ID of the order",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/orders/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/orders/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "UpdateAnOrder",
-        "summary": "Update an existing Order",
-        "description": "Make changes to an order using specified parameters",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "x-ms-summary": "Order Id",
-            "description": "Enter the ID of the Order",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/orders/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/orders/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/woopower/v1/coupons": {
-      "get": {
-        "operationId": "GetCoupons",
-        "summary": "Fetch a list of coupons",
-        "description": "Fetchs a list of coupons from the store",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/coupons"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "type": "array",
-              "items": {
-                "x-ms-dynamic-properties": {
-                  "operationId": "ResourceSchema",
-                  "itemValuePath": "schema",
-                  "parameters": {
-                    "x-reenhanced-proxy-action": {
-                      "value": "schema-converter"
-                    },
-                    "schema_path": {
-                      "value": "/woopower/v1/coupons"
-                    },
-                    "x-reenhanced-proxy-method": {
-                      "value": "options"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "CreateCoupon",
-        "summary": "Create a new Coupon",
-        "description": "Creates a coupon using specified parameters",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/coupons"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/coupons"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/woopower/v1/coupons/{id}": {
-      "get": {
-        "operationId": "GetACoupon",
-        "summary": "Get a single coupon",
-        "description": "Gets a coupon from the store",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "x-ms-summary": "Coupon Id",
-            "required": true,
-            "description": "Enter the ID of the coupon",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "get",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/coupons/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/coupons/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "UpdateACoupon",
-        "summary": "Update an existing coupon",
-        "description": "Make changes to a coupon using specified parameters",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "x-ms-summary": "Coupon Id",
-            "description": "Enter the ID of the Couipon",
-            "type": "number"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "post",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/coupons/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "ok",
-            "schema": {
-              "x-ms-dynamic-properties": {
-                "operationId": "ResourceSchema",
-                "itemValuePath": "schema",
-                "parameters": {
-                  "x-reenhanced-proxy-action": {
-                    "value": "schema-converter"
-                  },
-                  "schema_path": {
-                    "value": "/woopower/v1/coupons/1"
-                  },
-                  "x-reenhanced-proxy-method": {
-                    "value": "options"
-                  }
-                }
-              }
-            }
-          }
-        }
+
       }
     }
+
   },
   "tags": []
 }
