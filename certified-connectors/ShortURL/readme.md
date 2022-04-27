@@ -11,7 +11,7 @@ To shortern your long URL, you need to have a valid account with [Short URL] (ht
 * [Log In](https://www.shorturlapp.com/members/index.php?page=login) with your account details and click on ```SharePoint ShortUrlApp - Enterprise``` to get your Username and License Key.
 
 ## API documentation
-http://cirrussoft.support
+[http://apps365ltd.com/support](http://apps365ltd.com/support)
 
 ## Supported Operations
 The connector supports the following operations:
