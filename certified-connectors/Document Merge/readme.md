@@ -13,7 +13,6 @@ http://apps365ltd.com/support
 The connector supports the following operations:
 * ```Document Merge```: This operation allows you to merge any SharePoint list data into Word, Excel and PowerPoint Templates with NO CODING!.
 
-
 ## How to get credentials
 To get credentials, you need to subscribe for a valid license of Document Merge (https://www.sharepointdocumentmerge.com).
 
@@ -22,3 +21,6 @@ For further support, please contact support@apps365ltd.com
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
+
+## Publisher
+APPS 365 LTD
