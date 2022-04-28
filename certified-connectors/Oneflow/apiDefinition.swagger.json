@@ -1,0 +1,1886 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Oneflow",
+    "description": "Be more effective with truly digital contracts that make work faster, and life easier. Automate your contract management process with Oneflow",
+    "contact": {
+      "name": "Oneflow AB",
+      "url": "https://support.oneflow.com/",
+      "email": "support@oneflow.com"
+    }
+  },
+  "host": "api.oneflow.com",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [
+    "application/json"
+  ],
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-oneflow-api-token"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],  
+  "paths": {
+    "/contracts/parties/create": {
+      "post": {
+        "summary": "Add Participant",
+        "description": "Add participant to the contract",
+        "operationId": "PartyCreate",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "header",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description":"Contract Id"
+          },
+          {
+            "name": "participant_type",
+            "in": "header",
+            "type": "string",
+            "description": "Individual/Company",
+            "required": true,
+            "x-ms-summary": "Participant Type",
+            "enum": [
+              "Individual",
+              "Company"
+            ],
+            "default": "Company"
+          },
+          {
+            "name": "party",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "x-ms-dynamic-schema": {
+                "operationId": "GetDynamicSchema",
+                "parameters": {
+                  "schema_id": {
+                    "parameter": "participant_type"
+                  }
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/files": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "summary": "Upload attachments",
+        "description": "Add attachment or a  PDF document to a contract.",
+        "operationId": "UploadAttachments",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description":"Contract Id"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "multipart/form-data",
+            "description": "Content-Type",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "file",
+            "required": true,
+            "in": "formData",
+            "type": "file",
+            "format": "binary",
+            "description": "File to upload. File name should be in file.ext format",
+            "x-ms-summary": "File"
+          },
+          {
+            "name": "upload_as",
+            "x-ms-summary": "Upload As",
+            "in": "formData",
+            "type": "string",
+            "enum": [
+              "attachment",
+              "expanded_pdf"
+            ],
+            "description": "select type of attachment to upload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/files/{file_id}": {
+      "get": {
+        "summary": "Download a contract file",
+        "description": "Retrieve a specific contract file by its ID.",
+        "operationId": "GetAContractFileById",
+        "parameters": [
+          {
+            "name": "download",
+            "default": "true",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "Accept",
+            "default": "binary/octet-stream",
+            "in": "header",
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "required": true
+          },
+          {
+            "name": "contract_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description":"Contract Id"
+          },
+          {
+            "name": "file_id",
+            "x-ms-summary": "File Id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "1",
+              "2"
+            ],
+            "description": "Type of file: * 1 - Contract PDF * 2 - Verification\n",
+            "x-ms-enum": {
+              "name": "file_id",
+              "modelAsString": false,
+              "values": [
+                {
+                  "name": "Contract PDF",
+                  "value": "1"
+                },
+                {
+                  "name": "Verification",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "x-ms-summary": "File Content",
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "302": {
+            "description": "Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/": {
+      "delete": {
+        "summary": "Delete a contract",
+        "description": "Delete a specific contract by its ID.",
+        "operationId": "DeleteAContractById",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "default": "10015",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description":"Contract Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}": {
+      "get": {
+        "summary": "Get the status of a contract",
+        "description": "Retrieve the status of a specific contract by its ID.",
+        "operationId": "GetContractStatus",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description":"Contract Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "description": "draft/pending/overdue/signed/declined",
+                  "x-ms-summary": "Contract state"
+                },
+                "state_updated_time": {
+                  "type": "string",
+                  "x-ms-summary": "Contract state update time"
+                },
+                "updated_time": {
+                  "type": "string",
+                  "x-ms-summary": "Contract update time"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contract_id}/publish": {
+      "post": {
+        "summary": "Publish a contract",
+        "description": "Sends contract to participants for signing.",
+        "operationId": "PublishContract",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description":"Contract Id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "subject": {
+                  "type": "string",
+                  "description": "Notification subject",
+                  "x-ms-summary": "Subject"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Notification message",
+                  "x-ms-summary": "Message"
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Contract"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/contracts/create": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Create a contract",
+        "description": "Create a new contract based on the selected template.",
+        "operationId": "CreateAContract",
+        "parameters": [
+          {
+            "name": "contract",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Contract_For_Create"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Contract"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/workspaces": {
+      "get": {
+        "summary": "Get workspaces",
+        "description": "Retrieve the list of workspaces available for the specified user.",
+        "operationId": "GetWorkspaces",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_links": {
+                  "type": "object",
+                  "properties": {
+                    "next": {
+                      "type": "object",
+                      "properties": {
+                        "href": {
+                          "type": "string",
+                          "description": "href"
+                        }
+                      },
+                      "description": "next"
+                    },
+                    "previous": {
+                      "type": "object",
+                      "properties": {
+                        "href": {
+                          "type": "string",
+                          "description": "href"
+                        }
+                      },
+                      "description": "previous"
+                    },
+                    "self": {
+                      "type": "object",
+                      "properties": {
+                        "href": {
+                          "type": "string",
+                          "description": "href"
+                        }
+                      },
+                      "description": "self"
+                    }
+                  },
+                  "description": "_links"
+                },
+                "count": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "count"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_links": {
+                        "type": "object",
+                        "properties": {
+                          "self": {
+                            "type": "object",
+                            "properties": {
+                              "href": {
+                                "type": "string",
+                                "description": "href"
+                              }
+                            },
+                            "description": "self"
+                          }
+                        },
+                        "description": "_links"
+                      },
+                      "_permissions": {
+                        "type": "object",
+                        "properties": {
+                          "contract:create": {
+                            "type": "boolean",
+                            "description": "contract:create"
+                          }
+                        },
+                        "description": "_permissions"
+                      },
+                      "company_name": {
+                        "type": "string",
+                        "description": "company_name"
+                      },
+                      "country_code": {
+                        "type": "string",
+                        "description": "country_code"
+                      },
+                      "created_time": {
+                        "type": "string",
+                        "description": "created_time"
+                      },
+                      "date_format": {
+                        "type": "string",
+                        "description": "date_format"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "description"
+                      },
+                      "id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "id"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "name"
+                      },
+                      "registration_number": {
+                        "type": "string",
+                        "description": "registration_number"
+                      },
+                      "updated_time": {
+                        "type": "string",
+                        "description": "updated_time"
+                      }
+                    }
+                  },
+                  "description": "data"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "summary": "Ping",
+        "description": "Use this endpoint to check if the Oneflow API is available.",
+        "operationId": "Ping",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/helpers/contract_create_data/": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "x-ms-visibility": "internal",
+        "summary": "Get Templates For Workspace",
+        "description": "Get a list of templates for a specified workspace.",
+        "operationId": "GetTemplatesForWorkspace",
+        "parameters": [
+          {
+            "name": "extension_type",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "template_type_id",
+            "in": "query",
+            "type": "number",
+            "required": false,
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "x-oneflow-workspace-id",
+            "in": "header",
+            "type": "number",
+            "required": true,
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Template"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/helpers/dynamic_schemas": {
+      "get": {
+        "summary": "Get Dynamic Schema",
+        "description": "Get Dynamic Schema",
+        "operationId": "GetDynamicSchema",
+        "produces": [
+          "application/json"
+        ],
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "schema_id",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Invalid Schema Id"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Template": {
+      "type": "object",
+      "properties": {
+        "available_options": {
+          "x-ms-summary": "Available Options",
+          "type": "object",
+          "properties": {
+            "can_receive_attachments": {
+              "type": "boolean",
+              "description": "can_receive_attachments",
+              "x-ms  -summary": "Can Receive Attachments"
+            },
+            "can_receive_expanded_pdf": {
+              "type": "boolean",
+              "description": "can_receive_expanded_pdf",
+              "x-ms  -summary": "Can Receive Expanded PDF"
+            },
+            "can_receive_products": {
+              "type": "boolean",
+              "description": "can_receive_products",
+              "x-ms-summary": "Can Receive Products"
+            },
+            "delivery_channels": {
+              "x-ms-summary": "Delivery Channels",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name",
+                    "x-ms-summary": "Delivery Channel Name"
+                  },
+                  "preferred": {
+                    "type": "boolean",
+                    "description": "preferred",
+                    "x-ms-summary": "Is preferred   Delivery Channel"
+                  },
+                  "required_participant_attributes": {
+                    "x-ms-summary": "Required Participant Attributes (Delivery Channel)",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "required_participant_attributes"
+                  }
+                }
+              },
+              "description": "delivery_channels"
+            },
+            "sign_methods": {
+              "x-ms-summary": "Sign Methods",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name",
+                    "x-ms-summary": "Sign Method Name"
+                  },
+                  "preferred": {
+                    "type": "boolean",
+                    "description": "preferred",
+                    "x-ms-summary": "Is Preferred   Sign Method"
+                  }
+                }
+              },
+              "description": "sign_methods"
+            },
+            "two_step_authentication_methods": {
+              "x-ms-summary": "Two-Step Authentication Methods",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name",
+                    "x-ms-summary": "Two-Step Authentication   Name"
+                  },
+                  "preferred": {
+                    "type": "boolean",
+                    "description": "preferred",
+                    "x-ms-summary": "Is Preferred   Two-Step Authentication Method"
+                  },
+                  "required_participant_attributes": {
+                    "x-ms-summary": "Required Participant Attributes (Two-Step Authentication Method  )",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "required_participant_attributes"
+                  }
+                }
+              },
+              "description": "two_step_authentication_methods"
+            }
+          },
+          "description": "available_options"
+        },
+        "created_time": {
+          "type": "string",
+          "description": "created_time",
+          "x-ms-summary": "Created Time"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "id",
+          "x-ms-summary": "Template Id"
+        },
+        "name": {
+          "type": "string",
+          "description": "name",
+          "x-ms-summary": "Template Name"
+        },
+        "template_type": {
+          "x-ms-summary": "Template Type",
+          "type": "object",
+          "properties": {
+            "created_time": {
+              "type": "string",
+              "description": "created_time",
+              "x-ms-summary": "Created Time   (Template Type)"
+            },
+            "description": {
+              "type": "string",
+              "description": "description",
+              "x-ms-summary": "Template Type   Description"
+            },
+            "extension_type": {
+              "type": "string",
+              "description": "extension_type",
+              "x-ms-summary": "Extension   Type (Template Type)"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "description": "id",
+              "x-ms-summary": "Template Type Id"
+            },
+            "name": {
+              "type": "string",
+              "description": "name",
+              "x-ms-summary": "Template Type Name"
+            },
+            "updated_time": {
+              "type": "string",
+              "description": "updated_time",
+              "x-ms-summary": "Updated Time   (Template Type)"
+            }
+          },
+          "description": "template_type"
+        },
+        "updated_time": {
+          "type": "string",
+          "description": "updated_time",
+          "x-ms-summary": "Updated Time"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "error_code": {
+          "type": "number"
+        },
+        "parameter_problems": {
+          "type": "object"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "Contract_For_Create": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Contract name"
+        },
+        "workspace_id": {
+          "x-ms-summary": "Workspace name",
+          "description": "Select a Workspace for your contract",
+          "type": "number",
+          "format": "int32",
+          "x-ms-dynamic-values": {
+            "operationId": "GetWorkspaces",
+            "value-collection": "data",
+            "value-path": "id",
+            "value-title": "name"
+          }
+        },
+        "template_id": {
+          "x-ms-summary": "Template name",
+          "description": "Select a template to create your contract from",
+          "type": "number",
+          "format": "int32",
+          "x-ms-dynamic-values": {
+            "operationId": "GetTemplatesForWorkspace",
+            "parameters": {
+              "x-oneflow-workspace-id": {
+                "parameter": "workspace_id"
+              }
+            },
+            "value-path": "id",
+            "value-title": "name"
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "GetTemplatesForWorkspace",
+            "parameters": {
+              "x-oneflow-workspace-id": {
+                "parameterReference": "contract/workspace_id"
+              }
+            },
+            "itemValuePath": "id",
+            "itemTitlePath": "name"
+          }
+        }
+      },
+      "required": [
+        "workspace_id",
+        "template_id"
+      ]
+    },
+    "Contract": {
+      "type": "object",
+      "properties": {
+        "_permissions": {
+          "type": "object",
+          "properties": {
+            "contract:delete": {
+              "type": "boolean",
+              "x-ms-summary": "Contract Delete Permission",
+              "description": "User can delete contract"
+            }
+          },
+          "description": "Contract _permissions attributes"
+        },
+        "_private": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Contract name"
+            },
+            "value": {
+              "x-ms-visibility": "internal",
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "amount",
+                  "x-ms-summary": "Contract Amount"
+                },
+                "currency": {
+                  "type": "string",
+                  "description": "currency",
+                  "x-ms-summary": "Contract's Currency"
+                }
+              },
+              "description": "value"
+            },
+            "workspace_id": {
+              "type": "integer",
+              "format": "int32",
+              "description": "workspace_id",
+              "x-ms-summary": "Workspace Id",
+              "x-ms-visibility": "internal"
+            }
+          },
+          "description": "Contract _private attributes"
+        },
+        "_private_ownerside": {
+          "type": "object",
+          "properties": {
+            "created_time": {
+              "type": "string",
+              "x-ms-summary": "Contract creation time"
+            },
+            "template_id": {
+              "type": "integer",
+              "format": "int32",
+              "description": "template_id",
+              "x-ms-summary": "Template Id",
+              "x-ms-visibility": "internal"
+            },
+            "template_type_id": {
+              "type": "integer",
+              "format": "int32",
+              "description": "template_type_id",
+              "x-ms-summary": "Template Type Id",
+              "x-ms-visibility": "internal"
+            }
+          },
+          "description": "Contract _private_ownderside attributes"
+        },
+        "available_options": {
+          "type": "object",
+          "properties": {
+            "can_receive_attachments": {
+              "type": "boolean",
+              "x-ms-summary": "Can Receive Attachments",
+              "description": "Contract can receive attachments"
+            },
+            "can_receive_expanded_pdf": {
+              "type": "boolean",
+              "x-ms-summary": "Can Receive Expanded PDF",
+              "description": "Contract can receive expanded PDF"
+            },
+            "can_receive_products": {
+              "type": "boolean",
+              "description": "can_receive_products",
+              "x-ms-visibility": "internal",
+              "x-ms-summary": "Can Receive Products"
+            },
+            "delivery_channels": {
+              "x-ms-visibility": "internal",
+              "x-ms-summary": "Delivery Channels",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name",
+                    "x-ms-summary": "Delivery Channel Name"
+                  },
+                  "preferred": {
+                    "type": "boolean",
+                    "description": "preferred",
+                    "x-ms-summary": "Is Preferred Delivery Channel"
+                  },
+                  "required_participant_attributes": {
+                    "x-ms-summary": "Required Participant Attributes (Delivery Channel)",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "required_participant_attributes"
+                  }
+                }
+              },
+              "description": "delivery_channels"
+            },
+            "sign_methods": {
+              "x-ms-visibility": "internal",
+              "x-ms-summary": "Sign Methods",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name",
+                    "x-ms-summary": "Sign Method Name"
+                  },
+                  "preferred": {
+                    "type": "boolean",
+                    "description": "preferred",
+                    "x-ms-summary": "Is Preferred Sign Method"
+                  }
+                }
+              },
+              "description": "sign_methods"
+            },
+            "two_step_authentication_methods": {
+              "x-ms-visibility": "internal",
+              "x-ms-summary": "Two Step Authentication Methods",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name",
+                    "x-ms-summary": "Two Step Authentication Method Name"
+                  },
+                  "preferred": {
+                    "type": "boolean",
+                    "description": "preferred",
+                    "x-ms-summary": "Is Preferred Two Step Authentication Method"
+                  },
+                  "required_participant_attributes": {
+                    "x-ms-summary": "Required Participant Attributes (Two Step Authentication Method)",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "required_participant_attributes"
+                  }
+                }
+              },
+              "description": "two_step_authentication_methods"
+            }
+          },
+          "description": "Contract available_options attributes"
+        },
+        "data_fields": {
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Data Fields",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_private_ownerside": {
+                "x-ms-summary": "Private Ownerside (Data Fields)",
+                "type": "object",
+                "properties": {
+                  "created_time": {
+                    "type": "string",
+                    "description": "created_time",
+                    "x-ms-summary": "Created Time (Data Field)"
+                  },
+                  "custom_id": {
+                    "type": "string",
+                    "description": "custom_id",
+                    "x-ms-summary": "Custom Id (Data Field)"
+                  },
+                  "updated_time": {
+                    "type": "string",
+                    "description": "updated_time",
+                    "x-ms-summary": "Updated Time (Data Field)"
+                  }
+                },
+                "description": "_private_ownerside"
+              },
+              "description": {
+                "type": "string",
+                "description": "description",
+                "x-ms-summary": "Data Field Description"
+              },
+              "id": {
+                "type": "integer",
+                "format": "int32",
+                "description": "id",
+                "x-ms-summary": "Data Field Id"
+              },
+              "name": {
+                "type": "string",
+                "description": "name",
+                "x-ms-summary": "Data Field Name"
+              },
+              "placeholder": {
+                "type": "string",
+                "description": "placeholder"
+              },
+              "value": {
+                "type": "string",
+                "description": "value"
+              }
+            }
+          },
+          "description": "data_fields"
+        },
+        "id": {
+          "type": "integer",
+          "x-ms-summary": "Contract ID",
+          "description":"Contract Id",
+          "format": "int32"
+        },
+        "lifecycle_settings": {
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Lifecycle Settings",
+          "type": "object",
+          "properties": {
+            "duration": {
+              "type": "string",
+              "description": "duration",
+              "x-ms-summary": "Contract Duration"
+            },
+            "end_date": {
+              "type": "string",
+              "description": "end_date",
+              "x-ms-summary": "Contract End Date"
+            },
+            "initial_duration": {
+              "type": "string",
+              "description": "initial_duration",
+              "x-ms-summary": "Contract Initial Duration"
+            },
+            "notice_period": {
+              "type": "string",
+              "description": "notice_period",
+              "x-ms-summary": "Contract Notice Period"
+            },
+            "start_date": {
+              "type": "string",
+              "description": "start_date",
+              "x-ms-summary": "Contract Start Date"
+            },
+            "type": {
+              "type": "string",
+              "description": "type",
+              "x-ms-summary": "Contract Type"
+            }
+          },
+          "description": "lifecycle_settings"
+        },
+        "lifecycle_state": {
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Lifecycle state",
+          "type": "object",
+          "properties": {
+            "contract_end_time": {
+              "type": "string",
+              "description": "contract_end_time",
+              "x-ms-summary": "Contract End Time"
+            },
+            "contract_start_time": {
+              "type": "string",
+              "description": "contract_start_time",
+              "x-ms-summary": "Contract Start Time"
+            },
+            "cancel_time": {
+              "type": "string",
+              "description": "cancel_time",
+              "x-ms-summary": "Contract Cancel Time"
+            },
+            "has_ended_by_termination": {
+              "type": "boolean",
+              "description": "has_ended_by_termination",
+              "x-ms-summary": "Contract Ended By Termination?"
+            },
+            "has_passed_notice_period_start_time": {
+              "type": "boolean",
+              "description": "has_passed_notice_period_start_time",
+              "x-ms-summary": "Has Contract Passed Notice Period Start Time?"
+            },
+            "is_canceled": {
+              "type": "boolean",
+              "description": "is_canceled",
+              "x-ms-summary": "Is Contract Canceled"
+            },
+            "is_recurring": {
+              "type": "boolean",
+              "description": "is_recurring",
+              "x-ms-summary": "Is Contract Recurring"
+            },
+            "lifecycle_state": {
+              "type": "string",
+              "description": "lifecycle_state",
+              "x-ms-summary": "Lifecycle State"
+            },
+            "lifecycle_state_updated_time": {
+              "type": "string",
+              "description": "lifecycle_state_updated_time",
+              "x-ms-summary": "Lifecycle state Updated Time"
+            },
+            "notice_period_start_time": {
+              "type": "string",
+              "description": "notice_period_start_time",
+              "x-ms-summary": "Notice Period Start Time"
+            },
+            "period": {
+              "type": "integer",
+              "format": "int32",
+              "description": "period",
+              "x-ms-summary": "Period"
+            },
+            "period_end_time": {
+              "type": "string",
+              "description": "period_end_time",
+              "x-ms-summary": "Period End Time"
+            },
+            "period_start_time": {
+              "type": "string",
+              "description": "period_start_time",
+              "x-ms-summary": "Period Start Time"
+            }
+          },
+          "description": "lifecycle_state"
+        },
+        "parties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Party"
+          },
+          "description": "Parties collection"
+        },
+        "product_groups": {
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Product Groups",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_private_ownerside": {
+                "x-ms-summary": "Private Ownerside (Product Groups)",
+                "type": "object",
+                "properties": {
+                  "created_time": {
+                    "type": "string",
+                    "description": "created_time",
+                    "x-ms-summary": "Product Group Created Time"
+                  },
+                  "updated_time": {
+                    "type": "string",
+                    "description": "updated_time",
+                    "x-ms-summary": "Product Group Updated Time"
+                  }
+                },
+                "description": "_private_ownerside"
+              },
+              "id": {
+                "type": "integer",
+                "format": "int32",
+                "description": "id",
+                "x-ms-summary": "Product Group Id"
+              },
+              "products": {
+                "x-ms-summary": "Products",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "_private_ownerside": {
+                      "x-ms-summary": "Private Ownerside (Products)",
+                      "type": "object",
+                      "properties": {
+                        "created_time": {
+                          "type": "string",
+                          "description": "created_time",
+                          "x-ms-summary": "Product Created Time"
+                        },
+                        "updated_time": {
+                          "type": "string",
+                          "description": "updated_time",
+                          "x-ms-summary": "Product Updated Time"
+                        }
+                      },
+                      "description": "_private_ownerside"
+                    },
+                    "counterparty_lock": {
+                      "type": "boolean",
+                      "description": "counterparty_lock",
+                      "x-ms-summary": "Product Locked For Counterparties?"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "description",
+                      "x-ms-summary": "Product Description"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "id",
+                      "x-ms-summary": "Product Id"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "name",
+                      "x-ms-summary": "Product Name"
+                    },
+                    "price_1": {
+                      "x-ms-summary": "Product Price 1",
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "x-ms-summary": "Product Price 1 Amount (object)",
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "amount",
+                              "x-ms-summary": "Price 1 Amount"
+                            }
+                          },
+                          "description": "amount"
+                        },
+                        "base_amount": {
+                          "x-ms-summary": "Product Price 1 Base Amount (object)",
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "amount",
+                              "x-ms-summary": "Price 1 Base Amount"
+                            }
+                          },
+                          "description": "base_amount"
+                        },
+                        "discount_amount": {
+                          "x-ms-summary": "Product Price 1 Discount Amount (object)",
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "amount",
+                              "x-ms-summary": "Price 1 Discount Amount"
+                            }
+                          },
+                          "description": "discount_amount"
+                        },
+                        "discount_percent": {
+                          "type": "string",
+                          "description": "discount_percent",
+                          "x-ms-summary": "Price 1 Discount Percent"
+                        }
+                      },
+                      "description": "price_1"
+                    },
+                    "price_2": {
+                      "x-ms-summary": "Product Price 2",
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "x-ms-summary": "Product Price 2 Amount (object)",
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "amount",
+                              "x-ms-summary": "Price 2 Amount"
+                            }
+                          },
+                          "description": "amount"
+                        },
+                        "base_amount": {
+                          "x-ms-summary": "Product Price 2 Base Amount",
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "amount",
+                              "x-ms-summary": "Price 2 Base Amount"
+                            }
+                          },
+                          "description": "base_amount"
+                        },
+                        "discount_amount": {
+                          "x-ms-summary": "Product Price 2 Discount Amount (object)",
+                          "type": "object",
+                          "properties": {
+                            "amount": {
+                              "type": "string",
+                              "description": "amount",
+                              "x-ms-summary": "Price 2 Discount Amount"
+                            }
+                          },
+                          "description": "discount_amount"
+                        },
+                        "discount_percent": {
+                          "type": "string",
+                          "description": "discount_percent",
+                          "x-ms-summary": "Price 2 Discount Percent"
+                        }
+                      },
+                      "description": "price_2"
+                    },
+                    "quantity": {
+                      "x-ms-summary": "Product Quantity (object)",
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "integer",
+                          "format": "int32",
+                          "description": "amount",
+                          "x-ms-summary": "Product Quantity"
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "type",
+                          "x-ms-summary": "Product Type"
+                        }
+                      },
+                      "description": "quantity"
+                    }
+                  }
+                },
+                "description": "products"
+              }
+            }
+          },
+          "description": "product_groups"
+        },
+        "published_time": {
+          "type": "string",
+          "x-ms-summary": "Contract publishing time"
+        },
+        "signing_period_expiry_time": {
+          "type": "string",
+          "x-ms-summary": "Contract signing expiration time"
+        },
+        "state": {
+          "type": "string",
+          "description": "draft/pending/overdue/signed/declined",
+          "x-ms-summary": "Contract state"
+        },
+        "state_updated_time": {
+          "type": "string",
+          "x-ms-summary": "Contract state update time"
+        },
+        "updated_time": {
+          "type": "string",
+          "x-ms-summary": "Contract update time"
+        }
+      }
+    },
+    "Party": {
+      "type": "object",
+      "properties": {
+        "_private_ownerside": {
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Private Ownerside (Parties)",
+          "type": "object",
+          "properties": {
+            "created_time": {
+              "type": "string",
+              "description": "created_time",
+              "x-ms-summary": "Party Created Time"
+            },
+            "updated_time": {
+              "type": "string",
+              "description": "updated_time",
+              "x-ms-summary": "Party Updated Time"
+            }
+          },
+          "description": "Party _private_ownderside attributes"
+        },
+        "country_code": {
+          "type": "string",
+          "x-ms-summary": "Party country code"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Party Id",
+          "x-ms-visibility": "internal"
+        },
+        "identification_number": {
+          "type": "string",
+          "x-ms-summary": "Party Identification Number",
+          "description": "Party identification number"
+        },
+        "my_party": {
+          "type": "boolean",
+          "x-ms-summary": "Is My Party",
+          "description": "Contract party is my_party"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Party name"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "description": "Participants collection"
+        },
+        "type": {
+          "type": "string",
+          "description": "company/individual",
+          "x-ms-summary": "Party type"
+        },
+        "participant": {
+          "$ref": "#/definitions/Individual_Participant"
+        }
+      }
+    },
+    "Participant": {
+      "type": "object",
+      "properties": {
+        "_permissions": {
+          "type": "object",
+          "properties": {
+            "contract:update": {
+              "type": "boolean",
+              "x-ms-summary": "Can Participant Update Contract?"
+            }
+          },
+          "description": "Participant permissions"
+        },
+        "_private_ownerside": {
+          "x-ms-visibility": "internal",
+          "type": "object",
+          "properties": {
+            "created_time": {
+              "type": "string",
+              "description": "created_time",
+              "x-ms-summary": "Participant Created Time"
+            },
+            "first_visited_time": {
+              "type": "string",
+              "description": "first_visited_time",
+              "x-ms-summary": "Participant First Visited Time"
+            },
+            "last_visited_time": {
+              "type": "string",
+              "description": "last_visited_time",
+              "x-ms-summary": "Participant Last Visited Time"
+            },
+            "updated_time": {
+              "type": "string",
+              "description": "updated_time",
+              "x-ms-summary": "Participant Update Time"
+            },
+            "visits": {
+              "type": "integer",
+              "format": "int32",
+              "description": "visits",
+              "x-ms-summary": "Participant Visits Count"
+            }
+          },
+          "description": "_private_ownerside"
+        },
+        "delivery_channel": {
+          "type": "string",
+          "description": "email/none/same_device/sms",
+          "x-ms-summary": "Participant delivery channel"
+        },
+        "delivery_status": {
+          "type": "string",
+          "description": "not_sent/pending/failure/bounce/success/opened",
+          "x-ms-summary": "Participant delivery status"
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Participant email"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "internal",
+          "description": "id",
+          "x-ms-summary": "Participant Id"
+        },
+        "identification_number": {
+          "type": "string",
+          "x-ms-summary": "Participant identification number",
+          "description": "Participant identification number"
+        },
+        "my_participant": {
+          "type": "boolean",
+          "x-ms-summary": "Participant is my_participant"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Participant name"
+        },
+        "organizer": {
+          "type": "boolean",
+          "x-ms-summary": "Participant is organizer"
+        },
+        "phone_number": {
+          "type": "string",
+          "x-ms-summary": "Participant phone number"
+        },
+        "sign_method": {
+          "type": "string",
+          "description": "standard_esign/sms/swedish_bankid/norwegian_bankid/danish_nemid/finnish_bankid",
+          "x-ms-summary": "Participant sign method"
+        },
+        "sign_state": {
+          "type": "string",
+          "description": "undecided/signed/declined",
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Participant sign state"
+        },
+        "sign_state_updated_time": {
+          "type": "string",
+          "description": "sign_state_updated_time",
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Participant's Sign State Updated Time"
+        },
+        "signatory": {
+          "type": "boolean",
+          "x-ms-summary": "Participant is signatory"
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Participant title"
+        },
+        "two_step_authentication_method": {
+          "type": "string",
+          "description": "email/sms/none",
+          "x-ms-summary": "Participant 2FA method"
+        }
+      }
+    },
+    "Individual_Participant": {
+      "type": "object",
+      "properties": {
+        "_permissions": {
+          "type": "object",
+          "properties": {
+            "contract:update": {
+              "type": "boolean",
+              "description": "contract:update permissions for Individual Participant",
+              "x-ms-summary": "Individual participant can update contract"
+            }
+          },
+          "description": "Individual participant permissions"
+        },
+        "_private_ownerside": {
+          "x-ms-visibility": "internal",
+          "type": "object",
+          "properties": {
+            "created_time": {
+              "type": "string",
+              "description": "created_time",
+              "x-ms-summary": "Individual Participant Created Time"
+            },
+            "first_visited_time": {
+              "type": "string",
+              "description": "first_visited_time",
+              "x-ms-summary": "Individual Participant's First Visited Time"
+            },
+            "last_visited_time": {
+              "type": "string",
+              "description": "last_visited_time",
+              "x-ms-summary": "Individual Participant's Last Visited Time"
+            },
+            "updated_time": {
+              "type": "string",
+              "description": "updated_time",
+              "x-ms-summary": "Individual Participant's Updated Time"
+            },
+            "visits": {
+              "type": "integer",
+              "format": "int32",
+              "description": "visits",
+              "x-ms-summary": "Individual Participant's Visits Count"
+            }
+          },
+          "description": "_private_ownerside"
+        },
+        "delivery_channel": {
+          "type": "string",
+          "description": "email/none/same_device/sms",
+          "x-ms-summary": "Individual Participant delivery channel"
+        },
+        "delivery_status": {
+          "type": "string",
+          "description": "not_sent/pending/failure/bounce/success/opened",
+          "x-ms-summary": "Individual participant delivery status"
+        },
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Individual participant email"
+        },
+        "id": {
+          "type": "integer",
+          "x-ms-visibility": "internal",
+          "format": "int32",
+          "description": "id",
+          "x-ms-summary": "Individual participant id"
+        },
+        "identification_number": {
+          "type": "string",
+          "x-ms-summary": "Individual participant identification number",
+          "description": "Individual participant identification number"
+        },
+        "my_participant": {
+          "type": "boolean",
+          "x-ms-summary": "Individual participant is my_participant"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Individual participant name"
+        },
+        "organizer": {
+          "type": "boolean",
+          "x-ms-summary": "Individual participant is organizer"
+        },
+        "phone_number": {
+          "type": "string",
+          "x-ms-summary": "Individual participant phone number"
+        },
+        "sign_method": {
+          "type": "string",
+          "description": "standard_esign/sms/swedish_bankid/norwegian_bankid/danish_nemid/finnish_bankid",
+          "x-ms-summary": "Individual participant sign method"
+        },
+        "sign_state": {
+          "type": "string",
+          "description": "undecided/signed/declined",
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Individual Participant's Sign State"
+        },
+        "sign_state_updated_time": {
+          "type": "string",
+          "x-ms-visibility": "internal",
+          "description": "sign_state_updated_time",
+          "x-ms-summary": "Individual Participant's Sign State Updated Time"
+        },
+        "signatory": {
+          "type": "boolean",
+          "x-ms-summary": "Individual participant is signatory"
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Individual participant title"
+        },
+        "two_step_authentication_method": {
+          "type": "string",
+          "x-ms-summary": "Individual participant 2FA method",
+          "description": "email/sms/none"
+        }
+      },
+      "description": "Individual participant object"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://oneflow.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://oneflow.com/privacy-notice/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Sales and CRM;Productivity"
+    }
+  ]
+}
