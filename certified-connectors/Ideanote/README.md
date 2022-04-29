@@ -20,7 +20,6 @@ An Ideanote account. Create a new account at https://ideanote.io/.
 
 ### Supported Actions
 
-* `CreateIdea`: Create idea
 * `CreateUser`: Create user
 * `UpdateUser`: Update user
 * `ListMissions`: List all missions

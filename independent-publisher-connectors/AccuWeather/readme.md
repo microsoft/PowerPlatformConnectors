@@ -72,32 +72,6 @@ Returns information about a specific location, by location key.
 #### Search location by IP address
 Returns information about a specific location, by IP Address.
 
-### [Weather Alarms](https://developer.accuweather.com/accuweather-weather-alarms-api/apis)
-#### Get one day of weather alarms
-Returns 1 day of weather alarms for a specific location.
-#### Get five days of weather alarms
-Returns 5 days of weather alarms for a specific location.
-#### Get ten days of weather alarms
-Returns 10 days of weather alarms for a specific location.
-#### Get fifteen day of weather alarms
-Returns 15 days of weather alarms for a specific location.
-
-### [Translations](https://developer.accuweather.com/accuweather-translations-api/apis)
-#### List all languages
-Returns metadata for all languages.
-#### List the available translation groups
-Lists groups of phrases that are available for translation.
-#### List the translations for a specific group
-Returns all translated phrases for a specific group, in the desired language.
-
-### [Alerts](https://developer.accuweather.com/accuweather-alerts-api/apis)
-#### Get alerts by location key
-Returns alert data for a specific location. Alert searches require a location key. Please use the Locations API to obtain the location key for your desired location. By default, a truncated version of the alert data is returned. The full object can be obtained by passing details=true.
-
-### [Imagery](https://developer.accuweather.com/accuweather-imagery-api/apis)
-#### Get radar and satellite imagery
-Returns links to radar and satellite images by location key. Imagery searches require a location key. Please use the Locations API to obtain a location key for your desired location. Radar images are not available for all locations worldwide at this time. If radar is not available for your desired location, satellite images are still provided.
-
 ## API Documentation
 Visit [AccuWeather APIs reference](https://developer.accuweather.com/apis) page for further details.
 

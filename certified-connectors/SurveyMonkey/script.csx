@@ -1,4 +1,4 @@
-﻿public class Script : ScriptBase
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -76,7 +76,7 @@
         var triggerState = originalQuery.Get("triggerstate");
         if (items != null && triggerState != null)
         {
-            var listOfOperations = new List<string>() { "OnNewResponseAddedCollector", "OnNewResponseAddedSurvey", "OnNewResponseToQuestionAdded" };
+            var listOfOperations = new List<string>() { "OnNewResponseAddedCollector", "OnNewResponseAddedSurvey" };
 
             if (listOfOperations.Contains(this.Context.OperationId, StringComparer.OrdinalIgnoreCase))
             {
@@ -101,7 +101,7 @@
     {
         DateTime newTriggerState = DateTime.MinValue;
         string excludeIds = string.Empty;
-        var listOfOperations = new List<string>() { "OnNewResponseAddedCollector", "OnNewResponseAddedSurvey", "OnNewResponseToQuestionAdded" };
+        var listOfOperations = new List<string>() { "OnNewResponseAddedCollector", "OnNewResponseAddedSurvey" };
 
         if (listOfOperations.Contains(this.Context.OperationId, StringComparer.OrdinalIgnoreCase) && newItems != null)
         {
@@ -140,19 +140,16 @@
         if ("OnSurveyCreated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
             "OnNewResponseAddedCollector".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
             "OnNewResponseAddedSurvey".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-            "OnSurveyCollectorCreated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-            "OnNewResponseToQuestionAdded".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+            "OnSurveyCollectorCreated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             var segments = this.Context.Request.RequestUri.Segments.ToList();
             var removeTrigger = segments.Find(x => x.StartsWith("trigger"));
-            if (removeTrigger != null)
-                uriBuilder.Path = uriBuilder.Path.Replace(removeTrigger, string.Empty);
+            uriBuilder.Path = uriBuilder.Path.Replace(removeTrigger, string.Empty);
             if (!string.IsNullOrEmpty(triggerState))
             {
                 if ("OnSurveyCreated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
                 "OnNewResponseAddedCollector".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-                "OnNewResponseAddedSurvey".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-                "OnNewResponseToQuestionAdded".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+                "OnNewResponseAddedSurvey".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
                 {
                     query["start_modified_at"] = triggerState;
                 }
@@ -171,14 +168,6 @@
             }
             query.Remove("triggerstate");
             query.Remove("triggerstate_exclude_ids");
-        }
-        else if("GetResponseDetails".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-            "GetResponseDetailsNoPages".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
-        {
-            var segments = this.Context.Request.RequestUri.Segments.ToList();
-            var removeActions = segments.Find(x => x.StartsWith("actions"));
-            if (removeActions != null)
-                uriBuilder.Path = uriBuilder.Path.Replace(removeActions, string.Empty);
         }
         else
         {
@@ -206,8 +195,7 @@
         if ("OnSurveyCreated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
             "OnNewResponseAddedCollector".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
             "OnNewResponseAddedSurvey".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-            "OnSurveyCollectorCreated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-            "OnNewResponseToQuestionAdded".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+            "OnSurveyCollectorCreated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(60));
             var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -215,8 +203,7 @@
             var newItems = body.SelectToken("data") as JArray;
 
             if ("OnNewResponseAddedCollector".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-                "OnNewResponseAddedSurvey".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
-                "OnNewResponseToQuestionAdded".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+                "OnNewResponseAddedSurvey".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
             {
                 newItems = GetNewItems(newItems);
                 var triggerStates = SetTriggerState(newItems, triggerState, response.Headers?.Date.ToString());
@@ -234,93 +221,6 @@
                 response.StatusCode = HttpStatusCode.Accepted;
             }
             response.Headers.Location = SetLocationHeader(triggerState, excludeIds);
-        }
-
-        if ("GetResponseDetailsNoPages".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
-        {
-            response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(60));
-            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var body = JObject.Parse(content);
-            var pages = body.SelectToken("pages") as JArray;
-            if (pages != null && pages.HasValues)
-            {
-                var questionArray = new JArray();
-                foreach (var page in pages)
-                {
-                    questionArray.Add(page.SelectToken("questions") as JArray);
-                }
-                var questions = new JArray(questionArray.SelectMany(arr => arr));
-                var result = body.Remove("pages");
-                body.Add("questions", questions);
-            }
-
-            response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
-            response.StatusCode = HttpStatusCode.OK;
-        }
-
-        if("GetResponseDetails".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
-        {
-            response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(60));
-            var content2 = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var body2 = JObject.Parse(content2);
-            var pages2 = body2.SelectToken("pages") as JArray;
-            if (pages2 != null && pages2.HasValues)
-            {
-                var responseStr = new StringBuilder();
-                var questionsStr = new StringBuilder();
-                var answersStr = new StringBuilder();
-                questionsStr.Append("Respondent ID,Collector ID,Start Date,End Date,IP Address,Email Address,First Name, Last Name,");
-                answersStr.Append(body2.SelectToken("id").ToString());
-                answersStr.Append(",");
-                answersStr.Append(body2.SelectToken("collector_id").ToString());
-                answersStr.Append(",");
-                var startDate = DateTime.Parse(body2.SelectToken("date_created").ToString());
-                var endDate = DateTime.Parse(body2.SelectToken("date_modified").ToString());
-                var totalTime = int.Parse(body2.SelectToken("total_time").ToString());
-                answersStr.Append(startDate.ToString("G"));
-                answersStr.Append(",");
-                answersStr.Append(endDate.ToString("G"));
-                answersStr.Append(",");
-                answersStr.Append(body2.SelectToken("ip_address").ToString());
-                answersStr.Append(",");
-                answersStr.Append(body2.SelectToken("email_address").ToString());
-                answersStr.Append(",");
-                answersStr.Append(body2.SelectToken("first_name").ToString());
-                answersStr.Append(",");
-                answersStr.Append(body2.SelectToken("last_name").ToString());
-                answersStr.Append(",");
-                var customVariables = body2.SelectToken("custom_variables");
-                foreach (JProperty c in customVariables.Children())
-                {
-                    questionsStr.Append(c.Name);
-                    questionsStr.Append(",");
-                    answersStr.Append(c.Value);
-                    answersStr.Append(",");
-                }
-                foreach (var page2 in pages2)
-                {
-                    var questions = page2.SelectToken("questions");
-                    foreach (var question in questions)
-                    {
-                        questionsStr.Append(question.SelectToken("heading").ToString());
-                        questionsStr.Append(",");
-                        var answers = question.SelectToken("answers");
-                        answersStr.Append("\"");
-                        answersStr.Append(string.Join(",", answers.Select(a => a.SelectToken("simple_text") != null ? a.SelectToken("simple_text").ToString().Replace("\"", "\"\"") : "").ToArray()));
-                        answersStr.Append("\"");
-                        answersStr.Append(",");
-                    }
-                }
-                questionsStr.Remove(questionsStr.Length - 1, 1);
-                answersStr.Remove(answersStr.Length - 1, 1);
-                responseStr.AppendLine(questionsStr.ToString());
-                responseStr.AppendLine(answersStr.ToString());
-                var result = body2.Remove("pages");
-                body2.Add(new JProperty("RawResponseData", responseStr.ToString()));
-            }
-
-            response.Content = new StringContent(body2.ToString(), Encoding.UTF8, "application/json");
-            response.StatusCode = HttpStatusCode.OK;
         }
     }
 }

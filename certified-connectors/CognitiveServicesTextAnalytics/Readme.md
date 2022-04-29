@@ -1,5 +1,5 @@
 ## Text Analytics Connector
-The Language Service API is a cloud-based service that provides advanced natural language processing over raw text, and includes four main functions: sentiment analysis, key phrase extraction, language detection and entity recognition. This connector exposes these functions as operations in Microsoft Power Automate and Power Apps.
+The Text Analytics API is a cloud-based service that provides advanced natural language processing over raw text, and includes four main functions: sentiment analysis, key phrase extraction, language detection and entity recognition. This connector exposes these functions as operations in Microsoft Power Automate and Power Apps.
 
 ## Pre-requisites
 You will need the following to proceed:
