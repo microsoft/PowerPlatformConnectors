@@ -24,7 +24,10 @@ The connector supports the following operations:
 To get credentials, you need to subscribed for valid license of Short URL (https://www.shorturlapp.com).
 
 ## Further Support
-For further support, please contact support@cirrussoftltd.com
+For further support, please contact support@apps365ltd.com
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
+
+## Publisher
+APPS 365 LTD
