@@ -71,6 +71,7 @@ In order to use this connector, you will need the following:
 - Activate a user
 - Deactivate a user
 - Update a user
+- Update a partial user
 - Get a single user
 - Get a list of users 
 
@@ -78,6 +79,7 @@ In order to use this connector, you will need the following:
 - Create a vehicle
 - Activate a vehicle
 - Update a vehicle
+- Update partial vehicle information
 - Deactivate a vehicle
 - Delete a vehicle
 - Get a single vehicle
@@ -96,4 +98,9 @@ After credentials are created, the developer portal can be accessed at: [TeamWhe
 ## Deployment Instructions
 - N/A
 
+## Throttling Limits
+| Name	| Calls	| Renewal Period |
+| ----- | ------ | ------- |
+API calls per connection | 100 | 15 seconds 
+Frequency of trigger polls | 1 | 48 seconds
 
