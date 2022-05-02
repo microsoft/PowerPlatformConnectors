@@ -12,7 +12,6 @@ In order to use this connector, you will need the following:
 - TeamWherx API Key
 - Microsoft Power Apps or Power Automate plan
 
-
 # Supported Operations
 
 ## Triggers
@@ -90,5 +89,11 @@ Developer API portal credentials are managed in the TeamWherx web application. P
 
 After credentials are created, the developer portal can be accessed at: [TeamWherx APIs](https://developer.wfmplatform.com/)
 
+## Known Issues and Limitations
+- Audio file binary uploads (POST) for all endpoints are limited to MP4 only.
+- Dates for all endpoints that require date-time information must be specified according to RFC3339 guidelines, as in the following example: 2021-09-22T02:36:56.52Z. It is not necessary to specify the exact seconds in the timestamp; 00 is acceptable.
+
+## Deployment Instructions
+- N/A
 
 
