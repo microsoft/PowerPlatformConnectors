@@ -69,17 +69,17 @@ Split a PDF Document into multiple PDF Documents using barcodes - https://suppor
 ### Convert Word to PDF Form
 Convert the Word document provided (Legacy Form Controls Only) to a PDF form document. - https://support.encodian.com/hc/en-gb/articles/360012307133-Convert-Word-to-PDF-Form
 
-### Add Text Watermark
-Add a text watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012230494-Add-Text-Watermark
+### Add Text Watermark to PDF
+Add a text watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012230494
 
-### Add Image Watermark
-Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012484094-Add-Image-Watermark
+### Add Image Watermark to PDF
+Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012484094
 
-### Add Text Watermark (Advanced)
-Add a text watermark to the specified PDF document using the advanced options - https://support.encodian.com/hc/en-gb/articles/360012345813-Add-Text-Watermark-Advanced
+### Add Text Watermark to PDF (Advanced)
+Add a text watermark to the specified PDF document using the advanced options - https://support.encodian.com/hc/en-gb/articles/360012345813
 
-### Add Image Watermark (Advanced)
-Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012485874-Add-Image-Watermark-Advanced
+### Add Image Watermark to PDF (Advanced)
+Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012485874
 
 ### Image Clean Up (Document)
 Execute image clean up activities focussed on text based images such as Deskew, Rotate, Despeckle + more.
@@ -171,3 +171,50 @@ Create a Hash-based message authentication code (HMAC) using a secret key - http
 ### Create Hash Code
 Create a Hashcode / message digest - https://support.encodian.com/hc/en-gb/articles/360013996077-Create-Hash-Code
 
+### Add Text Watermark to Image
+Add a Text Watermark to the image provided - https://support.encodian.com/hc/en-gb/articles/360013560398-Add-Text-Watermark-To-Image
+
+### Compare Word Documents
+Compare differences between Microsoft Word and PDF Documents - https://support.encodian.com/hc/en-gb/articles/360018576278-Compare-Word-Documents
+
+### Populate Word Document
+Populate a Microsoft Word Document (DOCX) with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360019620578-Populate-Word-Document
+
+### Compress PDF
+Compress and optimise a PDF document - https://support.encodian.com/hc/en-gb/articles/360019994857-Compress-PDF
+
+### Send to Encodian Filer
+Send data to an Encodian Filer endpoint - https://support.encodian.com/hc/en-gb/articles/4404097189905-Send-to-Encodian-Filer
+
+### Add Text Watermark to Word
+Add a text watermark to the specified Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/4411284008593
+
+### Add Image Watermark to Word
+Add an image watermark to the specified Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/4411329161361
+
+### Merge Excel Files
+Merge an array of Microsoft Excel files to a single file (multiple formats) - https://support.encodian.com/hc/en-gb/articles/4469865776529
+
+### Remove EXIF Tags from Image
+Remove EXIF tags from the specified image - https://support.encodian.com/hc/en-gb/articles/4415700524817
+
+### Convert PDF to TIFF
+Convert a PDF document to TIFF (tiff) format - https://support.encodian.com/hc/en-gb/articles/4418024925457
+
+### Flatten PDF
+Flatten a PDF Document or PDF Form - https://support.encodian.com/hc/en-gb/articles/4416473033105
+
+### Convert PDF to Images
+Convert a PDF document into an array of images (PNG or JPG) - https://support.encodian.com/hc/en-gb/articles/4418101623441
+
+### Repair PDF
+Repair a PDF File - https://support.encodian.com/hc/en-gb/articles/4418809972753
+
+### Merge Presentations
+Merge an array of presentations to a single presentation - https://support.encodian.com/hc/en-gb/articles/4425652063761
+
+### Convert CAD
+Convert CAD files to another document format - https://support.encodian.com/hc/en-gb/articles/4542607350417
+
+### Get Image Information
+Get Image Information (Height, Width, Resolution, Format, File Size + more) - https://support.encodian.com/hc/en-gb/articles/4431662425489
