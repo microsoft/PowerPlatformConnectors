@@ -3,6 +3,8 @@ TeamWherx allows you to create and capture digital form information, capture emp
 
 This connector uses the [TeamWherx APIs]( https://developer.wfmplatform.com/) to make it easy to interact with information captured using the application.  You can utilize various triggers or actions in the connector to easily extract data from TeamWherx and integrate with other applications.
 
+# Publisher
+Actsoft, Inc
 # Prerequisites
 In order to use this connector, you will need the following:
 
