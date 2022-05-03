@@ -1,4 +1,4 @@
-This connector was specifically developed to be used for Dynamics 365 Intelligent Order Management's JBHunt provider integration.
+The JBHunt connector with Dynamics 365 Intelligent Order Management provides access to committed, market-relevant rating, tendering, and tracking, connected to nearly 1M trucks through carriers on 360 Marketplace by J.B. Hunt. 
 
 ## Use Cases of this connector
 -   Use this connector in PowerApps Workflows
