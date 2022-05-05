@@ -11,7 +11,7 @@ This connector exposes these actions as operations in Microsoft Power Automate a
 
 This connector is a new connector which can be readily used with Question Answering.
 
-To use this integration, you will need a resource in [Azure Cognitive Service for language](https://aka.ms/create-language-resource) with Custom Question Answering enabled. 
+To use this integration, you will need an [Azure Cognitive Service for language](https://aka.ms/create-language-resource) resource with Custom Question Answering enabled. 
 You will get an endpoint and a key for authenticating your applications.
 To make a connection, provide the Account key, site URL and select Create connection. For operation costs on your connection, learn more at [Pricing - Language Service](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/language-service/) .
 
@@ -36,5 +36,5 @@ paconn create --api-prop [Path to apiProperties.json] --api-def [Path to apiDefi
 The connector supports the following actions:
 
 - `Generate answer from Project`: This action helps in answering the specified question using your knowledge base in your project.
-- `Generate answer from provided text`: This action helps in answering the specified question using the provided text. Custom Question Answering need not be enabled for using this action only.
+- `Generate answer from provided text`: This action helps in answering the specified question using the provided text. To use only this action, Custom Question Answering need not be enabled on Language resource.
 - `Get Project Metadata`: This action helps in getting all the metadata of your project. 
