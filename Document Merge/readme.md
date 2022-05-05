@@ -12,7 +12,7 @@ The connector supports the following operations:
 * ```Document Merge```: This operation allows you to merge any SharePoint list data into Word, Excel and PowerPoint Templates with NO CODING!.
 
 ## Support
-For further support, please contact [support@apps365ltd.com](email:support@apps365ltd.com) or visit [http://apps365ltd.com/support](http://apps365ltd.com/support)
+For further support, please contact [support@apps365ltd.com](mailto:support@apps365ltd.com) or visit [http://apps365ltd.com/support](http://apps365ltd.com/support)
 
 ## Obtaining Credentials
 To get credentials, you need to subscribe for a valid license of Document Merge from [https://www.sharepointdocumentmerge.com](https://www.sharepointdocumentmerge.com).
