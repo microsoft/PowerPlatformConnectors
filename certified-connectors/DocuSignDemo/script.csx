@@ -87,6 +87,7 @@ public class Script : ScriptBase
     if (operationId.Equals("StaticResponseForRecipientTypes", StringComparison.OrdinalIgnoreCase))
     {
       var recipientTypesArray = new JArray();
+      
       string [,] recipientTypes = { 
         { "agent", "Agent" }, 
         { "carbonCopy", "Receives Carbon Copy" }, 
@@ -98,6 +99,7 @@ public class Script : ScriptBase
         { "signer", "Signer" },
         { "witness", "Witness" }
       };
+
       for (var i = 0; i < recipientTypes.GetLength(0); i++)
       {
         var recipientTypeObject = new JObject()
@@ -231,6 +233,53 @@ public class Script : ScriptBase
           ["type"] = "string",
           ["x-ms-summary"] = "italic",
           ["description"] = "true/false"
+        };
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForRecipientTypeSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var recipientType = query.Get("recipientType");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (recipientType.Equals("inPersonSigner", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["hostName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Host name"
+        };
+        response["schema"]["properties"]["hostEmail"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Host email"
+        };
+        response["schema"]["properties"]["signerName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Signer name"
+        };
+      }
+
+      if (recipientType.Equals("signer", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["signerName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Signer name"
+        };
+        response["schema"]["properties"]["signerEmail"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Signer email"
         };
       }
     }
@@ -507,19 +556,25 @@ public class Script : ScriptBase
 
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
-    var signers = new JArray
-      {
-        new JObject(),
-      };
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
-    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail"));
-    signers[0]["recipientType"] = Uri.UnescapeDataString(query.Get("recipientType"));
+    var recipientType = query.Get("recipientType");
     
-
-
+    var signers = new JArray
+    {
+      new JObject(),
+    };
     AddCoreRecipientParams(signers, body);
-    body["signers"] = signers;
+    AddParamsForSelectedRecipientType(signers, body);
+
+    if(recipientType.Equals("inPersonSigner"))
+    {
+      body["inPersonSigners"] = signers;
+    }
+    else if(recipientType.Equals("signer"))
+    {
+      body["signers"] = signers;
+    }
+
     return body;
   }
 
@@ -529,9 +584,9 @@ public class Script : ScriptBase
 
     signers[0]["recipientId"] = Guid.NewGuid();
     
-    if (body["routingOrder"] != null)
+    if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
-      signers[0]["routingOrder"] = body["routingOrder"];
+      signers[0]["routingOrder"] = query.Get("routingOrder");
     }
 
     if (!string.IsNullOrEmpty(query.Get("customFields")))
@@ -543,6 +598,13 @@ public class Script : ScriptBase
     var emailNotification = new JObject();
     var emailNotificationSet = false;
 
+    if (!string.IsNullOrEmpty(query.Get("emailNotificationLanguage")))
+    {
+      var language = query.Get("emailNotificationLanguage").Split("()".ToCharArray())[1];
+      emailNotification["supportedLanguage"] = language;
+      emailNotificationSet = true;
+    }
+
     if (!string.IsNullOrEmpty(query.Get("emailNotificationSubject")))
     {
       emailNotification["emailSubject"] = query.Get("emailNotificationSubject");
@@ -552,13 +614,6 @@ public class Script : ScriptBase
     if (!string.IsNullOrEmpty(query.Get("emailNotificationBody")))
     {
       emailNotification["emailBody"] = query.Get("emailNotificationBody");
-      emailNotificationSet = true;
-    }
-
-    if (!string.IsNullOrEmpty(query.Get("emailNotificationLanguage")))
-    {
-      var language = query.Get("emailNotificationLanguage").Split("()".ToCharArray())[1];
-      emailNotification["supportedLanguage"] = language;
       emailNotificationSet = true;
     }
 
@@ -576,20 +631,26 @@ public class Script : ScriptBase
     {
       signers[0]["roleName"] = query.Get("roleName");
     }
+  }
 
-    if (!string.IsNullOrEmpty(query.Get("templateAccessCodeRequired")))
+  private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var recipientType = query.Get("recipientType");
+    
+    if (recipientType.Equals("inPersonSigner"))
     {
-      signers[0]["templateAccessCodeRequired"] = bool.Parse(query.Get("templateAccessCodeRequired"));
+      signers[0]["recipientId"] = Guid.NewGuid();
+      signers[0]["hostName"] = body["hostName"];
+      signers[0]["hostEmail"] = body["hostEmail"];
+      signers[0]["signerName"] = body["signerName"];
     }
 
-    if (!string.IsNullOrEmpty(query.Get("templateLocked")))
+    if (recipientType.Equals("signer"))
     {
-      signers[0]["templateLocked"] = bool.Parse(query.Get("templateLocked"));
-    }
-
-    if (!string.IsNullOrEmpty(query.Get("templateRequired")))
-    {
-      signers[0]["templateRequired"] = bool.Parse(query.Get("templateRequired"));
+      signers[0]["recipientId"] = Guid.NewGuid();
+      signers[0]["name"] = body["signerName"];
+      signers[0]["email"] = body["signerEmail"];
     }
   }
 
