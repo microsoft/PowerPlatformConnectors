@@ -916,9 +916,23 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var recipientType = query.Get("recipientType");
       var newBody = new JObject();
+      var signers = new JArray();
 
-      foreach (var signer in (body["signers"] as JArray) ?? new JArray())
+      if(recipientType.Equals("inPersonSigner"))
+      {
+        signers = body["inPersonSigners"] as JArray;
+        signers[0]["name"] = signers[0]["hostName"];
+        signers[0]["email"] = signers[0]["hostEmail"];
+      }
+      else
+      {
+        signers = body["signers"] as JArray;
+      }
+
+      foreach (var signer in signers)
       {
         newBody = signer as JObject;
         break;
