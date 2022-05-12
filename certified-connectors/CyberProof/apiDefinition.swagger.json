@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0",
-    "title": "CyberProof Actions",
+    "title": "CyberProof",
     "description": "CyberProof CDC is a next generation incident management and response platform for building Security Operations Centers (SOCs). The platform is a key component of advanced security operations centers - supporting SOC management, orchestration, and incident response. Connect to CyberProof CDC to manage your incidents and communicate with analysts, and automate incident response activities.",
     "contact": {
       "name": "CyberProof Support",
@@ -205,6 +205,149 @@
           }
         },
         "x-ms-visibility": "internal"
+      }
+    },
+    "/api/v1/webhooks/azure-logic-apps": {
+      "get": {
+        "description": "CyberProof Triggers List.",
+        "summary": "CyberProof Triggers List",
+        "operationId": "CPGetTriggers",
+        "responses": {
+          "200": {
+            "description": "List of triggers",
+            "schema": {}
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/api/v1/webhooks/deregister/{action_name}/{id}": {
+      "delete": {
+        "description": "CyberProof Delete Trigger.",
+        "summary": "CyberProof Delete Trigger",
+        "operationId": "CPDeleteTrigger",
+        "parameters": [
+          {
+            "name": "action_name",
+            "type": "string",
+            "in": "path",
+            "description": "action name.",
+            "required": true,
+            "x-ms-summary": "action name"
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "in": "path",
+            "description": "webhook id.",
+            "required": true,
+            "x-ms-summary": "webhook id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger deregistration requested",
+            "schema": {}
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/api/v1/webhooks": {
+      "x-ms-notification-content": {
+        "description": "Webhook notification content",
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "CPGetActionOutputSchema",
+            "parameters": {
+              "action_ref": {
+                "parameter": "action"
+              }
+            },
+            "value-path": "output"
+          },
+          "x-ms-dynamic-properties": {
+            "operationId": "CPGetActionOutputSchema",
+            "parameters": {
+              "action_ref": {
+                "parameterReference": "actionReq/action"
+              }
+            },
+            "itemValuePath": "output"
+          }
+        }
+      },
+      "post": {
+        "description": "CyberProof Webhook Trigger",
+        "summary": "CyberProof Webhook Trigger",
+        "operationId": "CPTrigger",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "actionReq",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "action",
+                "parameters",
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "The callback URL.",
+                  "x-ms-url-encoding": "single",
+                  "x-ms-summary": "Url",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true,
+                  "title": "Url"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "select trigger",
+                  "x-ms-url-encoding": "single",
+                  "x-ms-summary": "Select Trigger",
+                  "x-ms-dynamic-values": {
+                    "operationId": "CPGetTriggers",
+                    "value-path": "ref",
+                    "value-title": "path"
+                  }
+                },
+                "parameters": {
+                  "description": "parameters description",
+                  "type": "object",
+                  "x-ms-dynamic-schema": {
+                    "operationId": "CPGetActionSchema",
+                    "parameters": {
+                      "action_ref": {
+                        "parameter": "action"
+                      }
+                    },
+                    "value-path": "items"
+                  },
+                  "x-ms-dynamic-properties": {
+                    "operationId": "CPGetActionSchema",
+                    "parameters": {
+                      "action_ref": {
+                        "parameterReference": "actionReq/action"
+                      }
+                    },
+                    "itemValuePath": "items"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook trigger registered successfully",
+            "schema": {}
+          }
+        },
+        "x-ms-trigger": "single"
       }
     }
   },
