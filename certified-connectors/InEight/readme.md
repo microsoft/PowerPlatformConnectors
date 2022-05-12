@@ -1,5 +1,5 @@
 # InEight Connector
-The InEight Connector provides a mechanism to create new data in InEight or extract data from InEight. It can be used to integrate other systems with InEight.
+InEight Connector provides an API to work with InEight objects.
 
 ## Publisher: InEight
 
@@ -26,7 +26,7 @@ Work with an administrator to get subscription key.
 
 ## Supported Operations
 The connector supports the following operations:
-​
+
 * `DailyPlan_Get`: Allows user to export all approved daily plans from Project Suite into their internal System of Record.
 * `DailyPlanStatus_Import`: Allows user to import confirmation from an external source, into Project Suite for all received daily plans.
 * `TimeCard_Get`: Allows user to export all submitted time cards from Project Suite into their internal System of Record.
