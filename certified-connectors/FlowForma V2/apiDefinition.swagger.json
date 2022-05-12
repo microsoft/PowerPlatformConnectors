@@ -1,0 +1,585 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "FlowForma V2",
+    "description": "FlowForma Business Process Management (BPM) tools for Office 365, enable users to build forms & workflow, automating processes without code.",
+    "contact": {
+      "name": "FlowForma Limited",
+      "url": "https://www.flowforma.com",
+      "email": "support@flowforma.com"
+    },
+    "version": "v1"
+  },
+  "host": "logic-apps.flowforma.com",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/v1/getFlows": {
+      "get": {
+        "tags": [
+          "FormActions"
+        ],
+        "operationId": "GetFlows",
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/FlowListResult"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "summary": "Get flows",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/v1/getSteps": {
+      "get": {
+        "tags": [
+          "FormActions"
+        ],
+        "operationId": "GetSteps",
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "flowId",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/StepListResult"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "summary": "Get steps of selected flow",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/v1/getQuestions": {
+      "get": {
+        "tags": [
+          "FormActions"
+        ],
+        "operationId": "GetQuestions",
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "flowId",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "stepCode",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/JToken"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "The specified resource was not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "summary": "Get questions of selected flow",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/v1/createForm": {
+      "post": {
+        "tags": [
+          "FormActions"
+        ],
+        "operationId": "CreateForm",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "flowId",
+            "type": "string",
+            "description": "Enter the flow id",
+            "x-ms-summary": "Flows",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFlows",
+              "value-collection": "Flows",
+              "value-path": "FlowId",
+              "value-title": "Title"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stepCode",
+            "type": "string",
+            "description": "Enter the step code",
+            "x-ms-summary": "Steps",
+            "x-ms-dynamic-values": {
+              "operationId": "GetSteps",
+              "value-collection": "Steps",
+              "value-path": "StepCode",
+              "value-title": "Title",
+              "parameters": {
+                "flowId": {
+                  "parameter": "flowId"
+                }
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "assignTo",
+            "type": "string",
+            "x-ms-summary": "Assign to",
+            "description": "Leave empty to assign to default"
+          },
+          {
+            "in": "body",
+            "name": "questionValues",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetQuestions",
+                "parameters": {
+                  "flowId": {
+                    "parameter": "flowId"
+                  },
+                  "stepCode": {
+                    "parameter": "stepCode"
+                  }
+                },
+                "value-path": "schema"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/CreatedOrUpdatedForm"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "summary": "Create a new form",
+        "x-ms-visibility": "advanced",
+        "description": "Create a new form"
+      }
+    },
+    "/v1/updateForm": {
+      "post": {
+        "tags": [
+          "FormActions"
+        ],
+        "operationId": "UpdateForm",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "flowId",
+            "type": "string",
+            "description": "Enter the flow id",
+            "x-ms-summary": "Flows",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFlows",
+              "value-collection": "Flows",
+              "value-path": "FlowId",
+              "value-title": "Title"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stepCode",
+            "type": "string",
+            "description": "Enter the step code",
+            "x-ms-summary": "Steps",
+            "x-ms-dynamic-values": {
+              "operationId": "GetSteps",
+              "value-collection": "Steps",
+              "value-path": "StepCode",
+              "value-title": "Title",
+              "parameters": {
+                "flowId": {
+                  "parameter": "flowId"
+                }
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "formId",
+            "type": "string",
+            "x-ms-summary": "Form id",
+            "description": "Enter the form id"
+          },
+          {
+            "in": "query",
+            "name": "assignTo",
+            "type": "string",
+            "x-ms-summary": "Assign to",
+            "description": "Leave empty to assign to default"
+          },
+          {
+            "in": "body",
+            "name": "questionValues",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetQuestions",
+                "parameters": {
+                  "flowId": {
+                    "parameter": "flowId"
+                  },
+                  "stepCode": {
+                    "parameter": "stepCode"
+                  }
+                },
+                "value-path": "schema"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/CreatedOrUpdatedForm"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "The specified resource was not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "summary": "Update a form",
+        "x-ms-visibility": "advanced",
+        "description": "Update a form"
+      }
+    }
+  },
+  "definitions": {
+    "CreatedOrUpdatedForm": {
+      "required": [
+        "formId",
+        "formTitle"
+      ],
+      "type": "object",
+      "properties": {
+        "formId": {
+          "format": "int32",
+          "description": "The created form's Id",
+          "type": "integer"
+        },
+        "formTitle": {
+          "description": "The created form's title",
+          "type": "string"
+        }
+      }
+    },
+    "Error": {
+      "description": "",
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Gets or Sets Code",
+          "type": "string"
+        },
+        "message": {
+          "description": "Gets or Sets Message",
+          "type": "string"
+        }
+      }
+    },
+    "Flow": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "description": "Gets or Sets Id",
+          "type": "integer"
+        },
+        "title": {
+          "description": "Gets or Sets Title",
+          "type": "string"
+        },
+        "steps": {
+          "description": "Gets or Sets Steps",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Step"
+          }
+        }
+      }
+    },
+    "FlowListResult": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "flows": {
+          "description": "Gets or Sets Flows",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Flows"
+          }
+        }
+      }
+    },
+    "Flows": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "title": {
+          "description": "Gets or Sets Title",
+          "type": "string"
+        },
+        "flow": {
+          "$ref": "#/definitions/Flow"
+        },
+        "flowId": {
+          "description": "Gets or Sets FlowId",
+          "type": "string"
+        }
+      }
+    },
+    "JToken": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/JToken"
+      }
+    },
+    "Question": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "description": "Gets or Sets Id",
+          "type": "integer"
+        },
+        "title": {
+          "description": "Gets or Sets Title",
+          "type": "string"
+        },
+        "type": {
+          "description": "Gets or Sets Type",
+          "type": "string"
+        },
+        "questionCode": {
+          "description": "Gets or Sets QuestionCode",
+          "type": "string"
+        },
+        "questions": {
+          "description": "Gets or Sets Questions",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubQuestion"
+          }
+        }
+      }
+    },
+    "Step": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "stepCode": {
+          "description": "Gets or Sets StepCode",
+          "type": "string"
+        },
+        "questions": {
+          "description": "Gets or Sets Questions",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Question"
+          }
+        },
+        "title": {
+          "description": "Gets or Sets Title",
+          "type": "string"
+        },
+        "id": {
+          "format": "int32",
+          "description": "Gets or Sets Id",
+          "type": "integer"
+        },
+        "isParallelGroup": {
+          "description": "Gets or Sets Value",
+          "type": "boolean"
+        },
+        "steps": {
+          "description": "Gets or Sets Steps",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Step"
+          }
+        }
+      }
+    },
+    "StepListResult": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Step"
+          }
+        }
+      }
+    },
+    "SubQuestion": {
+      "description": "",
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "description": "Gets or Sets Id",
+          "type": "integer"
+        },
+        "title": {
+          "description": "Gets or Sets Title",
+          "type": "string"
+        },
+        "type": {
+          "description": "Gets or Sets Type",
+          "type": "string"
+        },
+        "questionCode": {
+          "description": "Gets or Sets QuestionCode",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity"
+    },
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.flowforma.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.flowforma.com/"
+    }
+  ]
+}
