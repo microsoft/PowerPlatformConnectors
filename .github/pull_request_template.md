@@ -4,8 +4,7 @@
 
 If this is your first time submitting to GitHub and you need some help, please sign up for this [session](https://forms.office.com/pages/responsepage.aspx?id=KtIy2vgLW0SOgZbwvQuRaXDXyCl9DkBHq4A2OG7uLpdUMTFJWFFGVUxBNUFZQjZWRUdaOE5BMFkwNS4u). 
 
-Please note that we are experiencing a significant delay due to COVID delays, unanticipated team leaves, and high volume of connector submissions. 
-
+- [ ] I attest that the connector doesn't exist on the Power Platform today. I've verified by checking the pull requests in GitHub and by searching for the connector on the platform or in the documentation. 
 - [ ] I attest that the connector works and I verified by deploying and testing all the operations. 
 - [ ] I attest that I have added detailed descriptions for all operations and parameters in the swagger file.
 - [ ] I attest that I have added response schemas to my actions, unless the response schema is dynamic. 

@@ -218,3 +218,6 @@ Convert CAD files to another document format - https://support.encodian.com/hc/e
 
 ### Get Image Information
 Get Image Information (Height, Width, Resolution, Format, File Size + more) - https://support.encodian.com/hc/en-gb/articles/4431662425489
+
+### Convert Visio
+Convert Microsoft Visio documents to another document format - https://support.encodian.com/hc/en-gb/articles/5306216347665
