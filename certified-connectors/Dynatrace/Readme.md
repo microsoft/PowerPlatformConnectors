@@ -13,6 +13,17 @@ You will need the following to use the connector:
 
 * To get meaningful data, you will need to have an app running on your Dynatrace tenant. There are example applications and workshops for launching applications with Azure on your tenant here: https://learn.alliances.dynatracelabs.com/azure/
 
+## Set Up Guide
+You will need to enter your tenant URL and API key to start using the connector. Follow the instructions above to get both items.
+The tenant URL you input should be in the format:
+
+    * abc123.dynatrace.com/api/v2
+
+The API key should be entered in the format:
+
+    * Api-Token dt1234.ABCDEFGH
+
+
 ## Supported Actions
 * `GET problems` – Lists problems observed within the specified timeframe
 * `GET problems by problem ID` - Gets the properties of the specified problem
