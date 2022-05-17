@@ -9,6 +9,8 @@ This connector is built on top of Almabase APIs & Webhooks, and provides operati
 * Forms
 * Funds
 * Giving Pages
+* Events
+* Triggers
 * and more...
 
 
