@@ -2,7 +2,7 @@
 Required. One paragraph, two to three sentences about the service and the connector​.
 
 ## Publisher: Publisher's Name
-Required for Independent-Publisher-Connector and should be a first and last name of an individual or it can be a company name. ​If there is more than one publisher, please separate the names with a comma.​
+Required. For Independent-Publisher-Connector, it should be a first and last name of an individual or it can be a company name. ​If there is more than one publisher, please separate the names with a comma.​
 
 ## Prerequisites
 Required. Any plans or licenses, tools required from the connector.​
@@ -32,4 +32,4 @@ Answer to question 1
 Answer to question 2
 
 ## Deployment Instructions
-Required. Add instructions on how to deploy this connector as custom connector.
+Optional. Add instructions on how to deploy this connector as custom connector.
