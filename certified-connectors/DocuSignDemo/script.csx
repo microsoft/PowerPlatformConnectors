@@ -400,17 +400,22 @@ public class Script : ScriptBase
     var envelopeEventsArray = new JArray();
     envelopeEventsArray.Add(envelopeEvent);
     body["envelopeEvents"] = envelopeEventsArray;
-
     body["configurationType"] = "custom";
-    body["deliveryMode"] = "aggregate";
-    body["restv21"] = "true";
+    body["deliveryMode"] = "sim";
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients'
+    ]";
+
+    JArray includeData = JArray.Parse(json);
     body["eventData"] = new JObject
     {
         ["version"] = "restv2.1",
         ["format"] = "json",
-        ["includeData"] = new JArray()
+        ["includeData"] = includeData
     };
-    body["includeSenderAccountasCustomField"] = "true";
     return body;
   }
 
