@@ -390,8 +390,6 @@ public class Script : ScriptBase
     body["allUsers"] = "true";
     body["allowEnvelopePublish"] = "true";
     body["includeDocumentFields"] = "true";
-    body["includeEnvelopeVoidReason"] = "true";
-    body["includeTimeZoneInformation"] = "true";
     body["requiresAcknowledgement"] = "true";
     body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
     body["name"] = original["name"]?.ToString();
@@ -409,7 +407,7 @@ public class Script : ScriptBase
       'recipients'
     ]";
 
-    JArray includeData = JArray.Parse(json);
+    JArray includeData = JArray.Parse(eventData);
     body["eventData"] = new JObject
     {
         ["version"] = "restv2.1",
