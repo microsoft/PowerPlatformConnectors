@@ -2,6 +2,7 @@
 
 Dynatrace provides best-in-class observability through an open, AI-powered platform. This connector exposes the Problems API endpoints. For more details on the Problems API, check out the documentation here: https://www.dynatrace.com/support/help/dynatrace-api/environment-api/problems-v2
 
+## Publisher: Dynatrace
 
 ## Prerequisites
 You will need the following to use the connector:
@@ -13,7 +14,17 @@ You will need the following to use the connector:
 
 * To get meaningful data, you will need to have an app running on your Dynatrace tenant. There are example applications and workshops for launching applications with Azure on your tenant here: https://learn.alliances.dynatracelabs.com/azure/
 
-## Set Up Guide
+## Supported Operations
+### `GET problems`
+Lists problems observed within the specified timeframe
+### `GET problem by problem ID` 
+Gets the properties of the specified problem
+### `GET problem comments by problem ID` 
+Gets all comments on the specified problem
+### `GET problem comment by problem ID` 
+Gets the specified comment on a problem
+
+## Getting Started
 You will need to enter your tenant URL and API key to start using the connector. Follow the instructions above to get both items.
 The tenant URL you input should be in the format:
 
@@ -23,9 +34,5 @@ The API key should be entered in the format:
 
     * Api-Token dt1234.ABCDEFGH
 
-
-## Supported Actions
-* `GET problems` – Lists problems observed within the specified timeframe
-* `GET problems by problem ID` - Gets the properties of the specified problem
-* `GET problem comments by problem ID` - Gets all comments on the specified problem
-* `GET problem comment by problem ID` - Gets the specified comment on a problem
+## Known Issues and Limitations
+A user must have a Dynatrace Tenant in order to use this connector
