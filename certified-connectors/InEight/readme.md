@@ -1,19 +1,22 @@
 # InEight Connector
-The InEight Connector provides a mechanism to create new data in InEight or extract data from InEight. It can be used to integrate other systems with InEight.
+InEight Connector provides an API to work with InEight objects.
 
 ## Publisher: InEight
 
 ## Prerequisites
 You will need the following to proceed:
 * Access to the InEight Cloud platform
+* An Azure subscription
 
-## Obtaining Credentials:
+## Using the connector
+The InEight cloud platform APIs are secured by Azure Active Directory (AD) so, you first need to set up a user account with the required permissions in the cloud platform. This allows InEight connectors to access the InEight cloud platform securely.
 
 ### User account:
 A valid user account is required to create a connection and use the InEight connector. Work with administrator to set up a user account to access the InEight cloud platform.
 
 ### Tenant Prefix:
 This is part of the environment url.
+
 Example:
 - Environment url: [customer].hds.ineight.com
 - Tenant Prefix: [customer]
@@ -23,17 +26,17 @@ Work with an administrator to get subscription key.
 
 ## Supported Operations
 The connector supports the following operations:
-​
-* `DailyPlan_Get`: Gets all approved daily plans.
-* `DailyPlanStatus_Import`: Sends confirmation to all received daily plans.
-* `TimeCard_Get`: Gets all submitted time cards.
-* `TimeCardConfirmation_Import`: Sends confirmation to all received time cards.
-* `Crafts_Import`: Allows customers to provide and maintain a complete list of crafts or individual records as maintenance of the master list.
-* `Employees_Import`: Allows customers to provide and maintain a complete list of all employee resources for their entire organization.
-* `Equipments_Import`: Allows customers to provide and maintain a complete list of equipment that can be used on any given project.
-* `EquipmentCategories_Import`: Allows an external system to maintain a master list of Equipment Categories in the InEight cloud platform.
-* `EquipmentTypes_Import`: Allows an external system to maintain a master list of Equipment Types in the InEight cloud platform.
-* `Roles_Import`: Allows customers to create roles in bulk for any user with default permissions.
-* `Trades_Import`: Allows customers to provide a complete list of trades or individual records as maintenance of the master list.
-* `Users_Import`: Allows customers to create and maintain information about the people that have login credentials and access to the InEight cloud platform from a third-party system.
-* `UserRoles_Import`: Allows customers to assign roles to the users to setup access to the InEight cloud platform.
+
+* `DailyPlan_Get`: Allows user to export all approved daily plans from Project Suite into their internal System of Record.
+* `DailyPlanStatus_Import`: Allows user to import confirmation from an external source, into Project Suite for all received daily plans.
+* `TimeCard_Get`: Allows user to export all submitted time cards from Project Suite into their internal System of Record.
+* `TimeCardConfirmation_Import`: Allows user to import confirmation for  all received time cards from an external source into Project Suite.
+* `Crafts_Import`: Allows customers to maintain a complete list of crafts or individual records as a part of the master list.
+* `Employees_Import`: Allows customers to maintain a complete master list of all employee resources for their entire organization.
+* `Equipments_Import`: Allows customers to import a complete list of equipment master data that can be used on any given project.
+* `EquipmentCategories_Import`: Allows an external system to import  a master list of Equipment Categories in the InEight cloud platform.
+* `EquipmentTypes_Import`: Allows an external system to import  a master list of Equipment Types in the InEight cloud platform.
+* `Roles_Import`: Allows customers to create roles in bulk with default permissions.
+* `Trades_Import`: Allows customers to import a complete list of trades or individual trade records as maintenance of the master list.
+* `Users_Import`: Allows customers to maintain information about the people that have login credentials and access to the InEight cloud platform from a third-party system.
+* `UserRoles_Import`: Allows customers to maintain users roles in bulk.
