@@ -13,25 +13,25 @@ In all requests both the APP ID and APP KEY have to be provided. These settings 
 
 ## Supported Operations
 
-### Aircraft Types
+### Retrieve Aircraft Types
 Retrieves list of aircrafttypes. [More info](https://developer.schiphol.nl/apis/flight-api/v4/flights?version=latest#!/aircraft-type-controller/retrieveAllAircraftTypesUsingGET)
 
-### Airlines
+### Retrieve Airlines
 Retrieves list of airlines. [More info](https://developer.schiphol.nl/apis/flight-api/v4/flights?version=latest#!/airline-controller/retrieveAllAirlinesUsingGET)
 
-### Airline by IATA or ICAO
+### Retrieve Airline by IATA or ICAO
 Retrieves airline based on code (IATA or ICAO). [More info](https://developer.schiphol.nl/apis/flight-api/v4/flights?version=latest#!/airline-controller/retrieveAirlineUsingGET)
 
-### Destinations
+### Retrieve Destinations
 Retrieves list of destinations. [More info](https://developer.schiphol.nl/apis/flight-api/v4/flights?version=latest#!/destination-controller/retrieveAllDestinationsUsingGET)
 
-### Destination by IATA 
+### Retrieve Destination by IATA 
 Retrieves destination based on IATA code. [More info](https://developer.schiphol.nl/apis/flight-api/v4/flights?version=latest#!/destination-controller/retrieveDestinationUsingGET)
 
-### Flights by id
+### Retrieve Flight by Id
 Retrieves a Flight based on flight-id. [More info](https://developer.schiphol.nl/apis/flight-api/v4/flights?version=latest#!/flight-controller/retrieveFlightUsingGET)
 
-### Flights
+### Retrieve Flights
 Retrieves flights for a specific date. [More info](https://developer.schiphol.nl/apis/flight-api/v4/flights?version=latest#!/flight-controller/retrieveFlightsForDateOrPeriodUsingGET_1)
 
 ## Deployment Instructions
