@@ -1,4 +1,4 @@
-# Datablend API Connector
+# Datablend Connector
 Datablend is a powerful iPaaS solution with a focus is serving the needs of CFOs, controllers, and financial planning and analysis (budgeting) professionals as they look to streamline processes, speed up closes, and increase confidence in reporting.
 
 ## Publisher: Datablend
@@ -27,6 +27,9 @@ Reach out to sales@datablend.com or visit our website for more details.
 This is only set up to explore existing workflows for a customer. In order to create a new Workflow, you need to do so in Datablend.
 The Query results are returned as a Base64 CSV file, so you have to use "Compose" in Power Automate with the following:
 base64ToString(outputs('Get_Query_Execution_By_Id')?['body']['$content'])
+
+## Deployment Instructions
+* Obtain credentials from Datablend
 
 ## Notes
 * All default values for the parameters are set except the IDs of the group, workflow, or query
