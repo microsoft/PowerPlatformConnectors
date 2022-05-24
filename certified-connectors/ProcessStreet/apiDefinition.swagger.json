@@ -354,6 +354,11 @@
           "description" : "The ID of the Workflow Run",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "taskId",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -399,6 +404,41 @@
       }
     },
     "/power-automate/workflow-runs/{workflowRunId}/form-fields" : {
+      "get" : {
+        "summary" : "List all form field values",
+        "description" : "Allows to get all form field values for a workflow run.",
+        "operationId" : "listFormFieldValuesPA",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "workflowRunId",
+          "in" : "path",
+          "description" : "The ID of the Workflow Run",
+          "required" : true,
+          "type" : "string",
+          "x-ms-summary" : "Workflow Run Id",
+          "x-ms-url-encoding" : "single"
+        }, {
+          "name" : "taskId",
+          "in" : "query",
+          "description" : "Filters results by Task ID",
+          "required" : false,
+          "type" : "string",
+          "x-ms-summary" : "Task Id",
+          "x-ms-url-encoding" : "single"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The list of form field values for a workflow run",
+            "schema" : {
+              "$ref" : "#/definitions/PAListFormFieldValuesResponse"
+            }
+          },
+          "400" : {
+            "description" : "Invalid value for: query parameter taskId"
+          }
+        }
+      },
       "post" : {
         "summary" : "Update multiple form field values",
         "x-ms-visibility": "internal",
@@ -731,6 +771,21 @@
         }
       }
     },
+    "PAListFormFieldValuesResponse" : {
+      "type" : "object",
+      "x-ms-dynamic-schema" : {
+        "operationId" : "getSchemaForFormFieldsUpdateByWorkflowRunId",
+        "value-path" : "Schema",
+        "parameters" : {
+          "workflowRunId" : {
+            "parameter" : "workflowRunId"
+          },
+          "taskId" : {
+            "parameter" : "taskId"
+          }
+        }
+      }
+    },
     "PAUpdateFormFieldValuesRequest" : {
       "type" : "object",
       "x-ms-dynamic-schema" : {
@@ -771,7 +826,7 @@
           "type": "string"
         },
         "data": {
-          "type": "string"
+          "type": "object"
         },
         "taskId": {
           "$ref": "#/definitions/EntityID"
@@ -793,7 +848,8 @@
           "description" : "The ID of the Task"
         },
         "status" : {
-          "type" : "string"
+          "type" : "string",
+          "enum" : [ "NotCompleted", "Completed" ]
         },
         "dueDate" : {
           "type" : "string"
@@ -886,7 +942,8 @@
           "type": "string"
         },
         "status": {
-          "type": "string"
+          "type": "string",
+          "enum" : [ "Active", "Completed", "Archived", "Deleted" ]
         },
         "workflowId": {
           "$ref": "#/definitions/EntityID"
@@ -901,7 +958,8 @@
           "$ref": "#/definitions/AuditInfo"
         },
         "migrationStatus": {
-          "type": "string"
+          "type": "string",
+          "enum" : [ "Inactive", "Scheduled", "Migrating" ]
         }
       }
     },
@@ -921,7 +979,8 @@
       "required": [
         "name",
         "status",
-        "dueDate"
+        "dueDate",
+        "shared"
       ],
       "properties": {
         "name": {
@@ -932,12 +991,19 @@
         "status": {
           "type": "string",
           "x-ms-summary": "Status",
-          "description": "Use dynamic Status from a previous step to make no change."
+          "description": "Use dynamic Status from a previous step to make no change.",
+          "enum" : [ "Active", "Completed", "Archived", "Deleted" ]
         },
         "dueDate": {
           "type": "string",
           "x-ms-summary": "Due Date",
           "description": "Use dynamic Due date from a previous step to make no change."
+        },
+        "shared": {
+          "type": "boolean",
+          "x-ms-summary": "Shared",
+          "description": "Enable share link for this run?",
+          "enum": ["true", "false"]
         }
       }
     },
