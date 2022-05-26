@@ -2,6 +2,8 @@
 
 Prepare for client meetings using the FactSet connector to access key company information in a custom branded, presentation ready PDF. Stay on top of relevant news and events for companies of interest and highlight important topics to drive your discussion with FactSet Signals. Alternatively, use Digital Cards to collaborate with colleagues and send summaries of actionable insights via Teams.
 
+### Publisher - FactSet Research Systems
+
 ### Pre-Requisites
 
 You will need the following to proceed
