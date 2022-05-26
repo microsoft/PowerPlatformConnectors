@@ -89,15 +89,15 @@ public class Script : ScriptBase
       var recipientTypesArray = new JArray();
       
       string [,] recipientTypes = { 
-        { "agent", "Agent" }, 
-        { "carbonCopy", "Receives Carbon Copy" }, 
-        { "certifiedDelivery", "Certifies Delivery" }, 
-        { "editor", "Editor" },
-        { "inPersonSigner", "In Person Signer" },
+        { "agents", "Agent" }, 
+        { "carbonCopies", "Receives Carbon Copy" }, 
+        { "certifiedDeliveries", "Certifies Delivery" }, 
+        { "editors", "Editor" },
+        { "inPersonSigners", "In Person Signer" },
         { "intermediaries", "Intermediary" },
-        { "seal", "Seal" },
-        { "signer", "Signer" },
-        { "witness", "Witness" }
+        { "seals", "Seal" },
+        { "signers", "Signer" },
+        { "witnesses", "Witness" }
       };
 
       for (var i = 0; i < recipientTypes.GetLength(0); i++)
@@ -250,7 +250,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if (recipientType.Equals("inPersonSigner", StringComparison.OrdinalIgnoreCase))
+      if (recipientType.Equals("inPersonSigners", StringComparison.OrdinalIgnoreCase))
       {
         response["schema"]["properties"]["hostName"] = new JObject
         {
@@ -268,18 +268,30 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "Signer name"
         };
       }
-
-      if (recipientType.Equals("signer", StringComparison.OrdinalIgnoreCase))
+      else if (recipientType.Equals("signers", StringComparison.OrdinalIgnoreCase))
       {
-        response["schema"]["properties"]["signerName"] = new JObject
+        response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
           ["x-ms-summary"] = "Signer name"
         };
-        response["schema"]["properties"]["signerEmail"] = new JObject
+        response["schema"]["properties"]["email"] = new JObject
         {
           ["type"] = "string",
           ["x-ms-summary"] = "Signer email"
+        };
+      }
+      else
+      {
+        response["schema"]["properties"]["name"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Name"
+        };
+        response["schema"]["properties"]["email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Email"
         };
       }
     }
@@ -565,14 +577,7 @@ public class Script : ScriptBase
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
 
-    if(recipientType.Equals("inPersonSigner"))
-    {
-      body["inPersonSigners"] = signers;
-    }
-    else if(recipientType.Equals("signer"))
-    {
-      body["signers"] = signers;
-    }
+    body[recipientType] = signers;
 
     return body;
   }
@@ -637,19 +642,18 @@ public class Script : ScriptBase
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var recipientType = query.Get("recipientType");
     
-    if (recipientType.Equals("inPersonSigner"))
+    if (recipientType.Equals("inPersonSigners"))
     {
       signers[0]["recipientId"] = Guid.NewGuid();
       signers[0]["hostName"] = body["hostName"];
       signers[0]["hostEmail"] = body["hostEmail"];
       signers[0]["signerName"] = body["signerName"];
     }
-
-    if (recipientType.Equals("signer"))
+    else
     {
       signers[0]["recipientId"] = Guid.NewGuid();
-      signers[0]["name"] = body["signerName"];
-      signers[0]["email"] = body["signerEmail"];
+      signers[0]["name"] = body["name"];
+      signers[0]["email"] = body["email"];
     }
   }
 
@@ -920,7 +924,7 @@ public class Script : ScriptBase
       var newBody = new JObject();
       var signers = new JArray();
 
-      if(recipientType.Equals("inPersonSigner"))
+      if(recipientType.Equals("inPersonSigners"))
       {
         signers = body["inPersonSigners"] as JArray;
         signers[0]["name"] = signers[0]["hostName"];
@@ -928,7 +932,7 @@ public class Script : ScriptBase
       }
       else
       {
-        signers = body["signers"] as JArray;
+        signers = body[recipientType] as JArray;
       }
 
       foreach (var signer in signers)
