@@ -1,0 +1,234 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Azure Communication Services Identity",
+    "description": "Connector to create and manage identities in an Azure Communication Services resource.",
+    "version": "1.0",
+    "contact": {
+      "name": "Microsoft",
+      "email": "acssolutions@microsoft.com",
+      "url": "https://azure.microsoft.com/services/communication-services"
+    }
+  },
+  "host": "api.contoso.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/identities": {
+      "post": {
+        "summary": "Create Azure Communication Services Identity",
+        "description": "Create a new Azure Communication Services identity, and optionally, an access token.",
+        "operationId": "CreateCommunicationIdentity",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createTokenWithScopes": {
+                  "type": "array",
+                  "x-ms-summary": "Token Scopes",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "$ref": "#/definitions/tokenScopes"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "identity"
+              ],
+              "properties": {
+                "identity": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "properties": {
+                    "id": {
+                      "x-ms-summary": "Identity ID",
+                      "type": "string"
+                    }
+                  }
+                },
+                "accessToken": {
+                  "$ref": "#/definitions/accessToken"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identities/{identityId}": {
+      "delete": {
+        "summary": "Delete Azure Communication Services Identity",
+        "description": "Delete the Azure Communication Services identity, revoke all tokens for the identity and delete all associated data.",
+        "operationId": "DeleteCommunicationIdentity",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/identityId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success."
+          }
+        }
+      }
+    },
+    "/identities/{identityId}/:issueAccessToken": {
+      "post": {
+        "summary": "Issue Azure Communication Services Identity Access Token",
+        "description": "Issue a new access token for the Azure Communication Services identity.",
+        "operationId": "IssueIdentityAccessToken",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/identityId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "scopes"
+              ],
+              "properties": {
+                "scopes": {
+                  "type": "array",
+                  "x-ms-summary": "Token Scopes",
+                  "default": ["chat"],
+                  "items": {
+                    "$ref": "#/definitions/tokenScopes"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "$ref": "#/definitions/accessToken"
+            }
+          }
+        }
+      }
+    },
+    "/identities/{identityId}/:revokeAccessTokens": {
+      "post": {
+        "summary": "Revoke Azure Communication Services Identity Access Tokens",
+        "operationId": "RevokeIdentityAccessTokens",
+        "description": "Revoke all access tokens for the Azure Communication Services identity.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/identityId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "accessToken": {
+      "type": "object",
+      "required": [
+        "token",
+        "expiresOn"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "x-ms-summary": "Access Token"
+        },
+        "expiresOn": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Token Expiry"
+        }
+      }
+    },
+    "tokenScopes": {
+      "type": "string",
+      "enum": [
+        "chat",
+        "voip"
+      ]
+    }
+  },
+  "parameters": {
+    "apiVersion": {
+      "name": "api-version",
+      "description": "API version.",
+      "in": "query",
+      "required": true,
+      "type": "string",
+      "default": "2021-03-07",
+      "x-ms-visibility": "internal"
+    },
+    "identityId": {
+      "name": "identityId",
+      "description": "Azure Communication Services Identity ID.",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-url-encoding": "single",
+      "x-ms-visibility": "important",
+      "x-ms-summary": "Identity ID"
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Connection-String"
+    }
+  },
+  "security": [],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://azure.microsoft.com/services/communication-services"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://privacy.microsoft.com"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ]
+}
