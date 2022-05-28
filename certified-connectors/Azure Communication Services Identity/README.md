@@ -21,7 +21,7 @@ You will need the following to proceed:
 
 You can create a new connection using an [Azure Communication Services resource connection string](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp#access-your-connection-strings-and-service-endpoints).
 
-## Deployment instructions
+## Deployment Instructions
 
 Run the following commands and follow the prompts:
 
