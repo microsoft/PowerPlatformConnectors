@@ -66,7 +66,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Signer"
+                "$ref": "#/definitions/ExtendedSigner"
               }
             }
           }
@@ -127,7 +127,7 @@
             "x-nullable": false,
             "description": "The newly created actor.",
             "schema": {
-              "$ref": "#/definitions/Signer"
+              "$ref": "#/definitions/ExtendedSigner"
             }
           }
         },
@@ -188,7 +188,7 @@
             "required": true,
             "description": "Information of the actor to create.",
             "schema": {
-              "$ref": "#/definitions/Signer"
+              "$ref": "#/definitions/Actor"
             },
             "x-nullable": false,
             "x-ms-summary": "Actor information",
@@ -200,7 +200,7 @@
             "x-nullable": false,
             "description": "The updated information on an actor.",
             "schema": {
-              "$ref": "#/definitions/Signer"
+              "$ref": "#/definitions/ExtendedSigner"
             }
           }
         },
@@ -256,7 +256,7 @@
             "x-nullable": false,
             "description": "Information on a specific actor.",
             "schema": {
-              "$ref": "#/definitions/Signer"
+              "$ref": "#/definitions/ExtendedSigner"
             }
           }
         },
@@ -350,7 +350,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Signer"
+                "$ref": "#/definitions/ExtendedSigner"
               }
             }
           }
@@ -976,16 +976,6 @@
           },
           {
             "type": "string",
-            "name": "Id",
-            "in": "formData",
-            "description": "Id of the papertype.",
-            "format": "guid",
-            "x-nullable": false,
-            "x-ms-summary": "Papertype",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "type": "string",
             "name": "Name",
             "in": "formData",
             "description": "Name as to be shown to the user",
@@ -1318,9 +1308,8 @@
     }
   },
   "definitions": {
-    "Signer": {
+    "ExtendedSigner": {
       "type": "object",
-      "description": "Special type of actor",
       "required": [
         "action",
         "firstname",
@@ -1329,15 +1318,17 @@
         "mobile",
         "deadline",
         "order",
-        "hasSigned",
-        "validateRealIdentity"
+        "validateRealIdentity",
+        "hasSigned"
       ],
       "properties": {
-        "id": {
+        "fieldName": {
           "type": "string",
-          "description": "Id of the actor",
-          "format": "guid",
-          "x-nullable": "true"
+          "description": "The fieldname to sign by this signer"
+        },
+        "placeholder": {
+          "type": "string",
+          "description": "The placeholder to look for in the document to position a new signaturefield"
         },
         "action": {
           "$ref": "#/definitions/DocumentSignerAction"
@@ -1355,10 +1346,6 @@
           "type": "string",
           "description": "Lastname of the actor",
           "minLength": 1
-        },
-        "fullName": {
-          "type": "string",
-          "description": "Combined firstname, prefix and lastname (readonly)"
         },
         "email": {
           "type": "string",
@@ -1381,23 +1368,6 @@
           "description": "Order in which actors should perform actions on the document",
           "format": "int32"
         },
-        "emailActivity": {
-          "type": "array",
-          "description": "Metadata of email messages as sent by the platform to this actor",
-          "items": {
-            "$ref": "#/definitions/SignerActivity"
-          },
-          "x-nullable": "true"
-        },
-        "signingDate": {
-          "type": "string",
-          "description": "Date on which the actor has performed its action",
-          "format": "date-time"
-        },
-        "hasSigned": {
-          "type": "boolean",
-          "description": "Has the actor performed an action"
-        },
         "language": {
           "type": "string",
           "description": "Language of the actor"
@@ -1406,13 +1376,30 @@
           "type": "boolean",
           "description": "Should the real identity of the actor be verified (e.g. IDIN)"
         },
-        "fieldName": {
+        "id": {
           "type": "string",
-          "description": "The fieldname to sign by this signer"
+          "format": "guid",
+          "x-nullable": "true"
         },
-        "placeholder": {
+        "signingDate": {
           "type": "string",
-          "description": "The placeholder to look for in the document to position a new signaturefield"
+          "description": "Date on which the actor has performed its action",
+          "format": "date-time"
+        },
+        "hasSigned": {
+          "type": "boolean"
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Combined firstname, prefix and lastname (readonly)"
+        },
+        "emailActivity": {
+          "type": "array",
+          "description": "Metadata of email messages as sent by the platform to this actor",
+          "items": {
+            "$ref": "#/definitions/SignerActivity"
+          },
+          "x-nullable": "true"
         }
       }
     },
@@ -1459,6 +1446,138 @@
         "email": {
           "type": "string",
           "description": "Email address to where the message was sent"
+        }
+      }
+    },
+    "Signer": {
+      "type": "object",
+      "description": "Special type of actor",
+      "required": [
+        "action",
+        "firstname",
+        "lastname",
+        "email",
+        "mobile",
+        "deadline",
+        "order",
+        "validateRealIdentity"
+      ],
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/DocumentSignerAction"
+        },
+        "firstname": {
+          "type": "string",
+          "description": "Firstname of the actor",
+          "minLength": 1
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Prefix of the actor"
+        },
+        "lastname": {
+          "type": "string",
+          "description": "Lastname of the actor",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "description": "Personal email address of the actor.",
+          "minLength": 1
+        },
+        "mobile": {
+          "type": "string",
+          "description": "Mobile phone number of the actor",
+          "minLength": 1
+        },
+        "deadline": {
+          "type": "string",
+          "description": "The deadline for the actor to perform the action.",
+          "format": "date-time",
+          "minLength": 1
+        },
+        "order": {
+          "type": "integer",
+          "description": "Order in which actors should perform actions on the document",
+          "format": "int32"
+        },
+        "language": {
+          "type": "string",
+          "description": "Language of the actor"
+        },
+        "validateRealIdentity": {
+          "type": "boolean",
+          "description": "Should the real identity of the actor be verified (e.g. IDIN)"
+        },
+        "fieldName": {
+          "type": "string",
+          "description": "The fieldname to sign by this signer"
+        },
+        "placeholder": {
+          "type": "string",
+          "description": "The placeholder to look for in the document to position a new signaturefield"
+        }
+      }
+    },
+    "Actor": {
+      "type": "object",
+      "description": "An actor has to perform an action on a document before a certain deadline",
+      "required": [
+        "action",
+        "firstname",
+        "lastname",
+        "email",
+        "mobile",
+        "deadline",
+        "order",
+        "validateRealIdentity"
+      ],
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/DocumentSignerAction"
+        },
+        "firstname": {
+          "type": "string",
+          "description": "Firstname of the actor",
+          "minLength": 1
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Prefix of the actor"
+        },
+        "lastname": {
+          "type": "string",
+          "description": "Lastname of the actor",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "description": "Personal email address of the actor.",
+          "minLength": 1
+        },
+        "mobile": {
+          "type": "string",
+          "description": "Mobile phone number of the actor",
+          "minLength": 1
+        },
+        "deadline": {
+          "type": "string",
+          "description": "The deadline for the actor to perform the action.",
+          "format": "date-time",
+          "minLength": 1
+        },
+        "order": {
+          "type": "integer",
+          "description": "Order in which actors should perform actions on the document",
+          "format": "int32"
+        },
+        "language": {
+          "type": "string",
+          "description": "Language of the actor"
+        },
+        "validateRealIdentity": {
+          "type": "boolean",
+          "description": "Should the real identity of the actor be verified (e.g. IDIN)"
         }
       }
     },
@@ -1534,7 +1653,7 @@
           "type": "array",
           "description": "A list of actors that have an association with the document.",
           "items": {
-            "$ref": "#/definitions/Signer"
+            "$ref": "#/definitions/ExtendedSigner"
           }
         },
         "dossierId": {
@@ -1585,7 +1704,6 @@
         "PendingApproval",
         "PendingDownload",
         "PendingSignature",
-        "PendingFiling",
         "PendingDetermination"
       ],
       "enum": [
@@ -1605,7 +1723,6 @@
         "PendingApproval",
         "PendingDownload",
         "PendingSignature",
-        "PendingFiling",
         "PendingDetermination"
       ]
     },
@@ -1655,7 +1772,19 @@
         },
         "eSeal": {
           "type": "boolean",
-          "description": "This value indicates of the certificate used is eseal qualified."
+          "description": "This value indicates of the certificate used is an eseal."
+        },
+        "ipAddress": {
+          "type": "string",
+          "description": "The IP address if the signer"
+        },
+        "signatureField": {
+          "type": "string",
+          "description": "The field that has been signed"
+        },
+        "signatureImage": {
+          "type": "string",
+          "description": "The image that was used for signing"
         }
       }
     },
@@ -1717,6 +1846,9 @@
     },
     "UpdateDocumentMetadataModel": {
       "type": "object",
+      "required": [
+        "documentType"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -1725,8 +1857,73 @@
         "filename": {
           "type": "string",
           "description": "The name of the file associated with the document."
+        },
+        "documentType": {
+          "$ref": "#/definitions/DocumentTypes"
         }
       }
+    },
+    "DocumentTypes": {
+      "type": "string",
+      "description": "Type of a document",
+      "x-enumNames": [
+        "RegularPdf",
+        "XbrlPublicationVersionAnnualReport",
+        "XbrlAuditorsReport",
+        "DetachedSignature",
+        "XbrlPreparerExtension",
+        "PdfAudittrail",
+        "XbrlCompositionStatement",
+        "XbrlStatutoryVersionAnnualReport",
+        "DNBStaat",
+        "RegularXml",
+        "ReferencedDocument",
+        "Json",
+        "JsonSignature",
+        "GenericTextFile",
+        "VatDeclaration",
+        "VatEuRecapitulativeStatement",
+        "IncomeTaxDeclaration",
+        "CorporateTaxDeclaration",
+        "XbrlNexusVersionAnnualReport",
+        "XbrlAuditorsReportSFO",
+        "XbrlAssessmentStatement",
+        "SignatureStylesheet",
+        "EnvelopingSignatureData",
+        "PageImage",
+        "SHA256Hash",
+        "SHA256Signature",
+        "Unspecified"
+      ],
+      "enum": [
+        "RegularPdf",
+        "XbrlPublicationVersionAnnualReport",
+        "XbrlAuditorsReport",
+        "DetachedSignature",
+        "XbrlPreparerExtension",
+        "PdfAudittrail",
+        "XbrlCompositionStatement",
+        "XbrlStatutoryVersionAnnualReport",
+        "DNBStaat",
+        "RegularXml",
+        "ReferencedDocument",
+        "Json",
+        "JsonSignature",
+        "GenericTextFile",
+        "VatDeclaration",
+        "VatEuRecapitulativeStatement",
+        "IncomeTaxDeclaration",
+        "CorporateTaxDeclaration",
+        "XbrlNexusVersionAnnualReport",
+        "XbrlAuditorsReportSFO",
+        "XbrlAssessmentStatement",
+        "SignatureStylesheet",
+        "EnvelopingSignatureData",
+        "PageImage",
+        "SHA256Hash",
+        "SHA256Signature",
+        "Unspecified"
+      ]
     },
     "DossierModel": {
       "type": "object",
@@ -1762,7 +1959,7 @@
           "type": "array",
           "description": "Signers",
           "items": {
-            "$ref": "#/definitions/Signer"
+            "$ref": "#/definitions/ExtendedSigner"
           }
         },
         "signed": {
@@ -1868,64 +2065,6 @@
         }
       }
     },
-    "DocumentTypes": {
-      "type": "string",
-      "description": "Type of a document",
-      "x-enumNames": [
-        "RegularPdf",
-        "XbrlPublicationVersionAnnualReport",
-        "XbrlAuditorsReport",
-        "DetachedSignature",
-        "XbrlPreparerExtension",
-        "PdfAudittrail",
-        "XbrlCompositionStatement",
-        "XbrlStatutoryVersionAnnualReport",
-        "DNBStaat",
-        "RegularXml",
-        "ReferencedDocument",
-        "Json",
-        "JsonSignature",
-        "GenericTextFile",
-        "VatDeclaration",
-        "VatEuRecapitulativeStatement",
-        "IncomeTaxDeclaration",
-        "CorporateTaxDeclaration",
-        "XbrlNexusVersionAnnualReport",
-        "XbrlAuditorsReportSFO",
-        "XbrlAssessmentStatement",
-        "PageImage",
-        "SHA256Hash",
-        "SHA256Signature",
-        "Unspecified"
-      ],
-      "enum": [
-        "RegularPdf",
-        "XbrlPublicationVersionAnnualReport",
-        "XbrlAuditorsReport",
-        "DetachedSignature",
-        "XbrlPreparerExtension",
-        "PdfAudittrail",
-        "XbrlCompositionStatement",
-        "XbrlStatutoryVersionAnnualReport",
-        "DNBStaat",
-        "RegularXml",
-        "ReferencedDocument",
-        "Json",
-        "JsonSignature",
-        "GenericTextFile",
-        "VatDeclaration",
-        "VatEuRecapitulativeStatement",
-        "IncomeTaxDeclaration",
-        "CorporateTaxDeclaration",
-        "XbrlNexusVersionAnnualReport",
-        "XbrlAuditorsReportSFO",
-        "XbrlAssessmentStatement",
-        "PageImage",
-        "SHA256Hash",
-        "SHA256Signature",
-        "Unspecified"
-      ]
-    },
     "DossierStatuses": {
       "type": "string",
       "description": "Status of a dossier",
@@ -1944,8 +2083,7 @@
         "Expired",
         "PendingApproval",
         "PendingDownload",
-        "PendingSignature",
-        "PendingFiling"
+        "PendingSignature"
       ],
       "enum": [
         "Active",
@@ -1962,8 +2100,7 @@
         "Expired",
         "PendingApproval",
         "PendingDownload",
-        "PendingSignature",
-        "PendingFiling"
+        "PendingSignature"
       ]
     },
     "DossierTypes": {
@@ -1980,7 +2117,8 @@
         "SbrNexusAssurance",
         "SbrNexusAnnualReport",
         "CorporateTaxDeclaration",
-        "Incomplete"
+        "Incomplete",
+        "AnnualFinancialFiles"
       ],
       "enum": [
         "IcpDeclaration",
@@ -1993,7 +2131,8 @@
         "SbrNexusAssurance",
         "SbrNexusAnnualReport",
         "CorporateTaxDeclaration",
-        "Incomplete"
+        "Incomplete",
+        "AnnualFinancialFiles"
       ]
     },
     "CreateDossierModel": {
@@ -2056,12 +2195,14 @@
       "type": "object",
       "description": "A papertype to be used as background",
       "required": [
+        "name",
         "id"
       ],
       "properties": {
         "name": {
           "type": "string",
-          "description": "Name as to be shown to the user"
+          "description": "Name as to be shown to the user",
+          "minLength": 1
         },
         "id": {
           "type": "string",
