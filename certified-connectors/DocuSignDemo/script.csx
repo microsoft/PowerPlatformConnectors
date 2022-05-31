@@ -89,15 +89,14 @@ public class Script : ScriptBase
       var recipientTypesArray = new JArray();
       
       string [,] recipientTypes = { 
-        { "agents", "Agent" }, 
-        { "carbonCopies", "Receives Carbon Copy" }, 
-        { "certifiedDeliveries", "Certifies Delivery" }, 
-        { "editors", "Editor" },
+        { "agents", "Specify Recipients" }, 
+        { "carbonCopies", "Receives a Copy" }, 
+        { "certifiedDeliveries", "Needs to View" }, 
+        { "editors", "Allow to Edit" },
         { "inPersonSigners", "In Person Signer" },
-        { "intermediaries", "Intermediary" },
-        { "seals", "Seal" },
-        { "signers", "Signer" },
-        { "witnesses", "Witness" }
+        { "intermediaries", "Update Recipients" },
+        { "signers", "Needs to Sign" },
+        { "witnesses", "Signs with Witness" }
       };
 
       for (var i = 0; i < recipientTypes.GetLength(0); i++)
@@ -255,17 +254,17 @@ public class Script : ScriptBase
         response["schema"]["properties"]["hostName"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Host name"
+          ["x-ms-summary"] = "* Host name"
         };
         response["schema"]["properties"]["hostEmail"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Host email"
+          ["x-ms-summary"] = "* Host email"
         };
         response["schema"]["properties"]["signerName"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Signer name"
+          ["x-ms-summary"] = "* Signer name"
         };
       }
       else if (recipientType.Equals("signers", StringComparison.OrdinalIgnoreCase))
@@ -273,12 +272,12 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Signer name"
+          ["x-ms-summary"] = "* Signer name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Signer email"
+          ["x-ms-summary"] = "* Signer email"
         };
       }
       else
@@ -286,12 +285,12 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Name"
+          ["x-ms-summary"] = "* Name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Email"
+          ["x-ms-summary"] = "* Email"
         };
       }
     }
@@ -591,12 +590,6 @@ public class Script : ScriptBase
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
-    }
-
-    if (!string.IsNullOrEmpty(query.Get("customFields")))
-    {
-      var customFields = JArray.FromObject(query.Get("customFields").Split("[],".ToCharArray()));
-      signers[0]["customFields"] = customFields;
     }
 
     var emailNotification = new JObject();
