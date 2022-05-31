@@ -273,70 +273,66 @@ public class Script : ScriptBase
     JObject body = ParseContentAsJObject(content, true);
 
     // customfield code
-    if (body["DocuSignEnvelopeInformation"] is JObject && body["DocuSignEnvelopeInformation"]["EnvelopeStatus"] is JObject)
+    if (body["data"] is JObject && body["data"]["envelopeSummary"] is JObject)
     {
-      var envelopeStatus = body["DocuSignEnvelopeInformation"]["EnvelopeStatus"];
-      var customFields = envelopeStatus["CustomFields"];
+      var envelopeSummary = body["data"]["envelopeSummary"];
+      var customFields = envelopeSummary["customFields"];
       var newCustomFields = new JObject();
 
       if (customFields is JObject)
       {
-        var customFieldsArray = customFields["CustomField"];
+        var customFieldsArray = customFields["textCustomFields"];
         customFieldsArray = customFieldsArray is JObject ? new JArray(customFieldsArray) : customFieldsArray;
-        customFields["CustomField"] = customFieldsArray;
 
         foreach (var field in customFieldsArray as JArray ?? new JArray())
         {
-          var fieldName = field.Type == JTokenType.Object ? (string)field["Name"] : null;
+          var fieldName = field.Type == JTokenType.Object ? (string)field["name"] : null;
           if (!string.IsNullOrWhiteSpace(fieldName) && newCustomFields[fieldName] == null)
           {
-            newCustomFields.Add(fieldName, field["Value"]);
+            newCustomFields.Add(fieldName, field["value"]);
           }
         }
       }
 
-      body["customFields"] = newCustomFields;
+      body["data"]["envelopeSummary"]["customFields"] = newCustomFields;
 
       // tab code
-      var recipientStatuses = envelopeStatus["RecipientStatuses"];
+      var recipientStatuses = envelopeSummary["recipients"];
       if (recipientStatuses is JObject)
       {
-        var statusArray = recipientStatuses["RecipientStatus"];
-        statusArray = statusArray is JObject ? new JArray(statusArray) : statusArray;
-        recipientStatuses["RecipientStatus"] = statusArray;
-
-        // RecipientStatus is an array at this point so now check TabStatus
-        foreach (var recipient in recipientStatuses["RecipientStatus"] ?? new JArray())
+        foreach (var recipient in recipientStatuses["signers"] ?? new JArray())
         {
-          var tabStatuses = recipient["TabStatuses"];
-          if (tabStatuses is JObject)
+          var tabs = recipient["tabs"];
+          if (tabs is JObject)
           {
-            var tabStatusArray = tabStatuses["TabStatus"];
-            tabStatusArray = tabStatusArray is JObject ? new JArray(tabStatusArray) : tabStatusArray;
-            tabStatuses["TabStatus"] = tabStatusArray;
+            var newTabs = new JObject();
 
-            // TabStatus is an array at this point
-            var newTabStatuses = new JObject();
-            foreach (var tab in tabStatusArray as JArray ?? new JArray())
+            string[] tabTypes = { "textTabs", "fullNameTabs", "dateSignedTabs", "companyTabs", "titleTabs", "numberTabs",
+              "ssnTabs", "dateTabs", "zipTabs", "emailTabs", "noteTabs", "listTabs", "firstNameTabs", "lastNameTabs", "emailAddressTabs",
+              "formulaTabs" };
+            foreach (var tabType in tabTypes)
             {
-              if (tab is JObject)
-              {
-                var tabLabel = (string)tab["TabLabel"];
-                var tabValue = (string)tab["TabValue"];
-                var customTabType = (string)tab["CustomTabType"];
+              var tabStatusArray = tabs[tabType];
 
-                // skip Radio and List tabs that are not selected
-                if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue) && customTabType != "Radio" && customTabType != "List")
+              foreach (var tab in tabStatusArray as JArray ?? new JArray())
+              {
+                if (tab is JObject)
                 {
-                  if (newTabStatuses[tabLabel] == null)
+                  var tabLabel = (string)tab["tabLabel"];
+                  var tabValue = (string)tab["value"];
+
+                  if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue))
                   {
-                    newTabStatuses.Add(tabLabel, tabValue);
+                    if (newTabs[tabLabel] == null)
+                    {
+                      newTabs.Add(tabLabel, tabValue);
+                    }
                   }
                 }
               }
             }
-
-            recipient["tabs"] = newTabStatuses;
+            
+            recipient["tabs"] = newTabs;
           }
         }
       }
@@ -390,8 +386,6 @@ public class Script : ScriptBase
     body["allUsers"] = "true";
     body["allowEnvelopePublish"] = "true";
     body["includeDocumentFields"] = "true";
-    body["includeEnvelopeVoidReason"] = "true";
-    body["includeTimeZoneInformation"] = "true";
     body["requiresAcknowledgement"] = "true";
     body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
     body["name"] = original["name"]?.ToString();
@@ -400,17 +394,22 @@ public class Script : ScriptBase
     var envelopeEventsArray = new JArray();
     envelopeEventsArray.Add(envelopeEvent);
     body["envelopeEvents"] = envelopeEventsArray;
-
     body["configurationType"] = "custom";
-    body["deliveryMode"] = "aggregate";
-    body["restv21"] = "true";
+    body["deliveryMode"] = "sim";
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients'
+    ]";
+
+    JArray includeData = JArray.Parse(eventData);
     body["eventData"] = new JObject
     {
         ["version"] = "restv2.1",
         ["format"] = "json",
-        ["includeData"] = new JArray()
+        ["includeData"] = includeData
     };
-    body["includeSenderAccountasCustomField"] = "true";
     return body;
   }
 

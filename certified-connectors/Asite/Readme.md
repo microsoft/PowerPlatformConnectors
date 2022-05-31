@@ -21,7 +21,7 @@ Following are the internal and external actions used during connection flow to s
 | When a workflow is triggered on file(s) | Trigger | /asitePullDataWebhook | This operation triggers a flow when a file is uploaded/updated on the project. The trigger is fired to include sub-folders based on the workflow configuration. | Important |
 | Get file content | Action | /downloadFileByUrl | Retrieves the file content from Asite | Important |
 | List of configured Triggers from Asite Platform | | /triggerList | To display list of configured Triggers from Asite Platform | Internal |
-| Delete configured trigger || /deleteAsitePullDataWebhook/{id} | To Delete configured trigger | Internal |
+| Delete configured trigger || /deleteAsitePullDataWebhook/{id}/{nameOfClass} | To Delete configured trigger | Internal |
 | Get Dynamic Schema based on project and folder | | /getFolderAttributes | Get Dynamic Schema based on project and folder | Internal |
 | Set file metadata | Action | /saveMetadataForUpload | Retrieves standard and custom metadata | Important |
 | Create file | Action | /uploadFileFromExternalSystem | Upload a file in Asite project folder. | Important |
