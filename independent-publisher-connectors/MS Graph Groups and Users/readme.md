@@ -1,26 +1,48 @@
-# Binance.us
-The Binance platform allows anyone to get crypto market rates and historical trades.  This connector allows a user to pull this data into their app, flow, or report.
+# MS Graph Groups and Users
+The MS Graph Groups and Users connector utilizes Microsoft Graph to help retrieve Azure AD groups, members (users) and license details. Users can utilize this connector in their app or a flow.
 
-## Publisher: Roy Paar
+## Publisher: Jay Jani
 
 ## Prerequisites
-None.
+Azure Subscription and Azure AD App registration with specific permissions
 
 ## Obtaining Credentials
-No credentials are required for this connector.
+Refer: https://docs.microsoft.com/en-us/graph/auth-v2-service#authentication-and-authorization-steps
+1) Register your app (https://docs.microsoft.com/en-us/graph/auth-v2-service#1-register-your-app)
+2) Add Credentials (https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#add-a-client-secret)
+2) Configure app permissions
+3) Get administrator consent
 
+### Note: For steps #2 and #3
+You'll add following Graph API Delegated permissions and get administrator consent:
+•	User.Read— This permission is normally already granted
+•	User.Read.All — “Grant Admin consent for <your org>”
+•	Directory.Read.All — “Grant Admin consent for <your org>”
+•	GroupMember.Read.All — “Grant Admin consent for <your org>”
 ## Supported Operations
-### Get Live Ticker Price
-Latest price for a symbol. If the symbol is not sent, prices for all symbols will be returned in an array.  Enter two three-digit currency codes with no separation i.e. BTCUSD to see the market rate of the first currency in the denomination of the second.
+### List Users
+Retrieve all users in the organization (AAD Tenant).
 
-### Get Exchange Information
-Current exchange trading rules and symbol information.  Enter two three-digit currency codes with no separation i.e. BTCUSD to see the market rate of the first currency in the denomination of the second.
+### List Groups By Display Name Search
+Retrieve groups by searching group's display name with specific keywords.
 
-### Get Recent Trades
-Get recent trades (up to last 1000).  Enter two three-digit currency codes with no separation i.e. BTCUSD to see the market rate of the first currency in the denomination of the second.
+### List Subscribed Skus
+Retrieve details of organization's subscribed license plan skus.
+
+### List Direct Group Members
+Retrieve direct members of a group with count.
+
+### Get Member License Details
+Retrieve group member(user)'s license details.
+
+### Get Group Properties
+Retrieve properties and relationships of an AAD group.
+
+### Get Member Groups
+Group memberships for a user (member). This operation will retrieve list of AAD groups the member belongs to.
 
 ## API Documentation
-https://docs.binance.us/
+https://graph.microsoft.com
 
 ## Known Issues and Limitations
 None.
