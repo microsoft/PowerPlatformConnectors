@@ -44,3 +44,12 @@ List Messages From Thread.
 
 ### Get Thread Properties
 Get the properties of a chat thread.
+
+### Add Participant
+Add a participant to a chat thread
+
+### Remove Participant
+Remove a participant from a chat thread
+
+### List Participants
+List participants in a chat thread
