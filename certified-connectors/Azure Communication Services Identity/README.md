@@ -1,47 +1,41 @@
-## Azure Communication Services Identity Connector
-
-This Identity Connector can create and delete Azure Communication Services identities, which can be used to utilize the Chat and Calling capabilities in Azure Communication Services. You can read more about Azure Communication Services identities [here](https://docs.microsoft.com/en-us/rest/api/communication/communicationidentity/communication-identity).
+# Azure Communication Services Identity
+This Identity Connector can create and delete Azure Communication Servicies user, as well as issue and revoke Azure Communication Services user access tokens, which are used for Chat and Calling capabilities in Azure Communication Services. You can read more about Azure Communication Identity [here](https://docs.microsoft.com/en-us/rest/api/communication/communicationidentity/communication-identity).
 
 ## Publisher: Microsoft
 
 ## Prerequisites
-
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
 * An Azure subscription
 * An Azure Communication Services resource
 
-### Set up an Azure Communication Services resource
-
-- [Quickstart doc](https://review.docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?branch=pr-en-us-192537&tabs=windows&pivots=platform-azp)
-
-## Obtaining Credentials
-
-### Connection String Authentication
-
-You can create a new connection using an [Azure Communication Services resource connection string](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp#access-your-connection-strings-and-service-endpoints).
-
-## Deployment Instructions
-
-Run the following commands and follow the prompts:
-
-```paconn
-paconn create --api-def .\apiDefinition.swagger.json --api-prop .\apiProperties.json --script .\script.csx --icon .\icon.png
-```
-
 ## Supported Operations
 
-### Create Communication Identity 
-Create a new Azure Communication Services identity.
+The connector supports the following operations:
 
-### Delete Communication Identity 
-Delete the Azure Communication Services identity, revoke all tokens for the identity and delete all associated data.
+### Create a user
+Create a new user, and optionally, an access token.
 
-### Issue Identity Access Token 
-Issue a new access token for the Azure Communication Services identity.
+### Delete a user
+Delete the user, revoke all access tokens for the user and delete all associated data.
 
-### Revoke Identity Access Tokens 
-Revoke all access tokens for the specific identity.
+### Issue a user access token
+Issue a new access token for the user.
 
+### Revoke user access tokens
+Revoke all access tokens for the user.
 
+## Obtaining Credentials
+After setting up your Azure Communication Services resource (with this [quickstart doc](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource)), obtain the connection credentials by [accessing your connection string](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp#access-your-connection-strings-and-service-endpoints).
 
+## Getting Started
+To get started setting up an Azure Communication Services resource, follow this [quickstart doc](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource).
+
+## Known Issues and Limitations
+Does not support Service Principal (Azure AD application) Authentication at this time.
+
+## Deployment Instructions
+Run the following commands and follow the prompts:
+```paconn
+paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --script script.csx --icon icon.png
+```
