@@ -1,8 +1,7 @@
 ## RegEx Matching
 This connector extends Power Automate capabilities for performing tests whether a text string matches a pattern. There are pre-built patterns and also an option for user to provide their own regular expressions (regex) for matching the text string. 
 
-## Publisher
-Mitanshu Garg
+## Publisher: Mitanshu Garg
 
 ## Prerequisites
 There are no prerequisities for this connector
@@ -20,6 +19,9 @@ There are no prerequisities for this connector
 | `endsWith` | Returns `true` if the text string ends with the given keyword |
 | `match pattern` | Returns `true` if the text string matches the custom regex pattern |
 
-## Limitations and Exclusions
+## Obtaining Credentials
+Anonymous authentication
+
+## Known Issues and Limitations
 - This connector only checks whether the provided input matches the expected format for the corresponding action. Other logic (such as checksum) is not performed by this connector.
 - Datetime action does not limit number of days for different months and it accepts 31 days for all 12 months.
