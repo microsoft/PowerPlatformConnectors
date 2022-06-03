@@ -7,17 +7,33 @@ This connector extends Power Automate capabilities for performing tests whether 
 There are no prerequisities for this connector
 
 ## Supported Operations
-| Action | Description |
-| --- | --- |
-| `valid Email` | Returns `true` if the text string is a valid email address |
-| `valid GUID` | Returns `true` if the text string is in a valid GUID format |
-| `valid SSN` | Returns `true` if the text string is in United States Social Security Number format |
-| `valid Credit Card` | Returns `true` if the text string is in credit card number format |
-| `valid DATETIME` | Returns `true` if the text string is in YYYYMMDDHHMMSS format |
-| `contains Digit` | Returns `true` if the text string contains a digit (0-9) anywhere in the input |
-| `startsWith` | Returns `true` if the text string starts with the given keyword |
-| `endsWith` | Returns `true` if the text string ends with the given keyword |
-| `match pattern` | Returns `true` if the text string matches the custom regex pattern |
+
+### valid Email
+Returns `true` if the text string is a valid email address
+
+### valid GUID
+Returns `true` if the text string is in a valid GUID format
+
+### valid SSN
+Returns `true` if the text string is in United States Social Security Number format
+
+### valid Credit Card
+Returns `true` if the text string is in credit card number format
+
+### valid DATETIME
+Returns `true` if the text string is in YYYYMMDDhhmmss format
+
+### contains Digit
+Returns `true` if the text string contains a digit (0-9) anywhere in the input
+
+### startsWith
+Returns `true` if the text string starts with the given keyword
+
+### endsWith
+Returns `true` if the text string ends with the given keyword
+
+### match pattern
+Returns `true` if the text string matches the custom regex pattern
 
 ## Obtaining Credentials
 Anonymous authentication
