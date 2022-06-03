@@ -1,4 +1,4 @@
-## Azure Communication Services Email Connector
+## Azure Communication Services Email
 
 Azure Communication Services Email is a new primitive that facilitates high volume transactional, bulk and marketing emails on the Azure Communication Services platform and will enable Application-to-Person (A2P) use cases. You can read more about Email in Azure Communication Services [here](https://docs.microsoft.com/en-us/azure/communication-services/concepts/email/email-overview).
 
@@ -25,9 +25,18 @@ You will need the following to proceed:
 ### Connect Email Domain with Communication Services resource
 - [Quickstart doc](https://review.docs.microsoft.com/en-us/azure/communication-services/quickstarts/email/connect-email-communication-resource?branch=main)
 
+## Supported Operations
+
+### Send Email 
+
+Sends an email message to one or more recipients.
+
+### Get Email Message Status
+
+Gets the status of an email message sent previously.
+
 ## Obtaining Credentials
 
-### Connection String Authentication
 You can create a new connection using an [Azure Communication Services resource connection string](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp#access-your-connection-strings-and-service-endpoints).
 
 ## Deployment Instructions
@@ -38,10 +47,3 @@ Run the following commands and follow the prompts:
 paconn create --api-def .\apiDefinition.swagger.json --api-prop .\apiProperties.json --script .\script.csx --icon .\icon.png
 ```
 
-## Supported Operations
-
-### Send Email 
-Sends an email message to one or more recipients.
-
-### Get Email Message Status 
-Gets the status of an email message sent previously.
