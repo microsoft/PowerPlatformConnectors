@@ -1,9 +1,9 @@
 
 ### NOTE
-> This is a Scancloud APIs connector. The connector is provided here with the intent to illustrate certain features and functionality around connectors.
+> This is a Scancloud connector. The connector is provided here with the intent to illustrate certain features and functionality around connectors.
 
-## Scancloud APIs Connector
-Scancloud APIs provides a powerful platform for pluggable security using Scancloud APIs plugins.
+## Scancloud Connector
+Scancloud provides a powerful platform for pluggable security using Scancloud plugins.
 
 
 
