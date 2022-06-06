@@ -2,20 +2,16 @@
 
 Prepare for client meetings using the FactSet connector to access key company information in a custom branded, presentation ready PDF. Stay on top of relevant news and events for companies of interest and highlight important topics to drive your discussion with FactSet Signals. Alternatively, use Digital Cards to collaborate with colleagues and send summaries of actionable insights via Teams.
 
-### Publisher: FactSet Research Systems
+## Publisher: FactSet Research Systems
 
-### Pre-Requisites
+## Prerequisites
 
 You will need the following to proceed
 
 * A Microsoft Power Automate plan with premium connector access
 * FactSet API Access
 
-### Accessing FactSet APIs
-
-FactSet's API Program is designed to support digital transformation journeys through flexible access to data in a secure and consistent manner. To learn more about FactSet APIs and gain access to them, please click here : [FactSet Developer Portal](https://developer.factset.com/learn/getting-started)
-
-### Supported Operations
+## Supported Operations
 
 This connector supports the following operations
 
@@ -28,6 +24,19 @@ This connector supports the following operations
 * `BookBuilder - Create Book from Template` : This endpoint retrieves book status, book name, and book ID for ticker requested in JSON format.
 * `BookBuilder - Get PDF` : This endpoint will return the PDF output given a book_id.
 
-### FactSet Support
+## Obtaining Credentials
 
-Please contact this email address in case of issues : WorkflowAutomation@factset.com
+FactSet's API Program is designed to support digital transformation journeys through flexible access to data in a secure and consistent manner. To learn more about FactSet APIs and gain access to them, please click here : [FactSet Developer Portal](https://developer.factset.com/learn/getting-started).
+
+## Known Issues and Limitations
+
+No known issues or limitations
+
+## Frequently Asked Questions
+
+### Do you have a support email to contact in case of issues?
+Contact this email address in case of issues with the FactSet connector : WorkflowAutomation@factset.com
+
+## Deployment Instructions
+
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate.
