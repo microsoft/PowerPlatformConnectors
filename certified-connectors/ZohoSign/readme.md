@@ -1,4 +1,4 @@
-﻿# Zoho-Sign
+# Zoho-Sign
 
 Zoho Sign lets you digitally sign and verify legally binding documents without the hassles of transporting paper documents. It's a complete digital signature app for business signatories.
 
@@ -17,14 +17,14 @@ Since Zoho-Sign API uses OAuth 2 to authenticate, no secondary authentication is
 The connector supports the following operations:
 
 ### Download Completion Certificate
- 
+
 Download the completion certificate
 
 ### Download Document
 
 Download the selected document
 
-### Download File 
+### Download File
 
 Downloads the particular document that is selected.
 
@@ -60,16 +60,13 @@ Get particular template details
 
 List of Templates
 
-
 ## Supported Triggers
 
 The connector supports the following triggers:
 
-### Zoho Sign Triggers 
+### Zoho Sign Triggers
 
 Register a callback for a particular event
-
-
 
 ## FAQ
 
