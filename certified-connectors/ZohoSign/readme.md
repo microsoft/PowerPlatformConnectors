@@ -24,11 +24,7 @@ Download the completion certificate
 
 Download the selected document
 
-<<<<<<< HEAD
 ### Download File
-=======
-### Download File 
->>>>>>> 77fd2ff5554b765666482bb8b06b6824758f35b0
 
 Downloads the particular document that is selected.
 
@@ -64,27 +60,14 @@ Get particular template details
 
 List of Templates
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 77fd2ff5554b765666482bb8b06b6824758f35b0
 ## Supported Triggers
 
 The connector supports the following triggers:
 
-<<<<<<< HEAD
-### Zoho Sign Triggers
-
-Register a callback for a particular event
-
-=======
 ### Zoho Sign Triggers 
 
 Register a callback for a particular event
 
-
-
->>>>>>> 77fd2ff5554b765666482bb8b06b6824758f35b0
 ## FAQ
 
 https://www.zoho.com/sign/api/
