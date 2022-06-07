@@ -1,4 +1,4 @@
-# ShipStation
+# ShipStation IP
 The API is a great way to get data directly to and from ShipStation, like creating orders, updating products, and querying order, shipment and customer data.
 
 The API is available for any plan and allows you to interface with the ShipStation platform. The API can be used to automate many tasks including:
