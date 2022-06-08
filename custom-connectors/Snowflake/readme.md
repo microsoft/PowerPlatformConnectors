@@ -1,10 +1,11 @@
-Snowflake
+# Snowflake
+
 This connector is based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html).
 
 Publisher: Publisher's Name
 Required. It should be the company or organization name. ​
 
-Prerequisites
+## Obtaining Credentials
 Set up Azure AD authentication for Snowflake by following these steps:
 1. In [Step 1: Configure the OAuth Resource in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-1-configure-the-oauth-resource-in-azure-ad), follow steps 1-10 and define the scope as `SESSION:ROLE-ANY` by following these [instructions](https://docs.snowflake.com/en/user-guide/oauth-azure.html#using-any-role-with-external-oauth).
 2. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-13.
@@ -32,7 +33,7 @@ create security integration connector
        external_oauth_any_role_mode = 'ENABLE';
 ```
 
-Supported Operations
+## Supported Operations
 
 Submit SQL Statement for Execution
 \\TODO-Description of operation 1.
@@ -43,17 +44,14 @@ Check the Status and Get Results
 Cancel the Execution of a Statement
 \\TODO- Description of operation 3.
 
-Obtaining Credentials
-Required. Explain the authentication method and how to get the credentials.​
-
-Getting Started
+## Getting Started
 Optional. How to get started with your connector.
 
-Known Issues and Limitations
+## Known Issues and Limitations
 1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
 2. If you get a 401 response and your Host field in Step 1 follows this format "orgname-accountname," replace the Host field with your "locator" URL.
 3. The connector may time out with large query results. 
 
-Frequently Asked Questions
+## Frequently Asked Questions
 1. How can the connector be used within Power Apps?
 Currently, Power Apps does not support dynamic schema. You can still use the connector from Power Apps by calling a flow from the app instead of directly from an  app. 
