@@ -2,8 +2,7 @@
 
 This connector is based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html).
 
-Publisher: Publisher's Name
-Required. It should be the company or organization name. ​
+## Publisher: Rene Koch
 
 ## Obtaining Credentials
 Set up Azure AD authentication for Snowflake by following these steps:
