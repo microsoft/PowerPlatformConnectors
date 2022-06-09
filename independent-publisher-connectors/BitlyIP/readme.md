@@ -1,4 +1,4 @@
-# Bitly
+# BitlyIP
 Bitly is the most widely trusted link management platform in the world. By using the Bitly API, you will exercise the full power of your links through automated link customization, mobile deep linking, and click analytics.
 
 ## Publisher: Troy Taylor, Hitachi Solutions
