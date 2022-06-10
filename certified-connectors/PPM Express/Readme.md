@@ -26,7 +26,7 @@ For more details follow the [instructions](https://help.ppm.express/public-api/1
 1. Log into Microsoft Power Automate or Power Apps.
 2. On the left side panel click on the Dataverse menu item and then select Connections.
 3. At the top of the page click New Connection and select the PPM Express connection.
-4. You will be propmted to input three parameters: Tenant Region, Tenant Name, API Key. Region and tenant can be checked and copied at the URL: `https://app.ppm.express/{region}/@{tenant}`.
+4. You will be prompted to input three parameters: Tenant Region, Tenant Name, API Key. Region and tenant can be checked and copied at the URL: `https://app.ppm.express/{region}/@{tenant}`.
 5. In the Tenant Region section select your Data Center location (United States/Europe).  
 6. In the Tenant Name section type the name of your PPM Express tenant.
 7. In the API Key section, use the API key created in your PPM Express Automation settings and click Create.
@@ -62,7 +62,7 @@ The connector supports the following operations:
 
 - `Get a Key Date`: Gets a Key Date Info by Id
 - `Update a Key Date`: Updates a Key Date
-- `Get Key Dates List`: Gets a List of all Key Dates for the specifired project
+- `Get Key Dates List`: Gets a List of all Key Dates for the specified project
 - `Create a Key Date`: Creates a new Key Date
 
 - `Get a Task`: Gets a Task by Id and by Project
@@ -79,9 +79,9 @@ The connector supports the following operations:
 
 The connector supports the following triggers:
 
-`Webhook Trigger`: Triggers for any action (Create, Update, Delete) in PPM Express performed for the entity. 
+`Webhook Trigger`: Triggers for any action (Create, Update, Delete) in PPM Express performed for the entity.
 Here is the list of supported entities:
-"Project", Idea", "Task", "Key Date". PPM Express lets you use up to 50 webhooks subscriptions.
+"Project", "Idea", "Task", "Key Date", "Resource". PPM Express lets you use up to 50 webhooks subscriptions.
 
 ## Our public API documentation
 
@@ -102,7 +102,7 @@ API documentation can be found [here](https://api-us.ppm.express/index.html).
           "imageId": null
         }
       ],
-      "Custom Feld": 123
+      "Custom Field": 123
     }
 ```
 
