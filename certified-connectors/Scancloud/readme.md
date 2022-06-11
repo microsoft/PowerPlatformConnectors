@@ -1,9 +1,9 @@
 
-## Scancloud Connector
-Scancloud provides a powerful platform for pluggable security using Scancloud plugins.
+## Scancloud 
+ScanCloud is a unique security platform that allows you to customise and combine hosted security scanners and use them to protect your assets.We provide ready-made, open source apps & plugins, Kits and an API to use the security scanners you configure in our cloud.You can then use the ScanCloud portal monitor activity, review performance and provide centralised management. Using this connector customers can directly get files and emails scanned by selected scanner from Scancloud.
 
 ## Publisher: Scancloud
-
+scancloud
 
 ## Prerequisites
 You will need the following to proceed:
@@ -22,7 +22,7 @@ You can obtain key using a valid account from ScanCloud Profile.
 ## Known Issues and Limitations
 N/A
 
-### Deploying the sample
+## Deployment Instructions
 Run the following commands and follow the prompts:
 
 ```paconn
