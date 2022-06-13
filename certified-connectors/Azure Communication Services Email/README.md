@@ -1,4 +1,4 @@
-## Azure Communication Services Email
+# Azure Communication Services Email
 
 Azure Communication Services Email is a new primitive that facilitates high volume transactional, bulk and marketing emails on the Azure Communication Services platform and will enable Application-to-Person (A2P) use cases. You can read more about Email in Azure Communication Services [here](https://docs.microsoft.com/en-us/azure/communication-services/concepts/email/email-overview).
 
@@ -38,6 +38,9 @@ Gets the status of an email message sent previously.
 ## Obtaining Credentials
 
 You can create a new connection using an [Azure Communication Services resource connection string](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp#access-your-connection-strings-and-service-endpoints).
+
+## Known Issues and Limitations
+Does not support Service principal (Azure AD application) Authentication at this time.
 
 ## Deployment Instructions
 
