@@ -451,6 +451,11 @@ public class Script : ScriptBase
       ["templateId"] = query.Get("templateId")
     };
 
+    if (!string.IsNullOrEmpty(query.Get("status")))
+    {
+      newBody["status"] = query.Get("status");
+    }
+
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("envelopes/createFromTemplate", "/envelopes");
     this.Context.Request.RequestUri = uriBuilder.Uri;
