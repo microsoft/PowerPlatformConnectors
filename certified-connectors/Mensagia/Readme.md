@@ -1,5 +1,5 @@
 # Mensagia
-Mensagia offer reliable SMS, Email and Voice for business automation communication.
+Mensagia offers reliable SMS, Email and Voice messages for business automation communication.
 
 ## Publisher: Mensagia
 
@@ -48,7 +48,7 @@ Carry out Voice campaigns to telephone numbers in Spain. The recipients of the v
 The API key can be obtained by entering the portal of your Mensagia account.
 
 ## Known Issues and Limitations
-The GET methods doesn't allow parameters.
+The GET methods don't allow parameters.
 
 ## Deployment Instructions
 * Register on [Mensagia](https://mensagia.com/)
