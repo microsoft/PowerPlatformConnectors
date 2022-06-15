@@ -41,9 +41,11 @@ namespace Oneflow.PowerApps.CustomCode
                 [Operations.PartyCreate] = HandlePartyCreate
             };
 
-            _schemaMappings = new Dictionary<string, string>(){
+            _schemaMappings = new Dictionary<string, string>()
+            {
                 ["Company"] = Constants.CompanyPartyDynamicSchema,
-                ["Individual"] = Constants.IndividualPartyDynamicSchema
+                ["Individual"] = Constants.IndividualPartyDynamicSchema,
+                ["Ownerside"] = Constants.IndividualPartyDynamicSchema
             };
         }
         #endregion
@@ -106,17 +108,18 @@ namespace Oneflow.PowerApps.CustomCode
             return response;
         }
 
-        private async Task<HttpResponseMessage> HandleGetDynamicSchema(IScriptContext ctx){
+        private async Task<HttpResponseMessage> HandleGetDynamicSchema(IScriptContext ctx)
+        {
             var req = ctx.Request;
-            var schemaId = req.Headers.First(x => 
-                string.Equals(x.Key,"schema_id", StringComparison.OrdinalIgnoreCase))
-                .Value?.First();
-            if (string.IsNullOrEmpty(schemaId)){
+            var schemaId = GetHeaderStringValue(Constants.SchemaIdHeader, req);
+            if (string.IsNullOrEmpty(schemaId))
+            {
                 var defaultResponse = new HttpResponseMessage(HttpStatusCode.OK);
                 defaultResponse.Content = CreateJsonContent("{}");
                 return defaultResponse;
             }
-            if (!_schemaMappings.ContainsKey(schemaId)){
+            if (!_schemaMappings.ContainsKey(schemaId))
+            {
                 throw new ScriptException(HttpStatusCode.BadRequest, "Schema id was not found.");
             }
             var response = new HttpResponseMessage(HttpStatusCode.OK);
@@ -149,103 +152,123 @@ namespace Oneflow.PowerApps.CustomCode
             StringBuilder debugInfo = new StringBuilder();
             try
             {
-              var req = ctx.Request;
-              var contractId = req.Headers.FirstOrDefault(x => x.Key == "contract_id").Value?.First();
-              debugInfo.AppendLine($"contractId - {contractId}");
-              
-              var inputPartyJson = await req.Content.ReadAsStringAsync();
-              debugInfo.AppendLine($"inputJson - {inputPartyJson}");
-              var inputParty = JsonConvert.DeserializeObject<Models.Party>(inputPartyJson);
+                var req = ctx.Request;
+                var contractId = req.Headers.FirstOrDefault(x => x.Key == "contract_id").Value?.First();
+                debugInfo.AppendLine($"contractId - {contractId}");
 
-              // for individual parties, just straight up create an individual participant.
-              if (inputParty.type == Constants.PartyTypes.Individual)
-              {
-                  debugInfo.AppendLine("identified as individual. creating individual party.");
-                  return await CreateParty(req, contractId, inputParty, ctx);
-              }
-
-              // call getParties
-              debugInfo.AppendLine("trying to get existing parties.");
-              var getPartiesRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(string.Format(Constants.Requests.PartyEndpoint, contractId)));
-              CopyHeaders(req, getPartiesRequest);
-              
-              var getPartiesResponse = await ctx.SendAsync(getPartiesRequest, CancellationToken)
-                  .ConfigureAwait(false);
-              
-              if (!getPartiesResponse.IsSuccessStatusCode){
-                  return getPartiesResponse;
-              }
-              debugInfo.AppendLine("converting get party response.");
-              var getPartiesResponseJson = await getPartiesResponse.Content.ReadAsStringAsync();
-              
-              var existingParties = JsonConvert.DeserializeObject<Responses.GetPartiesResponse>(getPartiesResponseJson);
-
-              int matchingPartyId = 0;
-              foreach (Models.Party existingParty in existingParties.data){
-                if (existingParty.Equals(inputParty)) {
-                  matchingPartyId = existingParty.id.Value;
-                  break;
+                var inputPartyJson = await req.Content.ReadAsStringAsync();
+                debugInfo.AppendLine($"inputJson - {inputPartyJson}");
+                var inputParty = JsonConvert.DeserializeObject<Models.Party>(inputPartyJson);
+                var selectedType = GetHeaderStringValue(Constants.ParticipantTypeHeader, req);
+                debugInfo.AppendLine($"selectedType - {selectedType}");
+                // for individual parties, just straight up create an individual participant.
+                if (selectedType.Equals(Constants.PartyTypes.Individual, StringComparison.OrdinalIgnoreCase))
+                {
+                    debugInfo.AppendLine("identified as individual. creating individual party.");
+                    return await CreateParty(req, contractId, inputParty, ctx);
                 }
-              }
 
-              if (matchingPartyId != default) 
-              {
-                debugInfo.AppendLine("Party found. creating participant.");
-                return await CreateParticipant(req, matchingPartyId, contractId, inputParty.participant, ctx);
-              }
+                // call getParties
+                debugInfo.AppendLine("trying to get existing parties.");
+                var getPartiesRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(string.Format(Constants.Requests.PartyEndpoint, contractId)));
+                CopyHeaders(req, getPartiesRequest);
 
-              debugInfo.AppendLine("Party not found. creating new party.");
-              return await CreateParty(req, contractId, inputParty, ctx);    
+                var getPartiesResponse = await ctx.SendAsync(getPartiesRequest, CancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!getPartiesResponse.IsSuccessStatusCode)
+                {
+                    return getPartiesResponse;
+                }
+                debugInfo.AppendLine("converting get party response.");
+                var getPartiesResponseJson = await getPartiesResponse.Content.ReadAsStringAsync();
+                var existingParties = JsonConvert.DeserializeObject<Responses.GetPartiesResponse>(getPartiesResponseJson).data;
+                int matchingPartyId = 0;
+
+                // if we need to create an ownserside participant, just find my_party and create a participant for it.
+                if (selectedType.Equals(Constants.PartyTypes.Ownerside, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchingPartyId = existingParties.FirstOrDefault(x =>
+                    x.my_party.Value).id ??
+                    throw new ScriptException(HttpStatusCode.InternalServerError,
+                                              $"Couldn't find ownerside party for contract {contractId}");
+
+                    return await CreateParticipant(req, matchingPartyId, contractId, inputParty.participant, ctx);
+                }
+
+                // process Company participants.                
+                debugInfo.AppendLine($"Input party - {Environment.NewLine + inputParty}");
+                foreach (Models.Party existingParty in existingParties)
+                {
+                    debugInfo.AppendLine($"Trying to match with party - {Environment.NewLine + existingParty}");
+                    if (existingParty.Equals(inputParty))
+                    {
+                        debugInfo.AppendLine("match");
+                        matchingPartyId = existingParty.id.Value;
+                        break;
+                    }
+                    debugInfo.AppendLine("not match");
+                }
+
+                debugInfo.Append($"matching party id: {Environment.NewLine + matchingPartyId}");
+                if (matchingPartyId != default)
+                {
+                    debugInfo.AppendLine("Party found. creating participant.");
+                    return await CreateParticipant(req, matchingPartyId, contractId, inputParty.participant, ctx);
+                }
+
+                debugInfo.AppendLine("Party not found. creating new party.");
+                return await CreateParty(req, contractId, inputParty, ctx);
             }
             catch (Exception e)
             {
-              throw new ScriptException(HttpStatusCode.BadRequest, e.Message + $"Trace information: {debugInfo}");
-            }        
+                throw new ScriptException(HttpStatusCode.BadRequest, e.Message + $"Trace information: {debugInfo}");
+            }
         }
 
         private async Task<HttpResponseMessage> CreateParty(HttpRequestMessage initialRequest, string contractId, Models.Party party, IScriptContext ctx)
         {
-          StringBuilder debugInfo = new StringBuilder();
-          try
-          {
-            party.AlignParticipants();
-            string requestUrl = string.Format(Constants.Requests.PartyEndpoint, contractId);
-            debugInfo.AppendLine($"requestUri - {requestUrl}");
-            HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, new Uri(requestUrl));
-            CopyHeaders(initialRequest, req);
-            var jsonBody = JsonConvert.SerializeObject(party);
-            debugInfo.AppendLine($"jsonBody - {jsonBody}");
-            req.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-            return await ctx.SendAsync(req, CancellationToken);
-          }
-          catch (Exception e)
-          {
-            throw new ScriptException(HttpStatusCode.BadRequest, e.Message + $"Trace information: {debugInfo}");
-          }
+            StringBuilder debugInfo = new StringBuilder();
+            try
+            {
+                party.AlignParticipants();
+                string requestUrl = string.Format(Constants.Requests.PartyEndpoint, contractId);
+                debugInfo.AppendLine($"requestUri - {requestUrl}");
+                HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, new Uri(requestUrl));
+                CopyHeaders(initialRequest, req);
+                var jsonBody = JsonConvert.SerializeObject(party);
+                debugInfo.AppendLine($"jsonBody - {jsonBody}");
+                req.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+                return await ctx.SendAsync(req, CancellationToken);
+            }
+            catch (Exception e)
+            {
+                throw new ScriptException(HttpStatusCode.BadRequest, e.Message + $"Trace information: {debugInfo}");
+            }
         }
 
         private async Task<HttpResponseMessage> CreateParticipant(HttpRequestMessage initialRequest, int existingPartyId, string contractId, Models.Participant participant, IScriptContext ctx)
         {
-          StringBuilder debugInfo = new StringBuilder();
-          try
-          {
-            string requestUrl = String.Format(Constants.Requests.ParticipantEndpoint, contractId, existingPartyId);
-            debugInfo.AppendLine($"requestUri - {requestUrl}");
-            if (participant == null){
-              throw new ScriptException(HttpStatusCode.BadRequest, "Participant was not provided in the request.");
+            StringBuilder debugInfo = new StringBuilder();
+            try
+            {
+                string requestUrl = String.Format(Constants.Requests.ParticipantEndpoint, contractId, existingPartyId);
+                debugInfo.AppendLine($"requestUri - {requestUrl}");
+                if (participant == null)
+                {
+                    throw new ScriptException(HttpStatusCode.BadRequest, "Participant was not provided in the request.");
+                }
+                string participantJson = JsonConvert.SerializeObject(participant);
+                debugInfo.AppendLine($"participantJson - {participantJson}");
+                var req = new HttpRequestMessage(HttpMethod.Post, new Uri(requestUrl));
+                CopyHeaders(initialRequest, req);
+                req.Content = new StringContent(participantJson, Encoding.UTF8, "application/json");
+                return await ctx.SendAsync(req, CancellationToken);
             }
-            string participantJson = JsonConvert.SerializeObject(participant);
-            debugInfo.AppendLine($"participantJson - {participantJson}");
-
-            var req = new HttpRequestMessage(HttpMethod.Post, new Uri(requestUrl));
-            CopyHeaders(initialRequest, req);
-            req.Content = new StringContent(participantJson, Encoding.UTF8, "application/json");
-            return await ctx.SendAsync(req, CancellationToken);
-          }
-          catch (Exception e)
-          {
-            throw new ScriptException(HttpStatusCode.BadRequest, e.Message + $"Trace information: {debugInfo}");
-          }
+            catch (Exception e)
+            {
+                throw new ScriptException(HttpStatusCode.BadRequest, e.Message + $"Trace information: {debugInfo}");
+            }
         }
 
         private string FilterTemplatesByWorkspace(int workspaceId, JArray data)
@@ -257,18 +280,29 @@ namespace Oneflow.PowerApps.CustomCode
             }
             return new JArray().ToString();
         }
-        
-        private void CopyHeaders (HttpRequestMessage copyFrom, HttpRequestMessage copyTo)
+
+        private void CopyHeaders(HttpRequestMessage copyFrom, HttpRequestMessage copyTo)
         {
-          if (copyFrom == null || copyTo == null){
-            throw new ScriptException(HttpStatusCode.BadRequest, "CopyHeaders - one of the input parameters is null.");
-          }
+            if (copyFrom == null || copyTo == null)
+            {
+                throw new ScriptException(HttpStatusCode.BadRequest, "CopyHeaders - one of the input parameters is null.");
+            }
 
             foreach (var header in copyFrom.Headers)
             {
                 copyTo.Headers.Add(header.Key, header.Value);
             }
-        }        
+        }
+
+        private string GetHeaderStringValue(string headerName, HttpRequestMessage req)
+        {
+            if (req == null) throw new ScriptException(HttpStatusCode.InternalServerError,
+                                                       "GetHeaderStringValue - req is null.");
+
+            return req.Headers.First(x =>
+                string.Equals(x.Key, headerName, StringComparison.OrdinalIgnoreCase))
+                .Value?.First();
+        }
         #endregion
 
         #region additional classes
@@ -284,18 +318,20 @@ namespace Oneflow.PowerApps.CustomCode
 
         public static class Constants
         {
-          public static class Requests
-          {
-            public const string PartyEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties";
-            public const string ParticipantEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties/{1}/participants";
-          }
-          public static class PartyTypes
-          {
-            public const string Individual = "individual";
-            public const string Company = "company";
-          }
+            public static class Requests
+            {
+                public const string PartyEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties";
+                public const string ParticipantEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties/{1}/participants";
+            }
+            public static class PartyTypes
+            {
+                public const string Individual = "individual";
+                public const string Company = "company";
+                public const string Ownerside = "ownerside";
+            }
             public const string GetTemplatesFilterHeader = "x-oneflow-workspace-id";
-
+            public const string SchemaIdHeader = "schema_id";
+            public const string ParticipantTypeHeader = "participant_type";
             #region dynamic schemas
             public const string IndividualPartyDynamicSchema = @"{
                                                                       ""type"": ""object"",
@@ -545,22 +581,29 @@ namespace Oneflow.PowerApps.CustomCode
                                                                     ""type""
                                                                   ]
                                                                 }";
-             #endregion
+            #endregion
         }
         public class Models
         {
-          public class Party
-           {
+            public class Party
+            {
                 /// <summary>
                 ///  The country of the company.
                 /// </summary>       
-                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]         
+                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
                 public string country_code { get; set; }
+
+                /// <summary>
+                /// Whether the party belongs to the current user or not.
+                /// </summary>
+                /// 
+                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+                public bool? my_party { get; set; }
 
                 /// <summary>
                 /// The ID of the company.
                 /// </summary>         
-                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]       
+                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
                 public int? id { get; set; }
 
                 /// <summary>
@@ -578,7 +621,7 @@ namespace Oneflow.PowerApps.CustomCode
                 /// <summary>
                 /// Participants of the company
                 /// </summary>             
-                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]   
+                [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
                 public List<Participant> participants { get; set; }
 
                 /// <summary>
@@ -594,11 +637,15 @@ namespace Oneflow.PowerApps.CustomCode
 
                 public override bool Equals(object obj)
                 {
-                    return obj is Party party &&
-                           country_code == party.country_code &&
-                           identification_number == party.identification_number &&
-                           name == party.name &&                           
-                           type == party.type;
+                    return  obj is Party party &&
+                            NullStringComparer.NullEqualsEmptyComparer.Equals(identification_number, party.identification_number) &&
+                            NullStringComparer.NullEqualsEmptyComparer.Equals(name, party.name) &&
+                            NullStringComparer.NullEqualsEmptyComparer.Equals(type, party.type) &&
+                            // if country code is empty in the input, it defaults to a predefined country code in the application, 
+                            // so just ignore empty country codes during comparison if it's not set.
+                            (!String.IsNullOrEmpty(country_code) ? true :
+                              NullStringComparer.NullEqualsEmptyComparer.Equals(country_code, party.country_code));
+
                 }
 
                 public override int GetHashCode()
@@ -611,20 +658,34 @@ namespace Oneflow.PowerApps.CustomCode
                     return hashCode;
                 }
 
-                public void AlignParticipants(){
-                  if (String.Equals("individual", type, StringComparison.InvariantCultureIgnoreCase)) return;
-                  if (String.Equals("company", type, StringComparison.InvariantCultureIgnoreCase)){
-                    this.participants = new List<Participant>(){this.participant};
-                    this.participant = null;
-                  }
+                public override string ToString()
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine($"country_code - {this.country_code}");
+                    sb.AppendLine($"identification_number - {this.identification_number}");
+                    sb.AppendLine($"name - {this.name}");
+                    sb.AppendLine($"type - {this.type}");
+                    sb.AppendLine($"my_party - {this.my_party}");
+                    sb.AppendLine($"id - {this.id}");
+
+                    return sb.ToString();
+                }
+                public void AlignParticipants()
+                {
+                    if (Constants.PartyTypes.Individual.Equals(type, StringComparison.OrdinalIgnoreCase)) return;
+                    if (Constants.PartyTypes.Company.Equals(type, StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.participants = new List<Participant>() { this.participant };
+                        this.participant = null;
+                    }
                 }
             }
 
-          public class Participant
-          {
+            public class Participant
+            {
                 //workaround for Power Automate bug with a nested object in array element.
                 [JsonProperty("_permissions/contract:update", NullValueHandling = NullValueHandling.Ignore)]
-                bool? updatePermission {get; set;}
+                bool? updatePermission { get; set; }
 
                 [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
                 public ParticipantPermissions _permissions { get; set; }
@@ -683,13 +744,13 @@ namespace Oneflow.PowerApps.CustomCode
                 [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
                 public bool signatory { get; set; }
 
-                [System.Runtime.Serialization.OnDeserialized]  
+                [System.Runtime.Serialization.OnDeserialized]
                 internal void OnDeserializedMethod(System.Runtime.Serialization.StreamingContext context)
                 {
-                  if (_permissions == null && updatePermission.HasValue)
-                  {
-                    _permissions = updatePermission.Value;
-                  }
+                    if (_permissions == null && updatePermission.HasValue)
+                    {
+                        _permissions = updatePermission.Value;
+                    }
                 }
 
                 [System.Runtime.Serialization.OnSerializing]
@@ -702,14 +763,14 @@ namespace Oneflow.PowerApps.CustomCode
                 {
                     return obj is Participant participant &&
                            EqualityComparer<ParticipantPermissions>.Default.Equals(_permissions, participant._permissions) &&
-                           delivery_channel == participant.delivery_channel &&
-                           email == participant.email &&
-                           identification_number == participant.identification_number &&
-                           name == participant.name &&
-                           phone_number == participant.phone_number &&
-                           sign_method == participant.sign_method &&
-                           title == participant.title &&
-                           two_step_authentication_method == participant.two_step_authentication_method &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(delivery_channel,participant.delivery_channel) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(email, participant.email) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(identification_number, participant.identification_number) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(name, participant.name) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(phone_number, participant.phone_number) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(sign_method, participant.sign_method) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(title, participant.title) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(two_step_authentication_method, participant.two_step_authentication_method) &&
                            signatory == participant.signatory;
                 }
 
@@ -730,25 +791,27 @@ namespace Oneflow.PowerApps.CustomCode
                 }
             }
 
-          public class ParticipantPermissions {
+            public class ParticipantPermissions
+            {
                 [JsonProperty("contract:update")]
                 public bool ContractUpdate { get; set; }
 
-                public static implicit operator ParticipantPermissions (bool updatePermission)
+                public static implicit operator ParticipantPermissions(bool updatePermission)
                 {
-                  return new ParticipantPermissions(){
-                    ContractUpdate = updatePermission
-                  };
+                    return new ParticipantPermissions()
+                    {
+                        ContractUpdate = updatePermission
+                    };
                 }
-          }
+            }
         }
 
         public class Responses
         {
-          public class GetPartiesResponse
-          {
-            public IEnumerable<Models.Party> data {get; set;}
-          }
+            public class GetPartiesResponse
+            {
+                public IEnumerable<Models.Party> data { get; set; }
+            }
         }
         public class ScriptException : Exception
         {
@@ -765,6 +828,28 @@ namespace Oneflow.PowerApps.CustomCode
                 return ($"Error  while execuring custom script: {Message}. {Environment.NewLine} Stack trace: {StackTrace}.");
             }
         }
+
+        public class NullStringComparer : EqualityComparer<string>
+        {
+            public static IEqualityComparer<string> NullEqualsEmptyComparer { get; } = new NullStringComparer();
+
+            public override bool Equals(string x, string y)
+            {
+                // equal if string.Equals(x, y)
+                // or both StringIsNullOrEmpty
+                return String.Equals(x, y, StringComparison.Ordinal)
+                    || (String.IsNullOrEmpty(x) && String.IsNullOrEmpty(y));
+            }
+
+            public override int GetHashCode(string obj)
+            {
+                if (String.IsNullOrEmpty(obj))
+                    return 0;
+                else
+                    return obj.GetHashCode();
+            }
+        }
+
         #endregion
     }
 }
