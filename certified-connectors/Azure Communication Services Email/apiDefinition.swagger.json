@@ -1,0 +1,300 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Azure Communication Email",
+    "description": "Connector to send Email using the domains linked to the Azure Communication Services in your subscription.",
+    "version": "1.0",
+    "x-ms-api-annotation": {
+      "status": "Production"
+    },
+    "contact": {
+      "name": "Microsoft",
+      "email": "acssolutions@microsoft.com",
+      "url": "https://azure.microsoft.com/services/communication-services"
+    }
+  },
+  "host": "api.contoso.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/emails:send": {
+      "post": {
+        "summary": "Send email (Preview)",
+        "description": "Sends an email message to one or more recipients.",
+        "operationId": "SendEmail",
+        "parameters": [
+          {
+            "$ref": "#/parameters/PreviewApiVersion"
+          },
+          {
+            "name": "emailMessage",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sender": {
+                  "type": "string",
+                  "title": "From",
+                  "description": "The sender email address from a verified domain.",
+                  "x-ms-visibility": "important"
+                },
+                "recipients": {
+                  "type": "object",
+                  "description": "Recipients for the email.",
+                  "properties": {
+                    "to": {
+                      "type": "array",
+                      "title": "To",
+                      "description": "Email To recipients.",
+                      "minItems": 1,
+                      "maxItems": 100,
+                      "items": {
+                        "$ref": "#/definitions/EmailAddress"
+                      },
+                      "x-ms-visibility": "important"
+                    },
+                    "CC": {
+                      "type": "array",
+                      "title": "CC",
+                      "description": "Email CC recipients.",
+                      "items": {
+                        "$ref": "#/definitions/EmailAddress"
+                      },
+                      "x-ms-visibility": "advanced"
+                    },
+                    "bCC": {
+                      "type": "array",
+                      "title": "BCC",
+                      "description": "Email BCC recipients.",
+                      "items": {
+                        "$ref": "#/definitions/EmailAddress"
+                      },
+                      "x-ms-visibility": "advanced"
+                    }
+                  },
+                  "required": [
+                    "to"
+                  ]
+                },
+                "content": {
+                  "type": "object",
+                  "description": "Content.",
+                  "properties": {
+                    "subject": {
+                      "type": "string",
+                      "title": "Subject",
+                      "description": "Specify the subject of the email.",
+                      "x-ms-visibility": "important"
+                    },
+                    "html": {
+                      "format": "html",
+                      "type": "string",
+                      "title": "Body",
+                      "description": "Specify the body of the email.",
+                      "x-ms-visibility": "important"
+                    }
+                  },
+                  "required": [
+                    "subject"
+                  ]
+                },
+                "replyTo": {
+                  "type": "array",
+                  "title": "Reply To",
+                  "description": "Email addresses where recipients' replies will be sent to.",
+                  "items": {
+                    "$ref": "#/definitions/EmailAddress"
+                  },
+                  "x-ms-visibility": "advanced"
+                },
+                "attachments": {
+                  "type": "array",
+                  "title": "Attachments",
+                  "description": "List of attachments.",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Attachment name with extension.",
+                        "x-ms-visibility": "important"
+                      },
+                      "attachmentType": {
+                        "type": "string",
+                        "title": "Type",
+                        "description": "The type of attachment file.",
+                        "x-ms-visibility": "internal"
+                      },
+                      "contentBytesBase64": {
+                        "format": "byte",
+                        "type": "string",
+                        "title": "Content",
+                        "description": "Attachment content.",
+                        "x-ms-visibility": "important"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "attachmentType",
+                      "contentBytesBase64"
+                    ]
+                  }
+                },
+                "importance": {
+                  "type": "string",
+                  "title": "Importance",
+                  "description": "The importance type for the email.",
+                  "enum": [
+                    "high",
+                    "normal",
+                    "low"
+                  ],
+                  "default": "normal",
+                  "x-ms-visibility": "advanced"
+                },
+                "disableUserEngagementTracking": {
+                  "type": "boolean",
+                  "title": "Disable User Engagement Tracking",
+                  "description": "Indicates whether user engagement tracking should be disabled for this request if the resource-level user engagement tracking setting was already enabled in the control plane.",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "sender",
+                "recipients",
+                "content"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Error.",
+            "headers": {
+              "x-ms-error-code": {
+                "description": "Error code - this will be the same as the code in the error property in the response body.",
+                "type": "string"
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted.",
+            "headers": {
+              "x-ms-request-id": {
+                "type": "string",
+                "x-ms-summary": "Message ID"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emails/{messageId}/status": {
+      "get": {
+        "summary": "Get email message status (Preview)",
+        "description": "Gets the status of an email message sent previously.",
+        "operationId": "GetMessageStatus",
+        "parameters": [
+          {
+            "$ref": "#/parameters/PreviewApiVersion"
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Message ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important",
+            "description": "Message ID from a previous call to send email."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Error.",
+            "headers": {
+              "x-ms-error-code": {
+                "description": "Error code - this will be the same as the code in the error property in the response body.",
+                "type": "string"
+              }
+            }
+          },
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageId": {
+                  "type": "string",
+                  "x-ms-summary": "Message ID"
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Message Status"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "EmailAddress": {
+      "type": "object",
+      "description": "An object representing the email address.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "title": "Email",
+          "description": "Email address.",
+          "x-ms-visibility": "important"
+        }
+      },
+      "required": [
+        "email"
+      ]
+    }
+  },
+  "parameters": {
+    "PreviewApiVersion": {
+      "name": "api-version",
+      "in": "query",
+      "required": true,
+      "type": "string",
+      "default": "2021-10-01-preview",
+      "description": "Preview API version query parameter.",
+      "x-ms-visibility": "internal"
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Connection-String"
+    }
+  },
+  "security": [],
+  "tags": [],
+  "x-ms-capabilities": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://azure.microsoft.com/services/communication-services"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://privacy.microsoft.com"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ]
+}
