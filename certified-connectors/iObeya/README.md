@@ -30,4 +30,4 @@ The iObeya connector supports the following operations:
 * `List activity card`: Retrieve all activity cards by date range from a planning board
 
 ## Contact us
-Don’t hesitate to contact us if you have any question, or you want to share your feedback regarding our connector via integration-support@iobeya.com.
+Don’t hesitate to contact us if you have any question, or you want to share your feedback regarding our connector via integrations-support@iobeya.com.
