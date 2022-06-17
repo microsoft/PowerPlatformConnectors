@@ -451,6 +451,11 @@ public class Script : ScriptBase
       ["templateId"] = query.Get("templateId")
     };
 
+    if (!string.IsNullOrEmpty(query.Get("status")))
+    {
+      newBody["status"] = query.Get("status");
+    }
+
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("envelopes/createFromTemplate", "/envelopes");
     this.Context.Request.RequestUri = uriBuilder.Uri;
@@ -696,6 +701,15 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("GetFolderEnvelopeList".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      query["include_items"] = "true";
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     // update Accept Header
     this.Context.Request.Headers.Accept.Clear();
     var acceptHeaderValue = "application/json";
@@ -801,6 +815,20 @@ public class Script : ScriptBase
       locationUriBuilder.Query = originalQuery.ToString();
       response.Headers.Location = locationUriBuilder.Uri;
       response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(120));
+    }
+
+    if ("GetFolderEnvelopeList".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var newBody = new JObject();
+
+      foreach (var folder in (body["folders"] as JArray) ?? new JArray())
+      {
+        newBody = folder as JObject;
+        break;
+      }
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
     if (response.Content?.Headers?.ContentType != null)

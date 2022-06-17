@@ -39,7 +39,7 @@ List participants in a chat thread.
 ## Obtaining Credentials
 
 1 Set up an Azure Communication Services resource
-- [Quickstart doc](https://review.docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?branch=pr-en-us-192537&tabs=windows&pivots=platform-azp)
+- [[Quickstart doc](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp)
 
 2 Connection String Authentication
 - You can create a new connection using an [Azure Communication Services resource endpoint url](https://docs.microsoft.com/en-us/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp#access-your-connection-strings-and-service-endpoints).
