@@ -1,5 +1,5 @@
 # Givebutter
-Givebutter is the world’s first completely free end-to-end fundraising platform. Create beautiful giving experiences that feel like magic. Raise more with modern forms, campaigns, and events, and tools. This is fundraising, done right.
+Givebutter is the world’s first completely free end-to-end fundraising platform. Raise more with modern forms, campaigns, and events. Manage your contacts and funds with details about transactions, payouts, and funds.
 
 ## Publisher: Troy Taylor, Hitachi Solutions
 
