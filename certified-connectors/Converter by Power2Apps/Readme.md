@@ -7,13 +7,13 @@ Convert your data easily from one format to another with Microsoft Power Automat
 ## Supported Operations
 
 ### Convert CSV to JSON
-Convert CSV-Data to JSON
+Convert CSV data to JSON
 
 ### Convert JSON to CSV
-Convert JSON To CSV-Data
+Convert JSON To CSV data
 
-### Convert CSV To Excel
-Convert CSV-Data to Excel-File
+### Convert CSV to Excel
+Convert CSV data to Excel file
 
-### Convert SharePoint Search Results
+### Convert SharePoint search results to list
 Convert SharePoint search results to a simple list
