@@ -1,5 +1,5 @@
 # CarbonFootprint
-Calculate the carbon footprint in various situations, such as travel and hydro usage. Carbon equivalent is the key unit used to report one’s carbon footprint. This API enables developers to calculate carbon footprint without having to be concerned about the various conversion ratios.
+Calculate the carbon footprint in various situations, such as travel and hydro usage. Carbon equivalent is the key unit used to report one’s carbon footprint. This service enables developers to calculate carbon footprint without having to be concerned about the various conversion ratios.
 
 ## Publisher: Troy Taylor, Hitachi Solutions
 
