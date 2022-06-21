@@ -56,7 +56,8 @@ public class Script : ScriptBase
             foreach (JObject attachment in attachments)
             {
                 var attachmentName = (string)attachment["name"];
-                attachment["attachmentType"] = attachmentName.Substring(attachmentName.LastIndexOf(".") + 1);
+                var attachmentExtension = attachmentName.Substring(attachmentName.LastIndexOf(".") + 1);
+                attachment["attachmentType"] = attachmentExtension == "jpg" ? "jpeg" : attachmentExtension;
             }
         }
 
