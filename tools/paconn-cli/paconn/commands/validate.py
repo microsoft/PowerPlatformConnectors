@@ -31,6 +31,7 @@ def validate(
         api_properties=None,
         api_definition=api_definition,
         icon=None,
+        script=None,
         connector_id=None,
         powerapps_url=powerapps_url,
         powerapps_version=powerapps_version)

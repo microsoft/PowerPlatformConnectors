@@ -1,5 +1,5 @@
 ## Plumsail Documents Connector
-Plumsail Documents provides a powerful and very extensive REST API.  Using this API, you can generate documents in Microsoft Power Automate, Azure Logic Apps or Power Apps.
+Plumsail Documents provides a powerful and very extensive REST API.  Using this API, you can generate documents in Microsoft PowerAutomate, Azure Logic Apps or Power Apps. 
 
 ## Pre-requisites
 You will need the following to proceed:

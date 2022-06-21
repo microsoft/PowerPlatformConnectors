@@ -1,6 +1,6 @@
 ## Panviva Connector
 
-Panviva provides a powerful and very extensive REST API. Using this API, you can access and manage knowledge stores in your Panviva instances. This connector allows you to leverage the same knowledge within your application, or in your process automation.
+Panviva is an omnichannel knowledge management solution. Our priority is to aid our clients in keeping their employees happy, so that they can focus on ensuring their customers are happy. Digitally transforming organisations for the last 20 years, we're now helping our customers to deliver knowledge nuggets to their employees and customers, whether they are in the home or the office - anytime and anywhere.
 
 ## Prerequisites
 

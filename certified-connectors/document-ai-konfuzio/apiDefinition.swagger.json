@@ -1,0 +1,623 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Document AI Konfuzio",
+    "termsOfService": "https://konfuzio.com/impressum/",
+    "contact": {
+      "name": "Helm & Nagel GmbH",
+      "email": "info@konfuzio.com",
+      "url": "https://help.konfuzio.com"
+    },
+    "license": {
+      "name": "Helm & Nagel GmbH"
+    },
+    "version": "1.0.0",
+    "description": "Use the document AI Konfuzio Connector to OCR, extract, and retrieve structured information from PDFs, images, handwriting, and scans. Register on https://app.konfuzio.com for free to OCR PDFs and images from various file types, see https://dev.konfuzio.com/web/api.html#supported-file-types. In addition, you can train your custom Document AI following the Tutorial on https://help.konfuzio.com/tutorials/quickstart/ to extract structured information from documents."
+  },
+  "host": "app.konfuzio.com",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://konfuzio.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://konfuzio.com/de/impressum/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Content and Files"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/docs/": {
+      "post": {
+        "operationId": "v2_docs_create",
+        "summary": "Upload a new document",
+        "description": "Upload a new document",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "x-ms-summary": "File",
+            "description": "File to send to Host.",
+            "in": "formData",
+            "name": "data_file",
+            "type": "file",
+            "required": true
+          },
+          {
+            "x-ms-summary": "Project ID",
+            "description": "The ID of your project.",
+            "in": "formData",
+            "name": "project",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "x-ms-summary": "Synchron response",
+            "description": "Default is False",
+            "in": "formData",
+            "name": "sync",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "File sent to Host including the URL to retrieve the extracted results",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data_file": {
+                  "title": "Data file",
+                  "type": "string",
+                  "readOnly": true,
+                  "format": "uri"
+                },
+                "id": {
+                  "title": "ID",
+                  "type": "integer",
+                  "readOnly": true
+                },
+                "project": {
+                  "title": "Project",
+                  "type": "integer"
+                },
+                "data_file_name": {
+                  "title": "Data file name",
+                  "type": "string",
+                  "readOnly": true,
+                  "minLength": 1
+                },
+                "callback_url": {
+                  "title": "Callback URL",
+                  "type": "string",
+                  "format": "uri",
+                  "maxLength": 200,
+                  "x-nullable": true
+                },
+                "sync": {
+                  "title": "Sync",
+                  "type": "boolean"
+                },
+                "extraction_url": {
+                  "title": "Extraction url",
+                  "type": "string",
+                  "readOnly": true
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "docs"
+        ]
+      }
+    },
+    "/v2/docs/{doc}/": {
+      "get": {
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Document ID",
+            "description": "ID of your document in the project",
+            "name": "doc",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "operationId": "v2_docs_read",
+        "summary": "Retrieve the extraction results for a document",
+        "description": "Get all information for a document using its id. The extraction results are available once the processing has finished",
+        "responses": {
+          "200": {
+            "description": "Get the status of document after uploading it including structured information within detectd by the Extraction AI model"
+          }
+        },
+        "tags": [
+          "docs"
+        ]
+      },
+      "delete": {
+        "operationId": "v2_docs_delete",
+        "description": "Delete a document.",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Document ID",
+            "description": "ID of the document you want to delete",
+            "name": "doc",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted the document from the server successfully"
+          }
+        },
+        "tags": [
+          "docs"
+        ],
+        "summary": "Delete a document"
+      },
+      "patch": {
+        "operationId": "v2_docs_partial_update",
+        "summary": "Give feedback to the extraction results of a document",
+        "description": "You can give feedback by sending the adapted extraction result dictionary.\n\nExample python code:\n```python\nimport requests\nimport json\nfrom requests.auth import HTTPBasicAuth\n\nurl = f\"https://app.konfuzio.com/api/v2/docs/{DOC_ID}/\"\nauth = HTTPBasicAuth(KONFUZIO_USER, KONFUZIO_PASSWORD)\ndata = requests.get(url=url, auth=auth).json()\n\n# Mark Extraction as correct.\ndata['labels']['Bruttozahlweise']['extractions'][0]['correct'] = True\n\n# Add new Extraction which has not been in result list.\ndata['labels']['Bruttozahlweise']['extractions'].append({'value': '123,45'})\n\nr = requests.patch(url = url, data=json.dumps(data), auth=auth, headers={'Content-Type': 'application/json'},)\n```",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Document ID",
+            "description": "ID of the document you want to patch",
+            "name": "doc",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated the information of a document successfully"
+          }
+        },
+        "tags": [
+          "docs"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Label": {
+      "required": [
+        "text"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "text": {
+          "title": "Text",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "text_clean": {
+          "title": "Text clean",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "shortcut": {
+          "title": "Shortcut",
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "token_full_replacement": {
+          "title": "Token full replacement",
+          "type": "boolean"
+        },
+        "token_whitespace_replacement": {
+          "title": "Token whitespace replacement",
+          "type": "boolean"
+        },
+        "token_number_replacement": {
+          "title": "Token number replacement",
+          "type": "boolean"
+        },
+        "has_multiple_top_candidates": {
+          "title": "Has multiple top candidates",
+          "description": "If this is set, (1) annotations with this label are combined into a single cell in the csv export, (2) multiple extractions with this label are shown on the dashboard (instead of the most likely one), (3) in the evaluation every anotation of the ground truth needs to be matched (instead of only one).",
+          "type": "boolean"
+        },
+        "get_data_type_display": {
+          "title": "Get data type display",
+          "type": "string",
+          "readOnly": true
+        }
+      }
+    },
+    "SectionLabel": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 25,
+          "minLength": 1
+        },
+        "name_clean": {
+          "title": "Name clean",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "readOnly": true
+        },
+        "is_default": {
+          "title": "Is default",
+          "description": "Default templates refer to the type of a document, e.g. invoice, contract, payslip, account statement.",
+          "type": "boolean"
+        },
+        "default_template": {
+          "title": "Parent default template",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "has_multiple_sections": {
+          "title": "Has multiple sections",
+          "description": "Decide if a section with this template can occur multiple times in a document. For example, an invoice can have multiple positions. A default template cannot have multiple sections.",
+          "type": "boolean"
+        }
+      }
+    },
+    "Project": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Label"
+          },
+          "readOnly": true
+        },
+        "section_labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SectionLabel"
+          },
+          "readOnly": true
+        },
+        "storage_name": {
+          "title": "Storage name",
+          "type": "string",
+          "maxLength": 100,
+          "x-nullable": true
+        },
+        "enable_api": {
+          "title": "Enable API",
+          "description": "Decide if this project can be accessed via API. API access is necessary for uploading new documents.",
+          "type": "boolean"
+        },
+        "priority_processing": {
+          "title": "Priority OCR and extraction",
+          "type": "boolean"
+        }
+      }
+    },
+    "Document": {
+      "required": [
+        "data_file_name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "number_of_pages": {
+          "title": "Number of pages",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        },
+        "callback_url": {
+          "title": "Callback URL",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 200,
+          "x-nullable": true
+        },
+        "callback_status_code": {
+          "title": "Callback status code",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        },
+        "category_template": {
+          "title": "Category template",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "category_confidence": {
+          "title": "Category confidence",
+          "type": "number",
+          "x-nullable": true
+        },
+        "file_url": {
+          "title": "File url",
+          "type": "string",
+          "readOnly": true
+        },
+        "data_file_name": {
+          "title": "Data file name",
+          "type": "string",
+          "maxLength": 1024,
+          "minLength": 1
+        },
+        "data_file_producer": {
+          "title": "Data file producer",
+          "type": "string",
+          "maxLength": 1024,
+          "x-nullable": true
+        },
+        "data_file": {
+          "title": "Data file",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "ocr_time": {
+          "title": "Ocr time",
+          "type": "number",
+          "x-nullable": true
+        },
+        "extraction_time": {
+          "title": "Extraction time",
+          "type": "number",
+          "x-nullable": true
+        },
+        "workflow_start_time": {
+          "title": "Workflow start time",
+          "type": "number",
+          "x-nullable": true
+        },
+        "workflow_end_time": {
+          "title": "Workflow end time",
+          "type": "number",
+          "x-nullable": true
+        },
+        "dataset_status": {
+          "title": "Dataset status",
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "status": {
+          "title": "status",
+          "description": "A list containing two elements. First, the document status code as int. Second, a description of the status code as string. For example: [2, \"Done\"]",
+          "type": "object"
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "SequenceAnnotation": {
+      "required": [
+        "label"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "label": {
+          "title": "Label",
+          "type": "integer"
+        },
+        "label_text": {
+          "title": "Label text",
+          "type": "string",
+          "readOnly": true
+        },
+        "label_data_type": {
+          "title": "Label data type",
+          "type": "string",
+          "readOnly": true
+        },
+        "label_threshold": {
+          "title": "Label threshold",
+          "type": "string",
+          "readOnly": true
+        },
+        "section_label_text": {
+          "title": "Section label text",
+          "type": "string",
+          "readOnly": true
+        },
+        "section_label_id": {
+          "title": "Section label id",
+          "type": "integer"
+        },
+        "section": {
+          "title": "Section",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "offset_string": {
+          "title": "Offset string",
+          "type": "string",
+          "x-nullable": true
+        },
+        "offset_string_original": {
+          "title": "Original offset string",
+          "type": "string",
+          "x-nullable": true
+        },
+        "translated_string": {
+          "title": "Translated string",
+          "type": "string",
+          "x-nullable": true
+        },
+        "normalized": {
+          "title": "Normalized",
+          "type": "string",
+          "readOnly": true
+        },
+        "start_offset": {
+          "title": "Start offset",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        },
+        "end_offset": {
+          "title": "End offset",
+          "type": "integer",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "x-nullable": true
+        },
+        "accuracy": {
+          "title": "Accuracy",
+          "type": "number",
+          "x-nullable": true
+        },
+        "is_correct": {
+          "title": "Correct",
+          "type": "boolean"
+        },
+        "revised": {
+          "title": "Human revised",
+          "type": "boolean"
+        },
+        "created_by": {
+          "title": "Created by",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "revised_by": {
+          "title": "Revised by",
+          "type": "integer",
+          "x-nullable": true
+        },
+        "bbox": {
+          "title": "Bbox",
+          "type": "string"
+        },
+        "bboxes": {
+          "title": "Bboxes",
+          "type": "string",
+          "readOnly": true
+        },
+        "custom_bboxes": {
+          "title": "Custom bboxes",
+          "type": "object"
+        },
+        "selection_bbox": {
+          "title": "Selection bbox",
+          "type": "object"
+        },
+        "custom_offset_string": {
+          "title": "Custom offset string",
+          "type": "string",
+          "readOnly": true
+        },
+        "get_created_by": {
+          "title": "Get created by",
+          "type": "string",
+          "readOnly": true
+        },
+        "get_revised_by": {
+          "title": "Get revised by",
+          "type": "string",
+          "readOnly": true
+        },
+        "page_number": {
+          "title": "Page number",
+          "type": "integer",
+          "x-nullable": true
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "basic_auth": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "basic_auth": []
+    }
+  ],
+  "tags": []
+}
