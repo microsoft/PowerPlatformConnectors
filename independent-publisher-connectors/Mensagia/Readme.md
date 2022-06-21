@@ -1,15 +1,17 @@
 # Mensagia
 Mensagia offer reliable SMS, Email and Voice for business automation communication.
 
-## Publisher: Mensagia
+## Publisher: Sistemes Informàtics ICON, S.L.
+
+## Stack Owner: Sinergyne Global Communications, S.L.
 
 ## Prerequisites
 You will need the following to proceed:
-* A Mensagia "API Client" account.
+* A Mensagia "API Client" account created by an user type "Manager".
 * Make sure you have enough balance in your Mensagia account.
 
 ## Obtaining Credentials
-The API key can be obtained by entering the portal of your Mensagia account.
+If you are a Manager user, you can create an sub-user "API Client" within the portal of your [Mensagia account](https://mensagia.com/dashboard). This step is essential to be able to obtain an API key that allows you to use this connector. [More info](https://mensagia.com/docs/tipos-de-usuarios/1039).
 
 ## Supported Operations
 
@@ -25,17 +27,6 @@ Send an SMS to your contacts through your Mensagia account. [More info](https://
 
 #### Send SMS Campaigns
 Send SMS Campaigns to your contacts through your Mensagia account. [More info](https://api.mensagia.com/docs/v1#envios-sms-envio-masivo-campanas).
-
-### 2 Way SMS
-
-#### Get 2 Way SMS's numbers
-Get a list of 2 Way SMS's numbers through your Mensagia account. [More info](https://api.mensagia.com/docs/v1#2-way-sms-obtener-numeros-2-way-sms).
-
-#### Get 2 Way SMS
-Get a list of 2 Way SMS's through your Mensagia account. [More info](https://api.mensagia.com/docs/v1#2-way-sms-obtener-conversaciones).
-
-#### Send 2 Way SMS
-Send 2 Way SMS's to your contacts through your Mensagia account. [More info](https://api.mensagia.com/docs/v1#2-way-sms-enviar-sms).
 
 ### Email
 
