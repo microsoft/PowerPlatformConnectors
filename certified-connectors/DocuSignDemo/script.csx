@@ -280,6 +280,24 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "* Signer email"
         };
       }
+      else if (recipientType.Equals("witnesses", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["witnessName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Witness name"
+        };
+        response["schema"]["properties"]["witnessEmail"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Witness email"
+        };
+        response["schema"]["properties"]["witnessFor"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Witness for (Specify Recipient ID)"
+        };
+      }
       else
       {
         response["schema"]["properties"]["name"] = new JObject
@@ -590,7 +608,7 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
-    signers[0]["recipientId"] = Guid.NewGuid();
+    signers[0]["recipientId"] = GenerateId();
     
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
@@ -639,23 +657,28 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var recipientType = query.Get("recipientType");
-    
+    signers[0]["recipientId"] = GenerateId();
+
     if (recipientType.Equals("inPersonSigners"))
     {
-      signers[0]["recipientId"] = Guid.NewGuid();
       signers[0]["hostName"] = body["hostName"];
       signers[0]["hostEmail"] = body["hostEmail"];
       signers[0]["signerName"] = body["signerName"];
     }
+    else if (recipientType.Equals("witnesses"))
+    {
+      signers[0]["name"] = body["witnessName"];
+      signers[0]["email"] = body["witnessEmail"];
+      signers[0]["witnessFor"] = body["witnessFor"];
+    }
     else
     {
-      signers[0]["recipientId"] = Guid.NewGuid();
       signers[0]["name"] = body["name"];
       signers[0]["email"] = body["email"];
     }
   }
 
-  private int GenerateDocumentId()
+  private int GenerateId()
   {
     DateTimeOffset now = DateTimeOffset.UtcNow;
     DateTime midnight = DateTime.Now.Date;
@@ -669,7 +692,7 @@ public class Script : ScriptBase
 
     for (var i = 0; i < documents.Count; i++)
     {
-      documents[i]["documentId"] = $"{GenerateDocumentId() + i}";
+      documents[i]["documentId"] = $"{GenerateId() + i}";
     }
 
     body["documents"] = documents;
