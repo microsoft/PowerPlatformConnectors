@@ -1,6 +1,6 @@
 ## GAC Connect2All
 
-GAC Connect2All integrates the Microsoft Power Platform to Business Central SaaS and makes adaptations and the extensibility to connect virtual any Datasource to your business processes in Business Central SaaS possible. You do not need to be a Professional developer to seamlessly  extend Business Central SaaS  to interact to other business application and  Datasources. GAC Connect2All delivers your business the scalability and  flexibility to create smart integration solutions you need today and  tomorrow.
+GAC Connect2All integrates the Microsoft Power Platform to Business Central on-premises and makes adaptations and the extensibility to connect virtual any Datasource to your business processes in Business Central on-premises possible. You do not need to be a Professional developer to seamlessly  extend Business Central on-premises  to interact to other business application and  Datasources. GAC Connect2All delivers your business the scalability and  flexibility to create smart integration solutions you need today and  tomorrow.
 
 ## Pre-requisites
 
