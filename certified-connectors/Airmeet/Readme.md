@@ -33,4 +33,4 @@ The connector supports the following operations:
 - `Create Session`: Add a Session to your Airmeet.
 - `Add Registrant`: Add Registrant to an Airmeet.
 - `Register an Airmeet Trigger`: Select a trigger from the available options. Setup reminders and alerts based on event registration, attendance, event start and end time.
-  Avaible triggers are "trigger.airmeet.registrant.added","trigger.airmeet.attendee.added","trigger.airmeet.attendee.joined","trigger.airmeet.created","trigger.airmeet.started","trigger.airmeet.finished","trigger.airmeet.reminder"
+  Avaible triggers are "trigger.airmeet.registrant.added","trigger.airmeet.attendee.added","trigger.airmeet.attendee.joined","trigger.airmeet.created","trigger.airmeet.started","trigger.airmeet.finished","trigger.airmeet.reminder","trigger.airmeet.questions","trigger.attendee.booth.joined"
