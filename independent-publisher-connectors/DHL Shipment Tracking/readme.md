@@ -7,8 +7,8 @@ The Shipment Tracking API provides up-to-the-minute shipment status reports. Use
 
 
 ## Prerequisites
-You need an API Key.
+You need an [API Key](https://developer.dhl.com/).
 
 ## Links
-Swagger file referenced: https://app.swaggerhub.com/apis/dpdhl/shipment-tracking/1.1.0
-DHL Docs: https://developer.dhl.com/api-reference/shipment-tracking
+- Swagger file referenced: https://app.swaggerhub.com/apis/dpdhl/shipment-tracking/1.1.0
+- DHL Docs: https://developer.dhl.com/api-reference/shipment-tracking
