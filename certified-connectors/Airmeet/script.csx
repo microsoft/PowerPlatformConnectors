@@ -73,8 +73,7 @@
       var airmeetSecretKey);
     this.Context.Request.Headers.TryGetValues("region", out
       var airmeetRegion);
-    using
-    string authUrl = $"https://{airmeetRegion}/prod/auth";
+    var authUrl = $"https://{airmeetRegion}/prod/auth";
     var userInfoRequest = new HttpRequestMessage(HttpMethod.Post, authUrl);
     userInfoRequest.Headers.TryAddWithoutValidation("X-Airmeet-Access-Key", airmeetAccessKey);
     userInfoRequest.Headers.TryAddWithoutValidation("X-Airmeet-Secret-Key", airmeetSecretKey);
