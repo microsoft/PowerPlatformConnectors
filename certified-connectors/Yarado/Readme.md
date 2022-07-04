@@ -21,3 +21,13 @@ Fetch a list of tasks published in your organisation.
 
 ### Schedule task
 Schedule a single-run task to run immediately on a selected robot.
+
+
+## Obtaining Credentials
+To obtain credentials please contact Yarado team at info@yarado.com.
+
+## Known Issues and Limitations
+N/A
+
+## Deployment Instructions
+N/A
