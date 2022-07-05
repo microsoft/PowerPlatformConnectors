@@ -1,0 +1,366 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "DHL Tracking",
+    "description": "The Shipment Tracking API provides up-to-the-minute shipment status reports. Users of this API can: Retrieve tracking information for shipments, Identify the Deutsche Post DHL (DPDHL) service provider involved with the shipment, Verify DPDHL is using the correct delivery address. This can reduce the number of misdelivered shipments.",
+    "version": "1.0",
+    "contact": {
+      "name": "Seven Sigma",
+      "url": "https://www.sevensigma.com.au/"
+    }
+  },
+  "host": "api-eu.dhl.com",
+  "basePath": "/track",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/shipments": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "shipments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "tracking Number. http://schema.org/trackingNumber"
+                      },
+                      "service": {
+                        "type": "string",
+                        "description": "Service (provider) used to resolve this tracking number (id)."
+                      },
+                      "origin": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "$ref" : "#/definitions/Placeaddress"
+                          },
+                          "servicePoint": {
+                            "$ref" : "#/definitions/PlaceservicePoint"
+                          }
+                        },
+                        "description": "Origin of the Shipment"
+                      },
+                      "destination": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "$ref" : "#/definitions/Placeaddress"
+                          },
+                          "servicePoint": {
+                            "$ref" : "#/definitions/PlaceservicePoint"
+                          }
+                        },
+                        "description": "Destination of the Shipment"
+                      },
+                      "status": {
+                        "$ref" : "#/definitions/ShipmentEvent"
+                      },
+                      "details": {
+                        "$ref" : "#/definitions/ShipmentDetails"
+                      },
+                      "events": {
+                        "type": "array",
+                        "items": {
+                          "$ref" : "#/definitions/ShipmentEvent"
+                        },
+                        "description": "An event in shipment delivery; also known as Milestone, Checkpoint, Status History Entry or http://schema.org/DeliveryEvent"
+                      }
+                    }
+                  },
+                  "description": "Detailed information about one shipment"
+                },
+                "possibleAdditionalShipmentsUrl": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Array of URLs to potentially additional matching shipments in the other services."
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get shipment tracking",
+        "operationId": "ShipmentTracking",
+        "description": "Get shipment tracking",
+        "parameters": [
+          {
+            "$ref": "#/parameters/trackingNumber"
+          },
+          {
+            "$ref": "#/parameters/service"
+          },
+          {
+            "$ref": "#/parameters/requesterCountryCode"
+          },
+          {
+            "$ref": "#/parameters/originCountryCode"
+          },
+          {
+            "$ref": "#/parameters/recipientPostalCode"
+          },
+          {
+            "$ref": "#/parameters/language"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Placeaddress" : {
+      "type" : "object",
+      "properties" : {
+        "countryCode" : {
+          "type" : "string",
+          "description" : "A short text string code (ISO 3166-1 alpha-2 country code) specifying the country."
+        },
+        "postalCode" : {
+          "type" : "string",
+          "description" : "Text specifying the postal code for an address. https://gs1.org/voc/postalCode"
+        },
+        "addressLocality" : {
+          "type" : "string",
+          "description" : "Text specifying the name of the locality, for example a city. https://gs1.org/voc/addressLocality"
+        },
+        "streetAddress" : {
+          "type" : "string",
+          "description" : "The street address expressed as free form text. The street address is printed on paper as the first lines below the name. For example, the name of the street and the number in the street or the name of a building. https://www.gs1.org/voc/streetAddress"
+        }
+      }
+    },
+    "PlaceservicePoint": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Url of the service point"
+        },
+        "label": {
+          "type": "string",
+          "description": "Label of the service point"
+        }
+      },
+      "description": "Service Point"
+    },
+    "ShipmentEvent" : {
+      "title" : "Shipment Event",
+      "description" : "An event in shipment delivery; also known as Milestone, Checkpoint, Status History Entry or http://schema.org/DeliveryEvent",
+      "type" : "object",
+      "properties" : {
+        "timestamp": {
+          "type": "string",
+          "description": "A date value in ISO 8601 format (`2017-06-21`) or a combination of date and time of day (`2017-06-21T14:07:17Z`) (see Chapter 5.4 of ISO 8601)."
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "address": {
+              "type": "object",
+              "properties": {
+                "addressLocality": {
+                  "type": "string",
+                  "description": "Text specifying the name of the locality, for example a city. https://gs1.org/voc/addressLocality"
+                }
+              },
+              "description": "Address of the location"
+            }
+          },
+          "description": "Place model description. https://gs1.org/voc/Place"
+        },
+        "statusCode" : {
+          "type" : "string",
+          "description" : "Code of the event; These codes are high-level grouping statuses.",
+          "enum" : [ "pre-transit", "transit", "delivered", "failure", "unknown" ]
+        },
+        "status" : {
+          "type" : "string",
+          "description" : "Short description of the status - title",
+          "example" : "DELIVERED"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Detailed description of the event",
+          "example" : "JESSICA"
+        },
+        "remark" : {
+          "type" : "string",
+          "description" : "Remark regarding the shipment status",
+          "example" : "The shipment is pending completion of customs inspection."
+        },
+        "nextSteps" : {
+          "type" : "string",
+          "description" : "Description of the next steps",
+          "example" : "The status will be updated following customs inspection."
+        }
+      }
+    },
+    "ShipmentDetails": {
+      "type": "object",
+      "properties": {
+        "proofOfDelivery": {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "description": "A date value in ISO 8601 format (`2017-06-21`) or a combination of date and time of day (`2017-06-21T14:07:17Z`) (see Chapter 5.4 of ISO 8601)."
+            },
+            "signatureUrl": {
+              "type": "string",
+              "description": "**DEPRECATED**, this field is replaced by the `documentUrl` field which should be used instead."
+            },
+            "documentUrl": {
+              "type": "string",
+              "description": "The link to related electronic proof of delivery document."
+            }
+          },
+          "description": "proof Of Delivery"
+        },
+        "proofOfDeliverySignedAvailable": {
+          "type": "boolean",
+          "description": "Proof Of Delivery Signed Available"
+        },
+        "totalNumberOfPieces": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of items or pieces in the shipment"
+        },
+        "pieceIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ids of all the items or pieces in the shipment"
+        }
+      },
+      "description": "Detailed information about one shipment"
+    }
+  },
+  "parameters": {
+    "trackingNumber": {
+      "name": "trackingNumber",
+      "in": "query",
+      "description": "The tracking number of the shipment for which to return the information.",
+      "x-ms-summary": "Tracking number",
+      "required": true,
+      "type": "string"
+    },
+    "service": {
+      "name": "service",
+      "in": "query",
+      "description": "Hint which service (provider) should be used to resolve the tracking number.",
+      "x-ms-summary": "Service to be used",
+      "required": false,
+      "type": "string",
+      "enum": [
+        "freight",
+        "express",
+        "parcel-de",
+        "parcel-nl",
+        "parcel-pl",
+        "dsc",
+        "dgf",
+        "ecommerce"
+      ]
+    },
+    "requesterCountryCode": {
+      "name": "requesterCountryCode",
+      "in": "query",
+      "description": "Optional ISO 3166-1 alpha-2 country code represents country of the consumer of the API response. It optimizes the return of the API response.",
+      "x-ms-summary": "Requester country code",
+      "required": false,
+      "type": "string",
+      "x-example": "DE"
+    },
+    "originCountryCode": {
+      "name": "originCountryCode",
+      "in": "query",
+      "description": "Optional ISO 3166-1 alpha-2 country code of the shipment origin to further qualify the shipment tracking number (`trackingNumber`) parameter of the request.This parameter is necessary to search for the shipment in dsc service.",
+      "x-ms-summary": "Shipment country code",
+      "required": false,
+      "type": "string",
+      "x-example": "DE"
+    },
+    "recipientPostalCode": {
+      "name": "recipientPostalCode",
+      "in": "query",
+      "description": "Postal code of the destination address to",
+      "x-ms-summary": "Postal code",
+      "required": false,
+      "type": "string"
+    },
+    "language": {
+      "name": "language",
+      "in": "query",
+      "type": "string",
+      "description": "ISO 639-1 2-character language code for the response.",
+      "x-ms-summary": "Response language code",
+      "required": false,
+      "default": "en",
+      "x-example": "en"
+    },
+    "offset": {
+      "name": "offset",
+      "in": "query",
+      "description": "Pagination parameter. Offset from the start of the result set at which to retrieve the remainder of the results (if any).",
+      "x-ms-summary": "Result offset",
+      "required": false,
+      "type": "number",
+      "default": 0,
+      "x-example": 5
+    },
+    "limit": {
+      "name": "limit",
+      "in": "query",
+      "description": "Pagination parameter. Maximal number of results to retireve.",
+      "x-ms-summary": "Row Count",
+      "required": false,
+      "type": "number",
+      "default": 5,
+      "x-example": 5
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "DHL-API-Key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.dhl.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.dhl.com/content/dam/dhl/local/global/core/documents/pdf/MO-core-lela-local-pdp-policy.pdf"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Commerce"
+    }
+  ]
+}
