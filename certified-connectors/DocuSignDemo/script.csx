@@ -236,6 +236,34 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var verificationType = query.get("verificationType");
+
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (verificationType.Equals("Phone Call", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["countryCode"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Country Code"
+          ["default"] = "(+1)"
+        };
+        response["schema"]["properties"]["phoneNumber"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Recipient's Phone Number"
+          ["pattern"] = "^\d{3}-\d{3}-\d{4}$"
+        };
+      }
+    }
+
     if (operationId.Equals("StaticResponseForRecipientTypeSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
