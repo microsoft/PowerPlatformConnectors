@@ -4,7 +4,7 @@ Xero is an accounting software platform for small and medium sized businesses.
 
 Using this API, you can authorise Power App or Power Automate to work with the Xero API sets.  At present we're implementing:-
 
-* Xero OAuth 2.0 Client Authentication.  This mirrors the existing Xero definitions, so inludes the retrieval of invoice information also.
+* Xero OAuth 2.0 Client Authentication.  This mirrors the existing Xero definitions, so includes the retrieval of invoice information also.
 
 We plan to add the following
 * Accounting
