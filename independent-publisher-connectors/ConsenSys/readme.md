@@ -1,5 +1,5 @@
 # ConsenSys Ethereum Connector
-The ConsenSys Ethereum connector allows customers to connect to Ethereum based chains via RPC, creating and interacting with Smart Contracts. This includes reading and writing data on-chain via a known RPC endpoint.
+The ConsenSys Ethereum connector allows customers to connect to Ethereum based blockchains via RPC, creating and interacting with Smart Contracts. This includes reading and writing data on-chain via a known RPC endpoint.
 
 ## Prerequisites
 ---
@@ -8,10 +8,10 @@ The ConsenSys Ethereum connector allows customers to connect to Ethereum based c
 ## Supported Operations
 ---
 * `Deploy Smart Contract`: Deploy Smart Contract to a configured chain.
-* `Execute Query Function`: Execute a function on a smart contract that. **This does not affect chain state.** There operations are do not consume gas.
-* `Get Contract State`: Execute all query functions that are parameterless in one call. **This does not affect chain state.**  There operations do not consume gas.
-* `Execute Mutating Function`: Execute a function on a smart contract that **affects chain state**. There operations are expected to consume gas.
-* `Listen/Poll For Event Triggers`: Create a trigger that listens for on-chain events. This event trigger will provide automated polling data as expected by PowerApps.
+* `Execute Query Function`: Execute a function on a smart contract that **affects chain state** These operations do not consume gas.
+* `Get Contract State`: Execute all query functions that are parameterless in one call that **does NOT affect chain state**  These operations do not consume gas.
+* `Execute Mutating Function`: Execute a function on a smart contract that **affects chain state**. These operations are expected to consume gas.
+* `Listen/Poll For Event Triggers`: Create a trigger that listens for on-chain events. This event trigger will provide automated polling data and a `Retry-After` header as expected by PowerApps.
 
 ## Obtaining Credentials
 ---
