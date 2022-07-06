@@ -17,7 +17,6 @@ We plan to add the following
 * Bankfeeds
 * AppStore
 
-
 ## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
@@ -52,4 +51,4 @@ The connector supports the following operations:
 * `Invoices': returns all invoices for a single tenant
 * `Refresh token': returns a new token
 
-We plan to add all the API sets, as summarised above, if their is demand for them.
+We plan to add all the API sets, as summarised above, if there is demand for them.
