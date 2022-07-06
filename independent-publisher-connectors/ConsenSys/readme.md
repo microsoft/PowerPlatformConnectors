@@ -8,8 +8,8 @@ The ConsenSys Ethereum connector allows customers to connect to Ethereum based b
 ## Supported Operations
 ---
 * `Deploy Smart Contract`: Deploy Smart Contract to a configured chain.
-* `Execute Query Function`: Execute a function on a smart contract that **affects chain state** These operations do not consume gas.
-* `Get Contract State`: Execute all query functions that are parameterless in one call that **does NOT affect chain state**  These operations do not consume gas.
+* `Execute Query Function`: Execute a function on a smart contract that **affects chain state**. These operations do not consume gas.
+* `Get Contract State`: Execute all query functions that are parameterless in one call that **does NOT affect chain state**.  These operations do not consume gas.
 * `Execute Mutating Function`: Execute a function on a smart contract that **affects chain state**. These operations are expected to consume gas.
 * `Listen/Poll For Event Triggers`: Create a trigger that listens for on-chain events. This event trigger will provide automated polling data and a `Retry-After` header as expected by PowerApps.
 
