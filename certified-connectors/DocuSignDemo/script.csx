@@ -417,7 +417,6 @@ public class Script : ScriptBase
   {
     var templateRoles = new JArray();
     var signer = new JObject();
-    var count = 0;
 
     foreach (var property in body)
     {
@@ -430,18 +429,22 @@ public class Script : ScriptBase
         signer["name"] = value;
       }
 
-      if (key.Contains(" Email"))
+      if (key.Contains("* Name"))
+      {
+        signer["name"] = value;
+      }
+
+      if (key.Contains("Email"))
       {
         signer["email"] = value;
       }
 
-      if (count % 2 != 0)
+      //add every (name, email) pairs
+      if (key.Contains("Email"))
       {
         templateRoles.Add(signer);
         signer = new JObject();
       }
-
-      count++;
     }
 
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -746,11 +749,21 @@ public class Script : ScriptBase
         ["x-ms-sort"] = "none",
       };
 
-      foreach (var signer in (body["signers"] as JArray) ?? new JArray())
+      var signers = (body["signers"] as JArray) ?? new JArray();
+
+      if (signers.Count == 0)
       {
-        var roleName = signer["roleName"];
-        itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
-        itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+          itemProperties["* Recipient Name"] = basePropertyDefinition.DeepClone();
+          itemProperties["* Recipient Email"] = basePropertyDefinition.DeepClone();
+      }
+      else
+      {
+        foreach (var signer in signers)
+        {
+          var roleName = signer["roleName"];
+          itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
+          itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+        }
       }
 
       var newBody = new JObject
