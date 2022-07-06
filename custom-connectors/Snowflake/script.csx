@@ -3,6 +3,15 @@ public class Script : ScriptBase
 
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
+        // Need to get the custom base url from the headers
+        // Presence is enforced in swagger
+        var domain = this.Context.Request.Headers.GetValues("Domain").First();
+
+        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+        uriBuilder.Host = domain;
+        
+        this.Context.Request.RequestUri = uriBuilder.Uri;
+
         // Check if the operation ID matches what is specified in the OpenAPI definition of the connector
         if (this.Context.OperationId == "ExecuteSqlStatement" ||
             this.Context.OperationId == "GetResults")
