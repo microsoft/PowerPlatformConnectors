@@ -233,6 +233,34 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var verificationType = query.Get("verificationType");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (verificationType.Equals("phoneCall", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["countryCode"] = new JObject 
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Country Code"
+        };
+        response["schema"]["properties"]["phoneNumber"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Recipient's Phone Number"
+        };
+      }
+    }
+
     return CreateJsonContent(response.ToString());
   }
 
