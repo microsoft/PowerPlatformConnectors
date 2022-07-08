@@ -84,6 +84,31 @@ public class Script : ScriptBase
       response["tabTypes"] = tabTypesArray;
     }
 
+    if (operationId.Equals("StaticResponseForVerificationTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var verificationTypesArray = new JArray();
+
+      string [,] verificationTypes = {
+        {"accessCode", "Access Code"},
+        {"phoneCall", "Phone Call"},
+        {"SMS", "SMS"},
+        {"none", "None"},
+        {"knowledgeBased", "Knowledge-Based"},
+        {"idVerification", "ID Verification"}
+      };
+
+      for (var i = 0; i < verificationTypes.GetLength(0); i++){
+        var verificationObj = new JObject() 
+        {
+          ["type"] = verificationTypes[i,0],
+          ["name"] = verificationTypes[i,1]
+        };
+        verificationTypesArray.Add(verificationObj);
+      }
+
+      response["verificationTypes"] = verificationTypesArray;
+    }
+
     if (operationId.StartsWith("StaticResponseForFont", StringComparison.OrdinalIgnoreCase))
     {
       var fontNamesArray = new JArray();
