@@ -16,7 +16,7 @@ Deploy Smart Contract to a configured chain receiving the contract address and t
 Execute a function on a smart contract that **does NOT affects chain state**. These operations do not consume gas. Returns the function output.
 
 ### Get Contract State
-Execute all query functions that are parameterless in one call that **does NOT affect chain state**.  These operations do not consume 
+Execute all query functions that are parameterless in one call that **does NOT affect chain state**. These operations do not consume 
 gas. Returns output for all parameterless query functions.
 
 ### Execute Mutating Function
