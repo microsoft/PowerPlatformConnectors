@@ -553,8 +553,26 @@ public class Script : ScriptBase
       signers[0]["routingOrder"] = body["routingOrder"];
     }
 
+    AddParamsForSelectedVerificationType(body, signers);
+
     body["signers"] = signers;
     return body;
+  }
+
+  private void AddParamsForSelectedVerificationType (JObject body, JArray signers)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var verificationType = query.Get("verificationType");
+
+    if (verificationType.Equals("phoneCall"))
+    {
+      var phoneAuthentication = new JObject();
+      phoneAuthentication["recipMayProvideNumber"] = false;
+      var senderProvidedNumbers = new JArray();
+      senderProvidedNumbers.Add(body["phoneNumber"]);
+      phoneAuthentication["senderProvidedNumbers"] = senderProvidedNumbers;
+      signers[0]["phoneAuthentication"] = phoneAuthentication;
+    }
   }
 
   private int GenerateDocumentId()
