@@ -1,17 +1,29 @@
 # ConsenSys Ethereum Connector
 The ConsenSys Ethereum connector allows customers to connect to Ethereum based blockchains via RPC, creating and interacting with Smart Contracts. This includes reading and writing data on-chain via a known RPC endpoint.
 
+## Publisher: ConsenSys
+
 ## Prerequisites
 ---
 * An Infura or Quorum Blockchain Services account
 
 ## Supported Operations
 ---
-* `Deploy Smart Contract`: Deploy Smart Contract to a configured chain.
-* `Execute Query Function`: Execute a function on a smart contract that **affects chain state**. These operations do not consume gas.
-* `Get Contract State`: Execute all query functions that are parameterless in one call that **does NOT affect chain state**.  These operations do not consume gas.
-* `Execute Mutating Function`: Execute a function on a smart contract that **affects chain state**. These operations are expected to consume gas.
-* `Listen/Poll For Event Triggers`: Create a trigger that listens for on-chain events. This event trigger will provide automated polling data and a `Retry-After` header as expected by PowerApps.
+### Deploy Smart Contract
+Deploy Smart Contract to a configured chain receiving the contract address and transaction hash in response. This returns the new contract address and transaction hash.
+
+### Execute Query Function
+Execute a function on a smart contract that **does NOT affects chain state**. These operations do not consume gas. Returns the function output.
+
+### Get Contract State
+Execute all query functions that are parameterless in one call that **does NOT affect chain state**.  These operations do not consume 
+gas. Returns output for all parameterless query functions.
+
+### Execute Mutating Function
+Execute a function on a smart contract that **affects chain state**. These operations are expected to consume gas. Returns the transaction hash.
+
+### Listen/Poll For Event Triggers
+Create a trigger that listens for on-chain events. This event trigger will provide automated polling data and a `Retry-After` header as expected by PowerApps. Returns the event values if there is a new one and can be empty if no events found.
 
 ## Obtaining Credentials
 ---
