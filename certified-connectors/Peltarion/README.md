@@ -16,7 +16,7 @@ The Peltarion connector can let you build AI-powered apps that:
 3. Add the Peltarion connector to your app. Enter the URL and token for your build model (see image below)
 
 
-Peltarion's Power Platform connector currently 2 operations:
+Peltarion's Power Platform connector currently supports 2 operations:
 1. *callapi* (used to call conventional models) and
 2. *calltextsim* (used to call text similarity models). 
 
@@ -33,6 +33,12 @@ The *ClearCollect* method creates an array assigned to the variable *dd*.  The *
 
 - *key* is the name of the predicted class. For regression problems, the *key* is always "value".
 - *val* is the probability of the class.
+- *errorMessage* holds the error message, if any.
+
+As for the `.calltextsim()` command you can call it with the same snippet as above by simply changing the operation from callapi to calltextsim. The response variable *res* is an object with three entries: 
+
+- *first* is the first or closest similarity found within the data. *first* holds *text* and *distance* 
+- *all* returns a *collection* of 5 similarity results and all of the them hold *text* and *distance* 
 - *errorMessage* holds the error message, if any.
 
 Your URL, token and input name is found on the Deployment view on the Peltarion Platform. See screenshot below.

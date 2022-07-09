@@ -16,3 +16,5 @@ paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
 
 ## Supported Operations
 * `Form is submitted`: a trigger that fires when the specified form is submitted
+* `Delete submission`: an action that deletes the specified submission
+* `Delete attachment`: an action that deletes the specified attachment

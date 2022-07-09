@@ -15,6 +15,7 @@ If you're considering building and publishing a connector to a Microsoft first p
 - You can only submit one connector per PR. This ensures that our validation process runs smoothly.
 - The PR for your connector should follow the pattern "Connector Name (Independent Publisher)"
 - Please add an email to the support email section. This is in case we need to reach out to you! 
+- All Independent Publisher connectors must set iconBrandColor to "#da3b01".
 - Please make sure to fill in the privacy policy parameter with the privacy policy for the end service.
 - Please make sure that your operation descriptions are detailed. This ensures that the user can understand your operation.
 - If your connector uses OAuth, please make sure you provide detailed steps on how to create an app in the readme.md. Otherwise, our team will have to pause certification.
