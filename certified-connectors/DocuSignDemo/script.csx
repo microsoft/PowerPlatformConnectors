@@ -246,7 +246,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if (verificationType.Equals("phoneCall", StringComparison.OrdinalIgnoreCase))
+      if (verificationType.Equals("phoneCall", StringComparison.OrdinalIgnoreCase) || verificationType.Equals("SMS", StringComparison.OrdinalIgnoreCase) )
       {
         response["schema"]["properties"]["countryCode"] = new JObject 
         {
@@ -574,6 +574,10 @@ public class Script : ScriptBase
       phoneAuthentication["senderProvidedNumbers"] = senderProvidedNumbers;
       signers[0]["phoneAuthentication"] = phoneAuthentication;
       signers[0]["idCheckConfigurationName"] = "Phone Auth $";
+    }
+    else if (verificationType.Equals("SMS"))
+    {
+
     }
   }
 
