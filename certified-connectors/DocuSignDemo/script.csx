@@ -551,7 +551,6 @@ public class Script : ScriptBase
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    //signers[0]["recipientId"] = Guid.NewGuid();
     signers[0]["recipientId"] = GenerateId();
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
