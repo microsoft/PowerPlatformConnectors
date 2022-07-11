@@ -573,6 +573,7 @@ public class Script : ScriptBase
       senderProvidedNumbers.Add(body["phoneNumber"]);
       phoneAuthentication["senderProvidedNumbers"] = senderProvidedNumbers;
       signers[0]["phoneAuthentication"] = phoneAuthentication;
+      signers[0]["idCheckConfigurationName"] = "Phone Auth $";
     }
   }
 
