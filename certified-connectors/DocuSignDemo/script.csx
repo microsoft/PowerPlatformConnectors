@@ -538,28 +538,30 @@ public class Script : ScriptBase
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
     var signers = new JArray
-      {
-        new JObject(),
-      };
-    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
-    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
-    if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
     {
-      signers[0]["recipientId"] = Guid.NewGuid();
-    }
-    if (body["routingOrder"] != null)
-    {
-      signers[0]["routingOrder"] = body["routingOrder"];
-    }
-
-    AddParamsForSelectedVerificationType(body, signers);
+      new JObject(),
+    };
+    AddCoreRecipientParams(signers, body);
+    AddParamsForSelectedVerificationType(signers, body);
 
     body["signers"] = signers;
     return body;
   }
 
-  private void AddParamsForSelectedVerificationType (JObject body, JArray signers)
+  private void AddCoreRecipientParams(JArray signers, JObject body) 
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    //signers[0]["recipientId"] = Guid.NewGuid();
+    signers[0]["recipientId"] = GenerateId();
+    if (!string.IsNullOrEmpty(query.Get("routingOrder")))
+    {
+      signers[0]["routingOrder"] = query.Get("routingOrder");
+    }
+    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
+    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
+  }
+
+  private void AddParamsForSelectedVerificationType (JArray signers, JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var verificationType = query.Get("verificationType");
@@ -573,6 +575,14 @@ public class Script : ScriptBase
       phoneAuthentication["senderProvidedNumbers"] = senderProvidedNumbers;
       signers[0]["phoneAuthentication"] = phoneAuthentication;
     }
+  }
+
+  private int GenerateId()
+  {
+    DateTimeOffset now = DateTimeOffset.UtcNow;
+    DateTime midnight = DateTime.Now.Date;
+    TimeSpan ts = now.Subtract(midnight);
+    return (int)ts.TotalMilliseconds;
   }
 
   private int GenerateDocumentId()
