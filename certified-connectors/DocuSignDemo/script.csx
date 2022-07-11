@@ -577,7 +577,12 @@ public class Script : ScriptBase
     }
     else if (verificationType.Equals("SMS"))
     {
-
+      var smsAuthentication = new JObject();
+      var senderProvidedNumbers = new JArray();
+      senderProvidedNumbers.Add(body["phoneNumber"]);
+      smsAuthentication["senderProvidedNumbers"] = senderProvidedNumbers;
+      signers[0]["smsAuthentication"] = smsAuthentication;
+      signers[0]["idCheckConfigurationName"] = "SMS Auth $";
     }
   }
 
