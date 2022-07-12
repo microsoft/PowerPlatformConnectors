@@ -551,7 +551,7 @@ public class Script : ScriptBase
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["recipientId"] = GenerateId();
+    signers[0]["recipientId"] = Guid.NewGuid();
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
@@ -575,14 +575,6 @@ public class Script : ScriptBase
       signers[0]["phoneAuthentication"] = phoneAuthentication;
       signers[0]["idCheckConfigurationName"] = "Phone Auth $";
     }
-  }
-
-  private int GenerateId()
-  {
-    DateTimeOffset now = DateTimeOffset.UtcNow;
-    DateTime midnight = DateTime.Now.Date;
-    TimeSpan ts = now.Subtract(midnight);
-    return (int)ts.TotalMilliseconds;
   }
 
   private int GenerateDocumentId()
