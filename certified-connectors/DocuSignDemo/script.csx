@@ -584,6 +584,10 @@ public class Script : ScriptBase
       signers[0]["smsAuthentication"] = smsAuthentication;
       signers[0]["idCheckConfigurationName"] = "SMS Auth $";
     }
+    else if (verificationType.Equals("accessCode"))
+    {
+      signers[0]["addAccessCodeToEmail"] = true;
+    }
   }
 
   private int GenerateId()
