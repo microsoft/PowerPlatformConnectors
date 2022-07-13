@@ -596,6 +596,10 @@ public class Script : ScriptBase
     {
       signers[0]["accessCode"] = body["accessCode"];
     }
+    else if (verificationType.Equals("knowledgeBased"))
+    {
+      signers[0]["idCheckConfigurationName"] = "ID Check $";
+    }
   }
 
   private int GenerateId()
