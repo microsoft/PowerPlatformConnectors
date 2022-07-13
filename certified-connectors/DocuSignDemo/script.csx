@@ -259,6 +259,14 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "* Recipient's Phone Number"
         };
       }
+      else if (verificationType.Equals("accessCode", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["accessCode"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Access Code"
+        };
+      }
     }
 
     return CreateJsonContent(response.ToString());
@@ -586,7 +594,7 @@ public class Script : ScriptBase
     }
     else if (verificationType.Equals("accessCode"))
     {
-      signers[0]["addAccessCodeToEmail"] = true;
+      signers[0]["accessCode"] = body["accessCode"];
     }
   }
 
