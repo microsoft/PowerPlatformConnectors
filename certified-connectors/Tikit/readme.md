@@ -8,6 +8,15 @@ You will need to have an active Tikit, [Microsoft 365 Service Desk](https://www.
 
 ## Supported Operations
 
+### When a Ticket is Created
+This will trigger when a ticket is created
+
+### When a Ticket is Updated
+This will trigger when a ticket is updated
+
+### When a Comment is left on a Ticket
+This will trigger when a comment is left on a ticket
+
 ### Create New Ticket
 This action will give you the ability to create new ticket.
 
