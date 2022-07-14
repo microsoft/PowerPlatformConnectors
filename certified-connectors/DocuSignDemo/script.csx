@@ -551,7 +551,7 @@ public class Script : ScriptBase
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var verificationType = query.Get("verificationType");
 
-    if (verificationType.Equals("phoneCall"))
+    if (verificationType.Equals("Phone Call"))
     {
       var phoneAuthentication = new JObject();
       phoneAuthentication["recipMayProvideNumber"] = false;
