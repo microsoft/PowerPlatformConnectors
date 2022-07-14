@@ -3,10 +3,8 @@
 ## DocumentsCorePack Connector
 DocumentsCorePack is a fast & intuitive document generation solution based on Microsoft Dynamics 365 data.
 Using MS Word templates, DocumentsCorePack provides you with a set of tools to create and process documents effectively. 
-
 From a document generation wizard that guides users through the process to full document automation - DocumentsCorePack will make your business documents look professional
 and help you to process them efficiently!
-
 The DocumentsCorePack Connector brings this functionality to Power Automate and Flows.
 [Details](https://www.mscrm-addons.com/Products/DocumentsCorePack) 
 
@@ -16,7 +14,6 @@ The DocumentsCorePack Connector brings this functionality to Power Automate and 
 ## Prerequisites
 
 You need to have a Dynamics 365 or Dataverse environment. 
-
 You need to sign up on our website and create a DocumentsCorePack service (14 days free trial available)  [Start here](https://support.mscrm-addons.com/knowledgebase/documentscorepack-online-service-configuration/) 
 
 Get the API Key for your environment:
@@ -31,21 +28,19 @@ The API documentation can be found [here](https://support.mscrm-addons.com)
 ## Supported Operations
 
 ### CreateDocument
-Creates a new document(pdf,docx,html,..) based on a DocumentsCorePack Template. Optionally it is possible to:
-- save to Sharepoint
-- print
-- attach to an email as attachment
-- attach to a record as note
-
+Creates a new document(pdf,docx,html,..) based on a DocumentsCorePack Template. Optionally it is possible to 
+ *) save to Sharepoint
+ *) print
+ *) attach to an email as attachment
+ *) attach to a record as note
 This function is a synchronous function and returns the document and the DocumentJobId.
 
 ### CreateDocumentJobAsync
 Creates a new DocumentJob (pdf,docx,html,..) based on a DocumentsCorePack Template. Optionally it is possible to 
-- save to Sharepoint
-- print
-- attach to an email as attachment
-- attach to a record as note
-
+ *) save to Sharepoint
+ *) print
+ *) attach to an email as attachment
+ *) attach to a record as note
 This function is an async function and does NOT wait for a result. 
 It returns a DocumentJobId and you can use the DocumentJobStatus to get the actual status of the job and the DocumentJobResult will return the document.
 
