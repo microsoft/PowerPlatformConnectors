@@ -578,6 +578,10 @@ public class Script : ScriptBase
     {
       signers[0]["idCheckConfigurationName"] = "ID Check $";
     }
+    else if (verificationType.Equals("ID Verification"))
+    {
+      
+    }
   }
 
   private int GenerateId()
