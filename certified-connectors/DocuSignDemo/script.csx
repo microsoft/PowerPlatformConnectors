@@ -208,6 +208,37 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var verificationType = query.Get("verificationType");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (verificationType.Equals("Phone Call", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["countryCode"] = new JObject 
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Country Code"
+        };
+        response["schema"]["properties"]["phoneNumber"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Recipient's Phone Number"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
     return CreateJsonContent(response.ToString());
   }
 
@@ -485,23 +516,43 @@ public class Script : ScriptBase
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
     var signers = new JArray
-      {
-        new JObject(),
-      };
-    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
-    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
-    if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
     {
-      signers[0]["recipientId"] = Guid.NewGuid();
-    }
-    if (body["routingOrder"] != null)
-    {
-      signers[0]["routingOrder"] = body["routingOrder"];
-    }
+      new JObject(),
+    };
+    AddCoreRecipientParams(signers, body);
+    AddParamsForSelectedVerificationType(signers, body);
 
     body["signers"] = signers;
     return body;
+  }
+
+  private void AddCoreRecipientParams(JArray signers, JObject body) 
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    signers[0]["recipientId"] = Guid.NewGuid();
+    if (!string.IsNullOrEmpty(query.Get("routingOrder")))
+    {
+      signers[0]["routingOrder"] = query.Get("routingOrder");
+    }
+    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
+    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
+  }
+
+  private void AddParamsForSelectedVerificationType (JArray signers, JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var verificationType = query.Get("verificationType");
+
+    if (verificationType.Equals("Phone Call"))
+    {
+      var phoneAuthentication = new JObject();
+      phoneAuthentication["recipMayProvideNumber"] = false;
+      var senderProvidedNumbers = new JArray();
+      senderProvidedNumbers.Add(body["phoneNumber"]);
+      phoneAuthentication["senderProvidedNumbers"] = senderProvidedNumbers;
+      signers[0]["phoneAuthentication"] = phoneAuthentication;
+      signers[0]["idCheckConfigurationName"] = "Phone Auth $";
+    }
   }
 
   private int GenerateDocumentId()
