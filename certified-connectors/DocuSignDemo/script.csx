@@ -417,7 +417,13 @@ public class Script : ScriptBase
   {
     var templateRoles = new JArray();
     var signer = new JObject();
+	var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
+	var newBody = new JObject()
+    {
+      ["templateId"] = query.Get("templateId")
+    };
+	  
     foreach (var property in body)
     {
       var value = (string)property.Value;
@@ -428,31 +434,27 @@ public class Script : ScriptBase
         signer["roleName"] = key.Substring(0, key.Length - 5);
         signer["name"] = value;
       }
-
-      if (key.Contains("* Name"))
+	  
+      if (key.Contains("Email subject"))
       {
-        signer["name"] = value;
+        newBody["emailSubject"] = value;
       }
 
-      if (key.Contains("Email"))
+      if (key.Contains("Email body"))
       {
-        signer["email"] = value;
+        newBody["emailBlurb"] = value;
       }
 
       //add every (name, email) pairs
-      if (key.Contains("Email"))
+      if (key.Contains(" Email"))
       {
+		signer["email"] = value;
         templateRoles.Add(signer);
         signer = new JObject();
       }
     }
 
-    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    var newBody = new JObject()
-    {
-      ["templateRoles"] = templateRoles,
-      ["templateId"] = query.Get("templateId")
-    };
+    newBody["templateRoles"] = templateRoles;
 
     if (!string.IsNullOrEmpty(query.Get("status")))
     {
@@ -753,8 +755,8 @@ public class Script : ScriptBase
 
       if (signers.Count == 0)
       {
-          itemProperties["* Recipient Name"] = basePropertyDefinition.DeepClone();
-          itemProperties["* Recipient Email"] = basePropertyDefinition.DeepClone();
+          itemProperties["Email subject"] = basePropertyDefinition.DeepClone();
+          itemProperties["Email body"] = basePropertyDefinition.DeepClone();
       }
       else
       {
