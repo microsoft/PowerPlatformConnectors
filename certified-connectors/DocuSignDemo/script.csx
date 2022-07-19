@@ -417,13 +417,13 @@ public class Script : ScriptBase
   {
     var templateRoles = new JArray();
     var signer = new JObject();
-	var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
-	var newBody = new JObject()
+    var newBody = new JObject()
     {
       ["templateId"] = query.Get("templateId")
     };
-	  
+      
     foreach (var property in body)
     {
       var value = (string)property.Value;
@@ -434,7 +434,7 @@ public class Script : ScriptBase
         signer["roleName"] = key.Substring(0, key.Length - 5);
         signer["name"] = value;
       }
-	  
+      
       if (key.Contains("Email subject"))
       {
         newBody["emailSubject"] = value;
@@ -448,7 +448,7 @@ public class Script : ScriptBase
       //add every (name, email) pairs
       if (key.Contains(" Email"))
       {
-		signer["email"] = value;
+        signer["email"] = value;
         templateRoles.Add(signer);
         signer = new JObject();
       }
