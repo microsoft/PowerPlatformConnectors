@@ -580,7 +580,26 @@ public class Script : ScriptBase
     }
     else if (verificationType.Equals("ID Verification"))
     {
+      // var response = new JObject();
+      // response = await this.RetrieveWorkflowIds().ConfigureAwait(false);
+
+      // var identityVerification = new JObject();
       
+      // var arrayWorkflows = response["identityVerification"] as JArray;
+
+      // if (arrayWorkflows.Count > 0)
+      // {
+      //   for (var i = 0; i < arrayWorkflows.Count; i++)
+      //   {
+      //       if (arrayWorkflows[i]["defaultName"].Equals("DocuSign ID Verification"))
+      //       {
+      //         identityVerification["workflowId"] = arrayWorkflows[i]["workflowId"];
+      //         break;
+      //       }
+      //   }
+      // }
+
+      // signers[0]["identityVerification"] = identityVerification;
     }
   }
 
@@ -634,6 +653,47 @@ public class Script : ScriptBase
 
     return body;
   }
+
+  //Get Request: Retrieve the workflowIDs
+  // private async Task<JObject> RetrieveWorkflowIds()
+  // {
+  //    var currentUri = HttpContext.Current.Request.Url.AbsolutePath;
+  //    var index = currentUri.IndexOf('/',10);
+  //    var accountId = currentUri.Substring(10,index-10);
+     
+  //    //string[] params = new string[6];
+  //    //params = currentUri.Split('/');
+  //   // var accountId = params[1];
+
+  //   var uri = new Uri("https://demo.docusign.net/restapi/v2.1/accounts/"+accountId+"/identity_verification");
+  //   using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+  //   string content = string.Empty;
+  //   var jsonContent = new JObject();
+
+  //   try 
+  //   {
+  //     using var response = await this.Context.SendAsync(request,this.CancellationToken).ConfigureAwait(false);
+  //     content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+  //     if (response.IsSuccessStatusCode)
+  //     {
+  //       jsonContent = JObject.Parse(content);
+  //     }
+  //     return jsonContent;
+  //   }
+  //   catch (HttpRequestException ex)
+  //   {
+  //     throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to get User Info: " + ex.Message, ex);
+  //   }
+  //   catch (JsonReaderException ex)
+  //   {
+  //     throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse User Info response: " + content, ex);
+  //   }
+  //   catch (UriFormatException ex)
+  //   {
+  //     throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to construct User's API endpoint from the response: " + content, ex);
+  //   }
+  // }
 
   private async Task UpdateApiEndpoint()
   {
