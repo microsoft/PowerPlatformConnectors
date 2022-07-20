@@ -417,8 +417,13 @@ public class Script : ScriptBase
   {
     var templateRoles = new JArray();
     var signer = new JObject();
-    var count = 0;
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
+    var newBody = new JObject()
+    {
+      ["templateId"] = query.Get("templateId")
+    };
+      
     foreach (var property in body)
     {
       var value = (string)property.Value;
@@ -429,27 +434,27 @@ public class Script : ScriptBase
         signer["roleName"] = key.Substring(0, key.Length - 5);
         signer["name"] = value;
       }
+      
+      if (key.Contains("Email subject"))
+      {
+        newBody["emailSubject"] = value;
+      }
 
+      if (key.Contains("Email body"))
+      {
+        newBody["emailBlurb"] = value;
+      }
+
+      //add every (name, email) pairs
       if (key.Contains(" Email"))
       {
         signer["email"] = value;
-      }
-
-      if (count % 2 != 0)
-      {
         templateRoles.Add(signer);
         signer = new JObject();
       }
-
-      count++;
     }
 
-    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    var newBody = new JObject()
-    {
-      ["templateRoles"] = templateRoles,
-      ["templateId"] = query.Get("templateId")
-    };
+    newBody["templateRoles"] = templateRoles;
 
     if (!string.IsNullOrEmpty(query.Get("status")))
     {
@@ -746,11 +751,21 @@ public class Script : ScriptBase
         ["x-ms-sort"] = "none",
       };
 
-      foreach (var signer in (body["signers"] as JArray) ?? new JArray())
+      var signers = (body["signers"] as JArray) ?? new JArray();
+
+      if (signers.Count == 0)
       {
-        var roleName = signer["roleName"];
-        itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
-        itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+          itemProperties["Email subject"] = basePropertyDefinition.DeepClone();
+          itemProperties["Email body"] = basePropertyDefinition.DeepClone();
+      }
+      else
+      {
+        foreach (var signer in signers)
+        {
+          var roleName = signer["roleName"];
+          itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
+          itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+        }
       }
 
       var newBody = new JObject
