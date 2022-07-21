@@ -1,11 +1,21 @@
 # Title
-Required. One paragraph, two to three sentences about the service and the connector​.
+The Partner Center API helps Cloud Solution Provider (CSP) partners integrate their existing CRM or billing software with the Microsoft systems that manage customer accounts, place orders, manage subscriptions, and handle support requests.
 
 ## Publisher: Publisher's Name
-Required. For Independent-Publisher-Connector, it should be a first and last name of an individual or it can be a company name. ​If there is more than one publisher, please separate the names with a comma.​
+Oleksii Skirko | Innoware
 
 ## Prerequisites
-Required. Any plans or licenses, tools required from the connector.​
+You will need the following to proceed:
+
+- A Microsoft PowerApps or Microsoft Flow plan with custom connector feature
+- Access to Microsoft Partner Center with appropriate permissions to call API functions
+- The Power platform CLI tools
+- AAD Application
+
+Since the APIs used by the connector are secured by Azure Active Directory (AD), we first need to set up a few things in Azure AD for connector to securely access them. After this setup, you can create and test the connector. 
+
+### Azure AD Application
+Since the connector uses OAuth as authentication type, we first need to register an application in Azure AD. This application will be used to get the authorization token required to invoke rest APIs used by the connector on user's behalf. You can read more about this [here](https://docs.microsoft.com/en-us/partner/develop/api-authentication#application-and-user-access). Please use **Application and user access section** in this link. For redirect URI, use "https://global.consent.azure-apim.net/redirect". For the credentials, use a client secret (and not certificates). **Remember to note the secret down**, you will need this later and it is shown only once.
 
 ## Supported Operations
 Required. Describe actions, triggers, and other endpoints.​
