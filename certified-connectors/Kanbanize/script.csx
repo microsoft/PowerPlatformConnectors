@@ -2,7 +2,10 @@
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        await this.UpdateNameRequest().ConfigureAwait(false);
+        if (this.Context.OperationId == "CreateCard" || this.Context.OperationId == "UpdateCard")
+        {
+            await this.UpdateNameRequest().ConfigureAwait(false);
+        }
         return await this.HandleForwardAndTransformOperation().ConfigureAwait(false);
     }
 
