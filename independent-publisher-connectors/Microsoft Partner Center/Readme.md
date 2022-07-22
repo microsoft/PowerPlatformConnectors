@@ -22,9 +22,9 @@ Since the connector uses OAuth as authentication type, we first need to register
 - Make sure the installation path is in the PATH variable by running:
 `python --version`
 - After python is installed, install `paconn` by running:
-`pip install paconn`
+`pip install paconn`\
 If you get errors saying 'Access is denied', consider using the `--user` option or running the command as an Administrator (Windows).
-You can find more details regarding `paconn` by following the [link](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) 
+You can find more details regarding `paconn` by following this [link](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) 
 
 ## Supported Operations
 The connector currently supports the following operations:​
@@ -47,7 +47,7 @@ Gets a collection of all the orders for a specified customer.
 Gets customer's from profile
 
 ## Deployment Instructions
-Add your Application ID to clientId property of `apiProperties.json` file.
+Add your Application ID to clientId property of `apiProperties.json` file.\
 Run the following commands and follow the prompts:
 `paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>`
 
