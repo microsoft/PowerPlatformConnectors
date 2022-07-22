@@ -41,7 +41,7 @@ Gets a collection of a customer's subscriptions.
 Gets a collection of all the orders for a specified customer.
 
 ### [Get customer details](https://docs.microsoft.com/en-us/partner-center/develop/get-a-customer-by-id)
-Gets customer's from profile
+Gets customer's details from Business and Company profiles
 
 ## Deployment Instructions
 Add your Application ID to clientId property of `apiProperties.json` file.\
