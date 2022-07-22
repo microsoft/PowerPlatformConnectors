@@ -48,6 +48,6 @@ Gets customer's from profile
 
 ## Deployment Instructions
 Add your Application ID to clientId property of `apiProperties.json` file.\
-Run the following commands and follow the prompts:
+Run the following commands and follow the prompts:\
 `paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>`
 
