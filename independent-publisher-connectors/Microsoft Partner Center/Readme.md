@@ -34,9 +34,6 @@ Retrieves a collection of the partner's invoices.
 ### [Get Customers](https://docs.microsoft.com/en-us/partner-center/develop/get-a-list-of-customers)
 Gets a collection of resources that represents all of a partner's customers.
 
-### [Get Customers](https://docs.microsoft.com/en-us/partner-center/develop/get-a-list-of-customers)
-Gets a collection of resources that represents all of a partner's customers.
-
 ### [Get Subscriptions](https://docs.microsoft.com/en-us/partner-center/develop/get-all-of-a-customer-s-subscriptions)
 Gets a collection of a customer's subscriptions.
 
