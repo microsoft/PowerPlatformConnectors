@@ -242,11 +242,25 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "* Access Code"
         };
       }
+      else if (verificationType.Equals("ID Verification", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["workflowID"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "GetWorkflowIDs",
+              ["value-collection"] = "workFlowIds",
+              ["value-path"] = "type",
+              ["value-title"] = "name"
+            },
+          ["x-ms-summary"] = "* Workflow IDs"
+        };
+      }
       else {
         response["schema"] = null;
       }
     }
-
     return CreateJsonContent(response.ToString());
   }
 
@@ -546,7 +560,7 @@ public class Script : ScriptBase
     signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
   }
 
-  private void AddParamsForSelectedVerificationType (JArray signers, JObject body)
+  private async Task AddParamsForSelectedVerificationType (JArray signers, JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var verificationType = query.Get("verificationType");
@@ -574,32 +588,11 @@ public class Script : ScriptBase
     {
       signers[0]["accessCode"] = body["accessCode"];
     }
-    else if (verificationType.Equals("Knowledge Based"))
-    {
-      signers[0]["idCheckConfigurationName"] = "ID Check $";
-    }
     else if (verificationType.Equals("ID Verification"))
     {
-      // var response = new JObject();
-      // response = await this.RetrieveWorkflowIds().ConfigureAwait(false);
-
-      // var identityVerification = new JObject();
-      
-      // var arrayWorkflows = response["identityVerification"] as JArray;
-
-      // if (arrayWorkflows.Count > 0)
-      // {
-      //   for (var i = 0; i < arrayWorkflows.Count; i++)
-      //   {
-      //       if (arrayWorkflows[i]["defaultName"].Equals("DocuSign ID Verification"))
-      //       {
-      //         identityVerification["workflowId"] = arrayWorkflows[i]["workflowId"];
-      //         break;
-      //       }
-      //   }
-      // }
-
-      // signers[0]["identityVerification"] = identityVerification;
+      var identityVerification = new JObject();
+      identityVerification["workflowId"] = body["workflowID"];
+      signers[0]["identityVerification"] = identityVerification;
     }
   }
 
@@ -653,47 +646,6 @@ public class Script : ScriptBase
 
     return body;
   }
-
-  //Get Request: Retrieve the workflowIDs
-  // private async Task<JObject> RetrieveWorkflowIds()
-  // {
-  //    var currentUri = HttpContext.Current.Request.Url.AbsolutePath;
-  //    var index = currentUri.IndexOf('/',10);
-  //    var accountId = currentUri.Substring(10,index-10);
-     
-  //    //string[] params = new string[6];
-  //    //params = currentUri.Split('/');
-  //   // var accountId = params[1];
-
-  //   var uri = new Uri("https://demo.docusign.net/restapi/v2.1/accounts/"+accountId+"/identity_verification");
-  //   using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-  //   string content = string.Empty;
-  //   var jsonContent = new JObject();
-
-  //   try 
-  //   {
-  //     using var response = await this.Context.SendAsync(request,this.CancellationToken).ConfigureAwait(false);
-  //     content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-  //     if (response.IsSuccessStatusCode)
-  //     {
-  //       jsonContent = JObject.Parse(content);
-  //     }
-  //     return jsonContent;
-  //   }
-  //   catch (HttpRequestException ex)
-  //   {
-  //     throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to get User Info: " + ex.Message, ex);
-  //   }
-  //   catch (JsonReaderException ex)
-  //   {
-  //     throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse User Info response: " + content, ex);
-  //   }
-  //   catch (UriFormatException ex)
-  //   {
-  //     throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to construct User's API endpoint from the response: " + content, ex);
-  //   }
-  // }
 
   private async Task UpdateApiEndpoint()
   {
@@ -880,6 +832,23 @@ public class Script : ScriptBase
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
           body.GetValue("connectId").ToString()));
+    }
+
+    if ("GetWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var workflowsArray = new JArray();
+
+      foreach (var id in (body["identityVerification"] as JArray)) {
+        var workflowObj = new JObject()
+        {
+          ["type"] = id["workflowId"],
+          ["name"] = id["defaultName"]
+        };
+        workflowsArray.Add(workflowObj);
+      }
+      body["workflowIds"] = workflowsArray;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
