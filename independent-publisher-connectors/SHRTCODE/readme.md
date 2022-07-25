@@ -2,7 +2,7 @@
 the privacy-friendly URL Shortener. With this free Link Shortener connector you can make Links shorter and easier to remember.
 
 ## Publisher
-### Chandra Sekhar Malla
+### Chandra Sekhar
 
 ## Prerequisites
 This API doesn't require any Authentication.
