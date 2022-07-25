@@ -267,7 +267,84 @@ public class Script : ScriptBase
 
     return body;
   }
+  
+  private static string TransformWebhookNotificationBodyDeprecated(string content)
+  {
+    JObject body = ParseContentAsJObject(content, true);
 
+    // customfield code
+    if (body["DocuSignEnvelopeInformation"] is JObject && body["DocuSignEnvelopeInformation"]["EnvelopeStatus"] is JObject)
+    {
+        var envelopeStatus = body["DocuSignEnvelopeInformation"]["EnvelopeStatus"];
+        var customFields = envelopeStatus["CustomFields"];
+        var newCustomFields = new JObject();
+
+        if (customFields is JObject)
+        {
+            var customFieldsArray = customFields["CustomField"];
+            customFieldsArray = customFieldsArray is JObject ? new JArray(customFieldsArray) : customFieldsArray;
+            customFields["CustomField"] = customFieldsArray;
+
+            foreach (var field in customFieldsArray as JArray ?? new JArray())
+            {
+                var fieldName = field.Type == JTokenType.Object ? (string)field["Name"] : null;
+                if (!string.IsNullOrWhiteSpace(fieldName) && newCustomFields[fieldName] == null)
+                {
+                    newCustomFields.Add(fieldName, field["Value"]);
+                }
+            }
+        }
+
+        body["customFields"] = newCustomFields;
+
+        // tab code
+        var recipientStatuses = envelopeStatus["RecipientStatuses"];
+        if (recipientStatuses is JObject)
+        {
+            var statusArray = recipientStatuses["RecipientStatus"];
+            statusArray = statusArray is JObject ? new JArray(statusArray) : statusArray;
+            recipientStatuses["RecipientStatus"] = statusArray;
+
+            // RecipientStatus is an array at this point so now check TabStatus
+            foreach (var recipient in recipientStatuses["RecipientStatus"] ?? new JArray())
+            {
+                var tabStatuses = recipient["TabStatuses"];
+                if (tabStatuses is JObject)
+                {
+                    var tabStatusArray = tabStatuses["TabStatus"];
+                    tabStatusArray = tabStatusArray is JObject ? new JArray(tabStatusArray) : tabStatusArray;
+                    tabStatuses["TabStatus"] = tabStatusArray;
+
+                    // TabStatus is an array at this point
+                    var newTabStatuses = new JObject();
+                    foreach (var tab in tabStatusArray as JArray ?? new JArray())
+                    {
+                        if (tab is JObject)
+                        {
+                            var tabLabel = (string)tab["TabLabel"];
+                            var tabValue = (string)tab["TabValue"];
+                            var customTabType = (string)tab["CustomTabType"];
+
+                            // skip Radio and List tabs that are not selected
+                            if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue) && customTabType != "Radio" && customTabType != "List")
+                            {
+                                if (newTabStatuses[tabLabel] == null)
+                                {
+                                    newTabStatuses.Add(tabLabel, tabValue);
+                                }
+                            }
+                        }
+                    }
+
+                    recipient["tabs"] = newTabStatuses;
+                }
+            }
+        }
+    }
+
+    return body.ToString();
+  }
+    
   private static string TransformWebhookNotificationBody(string content)
   {
     JObject body = ParseContentAsJObject(content, true);
@@ -367,7 +444,15 @@ public class Script : ScriptBase
     }
 
     var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-    var notificationContent = TransformWebhookNotificationBody(content);
+    var notificationContent = "";
+    if (content.Contains("DocuSignEnvelopeInformation"))
+    {
+      notificationContent = TransformWebhookNotificationBodyDeprecated(content);
+    }
+    else
+    {
+      notificationContent = TransformWebhookNotificationBody(content);
+    }
 
     using var logicAppsRequest = new HttpRequestMessage(HttpMethod.Post, logicAppsUri);
     logicAppsRequest.Content = CreateJsonContent(notificationContent);
@@ -406,10 +491,38 @@ public class Script : ScriptBase
     JArray includeData = JArray.Parse(eventData);
     body["eventData"] = new JObject
     {
-        ["version"] = "restv2.1",
-        ["format"] = "json",
-        ["includeData"] = includeData
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
     };
+    
+    return body;
+  }
+  
+  private JObject CreateHookEnvelopeDeprecatedBodyTransformation(JObject original)
+  {
+    var body = new JObject();
+
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["includeEnvelopeVoidReason"] = "true";
+    body["includeTimeZoneInformation"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+    body["envelopeEvents"] = original["envelopeEvents"]?.ToString();
+    body["includeSenderAccountasCustomField"] = "true";
+    
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("connect_deprecated", "connect");
+    uriBuilder.Path = uriBuilder.Path.Replace("v2.1", "v2");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    
     return body;
   }
 
@@ -622,10 +735,15 @@ public class Script : ScriptBase
     {
       this.Context.Request.Content = new StringContent("{ \"status\": \"sent\" }", Encoding.UTF8, "application/json");
     }
-
+    
     if ("CreateHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+    
+    if ("CreateHookEnvelopeDeprecated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateHookEnvelopeDeprecatedBodyTransformation).ConfigureAwait(false);
     }
 
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -728,7 +846,7 @@ public class Script : ScriptBase
 
   private async Task UpdateResponse(HttpResponseMessage response)
   {
-    if ("CreateHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+    if ("CreateHookEnvelopeDeprecated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
         && response.Headers?.Location != null)
     {
       var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
