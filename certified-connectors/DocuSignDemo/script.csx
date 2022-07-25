@@ -250,9 +250,16 @@ public class Script : ScriptBase
           ["x-ms-dynamic-values"] = new JObject
             {
               ["operationId"] = "GetWorkflowIDs",
+              ["parameters"] = new JObject
+              {
+                ["accountId"] = new JObject
+                {
+                  ["parameter"] = "accountId"
+                }
+              },
               ["value-collection"] = "workFlowIds",
               ["value-path"] = "type",
-              ["value-title"] = "name"
+              ["value-title"] = "name",
             },
           ["x-ms-summary"] = "* Workflow IDs"
         };
