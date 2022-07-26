@@ -460,7 +460,7 @@ public class Script : ScriptBase
     return await this.Context.SendAsync(logicAppsRequest, this.CancellationToken).ConfigureAwait(false);
   }
 
-  private JObject CreateHookEnvelopeBodyTransformation(JObject original)
+  private JObject CreateHookEnvelopeV2BodyTransformation(JObject original)
   {
     var body = new JObject();
     
@@ -496,10 +496,14 @@ public class Script : ScriptBase
       ["includeData"] = includeData
     };
     
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    
     return body;
   }
   
-  private JObject CreateHookEnvelopeDeprecatedBodyTransformation(JObject original)
+  private JObject CreateHookEnvelopeBodyTransformation(JObject original)
   {
     var body = new JObject();
 
@@ -519,7 +523,6 @@ public class Script : ScriptBase
     body["includeSenderAccountasCustomField"] = "true";
     
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    uriBuilder.Path = uriBuilder.Path.Replace("connect_deprecated", "connect");
     uriBuilder.Path = uriBuilder.Path.Replace("v2.1", "v2");
     this.Context.Request.RequestUri = uriBuilder.Uri;
     
@@ -573,10 +576,6 @@ public class Script : ScriptBase
     {
       newBody["status"] = query.Get("status");
     }
-
-    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    uriBuilder.Path = uriBuilder.Path.Replace("envelopes/createFromTemplate", "/envelopes");
-    this.Context.Request.RequestUri = uriBuilder.Uri;
 
     return newBody;
   }
@@ -741,9 +740,9 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeBodyTransformation).ConfigureAwait(false);
     }
     
-    if ("CreateHookEnvelopeDeprecated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("CreateHookEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
-      await this.TransformRequestJsonBody(this.CreateHookEnvelopeDeprecatedBodyTransformation).ConfigureAwait(false);
+      await this.TransformRequestJsonBody(this.CreateHookEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
 
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -751,7 +750,7 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
     }
 
-    if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateBodyTransformation).ConfigureAwait(false);
     }
@@ -846,7 +845,7 @@ public class Script : ScriptBase
 
   private async Task UpdateResponse(HttpResponseMessage response)
   {
-    if ("CreateHookEnvelopeDeprecated".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+    if (this.Context.OperationId.Contains("CreateHookEnvelope")
         && response.Headers?.Location != null)
     {
       var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
