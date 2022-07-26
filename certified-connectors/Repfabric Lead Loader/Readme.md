@@ -2,6 +2,7 @@
 This connector is used for sending data to Repfabric's backend system, automatically creating new tables and objects related to customers, companies, and "leads". The primary purpose of this connector is to send the data from a .csv file, though this API can be used for other Microsoft services in the future.
 
 ## Publisher
+
 Repfabric
 
 ## Prerequisites
