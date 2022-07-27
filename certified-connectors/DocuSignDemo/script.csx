@@ -586,7 +586,7 @@ public class Script : ScriptBase
     signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
   }
 
-  private async Task AddParamsForSelectedVerificationType (JArray signers, JObject body)
+  private void AddParamsForSelectedVerificationType (JArray signers, JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var verificationType = query.Get("verificationType");
