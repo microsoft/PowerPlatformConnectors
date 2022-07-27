@@ -577,7 +577,7 @@ public class Script : ScriptBase
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["recipientId"] = GenerateId();
+    signers[0]["recipientId"] = Guid.NewGuid();
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
@@ -599,16 +599,16 @@ public class Script : ScriptBase
       var phoneNumberList = new JArray();
       var phoneNumberObject = new JObject();
 
-      identityVerification["workflowId"] = body["workflowID"];
-      
-      inputObject["name"] = "phone_number_list";
-      inputObject["valueType"] = "PhoneNumberList";
-      
       phoneNumberObject["Number"] = body["phoneNumber"];
       phoneNumberObject["CountryCode"] = body["countryCode"];
       phoneNumberList.Add(phoneNumberObject);
+
       inputObject["phoneNumberList"] = phoneNumberList;
+      inputObject["name"] = "phone_number_list";
+      inputObject["valueType"] = "PhoneNumberList";
       inputOptions.Add(inputObject);
+
+      identityVerification["workflowId"] = body["workflowID"];
       identityVerification["inputOptions"] = inputOptions;
       signers[0]["identityVerification"] = identityVerification;
     }
@@ -622,14 +622,6 @@ public class Script : ScriptBase
       identityVerification["workflowId"] = body["workflowID"];
       signers[0]["identityVerification"] = identityVerification;
     }
-  }
-
-  private int GenerateId()
-  {
-    DateTimeOffset now = DateTimeOffset.UtcNow;
-    DateTime midnight = DateTime.Now.Date;
-    TimeSpan ts = now.Subtract(midnight);
-    return (int)ts.TotalMilliseconds;
   }
 
   private int GenerateDocumentId()
