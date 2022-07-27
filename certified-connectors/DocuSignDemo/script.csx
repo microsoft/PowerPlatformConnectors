@@ -775,12 +775,12 @@ public class Script : ScriptBase
       var newBody = new JObject();
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       newBody["signers"] = new JArray
-            {
-                new JObject
-                {
-                    ["recipientId"] = Uri.UnescapeDataString(query.Get("RemoveRecipientFromEnvelopeRecipientId")).Replace("+", " "),
-                },
-            };
+      {
+          new JObject
+          {
+              ["recipientId"] = Uri.UnescapeDataString(query.Get("RemoveRecipientFromEnvelopeRecipientId")).Replace("+", " "),
+          },
+      };
 
       this.Context.Request.Content = CreateJsonContent(newBody.ToString());
     }
