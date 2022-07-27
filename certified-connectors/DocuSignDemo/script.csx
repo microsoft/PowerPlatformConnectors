@@ -616,6 +616,10 @@ public class Script : ScriptBase
     {
       signers[0]["accessCode"] = body["accessCode"];
     }
+    else if (verificationType.Equals("Knowledge Based"))
+    {
+      signers[0]["idCheckConfigurationName"] = "ID Check $";
+    }
     else if (verificationType.Equals("ID Verification"))
     {
       var identityVerification = new JObject();
