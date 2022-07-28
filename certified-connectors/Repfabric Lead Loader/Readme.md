@@ -2,7 +2,8 @@
 This connector is used for sending data to Repfabric's backend system, automatically creating new tables and objects related to customers, companies, and "leads". The primary purpose of this connector is to send the data from a .csv file, though this API can be used for other Microsoft services in the future.
 
 ## Publisher
-Phiquest
+
+Repfabric
 
 ## Prerequisites
 You will only need access to a sheet template that will provide the correct data for the API to process, and a Power Automate template that uses the connector. [Here](https://repfabric-my.sharepoint.com/:x:/p/jeremy_ramos/EfdJI0HWs3lMi9T7rvNrGVsB83ZmKSciVHeOebrYulcTDw?e=1yafTd) is a Google Sheet example. Until we can publish the template with the certified connector, contact andre@phiquest.io for a Power Automate template.
