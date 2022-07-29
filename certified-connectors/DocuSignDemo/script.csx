@@ -286,6 +286,9 @@ public class Script : ScriptBase
       else {
         response["schema"] = null;
       }
+      else {
+        response["schema"] = null;
+      }
     }
     return CreateJsonContent(response.ToString());
   }
