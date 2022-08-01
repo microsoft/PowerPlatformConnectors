@@ -208,6 +208,32 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForEmbeddedSigningSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnUrl"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Enter Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
     if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
@@ -582,6 +608,12 @@ public class Script : ScriptBase
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
     }
+
+    if (!string.IsNullOrEmpty(query.Get("clientUserId")))
+    {
+      signers[0]["clientUserId"] = query.Get("clientUserId");
+    }
+
     signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
     signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
   }
