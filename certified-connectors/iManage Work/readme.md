@@ -1,6 +1,6 @@
 # iManage Work
 
-iManage Work is a document and email management solution for organizing and sharing information with internal and external parties. The iManage Work connector enables users to automate repetitive tasks and approval processes while they keep all their files secure in the iManage Work environment.
+iManage is the industry-leading provider of document and email management solutions for knowledge workers. iManage platform organizes and secures the information in documents and emails, so professionals can search for what they need, act on it, and collaborate more effectively. The iManage Work connector enables users to automate repetitive tasks and approval processes while they keep all their files secure in the iManage Work environment.
 
 ## Publisher: iManage LLC
 
