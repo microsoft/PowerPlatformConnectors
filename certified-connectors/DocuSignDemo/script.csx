@@ -223,10 +223,10 @@ public class Script : ScriptBase
 
       if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase))
       {
-        response["schema"]["properties"]["returnUrl"] = new JObject
+        response["schema"]["properties"]["returnURL"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Enter Return URL"
+          ["x-ms-summary"] = "* Add Return URL"
         };
       }
       else {
@@ -600,6 +600,27 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject AddEmbeddedSigningViewBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    body["userName"] = query.Get("signerName");
+    body["email"] = query.Get("signerEmail");
+    body["authenticationMethod"] = query.Get("authenticationMethod");
+    body["clientUserId"] = query.Get("clientUserId");
+    
+    var returnUrl = query.Get("returnUrl");
+    if (returnUrl.Equals("Default URL"))
+    {
+      body["returnUrl"] = "https://global.consent.azure-apim.net/redirect";
+    }
+    else if (returnUrl.Equals("Add A Different URL"))
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+
+    return body;
+  }
+
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -792,6 +813,11 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("AddEmbeddedSigningView".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddEmbeddedSigningViewBodyTransformation).ConfigureAwait(false);
     }
 
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
