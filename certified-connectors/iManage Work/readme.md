@@ -76,7 +76,7 @@ Get details of users that belong to the specified group and match the specified 
 
 ### Get trustees
 
-Returns a list of trustees with certain permissions for a document, folder or workspace.
+Gets a list of trustees with certain permissions for a document, folder or workspace.
 
 ### Edit name-value pairs
 
