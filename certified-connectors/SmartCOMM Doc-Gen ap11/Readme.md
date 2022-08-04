@@ -1,5 +1,5 @@
 # SmartCOMM On Demand Generation Connector
-Smart Communications™ is a leading cloud-based platform for enterprise customer communications. As the only cloud solution ranked as a Leader in Gartner’s Magic Quadrant for Customer Communications Management, more than 350 global brands – many in the world’s most highly regulated industries – rely on Smart Communications to make multi-channel customer communications more meaningful, while also helping them simplify their processes and operate more efficiently.
+Smart Communications is a leading cloud-based platform for enterprise customer communications. As the only cloud solution ranked as a Leader in Gartner’s Magic Quadrant for Customer Communications Management, more than 350 global brands – many in the world’s most highly regulated industries – rely on Smart Communications to make multi-channel customer communications more meaningful, while also helping them simplify their processes and operate more efficiently.
 
 The SmartCOMM On Demand Connector for Power Apps includes a pre-built integration for producing Customer Communications. In addition, the connector provides RESTful webservice calls to SmartCOMM for on-demand use cases.
 
