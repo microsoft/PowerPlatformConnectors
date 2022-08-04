@@ -3,7 +3,7 @@ The Power Assist connector empowers you and your organization's citizen develope
 
 ## Prerequisites
 1. You must first [create a free RapidAPI account](https://rapidapi.com/auth/sign-up). This is required to be able to authenticate to the API. If you are signing up on behalf of your organization, consider creating an Organization in RapidAPI so that other users at your organization can share access to the API without sharing RapidAPI credentials. [See how.](https://docs.rapidapi.com/docs/getting-started-with-rapidapi-for-teams)
-2. Go to the [**Power Automate Helper API**](https://rapidapi.com/elevate-digital-elevate-digital-default/api/power-automate-helper) and navigate to the **Pricing** tab. If you are signing up on behalf of your organization, make sure your organization is selected in the dropdown above the pricing options.
+2. Go to the [**Power Assist API**](https://rapidapi.com/elevate-digital-elevate-digital-default/api/power-automate-helper) and navigate to the **Pricing** tab. If you are signing up on behalf of your organization, make sure your organization is selected in the dropdown above the pricing options.
 3. Select your desired plan. The **Basic** plan is FREE and offers access to all endpoints, but has a hard limit of 50 requests per month. The **Pro** plan is a paid subscription offering access to all endpoints, with a soft limit of 1,000 requests per month.
 4. Enter your card information, if applicable.
 5. Once you are subscribed, go to the **Endpoints** tab and locate the **X-RapidAPI-Key** in the center column. Copy this value, as you will need it to authenticate in Power Automate.
