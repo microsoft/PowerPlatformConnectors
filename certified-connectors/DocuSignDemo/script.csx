@@ -529,7 +529,7 @@ public class Script : ScriptBase
     return body;
   }
 
-  private JObject CreateEnvelopeFromTemplateBodyTransformation(JObject body)
+  private JObject CreateEnvelopeFromTemplateV1BodyTransformation(JObject body)
   {
     var templateRoles = new JArray();
     var signer = new JObject();
@@ -580,6 +580,59 @@ public class Script : ScriptBase
     return newBody;
   }
 
+  private JObject CreateEnvelopeFromTemplateV2BodyTransformation(JObject body)
+  {
+    var templateRoles = new JArray();
+    var signer = new JObject();
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    //custom fields
+    var textCustomFields = new JArray();
+
+    foreach (var property in body)
+    {
+      var textCustomField = new JObject();
+      var key = (string)property.Key;
+      var value = (string)property.Value;
+
+      if (key.StartsWith("* "))
+      {
+        textCustomField["required"] = "true";
+        key = key.Replace("* ", "");
+      }
+
+      if (key.EndsWith(" [hidden]"))
+      {
+        key = key.Replace(" [hidden]", "");
+      }
+      else
+      {
+        textCustomField["show"] = "true";
+      }
+
+      textCustomField["name"] = key;
+      textCustomField["value"] = value;
+
+      textCustomFields.Add(textCustomField);
+    }
+
+    var newBody = new JObject()
+    {
+      ["templateId"] = query.Get("templateId"),
+      ["customFields"] = new JObject()
+        {
+          ["textCustomFields"] = textCustomFields
+        }
+    };
+
+    if (!string.IsNullOrEmpty(query.Get("status")))
+    {
+      newBody["status"] = query.Get("status");
+    }
+
+    return newBody;
+  }
+  
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -752,8 +805,13 @@ public class Script : ScriptBase
 
     if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
-      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateBodyTransformation).ConfigureAwait(false);
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV1BodyTransformation).ConfigureAwait(false);
     }
+    
+    if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV2BodyTransformation).ConfigureAwait(false);
+    }    
 
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
@@ -904,6 +962,71 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("GetCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var itemProperties = new JObject();
+      var basePropertyDefinition = new JObject
+      {
+        ["type"] = "string"
+      };
+
+      /*
+        "listCustomFields": [
+          {
+            "listItems": [
+              "listval1",
+              "listval2"
+            ],
+            "name": "Company Location",
+            "required": "true"
+          }
+        ]
+      */
+
+      var count = 0;
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+        var name = customField["name"].ToString();
+
+        if (customField["required"].ToString() == "true") 
+        {
+          name = "* " + name;
+        }
+
+        if (customField["show"].ToString() == "false") 
+        {
+          name = name + " [hidden]";
+        }
+
+        itemProperties[name] = basePropertyDefinition.DeepClone();
+        count++;
+      }
+      
+      var newBody = new JObject
+      {
+        ["name"] = "dynamicSchema",
+        ["title"] = "dynamicSchema",
+        ["x-ms-permission"] = "read-write",
+        ["schema"] = new JObject
+        {
+          ["type"] = "array",
+          ["items"] = new JObject
+          {
+            ["type"] = "object",
+            ["properties"] = itemProperties,
+          },
+        },
+      };
+      
+      if (count == 0)
+      {
+        newBody["schema"] = null;
+      }
+      
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+    
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
