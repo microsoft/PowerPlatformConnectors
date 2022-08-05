@@ -36,6 +36,9 @@ Retreive a single voip endpoint object by providing an ID.
 ### Dial
 Request the start of new call by sending a request to a device.
 
+### Delete Webhook By ID
+Delete a single webhook object by providing an ID.
+
 ### Get Contacts
 Retrieve and maintain a list of all employees. Gets triggered, when new employee is created.
 
