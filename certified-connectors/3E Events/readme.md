@@ -1,5 +1,3 @@
-[[_TOC_]]
-
 # 3E Events connector
 3E provides law and professional service firm practice management software primarily for back office time, billing and accounting for firm operations as well as new client onboarding, record keeping, conflicts searching, asset reporting and purchasing. With the 3E Events Connector, you can extend 3E’s capabilities by creating event-based integrations, resulting in more interactive, immersive, responsive solutions. 
 
