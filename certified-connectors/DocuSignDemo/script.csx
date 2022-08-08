@@ -585,43 +585,18 @@ public class Script : ScriptBase
     var templateRoles = new JArray();
     var signer = new JObject();
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-
-    //custom fields
     var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
 
-    foreach (var property in body)
-    {
-      var textCustomField = new JObject();
-      var key = (string)property.Key;
-      var value = (string)property.Value;
-
-      if (key.StartsWith("* "))
-      {
-        textCustomField["required"] = "true";
-        key = key.Replace("* ", "");
-      }
-
-      if (key.EndsWith(" [hidden]"))
-      {
-        key = key.Replace(" [hidden]", "");
-      }
-      else
-      {
-        textCustomField["show"] = "true";
-      }
-
-      textCustomField["name"] = key;
-      textCustomField["value"] = value;
-
-      textCustomFields.Add(textCustomField);
-    }
+    ParseCustomFields(body, textCustomFields, listCustomFields);
 
     var newBody = new JObject()
     {
       ["templateId"] = query.Get("templateId"),
       ["customFields"] = new JObject()
         {
-          ["textCustomFields"] = textCustomFields
+          ["textCustomFields"] = textCustomFields,
+          ["listCustomFields"] = listCustomFields
         }
     };
 
@@ -631,6 +606,50 @@ public class Script : ScriptBase
     }
 
     return newBody;
+  }
+  
+  private void ParseCustomFields(JObject body, JArray textCustomFields,  JArray listCustomFields)
+  {
+    foreach (var property in body)
+    {
+      var customField = new JObject();
+      var key = (string)property.Key;
+      var value = (string)property.Value;
+
+      if (key.StartsWith("* "))
+      {
+        customField["required"] = "true";
+        key = key.Replace("* ", "");
+      }
+      else
+      {
+        key = key.Replace(" [optional]", "");
+      }
+
+      if (key.EndsWith(" [hidden]"))
+      {
+        key = key.Replace(" [hidden]", "");
+      }
+      else
+      {
+        customField["show"] = "true";
+      }
+
+      if (key.StartsWith("[list custom field]"))
+      {
+        key = key.Replace("[list custom field] ", "");
+        customField["name"] = key;
+        customField["value"] = value;
+        listCustomFields.Add(customField);
+      }
+      else
+      {
+        key = key.Replace("[text custom field] ", "");
+        customField["name"] = key;
+        customField["value"] = value;
+        textCustomFields.Add(customField);
+      }
+    }
   }
   
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
@@ -971,23 +990,10 @@ public class Script : ScriptBase
         ["type"] = "string"
       };
 
-      /*
-        "listCustomFields": [
-          {
-            "listItems": [
-              "listval1",
-              "listval2"
-            ],
-            "name": "Company Location",
-            "required": "true"
-          }
-        ]
-      */
-
       var count = 0;
       foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
       {
-        var name = customField["name"].ToString();
+        var name = "[text custom field] " + customField["name"].ToString();
 
         if (customField["required"].ToString() == "true") 
         {
@@ -1003,6 +1009,33 @@ public class Script : ScriptBase
         count++;
       }
       
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+        var name = "[list custom field] " + customField["name"].ToString();
+
+        if (customField["required"].ToString() == "true") 
+        {
+          name = "* " + name;
+        }
+
+        if (customField["show"].ToString() == "false") 
+        {
+          name = name + " [hidden]";
+        }
+
+        itemProperties[name] = basePropertyDefinition.DeepClone();
+        count++;
+      }
+
+      if (count == 0)
+      {
+        itemProperties["Custom Field [optional]"] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-visibility"]= "advanced"
+          };
+      }
+
       var newBody = new JObject
       {
         ["name"] = "dynamicSchema",
@@ -1018,11 +1051,6 @@ public class Script : ScriptBase
           },
         },
       };
-      
-      if (count == 0)
-      {
-        newBody["schema"] = null;
-      }
       
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
