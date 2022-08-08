@@ -815,7 +815,7 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
     }
 
-    if ("AddEmbeddedSigningView".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddEmbeddedSigningViewBodyTransformation).ConfigureAwait(false);
     }
