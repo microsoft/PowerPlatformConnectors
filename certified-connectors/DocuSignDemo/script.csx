@@ -600,7 +600,7 @@ public class Script : ScriptBase
     return body;
   }
 
-  private JObject AddEmbeddedSigningViewBodyTransformation (JObject body)
+  private JObject GenerateEmbeddedSigningURLBodyTransformation (JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     body["userName"] = query.Get("signerName");
@@ -817,7 +817,7 @@ public class Script : ScriptBase
 
     if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
-      await this.TransformRequestJsonBody(this.AddEmbeddedSigningViewBodyTransformation).ConfigureAwait(false);
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLBodyTransformation).ConfigureAwait(false);
     }
 
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
