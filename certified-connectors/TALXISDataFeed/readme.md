@@ -1,7 +1,7 @@
 # TALXIS Data Feed
 TALXIS Data Feed is a collection of different data sources. You can get company's business data, format address, or get public holidays for example. Use this connector to improve your data quality.
 
-## TALXIS
+## Publisher: TALXIS
 This connector is managed and published by [NETWORG](https://www.networg.com/) under the product name [TALXIS](https://www.talxis.com/).
 
 ## Prerequisites
