@@ -635,16 +635,16 @@ public class Script : ScriptBase
         customField["show"] = "true";
       }
 
-      if (key.StartsWith("[list custom field]"))
+      if (key.StartsWith("[List Custom Field]"))
       {
-        key = key.Replace("[list custom field] ", "");
+        key = key.Replace("[List Custom Field] ", "");
         customField["name"] = key;
         customField["value"] = value;
         listCustomFields.Add(customField);
       }
       else
       {
-        key = key.Replace("[text custom field] ", "");
+        key = key.Replace("[Text Custom Field] ", "");
         customField["name"] = key;
         customField["value"] = value;
         textCustomFields.Add(customField);
@@ -655,6 +655,16 @@ public class Script : ScriptBase
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
+
+    ParseCustomFields(body, textCustomFields, listCustomFields);
+
+    body["customFields"] = new JObject()
+    {
+      ["textCustomFields"] = textCustomFields,
+      ["listCustomFields"] = listCustomFields
+    };
 
     body["emailSubject"] = query.Get("emailSubject");
     var emailBody = query.Get("emailBody");
@@ -993,7 +1003,7 @@ public class Script : ScriptBase
       var count = 0;
       foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[text custom field] " + customField["name"].ToString();
+        var name = "[Text Custom Field] " + customField["name"].ToString();
 
         if (customField["required"].ToString() == "true") 
         {
@@ -1011,7 +1021,7 @@ public class Script : ScriptBase
       
       foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[list custom field] " + customField["name"].ToString();
+        var name = "[List Custom Field] " + customField["name"].ToString();
 
         if (customField["required"].ToString() == "true") 
         {
