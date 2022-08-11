@@ -129,12 +129,12 @@ public class Script : ScriptBase
                 ["anchorXOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "X offset (pixels)"
+                  ["x-ms-summary"] = "x offset (pixels)"
                 },
                 ["anchorYOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "Y offset (pixels)"
+                  ["x-ms-summary"] = "y offset (pixels)"
                 }
               }
             }
@@ -144,6 +144,12 @@ public class Script : ScriptBase
 
       if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
       {
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["tabLabel"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "label"
+        };
+        
         response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
         {
           ["type"] = "string",
@@ -635,16 +641,16 @@ public class Script : ScriptBase
         customField["show"] = "true";
       }
 
-      if (key.StartsWith("[List Custom Field]"))
+      if (key.StartsWith("[List Envelope Custom Field]"))
       {
-        key = key.Replace("[List Custom Field] ", "");
+        key = key.Replace("[List Envelope Custom Field] ", "");
         customField["name"] = key;
         customField["value"] = value;
         listCustomFields.Add(customField);
       }
       else
       {
-        key = key.Replace("[Text Custom Field] ", "");
+        key = key.Replace("[Text Envelope Custom Field] ", "");
         customField["name"] = key;
         customField["value"] = value;
         textCustomFields.Add(customField);
@@ -1003,7 +1009,7 @@ public class Script : ScriptBase
       var count = 0;
       foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[Text Custom Field] " + customField["name"].ToString();
+        var name = "[Text Envelope Custom Field] " + customField["name"].ToString();
 
         if (customField["required"].ToString() == "true") 
         {
@@ -1021,7 +1027,7 @@ public class Script : ScriptBase
       
       foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[List Custom Field] " + customField["name"].ToString();
+        var name = "[List Envelope Custom Field] " + customField["name"].ToString();
 
         if (customField["required"].ToString() == "true") 
         {
