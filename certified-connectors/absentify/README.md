@@ -1,8 +1,7 @@
 # absentify
 absentify is free and specially designed for the Microsoft 365 environment to manage your team's or employee's absences and have an overview of all time off and reason given. You benefit from full integration of paid time off tracking with Microsoft Teams and Microsoft 365, no more boring Excel sheets. absentify is the easiest way to approve vacation time and holidays.
 
-## Publisher: Publisher's Name
-BrainCore Solutions GmbH
+## Publisher: BrainCore Solutions GmbH
 
 ## Prerequisites
 To use this connector, you need to have a work, school or Microsoft personal account. You also need to accept the permissions and consent of absentify by taking one of these two steps:
