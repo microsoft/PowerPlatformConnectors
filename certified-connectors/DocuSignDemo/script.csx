@@ -611,7 +611,7 @@ public class Script : ScriptBase
     var returnUrl = query.Get("returnUrl");
     if (returnUrl.Equals("Default URL"))
     {
-      body["returnUrl"] = "https://global.consent.azure-apim.net/redirect";
+      body["returnUrl"] = "https://postsign.docusign.com/postsigning/en/finish-signing";
     }
     else if (returnUrl.Equals("Add A Different URL"))
     {
