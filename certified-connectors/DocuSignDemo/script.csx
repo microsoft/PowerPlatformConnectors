@@ -84,6 +84,34 @@ public class Script : ScriptBase
       response["tabTypes"] = tabTypesArray;
     }
 
+    if (operationId.Equals("StaticResponseForRecipientTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var recipientTypesArray = new JArray();
+      
+      string [,] recipientTypes = { 
+        { "agents", "Specify Recipients" }, 
+        { "carbonCopies", "Receives a Copy" }, 
+        { "certifiedDeliveries", "Needs to View" }, 
+        { "editors", "Allow to Edit" },
+        { "inPersonSigners", "In Person Signer" },
+        { "intermediaries", "Update Recipients" },
+        { "signers", "Needs to Sign" },
+        { "witnesses", "Signs with Witness" }
+      };
+
+      for (var i = 0; i < recipientTypes.GetLength(0); i++)
+      {
+        var recipientTypeObject = new JObject()
+        {
+          ["type"] = recipientTypes[i,0],
+          ["name"] = recipientTypes[i,1]
+        };
+        recipientTypesArray.Add(recipientTypeObject);
+      }
+
+      response["recipientTypes"] = recipientTypesArray;
+    }
+
     if (operationId.StartsWith("StaticResponseForFont", StringComparison.OrdinalIgnoreCase))
     {
       var fontNamesArray = new JArray();
@@ -210,6 +238,83 @@ public class Script : ScriptBase
           ["type"] = "string",
           ["x-ms-summary"] = "italic",
           ["description"] = "true/false"
+        };
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForRecipientTypeSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var recipientType = query.Get("recipientType");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (recipientType.Equals("inPersonSigners", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["hostName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Host name"
+        };
+        response["schema"]["properties"]["hostEmail"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Host email"
+        };
+        response["schema"]["properties"]["signerName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Signer name"
+        };
+      }
+      else if (recipientType.Equals("signers", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["name"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Signer name"
+        };
+        response["schema"]["properties"]["email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Signer email"
+        };
+      }
+      else if (recipientType.Equals("witnesses", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["witnessName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Witness name"
+        };
+        response["schema"]["properties"]["witnessEmail"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Witness email"
+        };
+        response["schema"]["properties"]["witnessFor"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Witness for (Specify Recipient ID)"
+        };
+      }
+      else
+      {
+        response["schema"]["properties"]["name"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Name"
+        };
+        response["schema"]["properties"]["email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Email"
         };
       }
     }
@@ -689,27 +794,96 @@ public class Script : ScriptBase
 
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
-    var signers = new JArray
-      {
-        new JObject(),
-      };
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
-    signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
-    if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
+    var recipientType = query.Get("recipientType");
+    
+    var signers = new JArray
     {
-      signers[0]["recipientId"] = Guid.NewGuid();
-    }
-    if (body["routingOrder"] != null)
-    {
-      signers[0]["routingOrder"] = body["routingOrder"];
-    }
+      new JObject(),
+    };
+    AddCoreRecipientParams(signers, body);
+    AddParamsForSelectedRecipientType(signers, body);
 
-    body["signers"] = signers;
+    body[recipientType] = signers;
+
     return body;
   }
 
-  private int GenerateDocumentId()
+  private void AddCoreRecipientParams(JArray signers, JObject body) 
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    signers[0]["recipientId"] = GenerateId();
+    
+    if (!string.IsNullOrEmpty(query.Get("routingOrder")))
+    {
+      signers[0]["routingOrder"] = query.Get("routingOrder");
+    }
+
+    var emailNotification = new JObject();
+    var emailNotificationSet = false;
+
+    if (!string.IsNullOrEmpty(query.Get("emailNotificationLanguage")))
+    {
+      var language = query.Get("emailNotificationLanguage").Split("()".ToCharArray())[1];
+      emailNotification["supportedLanguage"] = language;
+      emailNotificationSet = true;
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("emailNotificationSubject")))
+    {
+      emailNotification["emailSubject"] = query.Get("emailNotificationSubject");
+      emailNotificationSet = true;
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("emailNotificationBody")))
+    {
+      emailNotification["emailBody"] = query.Get("emailNotificationBody");
+      emailNotificationSet = true;
+    }
+
+    if(emailNotificationSet)
+    {
+      signers[0]["emailNotification"] = emailNotification;
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("note")))
+    {
+      signers[0]["note"] = query.Get("note");
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("roleName")))
+    {
+      signers[0]["roleName"] = query.Get("roleName");
+    }
+  }
+
+  private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var recipientType = query.Get("recipientType");
+    signers[0]["recipientId"] = GenerateId();
+
+    if (recipientType.Equals("inPersonSigners"))
+    {
+      signers[0]["hostName"] = body["hostName"];
+      signers[0]["hostEmail"] = body["hostEmail"];
+      signers[0]["signerName"] = body["signerName"];
+    }
+    else if (recipientType.Equals("witnesses"))
+    {
+      signers[0]["name"] = body["witnessName"];
+      signers[0]["email"] = body["witnessEmail"];
+      signers[0]["witnessFor"] = body["witnessFor"];
+    }
+    else
+    {
+      signers[0]["name"] = body["name"];
+      signers[0]["email"] = body["email"];
+    }
+  }
+
+  private int GenerateId()
   {
     DateTimeOffset now = DateTimeOffset.UtcNow;
     DateTime midnight = DateTime.Now.Date;
@@ -723,7 +897,7 @@ public class Script : ScriptBase
 
     for (var i = 0; i < documents.Count; i++)
     {
-      documents[i]["documentId"] = $"{GenerateDocumentId() + i}";
+      documents[i]["documentId"] = $"{GenerateId() + i}";
     }
 
     body["documents"] = documents;
@@ -1074,9 +1248,23 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var recipientType = query.Get("recipientType");
       var newBody = new JObject();
+      var signers = new JArray();
 
-      foreach (var signer in (body["signers"] as JArray) ?? new JArray())
+      if(recipientType.Equals("inPersonSigners"))
+      {
+        signers = body["inPersonSigners"] as JArray;
+        signers[0]["name"] = signers[0]["hostName"];
+        signers[0]["email"] = signers[0]["hostEmail"];
+      }
+      else
+      {
+        signers = body[recipientType] as JArray;
+      }
+
+      foreach (var signer in signers)
       {
         newBody = signer as JObject;
         break;
