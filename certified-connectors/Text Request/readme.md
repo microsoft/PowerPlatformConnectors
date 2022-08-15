@@ -1,8 +1,5 @@
-# Title
+# Text Request
 Text Request is a business texting solution for companies to manage and track customer experience and sales. With it, customers can host text lines to receive customer inquiries, as well as send group texts and marketing.
-
-## Publisher: Publisher's Name
-Text Request
 
 ## Supported Operations
 Text Request supports a wide variety of operations (no triggers) for handling your data.
