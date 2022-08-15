@@ -157,12 +157,12 @@ public class Script : ScriptBase
                 ["anchorXOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "X offset (pixels)"
+                  ["x-ms-summary"] = "x offset (pixels)"
                 },
                 ["anchorYOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "Y offset (pixels)"
+                  ["x-ms-summary"] = "y offset (pixels)"
                 }
               }
             }
@@ -172,6 +172,12 @@ public class Script : ScriptBase
 
       if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
       {
+        response["schema"]["properties"]["tabs"]["items"]["properties"]["tabLabel"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "label"
+        };
+        
         response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
         {
           ["type"] = "string",
@@ -372,7 +378,84 @@ public class Script : ScriptBase
 
     return body;
   }
+  
+  private static string TransformWebhookNotificationBodyDeprecated(string content)
+  {
+    JObject body = ParseContentAsJObject(content, true);
 
+    // customfield code
+    if (body["DocuSignEnvelopeInformation"] is JObject && body["DocuSignEnvelopeInformation"]["EnvelopeStatus"] is JObject)
+    {
+        var envelopeStatus = body["DocuSignEnvelopeInformation"]["EnvelopeStatus"];
+        var customFields = envelopeStatus["CustomFields"];
+        var newCustomFields = new JObject();
+
+        if (customFields is JObject)
+        {
+            var customFieldsArray = customFields["CustomField"];
+            customFieldsArray = customFieldsArray is JObject ? new JArray(customFieldsArray) : customFieldsArray;
+            customFields["CustomField"] = customFieldsArray;
+
+            foreach (var field in customFieldsArray as JArray ?? new JArray())
+            {
+                var fieldName = field.Type == JTokenType.Object ? (string)field["Name"] : null;
+                if (!string.IsNullOrWhiteSpace(fieldName) && newCustomFields[fieldName] == null)
+                {
+                    newCustomFields.Add(fieldName, field["Value"]);
+                }
+            }
+        }
+
+        body["customFields"] = newCustomFields;
+
+        // tab code
+        var recipientStatuses = envelopeStatus["RecipientStatuses"];
+        if (recipientStatuses is JObject)
+        {
+            var statusArray = recipientStatuses["RecipientStatus"];
+            statusArray = statusArray is JObject ? new JArray(statusArray) : statusArray;
+            recipientStatuses["RecipientStatus"] = statusArray;
+
+            // RecipientStatus is an array at this point so now check TabStatus
+            foreach (var recipient in recipientStatuses["RecipientStatus"] ?? new JArray())
+            {
+                var tabStatuses = recipient["TabStatuses"];
+                if (tabStatuses is JObject)
+                {
+                    var tabStatusArray = tabStatuses["TabStatus"];
+                    tabStatusArray = tabStatusArray is JObject ? new JArray(tabStatusArray) : tabStatusArray;
+                    tabStatuses["TabStatus"] = tabStatusArray;
+
+                    // TabStatus is an array at this point
+                    var newTabStatuses = new JObject();
+                    foreach (var tab in tabStatusArray as JArray ?? new JArray())
+                    {
+                        if (tab is JObject)
+                        {
+                            var tabLabel = (string)tab["TabLabel"];
+                            var tabValue = (string)tab["TabValue"];
+                            var customTabType = (string)tab["CustomTabType"];
+
+                            // skip Radio and List tabs that are not selected
+                            if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue) && customTabType != "Radio" && customTabType != "List")
+                            {
+                                if (newTabStatuses[tabLabel] == null)
+                                {
+                                    newTabStatuses.Add(tabLabel, tabValue);
+                                }
+                            }
+                        }
+                    }
+
+                    recipient["tabs"] = newTabStatuses;
+                }
+            }
+        }
+    }
+
+    return body.ToString();
+  }
+    
   private static string TransformWebhookNotificationBody(string content)
   {
     JObject body = ParseContentAsJObject(content, true);
@@ -472,7 +555,15 @@ public class Script : ScriptBase
     }
 
     var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-    var notificationContent = TransformWebhookNotificationBody(content);
+    var notificationContent = "";
+    if (content.Contains("DocuSignEnvelopeInformation"))
+    {
+      notificationContent = TransformWebhookNotificationBodyDeprecated(content);
+    }
+    else
+    {
+      notificationContent = TransformWebhookNotificationBody(content);
+    }
 
     using var logicAppsRequest = new HttpRequestMessage(HttpMethod.Post, logicAppsUri);
     logicAppsRequest.Content = CreateJsonContent(notificationContent);
@@ -480,7 +571,7 @@ public class Script : ScriptBase
     return await this.Context.SendAsync(logicAppsRequest, this.CancellationToken).ConfigureAwait(false);
   }
 
-  private JObject CreateHookEnvelopeBodyTransformation(JObject original)
+  private JObject CreateHookEnvelopeV2BodyTransformation(JObject original)
   {
     var body = new JObject();
     
@@ -511,19 +602,55 @@ public class Script : ScriptBase
     JArray includeData = JArray.Parse(eventData);
     body["eventData"] = new JObject
     {
-        ["version"] = "restv2.1",
-        ["format"] = "json",
-        ["includeData"] = includeData
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
     };
+    
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    
+    return body;
+  }
+  
+  private JObject CreateHookEnvelopeBodyTransformation(JObject original)
+  {
+    var body = new JObject();
+
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["includeEnvelopeVoidReason"] = "true";
+    body["includeTimeZoneInformation"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+    body["envelopeEvents"] = original["envelopeEvents"]?.ToString();
+    body["includeSenderAccountasCustomField"] = "true";
+    
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("v2.1", "v2");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    
     return body;
   }
 
-  private JObject CreateEnvelopeFromTemplateBodyTransformation(JObject body)
+  private JObject CreateEnvelopeFromTemplateV1BodyTransformation(JObject body)
   {
     var templateRoles = new JArray();
     var signer = new JObject();
-    var count = 0;
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
+    var newBody = new JObject()
+    {
+      ["templateId"] = query.Get("templateId")
+    };
+      
     foreach (var property in body)
     {
       var value = (string)property.Value;
@@ -534,26 +661,54 @@ public class Script : ScriptBase
         signer["roleName"] = key.Substring(0, key.Length - 5);
         signer["name"] = value;
       }
+      
+      if (key.Contains("Email subject"))
+      {
+        newBody["emailSubject"] = value;
+      }
 
+      if (key.Contains("Email body"))
+      {
+        newBody["emailBlurb"] = value;
+      }
+
+      //add every (name, email) pairs
       if (key.Contains(" Email"))
       {
         signer["email"] = value;
-      }
-
-      if (count % 2 != 0)
-      {
         templateRoles.Add(signer);
         signer = new JObject();
       }
-
-      count++;
     }
 
+    newBody["templateRoles"] = templateRoles;
+
+    if (!string.IsNullOrEmpty(query.Get("status")))
+    {
+      newBody["status"] = query.Get("status");
+    }
+
+    return newBody;
+  }
+
+  private JObject CreateEnvelopeFromTemplateV2BodyTransformation(JObject body)
+  {
+    var templateRoles = new JArray();
+    var signer = new JObject();
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
+
+    ParseCustomFields(body, textCustomFields, listCustomFields);
+
     var newBody = new JObject()
     {
-      ["templateRoles"] = templateRoles,
-      ["templateId"] = query.Get("templateId")
+      ["templateId"] = query.Get("templateId"),
+      ["customFields"] = new JObject()
+        {
+          ["textCustomFields"] = textCustomFields,
+          ["listCustomFields"] = listCustomFields
+        }
     };
 
     if (!string.IsNullOrEmpty(query.Get("status")))
@@ -561,16 +716,66 @@ public class Script : ScriptBase
       newBody["status"] = query.Get("status");
     }
 
-    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    uriBuilder.Path = uriBuilder.Path.Replace("envelopes/createFromTemplate", "/envelopes");
-    this.Context.Request.RequestUri = uriBuilder.Uri;
-
     return newBody;
   }
+  
+  private void ParseCustomFields(JObject body, JArray textCustomFields,  JArray listCustomFields)
+  {
+    foreach (var property in body)
+    {
+      var customField = new JObject();
+      var key = (string)property.Key;
+      var value = (string)property.Value;
 
+      if (key.StartsWith("* "))
+      {
+        customField["required"] = "true";
+        key = key.Replace("* ", "");
+      }
+      else
+      {
+        key = key.Replace(" [optional]", "");
+      }
+
+      if (key.EndsWith(" [hidden]"))
+      {
+        key = key.Replace(" [hidden]", "");
+      }
+      else
+      {
+        customField["show"] = "true";
+      }
+
+      if (key.StartsWith("[List Envelope Custom Field]"))
+      {
+        key = key.Replace("[List Envelope Custom Field] ", "");
+        customField["name"] = key;
+        customField["value"] = value;
+        listCustomFields.Add(customField);
+      }
+      else
+      {
+        key = key.Replace("[Text Envelope Custom Field] ", "");
+        customField["name"] = key;
+        customField["value"] = value;
+        textCustomFields.Add(customField);
+      }
+    }
+  }
+  
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
+
+    ParseCustomFields(body, textCustomFields, listCustomFields);
+
+    body["customFields"] = new JObject()
+    {
+      ["textCustomFields"] = textCustomFields,
+      ["listCustomFields"] = listCustomFields
+    };
 
     body["emailSubject"] = query.Get("emailSubject");
     var emailBody = query.Get("emailBody");
@@ -791,10 +996,15 @@ public class Script : ScriptBase
     {
       this.Context.Request.Content = new StringContent("{ \"status\": \"sent\" }", Encoding.UTF8, "application/json");
     }
-
+    
     if ("CreateHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+    
+    if ("CreateHookEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateHookEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
 
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -802,10 +1012,15 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
     }
 
+    if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV1BodyTransformation).ConfigureAwait(false);
+    }
+    
     if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
-      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateBodyTransformation).ConfigureAwait(false);
-    }
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV2BodyTransformation).ConfigureAwait(false);
+    }    
 
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
@@ -827,12 +1042,12 @@ public class Script : ScriptBase
       var newBody = new JObject();
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       newBody["signers"] = new JArray
-            {
-                new JObject
-                {
-                    ["recipientId"] = Uri.UnescapeDataString(query.Get("RemoveRecipientFromEnvelopeRecipientId")).Replace("+", " "),
-                },
-            };
+      {
+          new JObject
+          {
+              ["recipientId"] = Uri.UnescapeDataString(query.Get("RemoveRecipientFromEnvelopeRecipientId")).Replace("+", " "),
+          },
+      };
 
       this.Context.Request.Content = CreateJsonContent(newBody.ToString());
     }
@@ -897,7 +1112,7 @@ public class Script : ScriptBase
 
   private async Task UpdateResponse(HttpResponseMessage response)
   {
-    if ("CreateHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+    if (this.Context.OperationId.Contains("CreateHookEnvelope")
         && response.Headers?.Location != null)
     {
       var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -920,11 +1135,21 @@ public class Script : ScriptBase
         ["x-ms-sort"] = "none",
       };
 
-      foreach (var signer in (body["signers"] as JArray) ?? new JArray())
+      var signers = (body["signers"] as JArray) ?? new JArray();
+
+      if (signers.Count == 0)
       {
-        var roleName = signer["roleName"];
-        itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
-        itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+          itemProperties["Email subject"] = basePropertyDefinition.DeepClone();
+          itemProperties["Email body"] = basePropertyDefinition.DeepClone();
+      }
+      else
+      {
+        foreach (var signer in signers)
+        {
+          var roleName = signer["roleName"];
+          itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
+          itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+        }
       }
 
       var newBody = new JObject
@@ -946,6 +1171,80 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("GetCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var itemProperties = new JObject();
+      var basePropertyDefinition = new JObject
+      {
+        ["type"] = "string"
+      };
+
+      var count = 0;
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+        var name = "[Text Envelope Custom Field] " + customField["name"].ToString();
+
+        if (customField["required"].ToString() == "true") 
+        {
+          name = "* " + name;
+        }
+
+        if (customField["show"].ToString() == "false") 
+        {
+          name = name + " [hidden]";
+        }
+
+        itemProperties[name] = basePropertyDefinition.DeepClone();
+        count++;
+      }
+      
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+        var name = "[List Envelope Custom Field] " + customField["name"].ToString();
+
+        if (customField["required"].ToString() == "true") 
+        {
+          name = "* " + name;
+        }
+
+        if (customField["show"].ToString() == "false") 
+        {
+          name = name + " [hidden]";
+        }
+
+        itemProperties[name] = basePropertyDefinition.DeepClone();
+        count++;
+      }
+
+      if (count == 0)
+      {
+        itemProperties["Custom Field [optional]"] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-visibility"]= "advanced"
+          };
+      }
+
+      var newBody = new JObject
+      {
+        ["name"] = "dynamicSchema",
+        ["title"] = "dynamicSchema",
+        ["x-ms-permission"] = "read-write",
+        ["schema"] = new JObject
+        {
+          ["type"] = "array",
+          ["items"] = new JObject
+          {
+            ["type"] = "object",
+            ["properties"] = itemProperties,
+          },
+        },
+      };
+      
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+    
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
