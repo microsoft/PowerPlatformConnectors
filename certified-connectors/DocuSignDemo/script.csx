@@ -208,6 +208,32 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForEmbeddedSigningSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Add Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
     if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
@@ -574,6 +600,27 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject GenerateEmbeddedSigningURLBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    body["userName"] = query.Get("signerName");
+    body["email"] = query.Get("signerEmail");
+    body["authenticationMethod"] = query.Get("authenticationMethod");
+    body["clientUserId"] = query.Get("clientUserId");
+    
+    var returnUrl = query.Get("returnUrl");
+    if (returnUrl.Equals("Default URL"))
+    {
+      body["returnUrl"] = "https://global.consent.azure-apim.net/redirect";
+    }
+    else if (returnUrl.Equals("Add A Different URL"))
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+
+    return body;
+  }
+
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -582,6 +629,12 @@ public class Script : ScriptBase
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
     }
+
+    if (!string.IsNullOrEmpty(query.Get("clientUserId")))
+    {
+      signers[0]["clientUserId"] = query.Get("clientUserId");
+    }
+
     signers[0]["name"] = Uri.UnescapeDataString(query.Get("recipientName")).Replace("+", " ");
     signers[0]["email"] = Uri.UnescapeDataString(query.Get("recipientEmail")).Replace("+", " ");
   }
@@ -760,6 +813,11 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLBodyTransformation).ConfigureAwait(false);
     }
 
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
