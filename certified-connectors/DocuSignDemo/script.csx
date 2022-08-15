@@ -621,6 +621,13 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject GenerateEmbeddedSenderURLBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    body["returnUrl"] = query.Get("returnUrl");
+    return body;
+  }
+
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
