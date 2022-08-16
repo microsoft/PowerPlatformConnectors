@@ -928,6 +928,22 @@ public class Script : ScriptBase
           body.GetValue("connectId").ToString()));
     }
 
+    if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var openIn = query.Get("openIn");
+
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var url = body["url"].ToString();
+
+      if (openIn.Equals("Prepare"))
+      {
+        url = url.Replace("&send=" + 1, "&send=" + 0);
+      }
+      body["url"] = url;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("GetWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
