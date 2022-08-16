@@ -650,20 +650,24 @@ public class Script : ScriptBase
   private JObject GenerateEmbeddedSenderURLBodyTransformation (JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-
+    var returnUrl = query.Get("returnUrl");
     var url = this.Context.Request.RequestUri.Authority;
 
-    if (url.Equals("demo.docusign.net"))
+    if (returnUrl.Equals("DocuSign's URL"))
     {
-      body["returnUrl"] = " https://appdemo.docusign.com/";
+      if (url.Equals("demo.docusign.net"))
+      {
+        body["returnUrl"] = " https://appdemo.docusign.com/";
+      }
+      else
+      {
+        body["returnUrl"] = " https://app.docusign.com/";
+      }
     }
-
-    if (url.Equals("demo.docusign.net"))
+    else
     {
-
+      body["returnUrl"] = body["returnURL"];
     }
-
-    //body["returnUrl"] = query.Get("returnUrl");
     return body;
   }
 
