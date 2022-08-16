@@ -234,6 +234,32 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForEmbeddedSenderSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Add Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
     if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
@@ -624,7 +650,20 @@ public class Script : ScriptBase
   private JObject GenerateEmbeddedSenderURLBodyTransformation (JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    body["returnUrl"] = query.Get("returnUrl");
+
+    var url = this.Context.Request.RequestUri.Authority;
+
+    if (url.Equals("demo.docusign.net"))
+    {
+      body["returnUrl"] = " https://appdemo.docusign.com/";
+    }
+
+    if (url.Equals("demo.docusign.net"))
+    {
+
+    }
+
+    //body["returnUrl"] = query.Get("returnUrl");
     return body;
   }
 
