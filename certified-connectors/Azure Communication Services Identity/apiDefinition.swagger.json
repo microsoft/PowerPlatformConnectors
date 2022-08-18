@@ -1,0 +1,264 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Azure Communication Identity",
+    "description": "Connector to create and manage users and access tokens in an Azure Communication Services resource.",
+    "version": "1.0",
+    "contact": {
+      "name": "Microsoft",
+      "email": "acssolutions@microsoft.com",
+      "url": "https://azure.microsoft.com/services/communication-services"
+    }
+  },
+  "host": "api.contoso.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/identities": {
+      "post": {
+        "summary": "Create a user",
+        "description": "Create a new user, and optionally, an access token.",
+        "operationId": "CreateCommunicationIdentity",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "createTokenWithScopes": {
+                  "type": "array",
+                  "x-ms-summary": "Token Scopes",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "$ref": "#/definitions/tokenScopes"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "identity"
+              ],
+              "properties": {
+                "identity": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "properties": {
+                    "id": {
+                      "x-ms-summary": "User ID",
+                      "type": "string"
+                    }
+                  }
+                },
+                "accessToken": {
+                  "$ref": "#/definitions/accessToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    },
+    "/identities/{identityId}": {
+      "delete": {
+        "summary": "Delete a user",
+        "description": "Delete the user, revoke all access tokens for the user and delete all associated data.",
+        "operationId": "DeleteCommunicationIdentity",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/identityId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    },
+    "/identities/{identityId}/:issueAccessToken": {
+      "post": {
+        "summary": "Issue a user access token",
+        "description": "Issue a new access token for the user.",
+        "operationId": "IssueIdentityAccessToken",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/identityId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "scopes"
+              ],
+              "properties": {
+                "scopes": {
+                  "type": "array",
+                  "x-ms-summary": "Token Scopes",
+                  "default": ["chat"],
+                  "items": {
+                    "$ref": "#/definitions/tokenScopes"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "$ref": "#/definitions/accessToken"
+            }
+          },
+          "400": {
+            "description": "Bad Request."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    },
+    "/identities/{identityId}/:revokeAccessTokens": {
+      "post": {
+        "summary": "Revoke user access tokens",
+        "operationId": "RevokeIdentityAccessTokens",
+        "description": "Revoke all access tokens for the user.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/identityId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "accessToken": {
+      "type": "object",
+      "required": [
+        "token",
+        "expiresOn"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "x-ms-summary": "Access Token"
+        },
+        "expiresOn": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Token Expiry"
+        }
+      }
+    },
+    "tokenScopes": {
+      "type": "string",
+      "enum": [
+        "chat",
+        "voip"
+      ]
+    }
+  },
+  "parameters": {
+    "apiVersion": {
+      "name": "api-version",
+      "description": "API version.",
+      "in": "query",
+      "required": true,
+      "type": "string",
+      "default": "2021-03-07",
+      "x-ms-visibility": "internal"
+    },
+    "identityId": {
+      "name": "identityId",
+      "description": "Azure Communication Services user ID.",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-url-encoding": "single",
+      "x-ms-visibility": "important",
+      "x-ms-summary": "User ID"
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Connection-String"
+    }
+  },
+  "security": [],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://azure.microsoft.com/services/communication-services"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://privacy.microsoft.com"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ]
+}
