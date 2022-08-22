@@ -640,7 +640,7 @@ public class Script : ScriptBase
     return body;
   }
 
-  private JObject CreateEnvelopeFromTemplateV1BodyTransformation(JObject body)
+  private JObject CreateEnvelopeFromTemplateBodyTransformation(JObject body)
   {
     var templateRoles = new JArray();
     var signer = new JObject();
@@ -794,6 +794,29 @@ public class Script : ScriptBase
 
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
+      var signers = body["signers"] as JArray;
+      if (signers == null || signers.Count == 0)
+      {
+          signers = new JArray
+          {
+              new JObject(),
+          };
+      }
+
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      signers[0]["name"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeName")).Replace("+", " ");
+      signers[0]["email"] = Uri.UnescapeDataString(query.Get("AddRecipientToEnvelopeEmail")).Replace("+", " ");
+      if (string.IsNullOrWhiteSpace((string)signers[0]["recipientId"]))
+      {
+          signers[0]["recipientId"] = Guid.NewGuid();
+      }
+
+      body["signers"] = signers;
+      return body;
+  }
+
+  private JObject AddRecipientToEnvelopeV2BodyTransformation(JObject body)
+  {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var recipientType = query.Get("recipientType");
     
@@ -805,6 +828,10 @@ public class Script : ScriptBase
     AddParamsForSelectedRecipientType(signers, body);
 
     body[recipientType] = signers;
+    
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
 
     return body;
   }
@@ -1014,17 +1041,22 @@ public class Script : ScriptBase
 
     if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
-      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV1BodyTransformation).ConfigureAwait(false);
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateBodyTransformation).ConfigureAwait(false);
     }
     
     if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV2BodyTransformation).ConfigureAwait(false);
-    }    
+    }
 
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+    
+    if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
 
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -1245,7 +1277,7 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
     
-    if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
