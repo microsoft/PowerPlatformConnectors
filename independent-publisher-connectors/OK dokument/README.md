@@ -29,6 +29,8 @@ To send request for document signature you use response attribute URL and use it
 
 Once document is signed you can use “Signature request” to change the document state to “to sign” and create new signatureRequestId and prepare the document for next signature. Than the process repeats steps 3 – 5.
 
+To disable Sign Anywhere feature you can use parameter Additional rules with value `signAnywhere-false`. This parameter disable Sign Anywhere in signature request.
+
 ## 3. Wait for Signature
 Trigger action „Wait for Signature“ can be used in your process. „Wait for Signature“ action is waiting till document signature is confirmed in *OK dokument* service by clicking the Submit button. Once signature is submitted this trigger action is completed. You can use this action if you need to wait for document signature confirmation in your process.  
 
@@ -42,4 +44,4 @@ Once your document is signed, you can delete the document from *OK dokument* ser
 You can get the API key required to use *OK dokument* service by subscribing at https://app.okdokument.com.  
 
 # Limitations
-Currently there are limitations to using acrofields and tags. The only possible use of tags or acrofields is predefined string format in your process: `_sig1_, _sig2_, _sig3_, _sig4_, _sig5_`. Custom acrofield internal names or tags are not supported in current version.  
+Currently there are limitations to using acrofields and tags. The only possible use of tags or acrofields is predefined string format in your process: `_sig1_, _sig2_, _sig3_, _sig4_, _sig5_`. Custom acrofield internal names or tags are not supported in current version.
