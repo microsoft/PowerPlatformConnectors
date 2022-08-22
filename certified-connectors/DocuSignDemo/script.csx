@@ -657,11 +657,11 @@ public class Script : ScriptBase
     {
       if (url.Equals("demo.docusign.net"))
       {
-        body["returnUrl"] = " https://appdemo.docusign.com/";
+        body["returnUrl"] = "https://appdemo.docusign.com/";
       }
       else
       {
-        body["returnUrl"] = " https://app.docusign.com/";
+        body["returnUrl"] = "https://app.docusign.com/";
       }
     }
     else
