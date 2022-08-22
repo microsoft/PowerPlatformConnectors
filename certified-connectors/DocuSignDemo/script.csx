@@ -636,11 +636,37 @@ public class Script : ScriptBase
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("v2.1", "v2");
     this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+  
+  private JObject CreateHookEnvelopeBodyTransformation(JObject original)
+  {
+    var body = new JObject();
+
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["includeEnvelopeVoidReason"] = "true";
+    body["includeTimeZoneInformation"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+    body["envelopeEvents"] = original["envelopeEvents"]?.ToString();
+    body["includeSenderAccountasCustomField"] = "true";
+    
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("v2.1", "v2");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
     
     return body;
   }
 
-  private JObject CreateEnvelopeFromTemplateBodyTransformation(JObject body)
+  private JObject CreateEnvelopeFromTemplateV1BodyTransformation(JObject body)
   {
     var templateRoles = new JArray();
     var signer = new JObject();
@@ -828,7 +854,7 @@ public class Script : ScriptBase
     AddParamsForSelectedRecipientType(signers, body);
 
     body[recipientType] = signers;
-    
+
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
     this.Context.Request.RequestUri = uriBuilder.Uri;
@@ -1041,7 +1067,7 @@ public class Script : ScriptBase
 
     if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
-      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateBodyTransformation).ConfigureAwait(false);
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV1BodyTransformation).ConfigureAwait(false);
     }
     
     if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
