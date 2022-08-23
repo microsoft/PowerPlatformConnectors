@@ -1245,7 +1245,9 @@ public class Script : ScriptBase
           name = name + " [hidden]";
         }
 
-        itemProperties[name] = basePropertyDefinition.DeepClone();
+        var definition = basePropertyDefinition.DeepClone();
+        definition["enum"] = customField["listItems"];
+        itemProperties[name] = definition;
         count++;
       }
 
