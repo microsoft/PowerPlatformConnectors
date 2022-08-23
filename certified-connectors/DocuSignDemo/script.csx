@@ -639,32 +639,6 @@ public class Script : ScriptBase
 
     return body;
   }
-  
-  private JObject CreateHookEnvelopeBodyTransformation(JObject original)
-  {
-    var body = new JObject();
-
-    var uriLogicApps = original["urlToPublishTo"]?.ToString();
-    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
-    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
-
-    body["allUsers"] = "true";
-    body["allowEnvelopePublish"] = "true";
-    body["includeDocumentFields"] = "true";
-    body["includeEnvelopeVoidReason"] = "true";
-    body["includeTimeZoneInformation"] = "true";
-    body["requiresAcknowledgement"] = "true";
-    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
-    body["name"] = original["name"]?.ToString();
-    body["envelopeEvents"] = original["envelopeEvents"]?.ToString();
-    body["includeSenderAccountasCustomField"] = "true";
-    
-    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    uriBuilder.Path = uriBuilder.Path.Replace("v2.1", "v2");
-    this.Context.Request.RequestUri = uriBuilder.Uri;
-    
-    return body;
-  }
 
   private JObject CreateEnvelopeFromTemplateV1BodyTransformation(JObject body)
   {
