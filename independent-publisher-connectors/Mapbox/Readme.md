@@ -16,3 +16,4 @@ Visit [Mapbox APIs reference page](https://docs.mapbox.com/api/overview/) for fu
 ## Known Issues and Limitations
 * [Mapbox Search API](https://docs.mapbox.com/api/search/search/) is currently in private beta for worldwide coverage. I will update the connector with this action once it is published.
 * Mapbox API is free for a limited amount of requests per month, be sure to consult the [APIs Pricing page](https://www.mapbox.com/pricing)
+* The query parameter `geometries` in the **Get Route To Location** action currently only supports `polyline` value.
