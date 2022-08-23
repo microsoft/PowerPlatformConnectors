@@ -234,6 +234,32 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForEmbeddedSenderSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add a different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Add Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
     if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
@@ -621,6 +647,30 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject GenerateEmbeddedSenderURLBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var returnUrl = query.Get("returnUrl");
+    var url = this.Context.Request.RequestUri.Authority;
+
+    if (returnUrl.Equals("DocuSign homepage"))
+    {
+      if (url.Equals("demo.docusign.net"))
+      {
+        body["returnUrl"] = "https://appdemo.docusign.com/";
+      }
+      else
+      {
+        body["returnUrl"] = "https://app.docusign.com/";
+      }
+    }
+    else
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+    return body;
+  }
+
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -820,6 +870,11 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLBodyTransformation).ConfigureAwait(false);
     }
 
+    if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSenderURLBodyTransformation).ConfigureAwait(false);
+    }
+
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddDocumentsToEnvelopeBodyTransformation).ConfigureAwait(false);
@@ -914,6 +969,22 @@ public class Script : ScriptBase
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
           body.GetValue("connectId").ToString()));
+    }
+
+    if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var openIn = query.Get("openIn");
+
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var url = body["url"].ToString();
+
+      if (openIn.Equals("Prepare"))
+      {
+        url = url.Replace("&send=" + 1, "&send=" + 0);
+      }
+      body["url"] = url;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
