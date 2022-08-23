@@ -247,7 +247,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase))
+      if (returnUrl.Equals("Add a different URL", StringComparison.OrdinalIgnoreCase))
       {
         response["schema"]["properties"]["returnURL"] = new JObject
         {
