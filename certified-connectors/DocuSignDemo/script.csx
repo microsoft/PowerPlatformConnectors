@@ -653,7 +653,7 @@ public class Script : ScriptBase
     var returnUrl = query.Get("returnUrl");
     var url = this.Context.Request.RequestUri.Authority;
 
-    if (returnUrl.Equals("DocuSign's URL"))
+    if (returnUrl.Equals("DocuSign homepage"))
     {
       if (url.Equals("demo.docusign.net"))
       {
