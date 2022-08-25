@@ -2,7 +2,7 @@
 
 This connector provides actions for Translation, Regeneration, and Alignment powered by Dynamics 365 Translation Service (DTS). It is designed for Dynamics Lifecycle services users who already use DTS as their translation solution. 
 
-## Publisher: Microsoft
+## Publisher: Microsoft Corporation
 
 ## Prerequisites
 You will need the following to proceed:
@@ -19,9 +19,9 @@ If you have files that were previously translated, and you also have correspondi
 Use this operation to regenerate the translated native format files after revising the translation memory files.
 ### Retrieve 
 Use this operation to poll the status of a translation request. Once the request is completed, you can download the output.
-### Download Translation
+### Download Translation Result
 Use this operation to download the output of a completed translation request.
-### Download Alignment
+### Download Alignment Result
 Use this operation to download the output of a completed alignment request.
 ### Get Languages
 This is an internal operation. Use it to get the list of translation languages DTS supports for a given product.
