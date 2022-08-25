@@ -455,7 +455,21 @@ public class Script : ScriptBase
 
     return body.ToString();
   }
-    
+
+  private static void ParseCustomFields(JToken customFields, JObject parsedCustomFields)
+  {
+    var customFieldsArray = customFields is JObject ? new JArray(customFields) : customFields;
+
+    foreach (var field in customFieldsArray as JArray ?? new JArray())
+    {
+      var fieldName = field.Type == JTokenType.Object ? (string)field["name"] : null;
+      if (!string.IsNullOrWhiteSpace(fieldName) && parsedCustomFields[fieldName] == null)
+      {
+        parsedCustomFields.Add(fieldName, field["value"]);
+      }
+    }
+  }
+  
   private static string TransformWebhookNotificationBody(string content)
   {
     JObject body = ParseContentAsJObject(content, true);
@@ -469,17 +483,11 @@ public class Script : ScriptBase
 
       if (customFields is JObject)
       {
-        var customFieldsArray = customFields["textCustomFields"];
-        customFieldsArray = customFieldsArray is JObject ? new JArray(customFieldsArray) : customFieldsArray;
+        var textCustomFields = customFields["textCustomFields"];
+        ParseCustomFields(textCustomFields, newCustomFields);
 
-        foreach (var field in customFieldsArray as JArray ?? new JArray())
-        {
-          var fieldName = field.Type == JTokenType.Object ? (string)field["name"] : null;
-          if (!string.IsNullOrWhiteSpace(fieldName) && newCustomFields[fieldName] == null)
-          {
-            newCustomFields.Add(fieldName, field["value"]);
-          }
-        }
+        var listCustomFields = customFields["listCustomFields"];
+        ParseCustomFields(listCustomFields, newCustomFields);
       }
 
       body["data"]["envelopeSummary"]["customFields"] = newCustomFields;
