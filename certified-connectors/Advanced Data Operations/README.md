@@ -1,19 +1,16 @@
-# Advanced Data Operations
+# Title
+### Advanced Data Operations  
+A suite of advanced operations designed to assist in the transformation of bulk datasets.
 
-A suite of advanced API's designed to assist in the transformation of bulk datasets.
+## Publisher
+State Solutions
 
-## Getting Started
-
-You'll need a subscription.  
+## Prerequisites
+You'll need to sign up for a subscription.  
 
 One can be obtained by signing up to a paid plan or by activating a trial subscription.  Details can be found on our website under the pricing page ... http://www.statesolutions.com.au/pricing/
 
-## Documentation
-
-Detailed documentation for all of the operations listed below can be found on our website ... http://www.statesolutions.com.au
-
-## Operations
-
+## Supported Operations
 - `Aggregate` - Aggregate one or more properties by a grouped set of fields within a JSON array dataset.  
 - `Cartesian Join` - Perform a Cartesian join over two or more datasets.  
 - `Concatenate` - Concatenate a field from an array of objects into a single string output.  
@@ -31,8 +28,16 @@ Detailed documentation for all of the operations listed below can be found on ou
 - `Regex Matches` - Produce a set of matches for a string using a regular expression pattern.  
 - `Split` - Split each item of an array into one or more new items by a defined set of criteria.  
 - `Text to JSON` - Transform a tab delimited textual dataset into an array of JSON objects.  
-- `Transform` - Transform a set of properties in a dataset using any of the available custom transformation functions provided by the framework.  
+- `Transform` - Transform a set of properties in a dataset using any of the available custom transformation functions provided by the framework. 
 
-## Support
+## Obtaining Credentials
+Once you've signed up for a plan, you'll be emailed an API key that can be used to authenticate on each call made to the framework.
 
-Contact us at support@statesolutions.com.au for any and all questions you may have regarding this service.  We're more than happy to help.
+## Known Issues and Limitations
+All known issues and limitations are listed on our website ... http://www.statesolutions.com.au/overview
+
+## Frequently Asked Questions
+You can find an FAQ page on our website ... http://www.statesolutions.com.au/faq
+
+## Deployment Instructions
+Please use the instructions located [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate, Power Apps or Azure LogicApps.
