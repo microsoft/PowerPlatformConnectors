@@ -479,18 +479,18 @@ public class Script : ScriptBase
     {
       var envelopeSummary = body["data"]["envelopeSummary"];
       var customFields = envelopeSummary["customFields"];
-      var newCustomFields = new JObject();
+      var parsedCustomFields = new JObject();
 
       if (customFields is JObject)
       {
         var textCustomFields = customFields["textCustomFields"];
-        ParseCustomFields(textCustomFields, newCustomFields);
+        ParseCustomFields(textCustomFields, parsedCustomFields);
 
         var listCustomFields = customFields["listCustomFields"];
-        ParseCustomFields(listCustomFields, newCustomFields);
+        ParseCustomFields(listCustomFields, parsedCustomFields);
       }
 
-      body["data"]["envelopeSummary"]["customFields"] = newCustomFields;
+      body["data"]["envelopeSummary"]["customFields"] = parsedCustomFields;
 
       // tab code
       var recipientStatuses = envelopeSummary["recipients"];
