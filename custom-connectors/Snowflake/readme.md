@@ -35,16 +35,11 @@ create security integration connector
 ## Supported Operations
 
 Submit SQL Statement for Execution
-\\TODO-Description of operation 1.
 
 Check the Status and Get Results
-\\TODO- Description of operation 2.
 
 Cancel the Execution of a Statement
-\\TODO- Description of operation 3.
 
-## Getting Started
-Optional. How to get started with your connector.
 
 ## Known Issues and Limitations
 1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
