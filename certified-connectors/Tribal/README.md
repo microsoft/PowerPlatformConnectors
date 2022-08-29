@@ -63,7 +63,7 @@ We provide the expertise, software and services required to underpin student suc
 
 ## Known Issues and Limitations
 
-- Currently limited for use within the admissions service
+- Opening an editted flow can sometimes show the entity as a custom value instead of the description from the drop down. This is purely cosmetic and doesn't effect the behaviour of the flow.
 
 ## Deployment instructions
 
