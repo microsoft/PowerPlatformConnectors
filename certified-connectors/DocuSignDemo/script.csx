@@ -455,7 +455,21 @@ public class Script : ScriptBase
 
     return body.ToString();
   }
-    
+
+  private static void ParseCustomFields(JToken customFields, JObject parsedCustomFields)
+  {
+    var customFieldsArray = customFields is JObject ? new JArray(customFields) : customFields;
+
+    foreach (var field in customFieldsArray as JArray ?? new JArray())
+    {
+      var fieldName = field.Type == JTokenType.Object ? (string)field["name"] : null;
+      if (!string.IsNullOrWhiteSpace(fieldName) && parsedCustomFields[fieldName] == null)
+      {
+        parsedCustomFields.Add(fieldName, field["value"]);
+      }
+    }
+  }
+  
   private static string TransformWebhookNotificationBody(string content)
   {
     JObject body = ParseContentAsJObject(content, true);
@@ -465,24 +479,18 @@ public class Script : ScriptBase
     {
       var envelopeSummary = body["data"]["envelopeSummary"];
       var customFields = envelopeSummary["customFields"];
-      var newCustomFields = new JObject();
+      var parsedCustomFields = new JObject();
 
       if (customFields is JObject)
       {
-        var customFieldsArray = customFields["textCustomFields"];
-        customFieldsArray = customFieldsArray is JObject ? new JArray(customFieldsArray) : customFieldsArray;
+        var textCustomFields = customFields["textCustomFields"];
+        ParseCustomFields(textCustomFields, parsedCustomFields);
 
-        foreach (var field in customFieldsArray as JArray ?? new JArray())
-        {
-          var fieldName = field.Type == JTokenType.Object ? (string)field["name"] : null;
-          if (!string.IsNullOrWhiteSpace(fieldName) && newCustomFields[fieldName] == null)
-          {
-            newCustomFields.Add(fieldName, field["value"]);
-          }
-        }
+        var listCustomFields = customFields["listCustomFields"];
+        ParseCustomFields(listCustomFields, parsedCustomFields);
       }
 
-      body["data"]["envelopeSummary"]["customFields"] = newCustomFields;
+      body["data"]["envelopeSummary"]["customFields"] = parsedCustomFields;
 
       // tab code
       var recipientStatuses = envelopeSummary["recipients"];
@@ -1245,7 +1253,9 @@ public class Script : ScriptBase
           name = name + " [hidden]";
         }
 
-        itemProperties[name] = basePropertyDefinition.DeepClone();
+        var definition = basePropertyDefinition.DeepClone();
+        definition["enum"] = customField["listItems"];
+        itemProperties[name] = definition;
         count++;
       }
 
