@@ -14,6 +14,8 @@ You do not need any API authentication credentials, you do need access to the Fa
 
 **Manager ID:** This can be found by navigating to the 'Points' section on a desktop device and copying the ID from the URL. Example; https://fantasy.premierleague.com/entry/583476/event/5 You would copy the ID 583476 from the URL.
 
+**Event ID:** This is the current Game Week number, for example if it is game week five you would put '5' as the event ID. 
+
 ## Supported Operations
 The connector supports the following operations:
 * [Classic League Standings](/api/leagues-classic/{league_id}/standings)
