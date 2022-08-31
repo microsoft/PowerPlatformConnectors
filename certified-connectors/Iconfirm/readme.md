@@ -101,6 +101,15 @@ Risk assessments
 Incidents
 * `Find incidents`: Returns a list of all registered incidents.
 * `Get incident by Id`: Returns a single incident.
+* `Register incident`: Registeres a new incident.
+* `Update incident`: Updated the given incident.
+
+Dpia
+* `Find dpias`: Returns a list of all registered dpias .
+* `Get dpia by Id`: Returns a single dpia.
+* `Register dpia`: Registeres a new dpia.
+* `Update dpia`: Updated the given dpia.
+
 
 ### Additional operations for global systems
 Customers
