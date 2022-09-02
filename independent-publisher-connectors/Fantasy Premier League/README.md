@@ -1,6 +1,8 @@
 # Fantasy Premier League Independant Connector
 The Fantasy Premier League independant connector allows you to gather information from your fantasy football(soccer) leagues, ratings, information on current fixtures, general information and more. This will allow you to gather information on your fantasy league and post information about your league, such as current standings, to your Microsoft Teams groupchat or channel.
 
+## Publisher: Joe Unwin (FlowJoe)
+
 ## Pre-requisites
 To use this connector, you need the following
 1. A Microsoft Power Apps or Power Automate plan with custom connector feature
