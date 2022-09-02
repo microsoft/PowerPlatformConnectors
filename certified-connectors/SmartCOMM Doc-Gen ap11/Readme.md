@@ -1,7 +1,9 @@
 # SmartCOMM On Demand Generation Connector
-Smart Communications™ is a leading cloud-based platform for enterprise customer communications. As the only cloud solution ranked as a Leader in Gartner’s Magic Quadrant for Customer Communications Management, more than 350 global brands – many in the world’s most highly regulated industries – rely on Smart Communications to make multi-channel customer communications more meaningful, while also helping them simplify their processes and operate more efficiently.
+Smart Communications is a leading cloud-based platform for enterprise customer communications. As the only cloud solution ranked as a Leader in Gartner’s Magic Quadrant for Customer Communications Management, more than 350 global brands – many in the world’s most highly regulated industries – rely on Smart Communications to make multi-channel customer communications more meaningful, while also helping them simplify their processes and operate more efficiently.
 
 The SmartCOMM On Demand Connector for Power Apps includes a pre-built integration for producing Customer Communications. In addition, the connector provides RESTful webservice calls to SmartCOMM for on-demand use cases.
+
+For this connector the region is fixed to ap11 (ap-southeast-2 - Sydney), so only ap11.smartcommunications.cloud can be connected.
 
 ## Publisher: Smart Communications
 
@@ -33,7 +35,7 @@ The CMS ID of the Template Selector resource. The Template Selector is used to m
 ### `projectId`
 Resource versions referenced in this specified project will take precedence. If this value is not specified, the latest available resource version will be used. This should only be used in the development or testing scenarios. (optional)
 ### `transactionData`
-The sample data. The data is encoded as Base64.
+The sample data. The data will be transmitted to SmartCOMM in Base64 format, but the encoding is handled by a script, the connector parameter should be a simple JSON without Base64 encoding.
 ### `transactionRange`
 If the sample data contains more than one transaction, this value specifies which transaction to generate the document (optional).
 ### `transactionDataType`
@@ -52,12 +54,11 @@ The property value (A list of optional configuration properties). E.g. `true`
 6. Clients then use access tokens to access the resources, not the user's credentials.
 
 ## Getting Started
-1. Provide the host URL of the SmartCOMM instance
-2. Provide the OAuth 2.0 Client details - Client ID, Client Secret, Authorization URL and Token URL
-3. Provide the Power Apps generated Redirect URL (e.g. https://global.consent.azure-apim.net/redirect)
+1. Provide the OAuth 2.0 Client details - Client ID, Client Secret, Authorization URL and Token URL
+2. Provide the Power Apps generated Redirect URL (e.g. https://global.consent.azure-apim.net/redirect)
 3. Create a Data Connection to the SmartCOMM instance using a registered user account
-4. Supply Request URL to generateDocument endpoint. E.g. https://<RegionServer>.smartcommunications.cloud/one/oauth2/api/v10/job/generateDocument
-5. Supply required parameters (defined below). Note the transactionData parameter is required to be encoded as Base64.
+4. Supply Request URL to generateDocument endpoint. E.g. https://ap11.smartcommunications.cloud/one/oauth2/api/v10/job/generateDocument
+5. Supply required parameters (defined below).
 6. Supply optional parameters as required
 7. SmartCOMM On Demand Generation connector generates the communication(s) and returns the response (including the base64 encoded output) to the Power App
 8. The communication(s) can then be displayed in the Power App for download, archived (e.g. SharePoint, S3 bucket) or pushed to an output delivery service e.g. SNS, Outlook, mailhouse etc.
@@ -69,7 +70,7 @@ The property value (A list of optional configuration properties). E.g. `true`
 ## Frequently Asked Questions
 
 ### Where Can I find further information about the `GenerateDocument` service?
-This can be found here - https://<RegionServer>.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
+This can be found here - https://ap11.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
 
 ### Is data encrypted using this connector?
 Yes, if HTTPS is configured the connection will be encrypted end to end.
@@ -81,7 +82,7 @@ Contact your SmartCOMM user Admin.
 OAuth 2.0
 
 ### How can I get the OAuth2 Client ID and secret?
-Contact your SmartCOMM admin or refer to https://<RegionServer>.smartcommunications.cloud/one/help/oneplatform/en/index.htm#EditClient.htm
+Contact your SmartCOMM admin or refer to https://ap11.smartcommunications.cloud/one/help/oneplatform/en/index.htm#EditClient.htm
 
 ### How can I get the authorization code?
 Refer to section 'How to get credentials' above for full details.
@@ -93,20 +94,20 @@ Contact support@smartcommunications.com for all support enquiries
 https://www.smartcommunications.com
 
 ### How can I get the batchConfigResId?
-Contact your SmartCOMM SME or refer to https://<RegionServer>.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm. 
+Contact your SmartCOMM SME or refer to https://ap11.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm. 
 
 ### How can I get the projectId?
-Contact your SmartCOMM SME or refer to https://<RegionServer>.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm.
+Contact your SmartCOMM SME or refer to https://ap11.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm.
 
 ### How soon will I get the response?
 The response time can vary based on your network speed, payload size and resource complexity, etc. SmartCOMM recommends to run a performance baseline to collect the maximum response time and average response time
 
 ### How can I get the output from the response?
-The successful response includes the base64 encoded byte[] output. To view the output, actions have to be taken to decode the byte[] output and save the copy in a format as specified in the "mimeType". For more details please refer to https://<RegionServer>.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
+The successful response includes the base64 encoded byte[] output. To view the output, actions have to be taken to decode the byte[] output and save the copy in a format as specified in the "mimeType". For more details please refer to https://ap11.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
 
 ## Further information
-* Further information regarding the functionality of the SmartCOMM API (specifically `GenerateDocument`) can be found here - https://<RegionServer>.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
+* Further information regarding the functionality of the SmartCOMM API (specifically `GenerateDocument`) can be found here - https://ap11.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
 * Ensure HTTPS is configured for end to end encryption
