@@ -1,5 +1,5 @@
 # RegexFlow Regular Expression
-The Regular Expression connector enables the use of regular expression.  The connector takes text and a regex pattern as inputs and returns was the pattern matched and the matched groups
+The Regular Expression connector enables the use of regular expression. The connector uses the posted body and a regex pattern as inputs and returns the matched patterns and groups.
 
 ## Publisher: Epicycle
 
