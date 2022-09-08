@@ -966,7 +966,6 @@ public class Script : ScriptBase
     };
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
-    //AddParamsForSelectedVerificationType(signers, body);
 
     body[recipientType] = signers;
 
@@ -1019,6 +1018,77 @@ public class Script : ScriptBase
     {
       body["returnUrl"] = body["returnURL"];
     }
+    return body;
+  }
+
+  private JObject AddVerificationToRecipientBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var verificationType = query.Get("verificationType");
+    var recipientType = query.Get("recipientType");
+
+    if (recipientType.Equals("agent") || recipientType.Equals("editor") || recipientType.Equals("inPersonSigner") || recipientType.Equals("participant") || recipientType.Equals("seal") || recipientType.Equals("signer"))
+    {
+      recipientType = recipientType + "s";
+    }
+    else if (recipientType.Equals("witness"))
+    {
+      recipientType = recipientType + "es";
+    }
+    else
+    {
+      recipientType = recipientType.Replace("y", "ies");
+    }
+
+    var recipientId = query.Get("recipientId");
+
+    var recipient = new JObject();
+    var recipientArray = new JArray();
+
+    if (verificationType.Equals("Phone Authentication"))
+    {
+      var identityVerification = new JObject();
+      var inputOptions = new JArray();
+      var inputObject = new JObject();
+      var phoneNumberList = new JArray();
+      var phoneNumberObject = new JObject();
+
+      phoneNumberObject["Number"] = body["phoneNumber"];
+      phoneNumberObject["CountryCode"] = body["countryCode"];
+      phoneNumberList.Add(phoneNumberObject);
+
+      inputObject["phoneNumberList"] = phoneNumberList;
+      inputObject["name"] = "phone_number_list";
+      inputObject["valueType"] = "PhoneNumberList";
+      inputOptions.Add(inputObject);
+
+      identityVerification["workflowId"] = body["workflowID"];
+      identityVerification["inputOptions"] = inputOptions;
+      recipient["identityVerification"] = identityVerification;
+    }
+    else if (verificationType.Equals("Access Code"))
+    {
+      recipient["accessCode"] = body["accessCode"];
+    }
+    else if (verificationType.Equals("Knowledge Based"))
+    {
+      recipient["idCheckConfigurationName"] = "ID Check $";
+    }
+    else if (verificationType.Equals("ID Verification"))
+    {
+      var identityVerification = new JObject();
+      identityVerification["workflowId"] = body["workflowID"];
+      recipient["identityVerification"] = identityVerification;
+    }
+    
+    recipient["recipientId"] = recipientId;
+    recipientArray.Add(recipient);
+    body[recipientType] = recipientArray;
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
     return body;
   }
 
@@ -1093,48 +1163,6 @@ public class Script : ScriptBase
     {
       signers[0]["name"] = body["name"];
       signers[0]["email"] = body["email"];
-    }
-  }
-
-  private void AddParamsForSelectedVerificationType (JArray signers, JObject body)
-  {
-    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    var verificationType = query.Get("verificationType");
-
-    if (verificationType.Equals("Phone Authentication"))
-    {
-      var identityVerification = new JObject();
-      var inputOptions = new JArray();
-      var inputObject = new JObject();
-      var phoneNumberList = new JArray();
-      var phoneNumberObject = new JObject();
-
-      phoneNumberObject["Number"] = body["phoneNumber"];
-      phoneNumberObject["CountryCode"] = body["countryCode"];
-      phoneNumberList.Add(phoneNumberObject);
-
-      inputObject["phoneNumberList"] = phoneNumberList;
-      inputObject["name"] = "phone_number_list";
-      inputObject["valueType"] = "PhoneNumberList";
-      inputOptions.Add(inputObject);
-
-      identityVerification["workflowId"] = body["workflowID"];
-      identityVerification["inputOptions"] = inputOptions;
-      signers[0]["identityVerification"] = identityVerification;
-    }
-    else if (verificationType.Equals("Access Code"))
-    {
-      signers[0]["accessCode"] = body["accessCode"];
-    }
-    else if (verificationType.Equals("Knowledge Based"))
-    {
-      signers[0]["idCheckConfigurationName"] = "ID Check $";
-    }
-    else if (verificationType.Equals("ID Verification"))
-    {
-      var identityVerification = new JObject();
-      identityVerification["workflowId"] = body["workflowID"];
-      signers[0]["identityVerification"] = identityVerification;
     }
   }
 
@@ -1285,6 +1313,11 @@ public class Script : ScriptBase
     if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeV2BodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("AddVerificationToRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddVerificationToRecipientBodyTransformation).ConfigureAwait(false);
     }
 
     if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
