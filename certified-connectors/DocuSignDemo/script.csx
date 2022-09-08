@@ -1103,6 +1103,11 @@ public class Script : ScriptBase
       signers[0]["routingOrder"] = query.Get("routingOrder");
     }
 
+    if (!string.IsNullOrEmpty(query.Get("clientUserId")))
+    {
+      signers[0]["clientUserId"] = query.Get("clientUserId");
+    }
+
     var emailNotification = new JObject();
     var emailNotificationSet = false;
 
