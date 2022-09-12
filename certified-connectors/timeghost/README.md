@@ -21,6 +21,7 @@ The connector supports the following operations:
 - `Add Task` : Add a task to a workspace.
 - `Add Time` : Add a time to a project within a workspace.
 - `Add Time Tag` : Add a time tag to a workspace.
+- `Add Project Tag` : Add a project tag to a workspace.
 - `Create Times Excel Report` : Returns an Excel file containing a report of the specified time.
 - `Delete Item` : Deletes an item from a workspace.
 - `Get Client Projects` : Get all projects of one client in one workspace.
@@ -30,6 +31,7 @@ The connector supports the following operations:
 - `Get Project Times` : Get all times of one project in one workspace.
 - `Get Projects` : Get all projects from a workspace.
 - `Get Time Tags` : Get all time tags from a workspace.
+- `Get Project Tags` : Get all project tags from a workspace.
 - `Get Times` : Get all times from a workspace.
 - `Update Client` : Updates a client in a workspace.
 - `Update Custom Feed Event` : Updates a custom feed entry in a workspace.
@@ -37,6 +39,11 @@ The connector supports the following operations:
 - `Update Task` : Updates a task in a workspace.
 - `Update Time` : Updates a time in a workspace.
 - `Update Time Tag` : Updates a time tag in a workspace.
+- `Update project Tag` : Updates a project tag in a workspace.
+- `Update Tags of an Project` : Updates the tags of an existing project in a workspace.
+- `Update Users of an Project` : Updates the users and their roles of an existing project in a workspace.
+- `Update Groups of an Project` : Updates the groups and their roles of an existing project in a workspace.
+- `Update Tags of an Time` : Updates the tags of an existing time in a workspace.
 - `Client Trigger` : If a client is created, changed or deleted in timeghost, this trigger runs.
 - `Project Trigger` : If a project is created, changed or deleted in timeghost, this trigger runs.
 - `Tag Trigger` : If a tag is created, changed or deleted in timeghost, this trigger runs.

@@ -40,7 +40,7 @@ public class Script : ScriptBase
                 var xml_vatValid = doc.SelectSingleNode("//*[local-name()='valid']") as XmlElement;
                 var xml_companyName = doc.SelectSingleNode("//*[local-name()='name']") as XmlElement;
                 var xml_companyAddress = doc.SelectSingleNode("//*[local-name()='address']") as XmlElement;
-            
+
                 if (xmlResponse == null)
                 {
                     response = new HttpResponseMessage(HttpStatusCode.BadRequest);

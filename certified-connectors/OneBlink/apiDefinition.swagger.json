@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.1.0",
+    "version": "1.4",
     "title": "OneBlink",
     "description": "Empowers business users to create and deploy digital forms for enterprise and government organisations as web and native apps, while allowing developers to customise, extend, or harness the forms through their own custom apps. Connect your forms with this connector to allow easy submission of your form data into your backend systems or databases without the need to write complex integration code.",
     "contact": {
@@ -15,9 +15,15 @@
   },
   "host": "auth-api.blinkm.io",
   "basePath": "/",
-  "schemes": ["https"],
-  "consumes": ["application/json"],
-  "produces": ["application/json"],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
     "/form-submission-meta/web-hooks": {
       "x-ms-notification-content": {
@@ -37,9 +43,12 @@
             "in": "body",
             "description": "This is the request body of the Webhook",
             "required": true,
+            "x-ms-visibility": "important",
             "schema": {
               "type": "object",
-              "required": ["callbackUrl"],
+              "required": [
+                "callbackUrl"
+              ],
               "properties": {
                 "callbackUrl": {
                   "type": "string",
@@ -47,6 +56,24 @@
                   "title": "Callback URL",
                   "x-ms-notification-url": true,
                   "x-ms-visibility": "internal"
+                },
+                "label": {
+                  "type": "string",
+                  "description": "Label to display in Low code Suite to identify the Workflow Event",
+                  "title": "Label",
+                  "x-ms-visibility": "important"
+                },
+                "formId": {
+                  "type": "number",
+                  "description": "Select a form to restrict this flow to a single form's submissions",
+                  "title": "Form",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetForms",
+                    "value-collection": "forms",
+                    "value-path": "id",
+                    "value-title": "name"
+                  }
                 }
               }
             }
@@ -231,7 +258,9 @@
         "summary": "Retrieve Form Submission Attachment",
         "operationId": "GetFormSubmissionAttachment",
         "x-ms-visibility": "important",
-        "produces": ["*/*"],
+        "produces": [
+          "*/*"
+        ],
         "parameters": [
           {
             "name": "formId",
@@ -254,8 +283,70 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "file",
+              "type": "string",
+              "format": "binary",
+              "description": "Output file content of the form attachment",
               "x-ms-summary": "Attachment Content"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/forms": {
+      "get": {
+        "description": "Allows for Forms to be retrieved",
+        "summary": "Retrieve Forms",
+        "operationId": "GetForms",
+        "x-ms-visibility": "internal",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "forms": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -291,7 +382,9 @@
         "summary": "Generate Form Submission PDF",
         "operationId": "GenerateFormSubmissionPDF",
         "x-ms-visibility": "important",
-        "produces": ["application/pdf"],
+        "produces": [
+          "application/pdf"
+        ],
         "parameters": [
           {
             "name": "formId",
@@ -310,28 +403,63 @@
             "x-ms-summary": "Submission Id"
           },
           {
-            "name": "includeSubmissionIdInPdf",
-            "in": "query",
-            "description": "The submission identifier can be included at the bottom of each page in the PDF",
-            "required": true,
-            "type": "boolean",
-            "default": true,
-            "x-ms-summary": "Include Submission Identifier In Pdf"
-          },
-          {
-            "name": "X-OneBlink-Target-Group",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "oneblink-simple-pdf-prod",
-            "x-ms-visibility": "internal"
+            "name": "Request Body",
+            "in": "body",
+            "description": "This is the request body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "includeSubmissionIdInPdf": {
+                  "type": "boolean",
+                  "x-ms-summary": "Include submission identifier in PDF",
+                  "description": "The submission identifier can be included at the bottom of each page in the PDF"
+                },
+                "includePaymentInPdf": {
+                  "type": "boolean",
+                  "x-ms-summary": "Include payment details in PDF",
+                  "description": "Payment details can be included as the final page in the PDF"
+                },
+                "usePagesAsBreaks": {
+                  "type": "boolean",
+                  "x-ms-summary": "Page break on form pages",
+                  "description": "Form pages can be translated to page breaks in the PDF"
+                },
+                "excludedElementIds": {
+                  "type": "array",
+                  "x-ms-summary": "Excluded form elements",
+                  "description": "The identifiers of the form elements to exclude from the PDF",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "string",
+                    "description": "The form element identifier to exclude from the PDF",
+                    "x-ms-summary": "Form element identifier"
+                  }
+                },
+                "approvalFormsInclusion": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "x-ms-summary": "Include Approval Details In PDF",
+                      "title": "Include Approval Details In PDF",
+                      "x-ms-visibility": "advanced",
+                      "enum": [
+                        "ALL"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
           "201": {
             "description": "Created",
             "schema": {
-              "type": "file",
+              "type": "string",
+              "format": "binary",
+              "description": "Output file content from the PDF Service",
               "x-ms-summary": "Form Submission PDF Content"
             }
           },
@@ -394,19 +522,10 @@
         "externalId": {
           "type": "string",
           "x-ms-summary": "External Id"
-        }
-      }
-    },
-    "FormSubmissionMetaWebhook-POST": {
-      "type": "object",
-      "required": ["callbackUrl"],
-      "properties": {
-        "callbackUrl": {
-          "type": "string",
-          "description": "Callback URL to push data to the Form Submission Meta Webhook Trigger",
-          "title": "Callback URL",
-          "x-ms-notification-url": true,
-          "x-ms-visibility": "internal"
+        },
+        "formsAppId": {
+          "type": "integer",
+          "x-ms-summary": "App Id"
         }
       }
     },
@@ -451,6 +570,10 @@
           "type": "object",
           "additionalProperties": true,
           "x-ms-summary": "Submission Data"
+        },
+        "ipAddress": {
+          "type": "string",
+          "x-ms-summary": "Submitted By: IP Address"
         },
         "submissionTimestamp": {
           "type": "string",
