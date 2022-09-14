@@ -30,7 +30,7 @@ public class Script : ScriptBase
     catch (ConnectorException ex)
     {
       var response = new HttpResponseMessage(ex.StatusCode);
-      response.Content = CreateJsonContent(ex.Message);
+      response.Content = CreateJsonContent(ex.JsonMessage());
       return response;
     }
   }
@@ -1025,21 +1025,18 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var verificationType = query.Get("verificationType");
-    var recipientType = query.Get("recipientType");
+    var recipientTypeMap = new Dictionary<string, string>() {
+      {"agent", "agents"},
+      {"editor", "editors"},
+      {"inpersonsigner", "inPersonSigners"},
+      {"certifieddelivery", "certifiedDeliveries"},
+      {"signer", "signers"},
+      {"carboncopy", "carbonCopies"},
+      {"intermediary", "intermediaries"},
+      {"witness", "witnesses"}
+    };
 
-    if (recipientType.Equals("agent") || recipientType.Equals("editor") || recipientType.Equals("inPersonSigner") || recipientType.Equals("participant") || recipientType.Equals("seal") || recipientType.Equals("signer"))
-    {
-      recipientType = recipientType + "s";
-    }
-    else if (recipientType.Equals("witness"))
-    {
-      recipientType = recipientType + "es";
-    }
-    else
-    {
-      recipientType = recipientType.Replace("y", "ies");
-    }
-
+    var recipientType = recipientTypeMap[query.Get("recipientType")];
     var recipientId = query.Get("recipientId");
 
     var recipient = new JObject();
@@ -1052,6 +1049,11 @@ public class Script : ScriptBase
       var inputObject = new JObject();
       var phoneNumberList = new JArray();
       var phoneNumberObject = new JObject();
+
+      if (body["phoneNumber"] == null && body["countryCode"] == null && body["workflowID"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Phone number or workflow ID is missing");
+      }
 
       phoneNumberObject["Number"] = body["phoneNumber"];
       phoneNumberObject["CountryCode"] = body["countryCode"];
@@ -1068,6 +1070,11 @@ public class Script : ScriptBase
     }
     else if (verificationType.Equals("Access Code"))
     {
+      if (body["accessCode"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Access Code is missing");
+      }
+
       recipient["accessCode"] = body["accessCode"];
     }
     else if (verificationType.Equals("Knowledge Based"))
@@ -1077,6 +1084,11 @@ public class Script : ScriptBase
     else if (verificationType.Equals("ID Verification"))
     {
       var identityVerification = new JObject();
+      if (body["workflowID"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Workflow ID is missing");
+      }
+
       identityVerification["workflowId"] = body["workflowID"];
       recipient["identityVerification"] = identityVerification;
     }
@@ -1688,6 +1700,12 @@ public class Script : ScriptBase
     }
 
     public HttpStatusCode StatusCode { get; }
+
+    public string JsonMessage()
+    {
+      var error = new StringBuilder($"{{\"ConnectorException\": \"Status code={this.StatusCode}, Message='{this.Message}'\"}}");
+      return error.ToString();
+    }
 
     public override string ToString()
     {
