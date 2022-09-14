@@ -30,7 +30,7 @@ public class Script : ScriptBase
     catch (ConnectorException ex)
     {
       var response = new HttpResponseMessage(ex.StatusCode);
-      response.Content = CreateJsonContent(ex.Message);
+      response.Content = CreateJsonContent(ex.JsonMessage());
       return response;
     }
   }
@@ -1036,7 +1036,7 @@ public class Script : ScriptBase
       {"witness", "witnesses"}
     };
 
-    var recipientType = recipientTypeMap.get[query.Get("recipientType")];
+    var recipientType = recipientTypeMap[query.Get("recipientType")];
     var recipientId = query.Get("recipientId");
 
     var recipient = new JObject();
@@ -1052,7 +1052,7 @@ public class Script : ScriptBase
 
       if (body["phoneNumber"] == null && body["countryCode"] == null && body["workflowID"] == null)
       {
-        throw new Exception("Phone number or workflow ID is missing");
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Phone number or workflow ID is missing");
       }
 
       phoneNumberObject["Number"] = body["phoneNumber"];
@@ -1072,7 +1072,7 @@ public class Script : ScriptBase
     {
       if (body["accessCode"] == null)
       {
-        throw new Exception("Access Code is missing");
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Access Code is missing");
       }
 
       recipient["accessCode"] = body["accessCode"];
@@ -1086,7 +1086,7 @@ public class Script : ScriptBase
       var identityVerification = new JObject();
       if (body["workflowID"] == null)
       {
-        throw new Exception("Workflow ID is missing");
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Workflow ID is missing");
       }
 
       identityVerification["workflowId"] = body["workflowID"];
@@ -1700,6 +1700,12 @@ public class Script : ScriptBase
     }
 
     public HttpStatusCode StatusCode { get; }
+
+    public string JsonMessage()
+    {
+      var error = new StringBuilder($"{{\"ConnectorException\": \"Status code={this.StatusCode}, Message='{this.Message}'\"}}");
+      return error.ToString();
+    }
 
     public override string ToString()
     {
