@@ -1,13 +1,15 @@
 ## Cloud User Hub
 Cloud User Hub is a unified Microsoft CSP portal that lets you automate common tasks across all Microsoft 365 apps without switching consoles or customers.
 
+## Publisher: N-able Cloud User Hub B.V.
+
 ## Prerequisites
 You will need the following to proceed:
 * A Cloud User Hub subscription https://www.n-able.com/products/cloud-user-hub/trial
 * Configured solutions in Cloud User Hub for the specific operations you intend to use
 * Configured roles in Cloud User Hub for the specific operations you intend to use
 
-## How to get credentials
+## Obtaining Credentials
 You can login with any account that is configured to access Cloud User Hub. For automation scenarios we advise you to use a dedicated service account.
 
 ## Supported Operations
@@ -45,14 +47,5 @@ The connector supports the following operations:
 * `Get details of a single user job`: Get details of a single user job, provider and action validation depend on the the specific Command Block.
 * `Get Command Categories`: Get all available categories and subcategories.
 
-
-
-
-
-
-
-
-
-
-
-
+## Known issues and limitations
+There are no known issues or limitations specific to the Cloud User Hub connector.
