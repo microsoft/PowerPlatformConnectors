@@ -886,16 +886,16 @@ public class Script : ScriptBase
         customField["show"] = "true";
       }
 
-      if (key.StartsWith("[List Envelope Custom Field]"))
+      if (key.EndsWith("[Custom Field List]"))
       {
-        key = key.Replace("[List Envelope Custom Field] ", "");
+        key = key.Replace(" [Custom Field List]", "");
         customField["name"] = key;
         customField["value"] = value;
         listCustomFields.Add(customField);
       }
       else
       {
-        key = key.Replace("[Text Envelope Custom Field] ", "");
+        key = key.Replace(" [Custom Field Text]", "");
         customField["name"] = key;
         customField["value"] = value;
         textCustomFields.Add(customField);
@@ -1536,9 +1536,9 @@ public class Script : ScriptBase
       var count = 0;
       foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[Text Envelope Custom Field] " + customField["name"].ToString();
+        var name = customField["name"].ToString() + " [Custom Field Text]";
 
-        if (customField["required"].ToString() == "true") 
+        if (customField["required"].ToString() == "true")
         {
           name = "* " + name;
         }
@@ -1554,7 +1554,7 @@ public class Script : ScriptBase
       
       foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[List Envelope Custom Field] " + customField["name"].ToString();
+        var name = customField["name"].ToString() + " [Custom Field List]";
 
         if (customField["required"].ToString() == "true") 
         {
