@@ -10,7 +10,9 @@ An active account is required and its external connections option has to be vali
 BOT Done: Triggers when a BOT at the end of execution.
 
 ## Supported Actions
-Execute BOT: Execute your BOT.
+Execute BOT: Execute your BOT. You can set specific input values for your BOT.
+Upload file: Upload a file. You can set file contents and get file ref.
+Download file: Download a file. You can set file ref and get file contents.
 
 ## API documentation
 [API Reference](https://docs.c-bot.pro/en/2020/06/25/api-reference/)
