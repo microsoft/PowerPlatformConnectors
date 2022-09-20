@@ -320,12 +320,12 @@ public class Script : ScriptBase
       {
         response["schema"]["properties"]["countryCode"] = new JObject 
         {
-          ["type"] = "string",
+          ["type"] = "integer",
           ["x-ms-summary"] = "* Country Code, without the leading + sign."
         };
         response["schema"]["properties"]["phoneNumber"] = new JObject
         {
-          ["type"] = "string",
+          ["type"] = "integer",
           ["x-ms-summary"] = "* Recipient's Phone Number"
         };
       }
@@ -1141,8 +1141,8 @@ public class Script : ScriptBase
     if (!string.IsNullOrEmpty(query.Get("countryCode")) && !string.IsNullOrEmpty(query.Get("phoneNumber")))
     {
       var phoneNumber = new JObject();
-      phoneNumber["countryCode"] = body["countryCode"];
-      phoneNumber["number"] = body["phoneNumber"];
+      phoneNumber["countryCode"] = query.Get("countryCode");
+      phoneNumber["number"] = query.Get("phoneNumber");
 
       var additionalNotification = new JObject();
       additionalNotification["secondaryDeliveryMethod"] = "SMS";
