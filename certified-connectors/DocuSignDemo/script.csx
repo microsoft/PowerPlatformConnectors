@@ -321,7 +321,7 @@ public class Script : ScriptBase
         response["schema"]["properties"]["countryCode"] = new JObject 
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Country Code (+)"
+          ["x-ms-summary"] = "* Country Code, without the leading + sign."
         };
         response["schema"]["properties"]["phoneNumber"] = new JObject
         {
@@ -1137,6 +1137,21 @@ public class Script : ScriptBase
     {
       signers[0]["roleName"] = query.Get("roleName");
     }
+
+    if (!string.IsNullOrEmpty(query.Get("countryCode")) && !string.IsNullOrEmpty(query.Get("phoneNumber")))
+    {
+      var phoneNumber = new JObject();
+      phoneNumber["countryCode"] = body["countryCode"];
+      phoneNumber["number"] = body["phoneNumber"];
+
+      var additionalNotification = new JObject();
+      additionalNotification["secondaryDeliveryMethod"] = "SMS";
+      additionalNotification["phoneNumber"] = phoneNumber;
+
+      var additionalNotifications = new JArray();
+      additionalNotifications.Add(additionalNotification);
+      signers[0]["additionalNotifications"] = additionalNotifications;
+    }
   }
 
   private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
@@ -1604,6 +1619,11 @@ public class Script : ScriptBase
       {
         newBody = signer as JObject;
         break;
+      }
+
+      if (newBody["errorDetails"] != null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: " + newBody["errorDetails"]["message"]);
       }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
