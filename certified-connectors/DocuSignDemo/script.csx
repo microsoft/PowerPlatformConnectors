@@ -30,7 +30,16 @@ public class Script : ScriptBase
     catch (ConnectorException ex)
     {
       var response = new HttpResponseMessage(ex.StatusCode);
-      response.Content = CreateJsonContent(ex.JsonMessage());
+
+      if(ex.Message.Contains("ValidationFailure:"))
+      {
+        response.Content = CreateJsonContent(ex.JsonMessage());
+      }
+      else
+      {
+        response.Content = CreateJsonContent(ex.Message);
+      }
+      
       return response;
     }
   }
@@ -311,32 +320,13 @@ public class Script : ScriptBase
       {
         response["schema"]["properties"]["countryCode"] = new JObject 
         {
-          ["type"] = "string",
-          ["x-ms-summary"] = "* Country Code (+)"
+          ["type"] = "integer",
+          ["x-ms-summary"] = "* Country Code, without the leading + sign."
         };
         response["schema"]["properties"]["phoneNumber"] = new JObject
         {
-          ["type"] = "string",
+          ["type"] = "integer",
           ["x-ms-summary"] = "* Recipient's Phone Number"
-        };
-        response["schema"]["properties"]["workflowID"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-dynamic-values"] = new JObject
-            {
-              ["operationId"] = "GetWorkflowIDs",
-              ["parameters"] = new JObject
-              {
-                ["accountId"] = new JObject
-                {
-                  ["parameter"] = "accountId"
-                }
-              },
-              ["value-collection"] = "workFlowIds",
-              ["value-path"] = "type",
-              ["value-title"] = "name",
-            },
-          ["x-ms-summary"] = "* Workflow IDs"
         };
       }
       else if (verificationType.Equals("Access Code", StringComparison.OrdinalIgnoreCase))
@@ -886,16 +876,16 @@ public class Script : ScriptBase
         customField["show"] = "true";
       }
 
-      if (key.StartsWith("[List Envelope Custom Field]"))
+      if (key.EndsWith("[Custom Field List]"))
       {
-        key = key.Replace("[List Envelope Custom Field] ", "");
+        key = key.Replace(" [Custom Field List]", "");
         customField["name"] = key;
         customField["value"] = value;
         listCustomFields.Add(customField);
       }
       else
       {
-        key = key.Replace("[Text Envelope Custom Field] ", "");
+        key = key.Replace(" [Custom Field Text]", "");
         customField["name"] = key;
         customField["value"] = value;
         textCustomFields.Add(customField);
@@ -1044,35 +1034,26 @@ public class Script : ScriptBase
 
     if (verificationType.Equals("Phone Authentication"))
     {
-      var identityVerification = new JObject();
-      var inputOptions = new JArray();
-      var inputObject = new JObject();
-      var phoneNumberList = new JArray();
-      var phoneNumberObject = new JObject();
+      var phoneAuthentication = new JObject();
+      var phoneNumbers = new JArray();
 
-      if (body["phoneNumber"] == null && body["countryCode"] == null && body["workflowID"] == null)
+      if (body["phoneNumber"] == null || body["countryCode"] == null)
       {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "Phone number or workflow ID is missing");
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Phone number or country code is missing");
       }
 
-      phoneNumberObject["Number"] = body["phoneNumber"];
-      phoneNumberObject["CountryCode"] = body["countryCode"];
-      phoneNumberList.Add(phoneNumberObject);
+      var phoneNumber = body["countryCode"].ToString() + body["phoneNumber"].ToString();
+      phoneNumbers.Add(phoneNumber);
 
-      inputObject["phoneNumberList"] = phoneNumberList;
-      inputObject["name"] = "phone_number_list";
-      inputObject["valueType"] = "PhoneNumberList";
-      inputOptions.Add(inputObject);
-
-      identityVerification["workflowId"] = body["workflowID"];
-      identityVerification["inputOptions"] = inputOptions;
-      recipient["identityVerification"] = identityVerification;
+      phoneAuthentication["senderProvidedNumbers"] = phoneNumbers;
+      recipient["phoneAuthentication"] = phoneAuthentication;
+      recipient["idCheckConfigurationName"] = "Phone Auth $";
     }
     else if (verificationType.Equals("Access Code"))
     {
       if (body["accessCode"] == null)
       {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "Access Code is missing");
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Access Code is missing");
       }
 
       recipient["accessCode"] = body["accessCode"];
@@ -1086,7 +1067,7 @@ public class Script : ScriptBase
       var identityVerification = new JObject();
       if (body["workflowID"] == null)
       {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "Workflow ID is missing");
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Workflow ID is missing");
       }
 
       identityVerification["workflowId"] = body["workflowID"];
@@ -1155,6 +1136,21 @@ public class Script : ScriptBase
     if (!string.IsNullOrEmpty(query.Get("roleName")))
     {
       signers[0]["roleName"] = query.Get("roleName");
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("countryCode")) && !string.IsNullOrEmpty(query.Get("phoneNumber")))
+    {
+      var phoneNumber = new JObject();
+      phoneNumber["countryCode"] = query.Get("countryCode");
+      phoneNumber["number"] = query.Get("phoneNumber");
+
+      var additionalNotification = new JObject();
+      additionalNotification["secondaryDeliveryMethod"] = "SMS";
+      additionalNotification["phoneNumber"] = phoneNumber;
+
+      var additionalNotifications = new JArray();
+      additionalNotifications.Add(additionalNotification);
+      signers[0]["additionalNotifications"] = additionalNotifications;
     }
   }
 
@@ -1536,9 +1532,9 @@ public class Script : ScriptBase
       var count = 0;
       foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[Text Envelope Custom Field] " + customField["name"].ToString();
+        var name = customField["name"].ToString() + " [Custom Field Text]";
 
-        if (customField["required"].ToString() == "true") 
+        if (customField["required"].ToString() == "true")
         {
           name = "* " + name;
         }
@@ -1554,7 +1550,7 @@ public class Script : ScriptBase
       
       foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[List Envelope Custom Field] " + customField["name"].ToString();
+        var name = customField["name"].ToString() + " [Custom Field List]";
 
         if (customField["required"].ToString() == "true") 
         {
@@ -1623,6 +1619,11 @@ public class Script : ScriptBase
       {
         newBody = signer as JObject;
         break;
+      }
+
+      if (newBody["errorDetails"] != null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: " + newBody["errorDetails"]["message"]);
       }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
