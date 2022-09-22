@@ -1,25 +1,24 @@
-Create user-driven solutions that solve everyday business problems in a fraction of the time with the ultimate toolkit for Power Platform professionals. Redact a sensitive document, localize currencies and dates, translate text into multiple languages, perform advanced calculations, convert text to speech and more with only a few clicks. PowerTools PRO eliminates the need for complex expression syntax and formulas, putting the power to build advanced solutions back in the hands of business users. Increase productivity, reduce delivery time and accelerate adoption with a powerful set of utilities designed to supercharge low-code/no-code apps, forms and workflows.
+## Apptigent PowerTools Professional Edition
+
+Create user-driven solutions that solve everyday business problems in a fraction of the time with the ultimate toolkit for Power Platform professionals. Redact a sensitive document, localize currencies and dates, translate text into multiple languages, perform advanced calculations, convert speech to text, generate maps, moderate content, transform data, watermark images and more with only a few clicks. PowerTools Professional Edition eliminates the need for complex expression syntax and formulas, putting the power to build advanced solutions back in the hands of business users. Increase productivity, reduce delivery time and accelerate adoption with a powerful set of utilities designed to supercharge no-code apps, forms and workflows.
 
 ## Prerequisites
 
-Create an account and subscribe to PowerTools Professional Edition. Plans start at only $49 a month and scale to fit every budget. Learn more at https://portal.apptigent.com.
+Create an account and subscribe to PowerTools Professional Edition. Plans start at only $19 a month and scale to fit every budget. Learn more at https://www.apptigent.com/powertools/.
 
 ## How to get credentials
 
-Generate an API key by following these simple steps:
+Generate a license (API) key by following these simple steps:
 
-1. Open https://portal.apptigent.com in your browser, click "Create an account" and follow the prompts.
-2. Login with your new credentials and select the "Apps" link from the main menu.
-3. Click the "Create new App" button.
-4. Enter a Title and optional description (such as "Power Automate App") then click "Submit".
-5. Upon successful submission, the App details page will be shown with your new credentials. Click the "Show" checkbox next to the Client ID field and copy the value - this is the key you will use in the "API Key" field to authorize a new connector. 
-6. Browse to "API Products", select "PowerTools Professional", then click Subscribe under any paid plan (contact support for Enterprise and custom billing arrangements). 
-7. Select the app name created in Step 4 and click "Subscribe" to finish.
+1. Open https://www.apptigent.com in your browser, click "Shop" and select "PowerTools Professional Edition".
+2. Select a subscription plan and click "Subscribe". Follow the simple checkout process to complete your subscription.
+3. Click the 'Account' button then select 'Subscriptions' from the left navigation menu. View the new PowerTools Professional Edition subscription details to retreive your license (API) key (there may be a short delay after completing your order for the key to be generated) - this is the key you will use in the "License Key" field to authorize a new connector. 
+4. Users migrating from previous versions can view step-by-step instructions on our migration help page at https://www.apptigent.com/help/migrate/
 
 ## Known issues and limitations
 
-Professional Edition plans range from 100 - 5,000 action calls per day. Visit our Subscriptions page at https://www.apptigent.com/solutions/power-tools/subscription-plans/ to learn more about plan limits. 
+Professional Edition plans range from 1,000 - 50,000 actions per month. Visit our Shop at https://www.apptigent.com/product/powertools-pro/ to learn more. 
 
-** SPECIAL OFFER FOR MICROSOFT MVP's **
+## Supported Operations
 
-Once registered, select the drop-down menu next to your user name and click "My Organization". Edit the organization name and add your MVP ID. Then navigate to subscriptions and select the "MVP" plan for a FREE PRO 100 subscription.  You will receive an email confirming your benefit within 48 hours. You may then begin using your app Client ID in your Power Platform subscriptions (NOTE: for personal use only, not valid for customer, client or commercial purposes).
+Please visit the [PowerTools Professional product page](https://www.apptigent.com/product/powertools-professional-edition) for a complete list of available actions. To learn more about each one and how to use it in your apps, forms and flows, visit our [Tutorials page](https://www.apptigent.com/resources/tutorials/). 
