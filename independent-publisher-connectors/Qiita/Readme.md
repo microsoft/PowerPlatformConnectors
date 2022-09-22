@@ -27,4 +27,4 @@ There are no credentials needed to use this service.
 Visit [Qiita API v2 documentation page](https://qiita.com/api/v2/docs) for further detail
 
 ## Known Issues and Limitations
-There are no known issues at this time.
+Up to 60 requests per IP address per hour are accepted.
