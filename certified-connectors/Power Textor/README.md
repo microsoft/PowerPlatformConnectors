@@ -158,11 +158,11 @@ Send text message to a number directly, without specifying name of the user, whi
 
 Send an MMS to a number directly, without specifying name of the user, while the contact is automatically created in PowerTextor.
 
-### Send MMS to a group
+### Send an MMS to a group
 
 Send an MMS to a PowerTextor group at once.
 
-### Send MMS to a contact
+### Send an MMS to a contact
 
 Send an MMS to a Power Textor Contact.
 
