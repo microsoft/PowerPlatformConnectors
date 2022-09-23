@@ -154,15 +154,15 @@ Send a text to multiple contact numbers directly, while their numbers are saved 
 
 Send text message to a number directly, without specifying name of the user, while the contact is automatically created in PowerTextor.
 
-### Send MMS to a new contact
+### Send an MMS
 
-Create a contact to send an MMS using Power Textor, while the contact is automatically created in Power Textor.
+Send an MMS to a number directly, without specifying name of the user, while the contact is automatically created in PowerTextor.
 
-### Send MMS to a group
+### Send an MMS to a group
 
 Send an MMS to a PowerTextor group at once.
 
-### Send MMS to a contact
+### Send an MMS to a contact
 
 Send an MMS to a Power Textor Contact.
 
