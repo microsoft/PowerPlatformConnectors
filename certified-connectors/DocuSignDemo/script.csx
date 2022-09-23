@@ -242,6 +242,138 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForEmbeddedSigningSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Add Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForEmbeddedSenderSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add a different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Add Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var verificationType = query.Get("verificationType");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (verificationType.Equals("Phone Authentication", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["countryCode"] = new JObject 
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Country Code (+)"
+        };
+        response["schema"]["properties"]["phoneNumber"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Recipient's Phone Number"
+        };
+        response["schema"]["properties"]["workflowID"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "GetWorkflowIDs",
+              ["parameters"] = new JObject
+              {
+                ["accountId"] = new JObject
+                {
+                  ["parameter"] = "accountId"
+                }
+              },
+              ["value-collection"] = "workFlowIds",
+              ["value-path"] = "type",
+              ["value-title"] = "name",
+            },
+          ["x-ms-summary"] = "* Workflow IDs"
+        };
+      }
+      else if (verificationType.Equals("Access Code", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["accessCode"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Access Code"
+        };
+      }
+      else if (verificationType.Equals("ID Verification", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["workflowID"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "GetWorkflowIDs",
+              ["parameters"] = new JObject
+              {
+                ["accountId"] = new JObject
+                {
+                  ["parameter"] = "accountId"
+                }
+              },
+              ["value-collection"] = "workFlowIds",
+              ["value-path"] = "type",
+              ["value-title"] = "name",
+            },
+          ["x-ms-summary"] = "* Workflow IDs"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
     if (operationId.Equals("StaticResponseForRecipientTypeSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
@@ -844,6 +976,122 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject GenerateEmbeddedSigningURLBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    body["userName"] = query.Get("signerName");
+    body["email"] = query.Get("signerEmail");
+    body["authenticationMethod"] = query.Get("authenticationMethod");
+    body["clientUserId"] = query.Get("clientUserId");
+    
+    var returnUrl = query.Get("returnUrl");
+    if (returnUrl.Equals("Default URL"))
+    {
+      body["returnUrl"] = "https://postsign.docusign.com/postsigning/en/finish-signing";
+    }
+    else if (returnUrl.Equals("Add A Different URL"))
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+
+    return body;
+  }
+
+  private JObject GenerateEmbeddedSenderURLBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var returnUrl = query.Get("returnUrl");
+    var url = this.Context.Request.RequestUri.Authority;
+
+    if (returnUrl.Equals("DocuSign homepage"))
+    {
+      if (url.Equals("demo.docusign.net"))
+      {
+        body["returnUrl"] = "https://appdemo.docusign.com/";
+      }
+      else
+      {
+        body["returnUrl"] = "https://app.docusign.com/";
+      }
+    }
+    else
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+    return body;
+  }
+
+  private JObject AddVerificationToRecipientBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var verificationType = query.Get("verificationType");
+    var recipientType = query.Get("recipientType");
+
+    if (recipientType.Equals("agent") || recipientType.Equals("editor") || recipientType.Equals("inPersonSigner") || recipientType.Equals("participant") || recipientType.Equals("seal") || recipientType.Equals("signer"))
+    {
+      recipientType = recipientType + "s";
+    }
+    else if (recipientType.Equals("witness"))
+    {
+      recipientType = recipientType + "es";
+    }
+    else
+    {
+      recipientType = recipientType.Replace("y", "ies");
+    }
+
+    var recipientId = query.Get("recipientId");
+
+    var recipient = new JObject();
+    var recipientArray = new JArray();
+
+    if (verificationType.Equals("Phone Authentication"))
+    {
+      var identityVerification = new JObject();
+      var inputOptions = new JArray();
+      var inputObject = new JObject();
+      var phoneNumberList = new JArray();
+      var phoneNumberObject = new JObject();
+
+      phoneNumberObject["Number"] = body["phoneNumber"];
+      phoneNumberObject["CountryCode"] = body["countryCode"];
+      phoneNumberList.Add(phoneNumberObject);
+
+      inputObject["phoneNumberList"] = phoneNumberList;
+      inputObject["name"] = "phone_number_list";
+      inputObject["valueType"] = "PhoneNumberList";
+      inputOptions.Add(inputObject);
+
+      identityVerification["workflowId"] = body["workflowID"];
+      identityVerification["inputOptions"] = inputOptions;
+      recipient["identityVerification"] = identityVerification;
+    }
+    else if (verificationType.Equals("Access Code"))
+    {
+      recipient["accessCode"] = body["accessCode"];
+    }
+    else if (verificationType.Equals("Knowledge Based"))
+    {
+      recipient["idCheckConfigurationName"] = "ID Check $";
+    }
+    else if (verificationType.Equals("ID Verification"))
+    {
+      var identityVerification = new JObject();
+      identityVerification["workflowId"] = body["workflowID"];
+      recipient["identityVerification"] = identityVerification;
+    }
+    
+    recipient["recipientId"] = recipientId;
+    recipientArray.Add(recipient);
+    body[recipientType] = recipientArray;
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -853,6 +1101,11 @@ public class Script : ScriptBase
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("clientUserId")))
+    {
+      signers[0]["clientUserId"] = query.Get("clientUserId");
     }
 
     var emailNotification = new JObject();
@@ -1067,6 +1320,21 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
 
+    if ("AddVerificationToRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddVerificationToRecipientBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSenderURLBodyTransformation).ConfigureAwait(false);
+    }
+
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddDocumentsToEnvelopeBodyTransformation).ConfigureAwait(false);
@@ -1161,6 +1429,39 @@ public class Script : ScriptBase
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
           body.GetValue("connectId").ToString()));
+    }
+
+    if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var openIn = query.Get("openIn");
+
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var url = body["url"].ToString();
+
+      if (openIn.Equals("Prepare"))
+      {
+        url = url.Replace("&send=" + 1, "&send=" + 0);
+      }
+      body["url"] = url;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var workflowsArray = new JArray();
+
+      foreach (var id in (body["identityVerification"] as JArray)) {
+        var workflowObj = new JObject()
+        {
+          ["type"] = id["workflowId"],
+          ["name"] = id["defaultName"]
+        };
+        workflowsArray.Add(workflowObj);
+      }
+      body["workflowIds"] = workflowsArray;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
