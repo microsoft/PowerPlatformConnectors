@@ -13,13 +13,13 @@ Create a Meta App: Go to developers.facebook.com > My Apps > Create App. Select 
 
 ## Supported Operations
 
-### Send a Test Message
-### Receive a Test Message
-### Get a phone number ID
-### Register Phone Number
-### Upload Image
-### Send sticker
-### Download Media Content
+1. Send a Test Message
+2. Receive a Test Message
+3. Get a phone number ID
+4. Register Phone Number
+5. Upload Image
+6. Send sticker
+7. Download Media Content
 
 I plan to try these operations first before moving on to the further actions.
 
