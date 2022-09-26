@@ -17,3 +17,6 @@ Convert CSV data to Excel file
 
 ### Convert SharePoint search results to list
 Convert SharePoint search results to a simple list
+
+### Convert file (DOCX, PPTX, XLSX, HTML, ...) to PDF
+Convert a document (Word, Powerpoint, Excel, ..) to a PDF-File
