@@ -1,5 +1,5 @@
 # Working days
-Working days API. It covers more than 45 countries and 230 regional calendars. It also covers main stock exchanges calendars. The quality of data is the top priority. API offers up to date information by following government announcements regarding public holidays changes.
+Working days service. It covers more than 45 countries and 230 regional calendars. It also covers main stock exchanges calendars. The quality of data is the top priority. API offers up to date information by following government announcements regarding public holidays changes.
 
 ## Publisher: Tomasz Poszytek
 
