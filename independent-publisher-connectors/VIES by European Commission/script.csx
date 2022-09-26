@@ -23,7 +23,7 @@ public class Script : ScriptBase
         var countryCode = ((string)data["countryCode"]).Trim();
         var vatNumber = ((string)data["vatNumber"]).Trim().Replace(" ", string.Empty).Replace("-", string.Empty).Replace(".", string.Empty);
         
-        var url = "http://ec.europa.eu/taxation_customs/vies/services/checkVatTestService";
+        var url = "http://ec.europa.eu/taxation_customs/vies/services/checkVatService";
         var xml = @"<?xml version='1.0' encoding='utf-8'?><soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'><soap:Body><checkVat xmlns='urn:ec.europa.eu:taxud:vies:services:checkVat:types'><countryCode>"+countryCode+"</countryCode><vatNumber>"+vatNumber+"</vatNumber></checkVat></soap:Body></soap:Envelope>";
 
         try
