@@ -1,5 +1,4 @@
-# Title
-### Advanced Data Operations  
+# Advanced Data Operations  
 A suite of advanced operations designed to assist in the transformation of bulk datasets.
 
 ## Publisher
