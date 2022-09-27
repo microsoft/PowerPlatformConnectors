@@ -6,8 +6,8 @@ Kevin Comba Gatimu, Denis Wachira Gathuri
 ## Prerequisites
 To use the free service, no signup is required.
 ## Some of the Supported Operations
-1.Get global Covid-19 totals for today,yesterday and two days ago
-2.Get Covid-19 totals for all continents
+1.Get global Covid-19 totals for today,yesterday and two days ago.
+2.Get Covid-19 totals for all continents.
 3.Get Covid-19 totals for a specific continent
 4.Get Covid-19 totals for all countries
 5.Get Covid-19 totals for a specific country
