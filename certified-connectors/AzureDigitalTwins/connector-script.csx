@@ -41,6 +41,15 @@ public class Script : ScriptBase
                 var textToSend = (string)contentAsJson["value"];
                 this.Context.Request.Content = CreateJsonContent(textToSend.ToString());
                 var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
+
+                if(this.Context.OperationId == "AddTwin"){
+                    var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var newResult = new JObject
+                    {
+                        ["result"] = responseString,
+                    };
+                    response.Content = CreateJsonContent(newResult.ToString());
+                }
                 return response;
             }else{
                 var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
