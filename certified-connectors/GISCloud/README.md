@@ -1,4 +1,4 @@
-# GIS Cloud Map Connector
+# GIS Cloud
 GIS Cloud is a SaaS platform that provides best in class web and mobile map rendering coupled with a powerful forms engine to facilitate all your collaborative mapping needs. The GIS Cloud Map Connector provides a subset of the extensive and powerful REST API that allows automations to drive most of the common use cases for a Map project. This connector will aloow you to list, update and interogate GIS Cloud Maps, Layers, Users and to also create Features and Files. With this subset a user can automate many data driven activities such as creating new features for inspection, creating reports, exporting data for dashboarding etc...
 
 ## Publisher: HandyGeo Services
@@ -14,70 +14,70 @@ GIS Cloud is a SaaS platform that provides best in class web and mobile map rend
 A full reference for the GIS Cloud REST API can be found at: https://docs.giscloud.com/rest
 
 ## Supported Operations
-### ACTION: Get Maps
+### [ACTION]: Get Maps
 List accessable maps
 
-### ACTION: Get Map
+### [ACTION]: Get Map
 Get specified map details
 
-### ACTION: Delete Map
+### [ACTION]: Delete Map
 Delete specified map project
 
-### ACTION: Update Map
+### [ACTION]: Update Map
 Update specified map project
 
-### ACTION: Delete Map Cache
+### [ACTION]: Delete Map Cache
 Clears the server cache of map tiles for a specified map
 
-### ACTION: Render Map
+### [ACTION]: Render Map
 Renders an image of the map project
 
-### ACTION: Get Layers
+### [ACTION]: Get Layers
 List accessable layers
 
-### ACTION: Get Layer
+### [ACTION]: Get Layer
 Get specified layer details
 
-### ACTION: Delete Layer
+### [ACTION]: Delete Layer
 Delete specified layer
 
-### ACTION: Update Layer
+### [ACTION]: Update Layer
 Update specified layer
 
-### ACTION: Render Map
+### [ACTION]: Render Map
 Renders an image of the map layer
 
-### ACTION: Get Layer Columns
+### [ACTION]: Get Layer Columns
 Describe the attributes and data types of a layer
 
-### ACTION: Get Features
+### [ACTION]: Get Features
 List all features on a layer
 
-### ACTION: Get Feature
+### [ACTION]: Get Feature
 Get specified feature on a layer
 
-### ACTION: Create Feature
+### [ACTION]: Create Feature
 Create new feature on a specified layer
 
-### ACTION: Delete Feature
+### [ACTION]: Delete Feature
 Delete specified feature on a layer
 
-### ACTION: Update Feature
+### [ACTION]: Update Feature
 Update specified feature on a layer
 
-### ACTION: Download Media
+### [ACTION]: Download Media
 Get specified file from cloud storage
 
-### ACTION: Upload Media
+### [ACTION]: Upload Media
 Upload specified file to cloud storage
 
-### ACTION: Delete Media
+### [ACTION]: Delete Media
 Delete specified file from cloud storage
 
-### ACTION: Get Current User
+### [ACTION]: Get Current User
 Get current GIS Cloud user
 
-### ACTION: Get User
+### [ACTION]: Get User
 Get specified GIS Cloud user
 
 ## Obtaining Credentials

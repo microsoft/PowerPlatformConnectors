@@ -295,7 +295,7 @@ public class Script : ScriptBase
   public override async Task<HttpResponseMessage> ExecuteAsync()
   {
     // Handle the request based on the type of operation.
-    if (this.Context.OperationId == "getLayer")
+    if (this.Context.OperationId == "GetLayer")
     {
       return await this.GetLayer().ConfigureAwait(false);
     }
