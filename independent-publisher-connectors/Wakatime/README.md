@@ -1,0 +1,3 @@
+# Wakatime Power Platform Connector
+WakaTime is a time tracking service for programmers. It's fully automatic and can detect project names from revision control software. It can provide users with information such as their most-used programming languages, logged time for each project, and email summaries on a monthly, weekly, or daily basis. Open-source text editor plugins are available on GitHub.
+## Submitted By : Shadrack Kiprotich
