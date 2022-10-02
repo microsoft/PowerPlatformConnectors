@@ -1,6 +1,6 @@
 # Focusmate
 
-Focusmate is a virtual co-working platform that helps you get things done by providing an accountability partner for 25 or 50-minute sessions dedicated to each attendee's focus area.
+Focusmate is a virtual co-working platform that helps you get things done by providing an accountability partner for 25 or 50-minute sessions dedicated to each attendee's focus area. This connector will allow you to retrieve your user information, your Focusmate sessions, and public information on your session partners.
 
 ## Publisher: Phil Cole
 
@@ -27,14 +27,14 @@ Gets the profile data for the given user id. Only publicly available data is ret
 Returns a list of sessions for the calling user.
 
 * Sessions will be sorted in reverse chronological order (newest first)
-* The start parameter must be less than or equal to end
+* The start parameter must be less than or equal than the end parameter
 * The time range provided must not exceed 1 year in length
 * Datetime parameters must be in ISO 8601 format and must specify an offset (or 'Z' for UTC)
 * All sessions partially within the given range will be returned
 * The 10-minute gap (5-minute for 25-minute sessions) after a session ends does not count as part of that session
 * Sessions whose start time matches the start parameter will be included
 * Sessions whose end time matches the end parameter will be included
-* Returned datetime values will always be in UTC
+* Returned date-time values will always be in UTC
 * The calling user will always be the first user in the users array. Note that a number of fields are only available for the calling user
 * Canceled sessions are omitted
 
