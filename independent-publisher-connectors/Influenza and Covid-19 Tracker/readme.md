@@ -21,7 +21,7 @@ To use the free service, no signup is required.
 13.Get Influenza-like-illness data from the 2019 and 2020 outbreak from US Center for Disease Control
 14.Get Influenza-like-illness data from the 2019 and 2020 outbreak from US Center for Disease Control,reported by US CLinical labs
 15.Get Influenza-like-illness data from the 2019 and 2020 outbreak from US Center for Disease Control,reported by US public health labs
-16.Get COVID-19 data from The European Surveillance System -TESSy, provided by [Austria, Belgium, Bulgaria,.etc]
+16.Get COVID-19 data from The European Surveillance System -TESSy
 ## Source
 https://disease.sh/docs
 
