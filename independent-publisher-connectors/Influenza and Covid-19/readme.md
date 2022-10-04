@@ -1,7 +1,7 @@
 # Influenza and Covid-19 Tracker
 It gets all information related Influenza & Covid-19 Virus like deaths,cases today,vaccine trial data and provides realtime disease-related statistics accumulated from Worldometers,JHUCSSE,Apple,Therapeutics and United States CDC.
 
-## Publisher: 
+## Publisher : 
 Kevin Comba Gatimu, Denis Wachira Gathuri
 ## Prerequisites
 To use the free service, no signup is required.
