@@ -24,6 +24,8 @@ Once you have an account with firmar.online, go to the integration panel and get
 ![Icon](./img/APIKey.png)
 
 Then go to the connector and create the connexion.
+
+
 ![Icon](./img/Connexion.png)
 
 ## Connector methods
