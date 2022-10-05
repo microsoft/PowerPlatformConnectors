@@ -1,0 +1,1 @@
+This is connector intended to show different meals, categories, ingredients and areas where these meals originate or oftenly made.
