@@ -6,21 +6,35 @@ Kevin Comba Gatimu, Denis Wachira Gathuri
 ## Prerequisites
 To use the free service, no signup is required.
 ## Some of the Supported Operations
-1.Get global Covid-19 totals for today,yesterday and two days ago.
-2.Get Covid-19 totals for all continents.
-3.Get Covid-19 totals for a specific continent
-4.Get Covid-19 totals for all countries
-5.Get Covid-19 totals for a specific country
-6.Get Covid-19 Apple mobility data for subregions of a country
-7.Get a list of supported countries for Apple mobility data
-8.Get a list of supported countries for government specific data
-9.Get Covid-19 government reported data for a specific country
-10.Get vaccine trial data from RAPS(Regulatory Affairs Professional Society)
-11.Get total global COVID-19 vaccine dose administered 
-12.Get therapeutic trial data from RAPS
-13.Get Influenza-like-illness data from the 2019 and 2020 outbreak from US Center for Disease Control
-14.Get Influenza-like-illness data from the 2019 and 2020 outbreak from US Center for Disease Control,reported by US CLinical labs
-15.Get Influenza-like-illness data from the 2019 and 2020 outbreak from US Center for Disease Control,reported by US public health labs
-16.Get COVID-19 data from The European Surveillance System -TESSy, provided by [Austria, Belgium, Bulgaria,.etc]
+1.Get Influenza report data for the 2019 and 2020 sourced from US public health labs
+2.Get Influenza report data for the 2019 and 2020 reported by US clinical labs
+3.Get Influenza like illness data for the 2019 and 2020 outbreaks
+4.Get therapeutics trial data from Regulatory Affairs Professional Society
+5.Get global COVID-19 totals for today, yesterday and two days ago
+6.Get a list of supported countries for ECDC specific data
+7.Get vaccine trial data from RAPS (Regulatory Affairs Professional Society)
+8.Get total global COVID-19 vaccine doses administered
+9.Get COVID-19 vaccine doses administered for a state
+10.Get COVID-19 vaccine doses administered for all states
+11.Get COVID-19 vaccine doses administered for a country
+12.Get COVID-19 vaccine doses administered for all countries
+13.Get COVID-19 government reported data for a specific country
+14.Get a list of supported countries for government specific data
+15.Get COVID-19 time series data for the entire USA
+16.Get COVID-19 time series data for a county
+17.Get COVID-19 time series data for all available US counties.
+18.Get global accumulated COVID-19 time series data.
+19.Get COVID-19 time series data for all countries and their provinces.
+20.Get COVID-19 time series data for all counties in a specified US state.
+21.Get COVID-19 time series data for a specific country.
+22.Get COVID-19 totals for all countries and their provinces
+23.Get COVID-19 totals for a specific county.
+24.Get COVID-19 totals for all US counties.
+25.Get COVID-19 totals for a specific country
+26.Get COVID-19 totals for all countries.
+27.Get COVID-19 totals for a specific continent.
+28.Get COVID-19 totals for all continents
+29.Get COVID-19 totals for specific US State(s).
+30.Get COVID-19 totals for all US States
 ## Source
 https://disease.sh/docs
