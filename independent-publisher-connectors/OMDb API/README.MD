@@ -34,3 +34,6 @@ Please note while both "i" and "s" are optional at least one argument is require
 
 ## API Documentation
 Visit [OMDb reference page](http://www.omdbapi.com/) for further details.
+
+## Known Issues and Limitations
+No Issues and Limitations yet.
