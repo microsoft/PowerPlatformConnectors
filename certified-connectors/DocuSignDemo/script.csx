@@ -688,7 +688,10 @@ public class Script : ScriptBase
     var notificationContent = "";
     if (content.Contains("DocuSignEnvelopeInformation"))
     {
-      notificationContent = TransformWebhookNotificationBodyDeprecated(content);
+      var doc = new XmlDocument();
+      doc.LoadXml(content);
+      var jsonContent = JsonConvert.SerializeXmlNode(doc);
+      notificationContent = TransformWebhookNotificationBodyDeprecated(jsonContent);
     }
     else
     {
