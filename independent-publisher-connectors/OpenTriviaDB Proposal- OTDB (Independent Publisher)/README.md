@@ -13,7 +13,7 @@ None
 
 ### Get a certain number of trivia questions, based on a criteria
 
-Get a certain amount of questions from the database based on categories such as diffuculty, Question Type and Category. Leaving
+Get a certain amount of questions from the database based on categories such as difficulty, Question Type and Category. Leaving
 these options blank will return a random question
 
 ### Category Lookup
