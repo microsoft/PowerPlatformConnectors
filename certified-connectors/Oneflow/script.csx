@@ -38,7 +38,8 @@ namespace Oneflow.PowerApps.CustomCode
                 [Operations.GetTemplates] = HandleGetTemplates,
                 [Operations.DownloadFile] = HandleFileDownload,
                 [Operations.GetDynamicSchema] = HandleGetDynamicSchema,
-                [Operations.PartyCreate] = HandlePartyCreate
+                [Operations.PartyCreate] = HandlePartyCreate,
+                [Operations.GetTemplateTypeByTemplateId] = HandleGetTemplateTypeByTemplateId
             };
 
             _schemaMappings = new Dictionary<string, string>()
@@ -226,6 +227,30 @@ namespace Oneflow.PowerApps.CustomCode
             }
         }
 
+        private async Task<HttpResponseMessage> HandleGetTemplateTypeByTemplateId(IScriptContext ctx)
+        {
+            var req = ctx.Request;
+            var templateId = GetHeaderStringValue(Constants.TemplateIdHeader, req);
+            if (String.IsNullOrEmpty(templateId)) throw new ScriptException(HttpStatusCode.BadRequest, "template id is a required property.");
+
+            string requestUrl = string.Format(Constants.Requests.TemplatesEndpoint, templateId);
+            var getTemplateRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(requestUrl));
+            CopyHeaders(req, getTemplateRequest);
+
+            var getTemplateResponse = await ctx.SendAsync(getTemplateRequest, CancellationToken);
+            if (!getTemplateResponse.IsSuccessStatusCode) return getTemplateResponse;
+
+            string getTemplateResponseContent = await getTemplateResponse.Content.ReadAsStringAsync();
+            var template = JsonConvert.DeserializeObject<Models.Template>(getTemplateResponseContent);
+            if (template != null && template.template_type == null)
+                throw new ScriptException(HttpStatusCode.BadRequest,
+                    "Selected template is not a part of any template group and doesn't have data fields.");
+
+            var templateTypeId = template.template_type.id;
+            req.RequestUri = new Uri(req.RequestUri.AbsoluteUri.ToString() + templateTypeId);
+            return await ctx.SendAsync(req, CancellationToken);
+        }
+
         private async Task<HttpResponseMessage> CreateParty(HttpRequestMessage initialRequest, string contractId, Models.Party party, IScriptContext ctx)
         {
             StringBuilder debugInfo = new StringBuilder();
@@ -313,7 +338,7 @@ namespace Oneflow.PowerApps.CustomCode
             public const string DownloadFile = "GetAContractFileById";
             public const string GetDynamicSchema = "GetDynamicSchema";
             public const string PartyCreate = "PartyCreate";
-
+            public const string GetTemplateTypeByTemplateId = "GetTemplateByTemplateId";
         }
 
         public static class Constants
@@ -322,6 +347,7 @@ namespace Oneflow.PowerApps.CustomCode
             {
                 public const string PartyEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties";
                 public const string ParticipantEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties/{1}/participants";
+                public const string TemplatesEndpoint = "https://api.oneflow.com/v1/templates/{0}";
             }
             public static class PartyTypes
             {
@@ -330,6 +356,7 @@ namespace Oneflow.PowerApps.CustomCode
                 public const string Ownerside = "ownerside";
             }
             public const string GetTemplatesFilterHeader = "x-oneflow-workspace-id";
+            public const string TemplateIdHeader = "x-oneflow-template-id";
             public const string SchemaIdHeader = "schema_id";
             public const string ParticipantTypeHeader = "participant_type";
             #region dynamic schemas
@@ -637,7 +664,7 @@ namespace Oneflow.PowerApps.CustomCode
 
                 public override bool Equals(object obj)
                 {
-                    return  obj is Party party &&
+                    return obj is Party party &&
                             NullStringComparer.NullEqualsEmptyComparer.Equals(identification_number, party.identification_number) &&
                             NullStringComparer.NullEqualsEmptyComparer.Equals(name, party.name) &&
                             NullStringComparer.NullEqualsEmptyComparer.Equals(type, party.type) &&
@@ -763,7 +790,7 @@ namespace Oneflow.PowerApps.CustomCode
                 {
                     return obj is Participant participant &&
                            EqualityComparer<ParticipantPermissions>.Default.Equals(_permissions, participant._permissions) &&
-                           NullStringComparer.NullEqualsEmptyComparer.Equals(delivery_channel,participant.delivery_channel) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(delivery_channel, participant.delivery_channel) &&
                            NullStringComparer.NullEqualsEmptyComparer.Equals(email, participant.email) &&
                            NullStringComparer.NullEqualsEmptyComparer.Equals(identification_number, participant.identification_number) &&
                            NullStringComparer.NullEqualsEmptyComparer.Equals(name, participant.name) &&
@@ -803,6 +830,19 @@ namespace Oneflow.PowerApps.CustomCode
                         ContractUpdate = updatePermission
                     };
                 }
+            }
+
+            public class Template
+            {
+                public int id { get; set; }
+                public TemplateType template_type { get; set; }
+            }
+
+            public class TemplateType
+            {
+                public string extension_type { get; set; }
+                public string id { get; set; }
+                public string name { get; set; }
             }
         }
 

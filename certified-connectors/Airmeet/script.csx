@@ -54,6 +54,14 @@
       contentAsJson["name"] = "ATTENDEE_JOINED_SESSION";
       contentAsJson["description"] = "Airmeet joined session trigger subscription for MICROSOFT_DYNAMICS";
     }
+    if (triggerMetaInfoId == "trigger.airmeet.questions") {
+      contentAsJson["name"] = "EVENT_QUESTIONS";
+      contentAsJson["description"] = "Questions asked by the attendee during the session";
+    }
+    if (triggerMetaInfoId == "trigger.attendee.booth.joined") {
+      contentAsJson["name"] = "BOOTH_ATTENDEE";
+      contentAsJson["description"] = "Booth Attendance during the event";
+    }
     this.Context.Request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
     this.Context.Request.Content = CreateJsonContent(contentAsJson.ToString());
   }
@@ -63,8 +71,7 @@
       var airmeetAccessKey);
     this.Context.Request.Headers.TryGetValues("x-secret-key", out
       var airmeetSecretKey);
-    using
-    var userInfoRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.airmeet.com/api/v1/auth");
+    var userInfoRequest = new HttpRequestMessage(HttpMethod.Post, "https://api-gateway.airmeet.com/prod/auth");
     userInfoRequest.Headers.TryAddWithoutValidation("X-Airmeet-Access-Key", airmeetAccessKey);
     userInfoRequest.Headers.TryAddWithoutValidation("X-Airmeet-Secret-Key", airmeetSecretKey);
     userInfoRequest.Headers.TryAddWithoutValidation("Content-Type", "application/json");
