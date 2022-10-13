@@ -1,0 +1,142 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "adtInstance": {
+        "type": "string",
+        "uiDefinition": {
+          "displayName": "ADT Instance URL",
+          "description": "The URL where your ADT instance is hosted (must support https).",
+          "tooltip": "Your ADT domain (eg. myadtinstance.api.scus.digitaltwins.azure.net)",
+          "constraints": {
+            "required": "true"
+          }
+        }
+      },
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "aad",
+          "clientId": "<clientId>",
+          "scopes": [],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False",
+            "AzureActiveDirectoryResourceId": "https://digitaltwins.azure.net",
+            "IsOnbehalfofLoginSupported": true
+          },
+          "customParameters": {
+            "loginUri": {
+              "value": "https://login.windows.net"
+            },
+            "tenantId": {
+              "value": "common"
+            },
+            "resourceUri": {
+              "value": "https://digitaltwins.azure.net"
+            },
+            "enableOnbehalfOfLogin": {
+              "value": "false"
+            }
+          }
+        }
+      },
+      "token:TenantId": {
+        "type": "string",
+        "metadata": {
+          "sourceType": "AzureActiveDirectoryTenant"
+        },
+        "uiDefinition": {
+          "constraints": {
+            "required": "false",
+            "hidden": "true"
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#fafafa",
+    "scriptOperations": [
+      "GetTwinById",
+      "AddTwin",
+      "GetComponent",
+      "AddRelationship",
+      "SendTelemetry",
+      "SendComponentTelemetry",
+      "QueryTwins"
+    ],
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "dynamichosturl",
+        "title": "Set Host URL",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('adtInstance')"
+        }
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "UpdateModelsBoolProp"
+          ],
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplateParameter.newPath": "/models/{twinid}"
+          },
+          "templateId": "routerequesttoendpoint",
+          "title": "Redirect Update Model to original API"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "UpdateTwinStringProp",
+            "UpdateTwinBooleanProp",
+            "UpdateTwinDoubleProp"
+          ],
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplateParameter.newPath": "/digitaltwins/{twinid}"
+          },
+          "templateId": "routerequesttoendpoint",
+          "title": "Redirect Update Twin to original API"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "UpdateComponentStringProp",
+            "UpdateComponentBooleanProp",
+            "UpdateComponentDoubleProp"
+          ],
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplateParameter.newPath": "/digitaltwins/{twinid}/components/{componentPath}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "Redirect Update Component to original API"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "UpdateRelationshipStringProp",
+            "UpdateRelationshipBooleanProp",
+            "UpdateRelationshipDoubleProp"
+          ],
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplateParameter.newPath": "/digitaltwins/{twinid}/relationships/{relationshipId}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "Redirect Update Releationship to original API"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "ListIncomingRelationships",
+            "ListRelationships",
+            "ListModels"
+          ],
+          "x-ms-apimTemplateParameter.nextLinkPropertyName": "nextLink"
+        },
+        "templateId": "updatenextlink",
+        "title": "Updates next link to make pagination work"
+      }
+    ],
+    "publisher": "Microsoft Corporation",
+    "stackOwner": "Microsoft Corporation"
+  }
+}
