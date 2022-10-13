@@ -1,4 +1,5 @@
-# USB4SAP: USB4SAP is one single API for any SAP data source to be consumed as a REST or RFC enabled API
+# USB4SAP: 
+USB4SAP is one single API for any SAP data source to be consumed as a REST or RFC enabled API
 
 ## Publisher: Ecoservity
 
