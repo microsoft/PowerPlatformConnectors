@@ -18,7 +18,7 @@ This API uses Basic Authentication
 
 ## Known Issues and Limitations
 REST API supports data limits as specified under REST API protocols
-Large datasets extraction may result in time outs as configured in the REST API systems
+Large datasets extraction may result in timeouts as configured in the REST API systems
 
 
 ## Deployment Instructions
