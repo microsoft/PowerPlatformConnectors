@@ -10,7 +10,7 @@ https://www.axazure.com/en/
 https://firmar.online/
 
 ## Pre-requisites
-To use this connector is necessary to have an account in firmar.online with credits and a premiun license in Power Platform.
+To use this connector is necessary to have an account in firmar.online with credits and a premium license in Power Platform.
 For sandbox instances to test the host should be: https://restapi.firmar.info
 For production instances: https://restapi.firmar.online
 
@@ -18,22 +18,20 @@ You can create a test instance in https://firmar.online/
 
 ## Create your connection
 
-Once you have an account with firmar.online, go to the integration panel and get you API key
+Once you have an account with firmar.online, go to the integration panel and get your API key
 
 ![Icon](./img/integrationAPI.png)
 ![Icon](./img/APIKey.png)
 
 Then go to the connector and create the connexion.
-
-
 ![Icon](./img/Connexion.png)
 
 ## Connector methods
 
 - ### <strong> Send simple document to sign.</strong>
-    Send a document to be signed for one o more recipients.
+    Send a document to be signed for one or more recipients.
 - ### <strong> Send document to sign.</strong>
-    Send multiple document to be signed for one or more recipients
+    Send multiple documents to be signed by one or more recipients.
 - ### <strong> Get envelop details.</strong>
     Get all the information regarding with the envelop including the number of documents.
 - ### <strong> Get evidence signed document.</strong>
