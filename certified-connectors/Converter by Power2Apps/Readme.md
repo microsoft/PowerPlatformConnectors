@@ -12,6 +12,12 @@ Convert CSV data to JSON
 ### Convert JSON to CSV
 Convert JSON To CSV data
 
+### Convert JSON to XML
+Convert JSON To XML
+
+### Convert XML to JSON
+Convert XML To JSON
+
 ### Convert CSV to Excel
 Convert CSV data to Excel file
 
