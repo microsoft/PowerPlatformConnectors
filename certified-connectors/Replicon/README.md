@@ -51,6 +51,21 @@ Rewrite Team Member assignment of a project in Replicon
 ### PutResourceAssignments
 Rewrite Resource Assignment of a task in Replicon
 
+### BulkGetAllProjectTeamMembers2
+Get all Project Team Members of Projects in Replicon
+
+### GetAllProjectTeamMemberDetails3
+Get all Project Team Members of Projects in Replicon
+
+### BulkGetTaskResourceAssignments
+Get Resource Assignments of Task in Replicon
+
+### BulkUpdateProjectTeamMembersAssignment2
+Update Project Team Members of Projects in Replicon
+
+### BulkUpdateTaskResourceAssignments
+Update Resource Assignment of Tasks in Replicon
+
 ## Obtaining Credentials
 To use Replicon connector, you will need an account with Project Administrator access in Replicon. You will be taken to Replicon sign in process to complete connection.
 
