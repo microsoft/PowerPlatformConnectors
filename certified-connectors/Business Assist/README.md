@@ -1,6 +1,6 @@
 
 ## Business Assist Power Connector
-Business Assist APIs is used internally at Microsoft for managing the M365 support scenarios. The APIs are using Machine Learning models which will help in improving the customer experience and provide customer success. It will help to reduce the support cost and provide a better customer success experience with faster turnaround time.
+Business Assist APIs are using Machine Learning models which will help in improving the customer experience and provide customer success. These APIs will help you optimize your customer support that can help you forecast call volumes, analyze customer feedback, and provide self-help support for faster service. You can integrate with any platform they already use, allowing them to create their own technology stack based on both preference and value.  
 
 ## Publisher
 Microsoft Corporation
@@ -20,14 +20,13 @@ APIs used by the connector are secured by Azure Active Directory (AD).
 The connector supports the following operations:
 
 ### Create Forecast
-To process forecast share input historical support case volume data in the JSON format. You need to share the seasonality based on what cadence you want to get forecast results. You can retrieve the forecast output results in the JSON file format.
+Forecast support case volume allows you to confidently forecast future support case volume based on historical data. To process forecast share input historical support case volume data in the JSON format. You need to share the seasonality based on what cadence you want to get forecast results. You can retrieve the forecast output results in the JSON file format.
 
 ### Create Text Analytics
-To process open free text from responses share input verbatim feedback data in the JSON format. You need to have minimum 500 responses to initiate an api call to retrieve the topic clustered with sentiments as an output results in the JSON file format.
+Feedback text analytics allows you to identify key topics and sentiments from large number of free text responses from any customer/employee surveys. Allowing you to understand crucial pain points of your customers and improve the overall experience.
 
 ### Get Self-help Insights
-Empower your support personnel with instant access to Microsoft 365 insights, created by product teams and powered by machine learning, to assist end users in the moment of need.
-
+Increase end user satisfaction and reduce your helpdesk costs by integrating with Microsoft 365 self-help, created by product teams and powered by machine learning. M365 Self-help includes instant answers, walk-through solutions and top web search results. Provide end users with instant resolution to common issues.
 
 ## Build Connection to Business Assist Connector
 
