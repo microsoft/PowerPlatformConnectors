@@ -1,6 +1,6 @@
 
 ## Business Assist Power Connector
-Business Assist APIs are using Machine Learning models which will help in improving the customer experience and provide customer success. These APIs will help you optimize your customer support that can help you forecast call volumes, analyze customer feedback, and provide self-help support for faster service. You can integrate with any platform they already use, allowing them to create their own technology stack based on both preference and value.  
+Business Assist uses Machine Learning models which will help in improving the customer experience and provide customer success. This will help you optimize your customer support that can help you forecast call volumes, analyze customer feedback, and provide self-help support for faster service. You can integrate with any platform they already use, allowing them to create their own technology stack based on both preference and value.  
 
 ## Publisher
 Microsoft Corporation
