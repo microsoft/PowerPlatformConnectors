@@ -1,4 +1,4 @@
-# DeepL
+# DeepLIP
 DeepL Translator is a neural machine translation service.
 
 ## Publisher: Michał Romiszewski
