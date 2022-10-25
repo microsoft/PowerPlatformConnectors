@@ -1,6 +1,6 @@
 ## Maximzier
 
-Maximizer is an integration for Maximier CRM to CRUD Maximizer entries.
+Maximizer is an integration for Maximizer CRM to CRUD Maximizer entries.
 
 ## Prerequisites
 
