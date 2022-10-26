@@ -316,7 +316,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if (verificationType.Equals("Phone Authentication", StringComparison.OrdinalIgnoreCase))
+      if (verificationType.Equals("Phone Call") || verificationType.Equals("SMS"))
       {
         response["schema"]["properties"]["countryCode"] = new JObject 
         {
@@ -329,7 +329,7 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "* Recipient's Phone Number"
         };
       }
-      else if (verificationType.Equals("Access Code", StringComparison.OrdinalIgnoreCase))
+      else if (verificationType.Equals("Access Code"))
       {
         response["schema"]["properties"]["accessCode"] = new JObject
         {
@@ -337,7 +337,7 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "* Access Code"
         };
       }
-      else if (verificationType.Equals("ID Verification", StringComparison.OrdinalIgnoreCase))
+      else if (verificationType.Equals("ID Verification"))
       {
         response["schema"]["properties"]["workflowID"] = new JObject
         {
@@ -1035,7 +1035,7 @@ public class Script : ScriptBase
     var recipient = new JObject();
     var recipientArray = new JArray();
 
-    if (verificationType.Equals("Phone Authentication"))
+    if (verificationType.Equals("Phone Call") || verificationType.Equals("SMS"))
     {
       var phoneAuthentication = new JObject();
       var phoneNumbers = new JArray();
@@ -1049,8 +1049,16 @@ public class Script : ScriptBase
       phoneNumbers.Add(phoneNumber);
 
       phoneAuthentication["senderProvidedNumbers"] = phoneNumbers;
-      recipient["phoneAuthentication"] = phoneAuthentication;
-      recipient["idCheckConfigurationName"] = "Phone Auth $";
+      if (verificationType.Equals("Phone Call"))
+      {
+        recipient["idCheckConfigurationName"] = "Phone Auth $";
+        recipient["phoneAuthentication"] = phoneAuthentication;
+      }
+      else if (verificationType.Equals("SMS"))
+      {
+        recipient["idCheckConfigurationName"] = "SMS Auth $";
+        recipient["smsAuthentication"] = phoneAuthentication;
+      }
     }
     else if (verificationType.Equals("Access Code"))
     {
