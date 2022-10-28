@@ -31,3 +31,7 @@ Get the closest bus stops in Power Platform
 
 ## Known Issues and Limitations
 None, atm. Using the defintion delivered by 'De Lijn' company
+
+##Flow Example
+![image](https://user-images.githubusercontent.com/8872614/198582197-efe246dd-aea0-4359-a9ac-0358f9c2670b.png)
+
