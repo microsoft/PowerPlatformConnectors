@@ -1,11 +1,19 @@
 # De Lijn
 'De Lijn' is the public transport company for busses in Flanders. This is a part of Belgium.
 This service allows you to find a stop/line based on specific terms or location (lat/longitude)
+
+The api that is used is published by 'De Lijn' - I am not the owner of this endpoint and a Power Automate enthousiast.
+Submission containing materials of a third party: 'De lijn' - https://data.delijn.be/
+'This portal is the gateway to the open data sets and webservices of De Lijn. Open Data De Lijn combines freely accessible and usable data on routes, stops, interruptions and timetables.'
+More info on the webpage linked.
+
 ## Publisher: Publisher's Name
 Lenard Schockaert
 
 ## Prerequisites
 Create an account on https://data.delijn.be/ 
+
+
 
 ## Supported Operations
 ### Operation 1 - Zoek haltes(stops)
@@ -32,6 +40,6 @@ Get the closest bus stops in Power Platform
 ## Known Issues and Limitations
 None, atm. Using the defintion delivered by 'De Lijn' company
 
-##Flow Example
+## Flow Example
 ![image](https://user-images.githubusercontent.com/8872614/198582197-efe246dd-aea0-4359-a9ac-0358f9c2670b.png)
 
