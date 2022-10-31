@@ -12,7 +12,6 @@ We provide the expertise, software and services required to underpin student suc
 - Environment such as Live, Test or Development.
 - Region such as APAC or EMEA.
 - Edge Tenant ID as supplied by Tribal.
-- Service Name such as Admissions.
 
 2. On sign in, you must enable the following permissions:
 - Events Connector Endpoint
