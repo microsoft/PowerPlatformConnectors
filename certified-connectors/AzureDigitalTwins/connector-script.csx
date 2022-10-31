@@ -80,10 +80,6 @@
         }
         catch (ConnectorException ex)
         {
-            if (this.Context.OperationId == "TestMyAPIConnection") 
-            {
-                throw ex;
-            }
             var response = new HttpResponseMessage(ex.StatusCode)
             {
                 Content = CreateJsonContent("error: "+ ex.Message)
