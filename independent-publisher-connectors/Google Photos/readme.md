@@ -1,18 +1,12 @@
 # Google Photos
 Integrate smart, easy-to-use photo and video features into your product and reach hundreds of millions of people who choose Google Photos.
 
-<br>
-
 ## Publisher: Julia Muiruri
-
-<br>
 
 ## Prerequisites
 - Google Photos Library Account
 
 - Configure an App/ project. See [instructions](https://developers.google.com/photos/library/guides/get-started#configure-app)
-
-<br>
 
 ## Obtaining Credentials
 - Go to the App you created and login. 
@@ -20,8 +14,6 @@ Integrate smart, easy-to-use photo and video features into your product and reac
 - [Request an OAuth 2.0 Client Id](https://developers.google.com/photos/library/guides/get-started#request-id)
 
 - On the OAuth2 page (Credentials), add the redirect URL.
-
-<br>
 
 ## Supported Operations
 The connector supports the following operations:
@@ -33,4 +25,3 @@ The connector supports the following operations:
 * `List Shared Albums`: List all the albums with sharing enabled
 
 ## Known Issues and Limitations
-TBD
