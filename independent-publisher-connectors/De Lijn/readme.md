@@ -2,13 +2,12 @@
 'De Lijn' is the public transport company for busses in Flanders. This is a part of Belgium.
 This service allows you to find a stop/line based on specific terms or location (lat/longitude)
 
-The api that is used is published by 'De Lijn' - I am not the owner of this endpoint and a Power Automate enthousiast.
+The api that is used is published by 'De Lijn' - I am not the owner of this endpoint and a Power Automate enthusiast.
 Submission containing materials of a third party: 'De lijn' - https://data.delijn.be/
 'This portal is the gateway to the open data sets and webservices of De Lijn. Open Data De Lijn combines freely accessible and usable data on routes, stops, interruptions and timetables.'
 More info on the webpage linked.
 
-## Publisher: Publisher's Name
-Lenard Schockaert
+## Publisher: Lenard Schockaert
 
 ## Prerequisites
 Create an account on https://data.delijn.be/ 
