@@ -1,0 +1,328 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Azure Communication Services SMS",
+    "description": "Connector to send SMS using the phone numbers from Azure Communication Services in your subscription.",
+    "version": "1.0",
+    "x-ms-api-annotation": {
+      "status": "Production"
+    },
+    "contact": {
+      "name": "Microsoft",
+      "email": "acssolutions@microsoft.com",
+      "url": "https://azure.microsoft.com/services/communication-services"
+    }
+  },
+  "host": "api.contoso.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/administration/phonenumbers/phonenumbers": {
+      "get": {
+        "summary": "List the phone numbers",
+        "description": "List the phone numbers in your Azure Communication Services resource.",
+        "operationId": "ListPhoneNumbers",
+        "parameters": [
+          {
+            "name": "locale",
+            "description": "Locale.",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "en-US",
+            "x-ms-visibility": "internal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phoneNumbers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "phoneNumber": {
+                        "type": "string",
+                        "x-ms-summary": "phoneNumber",
+                        "readOnly": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/sms": {
+      "post": {
+        "summary": "Send SMS (deprecated)",
+        "description": "Sends SMS using the phone numbers in your Azure Communication Services (deprecated)",
+        "operationId": "SendSMS",
+        "deprecated": true,
+        "x-ms-api-annotation": {
+          "status": "Preview",
+          "family": "SendSms",
+          "revision": 1
+        },
+        "parameters": [
+          {
+            "name": "api-version",
+            "description": "API version.",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "2020-07-20-preview1",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "x-ms-summary": "From Phone Number",
+                  "type": "string",
+                  "description": "Phone number from your Azure Communication Services",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListPhoneNumbers",
+                    "value-path": "phoneNumber",
+                    "value-collection": "phoneNumbers",
+                    "value-title": "phoneNumber"
+                  },
+                  "x-ms-visibility": "important"
+                },
+                "to": {
+                  "x-ms-summary": "To",
+                  "type": "array",
+                  "description": "Valid phone number +(countryCode)(phoneNumber)",
+                  "items": {
+                    "x-ms-summary": "Phone Number",
+                    "type": "string",
+                    "pattern": "^\\+[1-9]\\d{1,14}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "x-ms-visibility": "important"
+                },
+                "message": {
+                  "x-ms-summary": "Message",
+                  "type": "string",
+                  "description": "Message to be sent",
+                  "minLength": 1,
+                  "x-ms-visibility": "important"
+                },
+                "sendSmsOptions": {
+                  "type": "object",
+                  "properties": {
+                    "enableDeliveryReport": {
+                      "x-ms-summary": "DeliveryReport",
+                      "type": "boolean",
+                      "description": "Delivery receipts are sent over event subscriptions in your Azure Communication Services",
+                      "default": false,
+                      "x-ms-visibility": "important"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageId": {
+                  "type": "string",
+                  "description": "Unique identifier for the message sent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/sms": {
+      "post": {
+        "summary": "Send SMS",
+        "description": "Sends SMS using the phone numbers in your Azure Communication Services",
+        "operationId": "SendSMSv2",
+        "x-ms-api-annotation": {
+          "status": "Production",
+          "family": "SendSms",
+          "revision": 2
+        },
+        "parameters": [
+          {
+            "name": "api-version",
+            "description": "API version.",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "2021-03-07",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "x-ms-summary": "From Phone Number",
+                  "type": "string",
+                  "description": "Phone number from your Azure Communication Services",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListPhoneNumbers",
+                    "value-path": "phoneNumber",
+                    "value-collection": "phoneNumbers",
+                    "value-title": "phoneNumber"
+                  },
+                  "x-ms-visibility": "important"
+                },
+                "smsRecipients":{
+                  "x-ms-summary": "Recipients",
+                  "type": "array",
+                  "description": "Recipient details for sending SMS messages.",
+                  "items":{
+                    "type": "object",
+                    "properties": {
+                      "to": {
+                        "x-ms-summary": "To",
+                        "description": "The recipient's phone number in E.164 format.",
+                        "type": "string"
+                      },
+                      "repeatabilityRequestId": {
+                        "x-ms-summary": "RequestId",
+                        "description": "Repeatability Id to specify idempotency for messages with same Id.",
+                        "type": "string",
+                        "x-ms-visibility": "internal"
+                      },
+                      "repeatabilityFirstSent": {
+                        "x-ms-summary": "FirstSent",
+                        "description": "REQUIRED if RequestId specified. Specifies the date, time when request was first created.",
+                        "type": "string",
+                        "x-ms-visibility": "internal"
+                      }
+                    },
+                    "required": [
+                      "to"
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "x-ms-visibility": "important"
+                },
+                "message": {
+                  "x-ms-summary": "Message",
+                  "type": "string",
+                  "description": "Message to be sent",
+                  "minLength": 1,
+                  "x-ms-visibility": "important"
+                },
+                "smsSendOptions": {
+                  "type": "object",
+                  "properties": {
+                    "enableDeliveryReport": {
+                      "x-ms-summary": "DeliveryReport",
+                      "type": "boolean",
+                      "description": "Delivery receipts are sent over event subscriptions in your Azure Communication Services",
+                      "default": false,
+                      "x-ms-visibility": "important"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "from",
+                "smsRecipients",
+                "message"   
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "accepted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "description": "Response for a single recipient.",
+                    "type": "object",
+                    "properties": {
+                      "to": {
+                        "description": "The recipient's phone number in E.164 format.",
+                        "type": "string"
+                      },
+                      "messageId": {
+                        "description": "The identifier of the outgoing Sms message. Only present if message processed.",
+                        "type": "string"
+                      },
+                      "httpStatusCode": {
+                        "description": "HTTP Status code.",
+                        "type": "integer"
+                      },
+                      "repeatabilityResult": {
+                        "description": "The result of a repeatable request with one of the case-insensitive values accepted or rejected.",
+                        "type": "string",
+                        "enum": [
+                          "accepted",
+                          "rejected"
+                        ]
+                      },
+                      "successful": {
+                        "description": "Indicates if the message is processed successfully or not.",
+                        "type": "boolean"
+                      },
+                      "errorMessage": {
+                        "description": "Optional error message in case of 4xx/5xx/repeatable errors.",
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "ListPhoneNumbers",
+      "parameters": {}
+    }
+  },
+  "securityDefinitions": {
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://azure.microsoft.com/services/communication-services"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://privacy.microsoft.com"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ]
+}
