@@ -42,5 +42,8 @@ Get the closest bus stops in Power Platform
 None, atm. Using the defintion delivered by 'De Lijn' company
 
 ## Flow Example
-![image](https://user-images.githubusercontent.com/8872614/198582197-efe246dd-aea0-4359-a9ac-0358f9c2670b.png)
+![image](https://user-images.githubusercontent.com/8872614/199251422-d9c8e533-3e07-4534-ad2b-238f08a88fcd.png)
+![image](https://user-images.githubusercontent.com/8872614/199251449-aa06a034-a01e-412e-afa7-53fd5179b740.png)
+![image](https://user-images.githubusercontent.com/8872614/199251471-4d31d356-d0b7-4b34-ac6c-026c18cfe532.png)
+
 
