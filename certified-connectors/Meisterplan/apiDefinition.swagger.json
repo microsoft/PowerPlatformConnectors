@@ -38,6 +38,14 @@
       "description": "Operations on Financials"
     },
     {
+      "name": "Me",
+      "description": "Connected user details."
+    },
+    {
+      "name": "Metadata",
+      "description": "Metadata queries"
+    },
+    {
       "name": "Milestone Dependencies",
       "description": "Operations on Milestones"
     },
@@ -540,6 +548,144 @@
             "description": "Too Many Requests"
           }
         }
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Me",
+        "description": "Returns information about the connected user.",
+        "operationId": "GetMe",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/MeResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/v1/meta/obs/dynamicSchema": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "OBS Dynamic Schema",
+        "description": "Returns swagger schema for OBS units.",
+        "operationId": "GetObsDynamicSchema",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "mode",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "CREATE_INPUT",
+              "OUTPUT",
+              "UPDATE_INPUT"
+            ],
+            "x-ms-summary": "Mode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SchemaResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/v1/meta/project/dynamicSchema": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Project Dynamic Schema",
+        "description": "Returns swagger schema for project entity.",
+        "operationId": "GetProjectDynamicSchema",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "mode",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "CREATE_INPUT",
+              "OUTPUT",
+              "UPDATE_INPUT"
+            ],
+            "x-ms-summary": "Mode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SchemaResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
       }
     },
     "/v1/obsTypes": {
@@ -4274,7 +4420,9 @@
           "example": [
             {
               "bookingDate": "2019-01-31",
-              "hours": 5.5
+              "hours": 5.5,
+              "costPerHour": 12.5,
+              "costType": "CAPEX"
             }
           ],
           "items": {
@@ -4321,6 +4469,21 @@
           "description": "Booking date of this actual time worked entry",
           "x-ms-summary": "Booking Date"
         },
+        "costPerHour": {
+          "type": "number",
+          "format": "double",
+          "example": 12.5,
+          "x-ms-summary": "Cost Per Hour"
+        },
+        "costType": {
+          "type": "string",
+          "example": "CAPEX",
+          "enum": [
+            "CAPEX",
+            "OPEX"
+          ],
+          "x-ms-summary": "Cost Type"
+        },
         "hours": {
           "type": "number",
           "format": "double",
@@ -4342,8 +4505,10 @@
         },
         "type": {
           "type": "string",
+          "example": "RESOURCE",
           "description": "The entity type for this actual time worked entry",
           "enum": [
+            "RESOLVE_BY_KEY_OR_NAME",
             "RESOURCE",
             "ROLE"
           ],
@@ -4468,7 +4633,14 @@
           "$ref": "#/definitions/StatusFieldResponse"
         }
       },
-      "title": "AllProjectsResponse"
+      "title": "AllProjectsResponse",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetProjectDynamicSchema",
+        "parameters": {
+          "mode": "OUTPUT"
+        },
+        "value-path": "schema"
+      }
     },
     "AllocatedEntity": {
       "type": "object",
@@ -4706,13 +4878,14 @@
         "id": {
           "type": "string",
           "example": "UUID",
-          "description": "The id of the entity to which this actual time worked entry is linked",
+          "description": "The id of the entity to which this actual time worked entry is linked. Set type to RESOLVE_BY_KEY_OR_NAME to resolve resource keys or role names automatically instead.",
           "x-ms-summary": "Id"
         },
         "type": {
           "type": "string",
           "example": "RESOURCE",
           "enum": [
+            "RESOLVE_BY_KEY_OR_NAME",
             "RESOURCE",
             "ROLE"
           ],
@@ -4731,11 +4904,28 @@
           "description": "Date of this booking",
           "x-ms-summary": "Booking Date"
         },
+        "costPerHour": {
+          "type": "number",
+          "format": "double",
+          "example": 12.5,
+          "description": "(BETA)",
+          "x-ms-summary": "Cost Per Hour"
+        },
+        "costType": {
+          "type": "string",
+          "example": "CAPEX",
+          "description": "(BETA) default: see Meisterplan documentation.",
+          "enum": [
+            "CAPEX",
+            "OPEX"
+          ],
+          "x-ms-summary": "Cost Type"
+        },
         "hours": {
           "type": "number",
           "format": "double",
           "example": 5.5,
-          "description": "Value in hours",
+          "description": "Actual time worked in hours",
           "x-ms-summary": "Hours"
         }
       },
@@ -5088,6 +5278,31 @@
       },
       "title": "CustomFieldValueType",
       "description": "Missing lookup values created automatically\n\nIf you create or update a project with a custom lookup field, unknown lookup values will be automatically created."
+    },
+    "DynamicSchemaPropertiesResponse": {
+      "type": "object",
+      "title": "DynamicSchemaPropertiesResponse"
+    },
+    "DynamicSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "$ref": "#/definitions/DynamicSchemaPropertiesResponse",
+          "x-ms-summary": "Type"
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Required"
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type"
+        }
+      },
+      "title": "DynamicSchemaResponse"
     },
     "EmploymentPeriod": {
       "type": "object",
@@ -5529,6 +5744,18 @@
         }
       },
       "title": "Manager"
+    },
+    "MeResponse": {
+      "type": "object",
+      "properties": {
+        "databaseName": {
+          "type": "string"
+        },
+        "userName": {
+          "type": "string"
+        }
+      },
+      "title": "MeResponse"
     },
     "Milestone": {
       "type": "object",
@@ -5978,6 +6205,55 @@
       },
       "title": "PrimaryRole"
     },
+    "PrimaryRoleResponse": {
+      "type": "object",
+      "properties": {
+        "costPerHour": {
+          "type": "number",
+          "format": "double",
+          "example": 12.5,
+          "x-ms-summary": "Cost Per Hour"
+        },
+        "costType": {
+          "type": "string",
+          "enum": [
+            "CAPEX",
+            "OPEX"
+          ],
+          "x-ms-summary": "Cost Type"
+        },
+        "externalId": {
+          "type": "string",
+          "example": "myCustomID",
+          "x-ms-summary": "External Id"
+        },
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "Id"
+        },
+        "name": {
+          "type": "string",
+          "example": "Junior Developer",
+          "x-ms-summary": "Name"
+        },
+        "obsUnits": {
+          "type": "object",
+          "example": {
+            "Department": {
+              "id": "UUID",
+              "path": "Services/Consulting/IT",
+              "displayName": "Services > Consulting > IT"
+            }
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/ObsUnitReferenceResponse"
+          },
+          "x-ms-summary": "OBS Units"
+        }
+      },
+      "title": "PrimaryRoleResponse"
+    },
     "Priorities": {
       "type": "object",
       "properties": {
@@ -6220,7 +6496,14 @@
           "$ref": "#/definitions/Status"
         }
       },
-      "title": "ProjectCreateRequest"
+      "title": "ProjectCreateRequest",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetProjectDynamicSchema",
+        "parameters": {
+          "mode": "CREATE_INPUT"
+        },
+        "value-path": "schema"
+      }
     },
     "ProjectManagerResponse": {
       "type": "object",
@@ -6349,7 +6632,14 @@
           "$ref": "#/definitions/StatusFieldResponse"
         }
       },
-      "title": "ProjectResponse"
+      "title": "ProjectResponse",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetProjectDynamicSchema",
+        "parameters": {
+          "mode": "OUTPUT"
+        },
+        "value-path": "schema"
+      }
     },
     "ProjectUpdateRequest": {
       "type": "object",
@@ -6443,7 +6733,14 @@
           "$ref": "#/definitions/Status"
         }
       },
-      "title": "ProjectUpdateRequest"
+      "title": "ProjectUpdateRequest",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetProjectDynamicSchema",
+        "parameters": {
+          "mode": "UPDATE_INPUT"
+        },
+        "value-path": "schema"
+      }
     },
     "RankCategory": {
       "type": "object",
@@ -6557,7 +6854,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/ObsUnitReferenceRequest"
           },
-          "x-ms-summary": "OBS Units"
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "CREATE_INPUT"
+            },
+            "value-path": "schema"
+          }
         },
         "postalAddress": {
           "$ref": "#/definitions/PostalAddress"
@@ -6590,7 +6893,8 @@
       "type": "object",
       "properties": {
         "calendar": {
-          "$ref": "#/definitions/ResourceCalendarResponse"
+          "$ref": "#/definitions/ResourceCalendarResponse",
+          "x-ms-summary": "Calendar"
         },
         "costPerHour": {
           "type": "number",
@@ -6642,13 +6946,20 @@
           "additionalProperties": {
             "$ref": "#/definitions/ObsUnitReferenceResponse"
           },
-          "x-ms-summary": "OBS Units"
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "OUTPUT"
+            },
+            "value-path": "schema"
+          }
         },
         "postalAddress": {
           "$ref": "#/definitions/PostalAddressResponse"
         },
         "primaryRole": {
-          "$ref": "#/definitions/RoleResponse"
+          "$ref": "#/definitions/PrimaryRoleResponse",
+          "x-ms-summary": "Primary Role"
         },
         "resourceKey": {
           "type": "string",
@@ -6719,7 +7030,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/ObsUnitReferenceRequest"
           },
-          "x-ms-summary": "OBS Units"
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "UPDATE_INPUT"
+            },
+            "value-path": "schema"
+          }
         },
         "postalAddress": {
           "$ref": "#/definitions/PostalAddress"
@@ -6837,7 +7154,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/ObsUnitReferenceRequest"
           },
-          "x-ms-summary": "OBS Units"
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "CREATE_INPUT"
+            },
+            "value-path": "schema"
+          }
         }
       },
       "title": "RoleCreateRequest"
@@ -6886,7 +7209,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/ObsUnitReferenceResponse"
           },
-          "x-ms-summary": "OBS Units"
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "OUTPUT"
+            },
+            "value-path": "schema"
+          }
         }
       },
       "title": "RoleResponse"
@@ -6931,7 +7260,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/ObsUnitReferenceRequest"
           },
-          "x-ms-summary": "OBS Units"
+          "x-ms-dynamic-schema": {
+            "operationId": "GetObsDynamicSchema",
+            "parameters": {
+              "mode": "UPDATE_INPUT"
+            },
+            "value-path": "schema"
+          }
         }
       },
       "title": "RoleUpdateRequest"
@@ -6969,6 +7304,16 @@
         }
       },
       "title": "ScenarioResponse"
+    },
+    "SchemaResponse": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "$ref": "#/definitions/DynamicSchemaResponse",
+          "x-ms-summary": "Swagger Schema Definition"
+        }
+      },
+      "title": "SchemaResponse"
     },
     "SetDefaultCalendarRequest": {
       "type": "object",
@@ -7161,6 +7506,11 @@
         }
       },
       "title": "WorkingHoursResponse"
+    }
+  },
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetMe"
     }
   },
   "x-ms-connector-metadata": [
