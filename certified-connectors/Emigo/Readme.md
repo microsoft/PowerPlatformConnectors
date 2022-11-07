@@ -1,5 +1,5 @@
 #Title
-It will enable the achievement of goals set for the sales force. It will ensure effective activities in shops, pharmacies or with medical staff. Connector Emigo will be increase the effectiveness of sales teams in their daily activities.
+It will enable the achievement of goals set for the sales force. It will ensure effective activities in shops, pharmacies or with medical staff. Connector Emigo will increase the effectiveness of sales teams in their daily activities.
 Publisher: Sagra Technology LLC
 
 ## Prerequisites
