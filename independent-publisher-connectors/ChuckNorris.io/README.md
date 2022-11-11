@@ -6,7 +6,7 @@ Chuck Norris facts have spread around the world, leading not only to translated 
 
 [chucknorris.io](https://chucknorris.io) is a free JSON API for hand curated Chuck Norris facts.
 
-## Publisher: Daniel Laskewitz | Sogeti
+## Publisher: Daniel Laskewitz
 
 ## Prerequisites
 
