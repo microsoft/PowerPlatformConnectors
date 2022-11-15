@@ -21,7 +21,8 @@ One can be obtained by signing up to a paid plan or by activating a trial subscr
 - `Flatten Object Array` - Flatten an array of complex, multi-level objects into an array of single level JSON objects.  
 - `Get Data Schema` - Get the schema (i.e. properties and their associated types) from an array of objects.  
 - `Join` - Join exactly two datasets using a left or inner join technique.  
-- `JSON to Text` - Transform a JSON array of objects into a tab delimited text format.  
+- `JSON to Table` - Transform a JSON structure into a tabluar format.
+- `JSON to Text` - Transform a JSON array of objects into a tab delimited text format.
 - `JSON to CSV` - Transform a JSON array of objects into a comma separated table format.  
 - `Parquet to JSON` - Transform a base64 encoded parquet dataset into an array of JSON objects.  
 - `Regex Matches` - Produce a set of matches for a string using a regular expression pattern.  

@@ -1,8 +1,30 @@
-public class Script : ScriptBase
+﻿public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
         try{
+            if (this.Context.OperationId == "ListRelationships" || this.Context.OperationId == "ListIncomingRelationships" || this.Context.OperationId == "ListModels"){
+                var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+                uriBuilder.Query = uriBuilder.Query.ToString().Replace("%25", "%");
+                this.Context.Request.RequestUri = uriBuilder.Uri;
+                HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken)
+                .ConfigureAwait(continueOnCapturedContext: false);
+                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var result = JObject.Parse(responseString);
+                if(response.IsSuccessStatusCode){
+                    var _newResult = new JObject
+                    {
+                        ["value"] = result["value"],
+                        ["nextLink"] = result["nextLink"],
+                        ["continuationToken"] = GetContinuationToken(result["nextLink"].ToString())
+                    }; 
+                    response.Content = CreateJsonContent(_newResult.ToString());
+                    return response;
+                }else{
+                    response.Content = CreateJsonContent(responseString);
+                    return response;
+                }
+            }
             if (this.Context.Request.Method == HttpMethod.Get){
                 HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
                 var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -60,11 +82,18 @@ public class Script : ScriptBase
         {
             var response = new HttpResponseMessage(ex.StatusCode)
             {
-                Content = CreateJsonContent("errorr: "+ ex.Message)
+                Content = CreateJsonContent("error: "+ ex.Message)
             };
             return response;
         }
     }
+
+    string GetContinuationToken(string nextLink)
+    {   
+        if(nextLink == "") return nextLink;
+        return nextLink.Split(new string[]{"continuationToken=", "&api-version"}, 3, StringSplitOptions.None)[1];
+    }
+
     public class ConnectorException : Exception
     {
         public ConnectorException(
