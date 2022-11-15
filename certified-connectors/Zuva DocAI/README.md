@@ -56,6 +56,12 @@ Find out what fields are available to you.
 
 - `Get Field List`: Return a list of all available fields (both built-in and custom).
 
+### Normalization
+
+Normalize a string of text to a standard format.
+
+- `Normalize Dates`: Convert dates found in text to an integer representation (e.g. year/month/day).
+
 ## Obtaining Credentials
 
 Zuva DocAI has multiple regional servers. You will need to create an API token for the
