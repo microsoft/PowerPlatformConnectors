@@ -41,6 +41,13 @@
         {
             response = await returnSingle(response).ConfigureAwait(continueOnCapturedContext: false);
         }
+
+        // Coalesce null to empty array when there are no extractions
+        if (this.Context.OperationId == "GetFieldExtractionRequestResults")
+        {
+            response = await coalesceNullExtractions(response).ConfigureAwait(continueOnCapturedContext: false);
+        }
+
         return response;
     }
 
@@ -89,7 +96,6 @@
     /// </code>
     /// </example>
     /// </summary>
-    /// </summary>
     private async Task<HttpResponseMessage> returnSingle(HttpResponseMessage response) {
         // Do the transformation if the response was successful, otherwise return error responses as-is
         if (response.IsSuccessStatusCode)
@@ -123,5 +129,28 @@
         request["file_ids"] = new JArray(request["file_id"].ToString());
 
         this.Context.Request.Content = new StringContent(request.ToString());
+    }
+
+    /// <summary>
+    /// This method coalesces the value of `extractions` from `null` to `[]`.
+    /// </summary>
+    private async Task<HttpResponseMessage> coalesceNullExtractions(HttpResponseMessage response) {
+        // Do the transformation if the response was successful, otherwise return error responses as-is
+        if (response.IsSuccessStatusCode)
+        {
+            var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+            var responseJson = JToken.Parse(responseString);
+            var results = responseJson["results"];
+            foreach (var res in results)
+            {
+                var token = res["extractions"];
+                if (token == null || token.Type == JTokenType.Null) {
+                        res["extractions"] = JToken.Parse("[]");
+                };
+            }
+
+            response.Content = CreateJsonContent(responseJson.ToString());
+        }
+        return response;
     }
 }
