@@ -54,7 +54,7 @@ as images of the document.
 
 Find out what fields are available to you.
 
-- `Get All Fields`: Return a list of all available fields (both built-in and custom).
+- `Get Field List`: Return a list of all available fields (both built-in and custom).
 
 ## Obtaining Credentials
 
