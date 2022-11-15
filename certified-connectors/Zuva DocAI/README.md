@@ -40,6 +40,13 @@ Categorize your document: is it a contract and, if so, what type of contract (re
 - `Create Document Classification Request`: Initiate asynchronous classification of the document type.
 - `Get Document Classification Request Status`: Get status and results of document classification.
 
+### Multi-level Classification
+
+Categorize your document's type using a multi-level classifier (e.g. ["Contract", "Real Estate Agt", "Real Estate Lease"]`).
+
+- `Create Multi-Level Classification Request`: Initiate asynchronous classification of the document.
+- `Get Multi-Level Classification Request Status`: Get status and results of multi-level classification.
+
 ### Optical Character Recognition (OCR)
 
 Obtain the text of your documents, regardless of their original file type (pdf, docx, png ...), as well
