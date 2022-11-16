@@ -647,7 +647,7 @@
     },
     "/language": {
       "post": {
-        "summary": "Create a Language Classification Request",
+        "summary": "Create Language Classification Request",
         "description": "Create a request for the language of the specified file.",
         "operationId": "CreateLanguageClassificationRequest",
         "consumes": ["application/json"],
@@ -738,6 +738,167 @@
           }
         }
       }
+    },
+    "/mlc": {
+      "post": {
+        "summary": "Create Multi-Level Classification Request",
+        "description": "Create a request for multi-level classification of the specified file.",
+        "operationId": "CreateMlcRequest",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/FileIdBody"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "MLC Request ID",
+                  "description": "ID to use to obtain status and results of this request.",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "status": {
+                  "x-ms-visibility": "internal",
+                  "type": "string",
+                  "description": "status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mlc/{request_id}": {
+      "get": {
+        "summary": "Get MLC request Status",
+        "description": "Get status and available results for an existing MLC request.",
+        "operationId": "GetMlcRequestStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "type": "string",
+            "required": true,
+            "description": "Request ID of the MLC request, as returned by CreateMlcRequest.",
+            "x-ms-summary": "Request ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "x-ms-summary": "MLC Request Status",
+                  "description": "Status of the request (one of 'queued', 'processing', 'complete' or 'failed').",
+                  "type": "string"
+                },
+                "is_finished": {
+                  "x-ms-summary": "Is Finished?",
+                  "description": "Boolean indicating whether the request has reached a terminal state (complete or failed).",
+                  "type": "boolean"
+                },
+                "classifications": {
+                  "x-ms-summary": "Classifications",
+                  "description": "The hierarchical classifications of the document.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/normalize/date": {
+      "post": {
+        "summary": "Normalize dates",
+        "description": "Normalize a string containing one or more dates. For each date found, the endpoint returns a set of integers representing the year, month and day.",
+        "operationId": "NormalizeDates",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/TextBody"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request",
+                  "type": "string"
+                },
+                "text": {
+                  "x-ms-summary": "text",
+                  "description": "The original text that was provided.",
+                  "type": "string"
+                },
+                "sha-256": {
+                  "type": "string",
+                  "description": "SHA-256 hash of the original text."
+                },
+                "date": {
+                  "type": "array",
+                  "description": "date",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "day": {
+                        "x-ms-summary": "Day",
+                        "description": "The day of the month as an integer.",
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "month": {
+                        "x-ms-summary": "Month",
+                        "description": "The month represented as an integer between 1 and 12.",
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "year": {
+                        "x-ms-summary": "Year",
+                        "description": "The year represented as an integer.",
+                        "type": "integer",
+                        "format": "int32"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {},
@@ -772,6 +933,23 @@
           "file_id": {
             "x-ms-summary": "File ID",
             "description": "The unique identifier for the file, as returned by the SubmitFile operation.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TextBody": {
+      "name": "text_body",
+      "in": "body",
+      "x-ms-summary": "Text",
+      "description": "A JSON request body containing the text to normalize.",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "x-ms-summary": "Text",
+            "description": "The text string to normalize.",
             "type": "string"
           }
         }
