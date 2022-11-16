@@ -21,7 +21,7 @@ You can follow the steps below:
 	 - For OAuth client name, use a unique name that identifies the application that you require OAuth access for. 
 	 - For Grant type check Refresh token and Authorization code
 	 - In Redirect URI's please add "https://global.consent.azure-apim.net/redirect"
-	 - Add the following scopes: `contacts:read agents-bulk:write callback:write notifications:write industries-activity:write users:read presence-user:read account-custom-status:read ccaas-user-status:write webhooks-trigger:write webhooks-schema:read account:read presence-account:read`
+	 - Add the following scopes: `contacts:read agents-bulk:write callback:write notifications:write industries-activity:write users:read account-custom-status:read ccaas-user-status:write ccaas-user-status:read webhooks-trigger:write webhooks-schema:read account:read`
 	 - Client Id and Client Secret will be automatically generated when you click the Save button
 	 - Save this `Client ID` to be used in apiProperties.json file in later steps and save this `Client Secret` to use it in later steps while deploying the connector.
 
@@ -51,9 +51,8 @@ The connector supports the following actions:
 * `Get user by email`: Get user by email from Talkdesk
 * `Get account configured custom status used by agents`: Get account configured custom status used by agents in Talkdesk
 * `Get user presence`: Get user presence in Talkdesk
-* `Update user status`: Update user status in Talkdesk. This action has to be used after the SubscribePresenceForAllUsers action
+* `Update user status`: Update user status in Talkdesk.
 * `Unsubscribe webhook`: Unsubscribe webhook when trigger is deleted
-* `Suscribe presence for all users`: Subscribe to the presence of all users from the authenticated account. This actions has to be used before UpdateUserStatus action
 
 ## Supported Triggers
 The connector supports the following triggers:
