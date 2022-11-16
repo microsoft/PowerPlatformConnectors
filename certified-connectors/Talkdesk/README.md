@@ -50,7 +50,7 @@ The connector supports the following actions:
 * `Create a workspace notification`: Create a new workspace notification in Talkdesk
 * `Get user by email`: Get user by email from Talkdesk
 * `Get account configured custom status used by agents`: Get account configured custom status used by agents in Talkdesk
-* `Get user presence`: Get user presence in Talkdesk
+* `Get user status`: Get user status in Talkdesk
 * `Update user status`: Update user status in Talkdesk.
 * `Unsubscribe webhook`: Unsubscribe webhook when trigger is deleted
 
