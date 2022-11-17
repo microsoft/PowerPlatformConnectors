@@ -20,7 +20,7 @@ The connector supports the following operations:
 
 ## Obtaining Credentials
 
-You will need to generate an OAuth 2.0 client ID and secret for authentication. You will need to setup your OAuth Consent Screen before creating the credentials. More information about the setup is located here.
+You will need to generate an OAuth 2.0 client ID and secret for authentication. You will need to setup your OAuth Consent Screen before creating the credentials. More information about the setup is located here. [Using OAuth 2.0 to Access Google APIs](https://developers.google.com/identity/protocols/oauth2) 
 
 ## Known issues and limitations
 
@@ -28,4 +28,4 @@ There are no known issues and limitations.
 
 ## Deployment Instructions
 
-Use the connector and choose no authentication as the authentication type.
+Use the connector and choose OAuth 2.0 authentication as the authentication type.
