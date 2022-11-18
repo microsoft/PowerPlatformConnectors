@@ -2,7 +2,7 @@
 
 Reddit is a social news aggregation, content rating, and discussion website. Registered users submit content to the site such as links, text posts, images, and videos, which are then voted up or down by other members.
 
-## Publisher: Appie Schot | Blis & Daniel Laskewitz | Microsoft
+## Publishers: Albert-Jan Schot | Blis Digital & Daniel Laskewitz | Microsoft
 
 ## Prerequisites
 
