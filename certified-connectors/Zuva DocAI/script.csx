@@ -7,6 +7,7 @@
             {
              "GetDocumentClassificationRequestStatus",
              "GetFieldExtractionRequestStatus",
+             "GetMlcRequestStatus",
              "GetLanguageClassificationRequestStatus",
              "GetOcrRequestStatus"
             };
@@ -16,6 +17,7 @@
             {
              "CreateFieldExtractionRequest",
              "CreateDocumentClassificationRequest",
+             "CreateMlcRequest",
              "CreateLanguageClassificationRequest",
              "CreateOcrRequest"
             };
