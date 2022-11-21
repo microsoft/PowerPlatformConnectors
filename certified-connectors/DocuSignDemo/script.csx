@@ -251,6 +251,23 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForBuildNumberSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      response["schema"]["properties"]["Build Number"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "DS1001"
+      };
+    }
+
     if (operationId.Equals("StaticResponseForEmbeddedSigningSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
