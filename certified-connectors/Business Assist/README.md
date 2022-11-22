@@ -16,6 +16,14 @@ APIs used by the connector are secured by Azure Active Directory (AD).
 * Register your application using [Azure Portal](https://portal.azure.com), by following the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).
 * Create a new user and set the password.
 
+## Create service principal for Business Assist
+Make a POST call to MS Graph API with Business Assist app Id (2b8844d8-6c87-4fce-97a0-fbec9006e140) as a payload to create service principal.
+POST https://graph.microsoft.com/v1.0/servicePrincipals
+Content-type: application/json
+{
+  "appId": "2b8844d8-6c87-4fce-97a0-fbec9006e140"
+}
+
 ## Supported Operations
 The connector supports the following operations:
 
@@ -55,6 +63,3 @@ The BA API Power Connector supports the following operations:
 * `Get Text Analytics Status`: Check on the status of a previously submitted text analysis job
 * `Get Text Analytics Result`: Retrieve the result of a completed text analysis job
 * `Create Self-Help Query`: Type query related to M365 product, and you will get the insights on how you can troubleshoot the issue and web search article links to learn more on how to address the issue.
-
-
-
