@@ -1,4 +1,4 @@
-# Title
+# BulkSMS
 Required. One paragraph, two to three sentences about the service and the connector​.
 
 ## Publisher: Publisher's Name
