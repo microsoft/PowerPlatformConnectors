@@ -1,8 +1,8 @@
 # BulkSMS
-Required. One paragraph, two to three sentences about the service and the connector​.
+SMS enable your workflows and automations with the Power Automate Connector for BulkSMS.
 
 ## Publisher: Publisher's Name
-Required. It should be the company or organization name. ​
+BulkSMS.com ​
 
 ## Prerequisites
 Required. Any plans or licenses, tools required from the connector.​
