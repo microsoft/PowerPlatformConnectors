@@ -1,8 +1,7 @@
-# Title
+# Impower
 Impower is an ERP system for property managers. This connector provides access to the Open API of Impower to send information to the ERP system as well as get information from the ERP​.
 
-## Publisher: Publisher's Name
-Impower GmbH ​
+## Publisher: Impower GmbH ​
 
 ## Prerequisites
 A license to Impower is required to use this connector. For details please visit www.impower.de​
