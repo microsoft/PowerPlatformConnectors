@@ -1,6 +1,6 @@
 # Axiom Browser Automation Connector
 
-The Axiom Browser Automation connector, lets you connect power automate with axiom.ai to trigger axiom bots. 
+The Axiom Browser Automation connector lets you connect power automate with axiom.ai to trigger axiom bots. 
 
 ## Pre-requisites
 
