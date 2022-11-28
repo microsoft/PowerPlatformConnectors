@@ -15,4 +15,6 @@ You will need the following to proceed:</br>
 
 ### Documentation
 
-For more information on how 
+For more guidelines and best-practices on integrating axiom with other services, please see:
+
+https://axiom.ai/docs/webhook-api-documentation.html
