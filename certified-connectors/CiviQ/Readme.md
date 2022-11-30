@@ -14,6 +14,7 @@ CiviQ API is part of the corporate data set and requires a corporate data set AP
 ## Pre-Requisites
 The access to the backend API is protected through an authorization key (api_key), and it's used to integrate data from diferent data model 
 objects (Consultations, Submissions, Surveys, etc...)
+API key could be taken from API configuration page (admin/config/civiq/api)
 
 
 ### Deploying the Connector
