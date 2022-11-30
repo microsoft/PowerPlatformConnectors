@@ -1,5 +1,5 @@
-# Lnk.Bio Connector
-This is a connector for Lnk.Bio. Lnk.Bio is a link-in-bio and website builder web tool and mobile app favoured by 600,000 creators. 
+# Lnk.Bio
+This is a connector for Lnk.Bio. Lnk.Bio is a link-in-bio and website builder web tool and mobile app favored by 600,000 creators. 
 With this connector, you can automate your Lnk.Bio Lnks creation, streamlining your workflow.
 
 ## Publisher: Lnk.Bio
