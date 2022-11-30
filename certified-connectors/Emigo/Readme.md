@@ -1,6 +1,7 @@
-#Title
+#Emigo 
 It will enable the achievement of goals set for the sales force. It will ensure effective activities in shops, pharmacies or with medical staff. Connector Emigo will increase the effectiveness of sales teams in their daily activities.
-Publisher: Sagra Technology LLC
+
+##Publisher: Sagra Technology LLC
 
 ## Prerequisites
 To use the Emigo trigger integration, you must be enabled in your Emigo account. 
@@ -42,7 +43,3 @@ Do you have a support email to contact in case of issues?
 Contact this email address in case of issues with the Emigo Connector: 
 Email: emigo@sagratechnology.com
 Website: https://sagratechnology.com
-
-
-
-
