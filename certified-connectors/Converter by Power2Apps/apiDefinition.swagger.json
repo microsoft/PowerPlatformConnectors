@@ -36,7 +36,16 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "FileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "x-ms-visibility": "important",
+                  "x-ms-summary": "File content",
+                  "description": "Content of the Excel file"
+                }
+              }
             }
           }
         },
@@ -70,7 +79,9 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "x-ms-summary": "JSON result",
+              "description": "Result in JSON"
             }
           }
         },
@@ -104,7 +115,9 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "x-ms-summary": "CSV result",
+              "description": "Result in CSV"
             }
           }
         },
@@ -123,6 +136,66 @@
           }
         ],
         "description": "Convert JSON to CSV data",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/ConvertJsonToXml": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string",
+              "x-ms-summary": "XML result",
+              "description": "Result in XML"
+            }
+          }
+        },
+        "summary": "Convert JSON to XML",
+        "operationId": "ConvertJsonToXml",
+        "parameters": [
+          {
+            "name": "JSON",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-ms-visibility": "important"
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "description": "Convert JSON to XML",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/ConvertXmlToJson": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string",
+              "x-ms-summary": "JSON result",
+              "description": "Result in JSON"
+            }
+          }
+        },
+        "summary": "Convert XML to JSON",
+        "operationId": "ConvertXmlToJson",
+        "parameters": [
+          {
+            "name": "XML",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-ms-visibility": "important"
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "description": "Convert XML to JSON",
         "x-ms-visibility": "important"
       }
     },
@@ -163,7 +236,7 @@
             "type": "string",
             "default": "application/json",
             "x-ms-visibility": "internal",
-            "description": "SharePoint JSON result",
+            "description": "SharePoint Json result",
             "x-ms-summary": "SP result"
           },
           {
@@ -202,8 +275,8 @@
             }
           }
         },
-        "summary": "Extract Word (docx) bookmarks",
-        "description": "Extract all Word (docx) bookmarks",
+        "summary": "Extract Word (DOCX) bookmarks to a list",
+        "description": "Extract all Word (docx) bookmarks to a list",
         "operationId": "ExtractWordBookmarks",
         "parameters": [
           {
@@ -224,10 +297,114 @@
         ],
         "x-ms-visibility": "important"
       }
+    },
+    "/GetFileExtensions": {
+      "get": {
+        "summary": "(private) Get list of domains",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "format": "int32",
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": "array"
+            },
+            "description": "List of file extensions"
+          }
+        },
+        "x-ms-visibility": "internal",
+        "operationId": "GetFileExtensions",
+        "description": "Returns supported file extensions"
+      }
+    },
+    "/ConvertFileToPdf": {
+      "post": {
+        "summary": "Convert file (DOCX, PPTX, XLSX, HTML, ...) to PDF",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "FileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "x-ms-visibility": "important",
+                  "x-ms-summary": "File content",
+                  "description": "Content of the PDF file"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/parameters/fileType"
+          },
+          {
+            "$ref": "#/parameters/fileName"
+          },
+          {
+            "name": "File",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "File": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "Insert file content"
+                }
+              }
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "operationId": "ConvertFileToPdf",
+        "description": "Convert a document (Word, Powerpoint, Excel, ..) to a PDF-File",
+        "x-ms-visibility": "important"
+      }
     }
   },
   "definitions": {},
-  "parameters": {},
+  "parameters": {
+    "fileName": {
+      "x-ms-summary": "File  name",
+      "required": false,
+      "in": "header",
+      "name": "FileName",
+      "description": "Use only if 'Extract from File name' is selected in File extension",
+      "x-ms-visibility": "important",
+      "type": "string"
+    },
+    "fileType": {
+      "x-ms-summary": "File extension",
+      "x-ms-dynamic-values": {
+        "operationId": "GetFileExtensions",
+        "value-path": "name",
+        "value-title": "name"
+      },
+      "required": true,
+      "in": "header",
+      "name": "FileExtension",
+      "description": "Select file extension",
+      "x-ms-visibility": "important",
+      "type": "string"
+    }
+  },
   "responses": {},
   "securityDefinitions": {
     "API-Schlüssel": {
