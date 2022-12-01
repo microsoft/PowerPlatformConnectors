@@ -333,7 +333,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if (verificationType.Equals("Phone Call") || verificationType.Equals("SMS"))
+      if (verificationType.Equals("Phone Authentication"))
       {
         response["schema"]["properties"]["countryCode"] = new JObject 
         {
@@ -345,6 +345,25 @@ public class Script : ScriptBase
           ["type"] = "integer",
           ["x-ms-summary"] = "* Recipient's Phone Number"
         };
+        response["schema"]["properties"]["workflowID"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "GetWorkflowIDs",
+              ["parameters"] = new JObject
+              {
+                ["accountId"] = new JObject
+                {
+                  ["parameter"] = "accountId"
+                }
+              },
+              ["value-collection"] = "workFlowIds",
+              ["value-path"] = "type",
+              ["value-title"] = "name",
+            },
+          ["x-ms-summary"] = "* Workflow IDs"
+        };        
       }
       else if (verificationType.Equals("Access Code"))
       {
@@ -1052,9 +1071,8 @@ public class Script : ScriptBase
     var recipient = new JObject();
     var recipientArray = new JArray();
 
-    if (verificationType.Equals("Phone Call") || verificationType.Equals("SMS"))
+    if (verificationType.Equals("Phone Authentication"))
     {
-      var phoneAuthentication = new JObject();
       var phoneNumbers = new JArray();
 
       if (body["phoneNumber"] == null || body["countryCode"] == null)
@@ -1062,20 +1080,28 @@ public class Script : ScriptBase
         throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Phone number or country code is missing");
       }
 
-      var phoneNumber = body["countryCode"].ToString() + body["phoneNumber"].ToString();
-      phoneNumbers.Add(phoneNumber);
+      var identityVerification = new JObject();
+      var inputOptions = new JArray();
+      var inputObject = new JObject();
+      var phoneNumberObject = new JObject();
 
-      phoneAuthentication["senderProvidedNumbers"] = phoneNumbers;
-      if (verificationType.Equals("Phone Call"))
+      if (body["workflowID"] == null)
       {
-        recipient["idCheckConfigurationName"] = "Phone Auth $";
-        recipient["phoneAuthentication"] = phoneAuthentication;
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Workflow ID is missing");
       }
-      else if (verificationType.Equals("SMS"))
-      {
-        recipient["idCheckConfigurationName"] = "SMS Auth $";
-        recipient["smsAuthentication"] = phoneAuthentication;
-      }
+
+      phoneNumberObject["Number"] = body["phoneNumber"];
+      phoneNumberObject["CountryCode"] = body["countryCode"];
+      phoneNumbers.Add(phoneNumberObject);
+
+      inputObject["phoneNumberList"] = phoneNumbers;
+      inputObject["name"] = "phone_number_list";
+      inputObject["valueType"] = "PhoneNumberList";
+      inputOptions.Add(inputObject);
+
+      identityVerification["workflowId"] = body["workflowID"];
+      identityVerification["inputOptions"] = inputOptions;
+      recipient["identityVerification"] = identityVerification;
     }
     else if (verificationType.Equals("Access Code"))
     {
