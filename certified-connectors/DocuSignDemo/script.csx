@@ -30,7 +30,16 @@ public class Script : ScriptBase
     catch (ConnectorException ex)
     {
       var response = new HttpResponseMessage(ex.StatusCode);
-      response.Content = CreateJsonContent(ex.Message);
+
+      if(ex.Message.Contains("ValidationFailure:"))
+      {
+        response.Content = CreateJsonContent(ex.JsonMessage());
+      }
+      else
+      {
+        response.Content = CreateJsonContent(ex.Message);
+      }
+      
       return response;
     }
   }
@@ -239,6 +248,119 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "italic",
           ["description"] = "true/false"
         };
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForEmbeddedSigningSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Add Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForEmbeddedSenderSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (returnUrl.Equals("Add a different URL", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Add Return URL"
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForVerificationTypeSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var verificationType = query.Get("verificationType");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      if (verificationType.Equals("Phone Authentication", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["countryCode"] = new JObject 
+        {
+          ["type"] = "integer",
+          ["x-ms-summary"] = "* Country Code, without the leading + sign."
+        };
+        response["schema"]["properties"]["phoneNumber"] = new JObject
+        {
+          ["type"] = "integer",
+          ["x-ms-summary"] = "* Recipient's Phone Number"
+        };
+      }
+      else if (verificationType.Equals("Access Code", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["accessCode"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Access Code"
+        };
+      }
+      else if (verificationType.Equals("ID Verification", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["workflowID"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "GetWorkflowIDs",
+              ["parameters"] = new JObject
+              {
+                ["accountId"] = new JObject
+                {
+                  ["parameter"] = "accountId"
+                }
+              },
+              ["value-collection"] = "workFlowIds",
+              ["value-path"] = "type",
+              ["value-title"] = "name",
+            },
+          ["x-ms-summary"] = "* Workflow IDs"
+        };
+      }
+      else {
+        response["schema"] = null;
       }
     }
 
@@ -566,7 +688,10 @@ public class Script : ScriptBase
     var notificationContent = "";
     if (content.Contains("DocuSignEnvelopeInformation"))
     {
-      notificationContent = TransformWebhookNotificationBodyDeprecated(content);
+      var doc = new XmlDocument();
+      doc.LoadXml(content);
+      var jsonContent = JsonConvert.SerializeXmlNode(doc);
+      notificationContent = TransformWebhookNotificationBodyDeprecated(jsonContent);
     }
     else
     {
@@ -754,16 +879,16 @@ public class Script : ScriptBase
         customField["show"] = "true";
       }
 
-      if (key.StartsWith("[List Envelope Custom Field]"))
+      if (key.EndsWith("[Custom Field List]"))
       {
-        key = key.Replace("[List Envelope Custom Field] ", "");
+        key = key.Replace(" [Custom Field List]", "");
         customField["name"] = key;
         customField["value"] = value;
         listCustomFields.Add(customField);
       }
       else
       {
-        key = key.Replace("[Text Envelope Custom Field] ", "");
+        key = key.Replace(" [Custom Field Text]", "");
         customField["name"] = key;
         customField["value"] = value;
         textCustomFields.Add(customField);
@@ -844,6 +969,125 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject GenerateEmbeddedSigningURLBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    body["userName"] = query.Get("signerName");
+    body["email"] = query.Get("signerEmail");
+    body["authenticationMethod"] = query.Get("authenticationMethod");
+    body["clientUserId"] = query.Get("clientUserId");
+    
+    var returnUrl = query.Get("returnUrl");
+    if (returnUrl.Equals("Default URL"))
+    {
+      body["returnUrl"] = "https://postsign.docusign.com/postsigning/en/finish-signing";
+    }
+    else if (returnUrl.Equals("Add A Different URL"))
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+
+    return body;
+  }
+
+  private JObject GenerateEmbeddedSenderURLBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var returnUrl = query.Get("returnUrl");
+    var url = this.Context.Request.RequestUri.Authority;
+
+    if (returnUrl.Equals("DocuSign homepage"))
+    {
+      if (url.Equals("demo.docusign.net"))
+      {
+        body["returnUrl"] = "https://appdemo.docusign.com/";
+      }
+      else
+      {
+        body["returnUrl"] = "https://app.docusign.com/";
+      }
+    }
+    else
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+    return body;
+  }
+
+  private JObject AddVerificationToRecipientBodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var verificationType = query.Get("verificationType");
+    var recipientTypeMap = new Dictionary<string, string>() {
+      {"agent", "agents"},
+      {"editor", "editors"},
+      {"inpersonsigner", "inPersonSigners"},
+      {"certifieddelivery", "certifiedDeliveries"},
+      {"signer", "signers"},
+      {"carboncopy", "carbonCopies"},
+      {"intermediary", "intermediaries"},
+      {"witness", "witnesses"}
+    };
+
+    var recipientType = recipientTypeMap[query.Get("recipientType")];
+    var recipientId = query.Get("recipientId");
+
+    var recipient = new JObject();
+    var recipientArray = new JArray();
+
+    if (verificationType.Equals("Phone Authentication"))
+    {
+      var phoneAuthentication = new JObject();
+      var phoneNumbers = new JArray();
+
+      if (body["phoneNumber"] == null || body["countryCode"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Phone number or country code is missing");
+      }
+
+      var phoneNumber = body["countryCode"].ToString() + body["phoneNumber"].ToString();
+      phoneNumbers.Add(phoneNumber);
+
+      phoneAuthentication["senderProvidedNumbers"] = phoneNumbers;
+      recipient["phoneAuthentication"] = phoneAuthentication;
+      recipient["idCheckConfigurationName"] = "Phone Auth $";
+    }
+    else if (verificationType.Equals("Access Code"))
+    {
+      if (body["accessCode"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Access Code is missing");
+      }
+
+      recipient["accessCode"] = body["accessCode"];
+    }
+    else if (verificationType.Equals("Knowledge Based"))
+    {
+      recipient["idCheckConfigurationName"] = "ID Check $";
+    }
+    else if (verificationType.Equals("ID Verification"))
+    {
+      var identityVerification = new JObject();
+      if (body["workflowID"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Workflow ID is missing");
+      }
+
+      identityVerification["workflowId"] = body["workflowID"];
+      recipient["identityVerification"] = identityVerification;
+    }
+    
+    recipient["recipientId"] = recipientId;
+    recipientArray.Add(recipient);
+    body[recipientType] = recipientArray;
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+
   private void AddCoreRecipientParams(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -853,6 +1097,11 @@ public class Script : ScriptBase
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("clientUserId")))
+    {
+      signers[0]["clientUserId"] = query.Get("clientUserId");
     }
 
     var emailNotification = new JObject();
@@ -890,6 +1139,21 @@ public class Script : ScriptBase
     if (!string.IsNullOrEmpty(query.Get("roleName")))
     {
       signers[0]["roleName"] = query.Get("roleName");
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("countryCode")) && !string.IsNullOrEmpty(query.Get("phoneNumber")))
+    {
+      var phoneNumber = new JObject();
+      phoneNumber["countryCode"] = query.Get("countryCode");
+      phoneNumber["number"] = query.Get("phoneNumber");
+
+      var additionalNotification = new JObject();
+      additionalNotification["secondaryDeliveryMethod"] = "SMS";
+      additionalNotification["phoneNumber"] = phoneNumber;
+
+      var additionalNotifications = new JArray();
+      additionalNotifications.Add(additionalNotification);
+      signers[0]["additionalNotifications"] = additionalNotifications;
     }
   }
 
@@ -1067,6 +1331,21 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
 
+    if ("AddVerificationToRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddVerificationToRecipientBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSenderURLBodyTransformation).ConfigureAwait(false);
+    }
+
     if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddDocumentsToEnvelopeBodyTransformation).ConfigureAwait(false);
@@ -1163,6 +1442,39 @@ public class Script : ScriptBase
           body.GetValue("connectId").ToString()));
     }
 
+    if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var openIn = query.Get("openIn");
+
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var url = body["url"].ToString();
+
+      if (openIn.Equals("Prepare"))
+      {
+        url = url.Replace("&send=" + 1, "&send=" + 0);
+      }
+      body["url"] = url;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var workflowsArray = new JArray();
+
+      foreach (var id in (body["identityVerification"] as JArray)) {
+        var workflowObj = new JObject()
+        {
+          ["type"] = id["workflowId"],
+          ["name"] = id["defaultName"]
+        };
+        workflowsArray.Add(workflowObj);
+      }
+      body["workflowIds"] = workflowsArray;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
@@ -1223,9 +1535,9 @@ public class Script : ScriptBase
       var count = 0;
       foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[Text Envelope Custom Field] " + customField["name"].ToString();
+        var name = customField["name"].ToString() + " [Custom Field Text]";
 
-        if (customField["required"].ToString() == "true") 
+        if (customField["required"].ToString() == "true")
         {
           name = "* " + name;
         }
@@ -1241,7 +1553,7 @@ public class Script : ScriptBase
       
       foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
       {
-        var name = "[List Envelope Custom Field] " + customField["name"].ToString();
+        var name = customField["name"].ToString() + " [Custom Field List]";
 
         if (customField["required"].ToString() == "true") 
         {
@@ -1310,6 +1622,11 @@ public class Script : ScriptBase
       {
         newBody = signer as JObject;
         break;
+      }
+
+      if (newBody["errorDetails"] != null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: " + newBody["errorDetails"]["message"]);
       }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
@@ -1387,6 +1704,12 @@ public class Script : ScriptBase
     }
 
     public HttpStatusCode StatusCode { get; }
+
+    public string JsonMessage()
+    {
+      var error = new StringBuilder($"{{\"ConnectorException\": \"Status code={this.StatusCode}, Message='{this.Message}'\"}}");
+      return error.ToString();
+    }
 
     public override string ToString()
     {
