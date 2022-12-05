@@ -11,6 +11,8 @@ Nodefusion Portal connector is published here with the intent to provide Nodefus
 The connector supports the following operations:
 ### Get Organization Profile
 Get your organization profile properties along with its contacts and billing services.
+### Get Organization's Work Services
+List your work services with main properties along with consumption estimate.
 
 ## Obtaining Credentials
 You should use your Organization's AD Account when creating PowerApps Connection, the same one you use on [Nodefusion Portal](https://portal.nodefusion.com/).
