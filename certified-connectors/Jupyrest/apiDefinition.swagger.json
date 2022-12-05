@@ -1,0 +1,290 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "x-ms-api-annotation": {
+      "status": "Preview"
+    },
+    "version": "v1",
+    "title": "Jupyrest",
+    "description": "Jupyrest is a service that can turn a notebook into a REST API with predefined input and output contracts.",
+    "contact": {
+      "email": "cosmosdbla@microsoft.com",
+      "url": "https://github.com/microsoft/jupyrest",
+      "name": "LivesiteAutomation"
+    }
+  },
+  "host": "cdbkeplerprod.azurewebsites.net",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/Notebooks": {
+      "get": {
+        "description": "Get available notebooks.",
+        "summary": "Get available notebooks",
+        "tags": [
+          "JupyrestConnector"
+        ],
+        "operationId": "GetNotebooks",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "notebook": {
+                    "type": "string",
+                    "description": "notebook"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/NotebookMetadata": {
+      "get": {
+        "description": "Get notebook metadata.",
+        "summary": "Get notebook metadata",
+        "tags": [
+          "JupyrestConnector"
+        ],
+        "operationId": "GetNotebookMetadata",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "notebook",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetNotebooks",
+              "value-path": "notebook",
+              "value-title": "notebook"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+                "type": "object",
+                "properties": {
+                  "input": {
+                      "type": "object"
+                  }
+                }
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/NotebookExecutions": {
+      "post": {
+        "description": "Run a notebook.",
+        "summary": "Run a notebook",
+        "tags": [
+          "JupyrestConnector"
+        ],
+        "operationId": "NotebookExecution",
+        "deprecated": false,
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "disableRedirect",
+            "in": "query",
+            "type": "boolean",
+            "default": true,
+            "required": true,
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "output",
+            "in": "query",
+            "type": "boolean",
+            "default": true,
+            "required": true,
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "html",
+            "in": "query",
+            "type": "boolean",
+            "default": true,
+            "required": true,
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "report",
+            "in": "query",
+            "type": "boolean",
+            "default": false,
+            "required": false,
+            "x-ms-visibility": "important",
+            "x-ms-summary": "report mode",
+            "description": "If true, return report version of execution results (without notebook command cells)."
+          },
+          {
+            "name": "parameters",
+            "in": "body",
+            "description": "Notebook input parameters.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "notebook": {
+                  "type": "string",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetNotebooks",
+                    "value-path": "notebook",
+                    "value-title": "notebook"
+                  }
+                },
+                "parameters": {
+                  "type": "object",
+                  "x-ms-dynamic-schema": {
+                    "operationId": "GetNotebookMetadata",
+                    "value-path": "input",
+                    "parameters": {
+                      "notebook": {
+                        "parameter": "notebook"
+                      }
+                    }
+                  },
+                  "x-ms-dynamic-properties": {
+                    "operationId": "GetNotebookMetadata",
+                    "itemValuePath": "input",
+                    "parameters": {
+                      "notebook": {
+                        "parameterReference": "parameters/notebook"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/NotebookResponse"
+            }
+          },
+          "202": {
+            "description": "Success",
+            "headers": {
+              "execution_id": {
+                "type": "string",
+                "description": "execution id"
+              },
+              "location": {
+                "type": "string",
+                "description": "url location for getting execution status"
+              },
+              "retry-after": {
+                "type": "string",
+                "description": "retry after in seconds"
+              }
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    }
+  },
+  "definitions": {
+    "NotebookResponse": {
+      "title": "NotebookResponse",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "notebook execution id"
+        },
+        "status": {
+          "type": "string",
+          "description": "notebook execution status"
+        },
+        "notebook": {
+          "type": "string",
+          "description": "notebook name"
+        },
+        "parameters": {
+          "type": "object",
+          "description": "notebook input parameters"
+        },
+        "output": {
+          "type": "array",
+          "items": {},
+          "description": "notebook execution output results"
+        },
+        "html": {
+          "type": "string",
+          "description": "notebook html results"
+        },
+        "start_time": {
+          "type": "string",
+          "description": "notebook execution start time"
+        },
+        "end_time": {
+          "type": "string",
+          "description": "notebook execution end time"
+        },
+        "exception": {
+            "type": "string",
+            "description": "notebook execution exception"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "tags": [
+    {
+      "name": "JupyrestConnector"
+    }
+  ],
+  "securityDefinitions": {},
+  "security": [
+    {
+      "undefined": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+      {
+        "propertyName": "Website",
+        "propertyValue": "https://github.com/microsoft/jupyrest"
+      },
+      {
+        "propertyName": "Privacy policy",
+        "propertyValue": "https://github.com/microsoft/jupyrest/blob/main/SECURITY.md"
+      },
+      {
+        "propertyName": "Categories",
+        "propertyValue": "Data"
+      }
+    ]
+}

@@ -14,12 +14,25 @@ Once you have users and inventory setup, email support@withoutwire.com and reque
 
 ## Supported Operations
 The connector supports the following operations:
-* create/update a work order
-* get list of work orders
-* delete a workorder 
-* assing a work order to technician(s)
-* set a work order status
-* set a work order as complete
+* methods to process different types of orders (sales order, transfer order, work order, manufacturing order)
+  - create/update
+  - get list of orders
+  - delete an order 
+  - assing an order to technician(s)
+  - set order status
+  - set order as complete
+* methods to process inbound requests and purchase orders
+  - create
+  - delete
+  - get list
+  - receipt complete
+  - inbound request complete
+* methods to support ibventory lookup scenarios
+* methods to support inventory receive scenario (lookup and receive)
+* methods to support workorder consumption scenario
+* methods to support inventory request and inventory adjustment scenarios
+* create location
+* create site
 
 ## Deployment instructions  
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
