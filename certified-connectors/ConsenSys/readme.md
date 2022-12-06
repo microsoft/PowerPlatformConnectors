@@ -44,7 +44,7 @@ As a Quorum Blockchain Services or Infura customer, you will be provided with RP
 * `Are parameterless functions supported?` Yes, these are supported for both querying and writing to the chain.
 * `Are structs supported?` Not currently as these are under development.
 * `Can I customise the event polling/Retry-After?` Not currently.
-* `How do I send or receive complex data types?` These are supported as JSON objects and should be passed and interpreted as such unless they are arrays or base types.
+* `How do I send or receive complex data types?` These are supported as JSON objects and should be passed and interpreted as such unless they are arrays of base types, or just base types.
 * `What are the new optional gas fields?` These fields are to allow more refined gas customisation for networks that support the EIP-1559 gas estimation/calculation. If unspecified and the chain supports it, we now default to EIP-1559 estimation.
 * `Why do I need to get the nexy nonce?` Transactions need to be sequential and have a unique reference. In order to correct/cancel a failed transaction or rework it before it is processed (or fails to process), you will need to pass the nonce in sequence. 
 * `Why do I need to send the nonce?` Using the nonce as an input will allow customisation and manual setting to correct chain blockages.
