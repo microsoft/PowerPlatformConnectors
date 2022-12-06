@@ -1,6 +1,6 @@
 # Team Forms
 
-Teams Forms brings digital forms into Microsoft Teams. The software will empower your teams to build and deliver forms from within the productivity tools that they already know and trust. Unlike many other forms solutions on the market Team Forms talks directly with your Teams SharePoint so that data captured by forms remains in your ownership and never leaves your trusted office 365 environment
+Teams Forms brings digital forms into Microsoft Teams. The software will empower your teams to build and deliver forms from within the productivity tools that they already know and trust. Unlike many other forms solutions on the market, Team Forms talks directly with your Teams SharePoint so that data captured by forms remains in your ownership and never leaves your trusted office 365 environment
 
 ## Publisher: VP Labs
 
@@ -32,7 +32,7 @@ Returns details for a specific form.
 
 ### `Action` Files
 
-Returns meta data for all files/attachments associated with a form response. Users can use the id from the response with the [SharePoint actions]('https://learn.microsoft.com/en-us/connectors/sharepointonline/') to get the file contents.
+Returns metadata for all files/attachments associated with a form response. Users can use the id from the response with the [SharePoint actions]('https://learn.microsoft.com/en-us/connectors/sharepointonline/') to get the file contents.
 
 ### `Action` Get Pdf
 
@@ -52,11 +52,11 @@ This action is used internally to dynamically get a form response schema so flow
 
 ### `Action` Delete Subscription
 
-This action is used internally to delete subscription trigger when flow trigger actions are updated of deleted.
+This action is used internally to delete subscription triggers when flow trigger actions are updated or deleted.
 
 ## Obtaining Credentials
 
-To use Team Forms simply logon using your existing Microsoft Office work or school account and provide it access to SharePoint and Teams.
+To use Team Forms simply login using your existing Microsoft Office work or school account and provide it access to SharePoint and Teams.
 
 ## Known Issues and Limitations
 
