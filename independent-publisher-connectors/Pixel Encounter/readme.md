@@ -32,5 +32,5 @@ Current version of the connector only supports a subset of the API endpoints. Co
 
 The API itself has some limitations:
 * maximum 2 requests/second tied to the IP address
-* mayimum 10 000 requests/30 days tied to the IP address
+* maximum 10 000 requests/30 days tied to the IP address
 * no support for CORS.
