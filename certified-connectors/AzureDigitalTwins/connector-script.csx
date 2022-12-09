@@ -3,6 +3,14 @@
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
         try{
+            if(this.Context.Request.Method == HttpMethod.Patch){
+                var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var contentAsJson = JObject.Parse(contentAsString);
+                var textToSend = (string)contentAsJson["value"];
+                this.Context.Request.Content = CreateJsonContent(textToSend.ToString());
+                return await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
+            }
+
             if (this.Context.OperationId == "ListRelationships" || this.Context.OperationId == "ListIncomingRelationships" || this.Context.OperationId == "ListModels"){
                 var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
                 uriBuilder.Query = uriBuilder.Query.ToString().Replace("%25", "%");
