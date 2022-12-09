@@ -3,6 +3,7 @@
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
         try{
+           
             if (this.Context.OperationId == "ListRelationships" || this.Context.OperationId == "ListIncomingRelationships" || this.Context.OperationId == "ListModels"){
                 var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
                 uriBuilder.Query = uriBuilder.Query.ToString().Replace("%25", "%");
