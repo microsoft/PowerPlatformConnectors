@@ -1691,7 +1691,7 @@ public class Script : ScriptBase
       {
         if (customField["name"].ToString().Equals(customFieldName))
         {
-          customField["type"] = "textCustomField";
+          customField["type"] = "text";
           responseCustomField = customField as JObject;
           break;
         }
@@ -1701,7 +1701,7 @@ public class Script : ScriptBase
       {
         if (customField["name"].ToString().Equals(customFieldName))
         {
-          customField["type"] = "listCustomField";
+          customField["type"] = "list";
           responseCustomField = customField as JObject;
           break;
         }
