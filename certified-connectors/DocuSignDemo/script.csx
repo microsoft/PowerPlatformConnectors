@@ -1451,6 +1451,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("GetAccountCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/account_custom_fields", "/custom_fields");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("GetLoginAccounts".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1649,7 +1656,60 @@ public class Script : ScriptBase
       
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
-    
+
+    if ("GetAccountCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var customFields = new JArray();
+
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+       customFields.Add(customField);
+      }
+      
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+       customFields.Add(customField);
+      }
+
+      var newBody = new JObject
+      {
+        ["customFields"] = customFields
+      };
+      
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }    
+
+    if ("GetEnvelopeCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var customFieldName = query.Get("fieldName");
+      var responseCustomField = new JObject();
+
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+        if (customField["name"].ToString().Equals(customFieldName))
+        {
+          customField["type"] = "text";
+          responseCustomField = customField as JObject;
+          break;
+        }
+      }
+      
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+        if (customField["name"].ToString().Equals(customFieldName))
+        {
+          customField["type"] = "list";
+          responseCustomField = customField as JObject;
+          break;
+        }
+      }
+      
+      response.Content = new StringContent(responseCustomField.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
