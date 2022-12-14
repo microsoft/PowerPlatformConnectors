@@ -218,3 +218,15 @@ Convert CAD files to another document format - https://support.encodian.com/hc/e
 
 ### Get Image Information
 Get Image Information (Height, Width, Resolution, Format, File Size + more) - https://support.encodian.com/hc/en-gb/articles/4431662425489
+
+### Convert Visio
+Convert Microsoft Visio documents to another document format - https://support.encodian.com/hc/en-gb/articles/5306216347665
+
+### Secure Word Document
+Secure and protect a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/6634150180253
+
+### Get Tracked Changes
+Get all the tracked changes (Revisions and comments) for the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/6634950400669
+
+### Sign PDF
+Apply a digital signature to the PDF document provided - https://support.encodian.com/hc/en-gb/articles/7117159708189
