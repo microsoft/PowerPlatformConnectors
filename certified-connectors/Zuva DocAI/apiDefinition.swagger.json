@@ -1,0 +1,987 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Zuva DocAI",
+    "description": "Embed Contracts AI into your product workflows using Zuva DocAI. No need for AI development from the ground up, leverage the DocAI APIs to extract information from your contracts.",
+    "contact": {
+      "name": "Zuva Support",
+      "url": "https://zuva.ai/support/",
+      "email": "support@zuva.ai"
+    }
+  },
+  "host": "us.app.zuva.ai",
+  "basePath": "/api/v2/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/files": {
+      "post": {
+        "summary": "Submit a file",
+        "description": "Submit a file to Zuva DocAI.",
+        "operationId": "SubmitFile",
+        "x-ms-visibility": "important",
+        "consumes": ["application/octet-stream", "text/plain"],
+        "parameters": [
+          {
+            "name": "File",
+            "in": "body",
+            "x-ms-summary": "File",
+            "description": "Binary file content or plain text string to upload. Binary content should NOT be Base64-encoded.",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "x-ms-visibility": "internal",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "The Zuva-assigned unique identifier for the file.",
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "content-type": {
+                      "x-ms-summary": "Content type",
+                      "description": "Detected MIME content type of the file",
+                      "type": "string"
+                    }
+                  },
+                  "description": "Attributes"
+                },
+                "expiration": {
+                  "x-ms-summary": "Expiration",
+                  "description": "The time at which the file is scheduled to be deleted from DocAI.",
+                  "type": "string"
+                },
+                "permissions": {
+                  "x-ms-visibility": "internal",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "permissions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}": {
+      "delete": {
+        "summary": "Delete a File",
+        "description": "Delete an existing file from Zuva.",
+        "operationId": "DeleteFile",
+        "parameters": [
+          {
+            "x-ms-summary": "File ID",
+            "description": "ID of the file to delete.",
+            "name": "file_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/ocr": {
+      "post": {
+        "summary": "Create an OCR Request",
+        "description": "Create a new request for OCR to be applied to the specified file.",
+        "operationId": "CreateOcrRequest",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/FileIdBody"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "OCR Request ID",
+                  "description": "ID used to obtain status and results of the OCR request.",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "File ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "status": {
+                  "x-ms-summary": "Status",
+                  "description": "Initial status of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ocr/{request_id}": {
+      "get": {
+        "summary": "Get OCR Request Status",
+        "description": "Check the status of an existing OCR request.",
+        "operationId": "GetOcrRequestStatus",
+        "parameters": [
+          {
+            "$ref": "#/parameters/OcrRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "x-ms-summary": "OCR Request Status",
+                  "description": "Status of the request (one of 'queued', 'processing', 'complete' or 'failed').",
+                  "type": "string"
+                },
+                "is_finished": {
+                  "x-ms-summary": "Is Finished?",
+                  "description": "Boolean indicating whether the request has reached a terminal state (complete or failed).",
+                  "type": "boolean"
+                },
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ocr/{request_id}/text": {
+      "get": {
+        "summary": "Get OCR Request Text",
+        "description": "Get the text from a completed OCR request.",
+        "operationId": "GetOcrRequestText",
+        "parameters": [
+          {
+            "$ref": "#/parameters/OcrRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "description": "Request ID",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "text": {
+                  "x-ms-summary": "Text",
+                  "description": "OCR text of the document.",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ocr/{request_id}/images": {
+      "get": {
+        "summary": "Get OCR Request Images",
+        "description": "Get the images from a completed OCR request.",
+        "operationId": "GetOcrRequestImages",
+        "parameters": [
+          {
+            "$ref": "#/parameters/OcrRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "x-ms-summary": "Images",
+              "description": "A zip file containing each page of the document as an image.",
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        }
+      }
+    },
+    "/fields": {
+      "get": {
+        "summary": "Get Field List",
+        "description": "Get a list of all fields available to you.",
+        "operationId": "GetFieldList",
+        "parameters": [],
+        "x-ms-visibility": "advanced",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field_id": {
+                    "x-ms-summary": "Field ID",
+                    "description": "The unique identifier for the field.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "x-ms-summary": "Name",
+                    "description": "The name of the field",
+                    "type": "string"
+                  },
+                  "description": {
+                    "x-ms-summary": "Description",
+                    "description": "A description of the field.",
+                    "type": "string"
+                  },
+                  "bias": {
+                    "x-ms-summary": "Bias",
+                    "description": "The bias used by the underlying ML model.",
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "f_score": {
+                    "x-ms-summary": "F-score",
+                    "description": "The F-score of the field, a statistical measure of its accuracy.",
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "precision": {
+                    "x-ms-summary": "Precision",
+                    "description": "The precision of the field.",
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "recall": {
+                    "x-ms-summary": "Recall",
+                    "description": "The recall of the field.",
+                    "type": "number",
+                    "format": "double"
+                  },
+                  "document_count": {
+                    "x-ms-summary": "Document Count",
+                    "description": "The number of documents the field has been trained on.",
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "is_custom": {
+                    "x-ms-summary": "Is Custom?",
+                    "description": "Boolean indicating whether the field is custom.",
+                    "type": "boolean"
+                  },
+                  "is_trained": {
+                    "x-ms-summary": "Is trained?",
+                    "description": "Boolean indicating whether a custom field has been trained.",
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extraction": {
+      "post": {
+        "summary": "Create Field Extraction Request",
+        "description": "Create a new request for extractions from the specified file.",
+        "operationId": "CreateFieldExtractionRequest",
+        "consumes": ["application/json"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "The file to extract text from.",
+                  "type": "string"
+                },
+                "field_ids": {
+                  "x-ms-summary": "Field IDs",
+                  "description": "The IDs of the fields to extract.",
+                  "type": "array",
+                  "items": {
+                    "x-ms-summary": "Field ID",
+                    "description": "The ID of a field to extract from the document.",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "x-ms-visibility": "internal",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "Extraction Request ID",
+                  "description": "ID to use to obtain status and results of this request.",
+                  "type": "string"
+                },
+                "file_id": {
+                  "type": "string",
+                  "x-ms-summary": "File ID",
+                  "description": "File ID that was requested.",
+                  "x-ms-visibility": "internal"
+                },
+                "field_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Field IDs",
+                  "description": "Field IDs that were requested.",
+                  "x-ms-visibility": "internal"
+                },
+                "status": {
+                  "x-ms-summary": "Status",
+                  "description": "Initial status of the request.",
+                  "type": "string",
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extraction/{request_id}": {
+      "get": {
+        "summary": "Get Field Extraction Request Status",
+        "description": "Check the status of an existing field extraction request.",
+        "operationId": "GetFieldExtractionRequestStatus",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/ExtractionRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Field Extraction Request Status",
+                  "description": "Status of the request (one of 'queued', 'processing', 'complete' or 'failed')."
+                },
+                "is_finished": {
+                  "type": "boolean",
+                  "x-ms-summary": "Is Finished?",
+                  "description": "Boolean indicating whether the request has reached a terminal state (complete or failed)."
+                },
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extraction/{request_id}/results/text": {
+      "get": {
+        "summary": "Get Field Extraction Request Results",
+        "description": "Get text results from a completed field extraction request.",
+        "operationId": "GetFieldExtractionRequestResults",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/ExtractionRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "x-ms-visibility": "important",
+                  "x-ms-summary": "Results",
+                  "description": "An array of the results of the field extraction.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "field_id": {
+                        "x-ms-summary": "Field ID",
+                        "description": "The unique identifier for the extracted field.",
+                        "type": "string"
+                      },
+                      "extractions": {
+                        "x-ms-summary": "Extractions",
+                        "description": "An array of results extracted for this particular field.",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "x-ms-summary": "Text",
+                              "description": "The text that was extracted for the field.",
+                              "type": "string"
+                            },
+                            "spans": {
+                              "x-ms-summary": "Spans",
+                              "description": "Information about the location of the text within the document.",
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "start": {
+                                    "x-ms-summary": "Start",
+                                    "description": "The index of the first character of the extraction within the document text.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                  },
+                                  "end": {
+                                    "x-ms-summary": "End",
+                                    "description": "The index of the last character of the extraction within the document text.",
+                                    "type": "integer",
+                                    "format": "int32"
+                                  },
+                                  "pages": {
+                                    "type": "object",
+                                    "properties": {
+                                      "start": {
+                                        "x-ms-summary": "Start",
+                                        "description": "The page number on which the extraction starts.",
+                                        "type": "integer",
+                                        "format": "int32"
+                                      },
+                                      "end": {
+                                        "x-ms-summary": "End",
+                                        "description": "The page number on which the extraction ends.",
+                                        "type": "integer",
+                                        "format": "int32"
+                                      }
+                                    },
+                                    "description": "pages"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/classification": {
+      "post": {
+        "summary": "Create Document Classification Request",
+        "description": "Create a request for classification of the specified document.",
+        "operationId": "CreateDocumentClassificationRequest",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/FileIdBody"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "Classification Request ID",
+                  "description": "ID to use to obtain status and results of this request.",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "status": {
+                  "x-ms-visibility": "internal",
+                  "type": "string",
+                  "description": "status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/classification/{request_id}": {
+      "get": {
+        "summary": "Get Document Classification Request Status",
+        "description": "Get status and available results for an existing document classification request.",
+        "operationId": "GetDocumentClassificationRequestStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Request ID",
+            "description": "Request ID of the document classification request, as returned by CreateDocumentClasssificationRequest.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "x-ms-summary": "Classification Request Status",
+                  "description": "Status of the request (one of 'queued', 'processing', 'complete' or 'failed').",
+                  "type": "string"
+                },
+                "is_finished": {
+                  "x-ms-summary": "Is Finished?",
+                  "description": "Boolean indicating whether the request has reached a terminal state (complete or failed).",
+                  "type": "boolean"
+                },
+                "classification": {
+                  "x-ms-summary": "Classification",
+                  "description": "The type of document that was detected.",
+                  "type": "string"
+                },
+                "is_contract": {
+                  "x-ms-summary": "Is Contract?",
+                  "description": "Whether the document was recognized as a contract or not.",
+                  "type": "boolean"
+                },
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/language": {
+      "post": {
+        "summary": "Create Language Classification Request",
+        "description": "Create a request for the language of the specified file.",
+        "operationId": "CreateLanguageClassificationRequest",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/FileIdBody"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "Language Request ID",
+                  "description": "ID to use to obtain status and results of this request.",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "status": {
+                  "x-ms-visibility": "internal",
+                  "type": "string",
+                  "description": "status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/language/{request_id}": {
+      "get": {
+        "summary": "Get Language Classification Request Status",
+        "description": "Get status and available results for an existing document classification request.",
+        "operationId": "GetLanguageClassificationRequestStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "type": "string",
+            "required": true,
+            "description": "Request ID of the language classification request, as returned by CreateLanguageRequest.",
+            "x-ms-summary": "Request ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "x-ms-summary": "Language Request Status",
+                  "description": "Status of the request (one of 'queued', 'processing', 'complete' or 'failed').",
+                  "type": "string"
+                },
+                "is_finished": {
+                  "x-ms-summary": "Is Finished?",
+                  "description": "Boolean indicating whether the request has reached a terminal state (complete or failed).",
+                  "type": "boolean"
+                },
+                "language": {
+                  "x-ms-summary": "Language",
+                  "description": "The primary detected language of the document.",
+                  "type": "string"
+                },
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mlc": {
+      "post": {
+        "summary": "Create Multi-Level Classification Request",
+        "description": "Create a request for multi-level classification of the specified file.",
+        "operationId": "CreateMlcRequest",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/FileIdBody"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "MLC Request ID",
+                  "description": "ID to use to obtain status and results of this request.",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "status": {
+                  "x-ms-visibility": "internal",
+                  "type": "string",
+                  "description": "status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mlc/{request_id}": {
+      "get": {
+        "summary": "Get MLC request Status",
+        "description": "Get status and available results for an existing MLC request.",
+        "operationId": "GetMlcRequestStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "type": "string",
+            "required": true,
+            "description": "Request ID of the MLC request, as returned by CreateMlcRequest.",
+            "x-ms-summary": "Request ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "x-ms-summary": "MLC Request Status",
+                  "description": "Status of the request (one of 'queued', 'processing', 'complete' or 'failed').",
+                  "type": "string"
+                },
+                "is_finished": {
+                  "x-ms-summary": "Is Finished?",
+                  "description": "Boolean indicating whether the request has reached a terminal state (complete or failed).",
+                  "type": "boolean"
+                },
+                "classifications": {
+                  "x-ms-summary": "Classifications",
+                  "description": "The hierarchical classifications of the document.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                },
+                "file_id": {
+                  "x-ms-summary": "File ID",
+                  "description": "ID of the file that the request pertains to.",
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/normalize/date": {
+      "post": {
+        "summary": "Normalize dates",
+        "description": "Normalize a string containing one or more dates. For each date found, the endpoint returns a set of integers representing the year, month and day.",
+        "operationId": "NormalizeDates",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/TextBody"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request_id": {
+                  "x-ms-summary": "Request ID",
+                  "description": "ID of the request",
+                  "type": "string"
+                },
+                "text": {
+                  "x-ms-summary": "text",
+                  "description": "The original text that was provided.",
+                  "type": "string"
+                },
+                "sha-256": {
+                  "type": "string",
+                  "description": "SHA-256 hash of the original text."
+                },
+                "date": {
+                  "type": "array",
+                  "description": "date",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "day": {
+                        "x-ms-summary": "Day",
+                        "description": "The day of the month as an integer.",
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "month": {
+                        "x-ms-summary": "Month",
+                        "description": "The month represented as an integer between 1 and 12.",
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "year": {
+                        "x-ms-summary": "Year",
+                        "description": "The year represented as an integer.",
+                        "type": "integer",
+                        "format": "int32"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {},
+  "parameters":{
+    "ExtractionRequestId": {
+      "name": "request_id",
+      "in": "path",
+      "x-ms-summary": "Extraction Request Id",
+      "description": "Unique identifer of an existing extraction request, as returned by CreateExtractionRequest.",
+      "required": true,
+      "type": "string",
+      "x-ms-url-encoding": "single"
+    },
+    "OcrRequestId": {
+      "name": "request_id",
+      "in": "path",
+      "x-ms-summary": "OCR Request Id",
+      "description": "Unique identifer of an existing OCR request, as returned by CreateOcrRequest.",
+      "required": true,
+      "type": "string",
+      "x-ms-url-encoding": "single"
+    },
+    "FileIdBody": {
+      "name": "file_id_body",
+      "in": "body",
+      "x-ms-summary": "File ID",
+      "description": "The unique xid identifying the file.",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "x-ms-summary": "File ID",
+            "description": "The unique identifier for the file, as returned by the SubmitFile operation.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TextBody": {
+      "name": "text_body",
+      "in": "body",
+      "x-ms-summary": "Text",
+      "description": "A JSON request body containing the text to normalize.",
+      "required": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "x-ms-summary": "Text",
+            "description": "The text string to normalize.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://zuva.ai/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://zuva.ai/privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI"
+    }
+  ]
+}
