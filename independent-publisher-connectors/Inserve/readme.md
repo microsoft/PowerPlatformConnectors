@@ -8,26 +8,6 @@ Inserve is an online IT service desk software especially made for Managed Servic
 - Inserve API key
 
 ## Supported Operations
-### clients.index
-Returns a list of clients.
-### clients.show
-Returns a specific client.
-### clients.store
-Creates a new client.
-### clients.delete
-Deletes a specific client.
-### companies.index
-Returns a list of companies.
-### companies.show
-Returns a specific company.
-### companies.store
-Creates a new company.
-### companies.delete
-Deletes a specific company.
-### companies.update
-Updates a specific company.
-### tickets.index
-Returns a list of tickets.
 ### tickets.create
 Creates a new ticket.
 
