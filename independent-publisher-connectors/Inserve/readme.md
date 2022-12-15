@@ -1,7 +1,7 @@
-# Title
+# Inserve connector
 Inserve is an online IT service desk software especially made for Managed Service Providers. This Powerautomate app enables Inserve users to automate workflows. Currently it is especially used for creating custom forms that will create a ticket inside Inserve.
 
-## Publisher: Inserve
+## Publisher: Frank Derks
 
 ## Prerequisites
 - Inserve tenant
