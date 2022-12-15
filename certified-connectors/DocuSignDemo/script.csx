@@ -887,6 +887,37 @@ public class Script : ScriptBase
 
     return newBody;
   }
+
+  private JObject UpdateEnvelopeCustomFieldBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
+    var fieldType = query.Get("fieldType");
+    var customField = new JObject() {
+      ["fieldId"] = query.Get("fieldId"),
+	    ["name"] = query.Get("name"),
+	    ["value"] = query.Get("value")
+    };
+
+    if (fieldType.Equals("Text"))
+    {
+      textCustomFields.Add(customField);
+    }
+
+    if (fieldType.Equals("List"))
+    {
+      listCustomFields.Add(customField);
+    }
+
+    var newBody = new JObject()
+    {
+      ["textCustomFields"] = textCustomFields,
+      ["listCustomFields"] = listCustomFields
+    };
+
+    return newBody;
+  }
   
   private void ParseCustomFields(JObject body, JArray textCustomFields,  JArray listCustomFields)
   {
@@ -1387,6 +1418,11 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.AddVerificationToRecipientBodyTransformation).ConfigureAwait(false);
     }
 
+    if ("UpdateEnvelopeCustomField".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.UpdateEnvelopeCustomFieldBodyTransformation).ConfigureAwait(false);
+    }
+
     if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLBodyTransformation).ConfigureAwait(false);
@@ -1678,9 +1714,9 @@ public class Script : ScriptBase
       };
       
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
-    }    
+    }
 
-    if ("GetEnvelopeCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeCustomField".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -1691,7 +1727,7 @@ public class Script : ScriptBase
       {
         if (customField["name"].ToString().Equals(customFieldName))
         {
-          customField["type"] = "text";
+          customField["fieldType"] = "Text";
           responseCustomField = customField as JObject;
           break;
         }
@@ -1701,7 +1737,7 @@ public class Script : ScriptBase
       {
         if (customField["name"].ToString().Equals(customFieldName))
         {
-          customField["type"] = "list";
+          customField["fieldType"] = "List";
           responseCustomField = customField as JObject;
           break;
         }
