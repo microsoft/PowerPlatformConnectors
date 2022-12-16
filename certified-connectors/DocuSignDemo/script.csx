@@ -712,7 +712,8 @@ public class Script : ScriptBase
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
 
-    var envelopeEventMap = new Dictionary<string, string>() {
+    // TODO: This map is added for backward compatibility. This will be removed once old events are deprecated
+	var envelopeEventMap = new Dictionary<string, string>() {
         {"Sent", "envelope-sent"},
         {"Delivered", "envelope-delivered"},
         {"Completed", "envelope-completed"},
