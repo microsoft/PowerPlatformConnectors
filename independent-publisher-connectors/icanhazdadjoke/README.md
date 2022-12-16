@@ -2,7 +2,7 @@
 
 [icanhazdadjoke.com](https://icanhazdadjoke.com) is the largest selection of dad jokes on the internet. Now supporting many different integrations to ensure you can access the dad jokes that you need wherever you are.
 
-## Publisher: Daniel Laskewitz | Sogeti
+## Publisher: Daniel Laskewitz
 
 ## Prerequisites
 
