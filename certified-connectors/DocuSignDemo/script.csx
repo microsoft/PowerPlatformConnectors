@@ -712,6 +712,15 @@ public class Script : ScriptBase
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
 
+    // TODO: This map is added for backward compatibility. This will be removed once old events are deprecated
+	var envelopeEventMap = new Dictionary<string, string>() {
+        {"Sent", "envelope-sent"},
+        {"Delivered", "envelope-delivered"},
+        {"Completed", "envelope-completed"},
+        {"Declined", "envelope-declined"},
+        {"Voided", "envelope-voided"}
+    };
+
     body["allUsers"] = "true";
     body["allowEnvelopePublish"] = "true";
     body["includeDocumentFields"] = "true";
@@ -720,9 +729,11 @@ public class Script : ScriptBase
     body["name"] = original["name"]?.ToString();
 
     var envelopeEvent = original["envelopeEvents"]?.ToString();
-    var envelopeEventsArray = new JArray();
-    envelopeEventsArray.Add(envelopeEvent);
-    body["envelopeEvents"] = envelopeEventsArray;
+    var webhookEvent = envelopeEventMap.ContainsKey(envelopeEvent) ? envelopeEventMap[envelopeEvent] : envelopeEvent;
+
+    var webhookEventsArray = new JArray();
+    webhookEventsArray.Add(webhookEvent);
+    body["events"] = webhookEventsArray;
     body["configurationType"] = "custom";
     body["deliveryMode"] = "sim";
 
@@ -743,7 +754,6 @@ public class Script : ScriptBase
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
-    
     return body;
   }
   
