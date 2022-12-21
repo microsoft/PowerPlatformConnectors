@@ -4,24 +4,21 @@ Create user-driven solutions that solve everyday business problems in a fraction
 
 ## Prerequisites
 
-Create an account and subscribe to PowerTools Community Edition. It's completely free! Learn more at https://portal.apptigent.com/start.
+Create an account and subscribe to PowerTools Community Edition. It's completely free! Learn more at https://www.apptigent.com/#start.
 
 ## How to get credentials
 
 Generate an API key by following these simple steps:
 
-1. Open https://portal.apptigent.com in your browser, click "Create an account" and follow the prompts.
-2. Login with your new credentials and select the "Apps" link from the main menu.
-3. Click the "Create new App" button.
-4. Enter a Title and optional description (such as "Power Automate App") then click "Submit".
-5. On successful submission, the App details page will be shown with your new credentials. Click the "Show" checkbox next to the Client ID field and copy the value - this is the key you will use in the "API Key" field to authorize a new connector. 
-6. Browse to "API Products", select "PowerTools LITE (Community Edition)", then click Subscribe under the Default plan. 
-7. Select the app name created in Step 4 and click "Subscribe" to finish.
+1. Open https://www.apptigent.com in your browser, click "Shop" and select "PowerTools Community Edition".
+2. Select a subscription plan and click "Subscribe". Follow the simple checkout process to complete your subscription.
+3. Click the 'Account' button then select 'Subscriptions' from the left navigation menu. View the new PowerTools Community Edition subscription details to retreive your license (API) key (there may be a short delay after completing your order for the key to be generated) - this is the key you will use in the "API Key" field to authorize a new connector. 
+
 
 ## Known issues and limitations
 
-The Community Edition plan includes 50 free action calls per day. Visit our Subscriptions page at https://www.apptigent.com/solutions/power-tools/subscription-plans/ to learn more about plans with higher limits and advanced capabilities. 
+The Community Edition (LITE) plan includes 1,000 free action calls per month. Visit our Products page at https://www.apptigent.com/shop/ to learn more about related offerings with higher limits and advanced capabilities. 
 
 ## Supported Operations
 
-Please visit the [Apptigent Customer Portal] (https://portal.apptigent.com) for a complete list of API operations.
+Please visit the [PowerTools LITE product page](https://www.apptigent.com/product/powertools-community-edition) for a complete list of available actions. To learn more about each one and how to use it in your apps, forms and flows, visit our [Tutorials page](https://www.apptigent.com/resources/tutorials/). 
