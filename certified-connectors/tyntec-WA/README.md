@@ -48,8 +48,59 @@ You will need the following to proceed:
   - **filename** - filename of the file
 - **Send Free-form List Message** Sends a list message.
   - **from** - Your WhatsApp Business Account number (Sender)
-  - **to** - Receiver's phone number 
-        
+  - **to** - Receiver's phone number
+  - **type** - Header's type (text)
+  - **text** - Header's text
+  - **type** - Body's type (text) - required
+  - **text** - Body's text - required
+  - **type** - Footer's type 
+  - **text** - Footer's text
+  - **title** - List name
+  - **sections title** - Name of section
+  - **sections rows payload** - Payload for section
+  - **sections rows title** - Title for section
+  - **sections rows description** - Description for section
+- **Send Free-form Location Message** Sends a location message.
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **longitude** - Longtitude of your location
+  - **latitude** - Latitude of your location
+  - **name** - Name of your location
+  - **address** - full address of your location with commas as separators
+- **Send WhatsApp Free-form Product List** Sends a product list
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **type** - Header's type (text)
+  - **text** - Header's text
+  - **type** - Body's type (text) - required
+  - **text** - Body's text - required
+  - **type** - Footer's type 
+  - **text** - Footer's text
+  - **catalogId** - Catalog ID
+  - **sections items productId** - Product ID
+- **Send WhatsApp Free-form Quick Reply** Sends a quick reply message
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **type** - Header's type (text)
+  - **text** - Header's text
+  - **type** - Body's type (text) - required
+  - **text** - Body's text - required
+  - **type** - Footer's type 
+  - **text** - Footer's text
+  - **buttons payload** - Payload of your button
+  - **buttons title** - Title of your button
+-  **Send WhatsApp Free-form Single Product** Sends a single product 
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **type** - Header's type (text)
+  - **text** - Header's text
+  - **type** - Body's type (text) - required
+  - **text** - Body's text - required
+  - **type** - Footer's type 
+  - **text** - Footer's text
+  - **catalogId** - Catalog ID
+  - **sections items productId** - Product ID
+         
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
         -   **id** - messageID of your message (_returned after each request_)
