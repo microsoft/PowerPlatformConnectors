@@ -105,7 +105,41 @@ You will need the following to proceed:
   - **to** - Receiver's phone number
   - **url** - URL of the sticker file
 - **Send Free-form Text Message** Sends text message 
-
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **text** - Your text message
+- **Send Free-form Video Message** Sends a video message.
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **url** - URL of the video file
+  - **caption** - caption of the video file
+- **Send Template Document Message** - Sends template message with document
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **templateId** - ID of your template
+  - **templateLanguage** - language code of your template
+  - **header type** - type of the header (document)
+  - **header url** - URL to your document file
+  - **body type** - type of your body argument - text
+  - **body text** - text of your body argument
+- **Send Template Dynamic URL Button** - Sends template message with URL Buttons
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **templateId** - ID of your template
+  - **templateLanguage** - language code of your template
+  - **body type** - type of your body argument - text
+  - **body text** - text of your body argument
+  - **button type** - type of your button argument 
+  - **button index** - index of your button argument 
+  - **button text** - text of your button argument
+- **Send Template Image Message** - Sends template message with image
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **templateId** - ID of your template
+  - **templateLanguage** - language code of your template
+  - **header type** - type of the header (image)
+  - **header url** - URL to your image file
+  - **body text** - text of your body argument
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
         -   **id** - messageID of your message (_returned after each request_)
