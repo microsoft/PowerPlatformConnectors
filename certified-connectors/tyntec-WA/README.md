@@ -21,28 +21,34 @@ You will need the following to proceed:
 
 
 ## Supported requests
--   **Send WhatsApp** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
-    *Sends template message*
-    -   To make a successful request, please, populate the followings fields:
-        -   **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
-        -   **from** - your WhatsApp Business account number number
-        -   **templateId** - the name of your approved template
-        -   **language-policy** - language policy of your template
-        -   **language-code** - language code of your template
-        -   **components type** - use **body** if you are sending text. Rich media use **header**
-        -   **type of parameter** - use **text** if sending text, rich media uses **media**
-        -   **parameter-url** - input the source url
-        -   **parameter-type** - type of used media - support **image**, **document** and **video**
-        -   **parameter-filename** - filename for your rich media
-        -   **parameter-text** - input your text message
-        -   _if your template uses more parameters, repeat **parameter-type** and **parameter-text** for each parameter your template requires_
--   **WhatsApp Free-Form Message**
-    - Sends a free form message
-        -   **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
-        -   **from** - your WhatsApp Business account number number
-        -   **contentType** - use **text** if you are sending text
-        -   **text** - input your text message
-
+- **Send Free-form Audio Message** Sends an audio message using [Conversations API](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message).
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **url** - URL of the audio file
+- **Send Free-form Image Message** Sends an image message.
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **url** - URL of the image file
+- **Send Free-form Contact Message** Sends a contact message
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **contacts addresses city** - Contact's city
+  - **contacts addresses country** - Contact's country
+  - **contacts addresses countryCode** - Contact's country code
+  - **contacts addresses street** - Contact's street
+  - **contacts addresses type** - Type of Address (Work, for example)
+  - **contacts addresses zip** - Contact's ZIP
+  - **formattedName** - Contact's formated name
+  - **lastName** Contact's last name
+- **Send Free-form Document Message** Sends a document message.
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **url** - URL of the file
+  - **caption** - caption of the file
+  - **filename** - filename of the file
+- **Send Free-form List Message** Sends a list message.
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number 
         
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
