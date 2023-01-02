@@ -89,7 +89,7 @@ You will need the following to proceed:
   - **text** - Footer's text
   - **buttons payload** - Payload of your button
   - **buttons title** - Title of your button
--  **Send Free-form Single Product** Sends a single product 
+- **Send Free-form Single Product** Sends a single product 
   - **from** - Your WhatsApp Business Account number (Sender)
   - **to** - Receiver's phone number
   - **type** - Header's type (text)
@@ -140,10 +140,52 @@ You will need the following to proceed:
   - **header type** - type of the header (image)
   - **header url** - URL to your image file
   - **body text** - text of your body argument
+- **Sends Template Location Message** - Sends template message with location
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **templateId** - ID of your template
+  - **templateLanguage** - language code of your template
+  - **header longitude** - longtitude of your location
+  - **header latitude** - latitude of your location
+  - **header name** - Name of your location
+  - **header address** - Address of your location
+  - **body type** - type of your body argument - text
+  - **body text** - text of your body argument
+- **Send Template Quick Reply Button** - Sends template message with Quick reply Buttons
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **templateId** - ID of your template
+  - **templateLanguage** - language code of your template
+  - **body type** - type of your body argument - text
+  - **body text** - text of your body argument
+  - **button type** - type of your button argument 
+  - **button index** - index of your button argument 
+  - **button payloada** - payload of your button argument
+- **Send Template Text Message** - Sends template message with text arguments
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **templateId** - ID of your template
+  - **templateLanguage** - language code of your template
+  - **header type** - type of the header (text)
+  - **header text** - text in header
+  - **body type** - type of your body argument - text
+  - **body text** - text of your body argument
+- **Send Template Video Message** - Sends template message with video
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **templateId** - ID of your template
+  - **templateLanguage** - language code of your template
+  - **header type** - type of the header (video)
+  - **header url** - URL to your image file
+  - **body text** - text of your body argument
+  - **body type** - type of your body argument - text
+
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
         -   **id** - messageID of your message (_returned after each request_)
-
+- **Validate your WABA number**
+  - To validate your WABA number, please, provide the connector with the following values:
+        -  **WhatsAppBusinessNumber** - Your WhatsApp Business Account number 
 ## Supported Triggers
 
 - **Incoming Message** Trigger any flow on new incoming messages
