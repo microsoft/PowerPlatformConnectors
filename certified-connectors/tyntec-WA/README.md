@@ -67,7 +67,7 @@ You will need the following to proceed:
   - **latitude** - Latitude of your location
   - **name** - Name of your location
   - **address** - full address of your location with commas as separators
-- **Send WhatsApp Free-form Product List** Sends a product list
+- **Send Free-form Product List** Sends a product list
   - **from** - Your WhatsApp Business Account number (Sender)
   - **to** - Receiver's phone number
   - **type** - Header's type (text)
@@ -78,7 +78,7 @@ You will need the following to proceed:
   - **text** - Footer's text
   - **catalogId** - Catalog ID
   - **sections items productId** - Product ID
-- **Send WhatsApp Free-form Quick Reply** Sends a quick reply message
+- **Send Free-form Quick Reply** Sends a quick reply message
   - **from** - Your WhatsApp Business Account number (Sender)
   - **to** - Receiver's phone number
   - **type** - Header's type (text)
@@ -89,7 +89,7 @@ You will need the following to proceed:
   - **text** - Footer's text
   - **buttons payload** - Payload of your button
   - **buttons title** - Title of your button
--  **Send WhatsApp Free-form Single Product** Sends a single product 
+-  **Send Free-form Single Product** Sends a single product 
   - **from** - Your WhatsApp Business Account number (Sender)
   - **to** - Receiver's phone number
   - **type** - Header's type (text)
@@ -100,7 +100,12 @@ You will need the following to proceed:
   - **text** - Footer's text
   - **catalogId** - Catalog ID
   - **sections items productId** - Product ID
-         
+- **Send Free-form Sticker Message** Sends Sticker Message
+  - **from** - Your WhatsApp Business Account number (Sender)
+  - **to** - Receiver's phone number
+  - **url** - URL of the sticker file
+- **Send Free-form Text Message** Sends text message 
+
 - **Status Check**
     -   To make a successful status check, please, provide the connector with the following values
         -   **id** - messageID of your message (_returned after each request_)
