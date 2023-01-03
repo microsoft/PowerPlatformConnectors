@@ -1746,6 +1746,28 @@ public class Script : ScriptBase
       response.Content = new StringContent(responseCustomField.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("UpdateEnvelopeCustomField".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var responseCustomField = new JObject();
+
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+        responseCustomField = customField as JObject;
+        responseCustomField["fieldType"] = "Text";
+        break;
+      }
+      
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+        responseCustomField = customField as JObject;
+        responseCustomField["fieldType"] = "List";
+        break;
+      }
+      
+      response.Content = new StringContent(responseCustomField.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
