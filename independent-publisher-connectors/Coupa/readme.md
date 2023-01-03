@@ -9,10 +9,13 @@ This API provides robust access to read, edit, or integrate your data with the C
 Login to your Coupa instance with an administrator\integration administrator account
 -	Click Setup > OAuth2/OpenID Connect Clients
 -	Create Client 
--	Grant Type: Client Credentials
+-	Grant Type: Authorization Code
 -	Name: A descriptive name such as “Power Automate Connector”
 -	Redirect URIs: https://global.consent.azure-apim.net/redirect
 -	Select relevant scope such as core.common.read
+
+![image](https://user-images.githubusercontent.com/16315601/210454583-f5083eac-ffec-457d-8dfc-1f452afdbf76.png)
+
 
 ## Power Automate
 
@@ -48,6 +51,8 @@ Copy the following information from the Coupa OAuth client page
 | Token URL|  https://instance.coupahost.com/oauth2/token|
 | Refresh URL|  https://instance.coupahost.com/oauth2/token|
 | Scope | Oidc Scopes without commas e.g  core.common.read core.contracts.read|
+
+![image](https://user-images.githubusercontent.com/16315601/210454637-4d47e655-eb02-4e66-8a6c-19b96726e68c.png)
 
 ### Definition
 The definition screen is broken down into four main sections and two areas.
