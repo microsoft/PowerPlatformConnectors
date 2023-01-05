@@ -33,9 +33,9 @@ Login to Power Automate
 * 	Add you instance url eg https://instance.coupahost.com
 
 
-### Supported Operations
+## Supported Operations
 
-#### Contracts - Get Contracts
+### Contracts - Get Contracts
 The following is an example of how to get contracts
 
 **General**
@@ -179,7 +179,7 @@ Not valid for this request
 
 
 
-### Obtaining Credentials
+## Obtaining Credentials
 
 | Title        | Result |           
 | ------------- |:-------------:|
@@ -200,7 +200,7 @@ Copy the following information from the Coupa OAuth client page
 
 ![image](https://user-images.githubusercontent.com/16315601/210454637-4d47e655-eb02-4e66-8a6c-19b96726e68c.png)
 
-#### Getting Started
+## Getting Started
 You can vist your local instance to find out a list of all available API Commands.
 https://instance.coupahost.com/api_docs/0
 
@@ -227,12 +227,12 @@ Rather than changing each request individually we can create a policy to update 
 | Run policy on      | Request|
 
 
-### Known Issues and Limitations
+## Known Issues and Limitations
 
 Power Automate has a limit of 512 objects. I've tried as far as I can to list all the common objects.
 If what you require is missing please send me a note and I will see what I can do.
 
-### Frequently Asked Questions
+## Frequently Asked Questions
 
 **My results don't match my postman output**
 This connector uses the User scope meaning that all output relates to that user. 
