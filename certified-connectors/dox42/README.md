@@ -8,7 +8,6 @@ You will need the following to proceed:
 * Azure Active Directory
 * a dox42 license (dox42 Online or dox42 Server + dox42 Word/Excel/PowerPoint Add-ins)
 * dox42 Server Designer application (Version 1.0.1.4 or later)
-* SharePoint Online
 
 ## Building the connector 
 Since dox42 uses Azure Active Directory (AD) authentication, we first need to set up a few things in Azure AD so that our connectors can securely generate your documents with dox42.  After that is completed, you can test the connector.
@@ -39,4 +38,5 @@ This step will ensure that your application can successfully retrieve an access 
 
 The connector supports the following operations:
 
-* `dox42_Call`: Make a call to your dox42 Server
+* `dox42_Call_GET`: Make an HTTP GET request to the dox42 service
+* `dox42_Call_POST`: Make an HTTP POST request to the dox42 service
