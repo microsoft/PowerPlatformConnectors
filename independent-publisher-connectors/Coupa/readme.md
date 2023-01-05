@@ -73,7 +73,7 @@ Now click on Accept under Headers and press edit
 | Visibility | Internal|
 
 
-#### Addresses - Create Address
+### Addresses - Create Address
 
 The following examples explains how to create a ship to address via the Coupa API
 
@@ -111,7 +111,7 @@ Import from Sample
 
 Click import from sample and copy the above body into the body field.
 
-#### Addresses - Update Address
+### Addresses - Update Address
 
 This example is quite similar to the above except for the fact we are updating not creating
 
@@ -150,7 +150,7 @@ Import from Sample
 Click import from sample and copy the above body into the body field.
 
 
-#### Invoices - Delete Invoice by ID
+### Invoices - Delete Invoice by ID
 
 To delete an invoice we have to make sure its in new status and able to be deleted
 
@@ -176,8 +176,6 @@ Import from Sample
 **Response**
 
 Not valid for this request
-
-
 
 ## Obtaining Credentials
 
