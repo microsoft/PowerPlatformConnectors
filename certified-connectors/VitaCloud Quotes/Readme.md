@@ -2,9 +2,9 @@
 VitaCloud Quotes API provides a curated set of quotes by famous authors and celebrities, tagged with various themes such as faith, god, happiness, hope, humour, inspiration, knowledge, life lessons, love, motivation, philosophy, poetry, relationship, religion, romance, science, time, truth, and wisdom. VitaCloud Quotes API connector is a wrapper around the VitaCloud Quotes API that enables bringing the tailored, daily and random VitaCloud Quotes into your workspace using Microsoft Power Automate, Microsoft Power Apps, and Azure Logic Apps in your Azure and Office 365 subscription. 
 
 ## Publisher: VitaCloud Limited
-[VitaCloud Website](https://www.vitacloud.co.uk) <br/>
-[VitaCloud API Portal](https://portal.vitacloud.co.uk/home) <br/>
-[VitaCloud Support](mailto:support@vitacloud.co.uk)
+<a href="https://www.vitacloud.co.uk" target="_blank">VitaCloud Website</a>
+<a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a>
+<a href="mailto:support@vitacloud.co.uk">VitaCloud Support</a>
 
 ## Prerequisites
 You will need the following to proceed:
@@ -32,7 +32,7 @@ The connector supports the following operations
 ## Obtaining Credentials
 ### Steps to generate the API Base URL and API Key
 
-1. Sign up or log in to the [VitaCloud API Portal](https://portal.vitacloud.co.uk/home)<br/>
+1. Sign up or log in to the <a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a><br/>
 <img src="https://vitacloud.blob.core.windows.net/company/portalhome.JPG" alt="Portal home" width="1200"/>
 
 2. Subscribe to one of the free or paid products from the Product catalog<br/>
@@ -65,7 +65,7 @@ Update the connection with the Base Product URL corresponding to the product con
 
 ## Frequently Asked Questions
 * **How can I track the number of calls made for the subscribed product?**<br/>
-In the [VitaCloud API Portal](https://portal.vitacloud.co.uk/home), select the subscribed product.<br/>
+In the <a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a>, select the subscribed product.<br/>
 <img src="https://vitacloud.blob.core.windows.net/company/selectproduct.jpg" alt="select action" width="800"/><br/>
 The **Overview** tab for the selected product will show the number of API calls made against the subscribed quota.
 
@@ -79,7 +79,7 @@ The Quotes connector `Get Themes` action provides over 20 themes to choose from,
 <img src="https://vitacloud.blob.core.windows.net/company/authors2.png" alt="authors" width="400"/>
 
 * **Where can I reach out if I have a product query or require support?**<br/>
-Please send your query to [VitaCloud Support](mailto:support@vitacloud.co.uk) or fill out the contact form on the [VitaCloud Website](https://www.vitacloud.co.uk).
+Please send your query to <a href="mailto:support@vitacloud.co.uk">VitaCloud Support</a> or fill out the contact form on the <a href="https://www.vitacloud.co.uk" target="_blank">VitaCloud Website</a>.
 
 ## Deployment Instructions
 Run the following commands and follow the prompts:
