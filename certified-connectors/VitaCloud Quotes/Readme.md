@@ -44,39 +44,38 @@ The connector supports the following operations
 4. Copy the **Base Product URL** and **API Key** from the **Authentication** tab<br/> 
 <img src="https://vitacloud.blob.core.windows.net/company/authentication.jpg" alt="Authentication" width="800"/>
 
-    > The **Base Product URL** and **API Key** will be required for connecting to the Quotes connector in Power Automate and Power Apps.
+> The **Base Product URL** and **API Key** will be required for connecting to the Quotes connector in Power Automate and Power Apps.
 
 ## Known Issues and Limitations
 
-* Please note some functionality may be limited based on the subscribed product. E.g. if only **Today's Quote** product is subscribed, only the **Get Today's Quote action** will work in the connector. 
-* We recommend subscribing to the full **Quotes by themes and authors** product to unlock all options in the connector.
-* If number is not specified for operations requiring them, then at most 5 quotes will be returned in the response.
-* Number of responses will be limited to maximum 10 quotes.
-* Some authors may not have a corresponding Wikipedia link
+* Please note some functionality may be limited based on the subscribed product. E.g. if only **Today's Quote** product is subscribed, only the **Get Today's Quote** action will work in the connector. 
+* We recommend subscribing to the **Quotes by themes and authors** product to unlock all options in the connector.
+* If number of quotes is not specified for operations requiring them, then at most 5 quotes will be returned in the response.
+* Number of quotes returned will be limited to a maximum of 10.
+* Some authors may not have a corresponding Wikipedia link.
 * Author images are subject to change, but will maintain the same size and aspect ratio.
 * If an incorrect Base Product URL or API Key is specified, HTTP status code `404 - not found` will be returned, alongwith a response as below <br/>
 `{"requestId": long string, "message": "No data product found. Please contact your data provider"}` <br/>
-Please update the connection with the correct Base Product URL and API Key from the API portal.
+Please update the connection with the correct **Base Product URL** and **API Key** from the API portal.
 
 * If an action is used that is not included in the product corresponding to the Base Product URL, HTTP status code `403 - forbidden` will be returned, alongwith a response as below <br/>
-`{"requestId": long string, "message": "Endpoint not available"}` 
-<br/>
-Update the connection with the Base Product URL corresponding to the product containing the requested endpoint.
+`{"requestId": long string, "message": "Endpoint not available"}` <br/>
+Update the connection with the **Base Product URL** corresponding to the product containing the requested endpoint.
 
 ## Frequently Asked Questions
 * **How can I track the number of calls made for the subscribed product?**<br/>
 In the <a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a>, select the subscribed product.<br/>
 <img src="https://vitacloud.blob.core.windows.net/company/selectproduct.jpg" alt="select action" width="800"/><br/>
-The **Overview** tab for the selected product will show the number of API calls made against the subscribed quota.
+The **Overview** tab for the selected product will show the number of API calls made against the available quota.
 
 * **How can I consume the APIs directly in a website or app?**<br/>
-Download the OpenAPI 3.0 specification for your subscribed endpoints on the **Overview** tab for your product. Please include the API key in the header for your request to the endpoints. Select an endpoint in the **Endpoints** tab to try out a request in the portal and copy code snippets available in Curl, JavaScript, Python, Go, Ruby and PhP.
+Download the OpenAPI 3.0 specification for your subscribed endpoints on the **Overview** tab for your product. Please include the API key in the header for your request to the endpoints. Select an endpoint in the **Endpoints** tab to try out a request in the portal. You can also copy code snippets available in Curl, JavaScript, Python, Go, Ruby and PhP from the portal.
 
 * **What themes and authors are included?**
 The Quotes connector `Get Themes` action provides over 20 themes to choose from, including popular ones like humour, wisdom, science, inspiration, philosophy and happiness. The `Get Authors` action provides details for over 700 authors, personalities and celebrities. Most endpoints also include authors' images and wikipedia links, where available.<br/>
-<img src="https://vitacloud.blob.core.windows.net/company/authors1.png" alt="authors" width="400"/>
-<img src="https://vitacloud.blob.core.windows.net/company/themes.png" alt="themes" width="400"/>
-<img src="https://vitacloud.blob.core.windows.net/company/authors2.png" alt="authors" width="400"/>
+<img src="https://vitacloud.blob.core.windows.net/company/authors1.png" alt="authors" width="300"/>
+<img src="https://vitacloud.blob.core.windows.net/company/themes.png" alt="themes" width="300"/>
+<img src="https://vitacloud.blob.core.windows.net/company/authors2.png" alt="authors" width="300"/>
 
 * **Where can I reach out if I have a product query or require support?**<br/>
 Please send your query to <a href="mailto:support@vitacloud.co.uk">VitaCloud Support</a> or fill out the contact form on the <a href="https://www.vitacloud.co.uk" target="_blank">VitaCloud Website</a>.
