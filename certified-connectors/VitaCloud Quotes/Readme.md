@@ -2,9 +2,9 @@
 VitaCloud Quotes API provides a curated set of quotes by famous authors and celebrities, tagged with various themes such as faith, god, happiness, hope, humour, inspiration, knowledge, life lessons, love, motivation, philosophy, poetry, relationship, religion, romance, science, time, truth, and wisdom. VitaCloud Quotes API connector is a wrapper around the VitaCloud Quotes API that enables bringing the tailored, daily and random VitaCloud Quotes into your workspace using Microsoft Power Automate, Microsoft Power Apps, and Azure Logic Apps in your Azure and Office 365 subscription. 
 
 ## Publisher: VitaCloud Limited
-<a href="https://www.vitacloud.co.uk" target="_blank">VitaCloud Website</a>
-<a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a>
-<a href="mailto:support@vitacloud.co.uk">VitaCloud Support</a>
+<a href="https://www.vitacloud.co.uk" target="_blank">VitaCloud Website</a><br/>
+<a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a><br/>
+<a href="mailto:support@vitacloud.co.uk">VitaCloud Support</a><br/>
 
 ## Prerequisites
 You will need the following to proceed:
