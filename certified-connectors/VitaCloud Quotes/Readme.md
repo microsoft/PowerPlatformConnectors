@@ -73,9 +73,9 @@ Download the OpenAPI 3.0 specification for your subscribed endpoints on the **Ov
 
 * **What themes and authors are included?**
 The Quotes connector `Get Themes` action provides over 20 themes to choose from, including popular ones like humour, wisdom, science, inspiration, philosophy and happiness. The `Get Authors` action provides details for over 700 authors, personalities and celebrities. Most endpoints also include authors' images and wikipedia links, where available.<br/>
-<img src="https://vitacloud.blob.core.windows.net/company/authors1.png" alt="authors" width="300"/>
-<img src="https://vitacloud.blob.core.windows.net/company/themes.png" alt="themes" width="300"/>
-<img src="https://vitacloud.blob.core.windows.net/company/authors2.png" alt="authors" width="300"/>
+<img src="https://vitacloud.blob.core.windows.net/company/authors1.png" alt="authors" width="400"/>
+<img src="https://vitacloud.blob.core.windows.net/company/themes.png" alt="themes" width="400"/>
+<img src="https://vitacloud.blob.core.windows.net/company/authors2.png" alt="authors" width="400"/>
 
 * **Where can I reach out if I have a product query or require support?**<br/>
 Please send your query to <a href="mailto:support@vitacloud.co.uk">VitaCloud Support</a> or fill out the contact form on the <a href="https://www.vitacloud.co.uk" target="_blank">VitaCloud Website</a>.
