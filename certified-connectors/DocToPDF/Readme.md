@@ -35,7 +35,6 @@ Convert Word Document to PDF: Converts list attached word doc file to PDF file
 Goto website https://registration.powerstore.spotsolutions.com/ to register 
 Or contact Spot Solutions Support at support@spotsolutions.com to request the APIKey.
 
-
 ## Getting Started
 The first step in using this connector is having a List or Library prepared for the attachment or storage of your source word documents. Once you have this in place you can create a workflow that uses this connector to convert the source MS Word file into a PDF.
 

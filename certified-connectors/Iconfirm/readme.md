@@ -101,6 +101,15 @@ Risk assessments
 Incidents
 * `Find incidents`: Returns a list of all registered incidents.
 * `Get incident by Id`: Returns a single incident.
+* `Register incident`: Registeres a new incident.
+* `Update incident`: Updated the given incident.
+
+Dpia
+* `Find dpias`: Returns a list of all registered dpias .
+* `Get dpia by Id`: Returns a single dpia.
+* `Register dpia`: Registeres a new dpia.
+* `Update dpia`: Updated the given dpia.
+
 
 ### Additional operations for global systems
 Customers
@@ -114,4 +123,5 @@ Customers
 * Not all elements of the solution is available through our API and this Connector for requests or suggestions for additional operations and functionality please contact Iconfirm support.
 
 ## Help, Feedback and Additional documentation
+For additional information, feedback or help, have a look at our [website](https://www.iconfirm.eu/en/) and/or contact support through there.
 For additional information, feedback or help, have a look at our [website](https://www.iconfirm.eu/en/) and/or contact support through there.
