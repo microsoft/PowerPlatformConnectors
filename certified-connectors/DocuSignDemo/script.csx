@@ -712,15 +712,6 @@ public class Script : ScriptBase
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
 
-    // TODO: This map is added for backward compatibility. This will be removed once old events are deprecated
-	var envelopeEventMap = new Dictionary<string, string>() {
-        {"Sent", "envelope-sent"},
-        {"Delivered", "envelope-delivered"},
-        {"Completed", "envelope-completed"},
-        {"Declined", "envelope-declined"},
-        {"Voided", "envelope-voided"}
-    };
-
     body["allUsers"] = "true";
     body["allowEnvelopePublish"] = "true";
     body["includeDocumentFields"] = "true";
@@ -729,11 +720,9 @@ public class Script : ScriptBase
     body["name"] = original["name"]?.ToString();
 
     var envelopeEvent = original["envelopeEvents"]?.ToString();
-    var webhookEvent = envelopeEventMap.ContainsKey(envelopeEvent) ? envelopeEventMap[envelopeEvent] : envelopeEvent;
-
-    var webhookEventsArray = new JArray();
-    webhookEventsArray.Add(webhookEvent);
-    body["events"] = webhookEventsArray;
+    var envelopeEventsArray = new JArray();
+    envelopeEventsArray.Add(envelopeEvent);
+    body["envelopeEvents"] = envelopeEventsArray;
     body["configurationType"] = "custom";
     body["deliveryMode"] = "sim";
 
@@ -753,6 +742,49 @@ public class Script : ScriptBase
     
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    
+    return body;
+  }
+  
+  private JObject CreateHookEnvelopeV3BodyTransformation(JObject original)
+  {
+    var body = new JObject();
+    
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+
+    var envelopeEvent = original["envelopeEvents"]?.ToString();
+    var envelopeEventsArray = new JArray();
+    envelopeEventsArray.Add(envelopeEvent);
+    body["events"] = envelopeEventsArray;
+    body["configurationType"] = "custom";
+    body["deliveryMode"] = "sim";
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients'
+    ]";
+
+    JArray includeData = JArray.Parse(eventData);
+    body["eventData"] = new JObject
+    {
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
+    };
+    
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
   }
@@ -1314,6 +1346,11 @@ public class Script : ScriptBase
     if ("CreateHookEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeV2BodyTransformation).ConfigureAwait(false);
+    }
+	
+	if ("CreateHookEnvelopeV3".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateHookEnvelopeV3BodyTransformation).ConfigureAwait(false);
     }
 
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
