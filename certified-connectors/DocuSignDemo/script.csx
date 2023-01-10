@@ -163,6 +163,11 @@ public class Script : ScriptBase
                   ["type"] = "string",
                   ["x-ms-summary"] = "anchor string *"
                 },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "label"
+                },
                 ["anchorXOffset"] = new JObject
                 {
                   ["type"] = "string",
@@ -181,12 +186,6 @@ public class Script : ScriptBase
 
       if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
       {
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["tabLabel"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "label"
-        };
-        
         response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
         {
           ["type"] = "string",
