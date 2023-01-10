@@ -9,7 +9,7 @@ To authenticate (using Oauth 2.0), users you must acquire a **Client ID** and **
 - Log in and click on **My Account** on the left sidebar.
 - Click on **Integrations**
 - Enter the **Client Name** (use a name that best suits the integration)
-- Enter [https://global.consent.azure-apim.net/redirect](https://global.consent.azure-apim.net/redirect) for the **Refresh URL** field.
+- Enter [https://global.consent.azure-apim.net/redirect](https://global.consent.azure-apim.net/redirect) for the **Redirect URL** field.
 - Click **Submit** and note down the **Client ID** and **Client Secret**.
 
 ## Supported Operations
