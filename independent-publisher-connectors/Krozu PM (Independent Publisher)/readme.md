@@ -103,6 +103,12 @@ Unassign existing user from this Card with a specified Role.
 ### Action - Delete List
 Deletes the specified list as long as confirmed is 1 and the list is empty.
 
+### Test Operations within Krozu PM Connector
+![Test Result](20230110174945.png)  
+
+![Message Added to Krozu Board](20230110175604.png)  
+
+
 ## Known Issues and Limitations
 No identified issue yet. <br/>
 However, there is a set API usage limit clearly defined in the [terms of use](https://krozu.com/terms). You would need to contact Krozu via email: **support@krozu.com** if needs differs from the limitation.
