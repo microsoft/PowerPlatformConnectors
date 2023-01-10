@@ -1348,7 +1348,7 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
 	
-	if ("CreateHookEnvelopeV3".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("CreateHookEnvelopeV3".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeV3BodyTransformation).ConfigureAwait(false);
     }
