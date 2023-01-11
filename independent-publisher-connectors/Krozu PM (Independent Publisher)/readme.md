@@ -108,6 +108,27 @@ Deletes the specified list as long as confirmed is 1 and the list is empty.
 
 ![Message Added to Krozu Board](20230110175604.png)  
 
+### Krozu PM Connector Test within a Power Automate Flow
+
+### Overall Test Result
+<br/>
+![Flow Result](screenshots/20230110192809.png)  
+
+### Get - My Boards
+<br/>
+![Get - My Boards](screenshots/20230110193650.png)  
+
+### Action - Add List
+<br/>
+![Action - Add List](screenshots/20230110194131.png)  
+
+### Action - Add Card
+<br/>
+![Action - Add Card](screenshots/20230110194342.png)  
+
+### Action - Delete Card
+<br/>
+![Action - Delete Card](screenshots/20230110194547.png)
 
 ## Known Issues and Limitations
 No identified issue yet. <br/>
