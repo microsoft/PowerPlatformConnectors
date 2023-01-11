@@ -1,15 +1,12 @@
-## Tyntec Portability Check
-
-Adds the ability to check phone numbers against the tyntec number portability database to validate phone numbers. It can be used to increase conversion, improve phone number data mining, and reduce fraudulent SIM swaps attempts.
-
+## Phone Verification API
+Phone Verification service aims to determine validity, reachability and fraud risk of phone numbers entered into forms by users or auto dialers so that brands can ensure their customer records are accurate, improve conversion rates for customer outreach, and guard against bad actors.
 
 ### Use Cases of this connector
 - Validating Contact Phone numbers
 - Mining more data on your Contact
 - Understanding if you should use the SMS channel with the Contact
-- Fraud Prevention (detect SIM swaps)
+- Fraud Prevention 
 And many more!
-
 
 ## Pre-requisites
 You will need the following to proceed:
@@ -17,23 +14,17 @@ You will need the following to proceed:
 - [tyntec API Key](http://my.tyntec.com/api-settings)
 
 ## Supported requests
-- **CheckPhoneNumber** using tyntec Portability Check API [reference](https://api.tyntec.com/reference/#number-information-global-number-portability)
+- **Verify Phone Number** using tyntec Phone Verification API [reference](https://api.tyntec.com/reference/verification/current.html#phone-verification-api)
     - To make a successful request, please, populate the followings fields:
-        - *msisdn* - The Phone Number you want to check
+        - *Phone Numberr* - The Phone Number you want to check
 
 ## Interpreting received values
-- "requestId": The ID of your request
-- "msisdn": The phone number of interest, given in the international format
-- "ported": An indication of the porting status (True/False)
-- "errorCode": The reason for an unsuccessful attempt (if 'ffff' then the phone number doesn't exist)
-- "mcc": A representative MCC (Mobile Country Code) of the operator
-- "mnc": A representative MNC (Mobile Network Code) of the operator
-- "ttId": The respective tyntec ID of the network
-- "operator": The operator's name
-- "country": Country of its operator 
-- "timeZone": Timezone of the given Phone number
-- "technology": The technology used by the operator's network. Possible values are: GSM, MVNO GSM, GSM/CDMA, Satellite, CDMA, iDen, iDen/GSM, Pager, Fixed
-- "synchronous": true
+- **Validity Check**: check if the phone number is valid according to the numbering plan for that country.
+- **Active Status**: check if the phone number has been assigned to a subscriber by an operator.
+- **Number Type**: determine the phone number type to decide which technology to use to communicate.
+- **Mobile Operator**: identify the name and the country of the home network operator for the subscriber.
+- **Outreach Status**: check if an SMS can be delivered to the subscriber behind the phone number.
+- **Fraud Risk**: determine the likelihood of the phone number being used by a bad actor.
 
 ## How to get API key 
 Please [sign up for a free account](https://www.tyntec.com/create-account). In your account, select the [API settings](http://my.tyntec.com/api-settings) and copy your API key.
