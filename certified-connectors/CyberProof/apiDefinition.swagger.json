@@ -1,9 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0",
-    "title": "CyberProof Actions",
-    "description": "CyberProof CDC is a next generation incident management and response platform for building Security Operations Centers (SOCs). The platform is a key component of advanced security operations centers - supporting SOC management, orchestration, and incident response. Connect to CyberProof CDC to manage your incidents and communicate with analysts, and automate incident response activities.",
+    "version": "3.0",
+    "title": "CyberProof",
+    "description": "CDC is a next generation incident management and response platform offered by CyberProof, for building Security Operations Centers (SOCs). The platform is a key component of advanced security operations centers - supporting SOC management, orchestration, and incident response. The Connector interacts with CDC, offering a wide range of incident response automation activities including Alert and Incident creation, parsing and manipulation, as well as observable enrichment.",
     "contact": {
       "name": "CyberProof Support",
       "url": "https://go.cyberproof.com/contact-us",
@@ -30,11 +30,43 @@
     }
   },
   "paths": {
+	"/api/v1/actions/views/packs": {
+		"get": {
+			"description": "CyberProof Packs List.",
+			"summary": "CyberProof Packs List",
+			"operationId": "CPGetPacks",
+			"parameters": [{
+				"name": "category",
+				"type": "string",
+				"in": "query",
+				"description": "logic app for pack you selected.",
+                "x-nullable": true,
+				"x-ms-summary": "execution items"
+			}],
+			"responses": {
+				"200": {
+					"description": "List of Packs",
+					"schema": {
+						"type": "object"
+					}
+				}
+			},
+			"x-ms-visibility": "internal"
+		}
+	},
     "/api/v1/actions/azure-logic-apps": {
       "get": {
         "description": "CyberProof Actions List.",
         "summary": "CyberProof Actions List",
         "operationId": "CPGetActions",
+		"parameters": [{
+			"name": "pack",
+			"type": "string",
+			"in": "query",
+			"description": "Action for pack you selected.",
+			"required": true,
+			"x-ms-summary": "execution items"
+		}],
         "responses": {
           "200": {
             "description": "List of actions",
@@ -111,10 +143,37 @@
             "schema": {
               "type": "object",
               "required": [
-                "action",
-                "parameters"
+                "a_category",
+				"a_product",
+				"action",
+				"parameters"
               ],
               "properties": {
+				"a_category": {
+					"type": "string",
+					"description": "select Category",
+					"x-ms-url-encoding": "single",
+					"x-ms-summary": "Select Category",
+					"x-ms-dynamic-values": {
+						"operationId": "CPGetPacks",
+						"value-path": "category_name",
+						"value-title": "category_name"
+					}
+				},
+				"a_product": {
+					"type": "string",
+					"description": "select Product",
+					"x-ms-url-encoding": "single",
+					"x-ms-summary": "Select Product",
+					"x-ms-dynamic-values": {
+						"operationId": "CPGetPacks",
+						"value-path": "pack_list",
+						"value-title": "pack_list",
+						"parameters": {
+							"category": "a_category"
+						}
+					}
+				},
                 "action": {
                   "type": "string",
                   "description": "select action",
@@ -123,7 +182,10 @@
                   "x-ms-dynamic-values": {
                     "operationId": "CPGetActions",
                     "value-path": "ref",
-                    "value-title": "path"
+                    "value-title": "path",
+					"parameters": {
+						"pack": "a_product"
+					}
                   }
                 },
                 "parameters": {
@@ -205,6 +267,259 @@
           }
         },
         "x-ms-visibility": "internal"
+      }
+    },
+    "/api/v1/webhooks/azure-logic-apps": {
+      "get": {
+        "description": "CyberProof Triggers List.",
+        "summary": "CyberProof Triggers List",
+        "operationId": "CPGetTriggers",
+        "responses": {
+          "200": {
+            "description": "List of triggers",
+            "schema": {}
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/api/v1/webhooks/deregister/{action_name}/{id}": {
+      "delete": {
+        "description": "CyberProof Delete Trigger.",
+        "summary": "CyberProof Delete Trigger",
+        "operationId": "CPDeleteTrigger",
+        "parameters": [
+          {
+            "name": "action_name",
+            "type": "string",
+            "in": "path",
+            "description": "action name.",
+            "required": true,
+            "x-ms-summary": "action name"
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "in": "path",
+            "description": "webhook id.",
+            "required": true,
+            "x-ms-summary": "webhook id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger deregistration requested",
+            "schema": {}
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/api/v1/webhooks": {
+      "x-ms-notification-content": {
+        "description": "Webhook notification content",
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "CPGetActionOutputSchema",
+            "parameters": {
+              "action_ref": {
+                "parameter": "action"
+              }
+            },
+            "value-path": "output"
+          },
+          "x-ms-dynamic-properties": {
+            "operationId": "CPGetActionOutputSchema",
+            "parameters": {
+              "action_ref": {
+                "parameterReference": "actionReq/action"
+              }
+            },
+            "itemValuePath": "output"
+          }
+        }
+      },
+      "post": {
+        "description": "CyberProof Webhook Trigger",
+        "summary": "CyberProof Webhook Trigger",
+        "operationId": "CPTrigger",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "actionReq",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "action",
+                "parameters",
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "The callback URL.",
+                  "x-ms-url-encoding": "single",
+                  "x-ms-summary": "Url",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true,
+                  "title": "Url"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "select trigger",
+                  "x-ms-url-encoding": "single",
+                  "x-ms-summary": "Select Trigger",
+                  "x-ms-dynamic-values": {
+                    "operationId": "CPGetTriggers",
+                    "value-path": "ref",
+                    "value-title": "path"
+                  }
+                },
+                "parameters": {
+                  "description": "parameters description",
+                  "type": "object",
+                  "x-ms-dynamic-schema": {
+                    "operationId": "CPGetActionSchema",
+                    "parameters": {
+                      "action_ref": {
+                        "parameter": "action"
+                      }
+                    },
+                    "value-path": "items"
+                  },
+                  "x-ms-dynamic-properties": {
+                    "operationId": "CPGetActionSchema",
+                    "parameters": {
+                      "action_ref": {
+                        "parameterReference": "actionReq/action"
+                      }
+                    },
+                    "itemValuePath": "items"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook trigger registered successfully",
+            "schema": {}
+          }
+        },
+        "x-ms-trigger": "single"
+      }
+    },
+    "/api/v1/webhooks/user/actions/azure-logic-apps": {
+      "get": {
+        "description": "CyberProof Webhooks User Actions List.",
+        "summary": "CyberProof Webhooks User Actions List",
+        "operationId": "CPGetWebhooksActions",
+        "responses": {
+          "200": {
+            "description": "List of Webhooks Actions",
+            "schema": {}
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/api/v1/webhooks/user-action": {
+      "x-ms-notification-content": {
+        "description": "Webhook user action content",
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "CPGetActionOutputSchema",
+            "parameters": {
+              "action_ref": {
+                "parameter": "action"
+              }
+            },
+            "value-path": "output"
+          },
+          "x-ms-dynamic-properties": {
+            "operationId": "CPGetActionOutputSchema",
+            "parameters": {
+              "action_ref": {
+                "parameterReference": "actionReq/action"
+              }
+            },
+            "itemValuePath": "output"
+          }
+        }
+      },
+      "post": {
+        "description": "CyberProof User Action.",
+        "summary": "CyberProof User Action",
+        "operationId": "CPCreateWebhookExecution",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "actionReq",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "action",
+                "parameters",
+                "url"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "The callback URL.",
+                  "x-ms-url-encoding": "single",
+                  "x-ms-summary": "Url",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true,
+                  "title": "Url"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "select action",
+                  "x-ms-url-encoding": "single",
+                  "x-ms-summary": "Select Action",
+                  "x-ms-dynamic-values": {
+                    "operationId": "CPGetWebhooksActions",
+                    "value-path": "ref",
+                    "value-title": "path"
+                  }
+                },
+                "parameters": {
+                  "description": "parameters description",
+                  "type": "object",
+                  "x-ms-dynamic-schema": {
+                    "operationId": "CPGetActionSchema",
+                    "parameters": {
+                      "action_ref": {
+                        "parameter": "action"
+                      }
+                    },
+                    "value-path": "items"
+                  },
+                  "x-ms-dynamic-properties": {
+                    "operationId": "CPGetActionSchema",
+                    "parameters": {
+                      "action_ref": {
+                        "parameterReference": "actionReq/action"
+                      }
+                    },
+                    "itemValuePath": "items"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook user action was triggered successfully",
+            "schema": {}
+          }
+        }
       }
     }
   },
