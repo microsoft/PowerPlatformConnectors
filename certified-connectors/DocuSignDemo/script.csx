@@ -722,7 +722,7 @@ public class Script : ScriptBase
     var envelopeEvent = original["envelopeEvents"]?.ToString();
     var envelopeEventsArray = new JArray();
     envelopeEventsArray.Add(envelopeEvent);
-    body["envelopeEvent"] = envelopeEventsArray;
+    body["envelopeEvents"] = envelopeEventsArray;
     body["configurationType"] = "custom";
     body["deliveryMode"] = "sim";
 
@@ -743,6 +743,7 @@ public class Script : ScriptBase
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
+	
     return body;
   }
   
