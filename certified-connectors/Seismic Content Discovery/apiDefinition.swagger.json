@@ -1,0 +1,1779 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Seismic Content Discovery",
+    "description": "Seismic content discovery connector provides set of actions required for searching contents in various repositories like library, workspace, recents, favorites and predictive contents.",
+    "contact": {
+      "name": "Seismic",
+      "email": "support@seismic.com",
+      "url": "https://seismic.com"
+    },
+    "license": {
+      "name": "Seismic"
+    },
+    "version": "1.0"
+  },
+  "host": "api.seismic.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/integration/v2/predictiveContent/{predictiveContentId}/{contextId}": {
+      "get": {
+        "tags": [
+          "Predictive Content"
+        ],
+        "summary": "Get predictive contents for user",
+        "description": "Gets the list of predictive content for a given predictive content setting for the currently authenticated user.",
+        "operationId": "GetPredictiveContentResultSet",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "predictiveContentId",
+            "description": "Predictive content setting name",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Predictive content setting name"
+          },
+          {
+            "in": "path",
+            "name": "contextId",
+            "description": "ContextId of content like SalesForce, Sugar etc.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Context System Type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.PredictiveContent.PredictiveContentResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/v2/predictiveContent": {
+      "get": {
+        "tags": [
+          "Predictive Content"
+        ],
+        "summary": "Get the available predictive content settings",
+        "description": "Gets the list of predictive content settings the current user has access to.",
+        "operationId": "GetPredictiveSettings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "systemType",
+            "description": "The system type such as Salesforce, MicrosoftDynamicCRM, Oracle etc. Default is empty.",
+            "type": "string",
+            "x-ms-summary": "System Type",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contextType",
+            "description": "The context type such as Opportunity, Contact, Account, etc. Default is empty.",
+            "type": "string",
+            "x-ms-summary": "Context Type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.PredictiveContent.EmbeddedAppTab"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/v2/users/favorites": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user's favorite contents",
+        "description": "Get the current user's favorite contents.",
+        "operationId": "GetUserFavorites",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.DocCenter.ContentItem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/v2/users/recents": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user's recent contents",
+        "description": "Get the current user's recent contents.",
+        "operationId": "GetUserRecentContents",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.DocCenter.ContentItem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/v1/content/query": {
+      "post": {
+        "description": "Users can query all content that a user has access to using a search term, and further apply a content filter.",
+        "summary": "Search contents",
+        "tags": [
+          "ContentSearch"
+        ],
+        "operationId": "QueryContent",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "(Optional) Pass the continuation token you have received from previous search action response to get results from next page.",
+            "x-ms-summary": "Continuation Token"
+          },
+          {
+            "name": "Search request body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Seismic.Search.SearchQueryRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Seismic.Search.SearchResultV1"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Seismic.ContentManager.ContentCustomProperties": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Seismic.DocCenter.ContentInfo": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "description": "The content source from(value can be doccenter, newscenter, workspace, library, generatedlivedocs)",
+          "type": "string"
+        },
+        "name": {
+          "description": "Content name",
+          "type": "string"
+        },
+        "type": {
+          "description": "Content Type(value can be \"file\", \"url\")",
+          "type": "string"
+        },
+        "format": {
+          "description": "Content format",
+          "type": "string"
+        },
+        "majorVersion": {
+          "description": "Major Version",
+          "type": "string"
+        },
+        "minorVersion": {
+          "description": "Minor Version",
+          "type": "string"
+        },
+        "libraryContent": {
+          "$ref": "#/definitions/Seismic.LiveSend.LiveSendLinkContentBasicInfo"
+        },
+        "contentProfileId": {
+          "description": "Content profile Id.",
+          "type": "string"
+        },
+        "contentProfileName": {
+          "description": "Content profile name",
+          "type": "string"
+        },
+        "contentProfilePath": {
+          "description": "Content profile path",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contentProfilePathIds": {
+          "description": "Content profile path ids",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "description": "Content Id",
+          "type": "string"
+        },
+        "contentTypes": {
+          "description": "Content Types",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "versionId": {
+          "description": "Content Version Id",
+          "type": "string"
+        },
+        "contentType": {
+          "description": "Content Type",
+          "type": "string"
+        },
+        "workspaceVersionType": {
+          "description": "Workspace version type",
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.DocCenter.ContentItem": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "$ref": "#/definitions/Seismic.DocCenter.ContentInfo"
+        },
+        "publishedAt": {
+          "description": "Content published date",
+          "type": "string"
+        },
+        "modifiedAt": {
+          "description": "Content Modified Date",
+          "type": "string"
+        },
+        "addedAt": {
+          "description": "Content added date",
+          "type": "string"
+        },
+        "universalLink": {
+          "description": "Content universal link",
+          "type": "string"
+        },
+        "urlObjectUrl": {
+          "description": "Origin URL",
+          "type": "string"
+        },
+        "thumbnailId": {
+          "description": "Content thumbnail id",
+          "type": "string"
+        },
+        "thumbnailUrl": {
+          "description": "Content thumbnail Url",
+          "type": "string"
+        },
+        "sourceBlobId": {
+          "description": "Source blob id",
+          "type": "string"
+        },
+        "sourceBlobDownloadUrl": {
+          "description": "Source blob download Url",
+          "type": "string"
+        },
+        "sourceContainerName": {
+          "description": "Source Container Name",
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "deliveryOptions": {
+          "description": "Content delivery options",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blockedDeliveryOptions": {
+          "description": "Content blocked delivery options",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedDeliveryOptions": {
+          "description": "Content allowed delivery options",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profileVersionId": {
+          "description": "Profile Version Id",
+          "type": "string"
+        },
+        "userId": {
+          "description": "For workspace content, user who created or shared content",
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.LibraryContentManagement.UrlInfo": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "openInNewWindow": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.LibraryWorkflow.LibraryContent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "versionId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "teamsiteId": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.LiveSend.LiveSendLinkContentBasicInfo": {
+      "description": "LiveSend link content Basic Info.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Content Id",
+          "type": "string"
+        },
+        "versionId": {
+          "description": "Content Version Id",
+          "type": "string"
+        },
+        "teamsiteId": {
+          "description": "TeamSiteId",
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.PredictiveContent.EmbeddedAppTab": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "systemType": {
+          "type": "string"
+        },
+        "contextType": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.PredictiveContent.PredictiveContentHierarchy": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.PredictiveContent.PredictiveContentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "score": {
+          "$ref": "#/definitions/Seismic.PredictiveContent.PredictiveContentScore"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "contentProfileId": {
+          "type": "string"
+        },
+        "url": {
+          "$ref": "#/definitions/Seismic.LibraryContentManagement.UrlInfo"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.ContentManager.ContentCustomProperties"
+          }
+        },
+        "hierarchy": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.PredictiveContent.PredictiveContentHierarchy"
+          }
+        },
+        "applicationUrls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.WorkSpaceContentManager.ApplicationUrl"
+          }
+        },
+        "libraryContent": {
+          "$ref": "#/definitions/Seismic.LibraryWorkflow.LibraryContent"
+        },
+        "deliveryOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.WorkSpaceContentManager.WsDeliveryOption"
+          }
+        }
+      }
+    },
+    "Seismic.PredictiveContent.PredictiveContentScore": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "format": "double",
+          "type": "number"
+        },
+        "rank": {
+          "format": "double",
+          "type": "number"
+        }
+      }
+    },
+    "Seismic.WorkSpaceContentManager.ApplicationUrl": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.WorkSpaceContentManager.WsDeliveryOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.ConditionExpressionInfo": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "title": "Attribute"
+        },
+        "operator": {
+          "type": "string",
+          "title": "Operator"
+        },
+        "value": {
+          "type": "string",
+          "title": "Value"
+        }
+      }
+    },
+    "Seismic.Search.FilterExpressionInfo": {
+      "type": "object",
+      "properties": {
+        "conditions": {
+          "description": "Represent a list of inner conditions",
+          "type": "array",
+          "x-ms-summary": "Condition",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.ConditionExpressionInfo"
+          }
+        },
+        "filters": {
+          "description": "Represent a list of inner filters",
+          "type": "array",
+          "x-ms-summary": "Filter",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.FilterExpressionInfo"
+          }
+        },
+        "operator": {
+          "description": "Represent the operator to apply on the condition list",
+          "type": "string",
+          "title": "Operator"
+        }
+      }
+    },
+    "Seismic.Search.SearchOptions": {
+      "type": "object",
+      "properties": {
+        "pageSize": {
+          "format": "int32",
+          "description": "(Optional)  Any number between 0 and 100. Default value of 40.",
+          "type": "integer",
+          "title": "Page Size"
+        },
+        "searchFields": {
+          "description": "search fields",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "(Optional) This specifies where in the content Seismic search service conducts the search.",
+            "title": "Search Fields",
+            "enum": [
+              "Name",
+              "Description",
+              "Body",
+              "Properties"
+            ]
+          }
+        },
+        "returnFields": {
+          "description": "return fields",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "(Optional) This specifies the content property fields that Seismic search service returns for matching content found.",
+            "title": "Return Fields",
+            "enum": [
+              "Repository",
+              "Name",
+              "TeamsiteId",
+              "Id",
+              "VersionId",
+              "Type",
+              "ApplicationUrls",
+              "Format",
+              "Description",
+              "Properties",
+              "ThumbnailUrl",
+              "DownloadUrl",
+              "CreatedDate",
+              "PublishDate",
+              "ModifiedDate",
+              "MajorVersion",
+              "MinorVersion"
+            ]
+          }
+        }
+      }
+    },
+    "Seismic.Search.SearchQueryRequest": {
+      "type": "object",
+      "properties": {
+        "term": {
+          "description": "Search term",
+          "type": "string",
+          "title": "Search Term"
+        },
+        "options": {
+          "$ref": "#/definitions/Seismic.Search.SearchOptions"
+        },
+        "sort": {
+          "description": "Sort criteria",
+          "type": "array",
+          "x-ms-summary": "Sort",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SortConstraint"
+          }
+        },
+        "filter": {
+          "$ref": "#/definitions/Seismic.Search.FilterExpressionInfo"
+        }
+      }
+    },
+    "Seismic.Search.SortConstraint": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "(Optional) This will allow search to sort search results on selected fields.",
+          "title": "Field"
+        },
+        "order": {
+          "$ref": "#/definitions/Seismic.Search.SortConstraintDirection",
+          "title": "Order",
+          "type": "string",
+          "x-ms-summary": "Order",
+          "enum": [
+            "Asc",
+            "Desc"
+          ]
+        }
+      }
+    },
+    "Seismic.Search.SortConstraintDirection": {
+      "enum": [
+        "Asc",
+        "Desc"
+      ],
+      "type": "string",
+      "x-ms-summary": "Order"
+    },
+    "Seismic.Search.ContentOwnerInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "fullname": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.ContentTypeMappingEntity": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Seismic.Search.CustomPropertyDefinition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "teamsiteId": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.CustomPropertyValueDefinition"
+          }
+        }
+      }
+    },
+    "Seismic.Search.CustomPropertyValueDefinition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.FolderType": {
+      "enum": [
+        "ControlCenter",
+        "DocCenter",
+        "WorkSpace",
+        "WorkSpaceShared",
+        "WorkSpaceContextual",
+        "Others"
+      ],
+      "type": "string"
+    },
+    "Seismic.Search.PageSize": {
+      "type": "object",
+      "properties": {
+        "height": {
+          "format": "double",
+          "type": "number"
+        },
+        "width": {
+          "format": "double",
+          "type": "number"
+        }
+      }
+    },
+    "Seismic.Search.SearchInputRequest": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "$ref": "#/definitions/Seismic.Search.SearchRequestInputFilter"
+        },
+        "disableDidYouMean": {
+          "type": "boolean"
+        },
+        "enableMultiFacetSearch": {
+          "type": "boolean"
+        },
+        "includeThumbnailUrl": {
+          "type": "boolean"
+        },
+        "includeAppTypeFacet": {
+          "type": "boolean"
+        },
+        "highlightPostTag": {
+          "type": "string"
+        },
+        "highlightPreTag": {
+          "type": "string"
+        },
+        "options": {
+          "$ref": "#/definitions/Seismic.Search.SearchRequestOptions"
+        },
+        "sortOrder": {
+          "$ref": "#/definitions/Seismic.Search.SortOrder"
+        },
+        "sort": {
+          "type": "string"
+        },
+        "page": {
+          "$ref": "#/definitions/Seismic.Search.SearchRequestInputPage"
+        },
+        "searchTerm": {
+          "type": "string"
+        },
+        "languageOverride": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.SearchQueryState": {
+      "type": "object",
+      "properties": {
+        "queryId": {
+          "type": "string"
+        },
+        "cycleId": {
+          "type": "string"
+        },
+        "cycleIndex": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "parameterHash": {
+          "type": "string"
+        },
+        "lastSearchTerm": {
+          "type": "string"
+        },
+        "lastSearchScope": {
+          "type": "string"
+        },
+        "lastSearchSort": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.SearchRequestFolderFilter": {
+      "type": "object",
+      "properties": {
+        "folderPath": {
+          "type": "string"
+        },
+        "currentTeamSiteId": {
+          "type": "string"
+        },
+        "sharedTeamSiteId": {
+          "type": "string"
+        },
+        "profileVersionId": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.SearchRequestInputCustomProperty": {
+      "type": "object",
+      "properties": {
+        "propName": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Seismic.Search.SearchRequestInputFilter": {
+      "type": "object",
+      "properties": {
+        "appType": {
+          "type": "string"
+        },
+        "deliveryOptionsAny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deliveryOptionsAll": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contentSources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludedAppTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contentTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contentProfiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fullPathIds": {
+          "type": "string"
+        },
+        "seismicProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchRequestInputCustomProperty"
+          }
+        },
+        "customProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchRequestInputCustomProperty"
+          }
+        },
+        "folder": {
+          "$ref": "#/definitions/Seismic.Search.SearchRequestFolderFilter"
+        },
+        "excludeFolder": {
+          "type": "boolean"
+        },
+        "includeSubFolder": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Seismic.Search.SearchRequestInputPage": {
+      "type": "object",
+      "properties": {
+        "pageIndex": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "pageSize": {
+          "format": "int32",
+          "type": "integer"
+        }
+      }
+    },
+    "Seismic.Search.SearchRequestOptions": {
+      "type": "object",
+      "properties": {
+        "includeDebugInfo": {
+          "type": "boolean"
+        },
+        "includeDetailedTimingInfo": {
+          "type": "boolean"
+        },
+        "includeSearchQueryInOutput": {
+          "type": "boolean"
+        },
+        "includeSearchQueryTemplateInOutput": {
+          "type": "boolean"
+        },
+        "filterOnUserPreferredLanguages": {
+          "type": "boolean"
+        },
+        "overrideSearchQueryTemplate": {
+          "type": "string"
+        },
+        "queryTemplate": {
+          "type": "string"
+        },
+        "overrideIndexName": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "serviceResult": {
+          "$ref": "#/definitions/Seismic.Search.SearchResultV1ServiceResult"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1CallInfo": {
+      "type": "object",
+      "properties": {
+        "detailedTiming": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1TimingDetail"
+          }
+        },
+        "getUserInfo": {
+          "format": "double",
+          "type": "number"
+        },
+        "getSearchCredentials": {
+          "format": "double",
+          "type": "number"
+        },
+        "getActiveSearchIndex": {
+          "format": "double",
+          "type": "number"
+        },
+        "buildSearchQuery": {
+          "format": "double",
+          "type": "number"
+        },
+        "executeSearchQuery": {
+          "format": "double",
+          "type": "number"
+        },
+        "executeSearchQueryGeoLag": {
+          "format": "double",
+          "type": "number"
+        },
+        "executeSearchQueryFromElastic": {
+          "format": "double",
+          "type": "number"
+        },
+        "processResults": {
+          "format": "double",
+          "type": "number"
+        },
+        "processResultLocations": {
+          "format": "double",
+          "type": "number"
+        },
+        "processResultHighlights": {
+          "format": "double",
+          "type": "number"
+        },
+        "processResultFacets": {
+          "format": "double",
+          "type": "number"
+        },
+        "processAggregations": {
+          "format": "double",
+          "type": "number"
+        },
+        "handleSecurity": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "rewriteCallInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1CallInfo"
+          }
+        },
+        "serviceResponseSize": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "serviceCall": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "errorMessage": {
+          "type": "string"
+        },
+        "stackTrace": {
+          "type": "string"
+        },
+        "docsFound": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "docsReturned": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "tenant": {
+          "type": "string"
+        },
+        "indexName": {
+          "type": "string"
+        },
+        "includesRewrite": {
+          "type": "boolean"
+        },
+        "rewriteType": {
+          "type": "string"
+        },
+        "searchServiceUri": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1Document": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "format": "double",
+          "type": "number"
+        },
+        "queryPartHits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cid": {
+          "type": "string"
+        },
+        "contentId": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "customProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.CustomPropertyDefinition"
+          }
+        },
+        "createTime": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "expirationDate": {
+          "type": "string"
+        },
+        "versionCreatedDate": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "assetType": {
+          "type": "string"
+        },
+        "contentTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contentProfiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profileVersions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isFolder": {
+          "type": "boolean"
+        },
+        "folderType": {
+          "$ref": "#/definitions/Seismic.Search.FolderType"
+        },
+        "highlights": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1Highlight"
+          }
+        },
+        "isDynamic": {
+          "type": "boolean"
+        },
+        "isLatestVersion": {
+          "type": "boolean"
+        },
+        "lastUpdatedTime": {
+          "type": "string"
+        },
+        "contentSources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1Location"
+          }
+        },
+        "majorVersion": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "minorVersion": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nativeFormat": {
+          "type": "string"
+        },
+        "publishTime": {
+          "type": "string"
+        },
+        "size": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "pages": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "pageSize": {
+          "$ref": "#/definitions/Seismic.Search.PageSize"
+        },
+        "isPromoted": {
+          "type": "boolean"
+        },
+        "sourceBlobId": {
+          "type": "string"
+        },
+        "sourceContainerName": {
+          "type": "string"
+        },
+        "thumbnailId": {
+          "type": "string"
+        },
+        "thumbnailUrl": {
+          "description": "URL to download the thumbnail of the document",
+          "type": "string"
+        },
+        "sourceBlobDownloadUrl": {
+          "description": "URL to download the blob of the document",
+          "type": "string"
+        },
+        "thumbnailRelativePathWithSignature": {
+          "description": "Thumbnail relative path from blob storage, compatible with image resize",
+          "type": "string"
+        },
+        "originUrl": {
+          "type": "string"
+        },
+        "urlObjectOpenMode": {
+          "type": "string"
+        },
+        "urlObjectUrl": {
+          "type": "string"
+        },
+        "versionId": {
+          "type": "string"
+        },
+        "teamSiteId": {
+          "type": "string"
+        },
+        "workSpaceIsGlobal": {
+          "type": "boolean"
+        },
+        "workSpaceVersionType": {
+          "type": "string"
+        },
+        "rating": {
+          "format": "double",
+          "type": "number"
+        },
+        "effectiveness": {
+          "format": "double",
+          "type": "number"
+        },
+        "popularity": {
+          "format": "double",
+          "type": "number"
+        },
+        "insightTag": {
+          "type": "string"
+        },
+        "canCustomize": {
+          "type": "boolean"
+        },
+        "canBeMixed": {
+          "type": "boolean"
+        },
+        "owner": {
+          "$ref": "#/definitions/Seismic.Search.ContentOwnerInfo"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1Facet": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "order": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "type": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1FacetValue"
+          }
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1FacetValue": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "value": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "isHybrid": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1Folder": {
+      "type": "object",
+      "properties": {
+        "contentId": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "folderType": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/definitions/Seismic.Search.SearchResultV1Location"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1Highlight": {
+      "type": "object",
+      "properties": {
+        "matchedText": {
+          "type": "string"
+        },
+        "matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1HighlightDetail"
+          }
+        },
+        "propertyName": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1HighlightDetail": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "count": {
+          "format": "int64",
+          "type": "integer"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1Location": {
+      "type": "object",
+      "properties": {
+        "appType": {
+          "type": "string"
+        },
+        "fullPath": {
+          "type": "string"
+        },
+        "profileItemId": {
+          "type": "string"
+        },
+        "fullPathName": {
+          "type": "string"
+        },
+        "isMajorLocation": {
+          "type": "boolean"
+        },
+        "publishDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "profileId": {
+          "type": "string"
+        },
+        "repositoryId": {
+          "type": "string"
+        },
+        "repositoryName": {
+          "type": "string"
+        },
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "parentsByName": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "versionId": {
+          "type": "string"
+        },
+        "locationCount": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "urlLink": {
+          "type": "string"
+        },
+        "deliveryOptionWhitelist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deliveryOptionBlacklist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1QueryRewrite": {
+      "type": "object",
+      "properties": {
+        "rewriteDetail": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Seismic.Search.SearchResultV1QueryRewriteDetail"
+            }
+          }
+        },
+        "initialSearchTerm": {
+          "type": "string"
+        },
+        "finalSearchTerm": {
+          "type": "string"
+        },
+        "finalSearchTermFuzzy": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1QueryRewriteDetail": {
+      "type": "object",
+      "properties": {
+        "term": {
+          "type": "string"
+        },
+        "rewrittenTerm": {
+          "type": "string"
+        },
+        "suggesterField": {
+          "type": "string"
+        },
+        "score": {
+          "format": "double",
+          "type": "number"
+        },
+        "frequency": {
+          "format": "int64",
+          "type": "integer"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1ServiceResult": {
+      "type": "object",
+      "properties": {
+        "actualSearchTerm": {
+          "type": "string"
+        },
+        "didYouMean": {
+          "type": "string"
+        },
+        "folders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1Folder"
+          }
+        },
+        "searchId": {
+          "type": "string"
+        },
+        "scrollId": {
+          "type": "string"
+        },
+        "searchQueryId": {
+          "description": "Duplicate info as query state, to be removed once the state is consolidated",
+          "type": "string"
+        },
+        "searchCycleId": {
+          "description": "Duplicate info as query state, to be removed once the state is consolidated",
+          "type": "string"
+        },
+        "queryState": {
+          "$ref": "#/definitions/Seismic.Search.SearchQueryState"
+        },
+        "totalCount": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "queryTimeInMs": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "serviceTimeInMs": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "facets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1Facet"
+          }
+        },
+        "aggregations": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1Document"
+          }
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1User"
+          }
+        },
+        "detailInfo": {
+          "$ref": "#/definitions/Seismic.Search.ServiceDetailResultInfo"
+        },
+        "rewriteInfo": {
+          "$ref": "#/definitions/Seismic.Search.SearchResultV1QueryRewrite"
+        },
+        "contentTypeMapping": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Seismic.Search.ContentTypeMappingEntity"
+            }
+          }
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1TimingDetail": {
+      "type": "object",
+      "properties": {
+        "step": {
+          "type": "string"
+        },
+        "timeInMs": {
+          "format": "int64",
+          "type": "integer"
+        }
+      }
+    },
+    "Seismic.Search.SearchResultV1User": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "format": "double",
+          "type": "number"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "pageId": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "userType": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "biography": {
+          "type": "string"
+        },
+        "organization": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "defaultTeamSiteId": {
+          "type": "string"
+        },
+        "currentTeamSiteId": {
+          "type": "string"
+        },
+        "defaultContentProfileId": {
+          "type": "string"
+        },
+        "thumbnailId": {
+          "type": "string"
+        },
+        "thumbnailRelativePathWithSignature": {
+          "description": "Thumbnail relative path from blob storage, compatible with image resize",
+          "type": "string"
+        },
+        "dateCreated": {
+          "type": "string"
+        },
+        "dateModified": {
+          "type": "string"
+        },
+        "customProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.CustomPropertyDefinition"
+          }
+        },
+        "highlights": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SearchResultV1Highlight"
+          }
+        },
+        "thumbnailUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.ServiceDetailResultInfo": {
+      "type": "object",
+      "properties": {
+        "callInfo": {
+          "$ref": "#/definitions/Seismic.Search.SearchResultV1CallInfo"
+        },
+        "queryString": {},
+        "indexName": {
+          "type": "string"
+        },
+        "searchDetail": {
+          "type": "string"
+        },
+        "extraMetrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Seismic.Search.SortOrder": {
+      "enum": [
+        "Default",
+        "Ascending",
+        "Descending",
+        "Reversed"
+      ],
+      "type": "string"
+    }
+  },
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://auth.seismic.com/central/connect/authorize",
+      "tokenUrl": "https://auth.seismic.com/central/connect/token",
+      "scopes": {
+        "seismic.self.view seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage seismic.search": "seismic.self.view seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage seismic.search"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Predictive Content"
+    }
+  ],
+  "security": [
+    {
+      "oauth2-auth": [
+        "seismic.self.view seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage seismic.search"
+      ]
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://seismic.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://seismic.com/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing;Sales and CRM"
+    }
+  ]
+}

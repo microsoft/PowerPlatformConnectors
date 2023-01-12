@@ -1,5 +1,5 @@
 # EBMS
-EBMS is an ERP Software enabling small businesses to simplify and automate with one powerful solution.  They are able to control inventory, sell product, manage labor and connect financials.
+EBMS is an ERP Software enabling small businesses to simplify and automate with one powerful solution. They are able to control inventory, sell product, manage labor, and connect financials.
 
 ## Publisher: Eagle Business Software
 
