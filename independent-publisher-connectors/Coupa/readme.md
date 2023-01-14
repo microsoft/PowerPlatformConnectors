@@ -16,6 +16,10 @@ Login to your Coupa instance with an administrator\integration administrator acc
 
 ![image](https://user-images.githubusercontent.com/16315601/210454583-f5083eac-ffec-457d-8dfc-1f452afdbf76.png)
 
+Once saved open up the newly saved connector and copy the details mentioned on the screen
+![image](https://user-images.githubusercontent.com/16315601/212443775-50ed7b37-74f1-4488-9f8a-62a0ea618a1a.png)
+
+For more information Please see here - https://compass.coupa.com/en-us/products/core-platform/integration-playbooks-and-resources/integration-knowledge-articles/oauth-2.0-getting-started-with-coupa-api
 
 ## Power Automate
 
