@@ -1,17 +1,8 @@
-## U.S. Bank 
-U.S. Bank provides a treasury management connector to create flexible and seamless banking experiences for your organization. Easily connect your ERP and other treasury applications to our Corporate Account Information and RTP® – Real-Time Payments services. Instantly access company accounts, transaction data and initiate and manage real-time payments through The Clearing House RTP® network.
+# U.S. Bank Treasury Management
+U.S. Bank provides a treasury management api's to create flexible and seamless banking experiences for your organization. Easily connect your ERP and other treasury applications to our Corporate Account Information and RTP® – Real-Time Payments services. Instantly access company accounts, transaction data and initiate and manage real-time payments through The Clearing House RTP® network.
 
-## Capabilities
-### Corporate Account Information 
-* Retrieve lists of company deposit accounts.
-* Collect detailed account balances for current day and previous day, with collection capability of up to 50 accounts at a time. Balance information includes an available balance, ledger balance and collected balances for previous and current day.
-* Receive transactions data for an account on a current day and previous day basis. Historical transactions are available up to 60 days with options for an additional retention period of 12 or 24 months.
-
-### RTP® - Real-Time Payments
-* Send transfers 24 hours a day, 7 days a week, 365 days a year.
-* Initiate and manage real-time clearing and settlement of invoices.
-* Initiate request for payment to receive payments from customers and suppliers.
-* Validate that the receiving bank is part of the RTP network.
+## Publisher
+U.S. Bank
 
 ## Prerequisites
 * An account on the U.S. Bank developer portal.
@@ -19,7 +10,21 @@ U.S. Bank provides a treasury management connector to create flexible and seamle
 * API credentials from the U.S. Bank API Onboarding team.
 * SinglePoint user credentials from the U.S. Bank Treasury Management implementation team.
 
-## How to get connected 
+## Supported Operations
+| Operation Name                            | Description                                                                                                                                        |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **InitiateRTPCreditTransfer**                | Initiate an RTP credit transfer Transaction                                                                            |
+| **GetRTPCreditTransfer**      | Retrieve status and details of a RTP credit transfer Transaction sent                                                     |
+| **InitiateRFP**                | Initiate an RTP request for payment (RFP)                                                                |
+| **GetRFP**       | Retrieve status and details of an RFP sent                                                                         |
+| **GetRTPEligibility**         | Check if receiver's bank is part of the RTP Network                                                                         |
+| **GetAccountsList**    | Get list of accounts for the authorized customer                                                               |
+| **GetAccountBalancesOfCurrentDay**         | Get account balances for an array of accounts for current-day                                                |
+| **GetAccountBalancesOfPreviousDay**  | Get account balances for an array of accounts for previous-day                                                         |
+| **GetTransactionsOfCurrentDay**         | Get transactions of an account for current-day                                          |
+| **GetTransactionsOfPreviousDay**  | Get transactions of an account for prior business days over a date range                                                |
+
+## Obtaining Credentials
 1. Sign up to create a U.S Bank Developer Portal account on our [Developer Portal](https://developer.usbank.com/). Signing up is easy with on-screen instructions that guide you along the way. If you need help, contact us.
 
 2. [Contact us](https://developer.usbank.com/contact) to request the keys. Enter the message below in the “Message” field on the [Contact us](https://developer.usbank.com/contact) form.
@@ -43,17 +48,8 @@ U.S. Bank provides a treasury management connector to create flexible and seamle
 
 8. You’re now ready to use the connector.
 
-## Supported Operations
+## Known Issues and Limitations
+* OAuth MFA required, our API Onboarding team will coordinate generating your SinglePoint and OAuth registrations
 
-| Operation Name                            | Description                                                                                                                                        |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **InitiateRTPCreditTransfer**                | Initiate an RTP credit transfer Transaction                                                                            |
-| **GetRTPCreditTransfer**      | Retrieve status and details of a RTP credit transfer Transaction sent                                                     |
-| **InitiateRFP**                | Initiate an RTP request for payment (RFP)                                                                |
-| **GetRFP**       | Retrieve status and details of an RFP sent                                                                         |
-| **GetRTPEligibility**         | Check if receiver's bank is part of the RTP Network                                                                         |
-| **GetAccountsList**    | Get list of accounts for the authorized customer                                                               |
-| **GetAccountBalancesOfCurrentDay**         | Get account balances for an array of accounts for current-day                                                |
-| **GetAccountBalancesOfPreviousDay**  | Get account balances for an array of accounts for previous-day                                                         |
-| **GetTransactionsOfCurrentDay**         | Get transactions of an account for current-day                                          |
-| **GetTransactionsOfPreviousDay**  | Get transactions of an account for prior business days over a date range                                                |
+## Deployment Instructions
+* N/A
