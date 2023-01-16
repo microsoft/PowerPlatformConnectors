@@ -3,32 +3,110 @@
   "info": {
     "title": "Airmeet",
     "description": "Airmeet is the fastest growing platform for hosting a rich variety of virtual events. From Hackathons to ice-breakers, panel discussions to workshops, Airmeet's intuitive experience delivers on organisers expectations for a wide range of events and not just conferences.",
-    "version": "1.0",
+    "version": "2.0",
     "contact": {
-      "name": "Airmeet Platform",
+      "name": "Airmeet",
       "url": "https://www.airmeet.com",
       "email": "platform@airmeet.com"
     }
   },
   "host": "api-gateway.airmeet.com",
   "basePath": "/",
-  "schemes": ["https"],
-  "consumes": ["application/json"],
-  "produces": ["application/json"],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
-    "/prod/platform-integration/v1/webhook-register": {
+    "/platform-integration/v1/webhook-register": {
       "x-ms-notification-content": {
         "description": "Success",
         "schema": {
           "type": "object",
           "properties": {
-            "id": {
+            "airmeetName": {
               "type": "string",
-              "description": "id"
+              "description": "Airmeet name"
+            },
+            "firstName": {
+              "type": "string",
+              "description": "First Name"
+            },
+            "lastName": {
+              "type": "string",
+              "description": "Last Name"
             },
             "name": {
               "type": "string",
               "description": "name"
+            },
+            "email": {
+              "type": "string",
+              "description": "email"
+            },
+            "city": {
+              "type": "string",
+              "description": "city"
+            },
+            "country": {
+              "type": "string",
+              "description": "country"
+            },
+            "designation": {
+              "type": "string",
+              "description": "Designation"
+            },
+            "organization": {
+              "type": "string",
+              "description": "organization"
+            },
+            "registrationTime": {
+              "type": "string",
+              "description": "Registration Time"
+            },
+            "entryLink": {
+              "type": "string",
+              "description": "Entry Link"
+            },
+            "user_id": {
+              "type": "string",
+              "description": "user id"
+            },
+            "recordings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "link": {
+                    "type": "string",
+                    "description": "link"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "session Id"
+                  }
+                }
+              }
+            },
+            "polls": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "description": "question"
+                  },
+                  "answer": {
+                    "type": "string",
+                    "description": "answer"
+                  }
+                }
+              }
             },
             "status": {
               "type": "string",
@@ -67,6 +145,47 @@
                 }
               },
               "description": "tables"
+            },
+            "questions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "description": "question"
+                  },
+                  "session_id": {
+                    "type": "string",
+                    "description": "session id"
+                  },
+                  "time_stamp": {
+                    "type": "string",
+                    "description": "time stamp"
+                  },
+                  "upvoteCount": {
+                    "type": "integer",
+                    "description": "up vote Count"
+                  }
+                }
+              },
+              "description": "question"
+            },
+            "interested_in_being_contacted": {
+              "type": "boolean",
+              "description": "interested in being contacted"
+            },
+            "time_stamp": {
+              "type": "string",
+              "description": "time stamp"
+            },
+            "userId": {
+              "type": "string",
+              "description": "user id"
+            },
+            "visits": {
+              "type": "integer",
+              "description": "visits count"
             },
             "users": {
               "type": "array",
@@ -312,7 +431,7 @@
           }
         },
         "summary": "Register an Airmeet Trigger",
-        "description": "Select a trigger from the available options. Setup reminders and alerts based on event registration, attendance, event start and end time",
+        "description": "Select a trigger from the available options. Setup reminders and alerts based on event registration, attendance, polls, event start and end time",
         "operationId": "AirmeetTriggers",
         "x-ms-trigger": "single",
         "parameters": [
@@ -327,7 +446,30 @@
               "operationId": "GetAirmeets",
               "value-path": "uid",
               "value-collection": "data",
-              "value-title": "name"
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "description": "Airmeet Session ID",
+            "x-ms-dynamic-values": {
+              "operationId": "AirmeetSessions",
+              "value-path": "sessionid",
+              "value-collection": "sessions",
+              "value-title": "name",
+              "parameters": {
+                "airmeetId": {
+                  "parameter": "airmeetId"
+                }
+              }
             }
           },
           {
@@ -362,25 +504,33 @@
                   "description": "Trigger Id",
                   "title": "triggerMetaInfoId",
                   "enum": [
-                    "trigger.airmeet.registrant.added",
-                    "trigger.airmeet.attendee.added",
-                    "trigger.airmeet.attendee.joined",
                     "trigger.airmeet.created",
+                    "trigger.airmeet.attendee.added",
                     "trigger.airmeet.started",
                     "trigger.airmeet.finished",
-                    "trigger.airmeet.reminder"
+                    "trigger.airmeet.reminder",
+                    "trigger.airmeet.recording.available",
+                    "trigger.airmeet.registrant.added",
+                    "trigger.airmeet.attendee.joined",
+                    "trigger.session.attendee.joined",
+                    "trigger.airmeet.polls",
+                    "trigger.airmeet.questions",
+                    "trigger.attendee.booth.joined"
                   ],
                   "default": "trigger.airmeet.registrant.added",
                   "x-ms-visibility": "important"
                 }
               },
-              "required": ["url", "triggerMetaInfoId"]
+              "required": [
+                "url",
+                "triggerMetaInfoId"
+              ]
             }
           }
         ]
       }
     },
-    "/api/v1/airmeets": {
+    "/airmeets": {
       "get": {
         "responses": {
           "200": {
@@ -454,10 +604,31 @@
         "description": "Get Airmeets",
         "operationId": "GetAirmeets",
         "x-ms-visibility": "advanced",
-        "parameters": []
+        "parameters": [
+          {
+            "name": "allAirmeets",
+            "in": "query",
+            "required": true,
+            "type": "boolean",
+            "default": true,
+            "description": "Get All Airmeet",
+            "x-ms-summary": "Get All Airmeet",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "crmName",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "default": "MICROSOFT_DYNAMICS",
+            "description": "CRM Name",
+            "x-ms-summary": "CRM Name",
+            "x-ms-visibility": "internal"
+          }
+        ]
       }
     },
-    "/api/v1/public/airmeet": {
+    "/airmeet": {
       "post": {
         "responses": {
           "200": {
@@ -556,7 +727,11 @@
                     }
                   },
                   "description": "Event timing",
-                  "required": ["endTime", "timezone", "startTime"]
+                  "required": [
+                    "endTime",
+                    "timezone",
+                    "startTime"
+                  ]
                 },
                 "config": {
                   "type": "object",
@@ -565,7 +740,10 @@
                       "type": "boolean",
                       "description": "Enable social lounge for the event",
                       "title": "Networking",
-                      "enum": [true, false],
+                      "enum": [
+                        true,
+                        false
+                      ],
                       "default": true
                     },
                     "tableCount": {
@@ -591,7 +769,7 @@
         ]
       }
     },
-    "/api/v1/public/airmeet/{airmeetid}/speaker": {
+    "/airmeet/{airmeetId}/speaker": {
       "post": {
         "responses": {
           "200": {
@@ -613,7 +791,7 @@
         },
         "parameters": [
           {
-            "name": "airmeetid",
+            "name": "airmeetId",
             "x-ms-url-encoding": "single",
             "x-ms-summary": "Airmeet ID",
             "description": "Airmeet Event ID",
@@ -624,7 +802,11 @@
               "operationId": "GetAirmeets",
               "value-path": "uid",
               "value-collection": "data",
-              "value-title": "name"
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
             }
           },
           {
@@ -675,7 +857,10 @@
                   "title": "Country"
                 }
               },
-              "required": ["email", "name"]
+              "required": [
+                "email",
+                "name"
+              ]
             }
           }
         ],
@@ -684,36 +869,872 @@
         "operationId": "CreateSpeaker"
       }
     },
-    "/api/v1/public/airmeet/{airmeetId}/session": {
-      "post": {
+    "/airmeet/{airmeetId}/info": {
+      "get": {
         "responses": {
           "200": {
-            "description": "Session added to your Airmeet",
+            "description": "Session details for your Airmeet",
             "schema": {
               "type": "object",
               "properties": {
-                "uuid": {
-                  "type": "string",
-                  "description": "session id"
+                "sessions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "sessionid": {
+                        "type": "string",
+                        "description": "Session ID"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the Session"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "description": "Start Time of the Session"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "Status of the Session"
+                      },
+                      "duration": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Duration of the Session"
+                      },
+                      "summary": {
+                        "type": "string",
+                        "description": "Summary of the Session"
+                      },
+                      "host_id": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Host ID for the Session"
+                      },
+                      "cohost_ids": {
+                        "type": "array",
+                        "items": {},
+                        "description": "Cohost List for the Session"
+                      },
+                      "speaker_id": {
+                        "type": "array",
+                        "items": {},
+                        "description": "Speaker ID for the Session"
+                      },
+                      "speakerList": {
+                        "type": "array",
+                        "items": {},
+                        "description": "Speaker List for the Session"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Type of the Session"
+                      }
+                    }
+                  },
+                  "description": "List of Sessions"
                 }
               }
             }
           }
         },
+        "summary": "Fetch Airmeet Sessions",
+        "description": "Fetch details for Sessions in an Airmeet",
+        "operationId": "AirmeetSessions",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "description": "Airmeet Event ID",
+            "x-ms-summary": "Airmeet ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/airmeet/{airmeetId}/status": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusUpdated": {
+                  "type": "boolean",
+                  "description": "Status is Updated"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Start or Finish an Airmeet",
+        "description": "Update the Airmeet Status to Ongoing or Finished",
+        "operationId": "StartAndEndAirmeet",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "description": "Airmeet Event ID",
+            "x-ms-summary": "Airmeet ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Airmeet Status",
+                  "title": "status",
+                  "default": "ONGOING",
+                  "enum": [
+                    "ONGOING",
+                    "FINISHED"
+                  ]
+                }
+              },
+              "required": [
+                "status"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/airmeet/{airmeetId}/registrations": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of authenticated registrations",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "Email of the user"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the user"
+                      },
+                      "city": {
+                        "type": "string",
+                        "description": "City of the user"
+                      },
+                      "country": {
+                        "type": "string",
+                        "description": "Country of the user"
+                      },
+                      "organisation": {
+                        "type": "string",
+                        "description": "Organisation of the user"
+                      },
+                      "Designation": {
+                        "type": "string",
+                        "description": "Designation of the user"
+                      },
+                      "registrationDate": {
+                        "type": "string",
+                        "description": "Date of registration"
+                      }
+                    }
+                  },
+                  "description": "List of authenticated registrations"
+                },
+                "cursors": {
+                  "type": "object",
+                  "properties": {
+                    "before": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Before cursor for next result page"
+                    },
+                    "after": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "After cursor for next result page"
+                    },
+                    "pageCount": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Number of result pages"
+                    }
+                  },
+                  "description": "Cursors for next result page"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Fetch Airmeet registrations",
+        "description": "Fetch all authenticated registrations for your Airmeet",
+        "operationId": "AirmeetRegistrations",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "description": "Airmeet Event ID",
+            "x-ms-summary": "Airmeet ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "After cursor for next result page",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "After",
+            "format": "int64"
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Before",
+            "description": "Before cursor for next result page",
+            "x-ms-visibility": "advanced",
+            "format": "int64"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "default": 100,
+            "x-ms-visibility": "important",
+            "description": "Response Page Size",
+            "x-ms-summary": "Size",
+            "format": "int64"
+          }
+        ]
+      }
+    },
+    "/airmeet/{airmeetId}/participants": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of authorized participants",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "paticipants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "Email of the participant"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the participant"
+                      },
+                      "city": {
+                        "type": "string",
+                        "description": "City of the participant"
+                      },
+                      "country": {
+                        "type": "string",
+                        "description": "Country of the participant"
+                      },
+                      "organisation": {
+                        "type": "string",
+                        "description": "Organisation of the participant"
+                      },
+                      "Designation": {
+                        "type": "string",
+                        "description": "Designation of the participant"
+                      },
+                      "registrationDate": {
+                        "type": "string",
+                        "description": "Date of registration for the participant"
+                      },
+                      "profile_url": {
+                        "type": "string",
+                        "description": "Profile URL for the participant"
+                      },
+                      "user_type": {
+                        "type": "string",
+                        "description": "User Type for the participant"
+                      },
+                      "token": {
+                        "type": "string",
+                        "description": "Unique joining link for the participant"
+                      },
+                      "invite_sent": {
+                        "type": "boolean",
+                        "description": "Invite Sent to the participant"
+                      },
+                      "user_profile": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "description": "Custom registration field value for the participant"
+                            },
+                            "fieldId": {
+                              "type": "string",
+                              "description": "Custom registration fieldid for the event"
+                            }
+                          }
+                        },
+                        "description": "Custom registration field details for the participant"
+                      }
+                    }
+                  },
+                  "description": "Details about the paticipants"
+                },
+                "userCount": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Number of results in this response page"
+                },
+                "totalUserCount": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Total count of participants"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Fetch Airmeet participants",
+        "description": "Fetch participants authorised to enter your Airmeet",
+        "operationId": "AirmeetParticipants",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "description": "Airmeet event ID",
+            "x-ms-summary": "Airmeet ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          },
+          {
+            "name": "resultSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Result Size",
+            "format": "int64",
+            "description": "Number of responses to fetch",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Page Number",
+            "format": "int32",
+            "description": "Page Number",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "sortingKey",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "registrationDate",
+            "description": "Sorting Key",
+            "x-ms-summary": "Sorting Key",
+            "enum": [
+              "name",
+              "email",
+              "registrationDate"
+            ],
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "sortingDirection",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Sorting Direction",
+            "x-ms-summary": "Sorting Direction",
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "x-ms-visibility": "advanced"
+          }
+        ]
+      }
+    },
+    "/airmeet/{airmeetId}/custom-fields": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of custom fields",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customFields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string",
+                        "description": "Label of the custom field"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the custom field"
+                      },
+                      "fieldId": {
+                        "type": "string",
+                        "description": "Field ID of the custom field"
+                      },
+                      "options": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "description": "Code for the custom field option"
+                            },
+                            "displayValue": {
+                              "type": "string",
+                              "description": "Display Value for the custom field option"
+                            }
+                          }
+                        },
+                        "description": "List of options for the custom field"
+                      },
+                      "isRequired": {
+                        "type": "boolean",
+                        "description": "Is this a mandatory field?"
+                      },
+                      "type": {
+                        "type": "object",
+                        "properties": {
+                          "fieldType": {
+                            "type": "string",
+                            "description": "Field Type"
+                          },
+                          "inputType": {
+                            "type": "string",
+                            "description": "Input Type for the custom field option"
+                          },
+                          "mappedFrom": {
+                            "type": "string",
+                            "description": "Mapping for the custom field option"
+                          }
+                        },
+                        "description": "Type of the custom field"
+                      }
+                    }
+                  },
+                  "description": "List of custom fields for the event"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Fetch Custom Registration Fields",
+        "description": "Fetch details of custom registration fields for the Airmeet",
+        "operationId": "CustomRegistrationFields",
         "parameters": [
           {
             "name": "airmeetId",
             "in": "path",
             "required": true,
-            "x-ms-summary": "Airmeet ID",
-            "description": "Airmeet Event ID",
             "x-ms-url-encoding": "single",
             "type": "string",
+            "description": "Airmeet event ID",
+            "x-ms-summary": "Airmeet ID",
             "x-ms-dynamic-values": {
               "operationId": "GetAirmeets",
               "value-path": "uid",
               "value-collection": "data",
-              "value-title": "name"
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/airmeet/{airmeetId}/attendee/{url_encoded_attendee_email}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Response message",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "Was the operation successful"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Success message"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Remove Authorized Attendee",
+        "description": "Remove an authorized participant from the Airmeet",
+        "operationId": "RemoveAttendee",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "description": "Airmeet event ID",
+            "x-ms-summary": "Airmeet ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          },
+          {
+            "name": "url_encoded_attendee_email",
+            "in": "path",
+            "x-ms-url-encoding": "double",
+            "required": true,
+            "x-ms-summary": "URL Encoded Email ID of the attendee to be removed",
+            "type": "string",
+            "description": "URL Encoded Email ID of the attendee to be removed"
+          }
+        ]
+      }
+    },
+    "/airmeet/{airmeetId}/tracks": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tracks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uid": {
+                        "type": "string",
+                        "description": "Track ID"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Description"
+                      },
+                      "track_order": {
+                        "type": "string",
+                        "description": "Track Order"
+                      },
+                      "metaData": {
+                        "type": "object",
+                        "properties": {
+                          "colorCode": {
+                            "type": "string",
+                            "description": "Color Code"
+                          }
+                        },
+                        "description": "Meta Data"
+                      },
+                      "sessions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Sessions"
+                      }
+                    }
+                  },
+                  "description": "Tracks"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Fetch Event Tracks",
+        "description": "Fetch Event Tracks",
+        "operationId": "FetchEventTracks",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "description": "Airmeet Event ID",
+            "x-ms-summary": "Airmeet ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/airmeet/{airmeetId}/booths": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booths": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uid": {
+                        "type": "string",
+                        "description": "Booth ID"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name"
+                      },
+                      "exhibitors": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Exhibitors"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Tags"
+                      },
+                      "airmeet_id": {
+                        "type": "string",
+                        "description": "Airmeet Id"
+                      },
+                      "logo_url": {
+                        "type": "string",
+                        "description": "Logo Url"
+                      },
+                      "video": {
+                        "type": "string",
+                        "description": "Video"
+                      },
+                      "faqs": {
+                        "type": "string",
+                        "description": "FAQ"
+                      },
+                      "order": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Order"
+                      },
+                      "resources": {
+                        "type": "string",
+                        "description": "Resources"
+                      },
+                      "layoutType": {
+                        "type": "string",
+                        "description": "Layout Type"
+                      },
+                      "layoutData": {
+                        "type": "string",
+                        "description": "Layout Data"
+                      },
+                      "boothExhibitor": {
+                        "type": "boolean",
+                        "description": "Booth Exhibitor"
+                      },
+                      "social_media_links": {
+                        "type": "string",
+                        "description": "Social Media Links"
+                      },
+                      "short_description": {
+                        "type": "string",
+                        "description": "Short Description"
+                      },
+                      "long_description": {
+                        "type": "string",
+                        "description": "Long Description"
+                      },
+                      "banner_url": {
+                        "type": "string",
+                        "description": "Banner Url"
+                      },
+                      "register_interest_details": {
+                        "type": "string",
+                        "description": "Register Interest Details"
+                      },
+                      "offer_details": {
+                        "type": "string",
+                        "description": "Offer Details"
+                      },
+                      "doc_url": {
+                        "type": "string",
+                        "description": "Document Url"
+                      },
+                      "doc_name": {
+                        "type": "string",
+                        "description": "Document Name"
+                      },
+                      "booth_space_id": {
+                        "type": "string",
+                        "description": "Booth Space Id"
+                      }
+                    }
+                  },
+                  "description": "Booths"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Fetch Airmeet Booths",
+        "description": "Fetch Airmeet Booths",
+        "operationId": "FetchAirmeetBooths",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string",
+            "description": "Airmeet Event ID",
+            "x-ms-summary": "Airmeet ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "uuid": {
+                  "type": "string",
+                  "description": "Booth ID"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create Booth",
+        "description": "Create Booth",
+        "operationId": "CreateBooth",
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "x-ms-summary": "Airmeet ID",
+            "description": "Airmeet Event ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
             }
           },
           {
@@ -723,70 +1744,107 @@
             "schema": {
               "type": "object",
               "properties": {
-                "sessionTitle": {
+                "name": {
                   "type": "string",
-                  "description": "Title for the Session",
-                  "title": "Session Title"
+                  "description": "name",
+                  "title": "Booth Name",
+                  "x-ms-visibility": "important"
                 },
-                "sessionStartTime": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Start time for the session, unix timestamp rounded to minutes",
-                  "title": "Session Start Time"
+                "exhibitorInfo": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "email",
+                        "title": "Email",
+                        "x-ms-visibility": "important"
+                      },
+                      "exhibitorAttendanceType": {
+                        "type": "string",
+                        "description": "exhibitorAttendanceType",
+                        "title": "Type",
+                        "enum": [
+                          "HYBRID",
+                          "ONLINE"
+                        ],
+                        "default": "HYBRID"
+                      }
+                    },
+                    "required": [
+                      "email"
+                    ]
+                  },
+                  "description": "exhibitorInfo"
                 },
-                "sessionDuration": {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "Duration of the event in seconds",
-                  "title": "Session Duration"
-                },
-                "sessionSummary": {
-                  "type": "string",
-                  "description": "Summary for the session",
-                  "title": "Session Summary"
-                },
-                "hostEmail": {
-                  "type": "string",
-                  "description": "Email of the Airmeet event host",
-                  "title": "Host Email"
-                },
-                "speakerEmails": {
+                "tags": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   },
-                  "description": "Emails of all the speakers. Speakers should be added to the Airmeet before creating the session"
+                  "description": "tags"
                 },
-                "cohostEmails": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
+                "metaData": {
+                  "type": "object",
+                  "properties": {
+                    "chatEnabled": {
+                      "type": "boolean",
+                      "description": "Chat Enabled",
+                      "title": "",
+                      "enum": [
+                        true,
+                        false
+                      ],
+                      "default": false
+                    },
+                    "loungeEnabled": {
+                      "type": "boolean",
+                      "description": "Lounge Enabled",
+                      "title": "",
+                      "enum": [
+                        true,
+                        false
+                      ],
+                      "default": false
+                    },
+                    "broadcastEnabled": {
+                      "type": "boolean",
+                      "description": "Broadcast Enabled",
+                      "title": "",
+                      "enum": [
+                        true,
+                        false
+                      ],
+                      "default": false
+                    },
+                    "tableCount": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Table Count",
+                      "title": "",
+                      "default": 6
+                    }
                   },
-                  "description": "Emails of all the co hosts. Team members should be added to the community before creating the session"
-                },
-                "type": {
-                  "type": "string",
-                  "description": "type",
-                  "title": "Type",
-                  "default": "HOSTING",
-                  "x-ms-visibility": "internal"
+                  "description": "metaData",
+                  "required": [
+                    "broadcastEnabled",
+                    "chatEnabled",
+                    "loungeEnabled"
+                  ]
                 }
               },
               "required": [
-                "hostEmail",
-                "sessionTitle",
-                "sessionStartTime",
-                "type"
+                "exhibitorInfo",
+                "metaData",
+                "name"
               ]
             }
           }
-        ],
-        "summary": "Add a Session to your Airmeet",
-        "description": "Create Session",
-        "operationId": "CreateSession"
+        ]
       }
-    },
-    "/api/v1/airmeet/{airmeetId}/attendee": {
+  },
+    "/airmeet/{airmeetId}/attendee": {
       "post": {
         "responses": {
           "200": {
@@ -806,99 +1864,286 @@
             }
           }
         },
-        "summary": "Add Registrant",
-        "description": "Add Registrant to an Airmeet",
-        "operationId": "AddRegistrant",
+        "summary": "Add Authorized Attendee",
+        "description": "Add Authorized Attendee to an Airmeet",
+        "operationId": "AddAuthorizedAttendee",
         "parameters": [
           {
             "name": "airmeetId",
             "in": "path",
             "required": true,
-            "x-ms-summary": "Airmeet ID",
-            "description": "Airmeet Event ID",
             "x-ms-url-encoding": "single",
             "type": "string",
+            "x-ms-summary": "Airmeet ID",
+            "description": "Airmeet Event ID",
             "x-ms-dynamic-values": {
               "operationId": "GetAirmeets",
               "value-path": "uid",
               "value-collection": "data",
-              "value-title": "name"
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
             }
           },
           {
             "name": "body",
             "in": "body",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "object",
               "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "Name of the Invitee",
-                  "title": "Name"
-                },
                 "email": {
                   "type": "string",
-                  "description": "Email of the Invitee",
+                  "description": "email",
                   "title": "Email"
                 },
-                "organisation": {
+                "firstName": {
                   "type": "string",
-                  "description": "Organisation of the Invitee",
-                  "title": "Organisation"
+                  "description": "firstName",
+                  "title": "First Name"
                 },
-                "designation": {
+                "lastName": {
                   "type": "string",
-                  "description": "Designation of the Invitee",
-                  "title": "Designation"
+                  "description": "lastName",
+                  "title": "Last Name"
+                },
+                "attendance_type": {
+                  "type": "string",
+                  "description": "attendance_type",
+                  "title": "Attendance Type",
+                  "enum": [
+                    "VIRTUAL",
+                    "IN-PERSON"
+                  ],
+                  "default": "IN-PERSON"
                 },
                 "city": {
                   "type": "string",
-                  "description": "City of the Invitee",
-                  "title": "City"
+                  "description": "City"
                 },
                 "country": {
                   "type": "string",
-                  "description": "Country of the Invitee",
-                  "title": "Country"
+                  "description": "Country"
                 },
-                "crm_platform": {
+                "designation": {
                   "type": "string",
-                  "description": "Registration Source",
-                  "title": "Registration Source",
-                  "x-ms-visibility": "internal",
-                  "default": "MICROSOFT_DYNAMICS"
+                  "description": "Designation"
+                },
+                "organisation": {
+                  "type": "string",
+                  "description": "Organization"
+                },
+                "registerAttendee": {
+                  "type": "boolean",
+                  "description": "Register Attendee",
+                  "title": "Register Attendee",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "default": false
+                },
+                "sendEmailInvite": {
+                  "type": "boolean",
+                  "description": "send Email Invite",
+                  "title": "Send Email Invite",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "default": false
                 },
                 "customFieldMapping": {
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "properties": {}
+                    "properties": {
+                      "fieldId": {
+                        "type": "string",
+                        "description": "fieldId"
+                      },
+                      "value": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "value"
+                      }
+                    }
                   },
-                  "description": "Custom Registration Fields"
+                  "description": "Custom Field Mapping"
                 }
               },
-              "required": ["email", "name", "crm_platform"]
+              "required": [
+                "email",
+                "firstName",
+                "lastName",
+                "sendEmailInvite",
+                "registerAttendee"
+              ]
             }
           }
         ]
       }
+    },
+    "/airmeet/{airmeetId}/session": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Session added to your Airmeet",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "uuid": {
+                  "type": "string",
+                  "description": "Session ID"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "airmeetId",
+            "in": "path",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string",
+            "x-ms-summary": "Airmeet ID",
+            "description": "Airmeet Event ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAirmeets",
+              "value-path": "uid",
+              "value-collection": "data",
+              "value-title": "name",
+              "parameters": {
+                "allAirmeets": true,
+                "crmName": "MICROSOFT_DYNAMICS"
+              }
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sessionTitle": {
+                  "type": "string",
+                  "description": "Session Title"
+                },
+                "sessionStartTime": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Session Start Time",
+                  "title": "Session Start Time"
+                },
+                "sessionDuration": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Session Duration",
+                  "title": "Session Duration",
+                  "default": 30
+                },
+                "sessionSummary": {
+                  "type": "string",
+                  "description": "Session Summary"
+                },
+                "hostEmail": {
+                  "type": "string",
+                  "description": "Host Email",
+                  "title": "Host Email"
+                },
+                "speakerEmails": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Speaker Emails"
+                },
+                "cohostEmails": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Cohost Emails"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "type",
+                  "title": "Type",
+                  "default": "HOSTING",
+                  "enum": [
+                    "HOSTING",
+                    "FLUID_LOUNGE",
+                    "BOOTH",
+                    "BREAK",
+                    "LARGE_CALL",
+                    "SPEED_NETWORKING",
+                    "STREAMING"
+                  ]
+                },
+                "tracks": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Tracks"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Tags"
+                },
+                "boothId": {
+                  "type": "string",
+                  "description": "Booth Id"
+                },
+                "speedNetworkingData": {
+                  "type": "object",
+                  "properties": {
+                    "conversationTime": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Conversation Time"
+                    },
+                    "extendNetworkingTime": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Extend Networking Time"
+                    }
+                  },
+                  "description": "Speed Networking Data"
+                },
+                "sessionMeta": {
+                  "type": "object",
+                  "properties": {
+                    "hideHost": {
+                      "type": "boolean",
+                      "description": "Hide Host"
+                    }
+                  },
+                  "description": "Session Meta"
+                }
+              },
+              "required": [
+                "hostEmail",
+                "sessionStartTime"
+              ]
+            }
+          }
+        ],
+        "summary": "Add a Session to your Airmeet",
+        "description": "Create Session",
+        "operationId": "CreateSession"
+      }
     }
   },
-  "x-ms-connector-metadata": [
-    {
-      "propertyName": "Website",
-      "propertyValue": "https://www.airmeet.com/"
-    },
-    {
-      "propertyName": "Privacy policy",
-      "propertyValue": "https://www.airmeet.com/hub/privacy-policy"
-    },
-    {
-      "propertyName": "Categories",
-      "propertyValue": "Marketing"
-    }
-  ],
   "definitions": {},
   "parameters": {},
   "responses": {},
@@ -912,5 +2157,19 @@
       "basic_auth": []
     }
   ],
-  "tags": []
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.airmeet.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.airmeet.com/hub/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing"
+    }
+  ]
 }
