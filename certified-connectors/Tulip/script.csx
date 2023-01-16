@@ -1,4 +1,4 @@
-public class Script : ScriptBase
+﻿public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {

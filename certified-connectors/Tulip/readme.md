@@ -27,4 +27,3 @@ The connector supports the following operations:
 ### For support see [support.tulip.co](support.tulip.co) or [support@tulip.co](mailto:support@tulip.co)
 
 ### This connector is provided for use by Tulip customers to leverage the Tulip API in Microsoft environment. Usage of the connector is to [Tulip Privacy Policy](https://tulip.co/legal/privacy-policy/) and [API License Agreement](https://tulip.co/legal/api-license-agreement/)
-
