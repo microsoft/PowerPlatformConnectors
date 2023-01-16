@@ -22,6 +22,9 @@ Protect your PDF with a password. [Documentation](https://pdfcross.com/en/docs/p
 ### Watermark
 Watermark the PDF. [Documentation](https://pdfcross.com/en/docs/power-automate/add-watermark)
 
+### Image
+Add image to the PDF. [Documentation](https://pdfcross.com/en/docs/power-automate/add-image)
+
 ## Obtaining Credentials
 You can get your own API key from [PDFcross dashboard](https://dashboard.pdfcross.com/).
 
