@@ -6,7 +6,8 @@ This connector provides robust access to read, edit, or integrate your data with
 
 ## Prerequisites
 
-Login to your Coupa instance with an administrator\integration administrator account
+*   Go to {instance}.coupahost.com (replacing the word instance with your instance name)
+*   Login with an administrator\integration administrator account
 *	Click Setup > OAuth2/OpenID Connect Clients
 *	Create Client 
 *	Grant Type: Authorization Code
