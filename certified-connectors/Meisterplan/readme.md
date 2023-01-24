@@ -46,8 +46,7 @@ If you're building the connector yourself, please use an API token as described 
 
 ## Known Issues and Limitations
 
-* This connector does not yet support triggers.
-* Webhooks for the Meisterplan REST-API are coming soon.
+The Meisterplan Connector uses the Meisterplan REST API. A description including status codes can be found in the REST API [documentation](https://api.us.meisterplan.com/docs/api.html). Additional information can be found in the [Help Center](https://help.meisterplan.com/hc/en-us/articles/360011962979-REST-API-Overview).
 
 ## Deployment Instructions
 
