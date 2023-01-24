@@ -12,7 +12,6 @@ We provide the expertise, software and services required to underpin student suc
 - Environment such as Live, Test or Development.
 - Region such as APAC or EMEA.
 - Edge Tenant ID as supplied by Tribal.
-- Service Name such as Admissions.
 
 2. On sign in, you must enable the following permissions:
 - Events Connector Endpoint
@@ -63,7 +62,7 @@ We provide the expertise, software and services required to underpin student suc
 
 ## Known Issues and Limitations
 
-- Currently limited for use within the admissions service
+- Opening an editted flow can sometimes show the entity as a custom value instead of the description from the drop down. This is purely cosmetic and doesn't effect the behaviour of the flow.
 
 ## Deployment instructions
 
