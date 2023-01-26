@@ -1,30 +1,31 @@
-# 24 Pull Requests
+# Pappers
 24 Pull Requests' goal is to encourage contribution to open source projects during December. The site suggests open projects, highlights tickets that are good for new contributors, provides guides for contributing and promotes good contributions submitted each day.
-## Publisher: Bernard karaba
+## Publisher: Allan De Castro
 
 ## Prerequisites
 
-The [24 pull requests](https://24pullrequests.com/) connector doesn't require authentication.
+You need to have a Pappers API Key. You can [register](https://www.pappers.fr/inscription) to get your key (a free developer plan is available).
 
 ## Supported Operations
 
 The connector supports the following operations:
 
-- `GetUsers`: This action will return all users and contribution information.
-- `GetUser`: This action will return specific user's contributing information.
-- `GetProjects`: This action will return all projects for contribution.
-- `GetPullRequests`: This action will load contributions by users.
-- `GetContributionInfo`: This action will load contribution information.
-- `GetAllOrganisations`: This action will load all organisations information.
-- `GetSpecificOrganisation`: This action will load specific organisation's information.
+- `Retrieves all the information available on a company.`: This action allows you to search for all the information available for a company based on the SIRET or SIREN.
+- `Search for companies matching criteria.`: This action allows you to perform a multi-criteria search to display a list of matching companies.
+
 
 ## Obtaining Credentials
 
-No credentials needed.
+### Pappers side
+Through the [API Key Management page](https://www.pappers.fr/mon-compte/api), you can grab the API Key.
+
+### Custom connector side
+Once you are configuring the connector on the Power Platform.
+You will have to use the **API Key** in order to validate the security stage in the process.
 
 ## Known issues and limitations
 
-There are no known issues and limitations.
+There are no known issues and limitations (except for those related to your subscribed plan).
 
 ## Deployment Instructions
 
