@@ -1,5 +1,7 @@
 # Pappers
-24 Pull Requests' goal is to encourage contribution to open source projects during December. The site suggests open projects, highlights tickets that are good for new contributors, provides guides for contributing and promotes good contributions submitted each day.
+Pappers is an API that allows you to collect all legal and financial information on the companies of your choice (statutes, corporate accounts, trademarks, managers, shareholders).
+Refine your analysis with our advanced search engine.
+
 ## Publisher: Allan De Castro
 
 ## Prerequisites
