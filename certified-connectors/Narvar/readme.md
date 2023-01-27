@@ -6,9 +6,10 @@ First, contact your Narvar Customer Support Manager (or email: partnerships@narv
 
 ## Supported Operations
 The connector supports the following operations:
-* ```Post-CreateUpdate_Orders```: This will create a new order or send new information about an existing order
-* ```Get-Retrieve_Order```: This operation is used to retrieve order details
-* ```Put-CreateUpdate_Shipments```: This will update an order with a shipment record or change
+* ```PostCreateUpdateOrders```: Create a new order or update existing order information.
+* ```GetRetrieveOrder```: Retrieve order details.
+* ```PutCreateUpdateShipments```: Add or edit order shipment information.
+
 
 ## Obtaining Credentials
 Once enabled, your credentials will be available within Narvar Hub for you to complete the app installation. ​
@@ -17,4 +18,4 @@ Once enabled, your credentials will be available within Narvar Hub for you to co
 Configure the connection with the "Account ID" and "Auth Tokens" from Narvar Hub
 
 ## Known Issues and Limitations
-This connector was specifically developed to be used for Dynamics 365 Intelligent Order Management's Narvar's provider integration. Support for usecases outside of Dynamics 365 Intelligent Order Management will be limited.
+This connector was specifically developed to be used for Dynamics 365 Intelligent Order Management's Narvar's provider integration. Support for use cases outside of Dynamics 365 Intelligent Order Management will be limited.
