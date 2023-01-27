@@ -221,3 +221,24 @@ Get Image Information (Height, Width, Resolution, Format, File Size + more) - ht
 
 ### Convert Visio
 Convert Microsoft Visio documents to another document format - https://support.encodian.com/hc/en-gb/articles/5306216347665
+
+### Secure Word Document
+Secure and protect a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/6634150180253
+
+### Get Tracked Changes
+Get all the tracked changes (Revisions and comments) for the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/6634950400669
+
+### Sign PDF
+Apply a digital signature to the PDF document provided - https://support.encodian.com/hc/en-gb/articles/7117159708189
+
+### Convert JSON to Excel
+Convert the JSON data to provided to a Microsoft Excel or CSV document - https://support.encodian.com/hc/en-gb/articles/7690520790045
+
+### Update Word Hyperlinks 
+Search for and update hyperlinks within a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/7136687719837
+
+### Remove Watermark from Word
+Remove both an image and text watermark from the Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/7752587767965
+
+### Remove Watermarks from PDF
+Removes all or targeted watermarks from the PDF document provided - https://support.encodian.com/hc/en-gb/articles/7751328751645

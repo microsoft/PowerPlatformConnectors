@@ -163,6 +163,11 @@ public class Script : ScriptBase
                   ["type"] = "string",
                   ["x-ms-summary"] = "anchor string *"
                 },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "label"
+                },
                 ["anchorXOffset"] = new JObject
                 {
                   ["type"] = "string",
@@ -181,12 +186,6 @@ public class Script : ScriptBase
 
       if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
       {
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["tabLabel"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "label"
-        };
-        
         response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
         {
           ["type"] = "string",
@@ -249,6 +248,23 @@ public class Script : ScriptBase
           ["description"] = "true/false"
         };
       }
+    }
+
+    if (operationId.Equals("StaticResponseForBuildNumberSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+
+      response["schema"]["properties"]["Build Number"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "DS1001"
+      };
     }
 
     if (operationId.Equals("StaticResponseForEmbeddedSigningSchema", StringComparison.OrdinalIgnoreCase))
@@ -316,7 +332,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if (verificationType.Equals("Phone Authentication", StringComparison.OrdinalIgnoreCase))
+      if (verificationType.Equals("Phone Authentication"))
       {
         response["schema"]["properties"]["countryCode"] = new JObject 
         {
@@ -328,8 +344,27 @@ public class Script : ScriptBase
           ["type"] = "integer",
           ["x-ms-summary"] = "* Recipient's Phone Number"
         };
+        response["schema"]["properties"]["workflowID"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "GetWorkflowIDs",
+              ["parameters"] = new JObject
+              {
+                ["accountId"] = new JObject
+                {
+                  ["parameter"] = "accountId"
+                }
+              },
+              ["value-collection"] = "workFlowIds",
+              ["value-path"] = "type",
+              ["value-title"] = "name",
+            },
+          ["x-ms-summary"] = "* Workflow IDs"
+        };        
       }
-      else if (verificationType.Equals("Access Code", StringComparison.OrdinalIgnoreCase))
+      else if (verificationType.Equals("Access Code"))
       {
         response["schema"]["properties"]["accessCode"] = new JObject
         {
@@ -337,7 +372,7 @@ public class Script : ScriptBase
           ["x-ms-summary"] = "* Access Code"
         };
       }
-      else if (verificationType.Equals("ID Verification", StringComparison.OrdinalIgnoreCase))
+      else if (verificationType.Equals("ID Verification"))
       {
         response["schema"]["properties"]["workflowID"] = new JObject
         {
@@ -410,20 +445,20 @@ public class Script : ScriptBase
       }
       else if (recipientType.Equals("witnesses", StringComparison.OrdinalIgnoreCase))
       {
+        response["schema"]["properties"]["witnessFor"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Witness for (Specify Recipient ID)"
+        };        
         response["schema"]["properties"]["witnessName"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Witness name"
+          ["x-ms-summary"] = "Witness name"
         };
         response["schema"]["properties"]["witnessEmail"] = new JObject
         {
           ["type"] = "string",
           ["x-ms-summary"] = "Witness email"
-        };
-        response["schema"]["properties"]["witnessFor"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "* Witness for (Specify Recipient ID)"
         };
       }
       else
@@ -743,7 +778,48 @@ public class Script : ScriptBase
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
+    return body;
+  }
+  
+  private JObject CreateHookEnvelopeV3BodyTransformation(JObject original)
+  {
+    var body = new JObject();
     
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+
+    var envelopeEvent = original["envelopeEvents"]?.ToString();
+    var envelopeEventsArray = new JArray();
+    envelopeEventsArray.Add(envelopeEvent);
+    body["events"] = envelopeEventsArray;
+    body["configurationType"] = "custom";
+    body["deliveryMode"] = "sim";
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients'
+    ]";
+
+    JArray includeData = JArray.Parse(eventData);
+    body["eventData"] = new JObject
+    {
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
+    };
+    
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
   }
   
@@ -848,6 +924,37 @@ public class Script : ScriptBase
     {
       newBody["status"] = query.Get("status");
     }
+
+    return newBody;
+  }
+
+  private JObject UpdateEnvelopeCustomFieldBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
+    var fieldType = query.Get("fieldType");
+    var customField = new JObject() {
+      ["fieldId"] = query.Get("fieldId"),
+	    ["name"] = query.Get("name"),
+	    ["value"] = query.Get("value")
+    };
+
+    if (fieldType.Equals("Text"))
+    {
+      textCustomFields.Add(customField);
+    }
+
+    if (fieldType.Equals("List"))
+    {
+      listCustomFields.Add(customField);
+    }
+
+    var newBody = new JObject()
+    {
+      ["textCustomFields"] = textCustomFields,
+      ["listCustomFields"] = listCustomFields
+    };
 
     return newBody;
   }
@@ -1037,7 +1144,6 @@ public class Script : ScriptBase
 
     if (verificationType.Equals("Phone Authentication"))
     {
-      var phoneAuthentication = new JObject();
       var phoneNumbers = new JArray();
 
       if (body["phoneNumber"] == null || body["countryCode"] == null)
@@ -1045,12 +1151,28 @@ public class Script : ScriptBase
         throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Phone number or country code is missing");
       }
 
-      var phoneNumber = body["countryCode"].ToString() + body["phoneNumber"].ToString();
-      phoneNumbers.Add(phoneNumber);
+      var identityVerification = new JObject();
+      var inputOptions = new JArray();
+      var inputObject = new JObject();
+      var phoneNumberObject = new JObject();
 
-      phoneAuthentication["senderProvidedNumbers"] = phoneNumbers;
-      recipient["phoneAuthentication"] = phoneAuthentication;
-      recipient["idCheckConfigurationName"] = "Phone Auth $";
+      if (body["workflowID"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Workflow ID is missing");
+      }
+
+      phoneNumberObject["Number"] = body["phoneNumber"];
+      phoneNumberObject["CountryCode"] = body["countryCode"];
+      phoneNumbers.Add(phoneNumberObject);
+
+      inputObject["phoneNumberList"] = phoneNumbers;
+      inputObject["name"] = "phone_number_list";
+      inputObject["valueType"] = "PhoneNumberList";
+      inputOptions.Add(inputObject);
+
+      identityVerification["workflowId"] = body["workflowID"];
+      identityVerification["inputOptions"] = inputOptions;
+      recipient["identityVerification"] = identityVerification;
     }
     else if (verificationType.Equals("Access Code"))
     {
@@ -1305,6 +1427,11 @@ public class Script : ScriptBase
     {
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
+	
+    if ("CreateHookEnvelopeV3".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateHookEnvelopeV3BodyTransformation).ConfigureAwait(false);
+    }
 
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
@@ -1334,6 +1461,11 @@ public class Script : ScriptBase
     if ("AddVerificationToRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddVerificationToRecipientBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("UpdateEnvelopeCustomField".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.UpdateEnvelopeCustomFieldBodyTransformation).ConfigureAwait(false);
     }
 
     if ("GenerateEmbeddedSigningURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -1397,6 +1529,13 @@ public class Script : ScriptBase
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       uriBuilder.Path = uriBuilder.Path.Replace("/signers/accounts/", "/accounts/");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
+    if ("GetAccountCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/account_custom_fields", "/custom_fields");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -1598,7 +1737,82 @@ public class Script : ScriptBase
       
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
-    
+
+    if ("GetAccountCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var customFields = new JArray();
+
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+       customFields.Add(customField);
+      }
+      
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+       customFields.Add(customField);
+      }
+
+      var newBody = new JObject
+      {
+        ["customFields"] = customFields
+      };
+      
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetEnvelopeCustomField".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var customFieldName = query.Get("fieldName");
+      var responseCustomField = new JObject();
+
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+        if (customField["name"].ToString().Equals(customFieldName))
+        {
+          customField["fieldType"] = "Text";
+          responseCustomField = customField as JObject;
+          break;
+        }
+      }
+      
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+        if (customField["name"].ToString().Equals(customFieldName))
+        {
+          customField["fieldType"] = "List";
+          responseCustomField = customField as JObject;
+          break;
+        }
+      }
+      
+      response.Content = new StringContent(responseCustomField.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("UpdateEnvelopeCustomField".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var responseCustomField = new JObject();
+
+      foreach (var customField in (body["textCustomFields"] as JArray) ?? new JArray())
+      {
+        responseCustomField = customField as JObject;
+        responseCustomField["fieldType"] = "Text";
+        break;
+      }
+      
+      foreach (var customField in (body["listCustomFields"] as JArray) ?? new JArray())
+      {
+        responseCustomField = customField as JObject;
+        responseCustomField["fieldType"] = "List";
+        break;
+      }
+      
+      response.Content = new StringContent(responseCustomField.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
