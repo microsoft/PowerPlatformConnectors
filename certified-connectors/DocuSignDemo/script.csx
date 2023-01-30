@@ -1413,6 +1413,20 @@ public class Script : ScriptBase
   {
     await this.UpdateApiEndpoint().ConfigureAwait(false);
 
+    if("DeleteHookV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
+    if("DeleteHookV3".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("SendDraftEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       this.Context.Request.Content = new StringContent("{ \"status\": \"sent\" }", Encoding.UTF8, "application/json");
