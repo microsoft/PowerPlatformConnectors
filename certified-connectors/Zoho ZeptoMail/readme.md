@@ -1,0 +1,35 @@
+# Zoho ZeptoMail
+
+This connector allows you to send emails from ZeptoMail. You can send custom emails or use existing email templates in your ZeptoMail account.
+
+## Prerequisites
+
+A verified ZeptoMail account. Click [here](https://zoho.com/zeptomail)to create your first account.
+
+
+## How to get credentials
+
+ZeptoMail API uses OAuth2 to authenticate and hence no secondary authentication is required once the account has been setup.
+
+## Supported Operations
+
+The connector supports the following operations:
+
+### Send email
+
+Send emails customized according to your needs.
+
+### Send template email 
+
+Send emails using pre-built templates available in your ZeptoMail account. 
+
+### Known Issues and Limitations
+
+The total email size, including the email headers, body content, inline images, and attachments should not exceed 15 MB.
+
+## FAQ
+
+https://help.zoho.com/portal/en/kb/zeptomail/faqs
+
+
+
