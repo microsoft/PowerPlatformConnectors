@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using System;
 using System.Runtime.Remoting.Contexts;
@@ -30,11 +30,10 @@ public class Script : ScriptBase
         // send request
         HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
-        if (response.IsSuccessStatusCode)
-        {
-            var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            response.Content = CreateJsonContent(responseString);
-        }
+        if (response.IsSuccessStatusCode) {
+           var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+           response.Content = CreateJsonContent(responseString);
+        }  
         return response;
     }
 

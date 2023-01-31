@@ -15,8 +15,15 @@ The following operations were defined for the connector:
 (Internal) Gets a list of methods defined in the selected project.
 ### GetMethodOpenApiSpec
 (Internal) Gets a Swagger 2 specification for the selected method.
-### PerformRequest
+### AS400Cobol
 Performs an HTTP request to the user's API. Main logic is controlled by C# script.
+During design-time displaying a list of projects filtered for this action only.
+### AS400Rpg
+Performs an HTTP request to the user's API. Main logic is controlled by C# script.
+During design-time displaying a list of projects filtered for this action only.
+### AS400DataQueue
+Performs an HTTP request to the user's API. Main logic is controlled by C# script.
+During design-time displaying a list of projects filtered for this action only.
 
 ## Obtaining Credentials
 Register to OpenLegacy Hub at https://hub.openlegacy.com.
@@ -26,9 +33,9 @@ To find your API Keys go to upper right-side menu, click on API Keys and copy th
 OpenLegacy has prepared a demo AS400 project for you to use that will connect to our Demo Environment.
 To meet your specific project requirements, an OpenLegacy team will build and manage the API to your AS400 according to your requirements.
 Register to OpenLegacy Hub. One of our Customer Success representatives will contact you for any questions.
-Follow the instructions below to import the AS400 demo project.Click on Projects->Import from Solution Center.
+Follow the instructions below to import the AS400 demo project. Click on Projects->Import from Solution Center.
 In the Filter Data Field type “IBMi” and select IBMi COBOL Insurance Policies Demo. The Demo project will be imported.
-Follow the instructions provided in this [video](https://youtu.be/u6VaH4yHO7E).<br/>
+Follow the instructions provided in this [video](https://youtu.be/u6VaH4yHO7E).
 Contact OpenLegacy at https://www.openlegacy.com/company/support for any question.
 
 ## Deployment Instructions
