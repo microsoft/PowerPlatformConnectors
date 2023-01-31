@@ -1,6 +1,6 @@
 # WhatsApp
 
-Allow the user to send automated WhatsApp messages through a flow on Power Automate. Custom message templates can be sent and variables within the JSON body can be set.
+Allows the user to send automated WhatsApp messages through a flow on Power Automate. Custom message templates can be sent and variables within the JSON body can be set.
 
 ## Publishers: Zakariya Fakira, Satbir Virdi, Oscar Hui, Chaohui Wang
 
@@ -55,4 +55,4 @@ To get a permanent token, follow the steps from the following link: [Permanent t
 
 Recipient is unable to reply to the messages as a webhook hasn’t been configured on the connector.
 
-For now the connector can only be used in a Power Automate Flow as Power Apps doesn’t recognise the innermost nested arrays found in the JSON body. By setting the raw body, it would work. In Power Automate, it works perfectly.
+For now the connector can only be used in a Power Automate Flow as Power Apps doesn’t recognize the innermost nested arrays found in the JSON body. By setting the raw body, it would work. In Power Automate, it works perfectly.
