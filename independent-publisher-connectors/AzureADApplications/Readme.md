@@ -11,6 +11,12 @@ The connector supports the following operations:
 ### List applications
 Get the list of applications in this organization.
 
+### Get application
+Get the details for the specified list application id.
+
+### Get Application Owners
+Get ownership details of the specificed applications id.
+
 ## Building the connector
 
 Since the APIs used by the connector are secured by Azure Active Directory (AD), we first need to set up a few things in Azure AD for connector to securely access them. After this setup, you can create and test the connector.
