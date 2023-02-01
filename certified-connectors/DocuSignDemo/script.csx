@@ -445,20 +445,20 @@ public class Script : ScriptBase
       }
       else if (recipientType.Equals("witnesses", StringComparison.OrdinalIgnoreCase))
       {
+        response["schema"]["properties"]["witnessFor"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Witness for (Specify Recipient ID)"
+        };        
         response["schema"]["properties"]["witnessName"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Witness name"
+          ["x-ms-summary"] = "Witness name"
         };
         response["schema"]["properties"]["witnessEmail"] = new JObject
         {
           ["type"] = "string",
           ["x-ms-summary"] = "Witness email"
-        };
-        response["schema"]["properties"]["witnessFor"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "* Witness for (Specify Recipient ID)"
         };
       }
       else
