@@ -26,9 +26,13 @@ public class Script : ScriptBase {
     }
 
     private async Task UpdateRequest() {
-        if ("AS400Cobol".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
-            || "AS400Pcml".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
-            || "AS400DataQueue".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
+        if ("MfCicsCobol".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "MfCtgCobol".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "MfImsCobol".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "MfNatural".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "MfVsamCics".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "Mf3270Screens".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "MfMq".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
             // get selected method id
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
             var methodId = query.Get("method");
