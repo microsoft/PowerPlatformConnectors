@@ -1,4 +1,3 @@
-
 # PaySpace
 PaySpace helps users to integrate with the PaySpace API in flows.
 
