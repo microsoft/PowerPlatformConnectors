@@ -85,7 +85,48 @@
     if (string.IsNullOrEmpty(token)) {
       token = string.Empty;
     }
+    if (this.Context.OperationId == "CreateBooth") 
+    {
+        await this.UpdateExhibitorForHybrid().ConfigureAwait(false);
+    }
     this.Context.Request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
     this.Context.Request.Headers.TryAddWithoutValidation("X-Airmeet-Access-Token", token);
+  }
+  private async Task UpdateExhibitorForHybrid() {
+    var contentAsStringExhibitor = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+    var contentAsJsonExhibitor = JObject.Parse(contentAsStringExhibitor);
+    var airmeetEventType = await this.GetAirmeetEventType().ConfigureAwait(false);
+   
+    var exhibitors = new JArray(); 
+    var exhibitorInfoForNoHybrid = new JArray(); 
+    var exhibitorInfo = contentAsJsonExhibitor["exhibitorInfo"];
+
+     foreach (var field in exhibitorInfo)
+     {
+       exhibitors.Add((string)field["email"]);
+       if(airmeetEventType != "HYBRID_CONFERENCE"){
+            var exhibitorObject = new JObject()
+            {
+                ["email"] = (string)field["email"],
+            };
+            exhibitorInfoForNoHybrid.Add(exhibitorObject);
+        }
+     }
+
+    if(airmeetEventType != "HYBRID_CONFERENCE"){
+      contentAsJsonExhibitor["exhibitorInfo"] = exhibitorInfoForNoHybrid;
+    }
+    contentAsJsonExhibitor["exhibitors"] = exhibitors;
+    this.Context.Request.Content = CreateJsonContent(contentAsJsonExhibitor.ToString());
+  }
+  private async Task<string> GetAirmeetEventType () {
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+        uriBuilder.Path = uriBuilder.Path.Replace("booths", "info");
+    using var airmeetInfoRequest = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+    var airmeetInfoResponse = await this.Context.SendAsync(airmeetInfoRequest, this.CancellationToken).ConfigureAwait(false);
+    var  airmeetInfo = await airmeetInfoResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+    var jsonContentInfo = JObject.Parse(airmeetInfo);
+    var eventSubType = (string) jsonContentInfo["event_sub_type"];
+    return eventSubType;
   }
 }
