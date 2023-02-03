@@ -41,10 +41,11 @@ Run the following commands and follow the prompts:
 paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>
 ```
 
+## Things to consider
+### Do not edit this connector in the out of the box UI. This connector supports pagination, which is implemented by a policy template that does not appear in the list of available templates. If you modify the connector in UI, this policy template will be lost and pagination will not work. 
+
+
 ## Frequently Asked Questions
 ### Why have you not added the other application endpoints?
 My intent here was to write flows that would look for application registrations with soon to be expiring client secrets. If you would like see other endpoints added, let me know or submit changes to this connector via github. 
-
-
-
 
