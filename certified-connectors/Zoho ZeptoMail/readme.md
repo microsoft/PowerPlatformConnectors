@@ -2,6 +2,8 @@
 
 This connector allows you to send emails from ZeptoMail. You can send custom emails or use existing email templates in your ZeptoMail account.
 
+## Publisher: Zoho Corporation
+
 ## Prerequisites
 
 A verified ZeptoMail account. Click [here](https://zoho.com/zeptomail)to create your first account.
@@ -31,5 +33,7 @@ The total email size, including the email headers, body content, inline images, 
 
 https://help.zoho.com/portal/en/kb/zeptomail/faqs
 
+##Deployment Instructions
+Refer the documentation [here](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate and Power Apps.
 
 
