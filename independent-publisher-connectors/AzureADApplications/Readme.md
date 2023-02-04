@@ -29,7 +29,7 @@ Since the connector uses OAuth as authentication type, we first need to register
    This can be done using [Azure Portal] (https://portal.azure.com), by following the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app). Once created, note down the value of Application (Client) ID. You will need this later.
 
 2. Configure (Update) your Azure AD application to access the Graph API API
-   This step will ensure that your application can successfully retrieve an access token to invoke Graph API calls. To do this, follow the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis). - For redirect URI, use "https://global.consent.azure-apim.net/redirect" - For the credentials, use a client secret (and not certificates). Remember to note the secret down, you will need this later and it is shown only once. - For API permissions, make sure the Graph API "Application.Read.All" permission is added.
+   This step will ensure that your application can successfully retrieve an access token to invoke Graph API calls. To do this, follow the steps [here](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis). - For redirect URI, use "https://global.consent.azure-apim.net/redirect" - For the credentials, use a client secret (and not certificates). Remember to note the secret down, you will need this later and it is shown only once. - For API permissions, make sure the Graph API "Application.Read.All" and "User.ReadBasic.All" delegated permissions are added.
 
 At this point, we now have a valid Azure AD application that can be used to getapp registration details. The next step for us is to create a custom connector.
 
@@ -44,6 +44,7 @@ paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
 ## Things to consider
 ### Do not edit this connector in the out of the box UI. This connector supports pagination, which is implemented by a policy template that does not appear in the list of available templates. If you modify the connector in UI, this policy template will be lost and pagination will not work. 
 
+### There are two pre-requisites to retrieve ownership details beyond the AAD object ID (eg displayName or UPN) for the owning users. The connector's Application identity requires User.ReadBasic.All and the user consenting to the connector also needs Directory Reader AAD Role.  
 
 ## Frequently Asked Questions
 ### Why have you not added the other application endpoints?
