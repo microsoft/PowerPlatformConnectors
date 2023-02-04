@@ -6,7 +6,9 @@ Azure Active Directory provides a powerful and very extensive REST API. This con
 ## Pre-requisites
 1. The application registration associated to this connector requires the delegated permission: Application.Read.All
 
-2. If you want to retrieve ownership details beyond just the AAD object ID of the owner (eg displayName or UPN), you have have to a) Grant User.ReadBasic.All to the application registration associated to this connector and b) grant the Directory Reader AAD Role to the user consenting to the connector.  
+2. If you want to retrieve ownership details beyond just the AAD object ID of the owner (eg displayName or UPN), you have have to Grant User.ReadBasic.All to the application registration associated to this connector
+
+3. If you have restricted users ability to view the profile info of other users in their company (ie Set-MsolCompanySettings -UsersPermissionToReadOtherUsersEnabled $true), you will also need to grant the Directory Reader AAD Role to any user consenting to this connector.  
 
 ## Supported Operations
 The connector supports the following operations:
