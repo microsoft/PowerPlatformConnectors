@@ -4,6 +4,7 @@ Azure Active Directory provides a powerful and very extensive REST API. This con
 ## Publisher: Paul Culmsee
 
 ## Pre-requisites
+There are two pre-requisites to retrieve ownership details beyond the AAD object ID (eg displayName or UPN) for the owning users. The connector's Application identity requires User.ReadBasic.All and the user consenting to the connector also needs Directory Reader AAD Role.  
 
 ## Supported Operations
 The connector supports the following operations:
@@ -42,9 +43,7 @@ paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json
 ```
 
 ## Things to consider
-### Do not edit this connector in the out of the box UI. This connector supports pagination, which is implemented by a policy template that does not appear in the list of available templates. If you modify the connector in UI, this policy template will be lost and pagination will not work. 
-
-### There are two pre-requisites to retrieve ownership details beyond the AAD object ID (eg displayName or UPN) for the owning users. The connector's Application identity requires User.ReadBasic.All and the user consenting to the connector also needs Directory Reader AAD Role.  
+Do not edit this connector in the out of the box UI. This connector supports pagination, which is implemented by a policy template that does not appear in the list of available templates. If you modify the connector in UI, this policy template will be lost and pagination will not work. 
 
 ## Frequently Asked Questions
 ### Why have you not added the other application endpoints?
