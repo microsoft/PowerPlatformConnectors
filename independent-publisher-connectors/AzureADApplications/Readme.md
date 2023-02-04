@@ -1,12 +1,12 @@
-# Azure Active Directory Connector
+# Azure Active Directory Connector for Application Registrations
 Azure Active Directory provides a powerful and very extensive REST API. This connector exposes just the /Applications endpoint in Microsoft Flow and PowerApps. My main intent was to provide an easy way to find client secrets that were expired or near to expiry. To acheive this I have tweaked it to pull credential metadata along with the app details via $expand=Owners (see [https://learn.microsoft.com/en-us/graph/api/application-list?view=graph-rest-1.0&tabs=http#optional-query-parameters](https://learn.microsoft.com/en-us/graph/api/application-list?view=graph-rest-1.0&tabs=http#optional-query-parameters)
 
 ## Publisher: Paul Culmsee
 
 ## Pre-requisites
-1. The application registration requires the delegated permission: Application.Read.All
+1. The application registration associated to this connector requires the delegated permission: Application.Read.All
 
-2. There are two steps if you want to retrieve ownership details beyond the AAD object ID (eg displayName or UPN) for the owning users. The connector's Application identity requires User.ReadBasic.All and the user consenting to the connector also needs Directory Reader AAD Role.  
+2. If you want to retrieve ownership details beyond just the AAD object ID of the owner (eg displayName or UPN), you have have to a) Grant User.ReadBasic.All to the application registration associated to this connector and b) grant the Directory Reader AAD Role to the user consenting to the connector.  
 
 ## Supported Operations
 The connector supports the following operations:
