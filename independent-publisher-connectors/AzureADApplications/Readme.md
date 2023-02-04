@@ -4,7 +4,9 @@ Azure Active Directory provides a powerful and very extensive REST API. This con
 ## Publisher: Paul Culmsee
 
 ## Pre-requisites
-There are two pre-requisites to retrieve ownership details beyond the AAD object ID (eg displayName or UPN) for the owning users. The connector's Application identity requires User.ReadBasic.All and the user consenting to the connector also needs Directory Reader AAD Role.  
+1. The application registration requires the delegated permission: Application.Read.All
+
+2. There are two steps if you want to retrieve ownership details beyond the AAD object ID (eg displayName or UPN) for the owning users. The connector's Application identity requires User.ReadBasic.All and the user consenting to the connector also needs Directory Reader AAD Role.  
 
 ## Supported Operations
 The connector supports the following operations:
