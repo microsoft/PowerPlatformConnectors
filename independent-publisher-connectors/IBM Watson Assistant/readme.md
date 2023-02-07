@@ -1,6 +1,6 @@
-# **IBM Watson Text to Speech**
+# **IBM Watson Assistant**
 
-The IBM Watson™ Text to Speech service provides APIs that use IBM's speech-synthesis capabilities to synthesize text into natural-sounding speech in a variety of languages, dialects, and voices. The service supports at least one male or female voice, sometimes both, for each language. The audio is streamed back to the client with minimal delay.
+The IBM Watson Assistant service combines machine learning, natural language understanding, and an integrated dialog editor to create conversation flows between your apps and your users.
 
 **This custom connector allows simple connectivity between the IBM Watson platform and the Power Platform.**
 
@@ -8,31 +8,33 @@ The IBM Watson™ Text to Speech service provides APIs that use IBM's speech-syn
 
 - A Microsoft Power Apps or Power Automate plan.
 - An [IBM Cloud](https://cloud.ibm.com) account with access to Watson services.
-- A provisioned [Text to Speech](https://cloud.ibm.com/catalog/services/text-to-speech) resource.
+- A provisioned [Watson Assistant](https://cloud.ibm.com/catalog/services/watson-assistant) resource.
 
 # Configuration
 
-Retrieve your IBM Watson Text to Speech API key and service URL from the **manage** resource page as seen in the image below.
+Retrieve your IBM Watson Assistant API key and service URL from the **manage** resource page as seen in the image below.
 
-![Credentials](https://i.gyazo.com/5e1d0845b57591a821ddf225eba38a19.png)
+![Credentials](https://i.gyazo.com/58170c137c0362b9fff72bb4a3795e3f.png)
 
-Copy your API key and URL and paste them in the connector connection configuration.
+Then retrieve your Assistant Environment ID by going to the Assistant dashboard then **Assistant Settings** as seen in the image below.
+
+![Credentials](https://i.gyazo.com/727ee9c5e637cafbbb063bf1b4a7ce8a.png)
+
+Copy your API key, URL and environment ID and paste them in the connector connection configuration.
 
 # Supported Operations
 
-### [Synethesize](https://cloud.ibm.com/apidocs/text-to-speech#synthesize)
-Synthesizes text to audio that is spoken in the specified voice. The service bases its understanding of the language for the input text on the specified voice. Use a voice that matches the language of the input text.
+### [Create a session](https://cloud.ibm.com/apidocs/assistant/assistant-v2#createsession)
+Create a new session. A session is used to send user input to a skill and receive responses. It also maintains the state of the conversation. A session persists until it is deleted, or until it times out because of inactivity.
 
-### [Get pronunciation](https://cloud.ibm.com/apidocs/text-to-speech#getpronunciation)
-Gets the phonetic pronunciation for the specified word. You can request the pronunciation for a specific format. You can also request the pronunciation for a specific voice to see the default translation for the language of that voice or for a specific custom model to see the translation for that model.
+### [Delete session](https://cloud.ibm.com/apidocs/assistant/assistant-v2#deletesession)
+Deletes a session explicitly before it times out.
 
+### [Send user input to assistant (stateful)](https://cloud.ibm.com/apidocs/assistant/assistant-v2#message)
+Send user input to an assistant and receive a response, with conversation state (including context data) stored by Watson Assistant for the duration of the session.
 
-### [List voices](https://cloud.ibm.com/apidocs/text-to-speech#listvoices)
-Lists all voices available for use with the service. The information includes the name, language, gender, and other details about the voice. The ordering of the list of voices can change from call to call; do not rely on an alphabetized or static list of voices. To see information about a specific voice, use the Get a voice.
-
-
-### [Get a voice](https://cloud.ibm.com/apidocs/text-to-speech#getvoice)
-Gets information about the specified voice. The information includes the name, language, gender, and other details about the voice. Specify a customization ID to obtain information for a custom model that is defined for the language of the specified voice. To list information about all available voices, use the List voices method.
+### [Send user input to assistant (stateless)](https://cloud.ibm.com/apidocs/assistant/assistant-v2#messagestateless)
+Send user input to an assistant and receive a response, with conversation state (including context data) managed by your application.
 
 ## Publishers
 - Lucas Titus
