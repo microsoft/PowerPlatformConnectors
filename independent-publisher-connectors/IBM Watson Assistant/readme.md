@@ -2,7 +2,7 @@
 
 The IBM Watson Assistant service combines machine learning, natural language understanding, and an integrated dialog editor to create conversation flows between your apps and your users.
 
-**This custom connector allows simple connectivity between the IBM Watson platform and the Power Platform.**
+### Publishers: Lucas Titus, Kin Cheung, Ivan Leong, Andrew Lau
 
 # Pre-requisites
 
@@ -10,7 +10,7 @@ The IBM Watson Assistant service combines machine learning, natural language und
 - An [IBM Cloud](https://cloud.ibm.com) account with access to Watson services.
 - A provisioned [Watson Assistant](https://cloud.ibm.com/catalog/services/watson-assistant) resource.
 
-# Configuration
+# Obtaining Credentials
 
 Retrieve your IBM Watson Assistant API key and service URL from the **manage** resource page as seen in the image below.
 
@@ -36,8 +36,6 @@ Send user input to an assistant and receive a response, with conversation state 
 ### [Send user input to assistant (stateless)](https://cloud.ibm.com/apidocs/assistant/assistant-v2#messagestateless)
 Send user input to an assistant and receive a response, with conversation state (including context data) managed by your application.
 
-## Publishers
-- Lucas Titus
-- Kin Cheung
-- Ivan Leong
-- Andrew Lau
+# Known Issues and Limitations
+
+Currently this connector does not support certain operations that are only available with Enterprise plans (Logs, Skills, Releases...)
