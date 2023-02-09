@@ -2,7 +2,7 @@
 
 The IBM Watson™ Text to Speech service provides APIs that use IBM's speech-synthesis capabilities to synthesize text into natural-sounding speech in a variety of languages, dialects, and voices. The service supports at least one male or female voice, sometimes both, for each language. The audio is streamed back to the client with minimal delay.
 
-**This custom connector allows simple connectivity between the IBM Watson platform and the Power Platform.**
+### Publishers: Lucas Titus, Kin Cheung, Ivan Leong, Andrew Lau
 
 # Pre-requisites
 
@@ -10,7 +10,7 @@ The IBM Watson™ Text to Speech service provides APIs that use IBM's speech-syn
 - An [IBM Cloud](https://cloud.ibm.com) account with access to Watson services.
 - A provisioned [Text to Speech](https://cloud.ibm.com/catalog/services/text-to-speech) resource.
 
-# Configuration
+# Obtaining Credentials
 
 Retrieve your IBM Watson Text to Speech API key and service URL from the **manage** resource page as seen in the image below.
 
@@ -34,8 +34,6 @@ Lists all voices available for use with the service. The information includes th
 ### [Get a voice](https://cloud.ibm.com/apidocs/text-to-speech#getvoice)
 Gets information about the specified voice. The information includes the name, language, gender, and other details about the voice. Specify a customization ID to obtain information for a custom model that is defined for the language of the specified voice. To list information about all available voices, use the List voices method.
 
-## Publishers
-- Lucas Titus
-- Kin Cheung
-- Ivan Leong
-- Andrew Lau
+# Known Issues and Limitations
+
+Currently, the audio file from the **Synethesize** operation is returned as a base64 string to allow support in Canvas apps. This might cause issues with other services.
