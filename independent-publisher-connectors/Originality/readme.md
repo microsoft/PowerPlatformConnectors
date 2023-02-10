@@ -27,3 +27,12 @@ Run an AI Detection scan for a full piece of content.
 
 ### Post - Url AI Detection
 Run an AI Detection scan on a full webpage.
+
+## Known Issues and Limitations
+No identified issue yet. <br/>
+However, there is a set API usage limit clearly defined in the [terms of use](https://krozu.com/terms). You would need to contact Krozu via email: **support@krozu.com** if needs differs from the limitation.
+
+## API Documentation
+API: [https://app.originality.ai/api-access](https://app.originality.ai/api-access)
+<br/>
+Terms of Use: [https://originality.ai/terms-and-conditions/](https://originality.ai/terms-and-conditions/)
