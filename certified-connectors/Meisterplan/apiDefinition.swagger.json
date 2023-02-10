@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Meisterplan is a portfolio-level resource management tool that helps portfolio and resource managers manage people across teams and initiatives whether your work is traditional, agile or hybrid. Use it to make confident portfolio decisions and interactively surface and solve resource conflicts.",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "title": "Meisterplan",
     "termsOfService": "https://meisterplan.com/terms-of-service/",
     "contact": {
@@ -17,6 +17,10 @@
   "host": "api.us.meisterplan.com",
   "basePath": "/",
   "tags": [
+    {
+      "name": "Absences",
+      "description": "Operations on Absences"
+    },
     {
       "name": "Actual Time Worked",
       "description": "Operations on Actual Time Worked"
@@ -88,6 +92,10 @@
     {
       "name": "Scenarios",
       "description": "Operations on Scenarios"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Webhooks allow to subscribe to notifications about changes in Meisterplan. An HTTP request with a small payload is sent to the specified endpoint when an event that you have subscribed to occurs. Currently webhooks support the following types of events: Project Created, Project Updated, Project Deleted."
     }
   ],
   "schemes": [
@@ -563,6 +571,43 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/MeResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/v1/meta/notification/dynamicSchema": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Notification Dynamic Schema",
+        "description": "Returns swagger schema for webhook notifications.",
+        "operationId": "GetNotificationDynamicSchema",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SchemaResponse"
             }
           },
           "400": {
@@ -1258,7 +1303,7 @@
           "Resources"
         ],
         "summary": "Get a List of Resources",
-        "description": "This endpoint is paginated. It returns a list of resources up to the specified PAGESIZE",
+        "description": "This endpoint is paginated. It returns a list of resources up to the specified pageSize",
         "operationId": "GetAllResources",
         "produces": [
           "application/json"
@@ -1502,6 +1547,395 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/ResourceResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/resources/{resourceId}/absences": {
+      "get": {
+        "tags": [
+          "Absences"
+        ],
+        "summary": "Get a List of Absences",
+        "description": "Returns a list of absences of the resource.",
+        "operationId": "GetAllAbsences",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "finishDate",
+            "in": "query",
+            "description": "Inclusive finish date for filtering time period.",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-example": "2019-12-31",
+            "x-ms-summary": "FinishDate"
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ResourceId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Start date for filtering time period",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-example": "2019-01-31",
+            "x-ms-summary": "StartDate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListResponseOfAbsenceResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Absences"
+        ],
+        "summary": "Create Absences",
+        "description": "Use this request to add an absence for a certain time period. This time period can be defined using the start and finish attributes of the request.",
+        "operationId": "CreateAbsences",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Absence in a given time period represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateAbsenceRequest"
+            },
+            "x-ms-summary": "Payload"
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ResourceId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/AbsenceResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Absences"
+        ],
+        "summary": "Replace Absences",
+        "description": "This endpoint lets you replace all absences of a resource. The result will be the same as if all existing absences are deleted and the passed absences are created again.",
+        "operationId": "ReplaceAbsences",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "absences",
+            "description": "Absences represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReplaceAbsencesRequest"
+            },
+            "x-ms-summary": "Absences"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "description": "Inclusive end date for filtering time period.",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-example": "2019-12-31",
+            "x-ms-summary": "FinishDate"
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ResourceId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Start date for filtering time period",
+            "required": false,
+            "type": "string",
+            "format": "date",
+            "x-example": "2019-01-31",
+            "x-ms-summary": "StartDate"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "schema": {
+              "$ref": "#/definitions/Unit"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/resources/{resourceId}/absences/{absenceId}": {
+      "get": {
+        "tags": [
+          "Absences"
+        ],
+        "summary": "Get Absences by ID",
+        "description": "Returns the individual absence specified by the given ID.",
+        "operationId": "GetAbsenceById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "absenceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "AbsenceId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ResourceId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AbsenceResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Absences"
+        ],
+        "summary": "Delete Absence",
+        "description": "Deletes an absence.",
+        "operationId": "DeleteAbsence",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "absenceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "AbsenceId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ResourceId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "schema": {
+              "$ref": "#/definitions/Unit"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Absences"
+        ],
+        "summary": "Update Absences",
+        "description": "Use this request to update an absence.",
+        "operationId": "UpdateAbsences",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "absenceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "AbsenceId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Absence in a given time period represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateAbsenceRequest"
+            },
+            "x-ms-summary": "Payload"
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ResourceId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AbsenceResponse"
             }
           },
           "400": {
@@ -1943,7 +2377,7 @@
           "Scenarios"
         ],
         "summary": "Get Scenarios by ID",
-        "description": "Returns the individual scenario specified by the given ID. HINT: You can use \"planOfRecord\" as the ID for the plan of record scenario.",
+        "description": "Returns the individual scenario specified by the given ID. Hint: You can use \"planOfRecord\" as the ID for the plan of record scenario.",
         "operationId": "GetScenarioById",
         "produces": [
           "application/json"
@@ -2472,7 +2906,7 @@
           "Projects"
         ],
         "summary": "Get a List of Projects",
-        "description": "This endpoint is paginated. It returns a list of projects up to the specified PAGESIZE",
+        "description": "This endpoint is paginated. It returns a list of projects up to the specified pageSize",
         "operationId": "GetAllProjects",
         "produces": [
           "application/json"
@@ -2551,7 +2985,7 @@
           "Projects"
         ],
         "summary": "Create Projects",
-        "description": "Creates a project with the given fields and returns the newly created project.\n\nNotes:\n\nPaths\n\nPaths delimited by / (e.g. in calendars and OBS unit paths) may define path segments which contain / by escaping with //. E.g. the path Europe/Berlin//Amsterdam will be interpreted as ['Europe', 'Berlin/Amsterdam']. An uneven amount of slashes will be interpreted as the following segment starting with one or more slashes.\n\nCustom Fields\n\nCustom fields are defined AS PROPERTIES OF the customFields object. The property name of a custom field corresponds to its column name. A custom field is an object containing a value. The value can be of type string, number or boolean depending on the type of custom field. You can view all available custom fields with their respective column names in your Meisterplan system.\n\nFor custom fields of type string, text, lookup or url, the value is of JSON type string. For custom fields of type integer, decimal or currency, the value is of JSON type float. For custom fields of type boolean, the value is of JSON type boolean.\n\nExample:\n\n    \"customFields\":{       \"cust_stage_gate\":{         \"value\": \"New\"       }       ...     }\n\nPriorities\n\nProjects may be assigned to a program, or they can be given a rank category. It is not possible to assign a project to a rank category and a program at the same time. Assigning an existing project to a rank category will unassign it from any program it may be assigned to. Assigning an existing project to a program may mean that its rank category changes, if the target program is in a different rank category.\n\nIt is currently not possible to prioritize projects within a program.",
+        "description": "Creates a project with the given fields and returns the newly created project.",
         "operationId": "CreateProject",
         "produces": [
           "application/json"
@@ -2724,7 +3158,7 @@
           "Projects"
         ],
         "summary": "Update Projects",
-        "description": "Perform an update on a project specified by the given ID.\n\nPaths\n\nPaths delimited by / (e.g. in calendars and OBS unit paths) may define path segments which contain / by escaping with //. E.g. the path Europe/Berlin//Amsterdam will be interpreted as ['Europe', 'Berlin/Amsterdam']. An uneven amount of slashes will be interpreted as the following segment starting with one or more slashes.\n\nCustom Fields\n\nCustom fields are defined AS PROPERTIES OF the customFields object. The property name of a custom field corresponds to its column name. A custom field is an object containing a value. The value can be of type string, number or boolean depending on the type of custom field. You can view all available custom fields with their respective column names in your Meisterplan system.\n\nFor custom fields of type string, text, lookup or url, the value is of JSON type string. For custom fields of type integer, decimal or currency, the value is of JSON type float. For custom fields of type boolean, the value is of JSON type boolean.\n\nExample:\n\n    \"customFields\":{       \"cust_stage_gate\":{         \"value\": \"New\"       }       ...     }\n\nA note on Project Finish\n\nPlease consider that an update of the finish date of a project deletes all milestones and allocation segments that exist after the new project finish date.",
+        "description": "Perform an update on a project specified by the given ID.",
         "operationId": "UpdateProject",
         "produces": [
           "application/json"
@@ -4406,9 +4840,335 @@
           }
         }
       }
+    },
+    "/v1/webhooks": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Get a List of Webhooks",
+        "description": "This endpoint is paginated. It returns a list of webhooks up to the specified pageSize",
+        "operationId": "GetAllWebhooks",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "pageAfter",
+            "in": "query",
+            "description": "The cursor after which to retrieve results. The cursor can be taken from a preceding request.",
+            "required": false,
+            "type": "string",
+            "x-example": "opaque cursor",
+            "x-ms-summary": "PageAfter"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Can be between 1 and 500",
+            "required": false,
+            "type": "integer",
+            "default": 500,
+            "maximum": 500,
+            "exclusiveMaximum": false,
+            "minimum": 1,
+            "exclusiveMinimum": false,
+            "format": "int32",
+            "x-example": 200,
+            "x-ms-summary": "PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PaginatedResponseOfWebhookResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      },
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Create Webhook",
+        "description": "Creates a webhook by the given fields and returns the newly created. 1000 webhooks are currently supported per system.",
+        "operationId": "CreateWebhook",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Webhook represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WebhookCreateRequest"
+            },
+            "x-ms-summary": "Payload"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/WebhookResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-trigger": "single"
+      },
+      "x-ms-notification-content": {
+        "description": "Webhook Notification",
+        "x-ms-summary": "Webhook Notification",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "x-ms-dynamic-schema": {
+            "operationId": "GetNotificationDynamicSchema",
+            "parameters": {},
+            "value-path": "schema"
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{webhookId}": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Get Webhook by ID",
+        "description": "Returns the individual webhook specified by the given ID.",
+        "operationId": "GetWebhookById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "WebhookId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/WebhookResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      },
+      "delete": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Delete Webhook",
+        "description": "Delete the webhook specified by the given ID. If the webhook with the given ID does not exist, the request will fail.",
+        "operationId": "DeleteWebhook",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "WebhookId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "schema": {
+              "$ref": "#/definitions/Unit"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      },
+      "patch": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Update Webhook Status",
+        "description": "Set the status of a webhook specified by the given ID.",
+        "operationId": "UpdateWebhookStatus",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "Webhook status represented by a JSON document.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WebhookUpdateStatusRequest"
+            },
+            "x-ms-summary": "Payload"
+          },
+          {
+            "name": "webhookId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "WebhookId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/WebhookResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
     }
   },
   "definitions": {
+    "AbsenceResponse": {
+      "type": "object",
+      "properties": {
+        "finish": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-12-31",
+          "description": "Finish date of this absence",
+          "x-ms-summary": "Finish Date"
+        },
+        "finishDayType": {
+          "type": "string",
+          "example": "FULL_DAY",
+          "enum": [
+            "FULL_DAY",
+            "HALF_DAY"
+          ],
+          "x-ms-summary": "Finish Absence Day Type"
+        },
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "description": "The id of the absence",
+          "x-ms-summary": "Id"
+        },
+        "start": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-01-31",
+          "description": "Start date of this absence",
+          "x-ms-summary": "Start Date"
+        },
+        "startDayType": {
+          "type": "string",
+          "example": "FULL_DAY",
+          "enum": [
+            "FULL_DAY",
+            "HALF_DAY"
+          ],
+          "x-ms-summary": "Start Absence Day Type"
+        }
+      },
+      "title": "AbsenceResponse"
+    },
     "ActualTimeWorkedCreateOrUpdateRequest": {
       "type": "object",
       "properties": {
@@ -5226,6 +5986,48 @@
       },
       "title": "Category"
     },
+    "CreateAbsenceRequest": {
+      "type": "object",
+      "required": [
+        "finish",
+        "start"
+      ],
+      "properties": {
+        "finish": {
+          "type": "string",
+          "example": "2019-12-31",
+          "description": "format: YYYY-MM-DD",
+          "x-ms-summary": "Finish"
+        },
+        "finishDayType": {
+          "type": "string",
+          "example": "FULL_DAY",
+          "description": "Default is FULL_DAY",
+          "enum": [
+            "FULL_DAY",
+            "HALF_DAY"
+          ],
+          "x-ms-summary": "Finish Day Type"
+        },
+        "start": {
+          "type": "string",
+          "example": "2019-01-31",
+          "description": "format: YYYY-MM-DD",
+          "x-ms-summary": "Start"
+        },
+        "startDayType": {
+          "type": "string",
+          "example": "FULL_DAY",
+          "description": "Default is FULL_DAY",
+          "enum": [
+            "FULL_DAY",
+            "HALF_DAY"
+          ],
+          "x-ms-summary": "Start Day Type"
+        }
+      },
+      "title": "CreateAbsenceRequest"
+    },
     "CreateCalendarExceptionsRequest": {
       "type": "object",
       "properties": {
@@ -5287,8 +6089,7 @@
       "type": "object",
       "properties": {
         "properties": {
-          "$ref": "#/definitions/DynamicSchemaPropertiesResponse",
-          "x-ms-summary": "Type"
+          "$ref": "#/definitions/DynamicSchemaPropertiesResponse"
         },
         "required": {
           "type": "array",
@@ -5538,6 +6339,19 @@
         }
       },
       "title": "FinancialsUpdateRequest"
+    },
+    "ListResponseOfAbsenceResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AbsenceResponse"
+          },
+          "x-ms-summary": "Items"
+        }
+      },
+      "title": "ListResponseOfAbsenceResponse"
     },
     "ListResponseOfAllocationResponse": {
       "type": "object",
@@ -6126,6 +6940,22 @@
         }
       },
       "title": "PaginatedResponseOfResourceResponse"
+    },
+    "PaginatedResponseOfWebhookResponse": {
+      "type": "object",
+      "properties": {
+        "_pagination": {
+          "$ref": "#/definitions/Pagination"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WebhookResponse"
+          },
+          "x-ms-summary": "Items"
+        }
+      },
+      "title": "PaginatedResponseOfWebhookResponse"
     },
     "Pagination": {
       "type": "object",
@@ -6771,6 +7601,19 @@
       },
       "title": "RankCategory"
     },
+    "ReplaceAbsencesRequest": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CreateAbsenceRequest"
+          },
+          "x-ms-summary": "Items"
+        }
+      },
+      "title": "ReplaceAbsencesRequest"
+    },
     "ReplaceMilestonesRequest": {
       "type": "object",
       "properties": {
@@ -6874,6 +7717,9 @@
           "description": "Must be unique. If empty, value will be generated.",
           "x-ms-summary": "Resource Key"
         },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerRequest"
+        },
         "skills": {
           "type": "array",
           "example": [
@@ -6889,12 +7735,41 @@
       },
       "title": "ResourceCreateRequest"
     },
+    "ResourceManagerRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "description": "If you specify the id to reference a resource manager you must omit the resourceKey property.",
+          "x-ms-summary": "ID"
+        },
+        "resourceKey": {
+          "type": "string",
+          "example": "KMY",
+          "description": "If you specify the resourceKey to reference a resource manager you must omit the id property.",
+          "x-ms-summary": "Resource Key"
+        }
+      },
+      "title": "ResourceManagerRequest"
+    },
+    "ResourceManagerResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "resourceKey": {
+          "type": "string"
+        }
+      },
+      "title": "ResourceManagerResponse"
+    },
     "ResourceResponse": {
       "type": "object",
       "properties": {
         "calendar": {
-          "$ref": "#/definitions/ResourceCalendarResponse",
-          "x-ms-summary": "Calendar"
+          "$ref": "#/definitions/ResourceCalendarResponse"
         },
         "costPerHour": {
           "type": "number",
@@ -6958,13 +7833,15 @@
           "$ref": "#/definitions/PostalAddressResponse"
         },
         "primaryRole": {
-          "$ref": "#/definitions/PrimaryRoleResponse",
-          "x-ms-summary": "Primary Role"
+          "$ref": "#/definitions/PrimaryRoleResponse"
         },
         "resourceKey": {
           "type": "string",
           "example": "KMY",
           "x-ms-summary": "Resource Key"
+        },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerResponse"
         },
         "skills": {
           "type": "array",
@@ -6995,7 +7872,6 @@
         "emailAddress": {
           "type": "string",
           "example": "jane.doe@meisterplan.com",
-          "description": "Must be unique.",
           "x-ms-summary": "Email Address"
         },
         "employmentPeriod": {
@@ -7004,6 +7880,7 @@
         "externalId": {
           "type": "string",
           "example": "myCustomID",
+          "description": "Must be unique.",
           "x-ms-summary": "External Id"
         },
         "externalResource": {
@@ -7049,6 +7926,9 @@
           "example": "KMY",
           "description": "Must be unique. If empty, value will be generated.",
           "x-ms-summary": "Resource Key"
+        },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerRequest"
         },
         "skills": {
           "type": "array",
@@ -7161,6 +8041,9 @@
             },
             "value-path": "schema"
           }
+        },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerRequest"
         }
       },
       "title": "RoleCreateRequest"
@@ -7216,6 +8099,9 @@
             },
             "value-path": "schema"
           }
+        },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerResponse"
         }
       },
       "title": "RoleResponse"
@@ -7267,6 +8153,9 @@
             },
             "value-path": "schema"
           }
+        },
+        "resourceManager": {
+          "$ref": "#/definitions/ResourceManagerRequest"
         }
       },
       "title": "RoleUpdateRequest"
@@ -7309,8 +8198,7 @@
       "type": "object",
       "properties": {
         "schema": {
-          "$ref": "#/definitions/DynamicSchemaResponse",
-          "x-ms-summary": "Swagger Schema Definition"
+          "$ref": "#/definitions/DynamicSchemaResponse"
         }
       },
       "title": "SchemaResponse"
@@ -7382,6 +8270,200 @@
     "Unit": {
       "type": "object",
       "title": "Unit"
+    },
+    "UpdateAbsenceRequest": {
+      "type": "object",
+      "properties": {
+        "finish": {
+          "type": "string",
+          "example": "2019-12-31",
+          "description": "format: YYYY-MM-DD",
+          "x-ms-summary": "Finish"
+        },
+        "finishDayType": {
+          "type": "string",
+          "example": "FULL_DAY",
+          "enum": [
+            "FULL_DAY",
+            "HALF_DAY"
+          ],
+          "x-ms-summary": "Finish Day Type"
+        },
+        "start": {
+          "type": "string",
+          "example": "2019-01-31",
+          "description": "format: YYYY-MM-DD",
+          "x-ms-summary": "Start"
+        },
+        "startDayType": {
+          "type": "string",
+          "example": "FULL_DAY",
+          "enum": [
+            "FULL_DAY",
+            "HALF_DAY"
+          ],
+          "x-ms-summary": "Start Day Type"
+        }
+      },
+      "title": "UpdateAbsenceRequest"
+    },
+    "UserResponse": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "example": "Doe, Jane",
+          "x-ms-summary": "User Display Name"
+        },
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "User ID"
+        }
+      },
+      "title": "UserResponse"
+    },
+    "WebhookCreateRequest": {
+      "type": "object",
+      "required": [
+        "callbackUrl",
+        "eventTypes",
+        "scenarioId"
+      ],
+      "properties": {
+        "callbackUrl": {
+          "type": "string",
+          "description": "Has to be a valid https URL.",
+          "x-ms-notification-url": true,
+          "x-ms-summary": "Callback URL",
+          "x-ms-visibility": "internal"
+        },
+        "eventTypes": {
+          "type": "array",
+          "description": "At least one event type needs to be provided.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "PROJECT_CREATE",
+              "PROJECT_DELETE",
+              "PROJECT_UPDATE"
+            ]
+          },
+          "x-ms-summary": "Event Types"
+        },
+        "name": {
+          "type": "string",
+          "description": "If not set the callback URL is also used for the name.",
+          "x-ms-summary": "Name",
+          "x-ms-visibility": "internal"
+        },
+        "projectId": {
+          "type": "string",
+          "example": "UUID",
+          "description": "The projectId is optional. It is only required if you want to subscribe to a specific project.",
+          "x-ms-summary": "Project ID"
+        },
+        "scenarioId": {
+          "type": "string",
+          "example": "UUID",
+          "description": "The scenario you want to subscribe to.",
+          "x-ms-summary": "Scenario ID",
+          "x-ms-dynamic-values": {
+            "operationId": "GetAllScenarios",
+            "value-path": "id",
+            "value-title": "name",
+            "value-collection": "items"
+          }
+        },
+        "secret": {
+          "type": "string",
+          "description": "The secret is optional. It is used to create a HmacSHA256 signature of the notification payload that is sent to the callback URL.",
+          "x-ms-summary": "Secret",
+          "x-ms-visibility": "internal"
+        }
+      },
+      "title": "WebhookCreateRequest"
+    },
+    "WebhookResponse": {
+      "type": "object",
+      "properties": {
+        "callbackUrl": {
+          "type": "string",
+          "x-ms-summary": "Callback URL"
+        },
+        "createdBy": {
+          "$ref": "#/definitions/UserResponse"
+        },
+        "createdDate": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2022-12-22T16:50:10",
+          "x-ms-summary": "Created Date"
+        },
+        "eventTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "PROJECT_CREATE",
+              "PROJECT_DELETE",
+              "PROJECT_UPDATE"
+            ]
+          },
+          "x-ms-summary": "Event Types"
+        },
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name"
+        },
+        "projectId": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "Project ID"
+        },
+        "scenarioId": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "Scenario ID"
+        },
+        "secret": {
+          "type": "string",
+          "x-ms-summary": "Secret"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "SUSPENDED"
+          ],
+          "x-ms-summary": "Status"
+        }
+      },
+      "title": "WebhookResponse"
+    },
+    "WebhookUpdateStatusRequest": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "SUSPENDED",
+          "description": "The new status of the webhook.",
+          "enum": [
+            "ACTIVE",
+            "SUSPENDED"
+          ],
+          "x-ms-summary": "Status"
+        }
+      },
+      "title": "WebhookUpdateStatusRequest"
     },
     "WorkingHours": {
       "type": "object",
