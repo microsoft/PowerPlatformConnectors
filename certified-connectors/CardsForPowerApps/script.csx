@@ -29,11 +29,24 @@ public class Script : ScriptBase
 
         // send request
         HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
-        if (response.IsSuccessStatusCode) {
-           var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-           response.Content = CreateJsonContent(responseString);
-        }  
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            if (this.Context.OperationId == "CreateCardInstance")
+            {
+                var body = JObject.Parse(responseString);
+                var card = body["card"] as JObject;
+                // add card type to card json
+                card.Add("CardType", "PowerAppsCard");
+                body["card"] = card;
+                response.Content = CreateJsonContent(body.ToString());
+            }
+            else
+            {
+                response.Content = CreateJsonContent(responseString);
+            }
+        }
         return response;
     }
 
