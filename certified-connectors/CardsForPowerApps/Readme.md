@@ -19,4 +19,3 @@ The connector supports the following operations:
 * Create Card Instance - To create the card instance of any card in your accessible environment. 
 * Get Card Instance - Get the card instance details.
 * Get Card Definition - Get the card definition given the card id.
-* Search Cards - Search for cards in the environment. You can also add search string to find a specific card.
