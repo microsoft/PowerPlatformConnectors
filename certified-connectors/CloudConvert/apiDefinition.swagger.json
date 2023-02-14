@@ -1,0 +1,1175 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "CloudConvert",
+    "description": "CloudConvert is a file converter service - more than 200 different audio, video, document, ebook, archive, image, spreadsheet and presentation formats supported. The connector allows to convert files, compress files and create website screenshots using the CloudConvert service.",
+    "version": "1.0",
+    "contact": {
+      "name": "CloudConvert Support",
+      "url": "https://cloudconvert.com/contact",
+      "email": "support@cloudconvert.com"
+    }
+  },
+  "host": "api.cloudconvert.com",
+  "basePath": "/v2/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/flow/jobs/convertfile": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Conversion Successful.",
+            "schema": {
+              "description": "Output File Content",
+              "title": "File Content",
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Filename": {
+                "description": "Output Filename",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Conversion Failed."
+          }
+        },
+        "summary": "Convert File",
+        "operationId": "ConvertFile",
+        "description": "Convert a file to another format",
+        "parameters": [
+          {
+            "name": "Content-type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tasks": {
+                  "type": "object",
+                  "properties": {
+                    "import": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the import task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "import/base64"
+                        },
+                        "file": {
+                          "type": "string",
+                          "description": "File content of the input file.",
+                          "title": "Input File Content",
+                          "format": "byte",
+                          "x-ms-visibility": "important"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Filename of the input file, including extension.",
+                          "title": "Input Filename",
+                          "x-ms-visibility": "important"
+                        }
+                      },
+                      "description": "import",
+                      "required": [
+                        "operation",
+                        "file",
+                        "filename"
+                      ]
+                    },
+                    "convert": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the convert task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "convert"
+                        },
+                        "input": {
+                          "type": "string",
+                          "description": "Input of the convert task.",
+                          "title": "Input",
+                          "default": "import",
+                          "x-ms-visibility": "internal"
+                        },
+                        "input_format": {
+                          "type": "string",
+                          "description": "Input Format",
+                          "title": "Input Format",
+                          "x-ms-visibility": "important",
+                          "x-ms-dynamic-list": {
+                            "operationId": "GetConvertInputFormats",
+                            "itemsPath": "data",
+                            "parameters": {
+                            }
+                          }
+                        },
+                        "output_format": {
+                          "type": "string",
+                          "description": "Output Format",
+                          "title": "Output Format",
+                          "x-ms-visibility": "important",
+                          "x-ms-dynamic-list": {
+                            "operationId": "GetConvertOutputFormats",
+                            "itemsPath": "data",
+                            "parameters": {
+                            }
+                          }
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "The filename of the output file. If it is not provided, input filename with output format as extension will be used.",
+                          "title": "Output Filename",
+                          "x-ms-visibility": "important"
+                        },
+                        "options": {
+                          "type": "object",
+                          "x-ms-dynamic-properties": {
+                            "operationId": "GetConvertOptions",
+                            "parameters": {
+                              "input_format": {
+                                "parameterReference": "body/tasks/convert/input_format"
+                              },
+                              "output_format": {
+                                "parameterReference": "body/tasks/convert/output_format"
+                              }
+                            },
+                            "itemValuePath": "data"
+                          }
+                        }
+                      },
+                      "description": "convert",
+                      "required": [
+                        "output_format",
+                        "input",
+                        "operation"
+                      ]
+                    },
+                    "export": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the export task.",
+                          "title": "Operation",
+                          "default": "export/url",
+                          "x-ms-visibility": "internal"
+                        },
+                        "input": {
+                          "type": "string",
+                          "description": "Input of the export task.",
+                          "title": "Input",
+                          "default": "convert",
+                          "x-ms-visibility": "internal"
+                        },
+                        "inline": {
+                          "type": "boolean",
+                          "description": "This option makes the export URLs return the Content-Disposition inline header, which tells browser to display the file instead of downloading it.",
+                          "title": "Inline",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "default": false,
+                          "x-ms-visibility": "internal"
+                        },
+                        "archive_multiple_files": {
+                          "type": "boolean",
+                          "description": "By default, multiple files will create multiple export URLs. When enabling this option, one export URL with a ZIP file will be created.",
+                          "title": "Archive Multiple Files",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "x-ms-visibility": "internal",
+                          "default": true
+                        }
+                      },
+                      "description": "export",
+                      "required": [
+                        "archive_multiple_files",
+                        "inline",
+                        "input",
+                        "operation"
+                      ]
+                    }
+                  },
+                  "description": "tasks",
+                  "required": [
+                    "convert",
+                    "export",
+                    "import"
+                  ]
+                }
+              },
+              "required": [
+                "tasks"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/flow/jobs/optimize": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Conversion Successful.",
+            "schema": {
+              "description": "Output File Content",
+              "title": "File Content",
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Filename": {
+                "description": "Output Filename",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Conversion Failed."
+          }
+        },
+        "summary": "Compress File",
+        "operationId": "OptimizeFile",
+        "description": "Compress a PDF, PNG or JPG file",
+        "parameters": [
+          {
+            "name": "Content-type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tasks": {
+                  "type": "object",
+                  "properties": {
+                    "import": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the import task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "import/base64"
+                        },
+                        "file": {
+                          "type": "string",
+                          "description": "File content of the input file.",
+                          "title": "Input File Content",
+                          "format": "byte",
+                          "x-ms-visibility": "important"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Filename of the input file, including extension.",
+                          "title": "Input Filename",
+                          "x-ms-visibility": "important"
+                        }
+                      },
+                      "description": "import",
+                      "required": [
+                        "operation",
+                        "file",
+                        "filename"
+                      ]
+                    },
+                    "convert": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the convert task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "optimize"
+                        },
+                        "input": {
+                          "type": "string",
+                          "description": "Input of the convert task.",
+                          "title": "Input",
+                          "default": "import",
+                          "x-ms-visibility": "internal"
+                        },
+                        "input_format": {
+                          "type": "string",
+                          "description": "Input Format",
+                          "title": "Input Format",
+                          "x-ms-visibility": "important",
+                          "x-ms-dynamic-list": {
+                            "operationId": "GetOptimizeInputFormats",
+                            "itemsPath": "data",
+                            "parameters": {
+                            }
+                          }
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "The filename of the compressed output file. If it is not provided, input filename will be used.",
+                          "title": "Output Filename",
+                          "x-ms-visibility": "important"
+                        },
+                        "options": {
+                          "type": "object",
+                          "x-ms-dynamic-properties": {
+                            "operationId": "GetOptimizeOptions",
+                            "parameters": {
+                              "input_format": {
+                                "parameterReference": "body/tasks/convert/input_format"
+                              }
+                            },
+                            "itemValuePath": "data"
+                          }
+                        }
+                      },
+                      "description": "convert",
+                      "required": [
+                        "input",
+                        "operation"
+                      ]
+                    },
+                    "export": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the export task.",
+                          "title": "Operation",
+                          "default": "export/url",
+                          "x-ms-visibility": "internal"
+                        },
+                        "input": {
+                          "type": "string",
+                          "description": "Input of the export task.",
+                          "title": "Input",
+                          "default": "convert",
+                          "x-ms-visibility": "internal"
+                        },
+                        "inline": {
+                          "type": "boolean",
+                          "description": "This option makes the export URLs return the Content-Disposition inline header, which tells browser to display the file instead of downloading it.",
+                          "title": "Inline",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "default": false,
+                          "x-ms-visibility": "internal"
+                        },
+                        "archive_multiple_files": {
+                          "type": "boolean",
+                          "description": "By default, multiple files will create multiple export URLs. When enabling this option, one export URL with a ZIP file will be created.",
+                          "title": "Archive Multiple Files",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "x-ms-visibility": "internal",
+                          "default": true
+                        }
+                      },
+                      "description": "export",
+                      "required": [
+                        "archive_multiple_files",
+                        "inline",
+                        "input",
+                        "operation"
+                      ]
+                    }
+                  },
+                  "description": "tasks",
+                  "required": [
+                    "convert",
+                    "export",
+                    "import"
+                  ]
+                }
+              },
+              "required": [
+                "tasks"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/flow/jobs/capture-website": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Conversion Successful.",
+            "schema": {
+              "description": "Output File Content",
+              "title": "File Content",
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Filename": {
+                "description": "Output Filename",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Conversion Failed."
+          }
+        },
+        "summary": "Create Website Screenshot",
+        "operationId": "CaptureWebsite",
+        "description": "Create a website screenshot as PDF, PNG or JPG",
+        "parameters": [
+          {
+            "name": "Content-type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tasks": {
+                  "type": "object",
+                  "properties": {
+                    "convert": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the convert task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "capture-website"
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "The URL of website to capture the screenshot of",
+                          "title": "URL",
+                          "x-ms-visibility": "important"
+                        },
+                        "output_format": {
+                          "type": "string",
+                          "description": "Output Format",
+                          "title": "Output Format",
+                          "x-ms-visibility": "important",
+                          "x-ms-dynamic-list": {
+                            "operationId": "GetCaptureWebsiteOutputFormats",
+                            "itemsPath": "data",
+                            "parameters": {
+                            }
+                          }
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "The filename of the output file. If it is not provided, a filename based on the URL will be generated.",
+                          "title": "Output Filename",
+                          "x-ms-visibility": "important"
+                        },
+                        "options": {
+                          "type": "object",
+                          "x-ms-dynamic-properties": {
+                            "operationId": "GetCaptureWebsiteOptions",
+                            "parameters": {
+                              "output_format": {
+                                "parameterReference": "body/tasks/convert/output_format"
+                              }
+                            },
+                            "itemValuePath": "data"
+                          }
+                        }
+                      },
+                      "description": "convert",
+                      "required": [
+                        "url",
+                        "output_format",
+                        "operation"
+                      ]
+                    },
+                    "export": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the export task,",
+                          "title": "Operation",
+                          "default": "export/url",
+                          "x-ms-visibility": "internal"
+                        },
+                        "input": {
+                          "type": "string",
+                          "description": "Input of the export task.",
+                          "title": "Input",
+                          "default": "convert",
+                          "x-ms-visibility": "internal"
+                        },
+                        "inline": {
+                          "type": "boolean",
+                          "description": "This option makes the export URLs return the Content-Disposition inline header, which tells browser to display the file instead of downloading it.",
+                          "title": "Inline",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "default": false,
+                          "x-ms-visibility": "internal"
+                        },
+                        "archive_multiple_files": {
+                          "type": "boolean",
+                          "description": "By default, multiple files will create multiple export URLs. When enabling this option, one export URL with a ZIP file will be created.",
+                          "title": "Archive Multiple Files",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "x-ms-visibility": "internal",
+                          "default": true
+                        }
+                      },
+                      "description": "export",
+                      "required": [
+                        "archive_multiple_files",
+                        "inline",
+                        "input",
+                        "operation"
+                      ]
+                    }
+                  },
+                  "description": "tasks",
+                  "required": [
+                    "convert",
+                    "export"
+                  ]
+                }
+              },
+              "required": [
+                "tasks"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/flow/jobs/merge": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Conversion Successful.",
+            "schema": {
+              "description": "Output File Content",
+              "title": "File Content",
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Filename": {
+                "description": "Output Filename",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Conversion Failed."
+          }
+        },
+        "summary": "Merge Files",
+        "operationId": "MergeFiles",
+        "description": "Merge multiple files in one PDF",
+        "parameters": [
+          {
+            "name": "Content-type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "number_of_inputs": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 100,
+                  "description": "Number of input files to merge.",
+                  "title": "Number of Files",
+                  "x-ms-visibility": "important",
+                  "default": 2
+                },
+                "additional_inputs": {
+                  "type": "object",
+                  "x-ms-dynamic-properties": {
+                    "operationId": "GetMergeInputs",
+                    "parameters": {
+                      "number_of_inputs": {
+                        "parameterReference": "body/number_of_inputs"
+                      }
+                    },
+                    "itemValuePath": "data"
+                  }
+                },
+                "tasks": {
+                  "type": "object",
+                  "properties": {
+                    "import-1": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the import task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "import/base64"
+                        },
+                        "file": {
+                          "type": "string",
+                          "description": "File content of the 1. input file.",
+                          "title": "Input 1 File Content",
+                          "format": "byte",
+                          "x-ms-visibility": "important"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Filename of the 1. input file, including extension.",
+                          "title": "Input 1 Filename",
+                          "x-ms-visibility": "important"
+                        }
+                      },
+                      "description": "import-1",
+                      "required": [
+                        "operation",
+                        "file",
+                        "filename"
+                      ]
+                    },
+                    "import-2": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the import task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "import/base64"
+                        },
+                        "file": {
+                          "type": "string",
+                          "description": "File content of the 2. input file.",
+                          "title": "Input 2 File Content",
+                          "format": "byte",
+                          "x-ms-visibility": "important"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Filename of the 2. input file, including extension.",
+                          "title": "Input 2 Filename",
+                          "x-ms-visibility": "important"
+                        }
+                      },
+                      "description": "import-2",
+                      "required": [
+                        "operation",
+                        "file",
+                        "filename"
+                      ]
+                    },
+                    "merge": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the convert task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "merge"
+                        },
+                        "input": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Input of the merge task.",
+                          "title": "Input",
+                          "default": ["import-1", "import-2"],
+                          "x-ms-visibility": "internal"
+                        },
+                        "output_format": {
+                          "type": "string",
+                          "description": "Output Format",
+                          "title": "Output Format",
+                          "default": "pdf",
+                          "x-ms-visibility": "important",
+                          "x-ms-dynamic-list": {
+                            "operationId": "GetMergeOutputFormats",
+                            "itemsPath": "data",
+                            "parameters": {
+                            }
+                          }
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "The filename of the merged output file. If it is not provided, output filename will be automatically generated.",
+                          "title": "Output Filename",
+                          "x-ms-visibility": "important"
+                        },
+                        "options": {
+                          "type": "object",
+                          "x-ms-dynamic-properties": {
+                            "operationId": "GetMergeOptions",
+                            "parameters": {
+                              "output_format": {
+                                "parameterReference": "body/tasks/merge/output_format"
+                              }
+                            },
+                            "itemValuePath": "data"
+                          }
+                        }
+                      },
+                      "description": "merge",
+                      "required": [
+                        "input",
+                        "operation",
+                        "output_format"
+                      ]
+                    },
+                    "export": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the export task.",
+                          "title": "Operation",
+                          "default": "export/url",
+                          "x-ms-visibility": "internal"
+                        },
+                        "input": {
+                          "type": "string",
+                          "description": "Input of the export task.",
+                          "title": "Input",
+                          "default": "merge",
+                          "x-ms-visibility": "internal"
+                        },
+                        "inline": {
+                          "type": "boolean",
+                          "description": "This option makes the export URLs return the Content-Disposition inline header, which tells browser to display the file instead of downloading it.",
+                          "title": "Inline",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "default": false,
+                          "x-ms-visibility": "internal"
+                        },
+                        "archive_multiple_files": {
+                          "type": "boolean",
+                          "description": "By default, multiple files will create multiple export URLs. When enabling this option, one export URL with a ZIP file will be created.",
+                          "title": "Archive Multiple Files",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "x-ms-visibility": "internal",
+                          "default": true
+                        }
+                      },
+                      "description": "export",
+                      "required": [
+                        "archive_multiple_files",
+                        "inline",
+                        "input",
+                        "operation"
+                      ]
+                    }
+                  },
+                  "description": "tasks",
+                  "required": [
+                    "merge",
+                    "export",
+                    "import-1",
+                    "import-2"
+                  ]
+                }
+              },
+              "required": [
+                "tasks",
+                "number_of_inputs"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/flow/options/convert": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Convert Options",
+        "operationId": "GetConvertOptions",
+        "parameters": [
+          {
+            "name": "input_format",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "output_format",
+            "in": "query",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/flow/options/optimize": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Optimize Options",
+        "operationId": "GetOptimizeOptions",
+        "parameters": [
+          {
+            "name": "input_format",
+            "in": "query",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/flow/options/capture-website": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Capture Website Options",
+        "operationId": "GetCaptureWebsiteOptions",
+        "parameters": [
+          {
+            "name": "output_format",
+            "in": "query",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/flow/options/merge": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Merge Options",
+        "operationId": "GetMergeOptions",
+        "parameters": [
+          {
+            "name": "output_format",
+            "in": "query",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/flow/inputs/merge": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Merge Inputs",
+        "operationId": "GetMergeInputs",
+        "parameters": [
+          {
+            "name": "number_of_inputs",
+            "in": "query",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "/flow/formats/convert/input_formats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Convert Input Formats",
+        "operationId": "GetConvertInputFormats",
+        "parameters": []
+      }
+    },
+    "/flow/formats/convert/output_formats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Convert Output Formats",
+        "operationId": "GetConvertOutputFormats",
+        "parameters": []
+      }
+    },
+    "/flow/formats/optimize/input_formats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Optimize Input Formats",
+        "operationId": "GetOptimizeInputFormats",
+        "parameters": []
+      }
+    },
+    "/flow/formats/capture-website/output_formats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Capture Website Output Formats",
+        "operationId": "GetCaptureWebsiteOutputFormats",
+        "parameters": []
+      }
+    },
+    "/flow/formats/merge/output_formats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Merge Output Formats",
+        "operationId": "GetMergeOutputFormats",
+        "parameters": []
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://cloudconvert.com/oauth/authorize",
+      "tokenUrl": "https://cloudconvert.com/oauth/token",
+      "scopes": {
+        "user.read": "user.read",
+        "task.read": "task.read",
+        "task.write": "task.write"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": [
+        "user.read",
+        "task.read",
+        "task.write"
+      ]
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://cloudconvert.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://cloudconvert.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Productivity"
+    }
+  ]
+}
