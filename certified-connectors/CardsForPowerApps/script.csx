@@ -29,7 +29,6 @@ public class Script : ScriptBase
 
         // send request
         HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
         if (response.IsSuccessStatusCode)
         {
             var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
