@@ -1,0 +1,884 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Zoho ZeptoMail",
+    "description": "ZeptoMail is a transactional email sending service from Zoho. You can directly send these automated emails from your application or website.",
+    "version": "1.0",
+    "contact": {
+      "name": "Zoho ZeptoMail",
+      "email": "zmintegration@zohomail.com",
+      "url": "https://www.zoho.com/zeptomail/contact.html?src=pd-menu"
+    }
+  },
+  "host": "zeptomail.zoho.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/portal/v1.0/mailagents": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "mailagent_name": {
+                        "type": "string",
+                        "description": "Mail Agent's name"
+                      },
+                      "created_time": {
+                        "type": "string",
+                        "description": "The time at which the Mail Agent was created"
+                      },
+                      "mailagent_id": {
+                        "type": "string",
+                        "description": "Mail Agent id"
+                      },
+                      "domain": {
+                        "type": "string",
+                        "description": "Domain"
+                      },
+                      "domain-verification-status": {
+                        "type": "string",
+                        "description": "Domain verification status"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Mail Agent description"
+                      },
+                      "user_connection_status": {
+                        "type": "string",
+                        "description": "User connection status"
+                      },
+                      "mailagent_key": {
+                        "type": "string",
+                        "description": "Mail Agent key"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "status"
+                      }
+                    }
+                  },
+                  "description": "data",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all Mail Agent",
+        "description": "List all the Mail Agents in your ZeptoMail account.",
+        "operationId": "GetMailAgent",
+        "x-ms-visibility": "internal",
+        "parameters": []
+      }
+    },
+    "/portal/v1.0/mailagents/{mailagent_key}/bounce-address": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "bounce_address": {
+                        "type": "string",
+                        "description": "Bounce address"
+                      },
+                      "is_default": {
+                        "type": "boolean",
+                        "description": "Is default"
+                      }
+                    }
+                  },
+                  "description": "data"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get bounce address",
+        "description": "List all the bounce addresses associated with your Mail Agent",
+        "x-ms-visibility": "internal",
+        "operationId": "GetBounceAddress",
+        "parameters": [
+          {
+            "name": "mailagent_key",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The Mail Agents in your ZeptoMail account.",
+            "x-ms-summary": "Mail Agent key",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/v1.0/email": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "535": {
+            "description": "Unauthorized"
+          },
+          "552": {
+            "description": "Sending email from Invalid 'from' address domain."
+          },
+          "553": {
+            "description": "Virus detected in eml file."
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "summary": "Send mail",
+        "description": "To send an email to the desired recipient.",
+        "operationId": "SendMail",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mailagent_key": {
+                  "type": "string",
+                  "description": "Choose the Mail Agent.",
+                  "x-ms-summary": "Mail Agent",
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetMailAgent",
+                    "itemValuePath": "mailagent_key",
+                    "itemsPath": "data",
+                    "itemTitlePath": "mailagent_name"
+                  }
+                },
+                "bounce_address": {
+                  "type": "string",
+                  "description": "The email address to which bounced emails will be sent.",
+                  "x-ms-summary": "Bounce address",
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetBounceAddress",
+                    "itemValuePath": "bounce_address",
+                    "itemTitlePath": "bounce_address",
+                    "itemsPath": "data",
+                    "parameters": {
+                      "mailagent_key": {
+                        "parameterReference": "body/mailagent_key"
+                      }
+                    }
+                  }
+                },
+                "from": {
+                  "$ref": "#/definitions/FromAddress"
+                },
+                "to": {
+                  "type": "array",
+                  "description": "Recipient email address.",
+                  "x-ms-summary": "To",
+                  "items": {
+                    "$ref": "#/definitions/EmailAddressItems"
+                  },
+                  "minItems": 1
+                },
+                "cc": {
+                  "type": "array",
+                  "description": "Email addresses of cc'd recipients.",
+                  "x-ms-summary": "CC",
+                  "items": {
+                    "$ref": "#/definitions/EmailAddressItems"
+                  },
+                  "x-ms-visibility": "advanced"
+                },
+                "bcc": {
+                  "type": "array",
+                  "description": "Email addresses of bcc'd recipients.",
+                  "x-ms-summary": "BCC",
+                  "items": {
+                    "$ref": "#/definitions/EmailAddressItems"
+                  },
+                  "x-ms-visibility": "advanced"
+                },
+                "mailtype": {
+                  "type": "string",
+                  "description": "Format of the mail to be sent",
+                  "x-ms-summary": "Mail type",
+                  "default": "html",
+                  "enum": [
+                    "html",
+                    "text"
+                  ]
+                },
+                "subject": {
+                  "type": "string",
+                  "description": "Subject line of your email",
+                  "x-ms-summary": "Subject"
+                },
+                "htmlbody": {
+                  "type": "string",
+                  "description": "This is the body content for your email.",
+                  "x-ms-summary": "Body"
+                },
+                "reply_to": {
+                  "type": "array",
+                  "description": "The email address to which the recipient's email responses will be addressed.",
+                  "x-ms-summary": "Reply to",
+                  "items": {
+                    "$ref": "#/definitions/ReplyToAddresss"
+                  },
+                  "x-ms-visibility": "advanced"
+                },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "description": " Base64 encoded value of a file.",
+                        "x-ms-summary": "Base 64 content"
+                      },
+                      "mime_type": {
+                        "type": "string",
+                        "description": "Indicates the content type in your attachment. ",
+                        "x-ms-summary": "Content type"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The file name of your attachment.",
+                        "x-ms-summary": "File name"
+                      }
+                    }
+                  },
+                  "description": "Attachments",
+                  "x-ms-summary": "Attachments",
+                  "x-ms-visibility": "advanced",
+                  "maxItems": 10
+                }
+              },
+              "required": [
+                "mailagent_key",
+                "bounce_address",
+                "from",
+                "to",
+                "subject"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v1.0/email/template": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessMessage"
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "535": {
+            "description": "Unauthorized"
+          },
+          "552": {
+            "description": "Sending email from Invalid 'from' address domain."
+          },
+          "553": {
+            "description": "Virus detected in eml file."
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "summary": "Send template mail",
+        "description": "Sending a single email using Templates.",
+        "operationId": "SendTemplateMail",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "mailagent_key": {
+                  "type": "string",
+                  "description": "Choose the Mail Agent.",
+                  "x-ms-summary": "Mail Agent",
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetMailAgent",
+                    "itemValuePath": "mailagent_key",
+                    "itemsPath": "data",
+                    "itemTitlePath": "mailagent_name"
+                  }
+                },
+                "bounce_address": {
+                  "type": "string",
+                  "description": "the email address to which bounced emails will be sent.",
+                  "x-ms-summary": "Bounce address",
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetBounceAddress",
+                    "itemValuePath": "bounce_address",
+                    "itemTitlePath": "bounce_address",
+                    "itemsPath": "data",
+                    "parameters": {
+                      "mailagent_key": {
+                        "parameterReference": "body/mailagent_key"
+                      }
+                    }
+                  }
+                },
+                "mail_template_key": {
+                  "type": "string",
+                  "description": "Choose the Mail template",
+                  "x-ms-summary": "Mail template",
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetMailTemplate",
+                    "itemValuePath": "template_key",
+                    "itemTitlePath": "template_name",
+                    "itemsPath": "mail_templates",
+                    "parameters": {
+                      "mailagent_key": {
+                        "parameterReference": "body/mailagent_key"
+                      }
+                    }
+                  }
+                },
+                "from": {
+                  "$ref": "#/definitions/FromAddress"
+                },
+                "to": {
+                  "type": "array",
+                  "description": "Recipient email address.",
+                  "x-ms-summary": "To",
+                  "items": {
+                    "$ref": "#/definitions/EmailAddressItems"
+                  },
+                  "minItems": 1
+                },
+                "cc": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/EmailAddressItems"
+                  },
+                  "description": "Email addresses of cc'd recipients.",
+                  "x-ms-summary": "CC",
+                  "x-ms-visibility": "advanced"
+                },
+                "bcc": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/EmailAddressItems"
+                  },
+                  "description": "Email addresses of bcc'd recipients.",
+                  "x-ms-summary": "BCC",
+                  "x-ms-visibility": "advanced"
+                },
+                "merge_key_detail": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "description": "The merge tags of the mail to be sent.",
+                        "x-ms-summary": "tag"
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "These tags will be replaced by the value provided in this param for that tag",
+                        "x-ms-summary": "value"
+                      }
+                    }
+                  },
+                  "description": "You can use merge tags to replace the placeholders with multiple values for different recipients. ",
+                  "x-ms-summary": "Merge Info"
+                },
+                "reply_to": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ReplyToAddresss"
+                  },
+                  "description": "Reply To",
+                  "x-ms-summary": "Reply To",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "mailagent_key",
+                "bounce_address",
+                "mail_template_key",
+                "from"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/portal/v1.0/mailagents/{mailagent_key}/template": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "message"
+                },
+                "mail_templates": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "upload_time": {
+                        "type": "string",
+                        "description": "Upload time"
+                      },
+                      "template_name": {
+                        "type": "string",
+                        "description": "Template name"
+                      },
+                      "template_key": {
+                        "type": "string",
+                        "description": "Template key"
+                      },
+                      "template_size": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Template size"
+                      },
+                      "modified_time": {
+                        "type": "string",
+                        "description": "Modified time"
+                      },
+                      "subject": {
+                        "type": "string",
+                        "description": "subject"
+                      }
+                    }
+                  },
+                  "description": "Mail templates"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get mail template",
+        "description": "List all templates in your Mail Agent.",
+        "operationId": "GetMailTemplate",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "mailagent_key",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The Mail Agents in your ZeptoMail account.",
+            "x-ms-summary": "Mail Agents",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/portal/v1.0/domains/mailagents/{mailagent_key}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "domain_id": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Domain id"
+                      },
+                      "associated_mailagents": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Associated mail agents"
+                      },
+                      "domain_name": {
+                        "type": "string",
+                        "description": "domain_name"
+                      },
+                      "domain_verified_via_domain_connect": {
+                        "type": "boolean",
+                        "description": "Domain verified via domain connect"
+                      },
+                      "record_status": {
+                        "type": "object",
+                        "properties": {
+                          "cname_status": {
+                            "type": "string",
+                            "description": "CName status"
+                          },
+                          "dkim_status": {
+                            "type": "string",
+                            "description": "DKIM status"
+                          },
+                          "hosting_status": {
+                            "type": "string",
+                            "description": "Hosting status"
+                          },
+                          "cname_verified_time": {
+                            "type": "string",
+                            "description": "CName verified time"
+                          },
+                          "dkim_verified_time": {
+                            "type": "string",
+                            "description": "DKIM verified time"
+                          },
+                          "mx_status": {
+                            "type": "string",
+                            "description": "MX status"
+                          },
+                          "spf_verified_time": {
+                            "type": "string",
+                            "description": "SPF verified time"
+                          },
+                          "spf_status": {
+                            "type": "string",
+                            "description": "SPF status"
+                          }
+                        },
+                        "description": "Record status"
+                      },
+                      "dns_records": {
+                        "type": "object",
+                        "properties": {
+                          "mx_records": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "mx_address": {
+                                  "type": "string",
+                                  "description": "MX address"
+                                },
+                                "mx_priority": {
+                                  "type": "integer",
+                                  "format": "int32",
+                                  "description": "MX priority"
+                                }
+                              }
+                            },
+                            "description": "MX records"
+                          },
+                          "spf_record": {
+                            "type": "object",
+                            "properties": {
+                              "spf_record_value": {
+                                "type": "string",
+                                "description": "SPF record value"
+                              },
+                              "spf_record_to_be_display": {
+                                "type": "string",
+                                "description": "SPF record to be display"
+                              }
+                            },
+                            "description": "spf_record"
+                          },
+                          "dkim_public_key": {
+                            "type": "string",
+                            "description": "DKIM public key"
+                          },
+                          "cname_record": {
+                            "type": "string",
+                            "description": "CName record"
+                          },
+                          "dkim_host": {
+                            "type": "string",
+                            "description": "DKIM host"
+                          },
+                          "dkim_selector": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "DKIM selector"
+                          }
+                        },
+                        "description": "DNS records"
+                      },
+                      "sub_domain": {
+                        "type": "string",
+                        "description": "sub_domain"
+                      },
+                      "domain_unverify_deadline": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Domain unverify deadline"
+                      }
+                    }
+                  },
+                  "description": "data"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get mail domain",
+        "description": "get mail domain",
+        "operationId": "GetMailDomain",
+        "parameters": [
+          {
+            "name": "mailagent_key",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "mail agent key",
+            "x-ms-summary": "mail agent key",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "x-ms-visibility": "internal"
+      }
+    }
+  },
+  "definitions": {
+    "FromAddress": {
+      "type": "object",
+      "properties": {
+        "from-detail": {
+          "type": "object",
+          "properties": {
+            "from-prefix": {
+              "type": "string",
+              "x-ms-summary": "prefix",
+              "description": "Ex., support prefix will be support@fromdomain.com"
+            },
+            "from-domain": {
+              "type": "string",
+              "description": "From address domain",
+              "x-ms-summary": "domain",
+              "x-ms-dynamic-list": {
+                "operationId": "GetMailDomain",
+                "itemValuePath": "domain_name",
+                "itemTitlePath": "domain_name",
+                "itemsPath": "data",
+                "parameters": {
+                  "mailagent_key": {
+                    "parameterReference": "body/mailagent_key"
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "from-prefix",
+            "from-domain"
+          ],
+          "x-ms-summary": "address"
+        },
+        "name": {
+          "type": "string",
+          "description": "Sender's user name",
+          "x-ms-summary": "name"
+        }
+      },
+      "description": "From",
+      "x-ms-summary": "From",
+      "required": [
+        "from-detail",
+        "name"
+      ]
+    },
+    "EmailAddress": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Recipient's email address.",
+          "x-ms-summary": "address"
+        },
+        "name": {
+          "type": "string",
+          "description": "Recipient's name.",
+          "x-ms-summary": "name"
+        }
+      },
+      "required": [
+        "address"
+      ]
+    },
+    "ReplyToAddresss": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "A valid email address containing a domain that is verified in your Mail Agent.",
+          "x-ms-summary": "address"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name for the reply-to.",
+          "x-ms-summary": "name"
+        }
+      }
+    },
+    "EmailAddressItems": {
+      "type": "object",
+      "properties": {
+        "email_address": {
+          "$ref": "#/definitions/EmailAddress"
+        }
+      }
+    },
+    "SuccessMessage" : {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "The code corresponding to a success response.",
+                "x-ms-summary": "Code"
+              },
+              "additional_info": {
+                "type": "array",
+                "items": {},
+                "description": "Provides additional information about the action performed in the request",
+                "x-ms-summary": "Additional info"
+              },
+              "message": {
+                "type": "string",
+                "description": "The action taken for this request.",
+                "x-ms-summary": "Detailed Message"
+              }
+            }
+          },
+          "description": "data"
+        },
+        "message": {
+          "type": "string",
+          "description": "The status of the request made.",
+          "x-ms-summary": "Status message"
+        },
+        "request_id": {
+          "type": "string",
+          "description": "A unique id which is generated for every request.",
+          "x-ms-summary": "Request id"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://accounts.zoho.com/oauth/v2/auth",
+      "tokenUrl": "https://accounts.zoho.com/oauth/v2/token",
+      "scopes": {
+        "transmail.accounts.READ": "transmail.accounts.READ",
+        "transmail.email.CREATE": "transmail.email.CREATE",
+        "transmail.mailagent.READ": "transmail.mailagent.READ",
+        "transmail.bounceSetup.READ": "transmail.bounceSetup.READ",
+        "transmail.domain.READ": "transmail.domain.READ"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": [
+        "transmail.accounts.READ",
+        "transmail.email.CREATE",
+        "transmail.mailagent.READ",
+        "transmail.bounceSetup.READ",
+        "transmail.domain.READ"
+      ]
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.zoho.com/zeptomail/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.zoho.com/privacy.html"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ]
+}
