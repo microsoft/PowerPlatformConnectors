@@ -2,7 +2,7 @@
 
 Discord is a voice, video and text communication service used by over a hundred million people to hang out and talk with their friends and communities.
 
-## Publisher: Daniel Laskewitz | Sogeti & Michael Guzowski | Developico
+## Publisher: Daniel Laskewitz & Michael Guzowski | Developico
 
 ## Prerequisites
 
