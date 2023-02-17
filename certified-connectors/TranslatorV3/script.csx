@@ -790,7 +790,8 @@
         }
         if (requestContentAsJson.ContainsKey(nameof(IncomingRequest.sourceLanguage)))
         {
-            if (requestContentAsJson[nameof(IncomingRequest.sourceLanguage)].ToString() == "auto")
+            if ((requestContentAsJson[nameof(IncomingRequest.sourceLanguage)].ToString() == "auto") ||
+                (requestContentAsJson[nameof(IncomingRequest.sourceLanguage)].ToString() == "Auto-detect"))
             {
                 incomingRequest.sourceLanguage = null;
             }
