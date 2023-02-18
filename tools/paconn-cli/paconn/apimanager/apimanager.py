@@ -15,12 +15,12 @@ import requests
 from knack.util import CLIError
 from knack.log import get_logger
 
+# Token specific variables
+_TOKEN_TYPE = 'token_type'
+_ACCESS_TOKEN = 'access_token'
+_LOCAL_ACCOUNT_ID = 'local_account_id'
+
 from paconn.common.util import display, format_json
-from paconn.authentication.tokenmanager import (
-    _ACCESS_TOKEN,
-    _TOKEN_TYPE,
-    _OID
-)
 
 LOGGER = get_logger(__name__)
 
@@ -30,7 +30,7 @@ class APIManager:
     A manager class for API calls
     """
     # pylint: disable=too-many-arguments
-    def __init__(self, scheme, region, netlocation, base_path, api_version, credentials=None):
+    def __init__(self, scheme, region, netlocation, base_path, api_version, credentials=None, account=None):
         self.scheme = scheme
 
         if not region:
@@ -45,12 +45,17 @@ class APIManager:
         self.api_version = api_version
 
         self.credentials = credentials
+        self.account = account
 
     def add_object_id(self, api):
         """
         Add object id to a given api endpoint
         """
-        object_id = self.credentials.get(_OID, '')
+
+        object_id = None
+        if self.account:
+            object_id = self.account.get(_LOCAL_ACCOUNT_ID, '')
+
         path = 'objectIds/{object_id}/{api}'.format(
             object_id=object_id,
             api=api)
@@ -111,15 +116,20 @@ class APIManager:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as exception:
-            exception_str = str(exception)
-            response_content = json.loads(response.content)
-            response_content = format_json(response_content)
-            if payload:
-                LOGGER.debug('PAYLOAD')
-                LOGGER.debug(payload)
-            LOGGER.debug('RESPONSE')
-            LOGGER.debug(response_content)
-            display(response_content)
-            raise CLIError(exception_str)
+            response_content = json.loads(response.text)
+
+            if response.status_code == 400 and response_content['error'] and response_content['error']['code'] == 'SwaggerCertificationFailedWithErrors':
+                pass
+            else:
+                response_content = format_json(response_content)
+                if payload:
+                    LOGGER.debug('PAYLOAD')
+                    LOGGER.debug(payload)
+                LOGGER.debug('RESPONSE')
+                LOGGER.debug(response_content)
+                display(response_content)
+
+                exception_str = str(exception)
+                raise CLIError(exception_str)
 
         return response

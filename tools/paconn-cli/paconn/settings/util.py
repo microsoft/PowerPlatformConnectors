@@ -9,11 +9,11 @@ Utility for loading settings.
 
 from paconn import _UPDATE, _DOWNLOAD, _VALIDATE
 from paconn.common.util import write_with_prompt
-from paconn.authentication.tokenmanager import TokenManager
 from paconn.apimanager.powerappsrpbuilder import PowerAppsRPBuilder
 from paconn.apimanager.flowrpbuilder import FlowRPBuilder
 from paconn.common.prompts import get_environment, get_connector_id
 from paconn.settings.settingsserializer import SettingsSerializer
+from paconn.authentication.auth import get_silent_authentication
 
 # Setting file name
 SETTINGS_FILE = 'settings.json'
@@ -37,16 +37,18 @@ def prompt_for_connector_id(settings, powerapps_rp):
 def load_powerapps_and_flow_rp(settings, command_context):
 
     # Get credentials
-    credentials = TokenManager().get_credentials()
+    (credentials, account) = get_silent_authentication()
 
     # Get powerapps rp
     powerapps_rp = PowerAppsRPBuilder.get_from_settings(
         credentials=credentials,
+        account=account,
         settings=settings)
 
     # Get flow rp
     flow_rp = FlowRPBuilder.get_from_settings(
         credentials=credentials,
+        account=account,
         settings=settings)
 
     # If the file names are missing for the download command

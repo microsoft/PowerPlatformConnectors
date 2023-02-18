@@ -9,25 +9,11 @@ Token file manager.
 """
 
 import os
-import json
-
-import time
-
+import msal
 from knack.util import CLIError
-
 from paconn.common.util import get_config_dir
 
 TOKEN_FILE = 'accessTokens.json'
-
-# Token specific variables
-_TOKEN_TYPE = 'token_type'
-_ACCESS_TOKEN = 'access_token'
-_EXPIRES_ON = 'expires_on'
-_OID = 'oid'
-
-
-# Number of seconds to request a login before the token expires
-TOKEN_BUFFER_SECONDS = 600
 
 
 class TokenManager:
@@ -52,36 +38,25 @@ class TokenManager:
         """
         Reads a login token file.
         """
-        creds = []
+        token_cache = msal.SerializableTokenCache()
         if os.path.isfile(self.token_file):
             try:
-                with open(self.token_file, 'r') as file:
-                    creds = json.load(file)
+                with open(self.token_file, 'r') as cred_file:
+                    token_cache.deserialize(cred_file.read())
             except ValueError as exception:
-                raise CLIError("Failed to load token files. (Inner Error: {})".format(exception))
-        return creds
+                raise CLIError("Failed to load access token. (Inner Error: {})".format(exception))
+        return token_cache
 
-    def write(self, credentials):
+    def write(self, token_cache):
         """
         Writes the login credentials to a token file.
         """
-        with os.fdopen(os.open(self.token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600), 'w+') as cred_file:
-            cred_file.write(json.dumps(credentials))
-
-    @staticmethod
-    def is_expired(credentials):
-        """
-        Returns true if the token is expired.
-        """
-        token_expired = _ACCESS_TOKEN not in credentials
-
-        # Check for timeout
-        if not token_expired and _EXPIRES_ON in credentials:
-            # time.time() returns number of seconds since epoch, 01/01/1970 UTC
-            expiration_time = time.time() + TOKEN_BUFFER_SECONDS
-            token_expired = credentials[_EXPIRES_ON] < expiration_time
-
-        return token_expired
+        try:
+            with os.fdopen(os.open(self.token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600), 'w+') as cred_file:
+                cred_file.write(token_cache.serialize())
+        except Exception as exception:
+            raise CLIError("Failed to save access token. (Inner Error: {})".format(exception))
 
     def delete_token_file(self):
-        os.remove(self.token_file)
+        if os.path.isfile(self.token_file):
+            os.remove(self.token_file)

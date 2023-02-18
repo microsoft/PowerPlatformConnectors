@@ -28,11 +28,7 @@ class SettingsBuilder:
             api_properties,
             api_definition,
             icon,
-            script,
-            client_id=None,
-            tenant=None,
-            authority_url=None,
-            resource=None):
+            script):
         """
         Loads settings into a settings object.
         """
@@ -49,42 +45,6 @@ class SettingsBuilder:
                 api_properties=api_properties,
                 api_definition=api_definition,
                 icon=icon,
-                script=script,
-                client_id=client_id,
-                tenant=tenant,
-                authority_url=authority_url,
-                resource=resource
-            )
-        return settings
-
-    # pylint: disable=too-many-arguments
-    @staticmethod
-    def get_authentication_settings(
-            settings_file,
-            client_id,
-            tenant,
-            authority_url,
-            resource):
-        """
-        Loads settings into a settings object.
-        """
-
-        # Load from settings file if it is available
-        if settings_file:
-            settings = SettingsSerializer.from_json(settings_file)
-        else:
-            settings = Settings(
-                connector_id=None,
-                environment=None,
-                powerapps_url=None,
-                powerapps_api_version=None,
-                api_properties=None,
-                api_definition=None,
-                icon=None,
-                script=None,
-                client_id=client_id,
-                tenant=tenant,
-                authority_url=authority_url,
-                resource=resource
+                script=script
             )
         return settings

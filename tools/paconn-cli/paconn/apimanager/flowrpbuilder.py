@@ -17,7 +17,7 @@ class FlowRPBuilder:
     """
     A builder class to create a FlowRP object
     """
-    def get_from_settings(credentials, settings):
+    def get_from_settings(credentials, account, settings):
         """
         Returns flow rp object from a given settings and credentials.
         """
@@ -27,7 +27,8 @@ class FlowRPBuilder:
             url=settings.flow_url,
             base_path=settings.flow_base_path,
             api_version=settings.flow_api_version,
-            credentials=credentials)
+            credentials=credentials,
+            account=account)
 
         flow_rp = FlowRP(api_manager=flow_api_manager)
 

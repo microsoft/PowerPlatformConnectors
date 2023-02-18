@@ -9,22 +9,36 @@ Login command.
 
 from paconn.authentication.auth import get_authentication
 from paconn.common.util import display
-from paconn.settings.settingsbuilder import SettingsBuilder
+from paconn.settings.authsettings import AuthSettings
 
 
-def login(client_id, tenant, authority_url, resource, settings_file, force):
+def login(client_id, tenant, authority_url, scopes):
     """
     Login command.
     """
+
+    # Convert string scope to array
+    if scopes and type(scopes) == str:
+        scopes = [] + scopes
+
+    # Scope must be an array
+    if scopes and not hasattr(scopes, "__len__"):
+        display('Scopes must be an array of scopes or a string scope.')
+        return
+
     # Get settings
-    settings = SettingsBuilder.get_authentication_settings(
-        settings_file=settings_file,
+    settings = AuthSettings(
         client_id=client_id,
         tenant=tenant,
         authority_url=authority_url,
-        resource=resource)
+        scopes=scopes)
 
-    get_authentication(
-        settings=settings,
-        force_authenticate=force)
-    display('Login successful.')
+    (result, account) = get_authentication(settings=settings)
+
+    if result:
+        if account:
+            display('Logged in with account {}.'.format(account['username']))
+        else:
+            display('Login successful.')
+    else:
+        display('Login failed.')

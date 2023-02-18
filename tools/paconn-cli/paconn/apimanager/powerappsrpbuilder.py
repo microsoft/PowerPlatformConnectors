@@ -17,7 +17,7 @@ class PowerAppsRPBuilder:
     """
     A builder class to create a PowerAppsRP object
     """
-    def get_from_settings(credentials, settings):
+    def get_from_settings(credentials, account, settings):
         """
         Returns powerapps rp object from a given settings and credentials.
         """
@@ -27,7 +27,8 @@ class PowerAppsRPBuilder:
             url=settings.powerapps_url,
             base_path=settings.powerapps_base_path,
             api_version=settings.powerapps_api_version,
-            credentials=credentials)
+            credentials=credentials,
+            account=account)
 
         powerapps_rp = PowerAppsRP(api_manager=powerapps_api_manager)
         return powerapps_rp

@@ -12,7 +12,6 @@ from paconn import _DOWNLOAD
 from paconn.common.util import display
 from paconn.settings.util import load_powerapps_and_flow_rp
 from paconn.settings.settingsbuilder import SettingsBuilder
-
 import paconn.operations.download
 
 

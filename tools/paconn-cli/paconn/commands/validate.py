@@ -18,6 +18,8 @@ import paconn.operations.validate
 
 def validate(
         api_definition,
+        disablecertificatevalidation,
+        ignorewarnings,
         powerapps_url,
         powerapps_version,
         settings_file):
@@ -40,8 +42,11 @@ def validate(
         settings=settings,
         command_context=_VALIDATE)
 
+    enablecertificatevalidation = not disablecertificatevalidation
     result = paconn.operations.validate.validate(
         powerapps_rp=powerapps_rp,
+        enablecertificatevalidation=enablecertificatevalidation,
+        ignorewarnings=ignorewarnings,
         settings=settings)
 
     if result:

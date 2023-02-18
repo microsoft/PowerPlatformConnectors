@@ -77,26 +77,11 @@ def load_arguments(self, command):
             required=False,
             help='Authority URL for login.')
         arg_context.argument(
-            'resource',
-            options_list=['--resource', '-r'],
+            'scopes',
+            options_list=['--scopes'],
             type=str,
             required=False,
-            help='Resource URL for login.')
-        arg_context.argument(
-            SETTINGS,
-            options_list=SETTINGS_OPTIONS,
-            type=str,
-            required=False,
-            help=SETTINGS_HELP)
-        arg_context.argument(
-            'force',
-            options_list=['--force', '-f'],
-            type=bool,
-            required=False,
-            nargs='?',
-            default=False,
-            const=True,
-            help='Override a previous login, if exists.')
+            help='Scopes for login.')
 
     with ArgumentsContext(self, _DOWNLOAD) as arg_context:
         arg_context.argument(
@@ -279,6 +264,24 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help=API_DEFINITION_HELP)
+        arg_context.argument(
+            'disablecertificatevalidation',
+            options_list=['--disablecertificatevalidation'],
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help='Enable certificate validation.')
+        arg_context.argument(
+            'ignorewarnings',
+            options_list=['--ignorewarnings'],
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help='Enable certificate validation.')
         arg_context.argument(
             POWERAPPS_URL,
             options_list=POWERAPPS_URL_OPTIONS,

@@ -14,7 +14,7 @@ import json
 from paconn.common.util import ensure_file_exists
 
 
-def validate(powerapps_rp, settings):
+def validate(powerapps_rp, enablecertificatevalidation, ignorewarnings, settings):
     """
     Method for create/update operation
     """
@@ -31,11 +31,32 @@ def validate(powerapps_rp, settings):
     # Validate Open API Definition
     result = powerapps_rp.validate_connector(
         payload=openapi_definition,
-        enable_certification_rules=True)
+        enable_certification_rules=enablecertificatevalidation)
 
-    # Replace \r\n in the string to newlines
-    result = bytes(result, 'utf-8').decode('unicode-escape')
-    # Remove quotes at the beginning and end
-    result = result.strip('"')
+    message = None
 
-    return result
+    if result:
+        try:
+            result_json = json.loads(result)
+            message = result_json['error']['message']
+        except ValueError:
+            message = result
+
+    if message:
+        message = message.replace(': ', '.\n', 1)
+
+        if ignorewarnings:
+            messages = message.split('\n')
+            new_messages = []
+
+            for m in messages:
+                if not m.startswith('Warning :'):
+                    new_messages.append(m)
+            
+            message = ''
+            # First line is the generic message.
+            # Ignore first line if there is no warning
+            if len(new_messages) > 1:
+                message = '\n'.join(new_messages)
+
+    return message

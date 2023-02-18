@@ -7,40 +7,48 @@
 """
 Authentication methods
 """
-
-from knack.util import CLIError
-
-from paconn.authentication.profile import Profile
+from paconn.authentication.msalprofile import MsalProfile
 from paconn.authentication.tokenmanager import TokenManager
+from paconn.settings.authsettings import AuthSettings
+from paconn.settings.authsettingsserializer import AuthSettingsSerializer
 
-
-def get_authentication(settings, force_authenticate):
+def get_authentication(settings, auth_type='interactive'):
     """
     Logs the user in and saves the token in a file.
     """
+    
+    # Read authentication settings
+    auth_settings = AuthSettingsSerializer.read_with_cli_settings(settings)
+
+    # Read last saved token
     tokenmanager = TokenManager()
-    credentials = tokenmanager.read()
-
-    token_expired = TokenManager.is_expired(credentials)
-
+    token_cache = tokenmanager.read()
+    
     # Get new token
-    if token_expired or force_authenticate:
-        profile = Profile(
-            client_id=settings.client_id,
-            tenant=settings.tenant,
-            resource=settings.resource,
-            authority_url=settings.authority_url)
+    profile = MsalProfile(
+        auth_settings=auth_settings,
+        token_cache=token_cache)
 
-        credentials = profile.authenticate_device_code()
+    if auth_type == 'interactive':
+        (result, account) = profile.auth_interactive()
+    else:
+        (result, account) = profile.authenticate_silent()
+    
+    # Save token
+    if token_cache.has_state_changed:
+        tokenmanager.write(token_cache)
 
-        tokenmanager.write(credentials)
+    # Save authentication settings
+    if account:
+        auth_settings.username = account['username']
+        AuthSettingsSerializer.write(auth_settings)
 
-        token_expired = TokenManager.is_expired(credentials)
+    return (result, account)
 
-    # Couldn't acquire valid token
-    if token_expired:
-        raise CLIError('Couldn\'t get authentication')
-
+def get_silent_authentication():
+    return get_authentication(
+        settings = None,
+        auth_type = 'silent')
 
 def remove_authentication():
     tokenmanager = TokenManager()
