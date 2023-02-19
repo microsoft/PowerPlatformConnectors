@@ -15,5 +15,6 @@ def logout():
     """
     Logout command.
     """
-    remove_authentication()
-    display('Logout successful.')
+    account = remove_authentication()
+    if account:
+        display('Logged out from account {}.'.format(account['username']))

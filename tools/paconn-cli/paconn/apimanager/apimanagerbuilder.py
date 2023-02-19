@@ -18,7 +18,7 @@ class APIManagerBuilder:
     A builder class to create an API Manager object from an url
     """
     @staticmethod
-    def get_from_url(url, base_path, api_version, credentials):
+    def get_from_url(url, base_path, api_version, credentials, account):
         """
         Creates an APIManager object from given URL, Base Path and credentials
         """
@@ -31,4 +31,5 @@ class APIManagerBuilder:
             netlocation=netloc,
             base_path=base_path,
             api_version=api_version,
-            credentials=credentials)
+            credentials=credentials,
+            account=account)
