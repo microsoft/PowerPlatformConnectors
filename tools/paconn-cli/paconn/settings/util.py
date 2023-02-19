@@ -14,6 +14,8 @@ from paconn.apimanager.flowrpbuilder import FlowRPBuilder
 from paconn.common.prompts import get_environment, get_connector_id
 from paconn.settings.settingsserializer import SettingsSerializer
 from paconn.authentication.auth import get_silent_authentication
+from paconn.common.util import display
+from knack.util import CLIError
 
 # Setting file name
 SETTINGS_FILE = 'settings.json'
@@ -38,6 +40,14 @@ def load_powerapps_and_flow_rp(settings, command_context):
 
     # Get credentials
     (credentials, account) = get_silent_authentication()
+
+    if credentials and "error" in credentials:
+        raise CLIError(credentials['error_description'])
+    elif not credentials:
+        raise CLIError('Couldn\'t obtain login token. Please log in again.')
+
+    if account and 'username' in account:
+        display('Using account {}.'.format(account['username']))
 
     # Get powerapps rp
     powerapps_rp = PowerAppsRPBuilder.get_from_settings(

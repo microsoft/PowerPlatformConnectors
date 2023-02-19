@@ -82,6 +82,15 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help='Scopes for login.')
+        arg_context.argument(
+            'force_interactive',
+            options_list=['--force_interactive', '-f'],
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help='Force interactive login even if previous login exists.')
 
     with ArgumentsContext(self, _DOWNLOAD) as arg_context:
         arg_context.argument(

@@ -9,7 +9,7 @@
 import os
 from setuptools import setup
 
-__VERSION__ = '0.1.1'
+__VERSION__ = '0.1.2'
 
 
 def read(fname):
@@ -57,7 +57,8 @@ setup(
         'pytest-xdist',
         'virtualenv',
         'requests',
-        'adal',
+        'msal',
+        'msal_extensions',
         'msrestazure',
         'azure-storage-blob>=2.1,<12.0'
     ],

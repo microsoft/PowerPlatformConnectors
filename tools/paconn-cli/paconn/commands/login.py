@@ -10,9 +10,9 @@ Login command.
 from paconn.authentication.auth import get_authentication
 from paconn.common.util import display
 from paconn.settings.authsettings import AuthSettings
+from knack.util import CLIError
 
-
-def login(client_id, tenant, authority_url, scopes):
+def login(client_id, tenant, authority_url, scopes, force_interactive):
     """
     Login command.
     """
@@ -33,12 +33,16 @@ def login(client_id, tenant, authority_url, scopes):
         authority_url=authority_url,
         scopes=scopes)
 
-    (result, account) = get_authentication(settings=settings)
+    (result, account) = get_authentication(
+        settings=settings,
+        force_interactive=force_interactive)
 
-    if result:
-        if account:
-            display('Logged in with account {}.'.format(account['username']))
-        else:
-            display('Login successful.')
+    if result and "error" in result:
+        raise CLIError(result["error_description"])
+    elif not result:
+        raise CLIError('Login failed.')
+
+    if account:
+        display('Logged in with account {}.'.format(account['username']))
     else:
-        display('Login failed.')
+        display('Login successful.')

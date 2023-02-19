@@ -7,22 +7,54 @@
 """
 Authentication methods
 """
+import os
+import sys
 from paconn.authentication.msalprofile import MsalProfile
-from paconn.authentication.tokenmanager import TokenManager
 from paconn.settings.authsettings import AuthSettings
 from paconn.settings.authsettingsserializer import AuthSettingsSerializer
+from paconn.common.util import get_config_dir
+from msal_extensions import *
 
-def get_authentication(settings, auth_type='interactive'):
+TOKEN_FILE = 'accessTokens.bin'
+
+def _build_persistence(token_file, fallback_to_plaintext=False):
+    """Build a suitable persistence instance based your current OS"""
+    if sys.platform.startswith('win'):
+        return FilePersistenceWithDataProtection(token_file)
+        
+    if sys.platform.startswith('darwin'):
+        return KeychainPersistence(token_file, "paconn", "paconn")
+
+    if sys.platform.startswith('linux'):
+        try:
+            return LibsecretPersistence(
+                token_file,
+                schema_name='paconn',
+                attributes={"appName": "paconn"})
+        except:
+            if not fallback_to_plaintext:
+                raise
+            logging.exception("Encryption unavailable. Opting in to plain text.")
+        
+    return FilePersistence(token_file)
+
+def _get_token_cache():
+    token_file = os.path.join(get_config_dir(), TOKEN_FILE)
+    persistence = _build_persistence(token_file)
+    token_cache = PersistedTokenCache(persistence)
+
+    return token_cache
+
+def get_authentication(settings, auth_type='interactive', force_interactive=False):
     """
     Logs the user in and saves the token in a file.
     """
-    
+
     # Read authentication settings
     auth_settings = AuthSettingsSerializer.read_with_cli_settings(settings)
 
     # Read last saved token
-    tokenmanager = TokenManager()
-    token_cache = tokenmanager.read()
+    token_cache = _get_token_cache()
     
     # Get new token
     profile = MsalProfile(
@@ -30,18 +62,17 @@ def get_authentication(settings, auth_type='interactive'):
         token_cache=token_cache)
 
     if auth_type == 'interactive':
-        (result, account) = profile.auth_interactive()
+        (result, account) = profile.auth_interactive(force_interactive=force_interactive)
     else:
         (result, account) = profile.authenticate_silent()
     
-    # Save token
-    if token_cache.has_state_changed:
-        tokenmanager.write(token_cache)
-
     # Save authentication settings
-    if account:
+    if account and 'username' in account:
         auth_settings.username = account['username']
-        AuthSettingsSerializer.write(auth_settings)
+    else:
+        auth_settings.username = None
+    
+    AuthSettingsSerializer.write(auth_settings)
 
     return (result, account)
 
@@ -51,5 +82,11 @@ def get_silent_authentication():
         auth_type = 'silent')
 
 def remove_authentication():
-    tokenmanager = TokenManager()
-    tokenmanager.delete_token_file()
+    # Read authentication settings
+    auth_settings = AuthSettingsSerializer.read()
+    token_cache = _get_token_cache()
+    profile = MsalProfile(
+        auth_settings=auth_settings,
+        token_cache=token_cache)
+    account = profile.logout()
+    return account
