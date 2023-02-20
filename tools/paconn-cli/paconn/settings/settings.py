@@ -54,4 +54,4 @@ class Settings:
         self.client_id = client_id or '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
         self.tenant = tenant or 'common'
         self.authority_url = authority_url or 'https://login.microsoftonline.com/'
-        self.resource = resource or 'https://management.core.windows.net/'
+        self.resource = resource or 'https://service.powerapps.com/'
