@@ -1,0 +1,782 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "APITemplate",
+    "description": "With the APITemplate.io service, you can create PDF documents and images, and manage your templates. Generate social media images, banners or PDFs from reusable templates with no coding!",
+    "contact": {
+      "name": "Troy Taylor",
+      "url": "https://www.hitachisolutions.com",
+      "email": "ttaylor@hitachisolutions.com"
+    }
+  
+  },
+  "host": "rest-us.apitemplate.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/create-pdf": {
+      "post": {
+        "description": "This request creates a PDF file with JSON data and your template. Supports synchronous and asynchronous PDF generation.",
+        "summary": "Create a PDF",
+        "operationId": "PDFPost",
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "query",
+            "x-ms-summary": "Template ID",
+            "required": true,
+            "type": "string",
+            "description": "Your template id, it can be obtained in the web console(Manage Templates)"
+          },
+          {
+            "name": "export_type",
+            "in": "query",
+            "x-ms-summary": "Export Type",
+            "required": false,
+            "type": "string",
+            "description": "Either `file` or `json`(Default). The option `json` returns a JSON object, and the output PDF is stored on a CDN. Use this with the parameter `expiration`. The option `file` returns binary data of the generated PDF(Secure and completely private) and the response HTTP header Content-Disposition is set to attachment."
+          },
+          {
+            "name": "expiration",
+            "in": "query",
+            "x-ms-summary": "Expiration",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "description": "Expiration of the generated PDF in minutes(default to `0`, store permanently). Use `0` to store on cdn permanently. Or use the range between `1` minute and `10080` minutes(7 days) to specify the expiration of the generated PDF"
+          },
+          {
+            "name": "output_html",
+            "in": "query",
+            "x-ms-summary": "Output HTML",
+            "required": false,
+            "type": "string",
+            "description": "Either `1` or `0`(Default).. To enable output of html content, set the value to `1` and it will return in the JSON response as html_url field (as a URL)"
+          },
+          {
+            "name": "output_format",
+            "in": "query",
+            "x-ms-summary": "Output Format",
+            "required": false,
+            "type": "string",
+            "description": "Either `pdf`(Default) or `html`.. It's generating PDF by default. However, you can specify output_format=html to generate only HTML(It will return in the JSON response as download_url field as a URL)."
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "x-ms-summary": "Filename",
+            "required": false,
+            "type": "string",
+            "description": "Default to UUID (e.g 0c93bd9e-9ebb-4634-a70f-de9131848416.pdf). Use this to specify custom file name, it should end with `.pdf`"
+          },
+          {
+            "name": "image_resample_res",
+            "in": "query",
+            "x-ms-summary": "Large Resample Res",
+            "required": false,
+            "type": "string",
+            "description": "We embed the original images by default, meaning large PDF file sizes. Specifying the option 'image_resample_res' helps reduce the PDF file size by downsampling the images of the current PDF to a resolution(in DPI). Common values are 72, 96, 150, 300 and 600."
+          },
+          {
+            "name": "is_cmyk",
+            "in": "query",
+            "x-ms-summary": "Is CMYK",
+            "required": false,
+            "type": "string",
+            "description": "Use CMYK color profile, 1=true, 0=false. Default to '0'"
+          },
+          {
+            "name": "cloud_storage",
+            "in": "query",
+            "x-ms-summary": "Cloud Storage",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "description": "Upload the generated PDFs/images to our storage CDN, default to `1`. If you have configured `Post Action` to upload the PDFs/Images to your own S3, please set it to `0`."
+          },
+          {
+            "name": "meta",
+            "in": "query",
+            "x-ms-summary": "Meta",
+            "required": false,
+            "type": "string",
+            "description": "Specify an external reference ID for your own reference. It appears in the `list-objects` API."
+          },
+          {
+            "name": "async",
+            "in": "query",
+            "x-ms-summary": "Async",
+            "required": false,
+            "type": "string",
+            "description": "Either `1` or `0`(Default).  `0` is synchronous call(default), `1` is asynchronous call. To generate PDF asynchronously, set the value to `1` and the API call returns immediately. Once the PDF document is generated, we will make a HTTP/HTTPS GET to your URL(webhook_url) and will retry for 3 times before giving up.. If `async` is set to `1`, then `webhook_url` is mandatory"
+          },
+          {
+            "name": "webhook_url",
+            "in": "query",
+            "x-ms-summary": "Webhook URL",
+            "required": false,
+            "type": "string",
+            "description": "It is the URL of your webhook URL, it starts with http:// or https:// and has to be urlencoded.. If `async` is set to `1`, then you have to specify the `webhook_url`. Format of Webhook callbackOnce the PDF is generated, we will initiate a HTTP/HTTPS GET call to the following URL:https://`[yourwebserver.com]`?&primary_url=`[primary_url]`&transaction_ref=`[transaction_ref]`&status=`[status]`&message=`[message]`. `[yourwebserver.com]`: The web services to handle the callback, which is the `webhook_url`. `[primary_url]`: The URL to the PDF document. `[transaction_ref]`: The transaction reference number. `[status]` : Status of the transaction, either `success` or `error`. `[message]` : Status message***The following is a sample webhook call back to your server***https://yourwebserver.com?&primary_url=https%3A%2F%2Fpub-cdn.apitemplate.io%2F2021%2F06%2Fb692183d-46d7-3213-891a-460a5814ad3f.pdf&transaction_ref=b692183d-46d7-3213-891a-460a5814ad3f&status=success"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The body.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and output file",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccessPDFFile"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/v2/create-image": {
+      "post": {
+        "description": "This request creates a JPEG file (along with PNG) from JSON data and your template.",
+        "summary": "Create an image",
+        "operationId": "ImagePost",
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "query",
+            "x-ms-summary": "Template ID",
+            "required": true,
+            "type": "string",
+            "description": "Your template id, it can be obtained in the web console"
+          },
+          {
+            "name": "expiration",
+            "in": "query",
+            "x-ms-summary": "Expiration",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "description": "Expiration of the generated image in minutes(default to `0`, store permanently). Use `0` to store on cdn permanently. Or use the range between `1` minute and `10080` minutes(7 days) to specify the expiration of the generated image"
+          },
+          {
+            "name": "cloud_storage",
+            "in": "query",
+            "x-ms-summary": "Cloud Storage",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "description": "Upload the generated PDFs/images to our storage CDN and generate a URL, default to `1`. If you have configured the `Post Actions` in `API Integration` to upload the generated PDFs/Images to your own private S3, please set cloud_storage to `0`. If the `export_type=file`, please ignore this."
+          },
+          {
+            "name": "output_image_type",
+            "in": "query",
+            "x-ms-summary": "Output Image Type",
+            "required": false,
+            "type": "string",
+            "description": "Output image type(JPEG or PNG format), default to `all`. Options are `all`, `jpegOnly`,`pngOnly`."
+          },
+          {
+            "name": "meta",
+            "in": "query",
+            "x-ms-summary": "Meta",
+            "required": false,
+            "type": "string",
+            "description": "Specify an external reference ID for your own reference. It appears in the `list-objects` API."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The body.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and output file",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccessImageFile"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/v2/list-objects": {
+      "get": {
+        "description": "Retrieves a list of all the generated PDFs and images.",
+        "summary": "List generated objects",
+        "operationId": "ObjectsGet",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "x-ms-summary": "Limit",
+            "required": false,
+            "type": "string",
+            "description": "Retrieve only the number of records specified. Default to 300"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "x-ms-summary": "Offset",
+            "required": false,
+            "type": "string",
+            "description": "Offset is used to skip the number of records from the results. Default to 0"
+          },
+          {
+            "name": "template_id",
+            "in": "query",
+            "x-ms-summary": "Template ID",
+            "required": false,
+            "type": "string",
+            "description": "Filtered by template id"
+          },
+          {
+            "name": "transaction_type",
+            "in": "query",
+            "x-ms-summary": "Transaction Type",
+            "required": false,
+            "type": "string",
+            "description": "Filtered by transaction type, options are `PDF`, `JPEG` or `MERGE`"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and output file",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccessListObjects"
+            }
+          }
+        }
+      }
+    },
+    "/v2/delete-object": {
+      "get": {
+        "description": "Delete a PDF or an image from CDN and mark the transaction as deleted.",
+        "summary": "Delete an object",
+        "operationId": "ObjectDelete",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transaction_ref",
+            "in": "query",
+            "x-ms-summary": "Transaction Ref",
+            "required": true,
+            "type": "string",
+            "description": "Object transaction reference"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and output file",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccessDeleteObject"
+            }
+          }
+        }
+      }
+    },
+    "/v2/list-templates": {
+      "get": {
+        "description": "Retrieves a list of the templates and their information.",
+        "summary": "List templates",
+        "operationId": "TemplatesGet",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "x-ms-summary": "Limit",
+            "required": false,
+            "type": "string",
+            "description": "Retrieve only the number of records specified. Default to 300"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "x-ms-summary": "Offset",
+            "required": false,
+            "type": "string",
+            "description": "Offset is used to skip the number of records from the results. Default to 0"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "x-ms-summary": "Format",
+            "required": false,
+            "type": "string",
+            "description": "To filter the templates by either 'PDF' or 'JPEG'"
+          },
+          {
+            "name": "template_id",
+            "in": "query",
+            "x-ms-summary": "Template ID",
+            "required": false,
+            "type": "string",
+            "description": "To filter the templates by template id"
+          },
+          {
+            "name": "group_name",
+            "in": "query",
+            "x-ms-summary": "Group Name",
+            "required": false,
+            "type": "string",
+            "description": "To filter the templates by the group name"
+          },
+          {
+            "name": "with_layer_info",
+            "in": "query",
+            "x-ms-summary": "With Layer Info",
+            "required": false,
+            "type": "string",
+            "description": "Return along with layer information for image templates, 0=false , 1=true. Default to '0'"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and output file",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccessListTemplates"
+            }
+          }
+        }
+      }
+    },
+    "/v2/get-template": {
+      "get": {
+        "description": "Retrieves information about the PDF template.",
+        "summary": "Get PDF template",
+        "operationId": "TemplateGet",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "query",
+            "x-ms-summary": "Template ID",
+            "required": false,
+            "type": "string",
+            "description": "Your template id, it can be obtained in the web console(Manage Templates)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and template information",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccessTemplate"
+            }
+          }
+        }
+      }
+    },
+    "/v2/update-template": {
+      "post": {
+        "description": "This action updates a PDF template.",
+        "summary": "Update PDF template",
+        "operationId": "TemplateUpdate",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The body.",
+            "schema": {
+              "$ref": "#/definitions/V2UpdateTemplateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and output file",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccess"
+            }
+          }
+        }
+      }
+    },
+    "/v2/merge-pdfs": {
+      "post": {
+        "description": "This action merges/joins multiple PDF into a single PDF file.",
+        "summary": "Merge multiple PDFs",
+        "operationId": "PDFMerge",
+        "parameters": [
+          {
+            "name": "meta",
+            "in": "query",
+            "x-ms-summary": "Meta",
+            "required": false,
+            "type": "string",
+            "description": "Specify an external reference ID for your own reference. It appears in the `list-objects` API."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The body.",
+            "schema": {
+              "$ref": "#/definitions/V2MergePdfsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns status and output file",
+            "schema": {
+              "$ref": "#/definitions/ResponseSuccessSingleFile"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Error": {
+      "title": "Error",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "Value of the status: error",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "description": "Error message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "message"
+      ]
+    },
+    "ResponseSuccess": {
+      "title": "ResponseSuccess",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "Status",
+          "type": "string"
+        }
+      }
+    },
+    "ResponseSuccessTemplate": {
+      "title": "ResponseSuccessTemplate",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "Status",
+          "type": "string"
+        },
+        "template_id": {
+          "title": "Template ID",
+          "description": "Template ID",
+          "type": "string"
+        },
+        "body": {
+          "title": "Body",
+          "description": "HTML body of the template",
+          "type": "string"
+        },
+        "css": {
+          "title": "CSS",
+          "description": "CSS of the template",
+          "type": "string"
+        },
+        "settings": {
+          "title": "Settings",
+          "description": "Print settings of the template",
+          "type": "string"
+        }
+      }
+    },
+    "ResponseSuccessPDFFile": {
+      "title": "ResponseSuccessPDFFile",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "Status",
+          "type": "string"
+        },
+        "download_url": {
+          "title": "Download URL",
+          "description": "Download URL",
+          "type": "string"
+        },
+        "template_id": {
+          "title": "Template ID",
+          "description": "Template ID",
+          "type": "string"
+        },
+        "transaction_ref": {
+          "title": "Transaction Ref",
+          "description": "Transaction reference",
+          "type": "string"
+        },
+        "post_actions": {
+          "title": "Post Actions",
+          "description": "The post actions.",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ResponseSuccessImageFile": {
+      "title": "ResponseSuccessImageFile",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "Status",
+          "type": "string"
+        },
+        "download_url": {
+          "title": "Download URL",
+          "description": "Download URL",
+          "type": "string"
+        },
+        "download_url_png": {
+          "title": "Download URL PNG",
+          "description": "Download URL PNG",
+          "type": "string"
+        },
+        "template_id": {
+          "title": "Template ID",
+          "description": "Template ID",
+          "type": "string"
+        },
+        "transaction_ref": {
+          "title": "Transaction Ref",
+          "description": "Transaction reference",
+          "type": "string"
+        },
+        "post_actions": {
+          "title": "Post Actions",
+          "description": "The post actions.",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ResponseSuccessListTemplates": {
+      "title": "ResponseSuccessListTemplates",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "The status.",
+          "type": "string"
+        },
+        "templates": {
+          "title": "Templates",
+          "description": "The templates",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ResponseSuccessListObjects": {
+      "title": "ResponseSuccessListObjects",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "The status.",
+          "type": "string"
+        },
+        "objects": {
+          "title": "Objects",
+          "description": "The objects.",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "ResponseSuccessDeleteObject": {
+      "title": "ResponseSuccessDeleteObject",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "The status.",
+          "type": "string"
+        }
+      }
+    },
+    "ResponseSuccessSingleFile": {
+      "title": "ResponseSuccessSingleFile",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "Status",
+          "type": "string"
+        },
+        "primary_url": {
+          "title": "Primary URL",
+          "description": "Generated PDF document",
+          "type": "string"
+        },
+        "transaction_ref": {
+          "title": "Transaction Ref",
+          "description": "Transaction reference",
+          "type": "string"
+        }
+      }
+    },
+    "ResponseSuccessQueryImageTemplate": {
+      "title": "ResponseSuccessQueryImageTemplate",
+      "type": "object",
+      "properties": {
+        "status": {
+          "title": "Status",
+          "description": "Status",
+          "type": "string"
+        },
+        "width": {
+          "title": "Width",
+          "description": "Width",
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "title": "Height",
+          "description": "Height",
+          "type": "integer",
+          "format": "int32"
+        },
+        "layers": {
+          "title": "Layers",
+          "description": "Array of layers",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "V2MergePdfsRequest": {
+      "title": "V2MergePdfsRequest",
+      "type": "object",
+      "properties": {
+        "urls": {
+          "title": "URLs",
+          "description": "URL array. We support normal http/https URLs and data URLs. Normal URLs: URLs start with http/https, e.g: \"https://fileserver.com/a1.pdf\"). Data URLs: URLs prefixed with the \"data:\" scheme, e.g \"data:application/pdf;base64,JVBERi0xLjIg..[truncated]\"",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "export_type": {
+          "title": "Export Type",
+          "description": "Either `file` or `json`(Default). The option `json` returns a JSON object, and the output PDF is stored on a CDN. The option `file` returns binary data of the generated PDF(Secure and completely private) and the response HTTP header Content-Disposition is set to attachment. It has a file size limit of 6MB.",
+          "type": "string"
+        },
+        "expiration": {
+          "title": "Expiration",
+          "description": "Expiration of the generated PDF in minutes(default to `0`, store permanently). Use `0` to store on cdn permanently. Or use the range between `1` minute and `43200` minutes(30 days) to specify the expiration of the generated PDF",
+          "type": "integer",
+          "format": "int32"
+        },
+        "cloud_storage": {
+          "title": "Cloud Storage",
+          "description": "Upload the generated PDFs/images to our storage CDN, default to `1`. If you have configured `Post Action` to upload the PDFs/Images to your own S3, please set it to `0`.",
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": [
+        "urls"
+      ]
+    },
+    "V2UpdateTemplateRequest": {
+      "title": "V2UpdateTemplateRequest",
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "title": "Template ID",
+          "description": "Your template id, it can be obtained in the web console (Manage Templates)",
+          "type": "string"
+        },
+        "body": {
+          "title": "Body",
+          "description": "The HTML body",
+          "type": "string"
+        },
+        "css": {
+          "title": "CSS",
+          "description": "The css",
+          "type": "string"
+        }
+      },
+      "required": [
+        "template_id"
+      ]
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "description": "The key.",
+      "name": "X-API-KEY",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://apitemplate.io/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://apitemplate.io/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files"
+    }
+  ]
+}
