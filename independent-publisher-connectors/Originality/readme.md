@@ -29,8 +29,8 @@ Run an AI Detection scan for a full piece of content.
 Run an AI Detection scan on a full webpage.
 
 ## Known Issues and Limitations
-No identified issue yet. <br/>
-However, there is a set API usage limit clearly defined in the [terms of use](https://krozu.com/terms). You would need to contact Krozu via email: **support@krozu.com** if needs differs from the limitation.
+Currently the maximum number of requests you can make per minute is 100 <br/>
+If you need a larger limit, feel free to contact us here: **info@originality.ai**
 
 ## API Documentation
 API: [https://app.originality.ai/api-access](https://app.originality.ai/api-access)
