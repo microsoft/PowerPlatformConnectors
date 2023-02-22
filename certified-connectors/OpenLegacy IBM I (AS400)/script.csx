@@ -26,7 +26,9 @@ public class Script : ScriptBase {
     }
 
     private async Task UpdateRequest() {
-        if ("PerformRequest".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
+        if ("AS400Cobol".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "AS400Rpg".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "AS400DataQueue".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
             // get selected method id
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
             var methodId = query.Get("method");
@@ -44,6 +46,9 @@ public class Script : ScriptBase {
                     var jsonContent = JObject.Parse(content);
                     // get routingKey
                     var routingKey = jsonContent["enrichment"]?["routingKey"]?.ToString();
+                    if (string.IsNullOrEmpty(routingKey) && jsonContent["name"] != null) {
+                        routingKey = $"/{jsonContent["name"]?.ToString()}";
+                    }
                     if (!string.IsNullOrEmpty(routingKey)) {
                         string formattedRoutingKey = routingKey;
                         // get initial content from request
@@ -64,7 +69,7 @@ public class Script : ScriptBase {
                                         if (formattedRoutingKey.Contains("{" + originalName + "}")) {
                                             formattedRoutingKey = formattedRoutingKey.Replace("{" + originalName + "}", entry.Value.ToString());
                                         } else {
-                                            throw new ConnectorException(HttpStatusCode.InternalServerError, $"Unable to find path parameter '{originalName}' in User's API");
+                                            throw new ConnectorException(HttpStatusCode.InternalServerError, "Unable to find path parameter '" + originalName + "' in User's API");
                                         }
                                     } else if (name.Contains(OL_QUERY_FIELD_SUFFIX)) {
                                         string originalName = name.Replace(OL_QUERY_FIELD_SUFFIX, "");
@@ -82,27 +87,27 @@ public class Script : ScriptBase {
                                 }
                             }
                             var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-                            uriBuilder.Path = uriBuilder.Path.Replace("/doPost", formattedRoutingKey);
+                            uriBuilder.Path = uriBuilder.Path.Replace("/dummy-" + this.Context.OperationId, formattedRoutingKey);
                             uriBuilder.Query = newQuery.ToString();
                             this.Context.Request.RequestUri = uriBuilder.Uri;
                             var httpMethod = jsonContent["enrichment"]?["method"]?.ToString() ?? "POST";
                             this.Context.Request.Method = new HttpMethod(httpMethod);
                         } catch (JsonReaderException ex) {
-                            throw new ConnectorException(HttpStatusCode.BadGateway, $"Unable to parse a content of original request: {originalRequestContent}", ex);
+                            throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse a content of original request: " + originalRequestContent, ex);
                         }
                     } else {
-                        throw new ConnectorException(HttpStatusCode.InternalServerError, $"Unable to get User's API endpoint from the response: {content}");
+                        throw new ConnectorException(HttpStatusCode.InternalServerError, "Unable to get User's API endpoint (routingKey) from the response");
                     }
                 } else {
                     throw new ConnectorException(methodMetadataResponse.StatusCode, "Cannot get method metadata");
                 }
 
             } catch (HttpRequestException ex) {
-                throw new ConnectorException(HttpStatusCode.BadGateway, $"Unable to get Method Metadata: {ex.Message}", ex);
+                throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to get Method Metadata: " + ex.Message, ex);
             } catch (JsonReaderException ex) {
-                throw new ConnectorException(HttpStatusCode.BadGateway, $"Unable to parse Method Metadata response: {content}", ex);
+                throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse Method Metadata response: "+ content, ex);
             } catch (UriFormatException ex) {
-                throw new ConnectorException(HttpStatusCode.BadGateway, $"Unable to construct User's API endpoint from the response. {ex.Message}", ex);
+                throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to construct User's API endpoint from the response. "+ ex.Message, ex);
             }
         }
     }
@@ -114,7 +119,6 @@ public class Script : ScriptBase {
             if (response.IsSuccessStatusCode) {
                 var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
 
-                // Example case: response string is some JSON object
                 var result = JObject.Parse(responseString);
                 JObject inputProperties = (JObject) result["flow-input"]?["properties"];
 
@@ -149,16 +153,48 @@ public class Script : ScriptBase {
             if (response.IsSuccessStatusCode) {
                 var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
 
-                // Example case: response string is some JSON object
                 var result = JObject.Parse(responseString);
                 JArray elements = (JArray) result["elements"] ?? new JArray();
 
-                var updatedProperties = new JObject();
                 foreach (var entry in elements) {
                     string httpMethod = entry["enrichment"]?["method"]?.ToString() ?? "POST";
                     string routingKey = entry["enrichment"]?["routingKey"]?.ToString() ?? entry["name"].ToString();
                     entry["combinedRoute"] = $"{httpMethod} {routingKey}";
                 }
+                response.Content = CreateJsonContent(result.ToString());
+            }
+        } else if ("GetAllProjects".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
+            // Do the transformation if the response was successful, otherwise return error responses as-is
+            if (response.IsSuccessStatusCode) {
+                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+
+                var result = JObject.Parse(responseString);
+                var flatElements = new JArray();
+
+                JArray elements = (JArray) result["elements"] ?? new JArray();
+                foreach (var entry in elements) {
+                    string name = entry["name"]?.ToString() ?? "Unknown";
+                    JObject versionsObj = (JObject) entry["versions"] ?? new JObject();
+                    foreach (var versionPair in versionsObj) {
+                        JObject versionElement = (JObject) versionPair.Value;
+
+                        var reason = versionElement["reason"];
+                        JProperty transformedName = new JProperty("name", name);
+                        if (versionsObj.Count > 1) {
+                            transformedName = new JProperty("name", name + $" ({reason})");
+                        }
+
+                        var contractId = versionElement["contractId"];
+                        JProperty transformedContractId = new JProperty("contractId", contractId);
+
+                        JObject transformedVersion = new JObject();
+                        transformedVersion.Add(transformedName);
+                        transformedVersion.Add(transformedContractId);
+
+                        flatElements.Add(transformedVersion);
+                    }
+                }
+                result.Add("flatElements", flatElements);
                 response.Content = CreateJsonContent(result.ToString());
             }
         }
@@ -175,16 +211,16 @@ public class Script : ScriptBase {
         public HttpStatusCode StatusCode { get; }
 
         public override string ToString() {
-            var error = new StringBuilder($"ConnectorException: Status code={this.StatusCode}, Message='{this.Message}'");
+            var error = new StringBuilder("ConnectorException: Status code=" + this.StatusCode + ", Message='" + this.Message + "'");
             var inner = this.InnerException;
             var level = 0;
             while (inner != null && level < 10) {
                 level += 1;
-                error.AppendLine($"Inner exception {level}: {inner.Message}");
+                error.AppendLine("Inner exception " + level + ": " + inner.Message);
                 inner = inner.InnerException;
             }
 
-            error.AppendLine($"Stack trace: {this.StackTrace}");
+            error.AppendLine("Stack trace: " + this.StackTrace);
             return error.ToString();
         }
     }
