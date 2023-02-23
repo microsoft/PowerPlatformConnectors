@@ -20,6 +20,8 @@ Please follow [the instructions](https://support.iterable.com/hc/en-us/articles/
 
 You can fetch all lists within a project.
 
+### Create a static list
+
 ### Add subscribers to list
 
 ### Remove users from a list
