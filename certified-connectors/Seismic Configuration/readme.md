@@ -1,51 +1,63 @@
-# Seismic Configuration
-Seismic configuration connector provides set of actions required for adding or updating content properties, fetching teamsites and updating email opt-outs.
+# Seismic Power Automate Configuration connector
+The Seismic Power Automate Configuration connector includes actions related to content properties, teamsite data, and privacy management settings.
 
 ## Publisher: Seismic​
 
 ## Prerequisites
-You must have user created in Seismic tenant.
+You need a Seismic Premium user account for the tenant with Full Control (System Administrator) permissions.
 
 ## Supported Operations
-### Get Content Property Values
-Provides the list of content property values for a given content property.
 
-### Add Content Property Values
-Add one or more content property values to an existing content property.
+### Content properties - Get values of a content property
+Gets the list of content property values for the specified content property.
 
-### Get Content Properties
-Provides the list of content properties defined within the system.
+### Content properties - Add values to a content property
+Adds one or more content property values to an existing content property.
 
-### Add Content Property
-Add a content property and associate it to an existing teamsite.
+### Content properties - Get all
+Gets the properties for all built-in and custom content properties configured for the specified TeamSite.
 
-### Get Gdpr Emails
-Get a list of registered opt-outs.
+### Content properties - Add a content property
+Adds a content property and associates it to an existing TeamSite.
 
-### Add or update Gdpr Emails
-This action allows one or more email addresses to be added or updated in the tracking opt-out list.
+### Email opt-outs - Get list
+Gets a list of email address opt-outs.
 
-### Delete Gdpr Email
-Deletes a single email address from the opt-out list
+### Email opt-outs - Add or update emails
+Adds or updates the email opt-out preferences for one or more email addresses.
 
-### Get Teamsites
-Provides the full list of teamsites that are available in the current tenant.
+### Email opt-outs - Delete email
+Deletes a single email address from the opt-out list.
 
-### Get Teamsite Details
-Get the details of a given teamsite.
+### Teamsite - Get all teamsites
+Gets the full list of TeamSites for the tenant, regardless of user access.
 
-### Get User Teamsites
-Get the current user's assigned teamsites.
+### Teamsite - Get teamsite information
+Gets information for the specified TeamSite.
 
-### Get User Profiles
-Get the list of content profiles that the current user has access to.
+### User - Get teamsites
+Gets the list of TeamSites to which the current user has access.
+
+### User - Get profiles
+Gets the list of content profiles to which the current user has access.
 
 ## Getting Started
-For more information follow https://developer.seismic.com/seismicsoftware/reference/seismiccontentpropertiesgetcontentpropertyvalues
+The Seismic Power Automate Configuration connector includes the following actions. Each action corresponds to an API endpoint. Refer to the article for each corresponding API endpoint for further information on the fields and properties associated with the action.
+
+* [Content properties - Add a content property](https://developer.seismic.com/seismicsoftware/reference/seismiccontentpropertiesaddacontentproperty)
+* [Content properties - Add values to a content property](https://developer.seismic.com/seismicsoftware/reference/seismiccontentpropertiesaddoneormorecontentpropertyvalues)
+* [Content properties - Get all](https://developer.seismic.com/seismicsoftware/reference/seismiccontentpropertiesgetcontentproperties)
+* [Content properties - Get values of a content property](https://developer.seismic.com/seismicsoftware/reference/seismiccontentpropertiesgetcontentpropertyvalues)
+* [Email opt-outs - Add or update emails](https://developer.seismic.com/seismicsoftware/reference/seismicprivacymanagementaddorupdateoneormoreemailsintheoptoutlist)
+* [Email opt-outs - Delete email](https://developer.seismic.com/seismicsoftware/reference/seismicprivacymanagementdeleteanemailfromtheoptoutlist)
+* [Email opt-outs - Get list](https://developer.seismic.com/seismicsoftware/reference/seismicprivacymanagementgetemailoptoutlist)
+* [Teamsite - Get all teamsites](https://developer.seismic.com/seismicsoftware/reference/seismicteamsitesgetalistofallteamsites)
+* [Teamsite - Get teamsite information](https://developer.seismic.com/seismicsoftware/reference/seismicteamsitesgetinformationforaspecificteamsite)
+* [User - Get profiles](https://developer.seismic.com/seismicsoftware/reference/seismicusersgetlistofmyassignedprofiles)
+* [User - Get teamsites](https://developer.seismic.com/seismicsoftware/reference/seismicusersgetmyassignedteamsites)
 
 ## Obtaining Credentials
-You must have user created in Seismic tenant. If your user is not present, please ask tenant admin to create user for you.
+You need a Seismic Premium user account for the tenant with Full Control (System Administrator) permissions. Contact your Seismic system administrator if you do not have sufficient permissions.
 
 ## Known Issues and Limitations
-No issues and limitations are known at this time.
-
+No issues and limitations are known at this time. All APIs operate in accordance with Seismic API policy, including Rate Limits. Please refer to the [Seismic Developer portal](https://developer.seismic.com/) for API specifications, restrictions, and standards.
