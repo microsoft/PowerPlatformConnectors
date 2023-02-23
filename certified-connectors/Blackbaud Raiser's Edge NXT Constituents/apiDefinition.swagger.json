@@ -710,7 +710,7 @@
           {
             "name": "constituent_id",
             "in": "query",
-            "description": "Represents a comma-separated list of constituent identifiers to filter the results. For example, \"280,1232\" returns only constituent 280 or constituent 1232.",
+            "description": "Represents a comma-separated list of constituent system record IDs to filter the results. For example, \"280,1232\" returns only constituent 280 or constituent 1232.",
             "type": "string",
             "x-ms-summary": "Constituent ID",
             "x-ms-visibility": "advanced"
@@ -1795,6 +1795,183 @@
         }
       }
     },
+    "/constituent/v1/constituents/duplicatesearch": {
+      "get": {
+        "operationId": "GetDuplicateSearchResults",
+        "summary": "Search for duplicate constituents",
+        "description": "Searches individual, organization, and related contact records and ranks potential duplicates based on the specified search filters. Records that match multiple filters rank higher as potential duplicates.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "last_org_name",
+            "in": "query",
+            "description": "A filter for records that match the specified last name or organization name.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Last/org name"
+          },
+          {
+            "name": "first_name",
+            "in": "query",
+            "description": "A filter for individual records that match the specified first name.",
+            "type": "string",
+            "x-ms-summary": "First name"
+          },
+          {
+            "name": "middle_name",
+            "in": "query",
+            "description": "A filter for individual records that match the specified middle name.",
+            "type": "string",
+            "x-ms-summary": "Middle name"
+          },
+          {
+            "name": "suffix",
+            "in": "query",
+            "description": "A filter for individual records that match the specified suffix.",
+            "type": "string",
+            "x-ms-summary": "Suffix",
+            "x-ms-dynamic-values": {
+              "operationId": "GetDynamicValues",
+              "value-collection": "value",
+              "value-path": "item",
+              "value-title": "item",
+              "parameters": {
+                "api": "constituent",
+                "route": "suffixes"
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetDynamicValues",
+              "itemsPath": "value",
+              "itemValuePath": "item",
+              "itemTitlePath": "item",
+              "parameters": {
+                "api": {
+                  "value": "constituent"
+                },
+                "route": {
+                  "value": "suffixes"
+                }
+              }
+            }
+          },
+          {
+            "name": "address_block",
+            "in": "query",
+            "description": "A filter for records that match the specified address block.",
+            "type": "string",
+            "x-ms-summary": "Address block"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "A filter for records that match the specified city.",
+            "type": "string",
+            "x-ms-summary": "City"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "A filter for records that match the specified state.",
+            "type": "string",
+            "x-ms-summary": "State"
+          },
+          {
+            "name": "post_code",
+            "in": "query",
+            "description": "A filter for records that match the specified postal code.",
+            "type": "string",
+            "x-ms-summary": "Postal code"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "A filter for records that match the specified email addresses.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary": "Email"
+          },
+          {
+            "name": "phone",
+            "in": "query",
+            "description": "A filter for records that match the specified phone numbers.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "x-ms-summary": "Phone"
+          },
+          {
+            "name": "search_individuals",
+            "in": "query",
+            "description": "Search for duplicate individual records?",
+            "required": false,
+            "default": true,
+            "type": "boolean",
+            "x-ms-summary": "Search individuals?",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "search_aliases",
+            "in": "query",
+            "description": "Search by the alias, as specified by the Last/org name parameter?",
+            "required": false,
+            "default": false,
+            "type": "boolean",
+            "x-ms-summary": "Search aliases?",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "search_contacts",
+            "in": "query",
+            "description": "Search relationship contact records?",
+            "required": false,
+            "default": false,
+            "type": "boolean",
+            "x-ms-summary": "Search contacts?",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The number of records to return when paging results (Default = 3).",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Limit",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The number of records to skip when paging results.",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/ConstituentApi.DuplicateSearchResultCollection"
+            }
+          },
+          "400": {
+            "description": "Returned when the specified request body is not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view constituents."
+          }
+        }
+      }
+    },
     "/constituent/v1/constituents/search": {
       "get": {
         "operationId": "SearchConstituent",
@@ -1834,7 +2011,8 @@
             "description": "Represents a field to search on. Currently, it only supports lookup_id. If it is provided with search_text, a constituent with lookup_id that matches the search_text will be returned.",
             "type": "string",
             "enum": [
-              "lookup_id"
+              "lookup_id",
+              "email_address"
             ],
             "x-ms-summary": "Search field",
             "x-ms-visibility": "advanced"
@@ -2871,6 +3049,397 @@
           },
           "400": {
             "description": "Returned when the specified request parameters are not in the appropriate format."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/codetables/{code_table_id}/tableentries": {
+      "get": {
+        "operationId": "ListTableEntries",
+        "summary": "List table entries",
+        "description": "Lists the table entries for a code table.",
+        "x-ms-visibility": "internal",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code_table_id",
+            "in": "path",
+            "description": "The code table ID.",
+            "required": true,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Code table ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "include_inactive",
+            "in": "query",
+            "type": "boolean",
+            "description": "Including inactive table entries?",
+            "x-ms-summary": "Include inactive?"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.TableEntryCollection"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view table entries."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/constituentidmap/{constituent_id}": {
+      "get": {
+        "operationId": "GetConstituentIdFromLookupId",
+        "summary": "Get a constituent by lookup ID",
+        "description": "Returns a constituent's system record ID from the specified lookup ID.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "constituent_id",
+            "in": "path",
+            "description": "The constituent lookup ID.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Lookup ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.ConstituentIdMap"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view the constituent."
+          },
+          "404": {
+            "description": "Returned when the specified constituent is not found."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/constituents/customsearch": {
+      "get": {
+        "operationId": "SearchConstituentEnhanced",
+        "summary": "Search for a constituent (enhanced)",
+        "description": "Searches for constituent records using the given filter criteria.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "first_name",
+            "in": "query",
+            "description": "Constituent first name.",
+            "type": "string",
+            "x-ms-summary": "First name"
+          },
+          {
+            "name": "last_name",
+            "in": "query",
+            "description": "Constituent last name.",
+            "type": "string",
+            "x-ms-summary": "Last name"
+          },
+          {
+            "name": "lookup_id",
+            "in": "query",
+            "description": "Constituent lookup ID.",
+            "type": "string",
+            "x-ms-summary": "Lookup ID"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Constituent email address.",
+            "type": "string",
+            "x-ms-summary": "Email address"
+          },
+          {
+            "name": "phone_number",
+            "in": "query",
+            "description": "Phone number.",
+            "type": "string",
+            "x-ms-summary": "Phone number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Represents the number of records to return. The default is 500. The maximum is 1000.",
+            "type": "integer",
+            "x-ms-summary": "Limit",
+            "maximum": 1000
+          },
+          {
+            "name": "address_lines",
+            "in": "query",
+            "description": "Address lines.",
+            "type": "string",
+            "x-ms-summary": "Address lines",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "Address city.",
+            "type": "string",
+            "x-ms-summary": "City",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Address state.",
+            "type": "string",
+            "x-ms-summary": "State",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "post_code",
+            "in": "query",
+            "description": "Address postal code.",
+            "type": "string",
+            "x-ms-summary": "Postal code",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_alias",
+            "in": "query",
+            "description": "Include alias when searching on last name?",
+            "type": "boolean",
+            "x-ms-summary": "Include alias?",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "alias_type",
+            "in": "query",
+            "description": "Alias type.",
+            "type": "string",
+            "x-ms-summary": "Alias type",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_maiden_name",
+            "in": "query",
+            "description": "Include maiden name when searching on last name?",
+            "type": "boolean",
+            "x-ms-summary": "Include maiden name?",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.ConstituentSearchResultCollection"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view constituents."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/tribute": {
+      "post": {
+        "operationId": "CreateConstituentTribute",
+        "summary": "Create a constituent tribute",
+        "description": "Creates a new constituent tribute.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.TributeCreate"
+            },
+            "description": "An object that represents the tribute to create.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation successfully creates a tribute. The response body contains the ID of the new tribute.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.CreatedConstituentTribute"
+            }
+          },
+          "400": {
+            "description": "Returned when the request body is not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to create the tribute."
+          },
+          "404": {
+            "description": "Returned when the specified constituent is not found."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/tribute/{tribute_id}": {
+      "get": {
+        "operationId": "GetConstituentTribute",
+        "summary": "Get a constituent tribute",
+        "description": "Returns details about a constituent tribute.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tribute_id",
+            "in": "path",
+            "description": "The tribute ID.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Tribute ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.Tribute"
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view the tribute."
+          },
+          "404": {
+            "description": "Returned when the specified tribute is not found."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/tribute/acknowledgee": {
+      "post": {
+        "operationId": "CreateTributeAcknowledgee",
+        "summary": "Create a tribute acknowledgee",
+        "description": "Creates a new tribute acknowledgee.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.TributeAcknowledgeeCreate"
+            },
+            "description": "An object that represents the tribute acknowledgee to create.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation successfully creates a tribute acknowledgee. The response body contains the ID of the new tribute acknowledgee.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.CreatedTributeAcknowledgee"
+            }
+          },
+          "400": {
+            "description": "Returned when the request body is not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to create the tribute acknowledgee."
+          },
+          "404": {
+            "description": "Returned when the specified tribute is not found."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/tribute/constituent/{constituentId}": {
+      "get": {
+        "operationId": "ListConstituentTributes",
+        "summary": "List constituent tributes",
+        "description": "Lists the tributes for a constituent.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "constituentId",
+            "in": "path",
+            "description": "The system record ID of the constituent.",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Constituent ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.TributeCollection"
+            }
+          },
+          "400": {
+            "description": "Returned when the specified constituent ID in the request URL is not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view the tributes."
+          },
+          "404": {
+            "description": "Returned when the specified constituent is not found."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/tribute/{tributeId}/acknowledgees": {
+      "get": {
+        "operationId": "ListTributeAcknowledgees",
+        "summary": "List tribute acknowledgees",
+        "description": "Lists the acknowledgees for a tribute.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tributeId",
+            "in": "path",
+            "description": "The system record ID of the tribute.",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Tribute ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.TributeAcknowledgeeCollection"
+            }
+          },
+          "400": {
+            "description": "Returned when the specified tribute ID in the request URL is not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view the tribute acknowledgees."
+          },
+          "404": {
+            "description": "Returned when the specified tribute is not found."
           }
         }
       }
@@ -4614,6 +5183,39 @@
           "minLength": 0,
           "description": "The identifier of the thumbnail. Character limit: 36. For physical attachments only.",
           "x-ms-summary": "Thumbnail ID"
+        },
+        "tags": {
+          "type": "array",
+          "description": "The tags associated with the attachment.",
+          "x-ms-summary": "Tags",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetDynamicValues",
+              "value-collection": "value",
+              "value-path": "item",
+              "value-title": "item",
+              "parameters": {
+                "api": "constituent",
+                "route": "attachmenttags"
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetDynamicValues",
+              "itemsPath": "value",
+              "itemValuePath": "item",
+              "itemTitlePath": "item",
+              "parameters": {
+                "api": {
+                  "value": "constituent"
+                },
+                "route": {
+                  "value": "attachmenttags"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -4638,6 +5240,39 @@
           "type": "string",
           "description": "The URL for the attachment. This is required for link attachments and not applicable for physical attachments.",
           "x-ms-summary": "URL"
+        },
+        "tags": {
+          "type": "array",
+          "description": "The tags associated with the attachment.",
+          "x-ms-summary": "Tags",
+          "x-ms-visibility": "advanced",
+          "items": {
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetDynamicValues",
+              "value-collection": "value",
+              "value-path": "item",
+              "value-title": "item",
+              "parameters": {
+                "api": "constituent",
+                "route": "attachmenttags"
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetDynamicValues",
+              "itemsPath": "value",
+              "itemValuePath": "item",
+              "itemTitlePath": "item",
+              "parameters": {
+                "api": {
+                  "value": "constituent"
+                },
+                "route": {
+                  "value": "attachmenttags"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -4714,6 +5349,14 @@
           "format": "int64",
           "description": "The file size in bytes. For physical attachments only.",
           "x-ms-summary": "File size"
+        },
+        "tags": {
+          "type": "array",
+          "description": "The tags associated with the attachment.",
+          "x-ms-summary": "Tags",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -5543,6 +6186,24 @@
           "x-ms-summary": "Gives anonymously?",
           "x-ms-visibility": "advanced"
         },
+        "requests_no_email": {
+          "type": "boolean",
+          "description": "Does the constituent request no email?",
+          "x-ms-summary": "Requests no email?",
+          "x-ms-visibility": "advanced"
+        },
+        "is_solicitor": {
+          "type": "boolean",
+          "description": "Is the constituent a solicitor?",
+          "x-ms-summary": "Is a solicitor?",
+          "x-ms-visibility": "advanced"
+        },
+        "no_valid_address": {
+          "type": "boolean",
+          "description": "Does the constituent have no valid addresses?",
+          "x-ms-summary": "No valid addresses?",
+          "x-ms-visibility": "advanced"
+        },
         "inactive": {
           "type": "boolean",
           "description": "Is the constituent inactive?",
@@ -5589,11 +6250,27 @@
           "x-ms-summary": "Ethnicity",
           "x-ms-visibility": "advanced"
         },
+        "target": {
+          "type": "string",
+          "description": "The target of the constituent.",
+          "x-ms-summary": "Target",
+          "x-ms-visibility": "advanced"
+        },
         "income": {
           "type": "string",
           "description": "The income for the constituent (for individuals only).",
           "x-ms-summary": "Income",
           "x-ms-visibility": "advanced"
+        },
+        "receipt_type": {
+          "type": "string",
+          "description": "The receipt type of the constituent.",
+          "x-ms-summary": "Receipt type",
+          "x-ms-visibility": "advanced",
+          "enum": [
+            "One receipt per gift",
+            "Consolidated receipts"
+          ]
         },
         "religion": {
           "type": "string",
@@ -5714,6 +6391,12 @@
               "x-ms-visibility": "advanced"
             }
           }
+        },
+        "is_memorial": {
+          "type": "boolean",
+          "description": "Is the constituent an honor/memorial?",
+          "x-ms-summary": "Is memorial?",
+          "x-ms-visibility": "advanced"
         }
       }
     },
@@ -6073,6 +6756,23 @@
           "description": "Does the constituent give anonymously?",
           "x-ms-summary": "Gives anonymously?"
         },
+        "requests_no_email": {
+          "type": "boolean",
+          "description": "Does the constituent request no email?",
+          "x-ms-summary": "Requests no email?"
+        },
+        "is_solicitor": {
+          "type": "boolean",
+          "description": "Is the constituent a solicitor?",
+          "x-ms-summary": "Is a solicitor?",
+          "x-ms-visibility": "advanced"
+        },
+        "no_valid_address": {
+          "type": "boolean",
+          "description": "Does the constituent have no valid addresses?",
+          "x-ms-summary": "No valid addresses?",
+          "x-ms-visibility": "advanced"
+        },
         "inactive": {
           "type": "boolean",
           "description": "Is the constituent inactive?",
@@ -6113,10 +6813,26 @@
           "description": "The ethnicity of the constituent (for individuals only).",
           "x-ms-summary": "Ethnicity"
         },
+        "target": {
+          "type": "string",
+          "description": "The target of the constituent.",
+          "x-ms-summary": "Target",
+          "x-ms-visibility": "advanced"
+        },
         "income": {
           "type": "string",
           "description": "The income for the constituent (for individuals only).",
           "x-ms-summary": "Income"
+        },
+        "receipt_type": {
+          "type": "string",
+          "description": "The receipt type of the constituent.",
+          "x-ms-summary": "Receipt type",
+          "x-ms-visibility": "advanced",
+          "enum": [
+            "One receipt per gift",
+            "Consolidated receipts"
+          ]
         },
         "religion": {
           "type": "string",
@@ -6147,45 +6863,53 @@
         },
         "matching_gift_per_gift_min": {
           "type": "object",
+          "description": "The minimum match amount per gift for the constituent (for organizations only).",
+          "x-ms-summary": "Min match per gift",
           "properties": {
             "value": {
               "type": "number",
               "format": "double",
-              "description": "The minimum match amount per gift for the constituent (for organizations only).",
-              "x-ms-summary": "Min match per gift"
+              "description": "The amount value.",
+              "x-ms-summary": "value"
             }
           }
         },
         "matching_gift_per_gift_max": {
           "type": "object",
+          "description": "The maximum match amount per gift for the constituent (for organizations only).",
+          "x-ms-summary": "Max match per gift",
           "properties": {
             "value": {
               "type": "number",
               "format": "double",
-              "description": "The maximum match amount per gift for the constituent (for organizations only).",
-              "x-ms-summary": "Max match per gift"
+              "description": "The amount value.",
+              "x-ms-summary": "value"
             }
           }
         },
         "matching_gift_total_min": {
           "type": "object",
+          "description": "The minimum match total for the constituent (for organizations only).",
+          "x-ms-summary": "Min match per constit",
           "properties": {
             "value": {
               "type": "number",
               "format": "double",
-              "description": "The minimum match total for the constituent (for organizations only).",
-              "x-ms-summary": "Min match per constit"
+              "description": "The amount value.",
+              "x-ms-summary": "value"
             }
           }
         },
         "matching_gift_total_max": {
           "type": "object",
+          "description": "The maximum match total for the constituent (for organizations only).",
+          "x-ms-summary": "Max match per constit",
           "properties": {
             "value": {
               "type": "number",
               "format": "double",
-              "description": "The maximum match total for the constituent (for organizations only).",
-              "x-ms-summary": "Max match per constit"
+              "description": "The amount value.",
+              "x-ms-summary": "value"
             }
           }
         },
@@ -6239,6 +6963,12 @@
             "None"
           ],
           "x-ms-summary": "Fundraiser status"
+        },
+        "is_memorial": {
+          "type": "boolean",
+          "description": "Is the constituent an honor/memorial?",
+          "x-ms-summary": "Is memorial?",
+          "x-ms-visibility": "advanced"
         },
         "spouse": {
           "type": "object",
@@ -6501,6 +7231,77 @@
             "ConstituentId",
             "FuzzyDate"
           ]
+        }
+      }
+    },
+    "ConstituentApi.DuplicateSearchResult": {
+      "type": "object",
+      "description": "Duplicate search result",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The system record ID for the constituent.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The constituent name. For individuals, this computed field indicates the full name of the constituent based on the target organization's display name settings.",
+          "x-ms-summary": "Name"
+        },
+        "display_name": {
+          "type": "string",
+          "description": "The constituent's display name.",
+          "x-ms-summary": "Display name"
+        },
+        "formatted_address": {
+          "type": "string",
+          "description": "The formatted primary address for the constituent.",
+          "x-ms-summary": "Address"
+        },
+        "deceased": {
+          "type": "boolean",
+          "description": "Is the constituent is deceased?",
+          "x-ms-summary": "Deceased?"
+        },
+        "is_constituent": {
+          "type": "boolean",
+          "description": "Is the record a constituent?",
+          "x-ms-summary": "Is a constituent?"
+        },
+        "constituent_id": {
+          "type": "string",
+          "description": "The user-defined identifier for the constituent.",
+          "x-ms-summary": "Lookup ID"
+        },
+        "date_added": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the constituent was added.",
+          "x-ms-summary": "Date added"
+        },
+        "rank": {
+          "type": "string",
+          "description": "The search rank indicating what the constituent was matched on.",
+          "x-ms-summary": "Rank"
+        }
+      }
+    },
+    "ConstituentApi.DuplicateSearchResultCollection": {
+      "type": "object",
+      "description": "Duplicate search results",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of items available for retrieval into the collection after applying any request parameters. The limit and offset parameters do not affect the count, but to facilitate paging, they may affect the number of items in the value result set.",
+          "x-ms-summary": "Count"
+        },
+        "value": {
+          "type": "array",
+          "description": "The set of items included in the response. This may be a subset of the items in the collection.",
+          "items": {
+            "$ref": "#/definitions/ConstituentApi.DuplicateSearchResult"
+          }
         }
       }
     },
@@ -8285,6 +9086,14 @@
           "type": "string",
           "description": "The note text.",
           "x-ms-summary": "Note"
+        },
+        "author": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 50,
+          "description": "The note author. If not supplied, will have a default set based on the user's account. Character limit: 50.",
+          "x-ms-summary": "Author",
+          "x-ms-visibility": "advanced"
         }
       }
     },
@@ -9787,6 +10596,24 @@
           "x-ms-summary": "Gives anonymously?",
           "x-ms-visibility": "advanced"
         },
+        "requests_no_email": {
+          "type": "boolean",
+          "description": "Does the constituent request no email?",
+          "x-ms-summary": "Requests no email?",
+          "x-ms-visibility": "advanced"
+        },
+        "is_solicitor": {
+          "type": "boolean",
+          "description": "Is the constituent a solicitor?",
+          "x-ms-summary": "Is a solicitor?",
+          "x-ms-visibility": "advanced"
+        },
+        "no_valid_address": {
+          "type": "boolean",
+          "description": "Does the constituent have no valid addresses?",
+          "x-ms-summary": "No valid addresses?",
+          "x-ms-visibility": "advanced"
+        },
         "birthdate": {
           "type": "object",
           "description": "The constituent's birthdate.",
@@ -9827,11 +10654,27 @@
           "x-ms-summary": "Ethnicity",
           "x-ms-visibility": "advanced"
         },
+        "target": {
+          "type": "string",
+          "description": "The target of the constituent.",
+          "x-ms-summary": "Target",
+          "x-ms-visibility": "advanced"
+        },
         "income": {
           "type": "string",
           "description": "The income for the constituent.",
           "x-ms-summary": "Income",
           "x-ms-visibility": "advanced"
+        },
+        "receipt_type": {
+          "type": "string",
+          "description": "The receipt type of the constituent.",
+          "x-ms-summary": "Receipt type",
+          "x-ms-visibility": "advanced",
+          "enum": [
+            "One receipt per gift",
+            "Consolidated receipts"
+          ]
         },
         "religion": {
           "type": "string",
@@ -9912,6 +10755,12 @@
               "x-ms-visibility": "advanced"
             }
           }
+        },
+        "is_memorial": {
+          "type": "boolean",
+          "description": "Is the constituent an honor/memorial?",
+          "x-ms-summary": "Is memorial?",
+          "x-ms-visibility": "advanced"
         }
       }
     },
@@ -10364,6 +11213,46 @@
           "x-ms-summary": "Gives anonymously?",
           "x-ms-visibility": "advanced"
         },
+        "requests_no_email": {
+          "type": "boolean",
+          "description": "Does the constituent request no email?",
+          "x-ms-summary": "Requests no email?",
+          "x-ms-visibility": "advanced"
+        },
+        "is_solicitor": {
+          "type": "boolean",
+          "description": "Is the constituent a solicitor?",
+          "x-ms-summary": "Is a solicitor?",
+          "x-ms-visibility": "advanced"
+        },
+        "no_valid_address": {
+          "type": "boolean",
+          "description": "Does the constituent have no valid addresses?",
+          "x-ms-summary": "No valid addresses?",
+          "x-ms-visibility": "advanced"
+        },
+        "target": {
+          "type": "string",
+          "description": "The target of the constituent.",
+          "x-ms-summary": "Target",
+          "x-ms-visibility": "advanced"
+        },
+        "income": {
+          "type": "string",
+          "description": "The income for the constituent.",
+          "x-ms-summary": "Income",
+          "x-ms-visibility": "advanced"
+        },
+        "receipt_type": {
+          "type": "string",
+          "description": "The receipt type of the constituent.",
+          "x-ms-summary": "Receipt type",
+          "x-ms-visibility": "advanced",
+          "enum": [
+            "One receipt per gift",
+            "Consolidated receipts"
+          ]
+        },
         "industry": {
           "type": "string",
           "description": "The industry of the constituent.",
@@ -10442,6 +11331,12 @@
           "type": "string",
           "description": "The matching gift notes for the constituent.",
           "x-ms-summary": "Matching gift notes",
+          "x-ms-visibility": "advanced"
+        },
+        "is_memorial": {
+          "type": "boolean",
+          "description": "Is the constituent an honor/memorial?",
+          "x-ms-summary": "Is memorial?",
           "x-ms-visibility": "advanced"
         }
       }
@@ -10835,6 +11730,582 @@
         "name": {
           "type": "string",
           "description": "The name of the list."
+        }
+      }
+    },
+    "NXTDataIntegrationApi.ConstituentIdMap": {
+      "type": "object",
+      "description": "Constituent ID map",
+      "properties": {
+        "system_record_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The constituent system record ID.",
+          "x-ms-summary": "ID"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.ConstituentSearchResult": {
+      "type": "object",
+      "description": "Search result",
+      "properties": {
+        "record_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the constituent.",
+          "x-ms-summary": "ID"
+        },
+        "constituent_id": {
+          "type": "string",
+          "description": "The constituent ID.",
+          "x-ms-summary": "Lookup ID"
+        },
+        "key_indicator": {
+          "type": "string",
+          "description": "The key indicator for the record.",
+          "x-ms-summary": "Key indicator"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "The first name (individuals only).",
+          "x-ms-summary": "First name"
+        },
+        "last_name": {
+          "type": "string",
+          "description": "The last name (individuals only).",
+          "x-ms-summary": "Last name"
+        },
+        "middle_name": {
+          "type": "string",
+          "description": "The middle name (individuals only).",
+          "x-ms-summary": "Middle name"
+        },
+        "preferred_name": {
+          "type": "string",
+          "description": "The preferred name (individuals only).",
+          "x-ms-summary": "Preferred name"
+        },
+        "maiden_name": {
+          "type": "string",
+          "description": "The former name (individuals only).",
+          "x-ms-summary": "Former name"
+        },
+        "title1": {
+          "type": "string",
+          "description": "The title 1 (individuals only).",
+          "x-ms-summary": "Title 1"
+        },
+        "suffix1": {
+          "type": "string",
+          "description": "The suffix 1 (individuals only).",
+          "x-ms-summary": "Suffix 1"
+        },
+        "gender": {
+          "type": "string",
+          "description": "The constituent gender (individuals only).",
+          "x-ms-summary": "Gender"
+        },
+        "birth_date": {
+          "type": "object",
+          "description": "The constituent's birthdate.",
+          "x-ms-summary": "Birthdate",
+          "properties": {
+            "d": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The day in the fuzzy date.",
+              "x-ms-summary": "day",
+              "x-ms-visibility": "advanced"
+            },
+            "m": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The month in the fuzzy date.",
+              "x-ms-summary": "month",
+              "x-ms-visibility": "advanced"
+            },
+            "y": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The year in the fuzzy date.",
+              "x-ms-summary": "year",
+              "x-ms-visibility": "advanced"
+            }
+          }
+        },
+        "spouse_first_name": {
+          "type": "string",
+          "description": "The spouse's first name (individuals only).",
+          "x-ms-summary": "Spouse first name"
+        },
+        "spouse_last_name": {
+          "type": "string",
+          "description": "The spouse's last name (individuals only).",
+          "x-ms-summary": "Spouse last name"
+        },
+        "org_name": {
+          "type": "string",
+          "description": "The organization name (organizations only).",
+          "x-ms-summary": "Organization name"
+        },
+        "address_block": {
+          "type": "string",
+          "description": "The address block.",
+          "x-ms-summary": "Address block"
+        },
+        "address_city_state": {
+          "type": "string",
+          "description": "The address city and state.",
+          "x-ms-summary": "City and state"
+        },
+        "address_post_code": {
+          "type": "string",
+          "description": "The address post code.",
+          "x-ms-summary": "Postal code"
+        },
+        "primary_email": {
+          "type": "string",
+          "description": "The primary email.",
+          "x-ms-summary": "Primary email address"
+        },
+        "primary_phone": {
+          "type": "string",
+          "description": "The primary phone.",
+          "x-ms-summary": "Primary phone number"
+        },
+        "matched_alias": {
+          "type": "string",
+          "description": "The matched alias name (individuals only).",
+          "x-ms-summary": "Matched alias"
+        },
+        "matched_email": {
+          "type": "string",
+          "description": "The matched email address.",
+          "x-ms-summary": "Matched email"
+        },
+        "matched_phone": {
+          "type": "string",
+          "description": "The matched phone number.",
+          "x-ms-summary": "Matched phone"
+        },
+        "is_constituent": {
+          "type": "boolean",
+          "description": "Is the record a constituent?",
+          "x-ms-summary": "Is a constituent?"
+        },
+        "is_deceased": {
+          "type": "boolean",
+          "description": "Is the record deceased?",
+          "x-ms-summary": "Is deceased?"
+        },
+        "is_inactive": {
+          "type": "boolean",
+          "description": "Is the record inactive?",
+          "x-ms-summary": "Is inactive?"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.ConstituentSearchResultCollection": {
+      "type": "object",
+      "description": "Constituents",
+      "properties": {
+        "results": {
+          "type": "array",
+          "description": "The set of items included in the response. This may be a subset of the items in the collection.",
+          "items": {
+            "$ref": "#/definitions/NXTDataIntegrationApi.ConstituentSearchResult"
+          }
+        }
+      }
+    },
+    "NXTDataIntegrationApi.CreatedConstituentTribute": {
+      "type": "object",
+      "description": "Created constituent tribute",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The ID of the newly created constituent tribute.",
+          "x-ms-summary": "ID"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.CreatedTributeAcknowledgee": {
+      "type": "object",
+      "description": "Created tribute acknowledgee",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The ID of the newly created tribute acknowledgee.",
+          "x-ms-summary": "ID"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TableEntry": {
+      "type": "object",
+      "properties": {
+        "table_entries_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the table entry.",
+          "x-ms-summary": "ID"
+        },
+        "long_description": {
+          "type": "string",
+          "x-ms-summary": "Description"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TableEntryCollection": {
+      "type": "object",
+      "description": "Table entries",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of items available for retrieval into the collection after applying any request parameters. The limit and offset parameters do not affect the count, but to facilitate paging, they may affect the number of items in the value result set.",
+          "x-ms-summary": "Count"
+        },
+        "value": {
+          "type": "array",
+          "description": "The set of items included in the response. This may be a subset of the items in the collection.",
+          "items": {
+            "$ref": "#/definitions/NXTDataIntegrationApi.TableEntry"
+          }
+        }
+      }
+    },
+    "NXTDataIntegrationApi.Tribute": {
+      "type": "object",
+      "description": "Tribute",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the tribute.",
+          "x-ms-summary": "ID"
+        },
+        "constituent_record_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the constituent associated with the tribute.",
+          "x-ms-summary": "Constituent ID"
+        },
+        "tribute_type_name": {
+          "type": "string",
+          "description": "The tribute type.",
+          "x-ms-summary": "Tribute type"
+        },
+        "tribute_type_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The tribute type ID.",
+          "x-ms-summary": "Tribute type ID"
+        },
+        "description": {
+          "type": "string",
+          "description": "The tribute description.",
+          "x-ms-summary": "Description"
+        },
+        "start_date": {
+          "type": "object",
+          "description": "The start date for the relationship.",
+          "x-ms-summary": "Start",
+          "properties": {
+            "d": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The day in the fuzzy date.",
+              "x-ms-summary": "day"
+            },
+            "m": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The month in the fuzzy date.",
+              "x-ms-summary": "month"
+            },
+            "y": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The year in the fuzzy date.",
+              "x-ms-summary": "year"
+            }
+          }
+        },
+        "end_date": {
+          "type": "object",
+          "description": "The end date for the relationship.",
+          "x-ms-summary": "End",
+          "properties": {
+            "d": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The day in the fuzzy date.",
+              "x-ms-summary": "day"
+            },
+            "m": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The month in the fuzzy date.",
+              "x-ms-summary": "month"
+            },
+            "y": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The year in the fuzzy date.",
+              "x-ms-summary": "year"
+            }
+          }
+        },
+        "default_fund_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the default fund associated with the tribute.",
+          "x-ms-summary": "Default fund ID"
+        },
+        "notes": {
+          "type": "string",
+          "description": "The tribute notes.",
+          "x-ms-summary": "Notes"
+        },
+        "is_active": {
+          "type": "boolean",
+          "description": "Is this tribute active?",
+          "x-ms-summary": "Active?"
+        },
+        "sequence": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The tribute sequence.",
+          "x-ms-summary": "Sequence"
+        },
+        "date_added": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date when the tribute was created.",
+          "x-ms-summary": "Date added"
+        },
+        "date_modified": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date when the tribute was last modified.",
+          "x-ms-summary": "Date modified"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TributeAcknowledgee": {
+      "type": "object",
+      "description": "Tribute acknowledgee",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the tribute acknowledgee.",
+          "x-ms-summary": "ID"
+        },
+        "tribute_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the tribute associated with the acknowledgee.",
+          "x-ms-summary": "Tribute ID"
+        },
+        "relationships_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the relationship (if null, this represents a self-acknowledgee).",
+          "x-ms-summary": "Relationship ID"
+        },
+        "letter": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The letter ID.",
+          "x-ms-summary": "Letter ID"
+        },
+        "sequence": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The tribute acknowledgee sequence.",
+          "x-ms-summary": "Sequence"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TributeAcknowledgeeCollection": {
+      "type": "object",
+      "description": "Tribute acknowledgees",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of items available for retrieval into the collection after applying any request parameters. The limit and offset parameters do not affect the count, but to facilitate paging, they may affect the number of items in the value result set.",
+          "x-ms-summary": "Count"
+        },
+        "value": {
+          "type": "array",
+          "description": "The set of items included in the response. This may be a subset of the items in the collection.",
+          "items": {
+            "$ref": "#/definitions/NXTDataIntegrationApi.TributeAcknowledgee"
+          }
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TributeAcknowledgeeCreate": {
+      "type": "object",
+      "required": [
+        "tribute_id"
+      ],
+      "properties": {
+        "tribute_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the tribute associated with the acknowledgee.",
+          "x-ms-summary": "Tribute ID"
+        },
+        "relationship_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the relationship (if null, this represents a self-acknowledgee).",
+          "x-ms-summary": "Relationship ID"
+        },
+        "letter_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The letter ID.",
+          "x-ms-summary": "Letter ID"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TributeCollection": {
+      "type": "object",
+      "description": "Tributes",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of items available for retrieval into the collection after applying any request parameters. The limit and offset parameters do not affect the count, but to facilitate paging, they may affect the number of items in the value result set.",
+          "x-ms-summary": "Count"
+        },
+        "value": {
+          "type": "array",
+          "description": "The set of items included in the response. This may be a subset of the items in the collection.",
+          "items": {
+            "$ref": "#/definitions/NXTDataIntegrationApi.Tribute"
+          }
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TributeCreate": {
+      "type": "object",
+      "required": [
+        "constituent_record_id",
+        "tribute_type_id"
+      ],
+      "properties": {
+        "constituent_record_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the constituent associated with the tribute.",
+          "x-ms-summary": "Constituent ID"
+        },
+        "tribute_type_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The tribute type.",
+          "x-ms-summary": "Tribute type",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTableEntries",
+            "value-collection": "value",
+            "value-path": "table_entries_id",
+            "value-title": "long_description",
+            "parameters": {
+              "code_table_id": 7,
+              "include_inactive": false
+            }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "ListTableEntries",
+            "itemsPath": "value",
+            "itemValuePath": "table_entries_id",
+            "itemTitlePath": "long_description",
+            "parameters": {
+              "code_table_id": {
+                "value": 7
+              },
+              "include_inactive": {
+                "value": false
+              }
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "The tribute description.",
+          "x-ms-summary": "Description"
+        },
+        "start_date": {
+          "type": "object",
+          "description": "The start date for the relationship.",
+          "x-ms-summary": "Start",
+          "properties": {
+            "d": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The day in the fuzzy date.",
+              "x-ms-summary": "day"
+            },
+            "m": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The month in the fuzzy date.",
+              "x-ms-summary": "month"
+            },
+            "y": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The year in the fuzzy date.",
+              "x-ms-summary": "year"
+            }
+          }
+        },
+        "end_date": {
+          "type": "object",
+          "description": "The end date for the relationship.",
+          "x-ms-summary": "End",
+          "properties": {
+            "d": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The day in the fuzzy date.",
+              "x-ms-summary": "day"
+            },
+            "m": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The month in the fuzzy date.",
+              "x-ms-summary": "month"
+            },
+            "y": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The year in the fuzzy date.",
+              "x-ms-summary": "year"
+            }
+          }
+        },
+        "default_fund_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the default fund associated with the tribute.",
+          "x-ms-summary": "Default fund ID"
+        },
+        "notes": {
+          "type": "string",
+          "description": "The tribute notes.",
+          "x-ms-summary": "Notes"
+        },
+        "is_active": {
+          "type": "boolean",
+          "description": "Is this tribute active?",
+          "x-ms-summary": "Active?",
+          "x-ms-visibility": "advanced"
         }
       }
     },
