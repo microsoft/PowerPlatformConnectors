@@ -13,8 +13,11 @@ You need an OpenAI account and available tokens. The account comes with a 3 mont
 
 The connector supports the following operations:
 
-- `List engines`: This action will return all available GPT-3 engines.
-- `Completion`: This action will complete your prompt and is the main action you will use.
+- `Create completion`: Creates a completion for the provided prompt and parameters.
+- `Edit prompt`: Creates a new edit for the provided input, instruction, and parameters.
+- `Completion [DEPRECATED]`: This action will complete your prompt and is the main action you will use.
+- `Create an image`: DallE2 creates an image from your prompt.
+- `List models`: Lists the currently available models, and provides basic information about each one such as the owner and availability.
 
 ## Obtaining Credentials
 
