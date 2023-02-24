@@ -1,9 +1,3 @@
-using System.Linq;
-using System.Threading.Tasks;
-using System;
-using System.Runtime.Remoting.Contexts;
-using System.Net;
-
 public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
@@ -23,9 +17,7 @@ public class Script : ScriptBase
         }
 
         // update request uri
-        this.Context.Request.RequestUri = this.UpdateRequestUri(envId, region);
-
-        var request = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+        this.Context.Request.RequestUri = this.GetRequestUri(envId, region);
 
         // send request
         HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
@@ -34,12 +26,27 @@ public class Script : ScriptBase
             var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             if (this.Context.OperationId == "CreateCardInstance")
             {
-                var body = JObject.Parse(responseString);
-                var card = body["card"] as JObject;
-                // add card type to card json
-                card.Add("CardType", "PowerAppsCard");
-                body["card"] = card;
-                response.Content = CreateJsonContent(body.ToString());
+                bool isBotUri = true;
+                // get URI for bot activity
+                Uri botUri = this.GetRequestUri(envId, region, isBotUri);
+                HttpResponseMessage botResponse = await CallBotActivitiesAsync(responseString, botUri);
+
+                if (botResponse.IsSuccessStatusCode)
+                {
+                    var botResponseString = await botResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var body = JObject.Parse(botResponseString);
+                    var cardBody = body["value"] as JObject;
+                    // add card type to card json
+                    cardBody.Add("CardType", "PowerAppsCard");
+
+                    //wrap the result in card key 
+                    var cardResult = new JObject
+                    {
+                        ["card"] = cardBody
+                    };
+
+                    response.Content = CreateJsonContent(cardResult.ToString());
+                }
             }
             else
             {
@@ -117,12 +124,14 @@ public class Script : ScriptBase
                 return prefixPath + $"/cards/{this.GetCardId(paths)}/instances/{this.GetInstanceId(paths)}";
             case "GetCardDescription":
                 return prefixPath + $"/cards/{this.GetCardId(paths)}";
+            case "BotProcess":
+                return prefixPath + $"/activities";
             default:
                 return prefixPath;
         }
     }
 
-    private Uri UpdateRequestUri(string envId, string region)
+    private Uri GetRequestUri(string envId, string region, bool isBotUri = false)
     {
         // normalize the env id it to be used in the host
         var normalizedEnvId = envId.ToLower().Replace("-", "");
@@ -160,8 +169,111 @@ public class Script : ScriptBase
         }
 
         // build the new request uri
-        var uriBuilder = new UriBuilder("https", newHostUrl, -1, this.GetPath(this.Context.OperationId));
+        string operation = isBotUri ? "BotProcess" : this.Context.OperationId;
+        var uriBuilder = new UriBuilder("https", newHostUrl, -1, this.GetPath(operation));
         uriBuilder.Query = (string)this.Context.Request.Headers.GetValues("x-ms-api-version").FirstOrDefault();
         return uriBuilder.Uri;
+    }
+
+    private string getRequestHeaderValue(string headerName)
+    {
+        IEnumerable<string> headerValues = this.Context.Request.Headers.GetValues(headerName);
+        var headerValue = headerValues.FirstOrDefault();
+        this.Context.Logger.LogInformation(headerValue);
+        return (string)headerValue;
+    }
+
+    private async Task<HttpResponseMessage> CallBotActivitiesAsync(string responseString, Uri botUri)
+    {
+        // create a new request to call bot activity
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, botUri);
+
+        // add all the headers from original request
+        foreach (var header in this.Context.Request.Headers)
+        {
+            httpRequest.Headers.Add(header.Key, header.Value);
+        }
+
+        JObject body = JObject.Parse(responseString);
+        JObject card = body["card"] as JObject;
+        JObject action = new JObject();
+
+        if (card.ContainsKey("refresh"))
+        {
+            JObject refresh = card["refresh"] as JObject;
+            if (refresh.ContainsKey("action"))
+            {
+                action = card["refresh"]["action"] as JObject;
+            }
+            else
+            {
+                throw new Exception($"EXPECTED500: Could not find action in refresh property in card JSON.");
+            }
+        }
+        else
+        {
+            throw new Exception($"EXPECTED500: Could not find refresh property in card JSON.");
+        }
+
+        // create bot request payload
+        JObject _botRequestPayload = new JObject
+        {
+            ["serviceUrl"] = "http://blank",
+            ["id"] = Guid.NewGuid(),
+            ["type"] = "invoke",
+            ["channelId"] = "powerautomate",
+            ["name"] = "adaptiveCard/action",
+            ["value"] = new JObject
+            {
+                ["action"] = action,
+                ["authentication"] = new JObject
+                {
+                    ["token"] = getRequestHeaderValue("Authorization"),
+                    ["id"] = body["cardId"].ToString()
+                }
+            }
+        };
+
+        // get original request to find input variables
+        var requestString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+        JObject requestContent = JObject.Parse(requestString);
+
+        if (requestContent.ContainsKey("inputs"))
+        {
+            var inputs = requestContent["inputs"] as JObject;
+            if (inputs != null)
+            {
+                if (_botRequestPayload.ContainsKey("value"))
+                {
+                    JObject value = _botRequestPayload["value"] as JObject;
+                    if (value.ContainsKey("action"))
+                    {
+                        JObject valueAction = _botRequestPayload["value"]["action"] as JObject;
+                        if (valueAction.ContainsKey("data"))
+                        {
+                            // merge inputs to data
+                            JObject data = valueAction["data"] as JObject;
+                            data.Merge(inputs);
+                        }
+                        else
+                        {
+                            throw new Exception($"EXPECTED500: Could not find data in action property in card JSON.");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception($"EXPECTED500: Could not find action in value property in card JSON.");
+                    }
+                }
+                else
+                {
+                    throw new Exception($"EXPECTED500: Could not find value property in bot request payload.");
+                }
+            }
+        }
+
+        httpRequest.Content = CreateJsonContent(_botRequestPayload.ToString());
+        HttpResponseMessage response = await this.Context.SendAsync(httpRequest, this.CancellationToken).ConfigureAwait(false);
+        return response;
     }
 }
