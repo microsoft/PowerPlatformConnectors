@@ -1,29 +1,35 @@
-# Seismic Livedoc
-Seismic engagement connector provides set of actions required for delivering content from content repository to other and generating livesend link.
+# Seismic Power Automate LiveDoc connector
+The Seismic Power Automate LiveDoc connector includes Actions related to LiveDoc generation.
 
 ## Publisher: Seismic​
 
 ## Prerequisites
-You must have user created in Seismic tenant.
+You need a Seismic Business or Premium user account for the tenant.
 
 ## Supported Operations
+
 ### Get the list of inputs for a LiveDoc
 Gets the list of adHoc inputs required to generate a LiveDoc.
 
 ### Generate a LiveDoc
-This is where you start a generation, with all the necessary options. Each of the desired outputs must be specified in the "outputs" array.
+Starts a LiveDoc generation with all of the necessary options.
 
 ### Get status of LiveDoc generation
-This is where you get the status for a generation process, it will give you the overall status for all underlying steps.
+Gets the status for a LiveDoc generation process.
 
 ### Download a particular output from a Livedoc generation
-This is where you can download a particular generated output such as a PPTX, DOCX, PDF, or XLSX.
+Downloads a particular generated LiveDoc output such as a PPTX, DOCX, PDF, or XLSX file.
 
 ## Getting Started
-For more information follow https://developer.seismic.com/seismicsoftware/reference/seismiclivedocgetthelistofinputsforalivedoc
+The Seismic Power Automate LiveDoc connector includes the following actions. Each action corresponds to an API endpoint. Refer to the article for each corresponding API endpoint for further information on the fields and properties associated with the action.
+
+* [Get the list of inputs for a LiveDoc](https://developer.seismic.com/seismicsoftware/reference/seismiclivedocgetthelistofinputsforalivedoc)
+* [Generate a LiveDoc](https://developer.seismic.com/seismicsoftware/reference/seismiclivedocgeneratealivedoc)
+* [Get status of LiveDoc generation](https://developer.seismic.com/seismicsoftware/reference/seismiclivedocgetstatusoflivedocgeneration)
+* [Download a particular output from a Livedoc generation](https://developer.seismic.com/seismicsoftware/reference/seismiclivedocdownloadaparticularoutputfromalivedocgeneration)
 
 ## Obtaining Credentials
-You must have user created in Seismic tenant. If your user is not created, please ask tenant admin to create user for you.
+You need a Seismic Business or Premium user account for the tenant. Contact your Seismic system administrator if you do not have sufficient permissions.
 
 ## Known Issues and Limitations
-No issues and limitations are known at this time.
+No issues and limitations are known at this time. All APIs operate in accordance with Seismic API policy, including Rate Limits. Please refer to the [Seismic Developer portal](https://developer.seismic.com/) for API specifications, restrictions, and standards.
