@@ -39,9 +39,11 @@
         // Wrap the original JSON object into a new JSON object
         var newResult = new JObject
         {
-            ["first_completion"] = result["choices"][0]["text"],
-            ["result"] = result
+            ["first_completion"] = result["choices"][0]["text"]
         };
+        newResult.Merge(result, new JsonMergeSettings {
+            MergeArrayHandling = MergeArrayHandling.Concat
+        });
 
         response.Content = CreateJsonContent(newResult.ToString());
     }
