@@ -18,15 +18,26 @@ Please follow [the instructions](https://support.iterable.com/hc/en-us/articles/
 
 ### Get lists
 
-You can fetch all lists within a project.
+Allows you to fetch all lists within a project. Rate limit: 100 requests/second, per project.
 
 ### Create a static list
 
+Allows you to create a new static list.
+
 ### Add subscribers to list
+
+Allows you to add specific subscribers to a list.
+Learn about [identifying users by userId and email](https://support.iterable.com/hc/en-us/articles/204780579#identifying-users).
 
 ### Remove users from a list
 
+Allows you to Remove specific users from a list.
+
+Learn about [identifying users by userId and email](https://support.iterable.com/hc/en-us/articles/204780579#identifying-users).
+
 ### Get users in a list
+
+Allows you to get all users within a list. Rate limit: 5 requests/minute, per project.
 
 ## Known issues and limitations
 
