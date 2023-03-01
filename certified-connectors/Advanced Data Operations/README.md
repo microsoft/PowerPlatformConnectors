@@ -21,14 +21,18 @@ One can be obtained by signing up to a paid plan or by activating a trial subscr
 - `Flatten Object Array` - Flatten an array of complex, multi-level objects into an array of single level JSON objects.  
 - `Get Data Schema` - Get the schema (i.e. properties and their associated types) from an array of objects.  
 - `Join` - Join exactly two datasets using a left or inner join technique.  
+- `JSON to CSV` - Transform a JSON array of objects into a comma separated table format.  
 - `JSON to Table` - Transform a JSON structure into a tabluar format.
 - `JSON to Text` - Transform a JSON array of objects into a tab delimited text format.
-- `JSON to CSV` - Transform a JSON array of objects into a comma separated table format.  
+- `Json Properties to Name/Value Pair Array` - Transforms a JSON structure to an array of name/value pairs.
+- `Levenshtein Distance` - Use the Levenshtein Distance algorithm to calculate a set of ratios for indicating how similar two strings are to each other.  
 - `Parquet to JSON` - Transform a base64 encoded parquet dataset into an array of JSON objects.  
-- `Regex Matches` - Produce a set of matches for a string using a regular expression pattern.  
+- `Regex Matches` - Produce a set of matches for a string using a regular expression pattern. 
+- `Sort Object Array` - Sort an array of complex, multi-level objects by one or more properties contained within each item in the array.  
 - `Split` - Split each item of an array into one or more new items by a defined set of criteria.  
 - `Text to JSON` - Transform a tab delimited textual dataset into an array of JSON objects.  
-- `Transform` - Transform a set of properties in a dataset using any of the available custom transformation functions provided by the framework. 
+- `Transform` - Transform a set of properties in a dataset using any of the 100+ custom transformation functions provided by the framework.
+- `XML to JSON` - Transform an XML structure to JSON using XPath statements and any of the 100+ custom transformation functions provided by the framework.
 
 ## Obtaining Credentials
 Once you've signed up for a plan, you'll be emailed an API key that can be used to authenticate on each call made to the framework.

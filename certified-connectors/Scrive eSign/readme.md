@@ -22,8 +22,10 @@ The API documentation can be found [here](https://apidocs.scrive.com/)
 - **When a document from template is signed by all signatories:** This trigger tracks any documents that were created using a specific template and waits for any of them to be signed.
 - **When a document is signed by all signatories (Start Signing):** This trigger starts the signing process for the selected document and waits for it to be signed.
 - **Add new party:** Adds a new party to the document as a signatory, viewer or approver.
-- **Create a document from template:** Creates a new document, using the selected template.
-- **Create a document from PDF:** Creates a new document, using the provided PDF content.
+- **Append file:** Appends a PDF to the main PDF of the document.
+- **Cancel:** Cancels the signing process for a started document.
+- **Create a document from template:** Creates a new document using the selected template.
+- **Create a document from PDF:** Creates a new document using the provided PDF content.
 - **Get document JSON:** Gets the all the meta-data for the selected document in JSON format.
 - **Get document PDF content:** Gets the PDF content of the selected document document, making it available in future steps in the flow.
 - **Set attachment:** Adds provided PDF content as an attachment to the document.
