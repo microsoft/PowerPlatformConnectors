@@ -18,10 +18,10 @@ The connector will then use this connection to fetch the report definitions and 
 ## Supported operations
 
 This connector supports the following operations:
-* `Generate entity report`: Generates a report for specific entity record / table row.
-* `Generate questionnaire report`: Generates a report or an auto-report for specific questionnaire.
-* `Generate entity list report`: Generates a report for provided list of entity records / table rows.
-* `Generate fetch XML report`: Generates a report for a set of records defined by fetch XML query.
+* `Generate a single row report`: Generates a report for specific table row.
+* `Generate a Resco questionnaire report`: Generates a report or an auto-report for specific Resco questionnaire.
+* `Generate a report on multiple rows`: Generates a report for provided list of table rows.
+* `Generate a report on multiple rows (fetch XML)`: Generates a report for a set of table rows defined by fetch XML query.
 
 ## Typical flow scenarios
 
