@@ -154,6 +154,19 @@ Send a text to multiple contact numbers directly, while their numbers are saved 
 
 Send text message to a number directly, without specifying name of the user, while the contact is automatically created in PowerTextor.
 
+### Send an MMS
+
+Send an MMS to a number directly, without specifying name of the user, while the contact is automatically created in PowerTextor.
+
+### Send an MMS to a group
+
+Send an MMS to a PowerTextor group at once.
+
+### Send an MMS to a contact
+
+Send an MMS to a Power Textor Contact.
+
+
 ## Obtaining Credentials
 
 Power Textor custom connector uses API key authentication. When creating a connection for the Power Textor custom connector, an API key needs to be provided. This API key can be obtained through the Power Textor website, the steps for which have been outlined in the following section.

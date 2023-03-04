@@ -2,11 +2,11 @@
 The Power Assist connector empowers you and your organization's citizen developers to solve business problems faster than ever with the Power Platform, offering actions to manipulate data in familiar ways that are currently difficult or unsupported within Power Automate. Whether you need to quickly sort an Array, perform advanced filtering, make a mathematical calculation, execute a Regular Expression on a string, escape HTML, check the type of a value, or do one of many more common tasks, Power Assist makes it simple. No more long, complex expressions, convoluted conditionals, and inefficient looping: Use Power Assist to make your Power Automate workflows fast and easy to build.
 
 ## Prerequisites
-1. You must first [create a free RapidAPI account](https://rapidapi.com/auth/sign-up). This is required to be able to authenticate to the API. If you are signing up on behalf of your organization, consider creating an Organization in RapidAPI so that other users at your organization can share access to the API without sharing RapidAPI credentials. [See how.](https://docs.rapidapi.com/docs/getting-started-with-rapidapi-for-teams)
-2. Go to the [**Power Assist API**](https://rapidapi.com/elevate-digital-elevate-digital-default/api/power-automate-helper) and navigate to the **Pricing** tab. If you are signing up on behalf of your organization, make sure your organization is selected in the dropdown above the pricing options.
-3. Select your desired plan. The **Basic** plan is FREE and offers access to all endpoints, but has a hard limit of 50 requests per month. The **Pro** plan is a paid subscription offering access to all endpoints, with a soft limit of 1,000 requests per month.
+1. Go to the [**Power Assist API**](https://rapidapi.com/elevate-digital-elevate-digital-default/api/power-assist) and navigate to the **Pricing** tab. If you are signing up on behalf of your organization, make sure your organization is selected in the dropdown above the pricing options.
+2. Subscribe to your desired plan. The **Basic** plan is FREE and offers access to all endpoints, but has a hard limit of 50 requests per month. The **Pro** plan is a paid subscription offering access to all endpoints, with a soft limit of 3,000 requests per month.
+3. Sign in or create your account. If you are signing up on behalf of your organization, consider checking the box to create an Organization in RapidAPI so that other users at your organization can share access to the API, without sharing RapidAPI credentials. 
 4. Enter your card information, if applicable.
-5. Once you are subscribed, go to the **Endpoints** tab and locate the **X-RapidAPI-Key** in the center column. Copy this value, as you will need it to authenticate in Power Automate.
+5. Once you are subscribed, go to the **Endpoints** tab and locate the **X-RapidAPI-Key** in the Content Snippet in the right column. Copy this value, as you will need it to authenticate in Power Automate.
 
 ## Setting up the connector
 1. In the [Power Automate portal](https://make.powerautomate.com/), create a new flow or edit an existing one. 

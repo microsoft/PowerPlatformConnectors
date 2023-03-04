@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "2.0",
+    "version": "3.0",
     "title": "CyberProof",
     "description": "CDC is a next generation incident management and response platform offered by CyberProof, for building Security Operations Centers (SOCs). The platform is a key component of advanced security operations centers - supporting SOC management, orchestration, and incident response. The Connector interacts with CDC, offering a wide range of incident response automation activities including Alert and Incident creation, parsing and manipulation, as well as observable enrichment.",
     "contact": {
@@ -30,11 +30,43 @@
     }
   },
   "paths": {
+	"/api/v1/actions/views/packs": {
+		"get": {
+			"description": "CyberProof Packs List.",
+			"summary": "CyberProof Packs List",
+			"operationId": "CPGetPacks",
+			"parameters": [{
+				"name": "category",
+				"type": "string",
+				"in": "query",
+				"description": "logic app for pack you selected.",
+                "x-nullable": true,
+				"x-ms-summary": "execution items"
+			}],
+			"responses": {
+				"200": {
+					"description": "List of Packs",
+					"schema": {
+						"type": "object"
+					}
+				}
+			},
+			"x-ms-visibility": "internal"
+		}
+	},
     "/api/v1/actions/azure-logic-apps": {
       "get": {
         "description": "CyberProof Actions List.",
         "summary": "CyberProof Actions List",
         "operationId": "CPGetActions",
+		"parameters": [{
+			"name": "pack",
+			"type": "string",
+			"in": "query",
+			"description": "Action for pack you selected.",
+			"required": true,
+			"x-ms-summary": "execution items"
+		}],
         "responses": {
           "200": {
             "description": "List of actions",
@@ -111,10 +143,37 @@
             "schema": {
               "type": "object",
               "required": [
-                "action",
-                "parameters"
+                "a_category",
+				"a_product",
+				"action",
+				"parameters"
               ],
               "properties": {
+				"a_category": {
+					"type": "string",
+					"description": "select Category",
+					"x-ms-url-encoding": "single",
+					"x-ms-summary": "Select Category",
+					"x-ms-dynamic-values": {
+						"operationId": "CPGetPacks",
+						"value-path": "category_name",
+						"value-title": "category_name"
+					}
+				},
+				"a_product": {
+					"type": "string",
+					"description": "select Product",
+					"x-ms-url-encoding": "single",
+					"x-ms-summary": "Select Product",
+					"x-ms-dynamic-values": {
+						"operationId": "CPGetPacks",
+						"value-path": "pack_list",
+						"value-title": "pack_list",
+						"parameters": {
+							"category": "a_category"
+						}
+					}
+				},
                 "action": {
                   "type": "string",
                   "description": "select action",
@@ -123,7 +182,10 @@
                   "x-ms-dynamic-values": {
                     "operationId": "CPGetActions",
                     "value-path": "ref",
-                    "value-title": "path"
+                    "value-title": "path",
+					"parameters": {
+						"pack": "a_product"
+					}
                   }
                 },
                 "parameters": {
