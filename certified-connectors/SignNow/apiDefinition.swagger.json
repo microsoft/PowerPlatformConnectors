@@ -29,9 +29,7 @@
   ],
   "host": "sn-msflow.infrateam.xyz",
   "basePath": "/",
-  "schemes": [
-    "https"
-  ],
+  "schemes": ["https"],
   "consumes": [],
   "produces": [],
   "paths": {
@@ -60,7 +58,7 @@
           },
           {
             "name": "limit",
-            "x-ms-summary": "Limit",  
+            "x-ms-summary": "Limit",
             "description": "Total number of items returned (between 1 and 50)",
             "in": "query",
             "required": false,
@@ -71,7 +69,7 @@
           },
           {
             "name": "offset",
-            "x-ms-summary": "Offset",  
+            "x-ms-summary": "Offset",
             "description": "The (zero-based) offset of the first item in the collection to return",
             "in": "query",
             "required": false,
@@ -84,6 +82,41 @@
       }
     },
     "/documentgroups/{doc_group_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DocumentGroupProperties"
+            }
+          }
+        },
+        "summary": "Get Document Group",
+        "operationId": "GetDocumentGroup",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "doc_group_id",
+            "x-ms-summary": "Group Template",
+            "x-ms-url-encoding": "single",
+            "description": "Select the group template from the list",
+            "x-ms-visibility": "important",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "template",
+            "x-ms-summary": "Template",
+            "description": "Specify if document group or group template should be retrieved",
+            "in": "query",
+            "required": true,
+            "type": "boolean",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "description": "Retrieve a list of user's document groups"
+      },
       "post": {
         "responses": {
           "200": {
@@ -112,7 +145,7 @@
               "operationId": "GetListDocGroups",
               "value-path": "group_id",
               "value-title": "group_name",
-              "value-collection" : "document_groups",
+              "value-collection": "document_groups",
               "parameters": {
                 "template": true
               }
@@ -186,6 +219,42 @@
         }
       }
     },
+    "/v2/schema/documentgroup/smartfields": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "properties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "doc_group_id",
+            "x-ms-summary": "Document Group ID",
+            "description": "Specify a unique document group ID",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "operationId": "GetDocGroupSmartFieldsSchema",
+        "summary": "Get Document Group schema",
+        "x-ms-visibility": "internal",
+        "description": "Retrieve the OpenAPI document group schema",
+        "x-ms-api-annotation": {
+          "family": "DocGroupSchemaFields",
+          "status": "Preview",
+          "revision": 2
+        }
+      }
+    },
     "/documentgroup/{doc_group_id}/fields": {
       "put": {
         "responses": {
@@ -213,7 +282,7 @@
               "operationId": "GetListDocGroups",
               "value-path": "group_id",
               "value-title": "group_name",
-              "value-collection" : "document_groups",
+              "value-collection": "document_groups",
               "parameters": {
                 "template": true
               }
@@ -261,7 +330,81 @@
         "description": "Automatically populate fillable fields in the documents with specific values",
         "operationId": "UpdateGroupFieldValues",
         "x-ms-visibility": "important",
-		    "consumes": ["application/json"]
+        "consumes": ["application/json"]
+      }
+    },
+    "/documentgroup/{doc_group_id}/smartfields": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/DocumentGroupId"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "template_group_id",
+            "x-ms-summary": "Template",
+            "description": "Specify a document group template to get fields from",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetListDocGroups",
+              "value-path": "group_id",
+              "value-title": "group_name",
+              "value-collection": "document_groups",
+              "parameters": {
+                "template": true
+              }
+            }
+          },
+          {
+            "name": "doc_group_id",
+            "x-ms-summary": "Document Group ID",
+            "x-ms-url-encoding": "single",
+            "description": "Specify a unique document group ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetDocGroupSmartFieldsSchema",
+                "parameters": {
+                  "doc_group_id": {
+                    "parameter": "template_group_id"
+                  }
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetDocGroupSmartFieldsSchema",
+                "parameters": {
+                  "doc_group_id": {
+                    "parameterReference": "template_group_id"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "summary": "Prefill Document Group Smart Field Values",
+        "description": "Automatically populate smart fields in the documents with specific values",
+        "operationId": "UpdateGroupSmartFieldValues",
+        "x-ms-visibility": "important",
+        "consumes": ["application/json"]
       }
     },
     "/document": {
@@ -330,9 +473,7 @@
         "description": "Upload a document to SignNow",
         "operationId": "UploadDocument",
         "x-ms-visibility": "important",
-        "consumes": [
-          "multipart/form-data"
-        ],
+        "consumes": ["multipart/form-data"],
         "parameters": [
           {
             "name": "file",
@@ -381,7 +522,7 @@
                 "template": {
                   "parameter": "template"
                 },
-				        "excludeDocumentRelations": true
+                "excludeDocumentRelations": true
               }
             }
           }
@@ -508,6 +649,46 @@
         "summary": "Get invite request body schema",
         "x-ms-visibility": "internal",
         "description": "Retrieve the OpenAPI request body schema for the invite to sign the document"
+      }
+    },
+    "/schema/documentgroup/invite": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "properties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "doc_group_id",
+            "x-ms-summary": "Document Group ID",
+            "description": "Specify a unique document group ID",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "template",
+            "x-ms-summary": "Template",
+            "description": "Specify if document groups or group templates should be retrieved",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "operationId": "GetDocumentGroupInviteSchema",
+        "summary": "Get invite request body schema",
+        "x-ms-visibility": "internal",
+        "description": "Retrieve the OpenAPI request body schema for the invite to sign the document group"
       }
     },
     "/document/{doc_id}/link": {
@@ -652,6 +833,86 @@
         "x-ms-visibility": "important"
       }
     },
+    "/documentgroup/{template_group_id}/invite": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "template",
+            "x-ms-summary": "Template",
+            "description": "Specify if document groups or group templates should be retrieved",
+            "in": "query",
+            "required": true,
+            "default": true,
+            "type": "boolean",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "template_group_id",
+            "x-ms-summary": "Document Group",
+            "x-ms-visibility": "important",
+            "description": "Select the document group from the list",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetListDocGroups",
+              "value-path": "group_id",
+              "value-title": "group_name",
+              "value-collection": "document_groups",
+              "parameters": {
+                "template": {
+                  "parameter": "template"
+                }
+              }
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetDocumentGroupInviteSchema",
+                "parameters": {
+                  "doc_group_id": {
+                    "parameter": "template_group_id"
+                  },
+                  "template": {
+                    "parameter": "template"
+                  }
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetDocumentGroupInviteSchema",
+                "parameters": {
+                  "doc_group_id": {
+                    "parameterReference": "template_group_id"
+                  },
+                  "template": {
+                    "parameterReference": "template"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "summary": "Invite to sign the Document Group",
+        "description": "Invite others to fill out and sign the document group",
+        "consumes": ["application/json"],
+        "operationId": "SendGroupInvite",
+        "x-ms-visibility": "important"
+      }
+    },
     "/document/{doc_id}/invite-user-defined-schema": {
       "post": {
         "responses": {
@@ -666,7 +927,7 @@
           {
             "in": "path",
             "name": "doc_id",
-			      "type": "string",
+            "type": "string",
             "x-ms-summary": "Document ID",
             "description": "Provide a document ID",
             "x-ms-visibility": "important",
@@ -697,6 +958,12 @@
                         "x-ms-visibility": "important",
                         "format": "email"
                       },
+                      "phone_invite": {
+                        "type": "string",
+                        "x-ms-summary": "Phone Number (Invite via SMS)",
+                        "description": "Specify +XXXXXXXXXXXX recipient's phone number. Required for Invite via SMS.",
+                        "x-ms-visibility": "important"
+                      },
                       "order": {
                         "type": "integer",
                         "x-ms-summary": "Order",
@@ -723,11 +990,7 @@
                         "x-ms-summary": "Authentication type",
                         "description": "Verify user identity via password, SMS, or phone call",
                         "x-ms-visibility": "important",
-                        "enum": [
-                          "Password",
-                          "Phone Call",
-                          "SMS"
-                        ]
+                        "enum": ["Password", "Phone Call", "SMS"]
                       },
                       "password": {
                         "type": "string",
@@ -755,6 +1018,13 @@
                         "x-ms-visibility": "important",
                         "format": "int32"
                       },
+                      "remind_repeat": {
+                        "type": "integer",
+                        "x-ms-summary": "Send Reminder every X Days",
+                        "description": "The recipient will get a reminder email every set amount of days.",
+                        "x-ms-visibility": "important",
+                        "format": "int32"
+                      },
                       "reassign": {
                         "type": "boolean",
                         "x-ms-summary": "Allow Forwarding",
@@ -778,7 +1048,7 @@
                   "format": "email"
                 },
                 "cc": {
-                  "type": "string", 
+                  "type": "string",
                   "x-ms-summary": "CC",
                   "description": "A comma-separated emails that will be Carbon Copied in the invite",
                   "x-ms-visibility": "advanced"
@@ -805,7 +1075,7 @@
                     "value-path": "value",
                     "value-title": "name",
                     "parameters": {
-                    "definitionKey": "OnInviteCompletion"
+                      "definitionKey": "OnInviteCompletion"
                     }
                   }
                 }
@@ -819,8 +1089,8 @@
         "consumes": ["application/json"],
         "x-ms-visibility": "advanced"
       }
-    },  
-	"/document/{doc_id}/invite-cancel": {
+    },
+    "/document/{doc_id}/invite-cancel": {
       "put": {
         "responses": {
           "200": {
@@ -846,7 +1116,7 @@
         "operationId": "CancelInvite",
         "x-ms-visibility": "important"
       }
-    },	
+    },
     "/document/{doc_id}/download": {
       "get": {
         "responses": {
@@ -858,9 +1128,7 @@
             }
           }
         },
-        "produces": [
-          "application/pdf"
-        ],
+        "produces": ["application/pdf"],
         "parameters": [
           {
             "name": "doc_id",
@@ -1297,10 +1565,10 @@
               }
             }
           },
-		      {
+          {
             "name": "doc_id",
             "x-ms-summary": "Document ID",
-			      "x-ms-url-encoding": "single",
+            "x-ms-url-encoding": "single",
             "description": "Specify a unique document ID",
             "in": "path",
             "required": true,
@@ -1334,7 +1602,7 @@
         "summary": "Prefill Smart Field Values",
         "description": "Prefill Smart Field values for the specified document",
         "x-ms-visibility": "important",
-		    "consumes": ["application/json"],
+        "consumes": ["application/json"],
         "operationId": "PrefillSmartFields"
       }
     },
@@ -1561,10 +1829,7 @@
                   "x-ms-visibility": "internal"
                 }
               },
-              "required": [
-                "event",
-                "callback_url"
-              ]
+              "required": ["event", "callback_url"]
             }
           }
         ],
@@ -1757,17 +2022,10 @@
                     }
                   },
                   "description": "attributes",
-                  "required": [
-                    "callback"
-                  ]
+                  "required": ["callback"]
                 }
               },
-              "required": [
-                "action",
-                "attributes",
-                "entity_id",
-                "event"
-              ]
+              "required": ["action", "attributes", "entity_id", "event"]
             }
           }
         ]
@@ -1919,7 +2177,7 @@
         }
       }
     },
-    "DocumentGroupProperties": {    
+    "DocumentGroupProperties": {
       "type": "object",
       "properties": {
         "group_id": {
