@@ -191,3 +191,54 @@ Add a text watermark to the specified Microsoft Word document - https://support.
 
 ### Add Image Watermark to Word
 Add an image watermark to the specified Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/4411329161361
+
+### Merge Excel Files
+Merge an array of Microsoft Excel files to a single file (multiple formats) - https://support.encodian.com/hc/en-gb/articles/4469865776529
+
+### Remove EXIF Tags from Image
+Remove EXIF tags from the specified image - https://support.encodian.com/hc/en-gb/articles/4415700524817
+
+### Convert PDF to TIFF
+Convert a PDF document to TIFF (tiff) format - https://support.encodian.com/hc/en-gb/articles/4418024925457
+
+### Flatten PDF
+Flatten a PDF Document or PDF Form - https://support.encodian.com/hc/en-gb/articles/4416473033105
+
+### Convert PDF to Images
+Convert a PDF document into an array of images (PNG or JPG) - https://support.encodian.com/hc/en-gb/articles/4418101623441
+
+### Repair PDF
+Repair a PDF File - https://support.encodian.com/hc/en-gb/articles/4418809972753
+
+### Merge Presentations
+Merge an array of presentations to a single presentation - https://support.encodian.com/hc/en-gb/articles/4425652063761
+
+### Convert CAD
+Convert CAD files to another document format - https://support.encodian.com/hc/en-gb/articles/4542607350417
+
+### Get Image Information
+Get Image Information (Height, Width, Resolution, Format, File Size + more) - https://support.encodian.com/hc/en-gb/articles/4431662425489
+
+### Convert Visio
+Convert Microsoft Visio documents to another document format - https://support.encodian.com/hc/en-gb/articles/5306216347665
+
+### Secure Word Document
+Secure and protect a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/6634150180253
+
+### Get Tracked Changes
+Get all the tracked changes (Revisions and comments) for the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/6634950400669
+
+### Sign PDF
+Apply a digital signature to the PDF document provided - https://support.encodian.com/hc/en-gb/articles/7117159708189
+
+### Convert JSON to Excel
+Convert the JSON data to provided to a Microsoft Excel or CSV document - https://support.encodian.com/hc/en-gb/articles/7690520790045
+
+### Update Word Hyperlinks 
+Search for and update hyperlinks within a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/7136687719837
+
+### Remove Watermark from Word
+Remove both an image and text watermark from the Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/7752587767965
+
+### Remove Watermarks from PDF
+Removes all or targeted watermarks from the PDF document provided - https://support.encodian.com/hc/en-gb/articles/7751328751645

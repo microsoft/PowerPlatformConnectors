@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.0.0",
+    "version": "1.3.1",
     "title": "Dokobit Portal",
     "description": "Use Dokobit portal with all the features that it has but make it automated so that you don't have to waste your time on the administrative job. Put together an automated document signing process puzzle from only the parts you need: signing, sharing, downloading or deleting documents, removing and replacing signers, getting details about signers and signature information.",
     "contact": {
@@ -26,7 +26,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create a PDF file for signing.",
+        "description": "Create a PDF, ASIC or ADOC file for signing.",
         "operationId": "Portal-CreateSigning",
         "parameters": [
           {
@@ -38,47 +38,84 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "name",
-                  "x-ms-summary title": "Signing Name",
+                  "description": "Signing name",
+                  "x-ms-summary title": "Name",
                   "x-ms-visibility": "important"
                 },
                 "type": {
                   "type": "string",
-                  "description": "type",
-                  "x-ms-summary title": "type",
+                  "description": "Document format",
+                  "x-ms-summary title": "Type",
                   "x-ms-visibility": "important",
                   "enum": [
                     "pdf",
-                    "asic"
+                    "asic",
+                    "adoc"
                   ]
                 },
                 "postback_url": {
                   "type": "string",
-                  "description": "postback_url",
-                  "x-ms-summary title": "postback_url",
+                  "description": "URL of your system to handle webhooks",
+                  "x-ms-summary title": "Postback URL",
                   "x-ms-visibility": "important"
                 },
                 "deadline": {
                   "type": "string",
                   "description": "Example: 2019-11-25T13:15:30Z",
-                  "x-ms-summary title": "deadline",
+                  "x-ms-summary title": "Deadline",
                   "x-ms-visibility": "important",
                   "format": "date-time"
                 },
+                "hard_deadline": {
+                  "type": "boolean",
+                  "description": "If set to true participants won’t be able to sign or approve this document after set `deadline`",
+                  "x-ms-summary title": "Hard Deadline",
+                  "enum": [
+                    false,
+                    true
+                  ]
+                },
                 "require_qualified_signatures": {
                   "type": "boolean",
-                  "description": "Require qualified signatures",
-                  "x-ms-summary title": "Require qualified signatures",
+                  "description": "Allow to sign only with qualified signatures",
+                  "x-ms-summary title": "Require Qualified Signatures",
                   "x-ms-visibility": "important",
                   "enum": [
                     false,
                     true
                   ]
                 },
+                "annotation_position": {
+                  "type": "string",
+                  "description": "You can choose the position of signature annotations on a PDF document. Default: first_top",
+                  "x-ms-summary title": "Annotation Position",
+                  "x-ms-visibility": "important",
+                  "enum": [
+                    "first_top",
+                    "first_bottom",
+                    "last_top",
+                    "last_bottom",
+                    "none"
+                  ]
+                },
+                "annotation_personal_code": {
+                  "type": "boolean",
+                  "description": "If set to true personal code will be visible in annotation. Only applicable for pdf type signing",
+                  "x-ms-summary title": "Annotation Personal Code",
+                  "enum": [
+                    false,
+                    true
+                  ]
+                },
+                "comment": {
+                  "type": "string",
+                  "description": "Message for participants",
+                  "x-ms-summary title": "Comment"
+                },
                 "require_account": {
                   "type": "boolean",
-                  "description": "Require user to have Dokobit acccount before signing.",
-                  "x-ms-summary title": "Require account",
+                  "description": "Require user to have a Dokobit account before signing",
+                  "x-ms-summary title": "Require Account",
                   "x-ms-visibility": "important",
                   "enum": [
                     false,
@@ -92,17 +129,17 @@
                     "properties": {
                       "name": {
                         "type": "string",
-                        "description": "name",
-                        "x-ms-summary title": "FileName",
+                        "description": "File name",
+                        "x-ms-summary title": "Name",
                         "x-ms-visibility": "important"
                       },
                       "content": {
                         "type": "string",
-                        "description": "content"
+                        "description": "Base64 encoded file content"
                       }
                     }
                   },
-                  "description": "files"
+                  "description": "File or files to be signed"
                 },
                 "signers": {
                   "type": "array",
@@ -111,33 +148,33 @@
                     "properties": {
                       "name": {
                         "type": "string",
-                        "description": "name",
+                        "description": "Participant's name",
                         "x-ms-summary title": "Name"
                       },
                       "surname": {
                         "type": "string",
-                        "description": "surname",
+                        "description": "Participant's surname",
                         "x-ms-summary title": "Surname"
                       },
                       "email": {
                         "type": "string",
-                        "description": "email",
-                        "x-ms-summary title": "Email"
+                        "description": "Participant's e-mail",
+                        "x-ms-summary title": "E-mail"
                       },
                       "code": {
                         "type": "string",
-                        "description": "code",
+                        "description": "Participant's personal code (National ID number)",
                         "x-ms-summary title": "Code"
                       },
                       "country_code": {
                         "type": "string",
-                        "description": "country_code",
+                        "description": "Participant's country code. Required if personal code is provided",
                         "x-ms-summary title": "Country Code"
                       },
                       "role": {
                         "type": "string",
-                        "description": "role",
-                        "x-ms-summary title": "role",
+                        "description": "Participant's role",
+                        "x-ms-summary title": "Role",
                         "x-ms-visibility": "important",
                         "enum": [
                           "approver",
@@ -147,22 +184,32 @@
                       },
                       "company": {
                         "type": "string",
-                        "description": "company",
+                        "description": "Participant's company name",
                         "x-ms-summary title": "Company"
                       },
                       "position": {
                         "type": "string",
-                        "description": "position",
+                        "description": "Participant's position",
                         "x-ms-summary title": "Position"
                       },
                       "phone": {
                         "type": "string",
-                        "description": "phone",
+                        "description": "Participant's phone number",
                         "x-ms-summary title": "Phone"
+                      },
+                      "sequence": {
+                        "type": "integer",
+                        "description": "Allows setting up the sequence order of document approving and signing actions",
+                        "x-ms-summary title": "Sequence"
+                      },
+                      "custom_reason": {
+                        "type": "string",
+                        "description": "Custom signature reason",
+                        "x-ms-summary title": "Custom Reason"
                       }
                     }
                   },
-                  "description": "signers"
+                  "description": "Participant's information"
                 },
                 "categories": {
                   "type": "array",
@@ -171,8 +218,8 @@
                     "properties": {
                       "category": {
                         "type": "string",
-                        "description": "category",
-                        "x-ms-summary title": "category",
+                        "description": "Document category",
+                        "x-ms-summary title": "Category",
                         "x-ms-visibility": "important",
                         "x-ms-dynamic-values": {
                           "operationId": "Portal-GetCategories",
@@ -187,7 +234,7 @@
                       }
                     }
                   },
-                  "description": "categories"
+                  "description": "Document categories"
                 }
               }
             },
@@ -202,11 +249,11 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status"
+                  "description": "Signing status"
                 },
                 "token": {
                   "type": "string",
-                  "description": "token",
+                  "description": "Signing token",
                   "title": "token"
                 },
                 "signers": {
@@ -216,32 +263,32 @@
                     "properties": {
                       "token": {
                         "type": "string",
-                        "description": "token",
+                        "description": "Participant's token",
                         "title": "signer.token"
                       },
                       "first_name": {
                         "type": "string",
-                        "description": "first_name"
+                        "description": "Participant's first name"
                       },
                       "last_name": {
                         "type": "string",
-                        "description": "last_name"
+                        "description": "Participant's last name"
                       },
                       "code": {
                         "type": "string",
-                        "description": "code"
+                        "description": "Participant's personal code (National ID number)"
                       },
                       "country": {
                         "type": "string",
-                        "description": "country"
+                        "description": "Participant's country"
                       },
                       "email": {
                         "type": "string",
-                        "description": "email"
+                        "description": "Participant's e-mail"
                       }
                     }
                   },
-                  "description": "signers"
+                  "description": "Participant's information"
                 }
               }
             }
@@ -303,7 +350,7 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status"
+                  "description": "Status"
                 },
                 "signings": {
                   "type": "array",
@@ -312,27 +359,27 @@
                     "properties": {
                       "token": {
                         "type": "string",
-                        "description": "token",
-                        "x-ms-summary title": "token"
+                        "description": "Signing token",
+                        "x-ms-summary title": "Token"
                       },
                       "status": {
                         "type": "string",
-                        "description": "Signing Status",
+                        "description": "Signing status",
                         "x-ms-summary title": "Signing Status"
                       },
                       "document_number": {
                         "type": "string",
-                        "description": "document_number",
+                        "description": "Document Number",
                         "x-ms-summary title": "Document Number"
                       },
                       "last_signature_date": {
                         "type": "string",
-                        "description": "last_signature_date",
+                        "description": "Last signature date",
                         "x-ms-summary title": "Last Signature Date"
                       }
                     }
                   },
-                  "description": "signings"
+                  "description": "List of signings"
                 }
               }
             }
@@ -397,7 +444,23 @@
             "required": false,
             "type": "string",
             "description": "Filter document status. E.g completed, pending",
-            "x-ms-summary": "filter"
+            "x-ms-summary": "Filter"
+          },
+          {
+            "in": "query",
+            "name": "date_from",
+            "type": "string",
+            "required": false,
+            "description": "Filter signings which were created on or after this date (Example: 2022-01-01)",
+            "x-ms-summary": "Date From"
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "required": false,
+            "type": "string",
+            "description": "Filter signings which were created on or before this date (Example: 2022-01-31)",
+            "x-ms-summary": "Date To"
           }
         ]
       }
@@ -414,7 +477,7 @@
             "in": "path",
             "type": "string",
             "required": true,
-            "description": "Token",
+            "description": "Signing token",
             "x-ms-summary": "token"
           }
         ],
@@ -426,12 +489,12 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status",
+                  "description": "Status",
                   "x-ms-summary title": "Status"
                 },
                 "name": {
                   "type": "string",
-                  "description": "name",
+                  "description": "Signing name",
                   "x-ms-summary title": "Name"
                 },
                 "deadline": {
@@ -443,18 +506,18 @@
                 },
                 "filename": {
                   "type": "string",
-                  "description": "name of the file",
-                  "x-ms-summary title": "Name of the file"
+                  "description": "Name of the file",
+                  "x-ms-summary title": "File Name"
                 },
                 "signed_file": {
                   "type": "object",
-                  "description": "signed_file",
-                  "x-ms-summary title": "Signed file",
+                  "description": "Signed file",
+                  "x-ms-summary title": "Signed File",
                   "properties": {
                     "url": {
                       "type": "string",
                       "description": "url",
-                      "x-ms-summary title": "url"
+                      "x-ms-summary title": "URL"
                     }
                   }
                 },
@@ -465,47 +528,47 @@
                     "properties": {
                       "token": {
                         "type": "string",
-                        "description": "signer.token",
-                        "x-ms-summary title": "signer.token"
+                        "description": "Participant's token",
+                        "x-ms-summary title": "Signer Token"
                       },
                       "first_name": {
                         "type": "string",
-                        "description": "first_name",
-                        "x-ms-summary title": "First name"
+                        "description": "Participant's first name",
+                        "x-ms-summary title": "First Name"
                       },
                       "last_name": {
                         "type": "string",
-                        "description": "last_name",
+                        "description": "Participant's surname",
                         "x-ms-summary title": "Surname"
                       },
                       "code": {
                         "type": "string",
-                        "description": "code",
+                        "description": "Participant's code",
                         "x-ms-summary title": "Code"
                       },
                       "country": {
                         "type": "string",
-                        "description": "country",
+                        "description": "Participant's country",
                         "x-ms-summary title": "Country"
                       },
                       "email": {
                         "type": "string",
-                        "description": "email",
-                        "x-ms-summary title": "Email"
+                        "description": "Participant's e-mail",
+                        "x-ms-summary title": "E-mail"
                       },
                       "type": {
                         "type": "string",
-                        "description": "type",
+                        "description": "Type",
                         "x-ms-summary title": "Type"
                       },
                       "status": {
                         "type": "string",
-                        "description": "status",
+                        "description": "Status",
                         "x-ms-summary title": "Status"
                       }
                     }
                   },
-                  "description": "signers"
+                  "description": "Participant information"
                 }
               }
             }
@@ -628,11 +691,117 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Token",
+            "description": "Signing token",
             "x-ms-summary": "token"
           }
         ],
         "x-ms-visibility": "important"
+      }
+    },
+    "/signing/{token}/remind.json": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Status",
+                  "x-ms-summary title": "Status"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary title": "Status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message",
+                  "x-ms-summary title": "Message"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "message",
+                        "x-ms-summary title": "Message"
+                      },
+                      "error_code": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "error_code",
+                        "x-ms-summary title": "Error Code"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "field"
+                      }
+                    }
+                  },
+                  "description": "errors"
+                },
+                "error_code": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error_code",
+                  "x-ms-summary title": "Error Code"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Portal - Send Reminder",
+        "description": "Allows to send a reminder e-mail for participant, only if person has not signed document yet.",
+        "operationId": "Portal-Remind",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "description": "Signing token",
+            "x-ms-summary": "token"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "signer": {
+                  "type": "string",
+                  "description": "Participant's token",
+                  "x-ms-summary title": "Signer Token"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Reminder message to signer",
+                  "x-ms-summary title": "Message"
+                }
+              },
+              "required": ["signer"]
+            }
+          }
+        ]
       }
     },
     "/signing/{token}/share.json": {
@@ -652,7 +821,7 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status"
+                  "description": "Status"
                 },
                 "signers": {
                   "type": "array",
@@ -661,32 +830,32 @@
                     "properties": {
                       "token": {
                         "type": "string",
-                        "description": "token",
+                        "description": "Participant's token",
                         "title": "signer.token"
                       },
                       "name": {
                         "type": "string",
-                        "description": "name"
+                        "description": "Participant's first name"
                       },
                       "surname": {
                         "type": "string",
-                        "description": "surname"
+                        "description": "Participant's last name"
                       },
                       "email": {
                         "type": "string",
-                        "description": "email"
+                        "description": "Participant's e-mail"
                       },
                       "code": {
                         "type": "string",
-                        "description": "code"
+                        "description": "Participant's personal code (National ID number)"
                       },
                       "country_code": {
                         "type": "string",
-                        "description": "country_code"
+                        "description": "Participant's country"
                       },
                       "role": {
                         "type": "string",
-                        "description": "role",
+                        "description": "Participant's role",
                         "title": "",
                         "x-ms-visibility": "important",
                         "enum": [
@@ -697,19 +866,19 @@
                       },
                       "company": {
                         "type": "string",
-                        "description": "company"
+                        "description": "Participant's company"
                       },
                       "position": {
                         "type": "string",
-                        "description": "position"
+                        "description": "Participant's position"
                       },
                       "phone": {
                         "type": "string",
-                        "description": "phone"
+                        "description": "Participant's phone"
                       }
                     }
                   },
-                  "description": "signers"
+                  "description": "Participant's information"
                 }
               }
             }
@@ -771,7 +940,7 @@
             "required": true,
             "type": "string",
             "x-ms-visibility": "important",
-            "description": "Token",
+            "description": "Signing token",
             "x-ms-summary": "token"
           },
           {
@@ -788,32 +957,32 @@
                     "properties": {
                       "name": {
                         "type": "string",
-                        "description": "name",
+                        "description": "Participant's name",
                         "x-ms-summary title": "Name"
                       },
                       "surname": {
                         "type": "string",
-                        "description": "surname",
+                        "description": "Participant's surname",
                         "x-ms-summary title": "Surname"
                       },
                       "email": {
                         "type": "string",
-                        "description": "email",
-                        "x-ms-summary title": "Email"
+                        "description": "Participant's e-mail",
+                        "x-ms-summary title": "E-mail"
                       },
                       "code": {
                         "type": "string",
-                        "description": "code",
+                        "description": "Participant's code",
                         "x-ms-summary title": "Code"
                       },
                       "country_code": {
                         "type": "string",
-                        "description": "country_code",
+                        "description": "Participant's country code",
                         "x-ms-summary title": "Country code"
                       },
                       "role": {
                         "type": "string",
-                        "description": "role",
+                        "description": "Participant's role",
                         "x-ms-summary title": "Role",
                         "x-ms-visibility": "important",
                         "enum": [
@@ -824,26 +993,31 @@
                       },
                       "company": {
                         "type": "string",
-                        "description": "company",
+                        "description": "Participant's company",
                         "x-ms-summary title": "Company"
                       },
                       "position": {
                         "type": "string",
-                        "description": "position",
+                        "description": "Participant's position",
                         "x-ms-summary title": "Position"
                       },
                       "phone": {
                         "type": "string",
-                        "description": "phone",
+                        "description": "Participant's phone",
                         "x-ms-summary title": "Phone"
+                      },
+                      "custom_reason": {
+                        "type": "string",
+                        "description": "Custom signature reason",
+                        "x-ms-summary title": "Custom Reason"
                       }
                     }
                   },
-                  "description": "signers"
+                  "description": "Participant's information"
                 },
                 "comment": {
                   "type": "string",
-                  "description": "comment",
+                  "description": "Message for participants",
                   "x-ms-summary title": "Comment"
                 }
               }
@@ -866,7 +1040,7 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status",
+                  "description": "Status",
                   "x-ms-summary title": "Status"
                 }
               }
@@ -929,7 +1103,7 @@
             "required": true,
             "type": "string",
             "x-ms-visibility": "important",
-            "description": "Token",
+            "description": "Signing token",
             "x-ms-summary": "token"
           }
         ]
@@ -948,7 +1122,7 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status",
+                  "description": "Status",
                   "x-ms-summary title": "Status"
                 }
               }
@@ -1004,7 +1178,7 @@
           }
         },
         "summary": "Portal - Delete participant from signing",
-        "description": "Access to the document will be revoked for the indicated participant.\n.",
+        "description": "Access to the document will be revoked for the indicated participant.",
         "operationId": "Portal-SignerDelete",
         "x-ms-visibility": "important",
         "parameters": [
@@ -1015,7 +1189,7 @@
             "required": true,
             "type": "string",
             "x-ms-visibility": "important",
-            "description": "Token",
+            "description": "Signing token",
             "x-ms-summary": "token"
           },
           {
@@ -1032,7 +1206,7 @@
                     "properties": {
                       "token": {
                         "type": "string",
-                        "description": "token",
+                        "description": "Participant's token",
                         "x-ms-summary title": "Token"
                       }
                     }
@@ -1058,7 +1232,7 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status",
+                  "description": "Status",
                   "x-ms-summary title": "Status"
                 }
               }
@@ -1121,7 +1295,7 @@
             "required": true,
             "type": "string",
             "x-ms-visibility": "important",
-            "description": "Token",
+            "description": "Signing token",
             "x-ms-summary": "token"
           }
         ]
@@ -1141,7 +1315,7 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "status",
+                  "description": "Status",
                   "x-ms-summary title": "Status"
                 }
               }
@@ -1204,8 +1378,8 @@
             "required": true,
             "type": "string",
             "x-ms-visibility": "important",
-            "description": "Token",
-            "x-ms-summary": "token"
+            "description": "Signing token",
+            "x-ms-summary": "Token"
           }
         ]
       }

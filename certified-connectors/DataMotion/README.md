@@ -1,5 +1,5 @@
-# Secure Message Delivery Connector
-DataMotion, Inc. specializes in secure data exchange APIs, providing companies the ability to integrate secure message and file exchange solutions into their existing workflows and automated processes. DataMotion’s secure message delivery connector enables seamless, one-way encrypted messaging, helping users protect their critical data and meet compliance regulations.
+# DataMotion Connector
+DataMotion, Inc. specializes in secure data exchange APIs, providing companies the ability to integrate secure message and file exchange solutions into their existing workflows and automated processes. DataMotion’s connector enables seamless, one-way encrypted messaging, helping users protect their critical data and meet compliance regulations.
 
 # Prerequisites
 You will need the following to proceed:

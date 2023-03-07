@@ -32,4 +32,4 @@ Answer to question 1
 Answer to question 2
 
 ## Deployment Instructions
-Required. Add instructions on how to deploy this connector as custom connector.
+Optional. Add instructions on how to deploy this connector as custom connector.
