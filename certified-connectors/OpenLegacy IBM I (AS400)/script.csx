@@ -27,7 +27,7 @@ public class Script : ScriptBase {
 
     private async Task UpdateRequest() {
         if ("AS400Cobol".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
-            || "AS400Pcml".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "AS400Rpg".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
             || "AS400DataQueue".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
             // get selected method id
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
