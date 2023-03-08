@@ -29,7 +29,9 @@ And need to create a new application on this page https://app.mural.co/me/apps
 The connector supports the following operations:
 
 * Create Mural
-
+  
+* Create Mural from template
+  
 * Create Sticky-note
 
 ## Known Issues and Limitations
