@@ -30,18 +30,23 @@ The connector supports the following operations
 * `Get today's quote`: Get today's quote
 
 ## Obtaining Credentials
+
+This video walks through the process of subscribing to the VitaCloud Quotes APIs and retrieving the sibscription keys and the Base URL require to integrate the APIs in your products and in the official Office 365 connector and web parts.
+
+[![VitaCloud Quotes API Signup](https://vitacloud.blob.core.windows.net/company/signupvideo.JPG)](https://youtu.be/etI2UpENN-0)
+
 ### Steps to generate the API Base URL and API Key
 
-1. Sign up or log in to the <a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a><br/>
+1. Sign up or log in to the <a href="https://portal.vitacloud.co.uk/" target="_blank">VitaCloud API Portal</a><br/>
 <img src="https://vitacloud.blob.core.windows.net/company/portalhome.JPG" alt="Portal home" width="1200"/>
 
 2. Subscribe to one of the free or paid products from the Product catalog<br/>
 <img src="https://vitacloud.blob.core.windows.net/company/products.JPG" alt="Product catalog" width="1200"/>
 
-3. Select the subscribed product in the portal<br/>
+3. Select the subscribed product in the portal and copy the **Base Product URL**<br/>
 <img src="https://vitacloud.blob.core.windows.net/company/selectproduct.jpg" alt="Select subscribed product" width="1200"/>
 
-4. Copy the **Base Product URL** and **API Key** from the **Authentication** tab<br/> 
+4. Click the **Profile** menu and in the **Subscriptions** section, select the same product, click the **Show** button for the **primary** or **secondary key** and copy it. This is your **API Key** <br/> 
 <img src="https://vitacloud.blob.core.windows.net/company/authentication.jpg" alt="Authentication" width="800"/>
 
 > The **Base Product URL** and **API Key** will be required for connecting to the Quotes connector in Power Automate and Power Apps.
@@ -69,7 +74,9 @@ In the <a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud A
 The **Overview** tab for the selected product will show the number of API calls made against the available quota.
 
 * **How can I consume the APIs directly in a website or app?**<br/>
-Download the OpenAPI 3.0 specification for your subscribed endpoints on the **Overview** tab for your product. Please include the API key in the header for your request to the endpoints. Select an endpoint in the **Endpoints** tab to try out a request in the portal. You can also copy code snippets available in Curl, JavaScript, Python, Go, Ruby and PhP from the portal.
+Download the OpenAPI 3.0 specification for your subscribed API on the **API** tab for your product.<br/> 
+<img src="https://vitacloud.blob.core.windows.net/company/api.jpg" alt="Authentication" width="800"/>
+Please include the API key in the header for your request to the endpoints. Select an endpoint in the **API** tab to try out a request in the portal. 
 
 * **What themes and authors are included?**
 The Quotes connector `Get Themes` action provides over 20 themes to choose from, including popular ones like humour, wisdom, science, inspiration, philosophy and happiness. The `Get Authors` action provides details for over 700 authors, personalities and celebrities. Most endpoints also include authors' images and wikipedia links, where available.<br/>
