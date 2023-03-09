@@ -53,26 +53,21 @@ This video walks through the process of subscribing to the VitaCloud Quotes APIs
 
 ## Known Issues and Limitations
 
-* Please note some functionality may be limited based on the subscribed product. E.g. if only **Today's Quote** product is subscribed, only the **Get Today's Quote** action will work in the connector. 
-* We recommend subscribing to the **Quotes by themes and authors** product to unlock all options in the connector.
+* Please note some functionality may be limited based on the subscribed product. E.g. if only **VitaCloud Free Quotes** product is subscribed, then only the **Get Today's Quote** and **Get Random Quote** actions will work in the connector. 
+* We recommend subscribing to the **VitaCloud Quotes Premium** or **VitaCloud Quotes Ultimate** product based on your call quota limits to unlock all options in the connector.
 * If number of quotes is not specified for operations requiring them, then at most 5 quotes will be returned in the response.
 * Number of quotes returned will be limited to a maximum of 10.
 * Some authors may not have a corresponding Wikipedia link.
 * Author images are subject to change, but will maintain the same size and aspect ratio.
 * If an incorrect Base Product URL or API Key is specified, HTTP status code `404 - not found` will be returned, alongwith a response as below <br/>
 `{"requestId": long string, "message": "No data product found. Please contact your data provider"}` <br/>
-Please update the connection with the correct **Base Product URL** and **API Key** from the API portal.
+Please update the connection with the correct **Base Product URL** and **API Key** from the API portal. Please see the above video.
 
 * If an action is used that is not included in the product corresponding to the Base Product URL, HTTP status code `403 - forbidden` will be returned, alongwith a response as below <br/>
 `{"requestId": long string, "message": "Endpoint not available"}` <br/>
 Update the connection with the **Base Product URL** corresponding to the product containing the requested endpoint.
 
 ## Frequently Asked Questions
-* **How can I track the number of calls made for the subscribed product?**<br/>
-In the <a href="https://portal.vitacloud.co.uk/home" target="_blank">VitaCloud API Portal</a>, select the subscribed product.<br/>
-<img src="https://vitacloud.blob.core.windows.net/company/selectproduct.jpg" alt="select action" width="800"/><br/>
-The **Overview** tab for the selected product will show the number of API calls made against the available quota.
-
 * **How can I consume the APIs directly in a website or app?**<br/>
 Download the OpenAPI 3.0 specification for your subscribed API on the **API** tab for your product.<br/> 
 <img src="https://vitacloud.blob.core.windows.net/company/api.jpg" alt="Authentication" width="800"/>
