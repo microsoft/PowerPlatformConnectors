@@ -13,6 +13,12 @@ This will trigger when a ticket is created.
 ### When a Ticket is Updated
 This will trigger when a ticket is updated.
 
+### When a Note is added to a Ticket
+This will trigger when a note is added to a ticket.
+
+### When a Reply is added to a Ticket
+This will trigger when a reply is added to a ticket.
+
 ### Create a Ticket
 Action used to create a new ticket.
 
@@ -34,4 +40,4 @@ You can also customize your query based on filters.
 You will need an API Key to access the Desk365 API. Please contact help@desk365.io to request access.
 
 ## Known Issues and Limitations
-By default, the operations "Get all tickets", "When a ticket is created", and "When a ticket is updated" do not include the description of the ticket in the response. However, you can choose to include it by setting the "Include Description" parameter to "Yes".
+By default, the operation "Get all tickets" do not include the description of the ticket in the response. However, you can choose to include it by setting the "Include Description" parameter to "Yes".
