@@ -7,7 +7,7 @@ Our aim is to allow doctors to create meetings via PowerApp and send them via em
 ## Publisher: University College London ##
 
 ## Prerequisites ##
-Cisco Webex Developer Account
+Cisco Webex Developer Account (https://developer.webex.com/)
 Cisco Webex User Account (Account generated from Cisco Webex Sandbox Developer Account also work)
 
 ## Supported Operations
