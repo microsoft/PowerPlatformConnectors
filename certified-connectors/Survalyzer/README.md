@@ -112,17 +112,3 @@ Open the Account settings and click on the Tab Automation. This screen shows the
 ## Known Issues and Limitations
 
 There are no known issues or limitations specific to the Survalyzer connector.
-
-## Deployment Instructions
-
-- Create a PowerApps solution (https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-solution) and create the following 3 Environment variables: 
-1. sula_ClientSecret (Secret)
-2. sula_DataCenter (Text)
-3. sula_Tenant (Text)
-- Clone the PowerPlatform Connectors GitHub repository.
-- Open a terminal session and change to the Survalyzer directory.
-- If necessary download the [paconn tool](https://docs.microsoft.com/connectors/custom-connectors/paconn-cli).
-- Run `paconn login` and follow authentication steps
-- Run `paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json`
-- Add existing connector to the PowerApps solution to make the 3 variables available to the connector.
-- Create a Flow or PowerApp and add a Survalyzer action from the custom section. Sign in with your Survalyzer account.
