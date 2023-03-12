@@ -1,6 +1,6 @@
-# Survalyzer
+# Survalyzer EU
 
-This connector can be used to manage Survalyzer entities like Surveys, Panels & Samples and Distributors.  
+This connector can be used to manage Survalyzer entities like Surveys, Panels & Samples and Distributors in the EU data center.  
 
 ## Publisher: Survalyzer AG
 
