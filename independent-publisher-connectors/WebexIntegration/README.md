@@ -22,6 +22,12 @@ This operation read all the meetings that is scheduled on the Webex account (inc
 ### Operation 3 `Create an invitee`
 This operation allows user to create a new invitee to the meeting, the api would send an invitation email to the invitee to join the meeting.
 
+### Operation 4 `Edit a meeting`
+This operation allows user to edit a meeting with its parameters.
+
+### Operation 5 `Delete a meeting`
+This operation allows user to delete a meeting.
+
 ## Obtaining Credentials
 - Go to the App you created and login. 
 - [Request an OAuth 2.0 Client Id and Client Secret](https://developer.webex.com/my-apps/new/integration)
