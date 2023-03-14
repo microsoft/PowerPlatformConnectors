@@ -4,7 +4,7 @@ Team 18 from UCL Computer Science propose to build a custom connector for WebEx 
 
 Our aim is to allow doctors to create meetings via PowerApp and send them via email or WhatsApp to the patients for remote diagnosis session, which would make the process simpler. 
 
-## Publisher: University College London ##
+## Publisher: University College London -- Oscar Hui, Zakariya Fakira, Satbir Virdi, Chaohui Wang ##
 
 ## Prerequisites ##
 Cisco Webex Developer Account (https://developer.webex.com/)
