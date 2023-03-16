@@ -8,16 +8,6 @@
         return await this.ConvertAndTransformOperation().ConfigureAwait(false);
     }
 
-    // Handle an invalid operation ID
-    HttpResponseMessage response = new HttpResponseMessage(
-        HttpStatusCode.BadRequest
-    );
-    response.Content = CreateJsonContent(
-        $"Unknown operation ID '{this.Context.OperationId}'"
-    );
-    return response;
-    }
-
     private async Task<HttpResponseMessage> ConvertAndTransformOperation()
     {
     // Use the context to forward/send an HTTP request
