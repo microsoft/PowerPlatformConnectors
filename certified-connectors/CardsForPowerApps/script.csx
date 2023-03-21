@@ -23,7 +23,7 @@ public class Script : ScriptBase
         {
             throw new ConnectorException(HttpStatusCode.InternalServerError, "Could not retrieve client region.");
         }
-
+        
         if (string.IsNullOrWhiteSpace(this.Context.Request.RequestUri.PathAndQuery))
         {
             throw new ConnectorException(HttpStatusCode.InternalServerError, "Context RequestUri is null.");
