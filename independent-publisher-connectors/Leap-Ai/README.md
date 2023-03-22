@@ -1,37 +1,75 @@
-# TheMealDB
-Its an open online database of food meal recipes.Recipe books are old school, there must be a better way! The connector provides high quality transparent PNG ingredients, meal image uploads, browsing of meals in sequence and areas and categories.
+# Leap AI
+Add AI features to your app in minutes.
+Generate images, edit them, fine tune models, retrieve text context and more with best-in-class APIs and SDKs.
 
-## Publisher: John Muchiri
+## Publisher
+### Chandra Sekhar
 
 ## Prerequisites
-You will need the following to proceed:
-* A Microsoft Power Apps or Power Automate plan
+This API doesn't require any Authentication.
 
 ## Supported Operations
-The connector supports the following operations:
-### Search Meal
- Search meal by name. You can also search by the first single letter.
+### [Leap AI API Documentation](https://docs.tryleap.ai/reference/inferencescontroller_create-1)
 
-### Look for a Meal with id
- Lookup full meal details by id
 
-### Get a random meal
- Lookup a random meal
 
-### Filter meals by ingredient
- Filter by main ingredient
+### List All Models
+This endpoint will return a list of all models for the workspace.
 
-### List all meal categories
- List all meal categories
+### Create Model
+This endpoint will create a new model
 
-## Obtaining Credentials 
-No Authentication needed to access the MealsDB.You can plug in and test the connector.
+### Upload Image Samples
+Upload one or multiple image samples to a model.
 
+### Queue Training Job
+This endpoint will queue a new model version to be trained.
+
+### List Inference Jobs
+Retrieve all inferences for a specific model.
+
+### Generate Image
+This endpoint will generate a new inference for a particular model.
+
+### Get Single Inference Job
+This endpoint will retrieve a specific inference for a particular model.
+
+### Delete Inference
+Retrieve all inferences for a specific model.
+
+
+
+## API Documentation
+Visit [Start building with the Leap AI API ](https://docs.tryleap.ai/reference/inferencescontroller_create-1) page for further details.
+
+Visit [change log](https://guides.tryleap.ai/) for API Updates
 
 ## Known Issues and Limitations
-There are no known issues and limitations at the moment.
+N/A
+
+### Rate Limit
+* Leap AI do not currently have a rate limit.
+They may introduce one in the future.
 
 
+### Size limits
+* Get started for free and pay for usage once you exceed the free tier.
+
+    Image Generation
+    * Generate 100 images for free.
+      Pay $0.005 per additional image.
+
+    Model Fine-tuning
+    * Train 1 fine-tuned model for free.
+      Pay $2 per additional fine-tuned model.
+
+### Request size limits
+N/A
+
+#### Not all operations provided by Leap AI are part of the first IP connector submission. We will keep adding/updating/supporting this connector based on your feedback/requests :)
 
 
+<!-- LICENSE -->
+## License
 
+Distributed under the MIT License. See `LICENSE` for more information.
