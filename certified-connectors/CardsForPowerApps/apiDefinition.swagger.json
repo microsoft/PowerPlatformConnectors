@@ -3,11 +3,14 @@
   "info": {
     "title": "Cards for Power Apps",
     "version": "1.0.0",
-    "description": "This connector is to create card instance, get card instance, get the card description and search cards in environment.",
+    "description": "This connector is to create card instance, get card instance, get the card description",
     "contact": {
       "name": "Microsoft",
       "url": "https://learn.microsoft.com/en-us/power-apps/cards/overview",
       "email": "pa-cards-core@microsoft.com"
+    },
+    "x-ms-api-annotation": {
+      "status": "Preview"
     }
   },
   "host": "api.powerapps.com",
@@ -18,30 +21,15 @@
   "consumes": [],
   "produces": [],
   "paths": {
-    "/cards/tenants/{tenantId}/environments/{environmentId}/cards": {
+    "/cards/cards": {
       "get": {
         "tags": [
-          "Api"
+          "Search Cards"
         ],
         "operationId": "SearchCards",
+        "x-ms-visibility": "internal",
         "produces": [
           "application/json"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/parameters/tenant_id"
-          },
-          {
-            "$ref": "#/parameters/environment_id"
-          },
-          {
-            "type": "string",
-            "name": "search",
-            "in": "query",
-            "x-nullable": true,
-            "x-ms-summary": "Search string",
-            "description": "Select a Value"
-          }
         ],
         "responses": {
           "200": {
@@ -55,14 +43,14 @@
             }
           }
         },
-        "summary": "Search Cards in environment",
-        "description": "This operation is used to search cards in environment. User can also give name of specific card they are looking for."
+        "summary": "Get card in environment",
+        "description": "This operation is used to get list of cards in environment."
       }
     },
-    "/cards/tenants/{tenantId}/environments/{environmentId}/cards/{cardId}/instances": {
+    "/cards/cards/{cardId}/instances": {
       "post": {
         "tags": [
-          "Api"
+          "Create Card Instance"
         ],
         "operationId": "CreateCardInstance",
         "consumes": [
@@ -75,12 +63,6 @@
           "application/json"
         ],
         "parameters": [
-          {
-            "$ref": "#/parameters/tenant_id"
-          },
-          {
-            "$ref": "#/parameters/environment_id"
-          },
           {
             "$ref": "#/parameters/card_id"
           },
@@ -99,32 +81,26 @@
         "responses": {
           "200": {
             "x-nullable": false,
-            "description": "",
+            "description": "Create card instace was successful",
             "schema": {
               "$ref": "#/definitions/CreateCardResult"
             }
           }
         },
         "summary": "Create card instance",
-        "description": "This operation is used to create the card instance. User should provide the tenant id, environment id and card id to create the instance."
+        "description": "This operation is used to create the card instance. User should select the card from drop down to create an instance."
       }
     },
-    "/cards/tenants/{tenantId}/environments/{environmentId}/cards/{cardId}/instances/{instanceId}": {
+    "/cards/cards/{cardId}/instances/{instanceId}": {
       "get": {
         "tags": [
-          "Api"
+          "Get Card Instance"
         ],
         "operationId": "GetCardInstance",
         "produces": [
           "application/json"
         ],
         "parameters": [
-          {
-            "$ref": "#/parameters/tenant_id"
-          },
-          {
-            "$ref": "#/parameters/environment_id"
-          },
           {
             "$ref": "#/parameters/card_id"
           },
@@ -141,20 +117,20 @@
         "responses": {
           "200": {
             "x-nullable": false,
-            "description": "",
+            "description": "Get card instance was successful",
             "schema": {
               "$ref": "#/definitions/AdaptiveCard"
             }
           }
         },
         "summary": "Get the card instance",
-        "description": "This operation is used to get the details of card instance. User should provide tenant id, environment id, card id and instance id to get the instance description."
+        "description": "This operation is used to retrieve the card instance. User should select the card from drop down and provide an instance id of the selected card."
       }
     },
-    "/cards/tenants/{tenantId}/environments/{environmentId}/cards/{cardId}": {
+    "/cards/cards/{cardId}": {
       "get": {
         "tags": [
-          "Api"
+          "Get Card Description"
         ],
         "operationId": "GetCardDescription",
         "produces": [
@@ -162,26 +138,20 @@
         ],
         "parameters": [
           {
-            "$ref": "#/parameters/tenant_id"
-          },
-          {
-            "$ref": "#/parameters/environment_id"
-          },
-          {
             "$ref": "#/parameters/card_id"
           }
         ],
         "responses": {
           "200": {
             "x-nullable": false,
-            "description": "",
+            "description": "Get card definition was successful",
             "schema": {
               "$ref": "#/definitions/PowerCardDescription"
             }
           }
         },
         "summary": "Get the card description",
-        "description": "This operation is used to get the card description. User should provide tenant id, environment id and card id to get its description."
+        "description": "This operation is used to get the card description. User should select the card from drop down to its description."
       }
     }
   },
@@ -525,22 +495,7 @@
     "CreateCardResult": {
       "type": "object",
       "properties": {
-        "botEndpoint": {
-          "type": "string"
-        },
-        "cardUrl": {
-          "type": "string"
-        },
-        "environmentId": {
-          "type": "string"
-        },
-        "cardId": {
-          "type": "string"
-        },
-        "instanceId": {
-          "type": "string"
-        },
-        "card": {
+        "Card": {
           "$ref": "#/definitions/AdaptiveCard"
         }
       }
@@ -966,9 +921,16 @@
     "CreateCardRequest": {
       "type": "object",
       "properties": {
-        "inputs": {},
-        "callbackUrl": {
-          "type": "string"
+        "inputs": {
+          "x-ms-dynamic-schema": {
+            "operationId": "GetCardDescription",
+            "value-path": "inputs",
+            "parameters": {
+              "cardId": {
+                "parameter": "cardId"
+              }
+            }
+          }
         }
       }
     },
@@ -1902,9 +1864,15 @@
       "name": "cardId",
       "in": "path",
       "required": true,
+      "x-ms-dynamic-values": {
+        "operationId": "SearchCards",
+        "parameters": {},
+        "value-path": "id",
+        "value-title": "name"
+      },
       "x-nullable": true,
-      "x-ms-summary": "Card Id",
-      "description": "Set Card Id"
+      "x-ms-summary": "Card",
+      "description": "Select card"
     }
   },
   "responses": {},
