@@ -1,7 +1,7 @@
 # OpenAI
 
 OpenAI is an artificial intelligence research laboratory. The company conducts research in the field of AI with the stated goal of promoting and developing friendly AI in a way that benefits humanity as a whole.
-Through this connector you can access the Generative Pre-trained Transformer 3 (GPT-3), an autoregressive language model that uses deep learning to produce human-like text.
+Through this connector you can access the Generative Pre-trained Transformer 4 (GPT-4), an autoregressive language model that uses deep learning to produce human-like text, plus many other models.
 
 ## Publisher: Troy Taylor, Robin Rosengrün
 
