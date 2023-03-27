@@ -4,16 +4,16 @@
 public class Script : ScriptBase
 {
   #region Constants
-  private const float STICKY_NOTE_PADDING = 30.0f;
+  private const int STICKY_NOTE_PADDING = 30;
   #endregion
 
   #region Type
   public struct Widget
   {
-    public float height;
-    public float width;
-    public float x;
-    public float y;
+    public double height;
+    public double width;
+    public double x;
+    public double y;
   }
 
   public struct WidgetsResponse
@@ -40,18 +40,18 @@ public class Script : ScriptBase
   #endregion
 
   #region Helper Methods
-  public (float, float) CalculateTopRightCoordinate(List<Widget> widgets)
+  public (int, int) CalculateTopRightCoordinate(List<Widget> widgets)
   {
     if (widgets.Count == 0) return (0, 0 );
 
-    List<float> allX = new List<float>(), allY = new List<float>();
+    List<double> allX = new List<double>(), allY = new List<double>();
     widgets.ForEach(widget =>
     {
       allX.Add(widget.x + widget.width);
       allY.Add(widget.y);
     });
 
-    return (allX.Max(), allY.Min());
+    return ((int)Math.Floor(allX.Max()), (int)Math.Floor(allY.Min()));
   }
   #endregion
 
@@ -80,7 +80,7 @@ public class Script : ScriptBase
         Content = CreateJsonContent("{{\"error\":\"Invalid request body.\"}}")
       };
 
-    //If either x or y isn't specified but the other is, then the other will default to 0.0f
+    //If either x or y isn't specified but the other is, then the other will default to 0
     var hasX = body.TryGetValue("x", out var x);
     var hasY = body.TryGetValue("y", out var y);
 
@@ -131,8 +131,8 @@ public class Script : ScriptBase
       y = coords.Item2;
     }
 
-    body["x"] = Convert.ToSingle(x);
-    body["y"] = Convert.ToSingle(y);
+    body["x"] = x != null ? x : 0;
+    body["y"] = y != null ? y : 0;
 
     Context.Request.Content = CreateJsonContent(JsonConvert.SerializeObject(body));
     return await Context.SendAsync(Context.Request, CancellationToken);
