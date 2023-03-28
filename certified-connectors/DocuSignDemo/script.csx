@@ -1642,6 +1642,13 @@ public class Script : ScriptBase
           if (recipientEmailId.ToString().Equals(signer["email"].ToString()))
           {
             newSigner["recipientId"] = signer["recipientId"];
+            newSigner["routingOrder"] = signer["routingOrder"];
+            newSigner["roleName"] = signer["roleName"];
+            newSigner["name"] = signer["name"];
+            newSigner["email"] = signer["email"];
+            newSigner["recipientType"] = signer["recipientType"];
+            newSigner["verificationType"] = signer["verificationType"];
+            newSigner["recipientIdGuid"] = signer["recipientIdGuid"];
             break;
           }
         }
@@ -1658,6 +1665,13 @@ public class Script : ScriptBase
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
               newSigner["recipientId"] = signer["recipientId"];
+              newSigner["routingOrder"] = signer["routingOrder"];
+              newSigner["roleName"] = signer["roleName"];
+              newSigner["name"] = signer["name"];
+              newSigner["email"] = signer["email"];
+              newSigner["recipientType"] = signer["recipientType"];
+              newSigner["verificationType"] = signer["verificationType"];
+              newSigner["recipientIdGuid"] = signer["recipientIdGuid"];
               break;
             }
           }
@@ -1670,6 +1684,13 @@ public class Script : ScriptBase
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
               newSigner["recipientId"] = signer["recipientId"];
+              newSigner["routingOrder"] = signer["routingOrder"];
+              newSigner["roleName"] = signer["roleName"];
+              newSigner["name"] = signer["name"];
+              newSigner["email"] = signer["email"];
+              newSigner["recipientType"] = signer["recipientType"];
+              newSigner["verificationType"] = signer["verificationType"];
+              newSigner["recipientIdGuid"] = signer["recipientIdGuid"];
               break;
             }
           } 
