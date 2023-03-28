@@ -1634,6 +1634,12 @@ public class Script : ScriptBase
       var recipientEmailId = query.Get("recipientEmail");
       var phoneNumber = query.Get("areaCode") + " " + query.Get("phoneNumber");
       var signerPhoneNumber = "";
+      char[] charsToTrimPhoneNumber = { '*', ' ', '\'', '/', '-', '(', ')', '+'};
+
+      if ((recipientEmailId == null) && (query.Get("phoneNumber") == null))
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Phone Number to retrieve Recipient information");
+      }
 
       if (recipientEmailId != null)
       {
@@ -1655,13 +1661,14 @@ public class Script : ScriptBase
       }
       if (query.Get("phoneNumber") != null)
       {
+        phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
         foreach(var signer in signers)
         { 
           if (signer.ToString().Contains("phoneAuthentication"))
           {
             signerPhoneNumber = signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString();
-            signerPhoneNumber = signerPhoneNumber.Substring(1);
-            
+            signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
+
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
               newSigner["recipientId"] = signer["recipientId"];
@@ -1679,7 +1686,7 @@ public class Script : ScriptBase
           if (signer.ToString().Contains("smsAuthentication"))
           {
             signerPhoneNumber = signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString();
-            signerPhoneNumber = signerPhoneNumber.Substring(1);
+            signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
 
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
