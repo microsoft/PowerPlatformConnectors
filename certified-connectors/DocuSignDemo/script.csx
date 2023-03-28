@@ -1503,6 +1503,16 @@ public class Script : ScriptBase
       this.Context.Request.Content = CreateJsonContent(newBody.ToString());
     }
 
+    if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/recipientsV2", "/recipients");
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      query["include_extended"] = "true";
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("OnEnvelopeStatusChanges".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1612,6 +1622,61 @@ public class Script : ScriptBase
       }
       body["workflowIds"] = workflowsArray;
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var signers = body["signers"] as JArray;
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+      var newSigner = new JObject();
+      var recipientEmailId = query.Get("recipientEmail");
+      var phoneNumber = query.Get("areaCode") + " " + query.Get("phoneNumber");
+      var signerPhoneNumber = "";
+
+      if (recipientEmailId != null)
+      {
+        foreach(var signer in signers)
+        {
+          if (recipientEmailId.ToString().Equals(signer["email"].ToString()))
+          {
+            newSigner["recipientId"] = signer["recipientId"];
+            break;
+          }
+        }
+      }
+      if (query.Get("phoneNumber") != null)
+      {
+        foreach(var signer in signers)
+        { 
+          if (signer.ToString().Contains("phoneAuthentication"))
+          {
+            signerPhoneNumber = signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString();
+            signerPhoneNumber = signerPhoneNumber.Substring(1);
+            
+            if (phoneNumber.ToString().Equals(signerPhoneNumber))
+            {
+              newSigner["recipientId"] = signer["recipientId"];
+              break;
+            }
+          }
+
+          if (signer.ToString().Contains("smsAuthentication"))
+          {
+            signerPhoneNumber = signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString();
+            signerPhoneNumber = signerPhoneNumber.Substring(1);
+
+            if (phoneNumber.ToString().Equals(signerPhoneNumber))
+            {
+              newSigner["recipientId"] = signer["recipientId"];
+              break;
+            }
+          } 
+        }
+      }
+
+      response.Content = new StringContent(newSigner.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
