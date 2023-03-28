@@ -16,6 +16,7 @@ The connector supports the following operations:
 - `Create completion`: Creates a completion for the provided prompt and parameters.
 - `Retrieve chat completion`: Retrieves a completion for the provided prompt and parameters.
 - `Edit prompt`: Creates a new edit for the provided input, instruction, and parameters.
+- `Create an image`: Dall-E creates an image from your prompt.
 - `List models`: Lists the currently available models, and provides basic information about each one such as the owner and availability.
 
 ## Obtaining Credentials
