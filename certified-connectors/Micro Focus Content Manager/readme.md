@@ -1,4 +1,4 @@
-# Kapish Power Connect
+# Micro Focus Content Manager
 The Kapish Power Connect, published as **Micro Focus Content Manager**, is the solution to connect Content Manager to all your business systems.  
 Removing the need to develop custom or ad-hoc integrations, Power Connect lets you do it yourself with no coding skills required.
 
