@@ -1639,7 +1639,6 @@ public class Script : ScriptBase
       recipientList.Add(body["witnesses"]);
       recipientList.Add(body["notaries"]);
 
-      var signers = body["signers"] as JArray;
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
       var newSigner = new JObject();
