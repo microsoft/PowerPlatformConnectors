@@ -1627,6 +1627,18 @@ public class Script : ScriptBase
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      List<JToken> recipientList = new List<JToken>();
+      recipientList.Add(body["signers"]);
+      recipientList.Add(body["agents"]);
+      recipientList.Add(body["editors"]);
+      recipientList.Add(body["carbonCopies"]);
+      recipientList.Add(body["certifiedDeliveries"]);
+      recipientList.Add(body["intermediaries"]);
+      recipientList.Add(body["inPersonSigners"]);
+      recipientList.Add(body["seals"]);
+      recipientList.Add(body["witnesses"]);
+      recipientList.Add(body["notaries"]);
+
       var signers = body["signers"] as JArray;
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
@@ -1640,43 +1652,49 @@ public class Script : ScriptBase
 
       if (recipientEmailId != null)
       {
-        foreach(var signer in signers)
+        for(var i = 0; i < recipientList.Count; i++)
         {
-          if (recipientEmailId.ToString().Equals(signer["email"].ToString()))
+          foreach(var signer in recipientList[i])
           {
-            newSigner["signer"] = signer;
-            break;
+            if (recipientEmailId.ToString().Equals(signer["email"].ToString()))
+            {
+              newSigner["signer"] = signer;
+              break;
+            }
           }
         }
       }
       if (query.Get("phoneNumber") != null)
       {
         phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
-        foreach(var signer in signers)
-        { 
-          if (signer.ToString().Contains("phoneAuthentication"))
-          {
-            signerPhoneNumber = signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString();
-            signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
-
-            if (phoneNumber.ToString().Equals(signerPhoneNumber))
+        for(var i = 0; i < recipientList.Count; i++)
+        {
+          foreach(var signer in recipientList[i])
+          { 
+            if (signer.ToString().Contains("phoneAuthentication"))
             {
-              newSigner["signer"] = signer;
-              break;
+              signerPhoneNumber = signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString();
+              signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
+
+              if (phoneNumber.ToString().Equals(signerPhoneNumber))
+              {
+                newSigner["signer"] = signer;
+                break;
+              }
             }
+
+            if (signer.ToString().Contains("smsAuthentication"))
+            {
+              signerPhoneNumber = signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString();
+              signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
+
+              if (phoneNumber.ToString().Equals(signerPhoneNumber))
+              {
+                newSigner["signer"] = signer;
+                break;
+              }
+            } 
           }
-
-          if (signer.ToString().Contains("smsAuthentication"))
-          {
-            signerPhoneNumber = signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString();
-            signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
-
-            if (phoneNumber.ToString().Equals(signerPhoneNumber))
-            {
-              newSigner["signer"] = signer;
-              break;
-            }
-          } 
         }
       }
 
