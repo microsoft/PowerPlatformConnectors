@@ -1278,7 +1278,7 @@ public class Script : ScriptBase
       signers[0]["additionalNotifications"] = additionalNotifications;
     }
   }
-
+  
   private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -1506,7 +1506,7 @@ public class Script : ScriptBase
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-      uriBuilder.Path = uriBuilder.Path.Replace("/recipientsV2", "/recipients");
+      uriBuilder.Path = uriBuilder.Path.Replace("/recipientFields", "/recipients/");
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       query["include_extended"] = "true";
       uriBuilder.Query = query.ToString();
@@ -1631,15 +1631,12 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
       var newSigner = new JObject();
+      newSigner["signer"] = null;
+      var newBody = new JObject();
       var recipientEmailId = query.Get("recipientEmail");
       var phoneNumber = query.Get("areaCode") + " " + query.Get("phoneNumber");
       var signerPhoneNumber = "";
       char[] charsToTrimPhoneNumber = { '*', ' ', '\'', '/', '-', '(', ')', '+'};
-
-      if ((recipientEmailId == null) && (query.Get("phoneNumber") == null))
-      {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Phone Number to retrieve Recipient information");
-      }
 
       if (recipientEmailId != null)
       {
@@ -1647,14 +1644,7 @@ public class Script : ScriptBase
         {
           if (recipientEmailId.ToString().Equals(signer["email"].ToString()))
           {
-            newSigner["recipientId"] = signer["recipientId"];
-            newSigner["routingOrder"] = signer["routingOrder"];
-            newSigner["roleName"] = signer["roleName"];
-            newSigner["name"] = signer["name"];
-            newSigner["email"] = signer["email"];
-            newSigner["recipientType"] = signer["recipientType"];
-            newSigner["verificationType"] = signer["verificationType"];
-            newSigner["recipientIdGuid"] = signer["recipientIdGuid"];
+            newSigner["signer"] = signer;
             break;
           }
         }
@@ -1671,14 +1661,7 @@ public class Script : ScriptBase
 
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
-              newSigner["recipientId"] = signer["recipientId"];
-              newSigner["routingOrder"] = signer["routingOrder"];
-              newSigner["roleName"] = signer["roleName"];
-              newSigner["name"] = signer["name"];
-              newSigner["email"] = signer["email"];
-              newSigner["recipientType"] = signer["recipientType"];
-              newSigner["verificationType"] = signer["verificationType"];
-              newSigner["recipientIdGuid"] = signer["recipientIdGuid"];
+              newSigner["signer"] = signer;
               break;
             }
           }
@@ -1690,21 +1673,29 @@ public class Script : ScriptBase
 
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
-              newSigner["recipientId"] = signer["recipientId"];
-              newSigner["routingOrder"] = signer["routingOrder"];
-              newSigner["roleName"] = signer["roleName"];
-              newSigner["name"] = signer["name"];
-              newSigner["email"] = signer["email"];
-              newSigner["recipientType"] = signer["recipientType"];
-              newSigner["verificationType"] = signer["verificationType"];
-              newSigner["recipientIdGuid"] = signer["recipientIdGuid"];
+              newSigner["signer"] = signer;
               break;
             }
           } 
         }
       }
 
-      response.Content = new StringContent(newSigner.ToString(), Encoding.UTF8, "application/json");
+      if ((recipientEmailId == null) && (query.Get("phoneNumber") == null))
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Phone Number to retrieve Recipient information");
+      } 
+      else 
+      {
+        newBody["recipientId"] = newSigner["signer"]["recipientId"];
+        newBody["routingOrder"] = newSigner["signer"]["routingOrder"];
+        newBody["roleName"] = newSigner["signer"]["roleName"];
+        newBody["name"] = newSigner["signer"]["name"];
+        newBody["email"] = newSigner["signer"]["email"];
+        newBody["verificationType"] = newSigner["signer"]["verificationType"];
+        newBody["recipientIdGuid"] = newSigner["signer"]["recipientIdGuid"];
+      }
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
