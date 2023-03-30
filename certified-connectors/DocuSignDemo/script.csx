@@ -1506,7 +1506,7 @@ public class Script : ScriptBase
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-      uriBuilder.Path = uriBuilder.Path.Replace("/recipientFields", "/recipients/");
+      uriBuilder.Path = uriBuilder.Path.Replace("/recipientFields", "/recipients");
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       query["include_extended"] = "true";
       uriBuilder.Query = query.ToString();
