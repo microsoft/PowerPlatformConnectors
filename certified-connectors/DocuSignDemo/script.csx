@@ -1627,22 +1627,28 @@ public class Script : ScriptBase
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
-      List<JToken> recipientList = new List<JToken>();
-      recipientList.Add(body["signers"]);
-      recipientList.Add(body["agents"]);
-      recipientList.Add(body["editors"]);
-      recipientList.Add(body["carbonCopies"]);
-      recipientList.Add(body["certifiedDeliveries"]);
-      recipientList.Add(body["intermediaries"]);
-      recipientList.Add(body["inPersonSigners"]);
-      recipientList.Add(body["seals"]);
-      recipientList.Add(body["witnesses"]);
-      recipientList.Add(body["notaries"]);
-
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
-      var newSigner = new JObject();
-      newSigner["signer"] = null;
+      List<JToken> recipientList = new List<JToken>();
+      JToken[] signerTypes = { 
+        body["signers"],
+        body["agents"],
+        body["editors"],
+        body["carbonCopies"],
+        body["certifiedDeliveries"],
+        body["intermediaries"],
+        body["inPersonSigners"],
+        body["seals"],
+        body["witnesses"],
+        body["notaries"]
+        };
+
+      for(var i = 0; i < signerTypes.Length; i++)
+      {
+        recipientList.Add(signerTypes[i]);
+      }
+
+      var matchingSigner = new JObject();
       var newBody = new JObject();
       var recipientEmailId = query.Get("recipientEmail");
       var phoneNumber = query.Get("areaCode") + " " + query.Get("phoneNumber");
@@ -1657,7 +1663,7 @@ public class Script : ScriptBase
           {
             if (recipientEmailId.ToString().Equals(signer["email"].ToString()))
             {
-              newSigner["signer"] = signer;
+              matchingSigner = signer as JObject;
               break;
             }
           }
@@ -1677,10 +1683,11 @@ public class Script : ScriptBase
 
               if (phoneNumber.ToString().Equals(signerPhoneNumber))
               {
-                newSigner["signer"] = signer;
+                matchingSigner = signer as JObject;
                 break;
               }
             }
+          
 
             if (signer.ToString().Contains("smsAuthentication"))
             {
@@ -1689,11 +1696,11 @@ public class Script : ScriptBase
 
               if (phoneNumber.ToString().Equals(signerPhoneNumber))
               {
-                newSigner["signer"] = signer;
+                matchingSigner = signer as JObject;
                 break;
               }
-            } 
-          }
+            }
+          } 
         }
       }
 
@@ -1703,13 +1710,13 @@ public class Script : ScriptBase
       } 
       else 
       {
-        newBody["recipientId"] = newSigner["signer"]["recipientId"];
-        newBody["routingOrder"] = newSigner["signer"]["routingOrder"];
-        newBody["roleName"] = newSigner["signer"]["roleName"];
-        newBody["name"] = newSigner["signer"]["name"];
-        newBody["email"] = newSigner["signer"]["email"];
-        newBody["verificationType"] = newSigner["signer"]["verificationType"];
-        newBody["recipientIdGuid"] = newSigner["signer"]["recipientIdGuid"];
+        newBody["recipientId"] = matchingSigner["recipientId"];
+        newBody["routingOrder"] = matchingSigner["routingOrder"];
+        newBody["roleName"] = matchingSigner["roleName"];
+        newBody["name"] = matchingSigner["name"];
+        newBody["email"] = matchingSigner["email"];
+        newBody["verificationType"] = matchingSigner["verificationType"];
+        newBody["recipientIdGuid"] = matchingSigner["recipientIdGuid"];
       }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
