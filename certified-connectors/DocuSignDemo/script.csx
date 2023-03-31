@@ -1687,7 +1687,6 @@ public class Script : ScriptBase
                 break;
               }
             }
-          
 
             if (signer.ToString().Contains("smsAuthentication"))
             {
