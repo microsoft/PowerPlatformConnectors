@@ -1063,6 +1063,7 @@ public class Script : ScriptBase
 
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
+    uriBuilder.Path = uriBuilder.Path.Replace("/recipients/updateRecipient", "/recipients");
     this.Context.Request.RequestUri = uriBuilder.Uri;
 
     return body;
@@ -1206,8 +1207,15 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
-    signers[0]["recipientId"] = GenerateId();
-    
+    if (!string.IsNullOrEmpty(query.Get("recipientId")))
+    {
+      signers[0]["recipientId"] = query.Get("recipientId");
+    }
+    else
+    {
+      signers[0]["recipientId"] = GenerateId();
+    }
+
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
@@ -1275,7 +1283,6 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var recipientType = query.Get("recipientType");
-    signers[0]["recipientId"] = GenerateId();
 
     if (recipientType.Equals("inPersonSigners"))
     {
@@ -1459,7 +1466,8 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
     }
     
-    if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
+        "UpdateEnvelopeRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
