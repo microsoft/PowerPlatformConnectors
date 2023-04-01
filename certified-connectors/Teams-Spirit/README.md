@@ -70,7 +70,9 @@ At this point, we now have a valid Azure AD application that can be used to get 
 
 ### Deploying the connector
 
-First replace ``{client_id}`` in the ``apiProperties.json`` with your Azure AD applications Client ID. 
+First replace ``{clientId}`` in the ``apiProperties.json`` with your Azure AD applications Client ID. 
+
+The ``{resourceId}`` shall be replaced with ``api://app.teams-spirit.com/3a57026a-cf3f-4295-93f5-ca245af3d2df/access_as_user`` in case of custom connector deployment.
 
 Then run the following commands and follow the prompts:
 
