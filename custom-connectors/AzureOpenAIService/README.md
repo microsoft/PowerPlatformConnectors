@@ -11,6 +11,20 @@ You will need the following to proceed:
 * An Azure subscription and access to Azure OpenAI Service (currently in preview)
 * The Power Platform Connectors CLI (Paconn CLI) tools ([link](https://learn.microsoft.com/connectors/custom-connectors/paconn-cli))
 
+To install the connector, you can use the following command (from the same folder as the `apiDefinition.swagger.json` file):
+
+```pwsh
+paconn login
+paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --script AzureOpenAIScript.csx --icon connector-icon.png
+```
+
+If you already have the connector installed, you can update it with the following command (from the same folder as the `apiDefinition.swagger.json` file):
+
+```pwsh
+paconn login
+paconn update --api-def apiDefinition.swagger.json --api-prop apiProperties.json --script AzureOpenAIScript.csx --icon connector-icon.png
+```
+
 ## Connection setup
 
 ![Connection setup](./Assets/Connection.png)
@@ -24,6 +38,7 @@ After importing the connector, you should create a  connection. There are two pr
 
 ![Available actions](./Assets/AzureOpenAIService.png)
 
+* `Create a chat completion (Preview)` - With this action, you can provide a prompt which the Azure OpenAI Chat Service will complete.
 * `Create a completion` - With this action, you can provide a prompt which the Azure OpenAI Service will complete.
 * `Create deployment` - With this action, you are able to create a deployment of a model inside of your instance of the Azure OpenAI Service.
 * `Delete deployment` - With this action, you are able to delete a deployment of a model inside of your instance of the Azure OpenAI Service.
