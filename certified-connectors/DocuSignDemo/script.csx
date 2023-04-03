@@ -1629,25 +1629,6 @@ public class Script : ScriptBase
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
-      List<JToken> recipientList = new List<JToken>();
-      JToken[] signerTypes = { 
-        body["signers"],
-        body["agents"],
-        body["editors"],
-        body["carbonCopies"],
-        body["certifiedDeliveries"],
-        body["intermediaries"],
-        body["inPersonSigners"],
-        body["seals"],
-        body["witnesses"],
-        body["notaries"]
-        };
-
-      for(var i = 0; i < signerTypes.Length; i++)
-      {
-        recipientList.Add(signerTypes[i]);
-      }
-
       var matchingSigner = new JObject();
       var newBody = new JObject();
       var recipientEmailId = query.Get("recipientEmail");
@@ -1655,27 +1636,25 @@ public class Script : ScriptBase
       var signerPhoneNumber = "";
       char[] charsToTrimPhoneNumber = { '*', ' ', '\'', '/', '-', '(', ')', '+'};
 
-      if (recipientEmailId != null)
+      string [] signerTypes = {
+        "signers", "agents", "editors", "carbonCopies", "certifiedDeliveries", "intermediaries",
+        "inPersonSigners", "seals", "witnesses", "notaries"
+      };
+
+      for(var i = 0; i < signerTypes.Length; i++)
       {
-        for(var i = 0; i < recipientList.Count; i++)
+        foreach(var signer in body[signerTypes[i]])
         {
-          foreach(var signer in recipientList[i])
+          if (recipientEmailId != null && recipientEmailId.ToString().Equals(signer["email"].ToString()))
           {
-            if (recipientEmailId.ToString().Equals(signer["email"].ToString()))
-            {
-              matchingSigner = signer as JObject;
-              break;
-            }
+            matchingSigner = signer as JObject;
+            break;
           }
-        }
-      }
-      if (query.Get("phoneNumber") != null)
-      {
-        phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
-        for(var i = 0; i < recipientList.Count; i++)
-        {
-          foreach(var signer in recipientList[i])
-          { 
+
+          if (query.Get("phoneNumber") != null)
+          {
+            phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
+
             if (signer.ToString().Contains("phoneAuthentication"))
             {
               signerPhoneNumber = signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString();
@@ -1699,7 +1678,7 @@ public class Script : ScriptBase
                 break;
               }
             }
-          } 
+          }
         }
       }
 
