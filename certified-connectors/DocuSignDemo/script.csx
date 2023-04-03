@@ -1553,6 +1553,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("GetDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/get_document_id", "/documents");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("GetLoginAccounts".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1893,6 +1900,31 @@ public class Script : ScriptBase
         newBody = folder as JObject;
         break;
       }
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var documentName = query.Get("documentName");
+      var newBody = new JObject();
+
+      foreach (var documentInfo in (body["envelopeDocuments"] as JArray) ?? new JArray())
+      {
+        if (documentName.Equals(documentInfo["name"]))
+        {
+          newBody["documentId"] = documentInfo["documentIdGuid"];
+          newBody["name"] = documentInfo["name"];
+          break;
+        }
+      }
+
+      if (body["documentId"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: No document found matching the provided name");
+      }      
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
