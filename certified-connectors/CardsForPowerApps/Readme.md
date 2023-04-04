@@ -9,7 +9,7 @@ You will need the following to proceed:
 
 ## Setting up the connector
 1. In the [Power Automate portal](https://make.powerautomate.com/), create a new flow or edit an existing one. 
-2. Add a new action to your flow and in the "Choose an operation" menu, search for "Cards For Power Apps" under the Premium tab. 
+2. Add a new action to your flow and in the "Choose an operation" menu, search for "Cards for Power Apps" connector. 
 3. Select your preferred action.
 4. You will be prompted to create a connection using your Azure AD account, and add a name for connection.
 5. That's it! You can now use Cards for Power Apps actions in all your Power Automate flows. 
@@ -19,4 +19,3 @@ The connector supports the following operations:
 * Create Card Instance - To create the card instance of any card in your accessible environment. 
 * Get Card Instance - Get the card instance details.
 * Get Card Definition - Get the card definition given the card id.
-* Search Cards - Search for cards in the environment. You can also add search string to find a specific card.
