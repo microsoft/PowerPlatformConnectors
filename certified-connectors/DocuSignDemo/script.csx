@@ -1921,7 +1921,7 @@ public class Script : ScriptBase
         }
       }
 
-      if (body["documentId"] == null)
+      if (newBody["documentId"] == null)
       {
         throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: No document found matching the provided name");
       }      
