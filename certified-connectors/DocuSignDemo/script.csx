@@ -1913,7 +1913,7 @@ public class Script : ScriptBase
 
       foreach (var documentInfo in (body["envelopeDocuments"] as JArray) ?? new JArray())
       {
-        if (documentName.Equals(documentInfo["name"]))
+        if (documentName.Equals(documentInfo["name"].ToString()))
         {
           newBody["documentId"] = documentInfo["documentIdGuid"];
           newBody["name"] = documentInfo["name"];
