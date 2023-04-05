@@ -1,0 +1,679 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Business Assist",
+    "description": "Business Assist uses Machine learning based tools originally developed internally at Microsoft to automate common customer success-oriented tasks.  They are now being made available to help customers and partners achieve their goals to reduce costs, listen more efficiently to customers, and respond to their needs more quickly. These tools will allow large scale data analysis to be performed quickly using the low code solution.",
+    "version": "1.0",
+    "contact": {
+      "name": "Microsoft",
+      "url": "https://admin.microsoft.com",
+      "email": "PowerConnector-BA@microsoft.com"
+    }
+  },
+  "host": "businessassist.microsoft.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/api/beta/forecast/{Forecast job Id}": {
+      "get": {
+        "responses": {
+          "202": {
+            "description": "The request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OperationId": {
+                  "type": "string",
+                  "description": "Job ID, use to get status and results."
+                },
+                "Name": {
+                  "type": "string",
+                  "description": "Job name submitted with request."
+                },
+                "Status": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Status code of forecast job."
+                },
+                "Diagnostics": {
+                  "type": "string",
+                  "description": "Errors or warnings generated during job creation."
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get forecast status",
+        "description": "Get forecast job status by job id.",
+        "operationId": "GetForecastStatus",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "Forecast job Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The GUID returned from a `CreateForecast` call that represents a specific job submitted to the Forecast API.",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/api/beta/forecast/{Forecast job Id}/download": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Date": {
+                    "type": "string",
+                    "description": "The date the forecast job was created."
+                  },
+                  "Forecast": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Forecast for the defined time period."
+                  },
+                  "Low": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Low end of the forecast range predicted.",
+                    "title": ""
+                  },
+                  "High": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "High end of the forecast range predicted."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get forecast result",
+        "description": "Get forecast job result by using job id.",
+        "operationId": "GetForecastResult",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "Forecast job Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Specify forecast job id.",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/api/beta/forecast": {
+      "post": {
+        "responses": {
+          "202": {
+            "description": "The `CreateForecast` API asynchronously accepts historical volume data, seasonality, and special date information and creates a forecast.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OperationId": {
+                  "type": "string",
+                  "description": "Job ID, use to get status and results"
+                },
+                "Name": {
+                  "type": "string",
+                  "description": "User-defined name for the Forecast job"
+                },
+                "Status": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Status code of forecast job."
+                },
+                "Diagnostics": {
+                  "type": "string",
+                  "description": "Errors or warnings generated during job creation"
+                },
+                "Results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Date": {
+                        "type": "string",
+                        "description": "Date"
+                      },
+                      "Forecast": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "Forecast"
+                      },
+                      "Low": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "Low"
+                      },
+                      "High": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "High"
+                      }
+                    }
+                  },
+                  "description": "Results"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create forecast job",
+        "operationId": "CreateForecastJob",
+        "description": "Submit forecast job to Business Assist.",
+        "x-ms-visibility": "important",
+        "consumes": ["application/json", "multipart/form-data"],
+        "parameters": [
+          {
+            "name": "inputDataMethod",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Name": {
+                  "type": "string",
+                  "description": "User-defined name for the Forecast job.",
+                  "title": "Name"
+                },
+                "EndDateTime": {
+                  "type": "string",
+                  "description": "End date for the forecasting. It can be `yyyymmdd`, `mm/dd/yyyy`, or other widely known date format.",
+                  "title": "Forecast end date"
+                },
+                "Seasonality": {
+                  "type": "string",
+                  "description": "Divide forecasts by time periods for comparison. Select at most two seasonality from (daily, weekly, monthly, quarterly, yearly).",
+                  "title": "Seasonality",
+                  "enum": [
+                    "None",
+                    "Daily",
+                    "Weekly",
+                    "Monthly",
+                    "Quarterly",
+                    "Yearly"
+                  ],
+                  "x-ms-visibility": "important"
+                },
+                "IncludePredictionInterval": {
+                  "type": "boolean",
+                  "description": "Include prediction interval with results.",
+                  "title": "Include prediction interval",
+                  "enum": [
+                    true,
+                    false
+                  ],
+                  "default": false
+                },
+                "inputDataJson": {
+                  "type": "string",
+                  "description": "JSON-formatted version of the historical data. For example, ``[{\"Date\":\"2022-07-01\",\"Ticket\":\"195\",\"DAO\":\"20000\"},{\"Date\":\"2022-07-02\",\"Ticket\":\"774\",\"DAO\":\"20500\"}]`",
+                  "title": "History data JSON"
+                },
+                "DateTimeColumnName": {
+                  "type": "string",
+                  "description": "Column header for the column containing data and time information.",
+                  "title": "Date property name"
+                },
+                "VolumeColumnName": {
+                  "type": "string",
+                  "description": "Column header for the column containing volume data.",
+                  "title": "Volume property name"
+                },
+                "AdjustmentColumnNames": {
+                  "title": "Adjustment property names",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "DAO",
+                    "title": "Adjustment property name",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "description": "[\"DAO\"]"
+                },
+                "SpecialDateDataJson": {
+                  "type": "string",
+                  "description": "JSON-formatted string containing special date data. [{\"Date\":\"2021-10-28\",\"Name\":\"IgniteDay1\"}]",
+                  "title": "Special date data JSON",
+                  "x-ms-visibility": "advanced"
+                },
+                "SpecialDateAdjustmentDataJson": {
+                  "type": "string",
+                  "description": "JSON-formatted string containing adjustments to make on special dates. [{\"Date\":\"2022-10-01\",\"Ratio\":\"-0.3\"}]",
+                  "title": "Special date adjustment data JSON",
+                  "x-ms-visibility": "advanced"
+                },
+                "SpecialDateColumnName": {
+                  "type": "string",
+                  "description": "Date",
+                  "title": "Name of the column in the `specialDateFileName` listing dates for special days and holidays.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SpecialDateEventColumnName": {
+                  "type": "string",
+                  "description": "Name",
+                  "title": "Name of the column in the `specialDateFilename` listing names of special days and holidays.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SpecialDateAdjustmentColumnName": {
+                  "type": "string",
+                  "description": "Name of the column in the special event data describing the adjustments to make.",
+                  "title": "Special date adjustment property name",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "Name",
+                "EndDateTime",
+                "DateTimeColumnName",
+                "inputDataJson",
+                "VolumeColumnName",
+                "IncludePredictionInterval",
+                "Seasonality"
+              ],
+              "x-ms-visibility": "important"
+            },
+            "x-ms-visibility": "important"
+          }
+        ]
+      }
+    },
+    "/api/beta/textanalytics/topicclustering": {
+      "post": {
+        "responses": {
+          "202": {
+            "description": "The request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "operationId": {
+                  "type": "string",
+                  "description": "Job ID"
+                },
+                "status": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Status"
+                },
+                "diagnostics": {
+                  "type": "string",
+                  "description": "Errors or warnings generated during job creatio"
+                },
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "recordId": {
+                        "type": "string",
+                        "description": "Unique identifier for each individual response item."
+                      },
+                      "topicId": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Unique identifier given to each topic cluster. You can query or filter results based on this id."
+                      },
+                      "topicConfidence": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "Confidence of the machine learning models regarding the clustering of the topic. A higher score is more likely to belong to a cluster."
+                      },
+                      "topicLabel": {
+                        "type": "string",
+                        "description": "Text label given to each cluster."
+                      }
+                      ,
+                      "sentiment": {
+                        "type": "string",
+                        "description": "Assessment of whether feedback is positive, negative, or neutral."
+                      }
+                    }
+                  },
+                  "description": "An array of records returned by a Topic clustering job."
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create text analytic job",
+        "description": "Submit text analytic job to Business Assist.",
+        "consumes": ["application/json"],
+        "operationId": "CreateCluserting",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Name": {
+                  "type": "string",
+                  "description": "Name"
+                },
+                "inputData": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "recordId": {
+                        "type": "string",
+                        "description": "Unique identifier for a single response item."
+                      },
+                      "text": {
+                        "type": "string",
+                        "description": "The text of a single response item. This may be multiple sentences."
+                      }
+                    }
+                  },
+                  "description": "An array of response records that consists of a recordId and the text of the response."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/api/beta/textanalytics/topicclustering/{Clustering job Id}/status": {
+      "get": {
+        "responses": {
+          "202": {
+            "description": "The `TextAnalyticsStatus` API accepts a TextAnalytics `operationId` and returns the status of the TextAnalytics job.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "operationId": {
+                  "type": "string",
+                  "description": "Job ID"
+                },
+                "status": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Code representing job status."
+                },
+                "diagnostics": {
+                  "type": "string",
+                  "description": "Errors or warnings generated during job creation."
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get text analytic job status",
+        "description": "Get text analytic job status by job id.",
+        "operationId": "GetClusteringStatus",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "Clustering job Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Specify clustering job id.",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/api/beta/textanalytics/topicclustering/{Clustering job Id}/result": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "operationId": {
+                  "type": "string",
+                  "description": "Job ID."
+                },
+                "result": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "recordId": {
+                        "type": "string",
+                        "description": "Unique identifier for each individual response item."
+                      },
+                      "topicId": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Unique identifier given to each topic cluster. You can query or filter results based on this id."
+                      },
+                      "topicConfidence": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "Confidence of the machine learning models regarding the clustering of the topic. A higher score is more likely to belong to a cluster."
+                      },
+                      "topicLabel": {
+                        "type": "string",
+                        "description": "Text label given to each cluster."
+                      }
+                    }
+                  },
+                  "description": "An array of records returned by a Topic clustering job."
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get text analytic job result",
+        "description": "The `TextAnalyticsResult` API accepts a TextAnalytics `operationId` and returns the results of the completed TextAnalytics job.",
+        "operationId": "GetClusteringResult",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "Clustering job Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Specify clustering job id.",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/api/beta/SelfHelp/insights": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "solutions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Solution or article title."
+                      },
+                      "details": {
+                        "type": "string",
+                        "description": "Preview text of article or content."
+                      },
+                      "solutionConfidence": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "Algorithmic confidence score of the confidence the solution is relevant to the query."
+                      }
+                    }
+                  },
+                  "description": "Instant answer to the user query. Contains `title`, `details` and `SolutionConfidence` score."
+                },
+                "webSearchResults": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Solution or article title."
+                      },
+                      "details": {
+                        "type": "string",
+                        "description": "Preview text of article or content."
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "Link to full content of the `WebSearchResults`."
+                      }
+                    }
+                  },
+                  "description": "Related article from the web search.Contains the `title`, `details`, and `url` found through a web search."
+                },
+                "serviceIncidents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                      "properties": {
+                        "id": {
+                        "type": "string",
+                        "description": "Id"
+                        },
+                        "serviceName": {
+                          "type": "string",
+                          "description": "ServiceName"
+                        },
+                        "issueType": {
+                          "type": "string",
+                          "description": "IssueType"
+                        },
+                        "startTime": {
+                          "type": "string",
+                          "description": "StartTime"
+                        },
+                        "endTime": {
+                          "type": "string",
+                          "description": "EndTime"
+                        },
+                        "lastUpdatedTime": {
+                          "type": "string",
+                          "description": "LastUpdatedTime"
+                        },
+                        "impactDescription": {
+                          "type": "string",
+                          "description": "ImpactDescription"
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "Title"
+                        },
+                        "severity": {
+                          "type": "string",
+                          "description": "Severity"
+                        },
+                        "issueStatus": {
+                          "type": "string",
+                          "description": "IssueStatus"
+                        },
+                        "isIncidentResolved": {
+                          "type": "boolean",
+                          "description": "IsIncidentResolved"
+                        }
+                      }                    
+                  },
+                  "description": "ServiceIncidents"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get self-help insights",
+        "description": "Get self-help insights from Business Assist.",
+        "operationId": "GetSelfHelpInsights",
+        "x-ms-visibility": "important",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "QueryText": {
+                  "type": "string",
+                  "description": "Text of the user's query.",
+                  "title": "Problem Description"
+                },
+                "Locale": {
+                  "type": "string",
+                  "description": "Locale to use for the solution returned.",
+                  "title": "Locale"
+                }
+              },
+              "required": [
+                "Locale",
+                "QueryText"
+              ],
+              "x-ms-visibility": "important"
+            },
+            "x-ms-visibility": "important"
+          }
+        ]
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://microsoft.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://support.microsoft.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI"
+    }
+  ],
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.windows.net/common/oauth2/authorize",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {
+        "https://business-assist.microsoft.com/.default": "https://business-assist.microsoft.com/.default"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": [
+        "https://business-assist.microsoft.com/.default"
+      ]
+    }
+  ],
+  "tags": []
+}
