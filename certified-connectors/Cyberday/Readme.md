@@ -19,6 +19,9 @@ Fetch a list of all data systems and their main information from your Cyberday a
 ### Create a new data system
 Add a new data system directly to your Cyberday account.
 
+### Create or update a data system with advanced fields
+Add a new data system directly to your Cyberday account or update an existing data system. Additional fields can be passed for advanced users.
+
 ## Obtaining Credentials
 In order to use this connector you will need your organisation's API key from your Cyberday account. This can be found in the "Settings" -> "Integration settings" section inside Cyberday.
 

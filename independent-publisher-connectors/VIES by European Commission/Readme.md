@@ -16,5 +16,10 @@ No credentials needed.
 ## Known Issues and Limitations
 Sometimes requests to VIES may take more time than expected which may lead to timeouts. If you face such issues, try building requests to VIES in a loop running until a correct response is received. Apart from that, no other issues or limitations are known at the moment of api creation.
 
+## Changelog
+
+1.0: Initial release of the Independent Publisher Connector.
+2.0: Updates to the connector caused by changes in VIES endpoint.
+
 ## Getting Started
 Visit https://ec.europa.eu/taxation_customs/vies/vatRequest.html to test the api on your own.
