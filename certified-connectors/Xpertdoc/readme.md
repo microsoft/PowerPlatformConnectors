@@ -2,6 +2,10 @@
 
 Xpertdoc enables business users to simplify, optimize and automate consistent document generation processes, leveraging Microsoft Dynamics 365 and external data sources as well as seamless integrations to leading applications. Our robust and user-friendly features let you easily create, generate, manage, store, deliver and e-sign business-critical documents like quotes, proposals, contracts, invoices and more without code.
 
+## Deprecated
+
+This connector is deprecated. You should now use the [Experlogix Smart Flows](https://learn.microsoft.com/en-us/connectors/experlogixsmartflows/) connector.
+
 ## Pre-requisites
 
 You need to have access to an Xpertdoc Smart Flows project. If you would like to get a free trial, simply click [here](https://www.xpertdoc.com/en/get-free-trial-document-generation/).
