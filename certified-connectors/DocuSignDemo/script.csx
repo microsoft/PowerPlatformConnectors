@@ -1635,6 +1635,28 @@ public class Script : ScriptBase
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("GetTabInfo".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var tabType = query.Get("tabLabel");
+      var newBody = new JObject();
+
+      foreach(JProperty tabTypes in body.Properties())
+      {
+        foreach(var tab in tabTypes.Value)
+        {
+          if((tab["tabLabel"].ToString()).Equals(tabType.ToString()))
+          {
+            newBody["name"] = tab["name"];
+            newBody["value"] = tab["value"];
+          }
+        }
+      }
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
