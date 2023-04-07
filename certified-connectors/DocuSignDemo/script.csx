@@ -1524,6 +1524,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("GetRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/tabCollection", "/tabs");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("OnEnvelopeStatusChanges".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1633,6 +1640,18 @@ public class Script : ScriptBase
       }
       body["workflowIds"] = workflowsArray;
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetRecipientTabs")..Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+
+      var newBody = new JObject
+      {
+        ["tabs"] = body;
+      };
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
