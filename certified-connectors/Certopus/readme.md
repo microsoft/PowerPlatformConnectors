@@ -2,15 +2,13 @@
 
 Certopus is a service that enables you to design and deliver verifiable credentials. With Certopus, you can design credentials using their template engine, which includes a rich library of professionally designed certificates and badges. You can also bulk generate high-quality PDFs and deliver personalized credentials to recipients in just a few clicks. Additionally, you can get insights on the performance of your credential campaign and plan accordingly to garner the best audience response.
 
-## Publisher:
-
-DevSquirrel Technologies Private Limited
+## Publisher: DevSquirrel Technologies Private Limited
 
 ## Prerequisites
 
 Paid plan is required to use this integration.
 
-## Supported Actions
+## Supported Operations
 
 ### Create a Credential:
 
