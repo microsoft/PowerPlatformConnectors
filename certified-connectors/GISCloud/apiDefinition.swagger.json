@@ -28,6 +28,7 @@
       "description": "GIS Cloud API Key used to Authorize the Operation",
       "in": "header",
       "type": "string",
+      "format": "password",
       "required": true,
       "x-example": "77e1c83b7bb0437bbc50a7a58e5660ac"
     },
@@ -130,12 +131,11 @@
     "geometry": {
       "name": "geometry",
       "x-ms-summary": "Include Geometry",
-      "description": "Format in which geometry will be packed. Possible values: 'geojson', 'wkt', 'kml' and 'gml'",
+      "description": "Format in which geometry will be packed. Possible values: 'wkt', 'kml' and 'gml'",
       "in": "query",
       "type": "string",
       "required": false,
       "enum": [
-        "geojson",
         "wkt",
         "kml",
         "gml"
@@ -313,7 +313,7 @@
       "type": "integer",
       "minimum": 2,
       "maximum": 2,
-      "x-example": 2,
+      "default": 2,
       "x-ms-url-encoding": "single"
     },
     "file_name": {
@@ -535,7 +535,7 @@
         }
       }
     },
-    "/map_cache/{map_id}/{init_trigger}/.json": {
+    "/map_cache/{map_id}/{init_trigger}": {
       "delete": {
         "summary": "Delete Map Cache",
         "description": "Deletes the map tile cache to reflect changes made via the API.",
@@ -571,6 +571,12 @@
             "description": "Resource Not Found",
             "schema": {
               "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "System Error",
+            "schema": {
+              "$ref": "#/definitions/GatewayError"
             }
           }
         }
@@ -740,7 +746,16 @@
             "$ref": "#/parameters/page"
           },
           {
-            "$ref": "#/parameters/nototal"
+            "name": "nototal",
+            "x-ms-summary": "No Total",
+            "description": "Total of results is not counted and displayed; improves response time; used for getting the response faster",
+            "in": "query",
+            "type": "integer",
+            "required": true,
+            "enum": [
+              0
+            ],
+            "default": 0
           }
         ],
         "responses": {
@@ -1014,6 +1029,14 @@
                 "type": "string",
                 "description": "URL link to the newly created feature with the API host removed"
               }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "location": {
+                  "type": "string"
+                }
+              }
             }
           },
           "403": {
@@ -1251,6 +1274,14 @@
                 "type": "string",
                 "description": "Loaction of uploaded file"
               }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "location": {
+                  "type": "string"
+                }
+              }
             }
           },
           "404": {
@@ -1425,6 +1456,35 @@
         "msg"
       ]
     },
+    "GatewayError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer"
+            },
+            "message": {
+              "type": "string",
+              "description": "Error Message"
+            },
+            "source": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "policyId": {
+              "type": "string"
+            },
+            "clientRequestId": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "Maps": {
       "type": "object",
       "required": [
@@ -1441,6 +1501,7 @@
           "enum": [
             "maps"
           ],
+          "default": "maps",
           "x-ms-visibility": "internal"
         },
         "total": {
@@ -1489,9 +1550,12 @@
           "example": "City of Zagreb"
         },
         "owner": {
-          "type": "string",
+          "type": "array",
           "description": "Map owner object. This value only appears if the expand parameter contains the key 'owner'",
-          "x-ms-summary": "Owner Object"
+          "x-ms-summary": "Owner Object",
+          "items": {
+            "type": "string"
+          }
         },
         "active": {
           "type": "string",
@@ -1597,9 +1661,7 @@
           "example": "t"
         },
         "resource": {
-          "type": "string",
-          "description": "Map resource object",
-          "x-ms-summary": "Resource Object"
+          "$ref": "#/definitions/Resource"
         },
         "description": {
           "type": "string",
@@ -1673,6 +1735,99 @@
         }
       }
     },
+    "Resource": {
+      "type": "object",
+      "description": "Map resource object",
+      "x-ms-summary": "Resource Object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Internal ID of this Resource",
+          "x-ms-summary": "Resource ID",
+          "example": 1198
+        },
+        "type": {
+          "type": "string",
+          "description": "Enumerated type of Resource",
+          "x-ms-summary": "Resource Type",
+          "example": "5"
+        },
+        "location": {
+          "type": "string",
+          "description": "TBC with potentially null values",
+          "x-ms-summary": "Resource Location",
+          "example": ""
+        },
+        "target_resource_id": {
+          "type": "string",
+          "description": "resource_id",
+          "x-ms-summary": "Resource ID",
+          "example": "793341"
+        },
+        "owner_id": {
+          "type": "string",
+          "description": "User Id of the User owning this Resource",
+          "x-ms-summary": "Resource Owner Id",
+          "example": 202
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "TBC with potentially null values",
+          "x-ms-summary": "Resource Parent ID",
+          "example": ""
+        },
+        "payment_subscription_id": {
+          "type": "string",
+          "description": "TBC with potentially null values",
+          "x-ms-summary": "Resource Payment Subscription ID",
+          "example": ""
+        },
+        "payment_id": {
+          "type": "string",
+          "description": "TBC with potentially null values",
+          "x-ms-summary": "Resource Payment ID",
+          "example": ""
+        },
+        "payment_id_obs": {
+          "type": "string",
+          "description": "TBC with potentially null values",
+          "x-ms-summary": "Resource Payment ID Obs",
+          "example": ""
+        },
+        "archived": {
+          "type": "string",
+          "description": "Indicates if the Resource has been archived",
+          "x-ms-summary": "Resource Archived",
+          "example": "0"
+        },
+        "disabled": {
+          "type": "string",
+          "description": "TBC with potentially null values",
+          "x-ms-summary": "Resource Disabled",
+          "example": ""
+        },
+        "access_time": {
+          "type": "object",
+          "description": "Time resource was last accessed",
+          "x-ms-summary": "Resource Access Time"
+        },
+        "modified": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Last time resource was modified (UNIX timestamp)",
+          "x-ms-summary": "Modified At",
+          "example": 1602773958
+        },
+        "created": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Time when resource was created (UNIX timestamp)",
+          "x-ms-summary": "Created At",
+          "example": 1593945880
+        }
+      }
+    },
     "Layers": {
       "type": "object",
       "required": [
@@ -1689,6 +1844,7 @@
           "enum": [
             "layers"
           ],
+          "default": "layers",
           "x-ms-visibility": "internal"
         },
         "total": {
@@ -1736,9 +1892,12 @@
           "example": "Open Street Map"
         },
         "owner": {
-          "type": "string",
+          "type": "array",
           "description": "Layer owner object, EXPANDABLE",
-          "x-ms-summary": "Owner Object"
+          "x-ms-summary": "Owner Object",
+          "items": {
+            "type": "string"
+          }
         },
         "source": {
           "type": "object",
@@ -1940,7 +2099,7 @@
           "example": "t"
         },
         "datasource_id": {
-          "type": "integer",
+          "type": "string",
           "description": "Datasource ID of the layer data source",
           "x-ms-summary": "Layer Datasource Id"
         },
@@ -1975,21 +2134,30 @@
           "example": "polygon"
         },
         "order": {
-          "type": "string",
+          "type": "integer",
+          "format": "int32",
           "description": "Layer Z index",
           "x-ms-summary": "Layer Order",
-          "example": "0"
+          "example": 0
         },
         "x-gc-columns": {
           "type": "object",
           "description": "Custom generated schema to provide dynamic lookup of feature schema",
           "x-ms-summary": "GC Schema",
           "x-ms-visibility": "internal",
-          "additionalProperties": {
-            "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
             "properties": {
-              "type": {
-                "type": "string"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  }
+                }
               }
             }
           }
@@ -2043,12 +2211,12 @@
               "example": "14125"
             },
             "type": {
-              "type": "integer",
+              "type": "string",
               "description": "Datasource Type for the layer",
               "x-ms-summary": "Datasource Type"
             },
             "owner_id": {
-              "type": "integer",
+              "type": "string",
               "description": "owner_id",
               "x-ms-summary": "Datasource Owner Id"
             },
@@ -2070,6 +2238,7 @@
             "properties": {
               "id": {
                 "type": "integer",
+                "format": "int32",
                 "description": "Layer Column Id",
                 "x-ms-summary": "Column Id",
                 "x-ms-visibility": "internal"
@@ -2101,6 +2270,13 @@
               }
             }
           }
+        },
+        "sublayers": {
+          "type": "array",
+          "description": "Array of Layer objects nested within this Layer",
+          "items": {
+            "$ref": "#/definitions/Layer"
+          }
         }
       }
     },
@@ -2120,6 +2296,7 @@
           "enum": [
             "features"
           ],
+          "default": "features",
           "x-ms-visibility": "internal"
         },
         "total": {
@@ -2279,8 +2456,7 @@
           "example": "Smith"
         },
         "owner_id": {
-          "type": "integer",
-          "format": "int32",
+          "type": "string",
           "description": "User Id of the User owning this User",
           "x-ms-summary": "User Owner Id",
           "example": 202
@@ -2366,37 +2542,37 @@
           "x-ms-visibility": "internal"
         },
         "file_feature_count": {
-          "type": "integer",
+          "type": "string",
           "description": "Geographic Feature count on the File System",
           "x-ms-summary": "File Feature Count",
           "example": 2201171
         },
         "db_feature_count": {
-          "type": "integer",
+          "type": "string",
           "description": "Geographic Feature count in the Database",
           "x-ms-summary": "DB Feature Count",
           "example": 245249
         },
         "storage_raster": {
-          "type": "integer",
+          "type": "string",
           "description": "File Storage Consumed by Raster Tiles",
           "x-ms-summary": "User Raster Stored",
           "example": 124743678
         },
         "storage_total": {
-          "type": "integer",
+          "type": "string",
           "description": "Total File Storage Consumed",
           "x-ms-summary": "User Storage Capcity",
           "example": 2130925920
         },
         "feature_count_limit": {
-          "type": "integer",
+          "type": "string",
           "description": "Licenced Max Feature Count",
           "x-ms-summary": "User Feature Limit",
           "example": 20000000
         },
         "storage_raster_limit": {
-          "type": "integer",
+          "type": "string",
           "description": "Licenced Max Storage Capacity",
           "x-ms-summary": "User Raster Limit",
           "example": 1048576000000
@@ -2408,15 +2584,13 @@
           "x-ms-visibility": "internal"
         },
         "subscription_begins": {
-          "type": "integer",
-          "format": "int32",
+          "type": "string",
           "description": "When the users subscription begins",
           "x-ms-summary": "Subscription Begins",
           "example": 1570757212
         },
         "subscription_expires": {
-          "type": "integer",
-          "format": "int32",
+          "type": "string",
           "description": "When the users subscription ends",
           "x-ms-summary": "Subscription Expires",
           "example": 1570757212
@@ -2443,19 +2617,20 @@
           "example": "0"
         },
         "resource_id": {
-          "type": "integer",
+          "type": "string",
           "description": "Internal Resource Id for this User",
           "x-ms-summary": "User Resource Id",
           "example": 18495
         },
         "modified": {
-          "type": "string",
+          "type": "integer",
+          "format": "int32",
           "description": "Last modified date time (UNIX format)",
           "x-ms-summary": "User last modified",
-          "example": "1570757212"
+          "example": 1570757212
         },
         "organization_id": {
-          "type": "integer",
+          "type": "string",
           "description": "Organization Id for this User",
           "x-ms-summary": "Users Organization",
           "example": 18495

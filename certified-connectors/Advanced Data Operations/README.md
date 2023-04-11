@@ -13,7 +13,9 @@ One can be obtained by signing up to a paid plan or by activating a trial subscr
 - `Aggregate` - Aggregate one or more properties by a grouped set of fields within a JSON array dataset.  
 - `Cartesian Join` - Perform a Cartesian join over two or more datasets.  
 - `Concatenate` - Concatenate a field from an array of objects into a single string output.  
-- `Concatenate (Simple)` - Concatenate an array of values into a delimited string.  
+- `Concatenate (Simple)` - Concatenate an array of values into a delimited string.
+- `C# Evaluate` - Evaluates a C# expression and returns the result.
+- `C# Script Execute` - Takes in and executes a C# script.
 - `CSV to JSON` - Transform a comma separated table of data into an array of JSON objects.  
 - `Distinct` - Select a set of distinct property values from an array of objects.  
 - `Distinct (Simple)` - Provide a distinct set of values from an array.  
