@@ -13,7 +13,7 @@
 
             switch (Context.OperationId)
             {
-                case "Completion":
+                case "CreateCompletion":
                     return await ProcessCompletion().ConfigureAwait(false);
                     break;
                 case "ChatCompletion":
@@ -85,36 +85,6 @@
         {
             const string DEFAULT_API_VERSION = "2021-08-01";
 
-            Context.Logger.LogInformation("Reading Headers");
-            var resourceName = Context.Request.Headers.Where(h => h.Key == "resource-name").FirstOrDefault().Value.FirstOrDefault();
-            var deploymentName = Context.Request.Headers.Where(h => h.Key == "deployment-name").FirstOrDefault().Value.FirstOrDefault();
-            var apiVersion = Context.Request.Headers.Where(h => h.Key == "api-version").FirstOrDefault().Value.FirstOrDefault() ?? DEFAULT_API_VERSION;
-            var apiKey = Context.Request.Headers.Where(h => h.Key == "api-key").FirstOrDefault().Value.FirstOrDefault();
-
-            Context.Logger.LogInformation("validating headers");
-            if (string.IsNullOrWhiteSpace(apiKey))
-            {
-                return new HttpResponseMessage(HttpStatusCode.Unauthorized) { Content = CreateJsonContent(JsonConvert.SerializeObject(new { message = "Must pass API Key" })) };
-            }
-
-            if (string.IsNullOrWhiteSpace(deploymentName))
-            {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = CreateJsonContent(JsonConvert.SerializeObject(new { message = "Must pass deployment name" })) };
-            }
-
-            if (string.IsNullOrWhiteSpace(resourceName))
-            {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = CreateJsonContent(JsonConvert.SerializeObject(new { message = "Must pass resource name" })) };
-            }
-
-            Context.Logger.LogInformation("building request uri");
-            var url = $"https://{resourceName}.openai.azure.com/openai/deployments/{deploymentName}/completions?api-version={(apiVersion)}";
-            Context.Logger.LogInformation(url);
-
-            Context.Request.Headers.Clear();
-            Context.Request.Headers.Add("api-key", apiKey);
-            Context.Request.RequestUri = new Uri(url);
-
             Context.Logger.LogInformation("reading body");
             var body = JsonConvert.DeserializeObject<IncomingRequestBody>(await Context.Request.Content.ReadAsStringAsync());
 
@@ -143,7 +113,7 @@
                 var responseBody = await response.Content.ReadAsStringAsync();
                 var responseJson = JObject.Parse(responseBody);
                 var completionObject = JsonConvert.DeserializeObject<AnswerObject>(responseJson?["choices"]?[0]?.ToString());
-                body.History.Add(new QAPair() { Question = body.Question, Answer = completionObject?.Text ?? "NO MATCH" });
+                body.History.Add(new QAPair() { Question = body.Prompt, Answer = completionObject?.Text ?? "NO MATCH" });
 
                 var newResponseBody = new ResponseBody
                 {
@@ -242,14 +212,18 @@
         {
             if (Messages.Count == 0)
             {
-                Messages.Add(new ChatMessage { Role = Role.system,
-                                   Content = SystemInstruction ?? DEFAULT_SYSTEM_INSTRUCTION
-                               });
+                Messages.Add(new ChatMessage
+                {
+                    Role = Role.system,
+                    Content = SystemInstruction ?? DEFAULT_SYSTEM_INSTRUCTION
+                });
             }
 
-            Messages.Add(new ChatMessage { Role = Role.user,
-                                          Content = UserMessage ?? DEFAULT_MORE_INFO_QUESTION
-                                      });
+            Messages.Add(new ChatMessage
+            {
+                Role = Role.user,
+                Content = UserMessage ?? DEFAULT_MORE_INFO_QUESTION
+            });
             return Messages;
         }
     }
@@ -288,17 +262,12 @@
         const string START_ASSISTANT_TOKEN = "<|im_start|>assistant";
         const string END_TOKEN = "<|im_end|>";
         const string DEFAULT_QUESTION = "Tell me more about that";
-        const string DEFAULT_SCOPE = @"    Assistant is an intelligent professional informal chatbot designed to help users with questions about Microsoft Azure Products. 
-    Instructions:
-    - Only answer questions related to Microsoft and Microsoft Azure products. 
-    - If you're unsure of an answer, you can say ""I don't know"" or ""I'm not sure"" and recommend users go to microsoft.com.";
+        const string DEFAULT_SCOPE = @"You are a helpful assistant";
 
         [JsonProperty(PropertyName = "history")]
         public List<QAPair> History { get; set; } = new List<QAPair>();
         [JsonProperty(PropertyName = "initial_scope")]
         public string InitialScope { get; set; } = DEFAULT_SCOPE;
-        [JsonProperty(PropertyName = "question")]
-        public string Question { get; set; } = DEFAULT_QUESTION;
         [JsonProperty(PropertyName = "max_history_size")]
         public int MaxHistorySize { get; set; } = int.MaxValue;
 
@@ -315,7 +284,7 @@
                 prompt.AppendLine($"{qa.Answer}");
             }
 
-            prompt.AppendLine($"{START_USER_TOKEN}\n{Question}\n{END_TOKEN}");
+            prompt.AppendLine($"{START_USER_TOKEN}\n{Prompt}\n{END_TOKEN}");
             prompt.AppendLine($"{START_ASSISTANT_TOKEN}");
 
             return prompt.ToString();
