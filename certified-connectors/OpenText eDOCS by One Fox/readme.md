@@ -1,10 +1,10 @@
-## OpenText eDOCS by One Fox
-Empower OpenText eDOCS as the primary repository for all things content related. Together with the OpenText eDOCS Power Automate Connector by One Fox you can streamline content processes across a widespread application landscape and limit information silos.
+## OpenText™ eDOCS
+OpenText™ eDOCS is a flexible, collaborative enterprise content management (ECM) system designed to support legal and other professional services organizations. Now you can bring content and processes more together by combining it in your low code solutions to ensure that critical business content is managed and secure throughout the content lifecycle, while remaining easily accessible for day-to-day operations.
 
 ## Pre-requisites
 You will need the following to proceed:
 * A license to use this connector purchasable in Azure Marketplace or AppSource.
-* OpenText eDOCS with the REST service online reachable.
+* OpenText eDOCS with the REST and SOAP services online reachable.
 * OpenText eDOCS login credentials.
 
 ## How to get credentials
@@ -21,7 +21,12 @@ The connector supports the following operations:
 * `Get document`: Get the document from eDOCS
 * `Get document properties`: Get the properties of the document from eDOCS
 * `Get document content`: Get the content of the document from eDOCS
+* `Get document version content`: Get the content of the document version from eDOCS
 * `Delete document`: Delete the document in eDOCS
+* `Delete document version`: Delete the document version in eDOCS
+* `Check in document`: Check in the document in eDOCS
+* `Check out document`: Check out the document in eDOCS
+* `Get document versions`: Get the versions of the document from eDOCS
 
 ### Folder
 * `Create folder`: Create the folder in eDOCS
@@ -35,3 +40,25 @@ The connector supports the following operations:
 ### Search
 * `Search`: Search on all profile metadata in eDOCS
 * `Advanced search`: Search on specified profile metadata in eDOCS
+
+### Lookup Entry
+* `Create lookup entry`: Create the lookup entry in eDOCS
+* `Update lookup entry`: Update the lookup entry in eDOCS
+* `Get lookup entries`: Get all lookup entries for the specified content type from eDOCS
+
+## Supported Triggers
+The connector supports the following triggers:
+
+### Document
+* `When a document is created`: When a document has been created in eDOCS
+* `When document content is updated`: When a document file content has been updated in eDOCS
+* `When document properties are updated`: When document properties have been updated in eDOCS
+* `When a document is deleted`: When a document has been deleted in eDOCS (in case of queue for deletion)
+
+### Folder
+* `When a folder is created`: When a folder has been created in eDOCS
+* `When a folder is updated`: When a folder has been updated in eDOCS
+* `When a folder is deleted`: When a folder has been deleted in eDOCS (in case of queue for deletion)
+
+### Item
+* `When an item is deleted`: When a folder or document has been deleted in eDOCS (in case of hard delete)
