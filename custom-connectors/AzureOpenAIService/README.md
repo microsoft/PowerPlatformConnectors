@@ -28,7 +28,7 @@ paconn update --api-def apiDefinition.swagger.json --api-prop apiProperties.json
 
 ## Connection setup
 
-![Connection setup](./Assets/Connection.png)
+![Connection setup](./resources/create-connection.png)
 
 After importing the connector, you should create a  connection. There are two properties you need to fill in when creating the connection:
 
@@ -37,19 +37,19 @@ After importing the connector, you should create a  connection. There are two pr
 
 ## Available actions
 
-![Available actions](./Assets/AzureOpenAIService.png)
+![Available actions](./resources/available-actions.png)
 
-* `Create a chat completion (Preview)` - With this action, you can provide a prompt which the Azure OpenAI Chat Service will complete.
 * `Create a completion` - With this action, you can provide a prompt which the Azure OpenAI Service will complete.
+* `Get deployment` - With this action, you are able to get details about a deployment of a model inside of your instance of the Azure OpenAI Service.
+* `Chat Completion (Preview)` - With this action, you can provide a prompt which the Azure OpenAI Chat Service will complete.
 * `Create deployment` - With this action, you are able to create a deployment of a model inside of your instance of the Azure OpenAI Service.
 * `Delete deployment` - With this action, you are able to delete a deployment of a model inside of your instance of the Azure OpenAI Service.
-* `Get deployment` - With this action, you are able to get details about a deployment of a model inside of your instance of the Azure OpenAI Service.
 * `List deployments` - With this action, you can list all deployments inside of your instance of the Azure OpenAI Service.
 * `List models` - With this action, you can list all models that are available to your instance of the Azure OpenAI Service.
 
 ## Connector Architecture
 
-![Azure OpenAI Custom Connector Architecture](.\resources\azure-openai-custom-connector-architecture.png)
+![Azure OpenAI Custom Connector Architecture](./resources/azure-openai-custom-connector-architecture.png)
 
 1. The connector is called from a Power Automate Flow, Power App or Logic App. The default policy is used to build the full Azure OpenAI endpoint from the `resource-name` (from the connection) and, if required, the `deployment-id` (passed as a header).
 1. If the operation is neither `CreateCompletion` nor `ChatCompletion`, the operation is passed directly to the applicable endpoint in the Azure OpenAI REST service.
