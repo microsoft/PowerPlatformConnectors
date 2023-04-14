@@ -113,12 +113,12 @@
                 var responseBody = await response.Content.ReadAsStringAsync();
                 var responseJson = JObject.Parse(responseBody);
                 var completionObject = JsonConvert.DeserializeObject<AnswerObject>(responseJson?["choices"]?[0]?.ToString());
-                body.History.Add(new QAPair() { Question = body.Prompt, Answer = completionObject?.Text ?? "NO MATCH" });
+                body.History.Add(new QAPair() { Question = body.Prompt, Answer = StripTrailingTokens(completionObject?.Text ?? "NO MATCH") });
 
                 var newResponseBody = new ResponseBody
                 {
                     History = body.History,
-                    Answer = completionObject?.Text ?? "NO MATCH",
+                    Answer = StripTrailingTokens(completionObject?.Text ?? "NO MATCH"),
                     InitialScope = body.InitialScope
                 };
 
@@ -128,6 +128,13 @@
             }
 
             return response;
+        }
+
+        const string END_TOKEN = "<|im_end|>";
+
+        private string StripTrailingTokens(string rawanswer)
+        {
+            return rawanswer.Replace(END_TOKEN, "").Trim();
         }
     }
 
