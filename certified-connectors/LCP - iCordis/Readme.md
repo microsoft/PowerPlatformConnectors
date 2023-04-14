@@ -1,5 +1,7 @@
-## LCP - iCordis
+# LCP - iCordis
 With the LCP - iCordis connector you can transfer data to the e-loket forms on your website.
+
+## Publisher: LCP nv
 
 ## Prerequisites
 You will need the following to proceed:
@@ -28,6 +30,15 @@ Unsubscribe from the webhook trigger for the given form.
 The connector supports the following triggers:  
 * `When a new submission is created for the e-loket form`: Get a notification when a new submission is created for the e-loket form and receive the ID of the new submission.
 
+## Obtaining Credentials
+1. Create an account in the CBO (https://#yourcbolink#/module/index/504)
+2. Send a request to helpdesk@lcp.be to give the created account access to the API.
+
+## Known Issues and Limitations
+Only LCP customers with the e-loket functionality can use this connector. 
+
+## Deployment Instructions
+Please use [these instructions](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
 
 
 
