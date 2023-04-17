@@ -1,4 +1,4 @@
-## Tesseron ASM Ticket Connector
+## Tesseron Invoice Connector
 With Tesseron, we offer your company an innovative solution for cooperation with your customers, partners and suppliers.This connector allows you to use Tesseron Invoice API to create position notes and activity recordings.
 
 ## Publisher: Publisher's Name
@@ -28,7 +28,7 @@ Authentication is done via an API key. Please provide your API key and your inst
 
 
 ## Deployment Instructions
-Since Tesseron ASM Rest API uses API keys to validate your user, you first need to contact your system administrator to create an API key for your user. After that is completed you can create your Tesseron ASM connection.
+Since Tesseron Rest API uses API keys to validate your user, you first need to contact your system administrator to create an API key for your user. After that is completed you can create your Tesseron connection.
 
 1. Check user rights
 With this connector you will be able to perform ticket actions within your Tesseron instance. Therefore you need to have the mandatory user rights in the needed areas (at least editor).
