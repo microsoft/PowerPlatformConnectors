@@ -920,6 +920,25 @@ public class Script : ScriptBase
     return newBody;
   }
 
+  private JObject CreateEnvelopeFromTemplateNoRecipientsBodyTransformation(JObject body)
+  {
+    var templateRoles = new JArray();
+    var signer = new JObject();
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    var newBody = new JObject()
+    {
+      ["templateId"] = query.Get("templateId")
+    };
+
+    if (!string.IsNullOrEmpty(query.Get("status")))
+    {
+      newBody["status"] = query.Get("status");
+    }
+
+    return newBody;
+  }
+
   private JObject UpdateEnvelopeCustomFieldBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -1459,6 +1478,11 @@ public class Script : ScriptBase
     if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV2BodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("CreateEnvelopeFromTemplateNoRecipients".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateNoRecipientsBodyTransformation).ConfigureAwait(false);
     }
 
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
