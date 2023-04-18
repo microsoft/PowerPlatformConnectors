@@ -1751,6 +1751,12 @@ public class Script : ScriptBase
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JArray envelopeDocuments = new JArray();
+      JObject newBody = new JObject();
+
+      if (body["envelopeDocuments"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Envelope do not contain documents");
+      }
 
       foreach(var document in body["envelopeDocuments"] as JArray ?? new JArray())
       {
@@ -1760,8 +1766,8 @@ public class Script : ScriptBase
         ));
       }
 
-      body["envelopeDocuments"] = envelopeDocuments;
-      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+      newBody["envelopeDocuments"] = envelopeDocuments;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
