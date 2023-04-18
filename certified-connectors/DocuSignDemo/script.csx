@@ -1750,21 +1750,17 @@ public class Script : ScriptBase
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-
       JArray envelopeDocuments = new JArray();
-      
-      envelopeDocuments.Add(new JObject(
-          new JProperty("name", "Sample"),
-          new JProperty("documentId", "1")
-      ));
-      
-      envelopeDocuments.Add(new JObject(
-          new JProperty("name", "blank"),
-          new JProperty("documentId", "2")
-      ));
+
+      foreach(var document in body["envelopeDocuments"] as JArray ?? new JArray())
+      {
+        envelopeDocuments.Add(new JObject(
+          new JProperty("documentId", document["documentId"]),
+          new JProperty("name", document["name"])
+        ));
+      }
 
       body["envelopeDocuments"] = envelopeDocuments;
-
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
