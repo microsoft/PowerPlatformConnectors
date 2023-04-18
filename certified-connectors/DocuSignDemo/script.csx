@@ -936,6 +936,10 @@ public class Script : ScriptBase
       newBody["status"] = query.Get("status");
     }
 
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createFromTemplateNoRecipients", "/envelopes");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
     return newBody;
   }
 
