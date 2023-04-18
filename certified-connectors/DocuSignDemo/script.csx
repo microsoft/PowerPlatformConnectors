@@ -1524,6 +1524,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("GetEnvelopeDocumentsInfo".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/envelopeDocuments", "/documents");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("OnEnvelopeStatusChanges".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1737,6 +1744,28 @@ public class Script : ScriptBase
       }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetEnvelopeDocumentsInfo".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+      JArray envelopeDocuments = new JArray();
+      
+      envelopeDocuments.Add(new JObject(
+          new JProperty("name", "Sample"),
+          new JProperty("documentId", "1")
+      ));
+      
+      envelopeDocuments.Add(new JObject(
+          new JProperty("name", "blank"),
+          new JProperty("documentId", "2")
+      ));
+
+      body["envelopeDocuments"] = envelopeDocuments;
+
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
