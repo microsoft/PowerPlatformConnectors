@@ -523,10 +523,21 @@
         var newResponse = new JArray();
         foreach (TranslationResult translationResult in translationResults)
         {
-            newResponse.Add(JObject.FromObject(new
+            if (translationResult.Translations[0].Transliteration != null)
             {
-                TranslatedText = translationResult.Translations[0].Text
-            }));
+                newResponse.Add(JObject.FromObject(new
+                {
+                    TranslatedText = translationResult.Translations[0].Text,
+                    TransliteratedText = translationResult.Translations[0].Transliteration.Text
+                }));
+            }
+            else
+            {
+                newResponse.Add(JObject.FromObject(new
+                {
+                    TranslatedText = translationResult.Translations[0].Text
+                }));
+            }
         }
 
         response.Content = CreateJsonContent(newResponse.ToString());
