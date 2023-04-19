@@ -1760,10 +1760,11 @@ public class Script : ScriptBase
 
       foreach(var document in body["envelopeDocuments"] as JArray ?? new JArray())
       {
-        envelopeDocuments.Add(new JObject(
-          new JProperty("documentId", document["documentId"]),
-          new JProperty("name", document["name"])
-        ));
+        envelopeDocuments.Add(new JObject()
+        {
+          ["documentId"] = document["documentId"],
+          ["name"] = document["name"]
+        });
       }
 
       newBody["envelopeDocuments"] = envelopeDocuments;
