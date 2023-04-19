@@ -1524,6 +1524,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("ListEnvelopeDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/envelopeDocuments", "/documents");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("OnEnvelopeStatusChanges".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1736,6 +1743,31 @@ public class Script : ScriptBase
         newBody["recipientIdGuid"] = matchingSigner["recipientIdGuid"];
       }
 
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("ListEnvelopeDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JArray envelopeDocuments = new JArray();
+      JObject newBody = new JObject();
+
+      if (body["envelopeDocuments"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Envelope do not contain documents");
+      }
+
+      foreach(var document in body["envelopeDocuments"] as JArray ?? new JArray())
+      {
+        envelopeDocuments.Add(new JObject()
+        {
+          ["documentId"] = document["documentId"],
+          ["name"] = document["name"]
+        });
+      }
+
+      newBody["envelopeDocuments"] = envelopeDocuments;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
