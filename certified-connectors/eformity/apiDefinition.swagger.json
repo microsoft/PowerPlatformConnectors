@@ -1,0 +1,337 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "eformity",
+    "description": "This connector allows you to create dynamically generated documents from eformity.net and automatically download them or send them by email.",
+    "version": "1.0",
+    "contact": {
+      "name": "eformity Support",
+      "url": "https://eformity.com/support",
+      "email": "support@eformity.nl"
+    }
+  },
+  "host": "eformity.net",
+  "basePath": "/api/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "API-key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "apikey"
+    }
+  },
+  "security": [
+    {
+      "API-key": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "website",
+      "propertyValue": "https://eformity.com/"
+    },
+    {
+      "propertyName": "Privacy Policy",
+      "propertyValue": "https://eformity.net/policies/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Website;IT Operations"
+    }
+  ],
+  "paths": {
+    "/tasks": {
+      "post": {
+        "operationId": "CreateDocument",
+        "summary": "Create a document",
+        "description": "Starts a task for creating a document",
+        "parameters": [
+          {
+            "$ref": "#/parameters/CreateDocumentBody"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a Task. This task contains a Task ID which can be used to download the document after the task is completed.",
+            "schema": {
+              "$ref": "#/definitions/CreateDocumentResponse"
+            }
+          },
+          "default": {
+            "description": "Operation failed: Task could not be started. A document could not be created."
+          }
+        }
+      }
+    },
+    "/tasks/{id}/status": {
+      "get": {
+        "operationId": "RetrieveTaskStatus",
+        "summary": "Retrieve task status",
+        "description": "Retrieves the current status of a task",
+        "parameters": [
+          {
+            "$ref": "#/parameters/TaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the current status of the task. This status indicates if the task has been completed, is still busy or if it failed.",
+            "schema": {
+              "$ref": "#/definitions/RetrieveTaskStatusResponse"
+            }
+          },
+          "default": {
+            "description": "Operation failed: Could not retrieve task status."
+          }
+        }
+      }
+    },
+    "/tasks/{id}/download": {
+      "get": {
+        "operationId": "DownloadDocument",
+        "summary": "Download a document",
+        "description": "Downloads a document from a completed task",
+        "parameters": [
+          {
+            "$ref": "#/parameters/TaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns an object containing the document in Base64 format.",
+            "schema": {
+              "$ref": "#/definitions/DownloadDocumentResponse"
+            }
+          },
+          "default": {
+            "description": "Operation failed: Could not download document."
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "CreateDocumentBody": {
+      "name": "body",
+      "in": "body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/CreateDocumentRequest"
+      }
+    },
+    "TaskId": {
+      "name": "id",
+      "in": "path",
+      "x-ms-summary": "Task ID",
+      "description": "The ID of the task.",
+      "type": "string",
+      "x-ms-url-encoding": "single",
+      "required": true
+    }
+  },
+  "definitions": {
+    "CreateDocumentRequest": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "title": "Path",
+          "description": "The path of the document in eformity.net.",
+          "x-ms-visibility": "important"
+        },
+        "data": {
+          "type": "string",
+          "title": "Data",
+          "description": "An XML string containing the variables which will be inserted in the document."
+        },
+        "format": {
+          "type": "string",
+          "title": "Format",
+          "description": "The format in which the document will be downloaded.",
+          "x-ms-visibility": "advanced",
+          "default": "docx",
+          "enum": [
+            "pdf",
+            "docx"
+          ]
+        },
+        "async": {
+          "type": "boolean",
+          "title": "Async",
+          "description": "Specify whether on not the task should be asynchronous.",
+          "x-ms-visibility": "advanced",
+          "default": true,
+          "enum": [
+            true,
+            false
+          ]
+        }
+      },
+      "required": [
+        "path"
+      ]
+    },
+    "CreateDocumentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Task ID",
+          "description": "The ID of the task."
+        },
+        "schedulerId": {
+          "type": "string",
+          "title": "Scheduler ID",
+          "description": "The ID of the Scheduler."
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "The current status of the task."
+        },
+        "state": {
+          "type": "string",
+          "title": "State",
+          "description": "The current state of the task."
+        },
+        "message": {
+          "type": "string",
+          "title": "Message",
+          "description": "This property will contain an error message if an error occurred. Otherwise this property will be empty."
+        },
+        "error": {
+          "type": "object",
+          "description": "This object will contain error details if an error occurred. Otherwise this property will be empty.",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "title": "Reason",
+              "description": "The reason the error occurred."
+            },
+            "stackTrace": {
+              "type": "string",
+              "title": "Stack Trace",
+              "description": "A list of the method calls that the application was in the middle of when the error was thrown."
+            }
+          }
+        },
+        "url": {
+          "type": "string",
+          "title": "URL",
+          "description": "The URL of the task."
+        },
+        "completed": {
+          "type": "integer",
+          "title": "Completed",
+          "description": "Indicates if the task has been completed or not.",
+          "format": "int32"
+        },
+        "startedOn": {
+          "type": "string",
+          "title": "Started On",
+          "description": "The timestamp on which the task was started."
+        },
+        "completedOn": {
+          "type": "string",
+          "title": "Completed On",
+          "description": "The timestamp on which the task was completed."
+        },
+        "owner": {
+          "type": "string",
+          "title": "Owner",
+          "description": "The owner of the document."
+        }
+      }
+    },
+    "RetrieveTaskStatusResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Task ID",
+          "description": "The ID of the task."
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "The current status of the task."
+        },
+        "state": {
+          "type": "string",
+          "title": "State",
+          "description": "The current state of the task."
+        },
+        "url": {
+          "type": "string",
+          "title": "URL",
+          "description": "The URL of the task."
+        },
+        "completed": {
+          "type": "integer",
+          "title": "Completed",
+          "description": "Indicates if the task has been completed or not.",
+          "format": "int32"
+        },
+        "startedOn": {
+          "type": "string",
+          "title": "Started On",
+          "description": "The timestamp on which the task was started."
+        },
+        "completedOn": {
+          "type": "string",
+          "title": "Completed On",
+          "description": "The timestamp on which the task was completed."
+        }
+      }
+    },
+    "DownloadDocumentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Task ID",
+          "description": "The ID of the task."
+        },
+        "data": {
+          "type": "string",
+          "title": "Data",
+          "description": "The document encoded in Base64.",
+          "format": "byte"
+        },
+        "format": {
+          "type": "string",
+          "title": "Format",
+          "description": "The format of the document."
+        },
+        "filename": {
+          "type": "string",
+          "title": "Filename",
+          "description": "The filename of the document."
+        },
+        "extension": {
+          "type": "string",
+          "title": "Extension",
+          "description": "The file extension of the document."
+        },
+        "hash": {
+          "type": "string",
+          "title": "Hash",
+          "description": "The hash of the document."
+        },
+        "contentType": {
+          "type": "string",
+          "title": "Content-type",
+          "description": "The content-type of the document."
+        }
+      }
+    }
+  }
+}
