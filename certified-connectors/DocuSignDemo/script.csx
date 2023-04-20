@@ -1791,7 +1791,7 @@ public class Script : ScriptBase
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-      JArray templateDocuments = new JArray();
+      JArray documents = new JArray();
       JObject newBody = new JObject();
 
       if (body["templateDocuments"] == null)
@@ -1801,14 +1801,14 @@ public class Script : ScriptBase
 
       foreach(var document in body["templateDocuments"] as JArray ?? new JArray())
       {
-        templateDocuments.Add(new JObject()
+        documents.Add(new JObject()
         {
           ["documentId"] = document["documentId"],
           ["name"] = document["name"]
         });
       }
 
-      newBody["templateDocuments"] = templateDocuments;
+      newBody["templateDocuments"] = documents;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
