@@ -30,7 +30,7 @@ public class Script : ScriptBase
             var contentAsJson = JObject.Parse(contentAsString);
 
             // check for parameters
-            if (contentAsJson["data"] == null || contentAsJson["rowType"]==null)
+            if (contentAsJson["data"] == null || contentAsJson["resultSetMetaData"]==null)
             {
                 return createErrorResponse("rowType or data parameter are empty!", HttpStatusCode.BadRequest);
             }
