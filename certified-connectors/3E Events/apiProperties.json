@@ -10,121 +10,51 @@
                 "https://api.thomsonreuters.com/auth/3e.ewh"
             ],
             "redirectMode": "Global",
-            "additionalParameters": {
-              "prodClientId":{
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "prodClientSecret": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "previewClientId": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.preview.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "previewClientSecret": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.preview.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "ciamAuthority": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.3e.thomsonreuters.com",
-                      "api.us.preview.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              }
-            },
+            "redirectUrl": "https://global.consent.azure-apim.net/redirect",
             "customParameters": {
-              "prodClientId": {
-                "value": "{{PROD_CLIENT_id}}"
-              },
-              "prodClientSecret": {
-                "value": "{{PROD_SECRET}}"
-              },
-              "previewClientId": {
-                "value": "{{PREVIEW_CLIENT_ID}}"
-              },
-              "previewClientSecret": {
-                "value": "{{PREVIEW_SECRET}}"
-              },
               "ciamAuthority": {
-                "value": "https://auth.thomsonreuters.com/"
+                "value": "https://auth-nonprod.thomsonreuters.com/"
               },
               "authorizationUrlTemplate": {
-                "value": "https://{envName}/webhook/v1/authorize"
+                "value": "https://{customHost}/webhook/v1/authorize"
               },
               "authorizationUrlQueryStringTemplate": {
-                "value": "?response_type=code&client_id={prodClientId}{previewClientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
               },
               "tokenUrlTemplate": {
                 "value": "{ciamAuthority}oauth/token"
               },
               "tokenBodyTemplate": {
-                "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={prodClientId}{previewClientId}&client_secret={prodClientSecret}{previewClientSecret}"
+                "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
               },
               "refreshUrlTemplate": {
                 "value": "{ciamAuthority}oauth/token"
               },
               "refreshBodyTemplate": {
-                "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={prodClientId}{previewClientId}&client_secret={prodClientSecret}{previewClientSecret}"
+                "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
               }
             }
-          }
+          },
+          "uiDefinition": {
+            "displayName": "Login",
+            "description": "Sign in with your 3E credentials",
+            "tooltip": "Provide 3E credentials",
+            "constraints": {
+              "required": "true",
+              "hidden": "false"
+            }
+        }
       },
-      "token:envName": {
+      "token:customHost": {
         "type": "string",
         "uiDefinition": {
           "constraints": {
-            "allowedValues": [
-              {
-                "text": "prod",
-                "value": "api.us.3e.thomsonreuters.com"
-              },
-              {
-                "text": "preview",
-                "value": "api.us.preview.3e.thomsonreuters.com"
-              }
-            ],
             "required": "true",
             "tabIndex": 1
           },
-          "description": "The Preview environment will enable you to accurately preview the forthcoming release before it is available to your Production environment.",
-          "displayName": "Environment",
-          "tooltip": "Select Production environment or Preview environment."
+          "description": "The APIM host domain.",
+          "displayName": "Host",
+          "tooltip": "Enter host domain."
         }
       },
       "token:tenantId": {
@@ -139,18 +69,1250 @@
           "tooltip": "Enter the 3E Instance TRS ID."
         }
       },
+      "token:clientId": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "tabIndex": 3
+          },
+          "description": "Client Id",
+          "displayName": "Client Id",
+          "tooltip": "Enter Client Id"
+        }
+      },
+      "token:clientSecret": {
+        "type": "string",
+
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "tabIndex": 4
+          },
+          "description": "Client Secret.",
+          "displayName": "Client Secret",
+          "tooltip": "Enter CIAM Client Id"
+        }
+      },
       "token:notes": {
         "type": "string",
         "uiDefinition": {
           "constraints": {
             "required": "false",
-            "tabIndex": 3
+            "tabIndex": 5
           },
           "description": "Notes for connection.",
           "displayName": "Notes",
           "tooltip": "Save your notes about this connection."
         }
       }
+    },
+    "connectionParameterSets": {
+      "uiDefinition": {
+        "displayName": "Environment",
+        "description": "Select the name of the environment."
+      },
+      "values": [
+        {
+          "name": "liveus",
+          "uiDefinition": {
+            "displayName": "Production - United States",
+            "description": "Production - United States.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveusCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveusCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.us.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "liveuks",
+          "uiDefinition": {
+            "displayName": "Production - United Kingdom",
+            "description": "Production - United Kingdom.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveukCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveukCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.uk.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "livecac",
+          "uiDefinition": {
+            "displayName": "Production - Canada",
+            "description": "Production - Canada.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{livecacCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{livecacCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.ca.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "liveweu",
+          "uiDefinition": {
+            "displayName": "Production - West Europe",
+            "description": "Production - West Europe.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveweuCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveweuCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.eu.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "liveanz",
+          "uiDefinition": {
+            "displayName": "Production - Australia",
+            "description": "Production - Australia.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveanzCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveanzCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.au.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewus",
+          "uiDefinition": {
+            "displayName": "Preview - United States",
+            "description": "Preview - United States.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewusCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewusCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.us.preview.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewuk",
+          "uiDefinition": {
+            "displayName": "Preview - United Kingdom",
+            "description": "Preview - United Kingdom.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewukCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewukCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.uk.preview.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewca",
+          "uiDefinition": {
+            "displayName": "Preview - Canada",
+            "description": "Preview - Canada.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewcaCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewcaCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.ca.preview.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "previeweu",
+          "uiDefinition": {
+            "displayName": "Preview - West Europe",
+            "description": "Preview - West Europe.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previeweuCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previeweuCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.eu.preview.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewau",
+          "uiDefinition": {
+            "displayName": "Preview - Australia",
+            "description": "Preview - Australia.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewauCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewauCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "false",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.au.preview.3e.thomsonreuters.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "nonprod",
+          "uiDefinition": {
+            "displayName": "Development (For TR use only)",
+            "description": "For non-production TR environments.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth-nonprod.thomsonreuters.com/"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/webhook/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1
+                },
+                "description": "The APIM host domain.",
+                "displayName": "Host",
+                "tooltip": "Enter host domain, e.g. api.us.dev.3e.thomsonreuters.com"
+              }
+            },
+            "token:tenantId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "The Tenant ID of the 3E instance.",
+                "displayName": "3E Tenant",
+                "tooltip": "Enter the 3E Instance TRS ID."
+              }
+            },
+            "token:clientId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 3
+                },
+                "description": "Client Id",
+                "displayName": "Client Id",
+                "tooltip": "Enter Client Id"
+              }
+            },
+            "token:clientSecret": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 4
+                },
+                "description": "Client Secret.",
+                "displayName": "Client Secret",
+                "tooltip": "Enter CIAM Client Id"
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 5
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        }
+      ]
     },
     "iconBrandColor": "#FA6400",
     "capabilities": [],
@@ -159,7 +1321,7 @@
         "templateId": "dynamichosturl",
         "title": "Set host for connection",
         "parameters": {
-          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('token:envName')/webhook"
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('token:customHost')/webhook"
         }
       },
       {
