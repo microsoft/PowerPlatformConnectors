@@ -748,12 +748,12 @@ public class Script : ScriptBase
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
 
     // TODO: This map is added for backward compatibility. This will be removed once old events are deprecated
-	var envelopeEventMap = new Dictionary<string, string>() {
-        {"Sent", "envelope-sent"},
-        {"Delivered", "envelope-delivered"},
-        {"Completed", "envelope-completed"},
-        {"Declined", "envelope-declined"},
-        {"Voided", "envelope-voided"}
+    var envelopeEventMap = new Dictionary<string, string>() {
+      {"Sent", "envelope-sent"},
+      {"Delivered", "envelope-delivered"},
+      {"Completed", "envelope-completed"},
+      {"Declined", "envelope-declined"},
+      {"Voided", "envelope-voided"}
     };
 
     body["allUsers"] = "true";
