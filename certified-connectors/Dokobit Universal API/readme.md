@@ -1,5 +1,5 @@
 ## Dokobit Universal API
-Dokobit Universal API is a versatile tool that enables signing documents internally, within your system, and collecting signatures from 3rd parties outside your system, using a wide variety of eID tools. Document signing takes place in an accountless Dokobit signing interface with your organization's branding.
+Dokobit Universal API is a versatile tool that enables signing documents internally, within your system, and collecting signatures from 3rd parties outside your system, across Europe. Document signing occurs in an accountless Dokobit signing (where invited participants can sign documents without registering on the Dokobit portal) interface with your organisation’s branding.
 
 ## Prerequisites
 
