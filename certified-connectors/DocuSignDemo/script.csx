@@ -1527,7 +1527,7 @@ public class Script : ScriptBase
     if ("GetRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-      uriBuilder.Path = uriBuilder.Path.Replace("/tabCollection", "/tabs");
+      uriBuilder.Path = uriBuilder.Path.Replace("/recipientTabs", "/tabs");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -1674,14 +1674,24 @@ public class Script : ScriptBase
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       JObject newBody = new JObject();
+      JArray recipientTabs = new JArray();
 
       foreach(JProperty tabTypes in body.Properties())
       {
         foreach(var tab in tabTypes.Value)
         {
-          newBody["tabs"] =  tab;
+          recipientTabs.Add(new JObject()
+          {
+            ["name"] =  tab["name"],
+            ["tabType"] =  tab["tabType"],
+            ["value"] =  tab["value"],
+            ["tabLabel"] =  tab["tabLabel"],
+            ["documentId"] =  tab["documentId"],
+          });
         }
       }
+
+      newBody["recipientTabs"] = recipientTabs;
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
