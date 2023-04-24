@@ -748,12 +748,12 @@ public class Script : ScriptBase
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
 
     // TODO: This map is added for backward compatibility. This will be removed once old events are deprecated
-	var envelopeEventMap = new Dictionary<string, string>() {
-        {"Sent", "envelope-sent"},
-        {"Delivered", "envelope-delivered"},
-        {"Completed", "envelope-completed"},
-        {"Declined", "envelope-declined"},
-        {"Voided", "envelope-voided"}
+    var envelopeEventMap = new Dictionary<string, string>() {
+      {"Sent", "envelope-sent"},
+      {"Delivered", "envelope-delivered"},
+      {"Completed", "envelope-completed"},
+      {"Declined", "envelope-declined"},
+      {"Voided", "envelope-voided"}
     };
 
     body["allUsers"] = "true";
@@ -868,9 +868,11 @@ public class Script : ScriptBase
 
     var newBody = new JObject()
     {
-      ["templateId"] = query.Get("templateId")
+      ["templateId"] = query.Get("templateId"),
+      ["emailSubject"] = query.Get("emailSubject"),
+      ["emailBlurb"] = query.Get("emailBody")
     };
-      
+
     foreach (var property in body)
     {
       var value = (string)property.Value;
@@ -880,16 +882,6 @@ public class Script : ScriptBase
       {
         signer["roleName"] = key.Substring(0, key.Length - 5);
         signer["name"] = value;
-      }
-      
-      if (key.Contains("Email subject"))
-      {
-        newBody["emailSubject"] = value;
-      }
-
-      if (key.Contains("Email body"))
-      {
-        newBody["emailBlurb"] = value;
       }
 
       //add every (name, email) pairs
@@ -1082,6 +1074,7 @@ public class Script : ScriptBase
 
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
+    uriBuilder.Path = uriBuilder.Path.Replace("/recipients/updateRecipient", "/recipients");
     this.Context.Request.RequestUri = uriBuilder.Uri;
 
     return body;
@@ -1225,8 +1218,15 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
 
-    signers[0]["recipientId"] = GenerateId();
-    
+    if (!string.IsNullOrEmpty(query.Get("recipientId")))
+    {
+      signers[0]["recipientId"] = query.Get("recipientId");
+    }
+    else
+    {
+      signers[0]["recipientId"] = GenerateId();
+    }
+
     if (!string.IsNullOrEmpty(query.Get("routingOrder")))
     {
       signers[0]["routingOrder"] = query.Get("routingOrder");
@@ -1294,7 +1294,6 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var recipientType = query.Get("recipientType");
-    signers[0]["recipientId"] = GenerateId();
 
     if (recipientType.Equals("inPersonSigners"))
     {
@@ -1424,6 +1423,20 @@ public class Script : ScriptBase
   {
     await this.UpdateApiEndpoint().ConfigureAwait(false);
 
+    if("DeleteHookV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
+    if("DeleteHookV3".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("SendDraftEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       this.Context.Request.Content = new StringContent("{ \"status\": \"sent\" }", Encoding.UTF8, "application/json");
@@ -1464,7 +1477,8 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
     }
     
-    if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("AddRecipientToEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
+        "UpdateEnvelopeRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeV2BodyTransformation).ConfigureAwait(false);
     }
@@ -1528,6 +1542,10 @@ public class Script : ScriptBase
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       uriBuilder.Path = uriBuilder.Path.Replace("/recipientTabs", "/tabs");
+    if ("ListEnvelopeDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/envelopeDocuments", "/documents");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -1564,6 +1582,13 @@ public class Script : ScriptBase
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       uriBuilder.Path = uriBuilder.Path.Replace("/account_custom_fields", "/custom_fields");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
+    if ("GetDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/get_document_id", "/documents");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -1696,6 +1721,7 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
@@ -1772,6 +1798,31 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("ListEnvelopeDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JArray envelopeDocuments = new JArray();
+      JObject newBody = new JObject();
+
+      if (body["envelopeDocuments"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Envelope do not contain documents");
+      }
+
+      foreach(var document in body["envelopeDocuments"] as JArray ?? new JArray())
+      {
+        envelopeDocuments.Add(new JObject()
+        {
+          ["documentId"] = document["documentId"],
+          ["name"] = document["name"]
+        });
+      }
+
+      newBody["envelopeDocuments"] = envelopeDocuments;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("GetDynamicSigners".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
@@ -1786,19 +1837,11 @@ public class Script : ScriptBase
 
       var signers = (body["signers"] as JArray) ?? new JArray();
 
-      if (signers.Count == 0)
+      foreach (var signer in signers)
       {
-          itemProperties["Email subject"] = basePropertyDefinition.DeepClone();
-          itemProperties["Email body"] = basePropertyDefinition.DeepClone();
-      }
-      else
-      {
-        foreach (var signer in signers)
-        {
-          var roleName = signer["roleName"];
-          itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
-          itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
-        }
+        var roleName = signer["roleName"];
+        itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
+        itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
       }
 
       var newBody = new JObject
@@ -1817,6 +1860,31 @@ public class Script : ScriptBase
         },
       };
 
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("ListTemplateDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JArray documents = new JArray();
+      JObject newBody = new JObject();
+
+      if (body["templateDocuments"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Specified template do not contain documents");
+      }
+
+      foreach(var document in body["templateDocuments"] as JArray ?? new JArray())
+      {
+        documents.Add(new JObject()
+        {
+          ["documentId"] = document["documentId"],
+          ["name"] = document["name"]
+        });
+      }
+
+      newBody["templateDocuments"] = documents;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
@@ -2044,6 +2112,31 @@ public class Script : ScriptBase
       {
         newBody = folder as JObject;
         break;
+      }
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var documentName = query.Get("documentName");
+      var newBody = new JObject();
+
+      foreach (var documentInfo in (body["envelopeDocuments"] as JArray) ?? new JArray())
+      {
+        if (documentName.Equals(documentInfo["name"].ToString()))
+        {
+          newBody["documentId"] = documentInfo["documentIdGuid"];
+          newBody["name"] = documentInfo["name"];
+          break;
+        }
+      }
+
+      if (newBody["documentId"] == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: No document found matching the provided name");
       }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
