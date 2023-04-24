@@ -1,9 +1,10 @@
-### NOTE
+## Strategic Portfolio Manager
 The Strategic Portfolio Manager connector allows users to interact with initiatives, projects, epics, etc. and data from 360 Portfolio Insights using Microsoft Power Automate or Power Apps.
-
-## Strategic Portfolio Manager Connector
 Strategic Portfolio Manager enables you to continuously connect, align and orchestrate all investments with strategies to drive business agility more effectively.
 It connects disparate silos across the enterprise and provides 360 degrees of insight to help ensure that all investments are derived from – and continuously align with – strategic priorities.
+
+## Publisher:
+UMT 360 LLC
 
 ## Prerequisites
 You will need the following to proceed:
@@ -12,7 +13,6 @@ You will need the following to proceed:
 * User with access rights to the 360 Portfolio Insights site
 
 ## Supported Operations
-
 The connector supports the following operations:
 * `Create entity`: Create a new entity in the Strategic Portfolio Manager site.
 * `Get entity`: Returns properties of a selected entity.
@@ -30,7 +30,6 @@ The connector supports the following operations:
 * `Update financial custom field`: Update the values of financial custom fields.
 
 ## Supported Triggers:
-
 The connector supports the following triggers:
 
 * `On Entity Created`: Executed when a new entity is created in the Strategic Portfolio Manager site.
@@ -55,4 +54,10 @@ The connector supports the following triggers:
 * `On Actuals Period Status Changed`: Executed when the status of an Actuals Period has been changed. Status values: Any = 0, Opened = 1, Locked = 2, Archived = 3, Waiting For Approval = 4, Open For Edit = 5, Processing = 6, Not Open = 7.
 
 ## Get access to 360 Portfolio Insights
- Contact us to start using 360 Portfolio Insights: [Contact Us](https://www.umt360.com/contact/)
+Contact us to start using 360 Portfolio Insights: [Contact Us](https://www.umt360.com/contact/)
+
+## Known Issues and Limitations
+No known issues or limitations
+
+## Deployment Instructions
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
