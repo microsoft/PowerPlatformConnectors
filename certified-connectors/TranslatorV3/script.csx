@@ -894,19 +894,21 @@
     private static string getTargetURL(string storageType, string sourceURL, string targetContainerURL, string targetLang)
     {
         Uri sourceUri = new Uri(sourceURL);
-        Uri targetContainerUri = new Uri(targetContainerURL);
+        UriBuilder targetContainerUri = new UriBuilder(targetContainerURL);
+        targetContainerUri.Port = -1;
         if (storageType == "File")
         {
             //get the source file name from sourceURL
-            string sourceFileName = sourceUri.Segments[2];
+            string sourceFileName = Path.GetFileName(sourceUri.LocalPath);
 
             //create target url for StorageType = File
-            return targetContainerUri.Scheme + "://" + targetContainerUri.IdnHost + "/" + targetContainerUri.Segments[1] + "/" + targetLang + "/" + sourceFileName + targetContainerUri.Query;
+            targetContainerUri.Path = targetContainerUri.Path.TrimEnd('/') + "/" + targetLang + "/" + sourceFileName;
         }
         else
         {
             //create target url for StorageType = Folder
-            return targetContainerUri.Scheme + "://" + targetContainerUri.IdnHost + "/" + targetContainerUri.Segments[1] + "/" + targetLang + targetContainerUri.Query;
+            targetContainerUri.Path = targetContainerUri.Path.TrimEnd('/') + "/" + targetLang;
         }
+        return targetContainerUri.ToString();
     }
 }
