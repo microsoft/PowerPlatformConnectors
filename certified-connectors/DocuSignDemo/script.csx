@@ -1704,11 +1704,6 @@ public class Script : ScriptBase
       JObject newBody = new JObject();
       JArray recipientTabs = new JArray();
 
-      if (body.Properties() == null)
-      {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: The specified recipient do not have any tabs");
-      }
-
       foreach(JProperty tabTypes in body.Properties())
       {
         foreach(var tab in tabTypes.Value)
@@ -1720,12 +1715,13 @@ public class Script : ScriptBase
             ["value"] =  tab["value"],
             ["tabLabel"] =  tab["tabLabel"],
             ["documentId"] =  tab["documentId"],
+            ["tabId"] = tab["tabId"],
+            ["recipientId"] = tab["recipientId"]
           });
         }
       }
 
       newBody["recipientTabs"] = recipientTabs;
-
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
