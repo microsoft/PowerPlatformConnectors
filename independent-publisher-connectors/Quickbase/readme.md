@@ -7,7 +7,7 @@ Quickbase is an application development platform that unites business and IT tea
 A paid plan (Team, Business, or Enterprise) or free trial is required
 
 ## Obtaining Credentials
-In the preferences for your profile, there is a link for Manage User Tokens. On that page, click the button for "+ New user token" and give the token a name. You will also want to assign the token to each app it should have access to. After saving the token, you will be brought back to the list of your user tokens and copy the newly created token value.
+In the preferences for your profile, there is a link for Manage User Tokens. On that page, click the button for "+ New user token" and give the token a name. You will also want to assign the token to each app it should have access to. After saving the token, you will be brought back to the list of your user tokens and copy the newly created token value. This token value you will use in the authorization for the connector in the form "QB-USER-TOKEN yourToken".
 
 ## Supported Operations
 ### Apps
