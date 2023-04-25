@@ -931,6 +931,29 @@ public class Script : ScriptBase
     return newBody;
   }
 
+  private JObject CreateEnvelopeFromTemplateNoRecipientsBodyTransformation(JObject body)
+  {
+    var templateRoles = new JArray();
+    var signer = new JObject();
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    var newBody = new JObject()
+    {
+      ["templateId"] = query.Get("templateId")
+    };
+
+    if (!string.IsNullOrEmpty(query.Get("status")))
+    {
+      newBody["status"] = query.Get("status");
+    }
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createFromTemplateNoRecipients", "/envelopes");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return newBody;
+  }
+
   private JObject UpdateEnvelopeCustomFieldBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -1472,6 +1495,11 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV2BodyTransformation).ConfigureAwait(false);
     }
 
+    if ("CreateEnvelopeFromTemplateNoRecipients".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateNoRecipientsBodyTransformation).ConfigureAwait(false);
+    }
+
     if ("AddRecipientToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientToEnvelopeBodyTransformation).ConfigureAwait(false);
@@ -1661,6 +1689,34 @@ public class Script : ScriptBase
       }
       body["workflowIds"] = workflowsArray;
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+  
+    if ("GetEnvelopeDocumentTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var newBody = new JObject();
+      JArray tabs = new JArray();
+
+      foreach(JProperty tabTypes in body.Properties())
+      {
+        foreach(var tab in tabTypes.Value)
+        {
+          tabs.Add(new JObject()
+          {
+            ["name"] = tab["name"],
+            ["tabLabel"] = tab["tabLabel"],
+            ["value"] = tab["value"],
+            ["documentId"] = tab["documentId"],
+            ["tabId"] = tab["tabId"],
+            ["tabType"] = tab["tabType"],
+            ["recipientId"] = tab["recipientId"]
+          });
+        }
+      }
+
+      newBody["tabs"] = tabs;
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GetTabInfo".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
