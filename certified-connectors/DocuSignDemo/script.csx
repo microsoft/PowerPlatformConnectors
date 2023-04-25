@@ -1542,6 +1542,9 @@ public class Script : ScriptBase
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       uriBuilder.Path = uriBuilder.Path.Replace("/recipientTabs", "/tabs");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("ListEnvelopeDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1700,6 +1703,11 @@ public class Script : ScriptBase
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       JObject newBody = new JObject();
       JArray recipientTabs = new JArray();
+
+      if (body.Properties() == null)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: The specified recipient do not have any tabs");
+      }
 
       foreach(JProperty tabTypes in body.Properties())
       {
