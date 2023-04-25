@@ -1566,6 +1566,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("GetRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/recipientTabs", "/tabs");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("ListEnvelopeDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1746,6 +1753,34 @@ public class Script : ScriptBase
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
+
+    if ("GetRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      JObject newBody = new JObject();
+      JArray recipientTabs = new JArray();
+
+      foreach(JProperty tabTypes in body.Properties())
+      {
+        foreach(var tab in tabTypes.Value)
+        {
+          recipientTabs.Add(new JObject()
+          {
+            ["name"] =  tab["name"],
+            ["tabType"] =  tab["tabType"],
+            ["value"] =  tab["value"],
+            ["tabLabel"] =  tab["tabLabel"],
+            ["documentId"] =  tab["documentId"],
+            ["tabId"] = tab["tabId"],
+            ["recipientId"] = tab["recipientId"]
+          });
+        }
+      }
+
+      newBody["recipientTabs"] = recipientTabs;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
 
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
