@@ -1726,6 +1726,34 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("GetTemplateDocumentTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var newBody = new JObject();
+      JArray tabs = new JArray();
+
+      foreach(JProperty tabTypes in body.Properties())
+      {
+        foreach(var tab in tabTypes.Value)
+        {
+          tabs.Add(new JObject()
+          {
+            ["name"] = tab["name"],
+            ["tabLabel"] = tab["tabLabel"],
+            ["value"] = tab["value"],
+            ["documentId"] = tab["documentId"],
+            ["tabId"] = tab["tabId"],
+            ["tabType"] = tab["tabType"],
+            ["recipientId"] = tab["recipientId"]
+          });
+        }
+      }
+
+      newBody["tabs"] = tabs;
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("GetTabInfo".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
