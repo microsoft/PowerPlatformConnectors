@@ -4,6 +4,8 @@ Azure OpenAI Service Connector for Power Platform & Azure Logic Apps.
 
 > This is a connector based on the [OpenAI Independent Publisher connector](https://learn.microsoft.com/connectors/openaiip/) built by [Robin Rosegrün](https://linktr.ee/r2power). It has some extra actions, because that's how Azure OpenAI Service works.
 
+## Publishers: Daniel Laskewitz, Andrew Coates & Robin Rosengrün
+
 ## Prerequisites
 
 You will need the following to proceed:
