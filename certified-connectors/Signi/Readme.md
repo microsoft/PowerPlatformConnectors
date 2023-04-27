@@ -4,7 +4,7 @@
 Signi connector allows you to sign your documents digitally. Streamline your paperwork!
 
 ## Publisher: NETWORG
-This connector is managed and published by NETWORG
+This connector is managed and published by NETWORG.
 
 ## Prerequisites
 You will need the following to proceed:
@@ -16,12 +16,16 @@ You will need the following to proceed:
 
 1. Generate an Signi API key for your workspace by following [this guide](https://signi.refined.site/space/PKNB/383516725), the generation is done at [this page](https://app.signi.com/api)
 2. Fill out the following [form](https://go.tntg.cz/ismlouva-signup) so that we can set everything up for you (the form is in Czech, here is a quick sum-up):
-   1. Enter the Login name (e-mail)
-   2. Enter the name of the workspace as you want it to appear to users in Microsoft Power Automate
-   3. Enter the Signi API key
+   1. Login name (e-mail)
+      * Enter your login name (email) that you use to log in to your company account. We will contact you at this email in case of problems.
+   2. Workspace name
+      * Enter the name of the workspace as you want it to appear to users in Microsoft Power Automate
+   3. Signi API key
+      * Enter the API key from the Signi website (https://app.signi.com/api)
    4. Do you want to limit the use of an API key to a specific group of users?
-(If you want only specific departments in your company to be able to use the workspace, select yes)
+      * If you want only specific departments in your company to be able to use the workspace, select yes
 
+**You can also find the full guide in Czech on [this page](https://docs.talxis.com/cz/customizer-guide/integration/signi).**
 
 
 ## Supported Operations
