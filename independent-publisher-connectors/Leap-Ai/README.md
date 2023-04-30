@@ -2,8 +2,7 @@
 Add AI features to your app in minutes.
 Generate images, edit them, fine tune models, retrieve text context and more with best-in-class APIs and SDKs.
 
-## Publisher
-### Chandra Sekhar
+## Publisher: Chandra Sekhar
 
 ## Prerequisites
 This API doesn't require any Authentication.
@@ -67,9 +66,3 @@ They may introduce one in the future.
 N/A
 
 #### Not all operations provided by Leap AI are part of the first IP connector submission. We will keep adding/updating/supporting this connector based on your feedback/requests :)
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
