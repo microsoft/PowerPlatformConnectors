@@ -1,27 +1,38 @@
-Provide a detailed description here, distinct from your connector's description, of the value that the connector offers users and a high-level overview of functionality that the connector supports. This description should be no more than one paragraph of eight sentences.
+Calendly helps you easily schedule meetings based on participants availability. This connector allows you to subscribe to `invitee.created` and `invitee.canceled` webhook events.
 
 ## Prerequisites
 
-Provide information about any prerequisites that are required to use this connector. For example, an account on your website or a paid service plan. 
+* A Calendly [Professional plan subscription or higher](https://calendly.com/pricing).
+* A personal access token associated with a Calendly organization admin or owner.
 
 ## How to get credentials
 
-Provide detailed information about how a user can get credentials to use the connector. Where possible, this should be step-by-step instructions with links pointing to relevant parts of your website.
+Follow the procedures below to generate a personal access token and authenticate an internal or private application with the Calendly API v2. Do not share your personal access token with public sources or reuse it across applications.
 
-If your connector doesn't require authentication, this section can be removed.
+To further secure your personal access tokens, we do not display or store them in your Calendly account. After generation, they’re unretrievable.
+
+*Note: The personal access token must be created by an organization owner or admin*
+
+* Go to the [Integrations Page](https://calendly.com/integrations).
+* Select the API & Webhooks tile
+* If you have no prior personal access tokens, select Get a token now under Personal Access Tokens.
+* If you already have a token, select Generate new token under Your personal access tokens.
+* At Create your personal access token, create an identifiable name for your token and select Create Token, then Copy token.
 
 ## Get started with your connector
 
-Provide users with a step-by-step process for getting started with your connector. This is where you should highlight common use cases, such as your expected popular triggers and actions, and how they can help in automation scenarios. Include images where possible.
+* Select `Create Webhook Subscription` from the list of Calendly triggers.
+* In the `events` dropdown menu select the events you would like to subscribe to.
 
 ## Known issues and limitations
 
-If your connector has any known issues and limitations, include a detailed description of them here. This information should be as robust as possible so users have plenty of information should they run into problems. If any workarounds are known, include them here.
+* The personal access token must be created by an organization admin or owner.
+* User scoped webhook subscriptions are not supported at this time. The webhook subscription will be fired when an event is scheduled or canceled with any user in the Calendly organization.
 
 ## Common errors and remedies
 
-Highlight any errors that might commonly occur when using the connector (such as HTTP status code errors), and what the user should do to resolve the error.
+Contact us via [support@calendly.com](support@calendly.com) in case of errors and questions.
 
 ## FAQ
 
-Provide a breakdown of frequently asked questions and their respective answers here. This can cover FAQs about interacting with the underlying service or about the connector itself.
+Contact us via [support@calendly.com](support@calendly.com) in case of errors and questions.
