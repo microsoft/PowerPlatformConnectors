@@ -1764,11 +1764,38 @@ public class Script : ScriptBase
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
   
-    if ("GetEnvelopePrefillTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeDocumentTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var newBody = new JObject();
       JArray tabs = new JArray();
+
+      //non-prefill tabs
+      var nonPrefillTabs = body as JObject ?? new JObject();
+
+      foreach (JProperty tabTypes in nonPrefillTabs.Properties())
+      {
+        if (tabTypes.Name.Equals("prefillTabs"))
+        {
+          continue;
+        }
+
+        foreach (var tab in tabTypes.Value)
+        {
+          tabs.Add(new JObject()
+          {
+            ["tabLabel"] = tab["tabLabel"],
+            ["value"] = tab["value"],
+            ["documentId"] = tab["documentId"],
+            ["recipientId"] = tab["recipientId"],
+            ["tabId"] = tab["tabId"],
+            ["tabType"] = tabTypes.Name,
+            ["prefill"] = false
+          });
+        }
+      }
+
+      //prefill tabs
       var prefillTabs = body["prefillTabs"] as JObject ?? new JObject();
 
       foreach (JProperty tabTypes in prefillTabs.Properties())
@@ -1781,7 +1808,8 @@ public class Script : ScriptBase
             ["value"] = tab["value"],
             ["documentId"] = tab["documentId"],
             ["tabId"] = tab["tabId"],
-            ["tabType"] = tabTypes.Name
+            ["tabType"] = tabTypes.Name,
+            ["prefill"] = true
           });
         }
       }
