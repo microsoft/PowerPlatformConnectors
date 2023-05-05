@@ -1026,12 +1026,12 @@ public class Script : ScriptBase
 
     foreach (var tab in body)
     {
-      var tabType = tab["type"].ToString();
+      var tabType = tab["tabType"].ToString();
       var tabsForType = tabs[tabType] as JArray ?? new JArray();
       
       tabsForType.Add(new JObject
         {
-          ["tabId"] = tab["id"],
+          ["tabId"] = tab["tabId"],
           ["value"] = tab["value"]
         });
 
