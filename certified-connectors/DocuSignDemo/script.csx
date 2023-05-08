@@ -536,6 +536,40 @@ public class Script : ScriptBase
     return body;
   }
   
+  private static JArray ParseContentAsJArray(string content, bool isRequest)
+  {
+    JArray body;
+    try
+    {
+      body = JArray.Parse(content);
+    }
+    catch (JsonReaderException ex)
+    {
+      if (isRequest)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Unable to parse the request body", ex);
+      }
+      else
+      {
+        throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse the response body", ex);
+      }
+    }
+
+    if (body == null)
+    {
+      if (isRequest)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "The request body is empty");
+      }
+      else
+      {
+        throw new ConnectorException(HttpStatusCode.BadGateway, "The response body is empty");
+      }
+    }
+
+    return body;
+  }
+
   private static string TransformWebhookNotificationBodyDeprecated(string content)
   {
     JObject body = ParseContentAsJObject(content, true);
@@ -985,6 +1019,33 @@ public class Script : ScriptBase
     return newBody;
   }
   
+  private async Task UpdateEnvelopePrefillTabsBodyTransformation()
+  {
+    var body = ParseContentAsJArray(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
+    var tabs = new JObject();
+
+    foreach (var tab in body)
+    {
+      var tabType = tab["tabType"].ToString();
+      var tabsForType = tabs[tabType] as JArray ?? new JArray();
+      
+      tabsForType.Add(new JObject
+        {
+          ["tabId"] = tab["tabId"],
+          ["value"] = tab["value"]
+        });
+
+      tabs[tabType] = tabsForType;
+    }
+
+    var newBody = new JObject()
+    {
+      ["prefillTabs"] = tabs
+    };
+
+    this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+  }
+
   private void ParseCustomFields(JObject body, JArray textCustomFields,  JArray listCustomFields)
   {
     foreach (var property in body)
@@ -1541,6 +1602,11 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
     }
 
+    if ("UpdateEnvelopePrefillTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.UpdateEnvelopePrefillTabsBodyTransformation().ConfigureAwait(false);
+    }
+
     if ("RemoveRecipientFromEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var newBody = new JObject();
@@ -1566,7 +1632,7 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if ("GetRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       uriBuilder.Path = uriBuilder.Path.Replace("/recipientTabs", "/tabs");
@@ -1704,19 +1770,46 @@ public class Script : ScriptBase
       var newBody = new JObject();
       JArray tabs = new JArray();
 
-      foreach(JProperty tabTypes in body.Properties())
+      //non-prefill tabs
+      var nonPrefillTabs = body as JObject ?? new JObject();
+
+      foreach (JProperty tabTypes in nonPrefillTabs.Properties())
       {
-        foreach(var tab in tabTypes.Value)
+        if (tabTypes.Name.Equals("prefillTabs"))
+        {
+          continue;
+        }
+
+        foreach (var tab in tabTypes.Value)
         {
           tabs.Add(new JObject()
           {
-            ["name"] = tab["name"],
+            ["tabLabel"] = tab["tabLabel"],
+            ["value"] = tab["value"],
+            ["documentId"] = tab["documentId"],
+            ["recipientId"] = tab["recipientId"],
+            ["tabId"] = tab["tabId"],
+            ["tabType"] = tabTypes.Name,
+            ["prefill"] = false
+          });
+        }
+      }
+
+      //prefill tabs
+      var prefillTabs = body["prefillTabs"] as JObject ?? new JObject();
+
+      foreach (JProperty tabTypes in prefillTabs.Properties())
+      {
+        foreach (var tab in tabTypes.Value)
+        {
+          tabs.Add(new JObject()
+          {
             ["tabLabel"] = tab["tabLabel"],
             ["value"] = tab["value"],
             ["documentId"] = tab["documentId"],
             ["tabId"] = tab["tabId"],
-            ["tabType"] = tab["tabType"],
-            ["recipientId"] = tab["recipientId"]
+            ["tabType"] = tabTypes.Name,
+            ["prefill"] = true
           });
         }
       }
@@ -1782,7 +1875,7 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if ("GetRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       JObject newBody = new JObject();
