@@ -10,7 +10,7 @@ public class Script : ScriptBase
 
         // Check if the operation ID matches what is specified in the OpenAPI definition of the connector
         // Presence is enforced in swagger
-        var domain = this.Context.Request.Headers.GetValues("Domain").First();
+        var domain = this.Context.Request.Headers.GetValues("Instance").First();
 
         var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
         uriBuilder.Host = domain;
