@@ -13,7 +13,7 @@ You need an OpenAI account and available tokens. The account comes with a 3 mont
 
 The connector supports the following operations:
 
-- `Completion_New`: This action will complete your prompt with the GPT-3 models.
+- `Completion_v2`: This action will complete your prompt with the GPT-3 models.
 - `ChatCompletion`: Chat models take a series of messages as input, and return a model-generated message as output.
 - `CreateImage`: The image generations endpoint allows you to create an original image given a text prompt.
 - `Embeddings`: Get a vector representation of a given text input.
