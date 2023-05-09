@@ -1,4 +1,4 @@
-# Title
+# Shopify
 This connector allows you to query your Shopify store Orders and Order related information. This information is provided on a store level. To connect to Shopify you will need to setup an application access token from the Shopify admin portal.
 
 ## Publisher: Ray Bennett (MSFT)
