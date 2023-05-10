@@ -1902,6 +1902,30 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("GetDocgenFormFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      JObject newBody = new JObject();
+      JArray formFields = new JArray();
+
+      foreach (var doc in (body["docGenFormFields"] as JArray) ?? new JArray())
+      {
+        foreach(var field in (doc["docGenFormFieldList"] as JArray) ?? new JArray())
+        {
+          formFields.Add(new JObject()
+          {
+            ["name"] =  field["name"],
+            ["type"] =  field["type"],
+            ["value"] =  field["value"],
+            ["label"] =  field["label"],
+            ["documentId"] =  doc["documentId"]
+          });
+        }
+      }
+
+      newBody["docgenFields"] = formFields;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
 
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
