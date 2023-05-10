@@ -93,6 +93,26 @@ public class Script : ScriptBase
       response["tabTypes"] = tabTypesArray;
     }
 
+    if (operationId.Equals("StaticResponseForTabTypesWithValues", StringComparison.OrdinalIgnoreCase))
+    {
+      var tabTypesArray = new JArray();
+      string [,] tabTypes = { 
+        { "textTabs", "Text" }, 
+        { "noteTabs", "Note" },
+      };
+      for (var i = 0; i < tabTypes.GetLength(0); i++)
+      {
+        var tabTypeObject = new JObject()
+        {
+          ["type"] = tabTypes[i,0],
+          ["name"] = tabTypes[i,1]
+        };
+        tabTypesArray.Add(tabTypeObject);
+      }
+
+      response["tabTypes"] = tabTypesArray;
+    }
+
     if (operationId.Equals("StaticResponseForRecipientTypes", StringComparison.OrdinalIgnoreCase))
     {
       var recipientTypesArray = new JArray();
@@ -1417,6 +1437,29 @@ public class Script : ScriptBase
 
     body["documents"] = documents;
     return body;
+  }  
+  
+  private async Task UpdateRecipientTabsValuesBodyTransformation()
+  {
+    var body = ParseContentAsJArray(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
+    var tabs = new JObject();
+
+    foreach (var tab in body)
+    {
+      var tabType = tab["tabType"].ToString();
+      var tabsForType = tabs[tabType] as JArray ?? new JArray();
+
+      tabsForType.Add(new JObject
+        {
+          ["tabId"] = tab["tabId"],
+          ["value"] = tab["value"]
+        });
+
+      tabs[tabType] = tabsForType;
+    }
+
+    var newBody = tabs;
+    this.Context.Request.Content = CreateJsonContent(newBody.ToString());
   }
 
   private JObject AddRecipientTabsBodyTransformation(JObject body)
@@ -1600,6 +1643,11 @@ public class Script : ScriptBase
     if ("AddRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("UpdateRecipientTabsValues".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.UpdateRecipientTabsValuesBodyTransformation().ConfigureAwait(false);
     }
 
     if ("UpdateEnvelopePrefillTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
