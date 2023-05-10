@@ -93,26 +93,6 @@ public class Script : ScriptBase
       response["tabTypes"] = tabTypesArray;
     }
 
-    if (operationId.Equals("StaticResponseForTabTypesWithValues", StringComparison.OrdinalIgnoreCase))
-    {
-      var tabTypesArray = new JArray();
-      string [,] tabTypes = { 
-        { "textTabs", "Text" }, 
-        { "noteTabs", "Note" },
-      };
-      for (var i = 0; i < tabTypes.GetLength(0); i++)
-      {
-        var tabTypeObject = new JObject()
-        {
-          ["type"] = tabTypes[i,0],
-          ["name"] = tabTypes[i,1]
-        };
-        tabTypesArray.Add(tabTypeObject);
-      }
-
-      response["tabTypes"] = tabTypesArray;
-    }
-
     if (operationId.Equals("StaticResponseForRecipientTypes", StringComparison.OrdinalIgnoreCase))
     {
       var recipientTypesArray = new JArray();
@@ -1444,9 +1424,15 @@ public class Script : ScriptBase
     var body = ParseContentAsJArray(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
     var tabs = new JObject();
 
+    var tabsMap = new Dictionary<string, string>() { 
+      { "Text", "textTabs" }, 
+      { "Note", "noteTabs" },
+    };
+
     foreach (var tab in body)
     {
       var tabType = tab["tabType"].ToString();
+      tabType = tabsMap.ContainsKey(tabType) ? tabsMap[tabType] : tabType;
       var tabsForType = tabs[tabType] as JArray ?? new JArray();
 
       tabsForType.Add(new JObject
