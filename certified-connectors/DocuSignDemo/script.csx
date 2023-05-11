@@ -1417,6 +1417,35 @@ public class Script : ScriptBase
 
     body["documents"] = documents;
     return body;
+  }  
+  
+  private async Task UpdateRecipientTabsValuesBodyTransformation()
+  {
+    var body = ParseContentAsJArray(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
+    var tabs = new JObject();
+
+    var tabsMap = new Dictionary<string, string>() { 
+      { "Text", "textTabs" }, 
+      { "Note", "noteTabs" },
+    };
+
+    foreach (var tab in body)
+    {
+      var tabType = tab["tabType"].ToString();
+      tabType = tabsMap.ContainsKey(tabType) ? tabsMap[tabType] : tabType;
+      var tabsForType = tabs[tabType] as JArray ?? new JArray();
+
+      tabsForType.Add(new JObject
+        {
+          ["tabId"] = tab["tabId"],
+          ["value"] = tab["value"]
+        });
+
+      tabs[tabType] = tabsForType;
+    }
+
+    var newBody = tabs;
+    this.Context.Request.Content = CreateJsonContent(newBody.ToString());
   }
 
   private JObject AddRecipientTabsBodyTransformation(JObject body)
@@ -1600,6 +1629,11 @@ public class Script : ScriptBase
     if ("AddRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("UpdateRecipientTabsValues".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.UpdateRecipientTabsValuesBodyTransformation().ConfigureAwait(false);
     }
 
     if ("UpdateEnvelopePrefillTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
