@@ -1958,7 +1958,7 @@ public class Script : ScriptBase
       {
         foreach(var signer in body[signerTypes[i]])
         {
-          if (recipientEmailId != null && recipientEmailId.ToString().Equals(signer["email"].ToString()))
+          if (recipientEmailId != null && (signer.SelectToken("email") != null) && recipientEmailId.ToString().Equals(signer["email"].ToString()))
           {
             matchingSigner = signer as JObject;
             break;
