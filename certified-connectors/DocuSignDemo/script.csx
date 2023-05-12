@@ -1441,6 +1441,37 @@ public class Script : ScriptBase
     return body;
   }
 
+  private async Task UpdateDocgenFormFieldsBodyTransformation()
+  {
+    var body = ParseContentAsJArray(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var fieldList = new JArray();
+    var documentId = query.Get("documentId");
+
+    foreach (var field in body)
+    {
+      fieldList.Add(new JObject
+        {
+          ["name"] = field["name"],
+          ["value"] = field["value"]
+        });
+    }
+
+    var docGenFormFields = new JArray
+    {
+      new JObject
+      {
+        ["documentId"] = documentId,
+        ["docGenFormFieldList"] = fieldList
+      },
+    };
+
+    var newBody = new JObject();
+    newBody["docGenFormFields"] = docGenFormFields;
+
+    this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+  }
+
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
@@ -1605,6 +1636,11 @@ public class Script : ScriptBase
     if ("UpdateEnvelopePrefillTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.UpdateEnvelopePrefillTabsBodyTransformation().ConfigureAwait(false);
+    }
+
+    if ("UpdateDocgenFormFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.UpdateDocgenFormFieldsBodyTransformation().ConfigureAwait(false);
     }
 
     if ("RemoveRecipientFromEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
