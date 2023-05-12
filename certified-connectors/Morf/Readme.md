@@ -24,6 +24,18 @@ and returns:
 
 * `Form`: A portable rendered form document (HTML) that can be rendered in browser environments.
 
+### Transform JSONata (V1)
+Transform JSON data using JSONata. Call this API with a JSON payload and a [JSONata](https://jsonata.org/) query or transformation expression to receive the modified data or query result
+
+The operation accepts:
+
+* `JSON Data`: A JSON data payload being submitted for querying or transformation
+* `JSONata Expression`: A [JSONata](https://jsonata.org/) query or transformation expression to execute against the JSON data payload
+
+and returns:
+
+* `Result`: Result of the expression execution containing a string or a stringified object (JSON).
+
 ## Obtaining Credentials
 To get started, head over to our [Morf Editor](https://editor.getmorf.io/) and request access keys. You will be granted one (1) site and one (1) API key. As described in our [authentication documentation](https://github.com/aftialabs/morf-docs/blob/main/guides/Authentication.md), use the provided API key when configuring your new Power Platform connection. Our free usage terms are available [here](https://github.com/aftialabs/morf-docs/blob/main/guides/termsandconditions.md#product-description).
 

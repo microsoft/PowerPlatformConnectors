@@ -1333,6 +1333,108 @@
         ]
       }
     },
+    "/v1/subscriptions/event/cdsdocument": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "tenant_id": {
+              "type": "string",
+              "description": "The ID of the tenant this notification belongs to.",
+              "title": "Tenant ID"
+            },
+            "event_type": {
+              "type": "string",
+              "description": "The type of the event.",
+              "title": "Event Type"
+            },
+            "event_state": {
+              "type": "string",
+              "description": "The field describing the state of the event.",
+              "title": "Event State"
+            },
+            "event_id": {
+              "type": "string",
+              "description": "A unique event ID",
+              "title": "Event ID"
+            },
+            "created_at": {
+              "type": "string",
+              "description": "The timestamp of when the event was generated.",
+              "title": "Created At"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "object_type": {
+                  "type": "string",
+                  "description": "The type of the affected object for the triggered event.",
+                  "title": "Object Type"
+                },
+                "object": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "type": "string",
+                      "description": "The ID of the job for the generated document.",
+                      "title": "Job ID"
+                    }
+                  },
+                  "description": "object"
+                }
+              },
+              "description": "The data associated with the event."
+            }
+          }
+        },
+        "description": "CdsDocument notification received."
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "$ref": "#/responses/okCreateSubscription"
+          },
+          "400": {
+            "$ref": "#/responses/badRequestCreateSubscription"
+          },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        },
+        "summary": "When a new 3E Templates document is generated",
+        "description": "This operation triggers a flow when a new 3E Templates document is generated for a template that has been enabled in 3E’s Distribution Setup for 3rd party distribution.",
+        "operationId": "CdsDocumentTrigger",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-visibility": "internal",
+            "schema": {
+              "type": "object",
+              "x-ms-visibility": "internal",
+              "properties": {
+                "application": {
+                  "$ref": "#/definitions/application"
+                },
+                "callbackUrl": {
+                  "$ref": "#/definitions/callbackUrl"
+                }
+              },
+              "required": [
+                "application",
+                "callbackUrl"
+              ]
+            }
+          }
+        ]
+      }
+    },
     "/v1/subscriptions/{subscriptionId}/event/{type}": {
       "delete": {
         "responses": {
@@ -1558,6 +1660,128 @@
         "x-ms-visibility": "internal",
         "description": "Get brief information about configured WorkflowAction events from the 3E database."
       }
+    },
+    "/v1/template/job/{jobId}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "The response model contains a metadata of the file stored on the Templates Platform service.",
+            "schema": {
+              "$ref": "#/definitions/fileMetadataModel"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404":{
+            "description": "The job not found."
+          }
+        },
+        "summary": "Get 3E Templates document metadata",
+        "operationId": "GetFileMetadata",
+        "x-ms-visibility": "important",
+        "description": "Obtain the metadata associated with a 3E Templates document .",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Job ID",
+            "description": "Enter ID of the job of generated document. Available in trigger data."
+          }
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "400":{
+            "description": "The issue was occurred on Platform side."
+          }
+        },
+        "summary": "Delete 3E Templates document",
+        "operationId": "CompleteJob",
+        "x-ms-visibility": "important",
+        "description": "Notify the platform to delete all 3E Templates temporary files and complete the operation.",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Job ID",
+            "description": "Enter ID of the job of generated document. Available in trigger data."
+          }
+        ]
+      }
+    },
+    "/v1/template/file/{fileId}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK, Success",
+            "schema": {
+              "format": "binary",
+              "description": "The content of the file.",
+              "type": "string",
+              "x-ms-summary": "File Content"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The mime type of the downloaded file.",
+                "type": "string"
+              },
+              "Content-Disposition": {
+                "description": "Content Disposition.",
+                "type": "string"
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "400":{
+            "description": "The issue was occurred on Platform side."
+          }
+        },
+        "summary": "Download 3E Templates document",
+        "operationId": "DownloadFile",
+        "x-ms-visibility": "important",
+        "description": "Download the 3E Templates generated document.",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "File ID",
+            "description": "Enter ID of the file of generated document. Available in file metadata."
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -1730,6 +1954,56 @@
       "title": "Callback URL",
       "x-ms-visibility": "internal",
       "x-ms-notification-url": true
+    },
+    "fileMetadataModel": {
+      "type": "object",
+      "properties": {
+        "fileId": {
+          "type": "string",
+          "description": "The ID of the generated file.",
+          "title": "FileID"
+        },
+        "fileName": {
+          "type": "string",
+          "description": "The name of the generated file.",
+          "title": "FileName"
+        },
+        "batchId": {
+          "type": "string",
+          "description": "The ID of a batch if file is a part of a batch.",
+          "title": "BatchId"
+        },
+        "batchSize": {
+          "type": "string",
+          "description": "The size of a batch if file is a part of a batch.",
+          "title": "BatchSize"
+        },
+        "batchOrdinal": {
+          "type": "string",
+          "description": "The ordinal of a file in a batch if file is a part of a batch.",
+          "title": "BatchOrdinal"
+        },
+        "data": {
+          "type": "string",
+          "description": "The metadata of a file.",
+          "title": "Data"
+        },
+        "copyFileId": {
+          "type": "string",
+          "description": "The ID of a copy of generated file.",
+          "title": "CopyFileId"
+        },
+        "copyFileName": {
+          "type": "string",
+          "description": "The name of a copy of generated file.",
+          "title": "CopyFileName"
+        },
+        "copyData": {
+          "type": "string",
+          "description": "The metadata of a copy of a file.",
+          "title": "CopyData"
+        }
+      }
     }
   },
   "parameters": {},
