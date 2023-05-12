@@ -8,12 +8,18 @@ Calendarific is a developer-friendly, worldwide service giving you access to pub
 In order to be able to use the connector, you must have a valid API key. You can obtain one at the following link: [https://calendarific.com/signup](https://calendarific.com/signup). Registration is completely free.
 
 ## Supported Operations
-### Search Alerts
-Search and list detailed information about various alerts and disturbances, based on time or free text search capabilities.
+### List Countries
+List all supported countries and their details. Useful to get references and ISO codes programmatically.
+
+### List Languages
+List all supported languages and thier details such as their ISO code.
+
+### List Holidays
+List local & bank holidays and observances based on various filter criteria.
 
 ## Usage and disclaimer
 
-The service provides subscription based model, where you can start with a free membership, but access only limited set of features. Additionally, you can check the supported countries (230+) under their website: [https://calendarific.com/supported-countries](https://calendarific.com/supported-countries)
+The service provides subscription based model, where you can start with a free membership, but access only limited set of features - for example an applied rate limit. Additionally, you can check the supported countries (230+) under their website: [https://calendarific.com/supported-countries](https://calendarific.com/supported-countries)
 
 ## Limitations
 
