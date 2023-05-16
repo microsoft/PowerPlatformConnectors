@@ -2,18 +2,17 @@
 # Eden AI
 Enhance your apps and workflows with the power of [Eden AI](https://www.edenai.co/)! Integrate advanced AI features such as [text analysis](https://www.edenai.co/technologies/text) (sentiment analysis, keyword extraction, text moderation, etc.) , [image recognition](https://www.edenai.co/technologies/image) (object detection, face detection, explicit content detection, etc.), [document parsing](https://www.edenai.co/technologies/ocr-document-parsing) (invoice, receipt, IDs, resumes, etc.), [audio processing](https://www.edenai.co/technologies/speech), [machine translation](https://www.edenai.co/technologies/translation), [generative AI](https://www.edenai.co/technologies/generative-ai) (text generation, image generation, speech generation) and more.
 
+## Publisher: Eden AI
 
 ## Prerequisites
-You will need the following to proceed:
-* [Create your Eden AI account for free](https://app.edenai.run/user/register?referral=power-apps)
-* Get your API key from your account
+You will need to [create your Eden AI account for free](https://app.edenai.run/user/register?referral=power-apps).
+
+## Obtaining Credentials
+Once you have sign up, get your API key from your account:
 ![image](https://github.com/queSaDiLLaSS/try/assets/118369217/b72d6510-6a10-4047-9656-536823f4cba3)
 
-
-## Create a connection
 When you create a connection to Eden AI, do not forget the keyword **Bearer** before your API key:
 ![image](https://github.com/queSaDiLLaSS/try/assets/118369217/7154fbab-0c90-4e7a-9fab-053a2c1b504f)
-
 
 ## Supported Operations
 The connector supports the following operations:
@@ -163,7 +162,14 @@ Extracts structured information like products purchased, quantity, price, date a
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/ocr_receipt_parser_create).
 * `file`: Choose the file you want to analyze.
 
+## Known Issues and Limitations
+Here are some issues you could face while using the connector:
+* `Error 400`: Appears when you make a bad request, it means that you wrongly enter the parameters. Check how to configure them correctly with our [doc](https://docs.edenai.co/reference/start-your-ai-journey-with-edenai).
+* `Error 403`: Appears when you wrongly enter your API Key. When you create a connection, don't forget the keyword **Bearer** before your API_Key: Bearer API_KEY
 
+If you have any interrogation about our APIs, check our [documentation](https://docs.edenai.co/reference/start-your-ai-journey-with-edenai) or feel free to [contact us](https://www.edenai.co/contact). 
 
+## Deployment Instructions
+Please use the instructions on [Microsoft Power Platform Connectors CLI](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate or Power Apps.
 
 
