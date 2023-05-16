@@ -17,14 +17,14 @@
         );
 
         // Example case: response string is some JSON object
-        var result = JArray.Parse(responseString); 
+        var result = JObject.Parse(responseString);
 
         // Wrap the original JSON object into a new JSON object
         var newResult = new JObject
         {
-          ["OperationId"] = jobId,
-          ["Status"] = 2,
-          ["Results"] = result,
+          ["operationId"] = jobId,
+          ["status"] = 2,
+          ["results"] = result,
         };
         response.Content = CreateJsonContent(newResult.ToString());
       }
