@@ -1,206 +1,277 @@
-Microsoft Power Platform Connectors
+Connector Easyvista Service Manager
+Different Endpoints to Update Easyvista Service Manager
 
-Welcome to the Microsoft Power Platform Connectors open source repository. This repository contains custom connectors, certified connectors, and related tools to facilitate connector development for Azure Logic Apps, Microsoft Power Apps, and Microsoft Power Automate.
+Publisher: Easyvista
 
-## Custom Connectors
+Prerequisites
+Need to be premium in Power automate and have login in Easyvista Service Manager
 
-The ```custom-connectors``` folder contains fully functional connector samples which can be deployed to the Power Platform for extension and use. If you are looking to publish a connector to the Power Platform, please explore Certified Connectors and Independent Publisher Connectors.
+Supported Operations
+Required. Describe actions, triggers, and other endpoints.​
 
-## Certified Connectors
+Operation 1
+This resource allows to finish the specified action.
 
-The ```certified-connectors``` folder contains certified connectors which are built by partners who own the end service of their connector. These connectors are deployed and available out-of-box within the Power Platform for use.
-One requirement of our [connector certification program](https://docs.microsoft.com/connectors/custom-connectors/submit-certification) is that new certified connectors be open sourced for community contributions.
-The ```certified-connectors``` folder is managed by the Microsoft Connector Certification Team to ensure that within the ```master``` branch, the connector version is identical to that deployed in the Power Platform.
-The ```dev``` branch is maintained by the connector owner and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version.
+Operation 2
+Returns List of assets.
 
-## Independent Publisher Connectors
+Operation 3
+This resource allows to create a new Asset.
 
-The ```independent-publisher-connectors``` folder contains connectors that are submitted by publishers (MVPs, developers, and companies) that do not own the underlying service behind their connector. These connectors are deployed and available out-of-box within the Power Platform as premium connectors. Anyone can submit a new connector to this folder, add functionality to connectors in this folder, and resolve issues related to the connectors in this folder. The folder is managed by the Independent Publisher Connector Community, which includes Independent Publishers and Project Coordinators. The master branch is maintained by the Microsoft Connector Certification Team, who ensures that the connector version is identical to that deployed in the Power Platform. The dev branch is maintained by the connector maintainer(s) and the Microsoft Connector Certification Team to allow community development of the connector prior to certification and deployment of a version. Click here to view the [Independent Publisher Connector Manifesto](https://github.com/microsoft/PowerPlatformConnectors/wiki/Independent-Publisher-Connector-Group-%22Manifesto%22).
+Operation 4
+Returns the specified Asset.
 
-## Contributing
+Operation 5
+This resource allows to update the specified Asset.
 
-This project welcomes contributions and suggestions. Most contributions require you to agree to a
-Contributor License Agreement (CLA), which declares that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.microsoft.com.
+Operation 6
+Returns all the links for a specific asset.
 
-### Files to Include
+Operation 7
+This resource allows to delete the specified Asset Link.
 
-Please submit the following files: An Open API 2.0 swagger definition, an API properties file, and a README.md.
+Operation 8
+This resource allows to create a new Asset Link.
 
-### API Definition (Swagger) File
+Operation 9
+This resource allows to update the specified Asset Link.
 
-The API definition, also known as the swagger, describes the API for the custom connector using the OpenAPI specification.
+Operation 10
+Returns a specific link corresponding to a {parent_asset_id} and a {asset_id}.
 
-For further details, see the [apiDefinition.swagger.json](schemas/apiDefinition.swagger.schema.json) JSON schema.
+Operation 11
+Returns List of catalog assets.
 
-### API Properties File
+Operation 12
+Returns an asset catalog entry.
 
-The API properties file contains some properties for the custom connector. These properties are not part of the API definition. It contains information such as the brand color, authentication information, etc. A typical API properties file looks like the following:
+Operation 13
+Returns List of catalog requests.
 
-```json
-{
-  "properties": {
-    "capabilities": [],
-    "connectionParameters": {
-      "api_key": {
-        "type": "securestring",
-        "uiDefinition": {
-          "constraints": {
-            "clearText": false,
-            "required": "true",
-            "tabIndex": 2
-          },
-          "description": "The KEY for this API",
-          "displayName": "KEY",
-          "tooltip": "Provide your KEY"
-        }
-      }
-    },
-    "iconBrandColor": "#007EE6",
-    "policyTemplateInstances": [
-      {
-        "title": "MyPolicy",
-        "templateId": "setqueryparameter",
-        "parameters": {
-            "x-ms-apimTemplateParameter.name": "queryParameterName",
-            "x-ms-apimTemplateParameter.value": "queryParameterValue",
-            "x-ms-apimTemplateParameter.existsAction": "override"
-        }
-      }
-    ]    
-  }
-}
-```
+Operation 14
+Returns List of catalog request path.
 
-More information on each of the properties are given below:
+Operation 15
+Returns a catalog requests path item.
 
-* `properties`: The container for the information.
+Operation 16
+Returns a catalog requests item.
 
-* `connectionParameters`: Defines the connection parameter for the service.
+Operation 17
+Returns List of configuration items.
 
-* `iconBrandColor`: The icon brand color in HTML hex code for the custom connector. Independent Publisher connectors must set the color to `"#da3b01"`.
+Operation 18
+Returns the specified Configuration Item.
 
-* `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
+Operation 19
+Returns all the links for a specific configuration item {ci_id}.
 
-* `policyTemplateInstances`: An optional list of policy template instances and values used in the custom connector.
+Operation 20
+Returns a specific link corresponding to a {parent_ci_id} and a {child_ci_id}
 
-For further details, see the [apiProperties.json](schemas/paconn-apiProperties.schema.json) JSON schema.
+Operation 21
+Removes a configuration item relationship.
 
-### README.md
+Operation 22
+Creates a new configuration item relationship.
 
-README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A good example is the [Azure Key Vault](custom-connectors/AzureKeyVault/Readme.md) custom connector.
-A readme.md template for [Certified Connectors](templates/certified-connectors/readme.md) and [Independent Publisher Connectors](templates/Independent%20Publisher/readme.md) is also included for your reference. If you are submitting an Independent Publisher connector that requires OAuth, please make sure to explain how to create the OAuth app. The Microsoft Certification Team will use those instructions to create the app, so please make sure they are detailed and accurate.
+Operation 23
+Updates the configuration item link. Only relation_type and blocking property can be updated.
 
-### Creating a Fork
+Operation 24
+Returns List of entities.
 
-To contribute to this open source repository, start by creating a fork on this repository. To do so, select the "fork" button in the upper right corner, and create your own copy of the repository. Next, sync your fork with the remote repository and clone your forked repository to your local machine.
+Operation 25
+Returns the specified entity.
 
-```git clone https://github.com/YOUR-USERNAME/PowerPlatformConnectors.git```
+Operation 26
+Update a department
 
-Check your remote URL.
+Operation 27
+Returns List of Employees.
 
-```git remote -v```
+Operation 28
+This resource allows to create a new Employee.
 
-```
-> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
-> origin  https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
-```
+Operation 29
+Returns the specified Employee.
 
-Add an upstream repository for your clone.
+Operation 30
+This resource allows to update the specified Employee.
 
-```git remote add upstream https://github.com/microsoft/PowerPlatformConnectors.git```
+Operation 31
+Returns List of known errors.
 
-Verify the upstream links.
+Operation 32
+Returns the specified known Errors.
 
-```git remote -v```
+Operation 33
+Returns List of locations.
 
-```
-> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (fetch)
-> origin    https://github.com/YOUR_USERNAME/PowerPlatformConnectors.git (push)
-> upstream  https://github.com/microsoft/PowerPlatformConnectors.git (fetch)
-> upstream  https://github.com/microsoft/PowerPlatformConnectors.git (push)
-```
+Operation 34
+Returns the specified location.
 
-To keep your fork up to date with this repository's updates, run these commands:
+Operation 35
+Update a location
 
-```git fetch upstream```
+Operation 36
+Returns List of manufacturers.
 
-```git checkout master```
+Operation 37
+Returns the specified Manufacturer.
 
-```git merge upstream/master```
+Operation 38
+Returns List of Incidents or Requests.
 
-You are now ready to develop your connector in your own branch.
+Operation 39
+This resource allows to create a new request or incident.
 
-### Submitting to the Open Source Repository
+Operation 40
+Returns the specified incident or request.
 
-Contributions to the open source repository are made through pull requests.
-Prior to submitting a pull request, ensure that 1) you have thoroughly tested the connector 2) you have provided response schemas unless the responses are dynamic, and 3) that your pull request does not contain any sensitive or specific information, for example client ids or client secrets.
-Any sensitive values can be replaced with fake or dummy values for the purposes of submission as long as it is clearly indicated.
-Also, ensure that the readme.md of the connector is updated with the latest information, or created for new connector submissions.
-An example of a clear, structured, readme.md can be found for the [Azure Key Vault](custom-connectors/AzureKeyVault/Readme.md) connector.
-A readme.md template for [Certified Connectors](templates/certified-connectors/readme.md) and [Independent Publisher Connectors](templates/Independent%20Publisher/readme.md) is also included for your reference.
-Put the `readme.md` in the same directory as the other connector files.
-Add tags indicating which connector type you are submitting. Connector type name should match the folder name you are submitting to: custom-connector, certified-connector, or independent-publisher-connector.
+Operation 41
+To close an incident or request.
 
-#### Certified Connectors
+Operation 42
+This resource allows to update the specified request or incident.
 
-For new connectors which will be submitted for certification, create a directory under the ```certified-connectors``` directory, place the connector files in the sub-folder, and submit a pull request to the ```dev``` branch. Ensure that a clear, structured, readme.md is included.
+Operation 43
+Returns the comment associated to the specified incident or request.
 
-Add a tag by selecting the labels option to "certified-connector"
+Operation 44
+Returns the URLs of all documents attached to the specified incident or request.
 
-Updates to certified connectors must first be made through a pull request to the ```dev``` branch for review by the connector owner.
+Operation 45
+Uploads a file (docx, pdf, txt or image file) and attach it to the specified request.
 
-Once a pull request has been merged to the ```dev``` branch, the connector owner can submit the connector for certification through the Connector certification tab in [ISV Studio](https://isvstudio.powerapps.com). Once certified, the Microsoft Certification team will handle merging the updates from ```dev``` to ```master```.
+Operation 46
+To restart an incident or request, update it with the optional "restarted" object along with a comment.
 
-Updates to an existing custom connector can be made through a simple pull request to the ```dev``` branch to update the custom connector files.
+Operation 47
+To suspend an incident or request, update it with the optional "suspended" object along with a comment.
 
-#### Independent Publisher Connectors
+Operation 48
+This resource allows to create a task.
 
-Follow the same instructions as above on submitting for certification, create a directory under the "independent-publisher-connectors" directory and place the connector files in the sub-folder.
-The `"iconBrandColor":` in the API properties file must be set to `"#da3b01"`.
-Set your pull request title to "Connector Name (Independent Publisher)."
-Paste in screenshots from the Test operations section and 3 unique operations (actions/triggers) working within a Flow. This can be in one flow or part of multiple flows. For each one of those flows, I have pasted in screenshots of the Flow succeeding.
-Add a tag by selecting the labels option to "independent-publisher-connector."
-If the connector uses OAuth, I have provided detailed steps on how to create an app in the readme.md.
+Operation 49
+Returns List of SLAs.
 
-#### Custom Connectors
+Operation 50
+Returns the specified SLA.
 
-Follow the same instructions on submitting for certification, create a directory under the custom-connectors directory and place the connector files in the sub-folder. Add a tag by selecting the labels option to "custom-connector".
+Operation 51
+View all the attributes of a list of assets
 
-### Tooling and Validation
+Operation 52
+View all the attributes of an asset
 
-#### CLA
+Operation 53
+Create a link between an attribute and an asset
 
-When a pull request is submitted, a CLA-bot will automatically determine whether you need to provide
-a CLA and annotate the PR appropriately. Simply follow the instructions
-provided by the bot to ensure your pull request can be properly reviewed.
-You will only need to do this once across all repos using our CLA.
+Operation 54
+Update an attribute of an asset
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+Operation 55
+Create a CI
 
-#### Swagger Validation
+Operation 56
+Update a CI
 
-A submitted pull request will also be validated against our Swagger Validator tool, which checks the connector files to ensure it is a proper Swagger file and adheres to our connector requirements and guidelines. Any errors or warnings will be added to the PR for both the submitter and the reviewer to understand. We do not accept pull requests with outstanding unresolved Swagger Validator issues.
+Operation 57
+Create a CI unavailability
 
-#### Breaking Change Detector
+Operation 58
+End a CI unavailability
 
-Another validation which runs on a submitted pull request is the breaking changes validator. This is to catch any inadvertent, non-backwards-compatible (i.e. breaking) changes which may break a current user experience, for example, deleting a published operation. The Breaking Change Detector compares the previous version of the Swagger with the new submission and raises awareness of any breaking change. The submitter and reviewer must both acknowledge any breaking changes submitted and ensure that no end users are inadvertently negatively affected. 
+Operation 59
+View all the links that have an impact on a CI
 
-## Legal Notices
+Operation 60
+View all the links impacted by a CI
 
-Microsoft and any contributors grant you a license to the Microsoft documentation and other content
-in this repository under the [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode),
-see the [LICENSE](LICENSE) file, and grant you a license to any code in the repository under the [MIT License](https://opensource.org/licenses/MIT), see the
-[LICENSE-CODE](LICENSE-CODE) file.
+Operation 61
+View the Tickets Status List
 
-Microsoft, Windows, Microsoft Azure and/or other Microsoft products and services referenced in the documentation
-may be either trademarks or registered trademarks of Microsoft in the United States and/or other countries.
-The licenses for this project do not grant you rights to use any Microsoft names, logos, or trademarks.
-Microsoft's general trademark guidelines can be found at http://go.microsoft.com/fwlink/?LinkID=254653.
+Operation 62
+View a list of problems attached to tickets
 
-Privacy information can be found at https://privacy.microsoft.com/en-us/
+Operation 63
+View a list of problems attached to a ticket
 
-Microsoft and any contributors reserve all others rights, whether under their respective copyrights, patents,
-or trademarks, whether by implication, estoppel or otherwise.
+Operation 64
+View a list of tickets attached to a problem
+
+Operation 65
+Delete a document
+
+Operation 66
+View a list of questions
+
+Operation 67
+View a list of questions with a response
+
+Operation 68
+View a question
+
+Operation 69
+View all the responses to a list of questions of a ticket
+
+Operation 70
+View the response to a question of a ticket
+
+Operation 71
+Create the response to a question of a ticket
+
+Operation 72
+Update the response to a question of a ticket
+
+Operation 73
+View a list of questionnaires
+
+Operation 74
+View a questionnaire
+
+Operation 75
+View a list of problems
+
+Operation 76
+View a problem
+
+Operation 77
+View a list of news
+
+Operation 78
+Create a news
+
+Operation 79
+View a news
+
+Operation 80
+Update a news
+
+Operation 81
+View a list of actions
+
+Operation 82
+Create an action for a ticket
+
+Operation 83
+View a list of records of an external table
+
+Operation 84
+Create a record in an external table
+
+Operation 85
+Delete a record in an external table
+
+Operation 86
+Update a record in an external table
+
+Obtaining Credentials
+Easyvista Basic Auth and ask Easyvista to obtain credentials
+
+Known Issues and Limitations
+Limitation only at the call present in the connector
+
+Deployment Instructions
+Need to be premium in Power automate and have login in Easyvista Service Manager
