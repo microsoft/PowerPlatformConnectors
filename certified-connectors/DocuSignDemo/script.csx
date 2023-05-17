@@ -1833,6 +1833,29 @@ public class Script : ScriptBase
       body["workflowIds"] = workflowsArray;
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
+
+    if ("GetEnvelopeDocumentFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var newBody = new JObject();
+      JArray envelopeDocumentFields = new JArray();
+
+      foreach(JProperty documentFields in body.Properties())
+      {
+        foreach(var field in documentFields.Value)
+        {
+          envelopeDocumentFields.Add(new JObject()
+          {
+            ["name"] = field["name"],
+            ["value"] = field["value"]
+          });
+        }
+      }
+
+      newBody["envelopeDocumentFields"] = envelopeDocumentFields;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
   
     if ("GetEnvelopeDocumentTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
