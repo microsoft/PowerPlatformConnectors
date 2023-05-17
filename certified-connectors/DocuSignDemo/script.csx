@@ -2418,6 +2418,17 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("CreateEnvelopeFromTemplateNoRecipients".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
+        "SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var templateId = query.Get("templateId");
+      body["templateId"] = templateId;
+
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if (response.Content?.Headers?.ContentType != null)
     {
       if ("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
