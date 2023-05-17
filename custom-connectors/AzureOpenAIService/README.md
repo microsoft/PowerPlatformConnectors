@@ -25,7 +25,7 @@ If you already have the connector installed, you can update it with the followin
 
 ```pwsh
 paconn login
-paconn update --api-def apiDefinition.swagger.json --api-prop apiProperties.json --script AzureOpenAIScript.csx --icon connector-icon.png
+paconn update --api-def apiDefinition.swagger.json --api-prop apiProperties.json --script AzureOpenAIScript.csx --icon icon.png
 ```
 
 ## Connection setup
@@ -50,35 +50,25 @@ After importing the connector, you should create a  connection. There are two pr
 * `List deployments` - With this action, you can list all deployments inside of your instance of the Azure OpenAI Service.
 * `List models` - With this action, you can list all models that are available to your instance of the Azure OpenAI Service.
 
+### Helper actions
+
+There are three actions provided that do not call the Azure OpenAI Service, but are used to either prepare for calling or interpret results from the Azure OpenAI Service.
+
+* `Build a ChatML Completion Prompt` - This action is used to build a prompt for the `Create a Completion` action. It takes a `question`, and `initial_scope` and an array of Question:Answer pairs called `history` and returns a `prompt` that can be used with the `Create a Completion` action.
+* `Get the answer and history QA pair from a Completion Response object` - This action is used to extract the answer and history from the response of the `Create a Completion` action. It takes the `response` from the `Create a Completion` action and returns the `answer` and `history` properties.
+* `Get the answer and assistant:content pair from a raw Chat Completion response object` - This action is used to extract the answer and history from the response of the `Create a Chat Completion (Preview)` action. It takes the `response` from the `Create a Chat Completion (Preview)` action and returns the `answer` and `history` properties.
+
 ## Connector Architecture
 
 ![Azure OpenAI Custom Connector Architecture](./resources/azure-openai-custom-connector-architecture.png)
 
 1. The connector is called from a Power Automate Flow, Power App or Logic App. The default policy is used to build the full Azure OpenAI endpoint from the `resource-name` (from the connection) and, if required, the `deployment-id` (passed as a header).
-1. If the operation is neither `CreateCompletion` nor `ChatCompletion`, the operation is passed directly to the applicable endpoint in the Azure OpenAI REST service.
-1. If the operation is either `CreateCompletion` or `ChatCompletion`, the operation is passed to `script.csx` where a new body is built from the parameters passed to the connector and the context property
-1. The updated body is passed to the appropriate endpoint in the Azure OpenAI REST service.
-1. The response is intercepted for `CreateCompletion` or `ChatCompletion` and a new response body crafted with the updated context property
 1. The response is received by the custom connector and
 1. The response is returned to the calling Power Automate Flow (or Power App, or Logic App)
 
 ### Maintaining State for Completions and Chat Completions
 
-The `Create a completion` and `Create a chat completion (Preview)` actions both have a property that allows the previous interactions with the service to be passed back to the service on subsequent calls. This property is used to maintain state between calls to the API. The value of this property should be stored in a variable and passed back to the action on subsequent calls. The value of the property should be the value of the property of the same name from the previous call.
-
-For the `Create a completion` action, the property is called `history`, and is an array of `question: answer` pairs. For the `Create a chat completion (Preview)` action, the property is called `messages` and is an array of `role: content` pairs.
-
-This state is captured, manipulated and returned in the [custom code](./script.csx).
-
-An example of using this state recursively in a Power Automate Flow is shown below:
-
-![Example of using state in Power Automate Flow](./resources/passing-context-to-azure-openai-custom-connector.png)
-
-Note that the `Chat Completion(Preview)` action is called twice in this example. The first time, the `history` property is not set, so the value of the property is `null`. The second time, the `history` property is set to the value of the `history` property returned by the previous call.
-
-Note that the second prompt is simply "Where did they play their first gig?", but because the context of the original interaction is passed with the question, the model is able to disambiguate the request and answer in the expected manner.
-
-![Context used to successfully disambiguate a prompt to the model](./resources/context-passed-to-azure-openai-custom-connector.png)
+TODO: Update with new architecture using helper operations
 
 ## Resources
 
