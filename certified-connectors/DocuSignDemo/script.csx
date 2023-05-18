@@ -1475,7 +1475,7 @@ public class Script : ScriptBase
     var body = ParseContentAsJArray(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var fieldList = new JArray();
-    var documentId = query.Get("documentId");
+    var documentId = query.Get("documentGuid");
 
     foreach (var field in body)
     {
@@ -1752,7 +1752,7 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if ("GetDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       uriBuilder.Path = uriBuilder.Path.Replace("/get_document_id", "/documents");
@@ -1832,6 +1832,29 @@ public class Script : ScriptBase
       }
       body["workflowIds"] = workflowsArray;
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetEnvelopeDocumentFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var newBody = new JObject();
+      JArray envelopeDocumentFields = new JArray();
+
+      foreach(JProperty documentFields in body.Properties())
+      {
+        foreach(var field in documentFields.Value)
+        {
+          envelopeDocumentFields.Add(new JObject()
+          {
+            ["name"] = field["name"],
+            ["value"] = field["value"]
+          });
+        }
+      }
+
+      newBody["envelopeDocumentFields"] = envelopeDocumentFields;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
   
     if ("GetEnvelopeDocumentTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -2392,7 +2415,7 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if ("GetDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -2403,7 +2426,8 @@ public class Script : ScriptBase
       {
         if (documentName.Equals(documentInfo["name"].ToString()))
         {
-          newBody["documentId"] = documentInfo["documentIdGuid"];
+          newBody["documentId"] = documentInfo["documentId"];
+          newBody["documentIdGuid"] = documentInfo["documentIdGuid"];
           newBody["name"] = documentInfo["name"];
           break;
         }
@@ -2415,6 +2439,17 @@ public class Script : ScriptBase
       }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("CreateEnvelopeFromTemplateNoRecipients".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
+        "SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var templateId = query.Get("templateId");
+      body["templateId"] = templateId;
+
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
     if (response.Content?.Headers?.ContentType != null)
