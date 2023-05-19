@@ -10,7 +10,7 @@ public class Script : ScriptBase
 
         // Check if the operation ID matches what is specified in the OpenAPI definition of the connector
         // Presence is enforced in swagger
-        var domain = this.Context.Request.Headers.GetValues("Domain").First();
+        var domain = this.Context.Request.Headers.GetValues("Instance").First();
 
         var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
         uriBuilder.Host = domain;
@@ -30,13 +30,13 @@ public class Script : ScriptBase
             var contentAsJson = JObject.Parse(contentAsString);
 
             // check for parameters
-            if (contentAsJson["data"] == null || contentAsJson["resultSetMetadata"]==null)
+            if (contentAsJson["data"] == null || contentAsJson["resultSetMetaData"]==null)
             {
-                return createErrorResponse("resultSetMetadata or data parameter are empty!", HttpStatusCode.BadRequest);
+                return createErrorResponse("resultSetMetaData or data parameter are empty!", HttpStatusCode.BadRequest);
             }
 
             // get metadata
-            var cols = JArray.Parse(contentAsJson["resultSetMetadata"].ToString());
+            var cols = JArray.Parse(contentAsJson["resultSetMetaData"].ToString());
             var rows = JArray.Parse(contentAsJson["data"].ToString());
 
             JArray newRows = new JArray();
