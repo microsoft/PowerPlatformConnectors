@@ -1,5 +1,5 @@
 
-## Line Connector
+## Line Message API Connector
 
 The connector allows you to send messages to registered LINE bot and associated users.
 
@@ -7,12 +7,15 @@ The connector allows you to send messages to registered LINE bot and associated 
 
 ## Prerequisites
 
-Request LINE Message API,Follow [Getting started with the Messaging API](https://developers.line.biz/en/docs/messaging-api/getting-started)
+Request LINE Developer Account,
+
+See more [Getting started with the Messaging API](https://developers.line.biz/en/docs/messaging-api/getting-started)
 
 ## Getting your credentials
 
 Once you are logged in to LINE Developer Console dashboard, open the Auth Keys page and create a key to generate an API key and Bearer token.
-[Long-lived channel access token](https://developers.line.biz/en/docs/messaging-api/channel-access-tokens/#long-lived-channel-access-tokens)
+
+See more [Long-lived channel access token](https://developers.line.biz/en/docs/messaging-api/channel-access-tokens/#long-lived-channel-access-tokens)
 
 ## Supported Operations
 The connector supports the following operations:
