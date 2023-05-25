@@ -1,32 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Security;
-using System.Security.Authentication;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Web;
-using System.Xml;
-using System.Xml.Linq;
-using System.Drawing;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Oneflow.PowerApps.CustomCode.SupportingClasses;
-
-namespace Oneflow.PowerApps.CustomCode
-{
-    public class Script : ScriptBase
+﻿    public class Script : ScriptBase
     {
         #region fields & consctructors
         private readonly Dictionary<string, Func<IScriptContext, Task<HttpResponseMessage>>> _operationMappings;
@@ -38,7 +10,9 @@ namespace Oneflow.PowerApps.CustomCode
                 [Operations.GetTemplates] = HandleGetTemplates,
                 [Operations.DownloadFile] = HandleFileDownload,
                 [Operations.GetDynamicSchema] = HandleGetDynamicSchema,
-                [Operations.PartyCreate] = HandlePartyCreate
+                [Operations.PartyCreate] = HandlePartyCreate,
+                [Operations.GetTemplateTypeByTemplateId] = HandleGetTemplateTypeByTemplateId,
+                [Operations.ExecuteAs] = HandleGetExecuteAs
             };
 
             _schemaMappings = new Dictionary<string, string>()
@@ -69,6 +43,11 @@ namespace Oneflow.PowerApps.CustomCode
         #region operation handling methods
         private async Task<HttpResponseMessage> HandleOperation(IScriptContext ctx)
         {
+            if (ContainsHeader(ctx.Request, Constants.UserEmailOverrideHeader))
+            {
+                ReplaceUserEmailWithOverriddenValue(ctx.Request);
+            }
+
             if (_operationMappings.ContainsKey(ctx.OperationId))
             {
                 return await _operationMappings[ctx.OperationId].Invoke(ctx)
@@ -226,6 +205,37 @@ namespace Oneflow.PowerApps.CustomCode
             }
         }
 
+        private async Task<HttpResponseMessage> HandleGetTemplateTypeByTemplateId(IScriptContext ctx)
+        {
+            var req = ctx.Request;
+            var templateId = GetHeaderStringValue(Constants.TemplateIdHeader, req);
+            if (String.IsNullOrEmpty(templateId)) throw new ScriptException(HttpStatusCode.BadRequest, "template id is a required property.");
+
+            string requestUrl = string.Format(Constants.Requests.TemplatesEndpoint, templateId);
+            var getTemplateRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(requestUrl));
+            CopyHeaders(req, getTemplateRequest);
+
+            var getTemplateResponse = await ctx.SendAsync(getTemplateRequest, CancellationToken);
+            if (!getTemplateResponse.IsSuccessStatusCode) return getTemplateResponse;
+
+            string getTemplateResponseContent = await getTemplateResponse.Content.ReadAsStringAsync();
+            var template = JsonConvert.DeserializeObject<Models.Template>(getTemplateResponseContent);
+            if (template != null && template.template_type == null)
+                throw new ScriptException(HttpStatusCode.BadRequest,
+                    "Selected template is not a part of any template group and doesn't have data fields.");
+
+            var templateTypeId = template.template_type.id;
+            req.RequestUri = new Uri(req.RequestUri.AbsoluteUri.ToString() + templateTypeId);
+            return await ctx.SendAsync(req, CancellationToken);
+        }
+
+        private async Task<HttpResponseMessage> HandleGetExecuteAs(IScriptContext ctx)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Content = CreateJsonContent(Constants.ExecuteAsResponse);
+            return response;
+        }
+
         private async Task<HttpResponseMessage> CreateParty(HttpRequestMessage initialRequest, string contractId, Models.Party party, IScriptContext ctx)
         {
             StringBuilder debugInfo = new StringBuilder();
@@ -303,6 +313,46 @@ namespace Oneflow.PowerApps.CustomCode
                 string.Equals(x.Key, headerName, StringComparison.OrdinalIgnoreCase))
                 .Value?.First();
         }
+        
+        private bool ContainsHeader(HttpRequestMessage req, string headerName)
+        {
+            if (req == null) return false;
+            return req.Headers?.Any(x => string.Equals(x.Key, headerName, StringComparison.OrdinalIgnoreCase)) == true;
+        }
+
+        private void ReplaceUserEmailWithOverriddenValue(HttpRequestMessage req)
+        {
+            string overrideWith = req.Headers.FirstOrDefault(x => string.Equals(x.Key, Constants.UserEmailOverrideHeader))
+                .Value?.First();
+            if (String.IsNullOrEmpty(overrideWith) || overrideWith.Equals(Constants.ExecuteAsOptions.CurrentUser, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+            string headerValue = string.Empty;
+            bool isValidEmail = IsStringAValidEmail(overrideWith);
+
+            if (overrideWith.Equals(Constants.ExecuteAsOptions.Creator, StringComparison.OrdinalIgnoreCase))
+            {
+                headerValue = Constants.CreatorHeaderValue;
+            }            
+            else if (isValidEmail)
+            {
+                headerValue = overrideWith;
+            }
+            else
+            {
+                throw new ScriptException(HttpStatusCode.BadRequest, $"{overrideWith} is not recognized as a valid email address.");
+            }
+            req.Headers.Remove(Constants.UserEmailOverrideHeader);
+            req.Headers.Remove(Constants.UserEmailHeader);
+            req.Headers.Add(Constants.UserEmailHeader, headerValue);
+        }
+
+        private bool IsStringAValidEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return false;
+            return Constants.EmailRegex.Match(email).Length > 0;
+        }
         #endregion
 
         #region additional classes
@@ -313,7 +363,8 @@ namespace Oneflow.PowerApps.CustomCode
             public const string DownloadFile = "GetAContractFileById";
             public const string GetDynamicSchema = "GetDynamicSchema";
             public const string PartyCreate = "PartyCreate";
-
+            public const string GetTemplateTypeByTemplateId = "GetTemplateByTemplateId";            
+            public const string ExecuteAs = "GetExecuteAs";
         }
 
         public static class Constants
@@ -322,6 +373,7 @@ namespace Oneflow.PowerApps.CustomCode
             {
                 public const string PartyEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties";
                 public const string ParticipantEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties/{1}/participants";
+                public const string TemplatesEndpoint = "https://api.oneflow.com/v1/templates/{0}";
             }
             public static class PartyTypes
             {
@@ -330,8 +382,19 @@ namespace Oneflow.PowerApps.CustomCode
                 public const string Ownerside = "ownerside";
             }
             public const string GetTemplatesFilterHeader = "x-oneflow-workspace-id";
+            public const string TemplateIdHeader = "x-oneflow-template-id";
             public const string SchemaIdHeader = "schema_id";
             public const string ParticipantTypeHeader = "participant_type";
+            public const string UserEmailOverrideHeader = "x-oneflow-user-email-override";
+            public const string UserEmailHeader = "x-oneflow-user-email";
+            public const string CreatorHeaderValue = "__CREATOR__";
+            public static readonly Regex EmailRegex = new Regex("^((([a-z]|\\d|[!#\\$%&'\\*\\+\\-\\/=\\?\\^_`{\\|}~]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])+(\\.([a-z]|\\d|[!#\\$%&'\\*\\+\\-\\/=\\?\\^_`{\\|}~]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])+)*)|((\\x22)((((\\x20|\\x09)*(\\x0d\\x0a))?(\\x20|\\x09)+)?(([\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(\\\\([\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]))))*(((\\x20|\\x09)*(\\x0d\\x0a))?(\\x20|\\x09)+)?(\\x22)))@((([a-z]|\\d|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(([a-z]|\\d|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])*([a-z]|\\d|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])))\\.)+(([a-z]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])|(([a-z]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])([a-z]|\\d|-|\\.|_|~|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])*([a-z]|[\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF])))\\.?$", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+           
+            public static class ExecuteAsOptions
+            {
+                public const string Creator = "Contract creator";
+                public const string CurrentUser = "Connection user";
+            }
             #region dynamic schemas
             public const string IndividualPartyDynamicSchema = @"{
                                                                       ""type"": ""object"",
@@ -581,6 +644,13 @@ namespace Oneflow.PowerApps.CustomCode
                                                                     ""type""
                                                                   ]
                                                                 }";
+            public static readonly string ExecuteAsResponse = @"{
+                                                                 ""data"":
+                                                                    [
+                                                                        {""key"": ""Contract creator"", ""value"" : ""Contract creator""}, 
+                                                                        {""key"":""Connection user"", ""value"":""Connection user""}
+                                                                    ]
+                                                                }";
             #endregion
         }
         public class Models
@@ -637,7 +707,7 @@ namespace Oneflow.PowerApps.CustomCode
 
                 public override bool Equals(object obj)
                 {
-                    return  obj is Party party &&
+                    return obj is Party party &&
                             NullStringComparer.NullEqualsEmptyComparer.Equals(identification_number, party.identification_number) &&
                             NullStringComparer.NullEqualsEmptyComparer.Equals(name, party.name) &&
                             NullStringComparer.NullEqualsEmptyComparer.Equals(type, party.type) &&
@@ -763,7 +833,7 @@ namespace Oneflow.PowerApps.CustomCode
                 {
                     return obj is Participant participant &&
                            EqualityComparer<ParticipantPermissions>.Default.Equals(_permissions, participant._permissions) &&
-                           NullStringComparer.NullEqualsEmptyComparer.Equals(delivery_channel,participant.delivery_channel) &&
+                           NullStringComparer.NullEqualsEmptyComparer.Equals(delivery_channel, participant.delivery_channel) &&
                            NullStringComparer.NullEqualsEmptyComparer.Equals(email, participant.email) &&
                            NullStringComparer.NullEqualsEmptyComparer.Equals(identification_number, participant.identification_number) &&
                            NullStringComparer.NullEqualsEmptyComparer.Equals(name, participant.name) &&
@@ -803,6 +873,19 @@ namespace Oneflow.PowerApps.CustomCode
                         ContractUpdate = updatePermission
                     };
                 }
+            }
+
+            public class Template
+            {
+                public int id { get; set; }
+                public TemplateType template_type { get; set; }
+            }
+
+            public class TemplateType
+            {
+                public string extension_type { get; set; }
+                public string id { get; set; }
+                public string name { get; set; }
             }
         }
 
@@ -852,4 +935,4 @@ namespace Oneflow.PowerApps.CustomCode
 
         #endregion
     }
-}
+    
