@@ -1,35 +1,31 @@
 # Kyndryl Mainframe Connector
-Required. One paragraph, two to three sentences about the service and the connector​.
+Unlock the value of your data by using this connector to enable low-code developers to build power apps that will unleash new data insights and capabilities across your organization. Work with the thousands of mainframe developers at Kyndryl to innovate and provide better end user experiences against your mainframe data whilst securing it through Kyndryl Bridge and Microsoft Power Platform. 
 
 ## Publisher: Publisher's Name
-Required. It should be the company or organization name. ​
+Kyndryl
 
 ## Prerequisites
-Required. Any plans or licenses, tools required from the connector.​
+Kyndryl Bridge API Key, Kyndryl Bridge Host URL, Kyndryl Bridge Base URL, IBM mainframe. 
 
 ## Supported Operations
-Required. Describe actions, triggers, and other endpoints.​
-### Operation 1
-Description of operation 1.
 
-### Operation 2
-Description of operation 2.
+### Get Customer
+This action retrieves a specific customers details. 
+
+### Create Customer
+This action creates a new customer profile. 
+
+### Get Policy
+This action retrieves a policy related to a customer. 
+
+### Update Customer
+This action updates a specific customers details. 
 
 ## Obtaining Credentials
-Required. Explain the authentication method and how to get the credentials.​
-
-## Getting Started
-Optional. How to get started with your connector.
+Active Directory, Kyndryl Bridge API Key. 
 
 ## Known Issues and Limitations
-Required. Include any known issues and limitations a user may encounter.
-
-## Frequently Asked Questions
-Optional. Include frequently asked questions by your customer.
-### Question 1
-Answer to question 1
-### Question 2
-Answer to question 2
+N/A
 
 ## Deployment Instructions
-Required. Add instructions on how to deploy this connector as custom connector.
+N/A
