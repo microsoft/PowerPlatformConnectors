@@ -1,8 +1,10 @@
 ## HTML To PDF By Pascalcase 
 
-This connector can overcome the limitation of the native one drive HTML to PDF convertor which has 2mb HTML size limit, there are not many options in the market if one wants to find a way to convert more than 2mb HTML. We think for the cost which we are offering, its the cheapest in the market, without any compromises being made to the capabilities.
+HTML to PDF connector by Pascalcase can overcome the limitation of the native one drive HTML to PDF convertor which has 2mb HTML size limit.
 
-## Publisher: Pascalcase Software Pvt.Ltd
+## Publisher: 
+
+Pascalcase
 
 ## Prerequisites
 
@@ -32,33 +34,24 @@ Image – H2
 
 Image – H3
 
-# HTML To PDF By Pascalcase
-Convert HTML to PDF connectors
-
-1. Users can use this connector by searching "HTML to PDF by pascalcase" in powerautomate "add an action".
-
-2. Once selected they need to provide the content type {i.e. application/json}, the HTML string and the Key{ provided by pascalcase software pvt.ltd}.
-
-3. The response is then sent back to power automate as a bytes array which can then be used as file content.
-
-4. If the users do not have a key the response will be limited to 1 page of PDF, if the users have the key the response will be limited to 5pages and maximum HTML file of 20mb can be processed by the connector.
-
-
 ## Known issues and limitations
 
-This connector can process maximum 15MB of HTML and can generate maximum 5 pages of the PDF. If there is a HTML which is more than 5pages it will descard the remaining pages and send output of only 5pages.
+This connector can create a maximum of 5 PDF pages and process up to 15MB of HTML. If an HTML file has more than 5 pages, the extra pages will be discarded, and just 5 pages will be sent as output.
 
 ## Common errors and remedies
 
-If there are any issues with the connector i.e. HTTPS timeout i.e 2min then reduce the size of the HTML and try again. 
+If there are any issues with the connector i.e. HTTPS timeout(2min) then reduce the size of the HTML and try again. 
 
 ## FAQ
 
 1.  Can I use the connector without key?
+
     Yes you can, but the generated PDF will be of only 1 page.
 
 2.  What is the maximum size of PDF which can be converted?
+
     Maximum 15MB of PDF can be converted currently.
 
-3.  How many pages does the licences version of the app can process.
+3.  How many pages does the licences version of the app can process?
+
     Maximum 5pages of PDF can be processed currently by our system.
