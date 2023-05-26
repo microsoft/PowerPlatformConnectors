@@ -1752,10 +1752,10 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if ("GetEnvelopeDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeDocumentInfo".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-      uriBuilder.Path = uriBuilder.Path.Replace("/get_document_id", "/documents");
+      uriBuilder.Path = uriBuilder.Path.Replace("/get_document_info", "/documents");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -2051,28 +2051,23 @@ public class Script : ScriptBase
           {
             phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
 
-            if (signer.ToString().Contains("phoneAuthentication"))
+            signerPhoneNumber = 
+              signer.ToString().Contains("phoneAuthentication") ? 
+                signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString() 
+              : signer.ToString().Contains("additionalNotifications") ? 
+                signer["additionalNotifications"][0]["phoneNumber"]["countryCode"].ToString() + " " + 
+                signer["additionalNotifications"][0]["phoneNumber"]["number"].ToString() 
+              : signer.ToString().Contains("phoneNumber") ? 
+                signer["phoneNumber"]["countryCode"].ToString() + " " + signer["phoneNumber"]["number"].ToString() 
+              : signer.ToString().Contains("smsAuthentication") ? 
+                signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString() : "0";
+
+            signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
+
+            if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
-              signerPhoneNumber = signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString();
-              signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
-
-              if (phoneNumber.ToString().Equals(signerPhoneNumber))
-              {
-                matchingSigner = signer as JObject;
-                break;
-              }
-            }
-
-            if (signer.ToString().Contains("smsAuthentication"))
-            {
-              signerPhoneNumber = signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString();
-              signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
-
-              if (phoneNumber.ToString().Equals(signerPhoneNumber))
-              {
-                matchingSigner = signer as JObject;
-                break;
-              }
+              matchingSigner = signer as JObject;
+              break;
             }
           }
         }
@@ -2082,6 +2077,11 @@ public class Script : ScriptBase
       {
         throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Phone Number to retrieve Recipient information");
       } 
+
+      if (string.IsNullOrEmpty((string)matchingSigner["recipientIdGuid"]))
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: No recipient found for the given information");
+      }
       else 
       {
         newBody["recipientId"] = matchingSigner["recipientId"];
@@ -2415,7 +2415,7 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if ("GetEnvelopeDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopeDocumentInfo".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
