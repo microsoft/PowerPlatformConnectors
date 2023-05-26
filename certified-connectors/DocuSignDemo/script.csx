@@ -2051,11 +2051,16 @@ public class Script : ScriptBase
           {
             phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
 
-            signerPhoneNumber = signer.ToString().Contains("phoneAuthentication") ? signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString() :
-              signer.ToString().Contains("additionalNotifications") ? (signer["additionalNotifications"][0]["phoneNumber"]["countryCode"].ToString() + 
-                " " + signer["additionalNotifications"][0]["phoneNumber"]["number"].ToString()) :
-              signer.ToString().Contains("phoneNumber") ? (signer["phoneNumber"]["countryCode"].ToString() + " " + signer["phoneNumber"]["number"].ToString()) :
-              signer.ToString().Contains("smsAuthentication") ? signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString() : "0";
+            signerPhoneNumber = 
+              signer.ToString().Contains("phoneAuthentication") ? 
+                signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString() 
+              : signer.ToString().Contains("additionalNotifications") ? 
+                signer["additionalNotifications"][0]["phoneNumber"]["countryCode"].ToString() + " " + 
+                signer["additionalNotifications"][0]["phoneNumber"]["number"].ToString() 
+              : signer.ToString().Contains("phoneNumber") ? 
+                signer["phoneNumber"]["countryCode"].ToString() + " " + signer["phoneNumber"]["number"].ToString() 
+              : signer.ToString().Contains("smsAuthentication") ? 
+                signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString() : "0";
 
             signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
 
