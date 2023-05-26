@@ -19,7 +19,7 @@ class PowerAppsRP:
 
     def __init__(self, api_manager):
         self.api_manager = api_manager
-        self.rp_headers = {'x-ms-user-agent': 'paconn-cli'}
+        self.rp_headers = {'x-ms-origin': 'paconn-cli'}
 
     @staticmethod
     def _get_filter_query(environment):

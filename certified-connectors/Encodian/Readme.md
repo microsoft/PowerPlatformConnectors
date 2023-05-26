@@ -10,7 +10,7 @@
 ## Encodian Power Automate Action Documentation
 The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
 
-## Supported Operations
+## Standard Actions
 
 ### Convert to PDF
 Convert a document to PDF or PDF/A format - https://support.encodian.com/hc/en-gb/articles/360011123574-Convert-to-PDF
@@ -69,17 +69,17 @@ Split a PDF Document into multiple PDF Documents using barcodes - https://suppor
 ### Convert Word to PDF Form
 Convert the Word document provided (Legacy Form Controls Only) to a PDF form document. - https://support.encodian.com/hc/en-gb/articles/360012307133-Convert-Word-to-PDF-Form
 
-### Add Text Watermark
-Add a text watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012230494-Add-Text-Watermark
+### Add Text Watermark to PDF
+Add a text watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012230494
 
-### Add Image Watermark
-Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012484094-Add-Image-Watermark
+### Add Image Watermark to PDF
+Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012484094
 
-### Add Text Watermark (Advanced)
-Add a text watermark to the specified PDF document using the advanced options - https://support.encodian.com/hc/en-gb/articles/360012345813-Add-Text-Watermark-Advanced
+### Add Text Watermark to PDF (Advanced)
+Add a text watermark to the specified PDF document using the advanced options - https://support.encodian.com/hc/en-gb/articles/360012345813
 
-### Add Image Watermark (Advanced)
-Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012485874-Add-Image-Watermark-Advanced
+### Add Image Watermark to PDF (Advanced)
+Add an image watermark to the specified PDF document using the standard options - https://support.encodian.com/hc/en-gb/articles/360012485874
 
 ### Image Clean Up (Document)
 Execute image clean up activities focussed on text based images such as Deskew, Rotate, Despeckle + more.
@@ -110,6 +110,9 @@ Extract PDF form data from a PDF Form - https://support.encodian.com/hc/en-gb/ar
 
 ### Search and Replace Text
 Find and replace text contained within a PDF or DOCX document - https://support.encodian.com/hc/en-gb/articles/360020937853-Search-and-Replace-Text
+
+### Update Word Hyperlinks 
+Search for and update hyperlinks within a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/7136687719837
 
 ### Replace Text with Image
 Find and replace text contained within a PDF or DOCX document with an image - https://support.encodian.com/hc/en-gb/articles/360027234874
@@ -171,3 +174,112 @@ Create a Hash-based message authentication code (HMAC) using a secret key - http
 ### Create Hash Code
 Create a Hashcode / message digest - https://support.encodian.com/hc/en-gb/articles/360013996077-Create-Hash-Code
 
+### Add Text Watermark to Image
+Add a Text Watermark to the image provided - https://support.encodian.com/hc/en-gb/articles/360013560398-Add-Text-Watermark-To-Image
+
+### Compare Word Documents
+Compare differences between Microsoft Word and PDF Documents - https://support.encodian.com/hc/en-gb/articles/360018576278-Compare-Word-Documents
+
+### Populate Word Document
+Populate a Microsoft Word Document (DOCX) with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/360019620578-Populate-Word-Document
+
+### Compress PDF
+Compress and optimise a PDF document - https://support.encodian.com/hc/en-gb/articles/360019994857-Compress-PDF
+
+### Send to Encodian Filer
+Send data to an Encodian Filer endpoint - https://support.encodian.com/hc/en-gb/articles/4404097189905-Send-to-Encodian-Filer
+
+### Add Text Watermark to Word
+Add a text watermark to the specified Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/4411284008593
+
+### Add Image Watermark to Word
+Add an image watermark to the specified Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/4411329161361
+
+### Merge Excel Files
+Merge an array of Microsoft Excel files to a single file (multiple formats) - https://support.encodian.com/hc/en-gb/articles/4469865776529
+
+### Remove EXIF Tags from Image
+Remove EXIF tags from the specified image - https://support.encodian.com/hc/en-gb/articles/4415700524817
+
+### Convert PDF to TIFF
+Convert a PDF document to TIFF (tiff) format - https://support.encodian.com/hc/en-gb/articles/4418024925457
+
+### Flatten PDF
+Flatten a PDF Document or PDF Form - https://support.encodian.com/hc/en-gb/articles/4416473033105
+
+### Convert PDF to Images
+Convert a PDF document into an array of images (PNG or JPG) - https://support.encodian.com/hc/en-gb/articles/4418101623441
+
+### Repair PDF
+Repair a PDF File - https://support.encodian.com/hc/en-gb/articles/4418809972753
+
+### Merge Presentations
+Merge an array of presentations to a single presentation - https://support.encodian.com/hc/en-gb/articles/4425652063761
+
+### Convert CAD
+Convert CAD files to another document format - https://support.encodian.com/hc/en-gb/articles/4542607350417
+
+### Get Image Information
+Get Image Information (Height, Width, Resolution, Format, File Size + more) - https://support.encodian.com/hc/en-gb/articles/4431662425489
+
+### Convert Visio
+Convert Microsoft Visio documents to another document format - https://support.encodian.com/hc/en-gb/articles/5306216347665
+
+### Secure Word Document
+Secure and protect a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/6634150180253
+
+### Get Tracked Changes
+Get all the tracked changes (Revisions and comments) for the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/6634950400669
+
+### Sign PDF
+Apply a digital signature to the PDF document provided - https://support.encodian.com/hc/en-gb/articles/7117159708189
+
+### Enable Tracked Changes
+Enables tracked changes for the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/6695385009053
+
+### Disable Tracked Changes
+Disables tracked changes for the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/6695370804125
+
+### Compress PowerPoint
+Applies compression to the PowerPoint or presentation file provided - https://support.encodian.com/hc/en-gb/articles/7621965500189
+
+### Remove Watermark from Word
+Remove both an image and text watermark from the Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/7752587767965
+
+### Remove Watermarks from PDF
+Removes all or targeted watermarks from the PDF document provided - https://support.encodian.com/hc/en-gb/articles/7751328751645
+
+### Add Attachments to PDF
+Attaches (also referred to as embeds) the files provided within the 'Attachments' property to the PDF document provided - https://support.encodian.com/hc/en-gb/articles/8087678202653-Add-Attachments-to-PDF
+
+### Convert JSON to Excel
+Convert the JSON data to provided to a Microsoft Excel or CSV document - https://support.encodian.com/hc/en-gb/articles/7690520790045
+
+### Convert PDF to PNG
+Converts every page contained within the PDF document provided to a single PNG image - https://support.encodian.com/hc/en-gb/articles/10086003836701-Convert-PDF-to-PNG
+
+## Utility Actions
+
+### Utility - Clean Text
+Removes specified characters and performs specified clean operations upon the text value provided - https://support.encodian.com/hc/en-gb/articles/10072015106077
+
+### Utility - Create GUID
+Generates a new GUID - https://support.encodian.com/hc/en-gb/articles/9563119917597
+
+### Utility - Extract Email Addresses from Text
+Detects and returns all email addresses found within the text provided - https://support.encodian.com/hc/en-gb/articles/10068475924253
+
+### Utility - Extract Text between Values
+Rreturns a string value extracted from two defined points within the string value provided - https://support.encodian.com/hc/en-gb/articles/9604938273565
+
+### Utility - Validate Email Address
+Validates the email address provided - https://support.encodian.com/hc/en-gb/articles/9588817792925
+
+### Utility - Validate GUID
+Validates whether the string value provided is a valid GUID - https://support.encodian.com/hc/en-gb/articles/9601440603421
+
+### Utility - Validate URL Availability
+Checks whether the URL provided is available - https://support.encodian.com/hc/en-gb/articles/9224582350365
+
+### Utility - Validate URL Syntax
+Validates whether the string value provided is a valid URL - https://support.encodian.com/hc/en-gb/articles/9601816944413

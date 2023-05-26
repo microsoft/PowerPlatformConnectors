@@ -29,7 +29,8 @@ from paconn.operations.json_keys import (
     _SCRIPT_OPERATIONS,
     _CAPABILITIES,
     _POLICY_TEMPLATE_INSTANCES,
-    _PUBLISHER
+    _PUBLISHER,
+    _STACKOWNER
 )
 
 
@@ -46,12 +47,9 @@ def _prepare_directory(destination, connector_id):
     # Create a sub-directory in the current directory
     # when a destination isn't provided
     else:
-        if os.path.isdir(connector_id):
-            error = '{} directory already exists. Please remove the directory before continuing.'
-            raise CLIError(error.format(connector_id))
-        else:
+        if not os.path.isdir(connector_id):
             os.mkdir(connector_id)
-            destination = connector_id
+        destination = connector_id
 
     if os.path.isdir(destination):
         os.chdir(destination)
@@ -108,7 +106,8 @@ def download(powerapps_rp, settings, destination, overwrite):
         _SCRIPT_OPERATIONS,
         _CAPABILITIES,
         _POLICY_TEMPLATE_INSTANCES,
-        _PUBLISHER
+        _PUBLISHER,
+        _STACKOWNER
     ]
 
     # Remove the keys that aren't present in the property JSON
