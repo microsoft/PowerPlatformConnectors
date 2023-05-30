@@ -8,14 +8,23 @@ Get and search planned and real-time information from the BKK FUTÁR system - pu
 In order to be able to use the connector, you must have a valid API key. You can obtain one at the following link: [https://opendata.bkk.hu/keys](https://opendata.bkk.hu/keys). Registration is completely free.
 
 ## Supported Operations
-### Search Alerts
+### Search alerts
 Search and list detailed information about various alerts and disturbances, based on time or free text search capabilities.
 
-### Get Bicycle Rental Stations
+### Get bicycle rental stations
 List all bike rental stations and detailes about them, such as location information or currently available number of bikes.
 
-### Get Arrivals and Departures for a Stop
+### Get arrivals and departures for a stop
 List planned and actual arrival and departure times for given stop, based on additional time or location filters.
+
+### Get schedule for a stop
+List schedules for a selected stop, including times, details and directions.
+
+### Get stops for a location
+List all nearby stops and their details for a selected location based on coordinates. If no coordinates are given, returns all stops.
+
+### Get vehicles for a stop
+List all vehicles and their details, which are on route containing the selected stop.
 
 ## Usage and disclaimer
 
