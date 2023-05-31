@@ -2030,7 +2030,6 @@ public class Script : ScriptBase
       var recipientEmailId = query.Get("recipientEmail");
       var phoneNumber = query.Get("areaCode") + " " + query.Get("phoneNumber");
       var signerPhoneNumber = "";
-      char[] charsToTrimPhoneNumber = { '*', ' ', '\'', '/', '-', '(', ')', '+'};
 
       string [] signerTypes = {
         "signers", "agents", "editors", "carbonCopies", "certifiedDeliveries", "intermediaries",
@@ -2049,7 +2048,7 @@ public class Script : ScriptBase
 
           if (query.Get("phoneNumber") != null)
           {
-            phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
+            phoneNumber = Regex.Replace(phoneNumber, @"[^a-zA-Z0-9]", "");
 
             signerPhoneNumber = 
               signer.ToString().Contains("phoneAuthentication") ? 
@@ -2065,7 +2064,7 @@ public class Script : ScriptBase
               : signer.ToString().Contains("phoneNumber") ? 
                 signer["phoneNumber"]["countryCode"].ToString() + " " + signer["phoneNumber"]["number"].ToString() : "0";
 
-            signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
+            signerPhoneNumber = Regex.Replace(signerPhoneNumber, @"[^a-zA-Z0-9]", "");
 
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
