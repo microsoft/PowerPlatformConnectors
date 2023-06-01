@@ -12,7 +12,7 @@ You need a Seismic Business or Premium user account for the tenant.
 
 ### Add a comment on an item
 
- Add a comment on an item.
+Add a comment on an item.
 
 ### Add a File
 
@@ -25,6 +25,10 @@ Adds a new subfolder to a specified workspace folder.
 ### Add a reply on comment
 
 Add a reply on comment.
+
+### Add a member to content
+
+Add a member to content
 
 ### Copy a File
 
@@ -49,6 +53,10 @@ Adds a new URL content item to the workspace.
 ### Create or get a contextual workspace folder
 
 Creates a contextual folder or gets the workspaceContentId for a contextual folder if it already exists.
+
+### Remove a member from content
+
+Remove a member from content
 
 ### Delete a comment on an item
 
@@ -77,6 +85,10 @@ Delete an item from workspace.
 ### Download a file
 
 Downloads the binary contents of a workspace content.
+
+### Get file custom properties
+
+Get file custom properties
 
 ### Get a Url
 
@@ -134,12 +146,14 @@ The Seismic Power Automate Workpace connector includes the following actions. Ea
 * [Add a File](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementaddafile)
 * [Add a folder](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementaddafile)
 * [Add a reply on comment](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecommentsaddareplytoacomment)
+* [Add a member to content](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacepermissionssharingaddamembertocontent)
 * [Copy a File](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementcopyafile)
 * [Copy a folder](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementcopyafolder)
 * [Copy a Url](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementcopyaurl)
 * [Copy an Item](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementcopyanitem)
 * [Create a Url](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementcreateaurl)
 * [Create or get a contextual workspace folder](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementcreategetacontextualworkspacefolder)
+* [Remove a member from content](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacepermissionssharingremoveamemberfromcontent)
 * [Delete a comment on an item](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecommentsdeleteacomment)
 * [Delete a file](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementdeleteafile)
 * [Delete a folder](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementdeleteafolder)
@@ -147,7 +161,8 @@ The Seismic Power Automate Workpace connector includes the following actions. Ea
 * [Delete a Url](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementdeleteaurl)
 * [Delete an item](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementdeleteanitem)
 * [Download a file](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementdownloadafile)
-* [Get a Url](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementgetaurl)
+* [Get file custom properties](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementgetfilecustomproperties)
+* [Get a Url](https://developer.seismic].com/seismicsoftware/reference/seismicworkspacecontentmanagementgetaurl)
 * [Get an Item's metadata](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementgetanitemsmetadata)
 * [Get file information](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementgetfileinformation)
 * [Get information about a folder](https://developer.seismic.com/seismicsoftware/reference/seismicworkspacecontentmanagementgetinformationaboutafolder)
