@@ -20,6 +20,10 @@ The connector supports the following operations:
 
 Send data received from Leadinfo to any connected application in your Microsoft Power Automate flow.
 
+## Obtaining Credentials
+
+When creating a connection with leadinfo through the connector use your Leadinfo account to log in.
+
 ## Getting Started
 
 To get started using the Leadinfo connector start to create a new flow. Within the selection menu to start a new flow,
@@ -30,3 +34,6 @@ choose the "Automated cloud flow" option.
 Currently there are no known issues and limitations, if you run into some issues you can contact
 us [here](https://www.leadinfo.com/en/contact/).
 
+## Deployment Instructions
+
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
