@@ -4,7 +4,7 @@ SuperOffice (https://www.superoffice.com/) is a CRM (Customer Relationship Manag
 ## Publisher: justyna.nowak@ggsitc.com
 
 ## Prerequisites
-
+test
 
 ## Getting Started
 
