@@ -1785,6 +1785,25 @@ public class Script : ScriptBase
       acceptHeaderValue = "application/pdf";
     }
 
+    if ("GetDocumentsWithDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+      acceptHeaderValue = "application/pdf";
+      string[] path = uriBuilder.Path.Split('/');
+      string documentId = HttpUtility.UrlDecode(path[8]);
+
+      var documentDownloadOptionsMap = new Dictionary<string, string>() {
+        { "Get ZIP archive with documents and COC", "archive" },
+        { "Get only certificate of completion as pdf", "certificate" },
+        { "Get all documents as single pdf", "combined" },
+        { "Get envelope documents as single pdf", "portfolio" }
+      };
+
+      uriBuilder.Path = uriBuilder.Path.Replace(path[8] + "/documentsDownload", documentDownloadOptionsMap[documentId]);
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     this.Context.Request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(acceptHeaderValue));
   }
 
@@ -2456,7 +2475,8 @@ public class Script : ScriptBase
 
     if (response.Content?.Headers?.ContentType != null)
     {
-      if ("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+      if (("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
+      ("GetDocumentsWithDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
       {
         response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
       }
