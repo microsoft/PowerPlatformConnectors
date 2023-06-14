@@ -19,8 +19,9 @@ It provides the following functionalities:
 - Send alerts to SIGNL4 teams
 - Acknowledge, close and annotate alerts
 - Set users on-duty and off-duty
-- Managing duty schedules
-- Managing users
+- Manage duty schedules
+- Manage users
+- Manage categories
 - And more ...
 
 ### AlertsTrigger
@@ -661,9 +662,14 @@ In order to use the connector you need your SIGNL4 API key. In the SIGNL4 web po
 
 ## Getting Started
 
-You can find a detailed description of the the SIGNL4 API functions [here](https://connect.signl4.com/api/docs/index.html?urls.primaryName=SIGNL4%20API%20V2).
+You can find a detailed description of the SIGNL4 API functions [here](https://connect.signl4.com/api/docs/index.html?urls.primaryName=SIGNL4%20API%20V2).
 After adding the SIGNL4 connector to your Power Automate flow you need to obtain the SIGNL4 API key. Then you can use the API functions accordingly.
 If you should have any further questions please do not hesitate to contact the SIGNL4 team.
+
+The easiest way to start is to use the EventsSend action to send an alert:
+- First get Your SIGNL4 team secret / integration secret from your SIGNL4 web portal.
+- When you have the team secret / integration secret you can use this one in the function EventsSend to trigger an event that can generate an alert for your team. You just need to enter any Title and Message. You can find a description of the other parameters on the [inbound webhook documentation page](https://connect.signl4.com/webhook/docs/index.html).
+- That's it and you now trigger an event and receive an alert in SIGNL4.
 
 ## Known Issues and Limitations
 

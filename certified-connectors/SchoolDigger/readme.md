@@ -12,6 +12,7 @@ also needed:
 
 ## Supported Operations
 The connector supports the following operations:
+
 * ```Get a school list```: Look for schools by name, location (lat/long, city, zip, and more), district, etc.
 * ```Get a district list```: Look for schools districts by name, location (lat/long, city, zip, and more), district, etc.
 * ```Get school detail```: Returns a detailed record for one school
