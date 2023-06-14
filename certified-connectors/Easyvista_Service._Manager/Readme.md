@@ -1,6 +1,5 @@
 Title
-Connector Easyvista Service Manager
-Different endpoints for creating/updating/deleting in the Easyvista Service Manager database
+Different endpoints for creating/updating/deleting in the Easyvista Service Manager Connector
 
 Publisher: Easyvista
 
