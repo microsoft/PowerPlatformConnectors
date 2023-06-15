@@ -1,6 +1,6 @@
 # Sunrise Sunset
 
-A free service that provides sunset and sunrise times for a given latitude and longitude. Attribution required.
+Sunrise-Sunset provides sunset and sunrise times for a given latitude and longitude, including twilight informations. Attribution required.
 
 ## Publisher: Fördős András
 
@@ -10,7 +10,7 @@ There are no pre-requisites to this service as it is free and public, however at
 
 ## Supported Operations
 
-### Get Data
+### Get sunset-sunrise
 Query sunrise and sunset information (twilight included) based on latitude and longitude.
 
 ## Known Issues and Limitations
