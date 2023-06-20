@@ -2054,13 +2054,16 @@ public class Script : ScriptBase
             signerPhoneNumber = 
               signer.ToString().Contains("phoneAuthentication") ? 
                 signer["phoneAuthentication"]["senderProvidedNumbers"][0].ToString() 
+              : signer.ToString().Contains("identityVerification") ? 
+                signer["identityVerification"]["inputOptions"][0]["phoneNumberList"][0]["countryCode"].ToString() + " " +
+                signer["identityVerification"]["inputOptions"][0]["phoneNumberList"][0]["number"].ToString()
               : signer.ToString().Contains("additionalNotifications") ? 
                 signer["additionalNotifications"][0]["phoneNumber"]["countryCode"].ToString() + " " + 
-                signer["additionalNotifications"][0]["phoneNumber"]["number"].ToString() 
-              : signer.ToString().Contains("phoneNumber") ? 
-                signer["phoneNumber"]["countryCode"].ToString() + " " + signer["phoneNumber"]["number"].ToString() 
+                signer["additionalNotifications"][0]["phoneNumber"]["number"].ToString()
               : signer.ToString().Contains("smsAuthentication") ? 
-                signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString() : "0";
+                signer["smsAuthentication"]["senderProvidedNumbers"][0].ToString() 
+              : signer.ToString().Contains("phoneNumber") ? 
+                signer["phoneNumber"]["countryCode"].ToString() + " " + signer["phoneNumber"]["number"].ToString() : "0";
 
             signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
 
