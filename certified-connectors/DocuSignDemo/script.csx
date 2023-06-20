@@ -1785,22 +1785,27 @@ public class Script : ScriptBase
       acceptHeaderValue = "application/pdf";
     }
 
-    if ("GetDocumentsWithDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      string[] documentDownloadOptions = { "Combined", "Archive", "Certificate", "Portfolio" };
 
       acceptHeaderValue = "application/pdf";
-      string[] path = uriBuilder.Path.Split('/');
-      string documentId = HttpUtility.UrlDecode(path[8]);
+      string documentId = null;
 
-      var documentDownloadOptionsMap = new Dictionary<string, string>() {
-        { "Get ZIP archive with documents and COC", "archive" },
-        { "Get only certificate of completion as pdf", "certificate" },
-        { "Get all documents as single pdf", "combined" },
-        { "Get envelope documents as single pdf", "portfolio" }
-      };
+      foreach(var downloadOption in documentDownloadOptions)
+      {
+        if (uriBuilder.Path.Contains(downloadOption))
+        {
+          documentId = downloadOption;
+          break;
+        }
+      }
 
-      uriBuilder.Path = uriBuilder.Path.Replace(path[8] + "/documentsDownload", documentDownloadOptionsMap[documentId]);
+      uriBuilder.Path = uriBuilder.Path.Replace(uriBuilder.Path.Substring(
+        uriBuilder.Path.IndexOf(documentId),
+        uriBuilder.Path.Length - uriBuilder.Path.IndexOf(documentId)),
+        HttpUtility.UrlDecode(documentId.ToLower()));
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -2476,7 +2481,7 @@ public class Script : ScriptBase
     if (response.Content?.Headers?.ContentType != null)
     {
       if (("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
-      ("GetDocumentsWithDocumentId".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
+      ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
       {
         response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
       }
