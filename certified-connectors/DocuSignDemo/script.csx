@@ -1788,6 +1788,7 @@ public class Script : ScriptBase
     if ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var newPath = uriBuilder.Path;
       string[] documentDownloadOptions = { "Combined", "Archive", "Certificate", "Portfolio" };
 
       acceptHeaderValue = "application/pdf";
@@ -1795,17 +1796,18 @@ public class Script : ScriptBase
 
       foreach(var downloadOption in documentDownloadOptions)
       {
-        if (uriBuilder.Path.Contains(downloadOption))
+        if (newPath.Contains(downloadOption))
         {
           documentId = downloadOption;
           break;
         }
       }
 
-      uriBuilder.Path = uriBuilder.Path.Replace(uriBuilder.Path.Substring(
-        uriBuilder.Path.IndexOf(documentId),
-        uriBuilder.Path.Length - uriBuilder.Path.IndexOf(documentId)),
+      uriBuilder.Path = newPath.Replace(newPath.Substring(
+        newPath.IndexOf(documentId),
+        newPath.IndexOf("/documentsDownload") + ("/documentsDownload".Length)- newPath.IndexOf(documentId)),
         HttpUtility.UrlDecode(documentId.ToLower()));
+
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
