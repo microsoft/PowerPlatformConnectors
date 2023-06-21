@@ -1803,10 +1803,17 @@ public class Script : ScriptBase
         }
       }
 
-      uriBuilder.Path = newPath.Replace(newPath.Substring(
-        newPath.IndexOf(documentId),
-        newPath.IndexOf("/documentsDownload") + ("/documentsDownload".Length)- newPath.IndexOf(documentId)),
-        HttpUtility.UrlDecode(documentId.ToLower()));
+      if (documentId == null)
+      {
+        uriBuilder.Path = newPath.Replace("/documentsDownload", "/");
+      }
+      else
+      {
+        uriBuilder.Path = newPath.Replace(newPath.Substring(
+          newPath.IndexOf(documentId),
+          newPath.IndexOf("/documentsDownload") + ("/documentsDownload".Length)- newPath.IndexOf(documentId)),
+          HttpUtility.UrlDecode(documentId.ToLower()));
+      }
 
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
