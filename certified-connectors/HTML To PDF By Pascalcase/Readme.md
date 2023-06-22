@@ -23,19 +23,19 @@ You will be given a key/cipher, such as the y9XSXTizWPQVfq1MYbSR!709 dummy key, 
 
 1.	Search for HTML to PDF by pascalcase in 'add an actions', select the pascalcase connector. Refer Image – H1
  
- ![image](https://github.com/VikrantUpadhyay1/HTMLToPDFCustomConnector/assets/122965309/5d5e13f1-8877-4798-9f68-16c20f83767f)
- 
+![image](https://github.com/microsoft/PowerPlatformConnectors/assets/122965309/263f26aa-4f26-4318-a814-c587ac4c2136)
+
 $${\color{lightblue}Image \space – \space H1}$$
 
-2.	Provide content type, HTML string/code and the key **{can be null}**.The key will be provided by pascalcase software pvt.ltd to the users if they want to generate more than 1 page of PDF, else the generated PDF will be of 1 page. By default, the content type and HTML string will have some values in them, users can change the HTML value based on their desire. Refer Image – H2
+2.	Provide HTML string/code and the key **{can be null}**.The key will be provided by [pascalcase software pvt.ltd](https://pascalcase.com/Home/HTMLToPDFConverter) to the users if they want to generate more than 1 page of PDF, else the generated PDF will be of 1 page. By default, the HTML string will have some values in it, users can change the HTML value based on their desire. Refer Image – H2
 
- ![image](https://github.com/VikrantUpadhyay1/HTMLToPDFCustomConnector/assets/122965309/32eed87d-0055-478a-8c6a-3305f9899396)
+ ![image](https://github.com/microsoft/PowerPlatformConnectors/assets/122965309/944d34bd-14b5-4b40-8301-42de8c23bdb1)
  
 $${\color{lightblue}Image \space – \space H2}$$
 
 3.	Once the flow is run, the response will be a bytes array which can be used in any file content parameter either for Dataverse or for SharePoint. Refer Image – H3
  
-![image](https://github.com/VikrantUpadhyay1/HTMLToPDFCustomConnector/assets/122965309/3c51d113-031f-4fb5-9629-b93e400b66c2)
+![image](https://github.com/microsoft/PowerPlatformConnectors/assets/122965309/a9dd5a1d-867d-45fb-9318-d1364046dedb)
 
 $${\color{lightblue}Image \space – \space H3}$$
 
