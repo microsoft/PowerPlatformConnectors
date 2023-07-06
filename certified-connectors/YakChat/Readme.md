@@ -17,6 +17,7 @@ The YakChat connector supports the following operations:
 * `Send Message` Action: Send an SMS message using through YakChat in a flow
 * `When a Message is Received` Trigger: Trigger a flow when a message is received by YakChat
 * `When a Message is Sent` Trigger: Trigger a flow when a message is sent by YakChat
+* `When a Message is Sent or Received` Trigger: Trigger a flow when a message is sent or receieved by YakChat
 
 ## Known Issues and Limitations
 * The YakChat connector currently does not support sending MMS using the `Send Message` Action.
