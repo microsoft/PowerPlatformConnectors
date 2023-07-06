@@ -19,23 +19,45 @@ You will need the following to proceed:
 - [Viber Service ID](https://www.tyntec.com/viber-business-messages#contact)
 
 ## Supported requests
-- **Send Viber** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
- - To make a successful request, please, populate the followings fields:
- - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
- - **from** - your Viber Service ID
- - **text** - text of your Viber message
+- **Send Viber text** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+   - To make a successful request, please, populate the followings fields:
+   - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
+   - **from** - your Viber Service ID
+   - **text** - text of your Viber message
+   - **rateType** - The rate type of the message. One of these values: "transaction|promotion|session"
 
-- **Send Rich Media** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
- - To make a successful request, please, populate the followings fields:
- - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
- - **from** - your Viber Service ID
- - **components type - 1**  - type of sent media (an image)
- - **components url - 1** - url to given media (the link to image)
+- **Send image** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+   - To make a successful request, please, populate the followings fields:
+   - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
+   - **from** - your Viber Service ID
+   - **components type - 1**  - type of sent media (an image)
+   - **components url - 1** - url to given media (the link to image)
+   - **rateType** - The rate type of the message. One of these values: "transaction|promotion"
+
+- **Send file** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+   - To make a successful request, please, populate the followings fields:
+   - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
+   - **from** - your Viber Service ID
+   - **components type - 1**  - type of sent media (a pdf)
+   - **components url - 1** - url to given media (the link to pdf)
+   - **rateType** - The rate type of the message. One of these values: "transaction|promotion"
+
+- **Send complex message** using tyntec Conversations API [reference](https://api.tyntec.com/reference/#conversations-send-messages-send-a-message)
+   - To make a successful request, please, populate the followings fields:
+   - **to** - receiver's phone number in _international_ form without leading 00 (_E.g. 4989202451100_)
+   - **from** - your Viber Service ID
+   - **body type - 1**  - type of component (text, image or button)
+   - **body text - 1** - text of the component (at least one is mandatory)
+   - **components url - 1** - url to given image
+   - **body caption - 1** - caption of button
+   - **body callback - 1** - button's callback
+   - **rateType** - The rate type of the message. One of these values: "transaction|promotion"
+
 
 - **Status Check**
- - To make a successful status check, please, provide the connector with the following values
+  - To make a successful status check, please, provide the connector with the following values
 
- - **id** - messageID of your message (_returned after each request_)
+  - **id** - messageID of your message (_returned after each request_)
 
 
 

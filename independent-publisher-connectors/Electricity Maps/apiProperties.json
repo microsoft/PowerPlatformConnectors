@@ -1,0 +1,84 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "API Key",
+          "description": "The API Key for this api",
+          "tooltip": "Provide your API Key",
+          "constraints": {
+            "tabIndex": 2,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      },
+      "base_product_url": {
+        "type": "string",
+        "uiDefinition": {
+          "displayName": "Base Product URL",
+          "description": "The base URL of subscribed product at Electricity Maps",
+          "tooltip": "Provide your base product URL",
+          "constraints": {
+            "tabIndex": 3,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      }
+    },
+    "policyTemplateInstances": [
+      {
+        "templateId": "dynamichosturl",
+        "title": "Set Zone Host",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://api.electricitymap.org",
+          "x-ms-apimTemplate-operationName": ["GetZones", "CheckHealth"]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Set Zone Path",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/v3/zones",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": ["GetZones"]
+        }
+      },
+      {
+        "templateId": "dynamichosturl",
+        "title": "Set Base URL for product API",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "@connectionParameters('base_product_url')",
+          "x-ms-apimTemplate-operationName": [
+            "CarbonForecast",
+            "CarbonHistory",
+            "CarbonLatest",
+            "BreakdownHistory",
+            "BreakdownLatest",
+            "ConsumptionForecast",
+            "BreakdownForecast"
+          ]
+        }
+      },
+      {
+        "templateId": "convertobjecttoarray",
+        "title": "Process Zone Payload",
+        "parameters": {
+          "x-ms-apimTemplateParameter.propertyParentPath": "@body()",
+          "x-ms-apimTemplateParameter.propertySubPath": "null",
+          "x-ms-apimTemplateParameter.newPropertyPath": "@body().Zones",
+          "x-ms-apimTemplateParameter.keyName": "Name",
+          "x-ms-apimTemplateParameter.valueName": "Details",
+          "x-ms-apimTemplate-policySection": "Response",
+          "x-ms-apimTemplate-operationName": ["GetZones"]
+        }
+      }
+    ],
+    "iconBrandColor": "#da3b01",
+    "capabilities": [],
+    "publisher": "Vitalii Sorokin",
+    "stackOwner": "Electricity Maps"
+  }
+}
