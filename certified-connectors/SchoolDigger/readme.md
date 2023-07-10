@@ -12,12 +12,14 @@ also needed:
 
 ## Supported Operations
 The connector supports the following operations:
-* ```Search for a school```: Look for schools by name, location (lat/long, city, zip, and more), district, etc.
-* ```Search for a school district```: Look for schools districts by name, location (lat/long, city, zip, and more), district, etc.
-* ```Retrieve school details```: Returns a detailed record for one school
-* ```Retrieve district details```: Returns a detailed record for one district
-* ```Retrieve a school ranking list```: Returns a SchoolDigger school ranking list for a particular state and level (elementary, middle, high)
-* ```Retrieve a district ranking list```: Returns a SchoolDigger district ranking list for a particular state
+
+* ```Get a school list```: Look for schools by name, location (lat/long, city, zip, and more), district, etc.
+* ```Get a district list```: Look for schools districts by name, location (lat/long, city, zip, and more), district, etc.
+* ```Get school detail```: Returns a detailed record for one school
+* ```Get school district detail```: Returns a detailed record for one district
+* ```Get a SchoolDigger school ranking list```: Returns a SchoolDigger school ranking list for a particular state and level (elementary, middle, high)
+* ```Get a SchoolDigger district ranking list```: Returns a SchoolDigger district ranking list for a particular state
+* ```School list autocomplete```: Returns a simple and quick list of schools for use in a client-typed autocomplete.
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
