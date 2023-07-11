@@ -13,4 +13,3 @@ The connector supports the following operations:
 * `CallGetuploadsession`: Get the session for the CSV file upload.
 * `GetDataconnectorList`: Get the DataConnector list.
 * `CallValidate`: Call the operation to validate the uploaded CSV files.
-* 
