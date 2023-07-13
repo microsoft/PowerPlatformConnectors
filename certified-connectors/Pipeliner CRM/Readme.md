@@ -9,31 +9,31 @@ Basic access authentication credentials for API.
 
 ## Supported Operations
 
-### Account:
+### Account
 - Get an Account
 - Create an Account
 - Update an Account
 - Delete an Account
 
-### Contact:
+### Contact
 - Get a Contact
 - Create a Contact
 - Update a Contact
 - Delete a Contact
 
-### Lead:
+### Lead
 - Get a Lead
 - Create a Lead
 - Update a Lead
 - Delete a Lead
 
-### Opportunity:
+### Opportunity
 - Get an Opportunity
 - Create an Opportunity
 - Update an Opportunity
 - Delete an Opportunity
 
-### Task:
+### Task
 - Get a Task
 - Create a Task
 - Update a Task
