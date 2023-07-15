@@ -6,7 +6,7 @@ NameAPI is a free and paid service platform to work with names. It provides func
 
 ## Prerequisites
 
-No prerequisites exists apart form signing up to obtain an API key. The service provides additional subscription based model, in case you need access to better features.
+No prerequisites exists apart from signing up to obtain an API key. The service provides additional subscription based model, in case you need access to better features.
 
 ## Obtaining Credentials
 
@@ -15,10 +15,16 @@ To obtain an API key, simply register with your email through [https://www.namea
 ## Supported Operations
 
 ### Name Parser
-Name parsing is the process of splitting a person's name into its individual components, such as first name, middle name, last name, suffix, salutation, and title
+Name parsing is the process of splitting a person's name into its individual components, such as first name, middle name, last name, suffix, salutation, and title.
+
+### Person genderizer
+Attempts to detect the person's gender based on the inputs, especially the person's name.
+
+### Disposable email address detector
+Detects disposable email addresses "DEA", also known as trash email addresses such as "foo@mailinator.com".
 
 ## Known Issues and Limitations
 
-Current version of the connector only supports a subset of the API endpoints. Contact me if you see a need to bring in any of the other ones!
+Current version of the connector only supports a subset of the API endpoints. Additonally, the supported operations don't fully map with the available inputs to the API endpoints. Contact me if you see a need to bring in any of the other ones or extend the existing ones!
 
 The underlying API itself has some limitations, mostly based on your subscription: [https://www.nameapi.org/en/account/quotas/](https://www.nameapi.org/en/account/quotas/)
