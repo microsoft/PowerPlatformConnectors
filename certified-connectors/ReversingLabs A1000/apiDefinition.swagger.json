@@ -1,0 +1,941 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "ReversingLabs A1000",
+        "version": "1.0",
+        "description": "ReversingLabs A1000 Malware Analysis Appliance integrates the ReversingLabs TitaniumCore automated static analysis technology and the TitaniumCloud File Reputation Service database. The REST Services APIs enable analysts to input samples, access unpacked files and view extracted Proactive Threat Indicators. The platform performs an in-depth static analysis of a comprehensive array of file types including Windows, Linux, Mac OS, iOS, Android, email attachments, documents and firmware.",
+        "contact": {
+            "name": "ReversingLabs support",
+            "url": "https://support.reversinglabs.com/",
+            "email": "support@reversinglabs.com"
+        }
+    },
+    "host": "a1000.reversinglabs.com",
+    "basePath": "/",
+    "schemes": [
+        "https"
+    ],
+    "consumes": [],
+    "produces": [],
+    "paths": {
+        "/api/samples/v2/list/details/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "post": {
+                "summary": "Retrieve the detailed analysis report",
+                "description": "Retrieve a detailed analysis report for local samples.",
+                "operationId": "Retrieve-detailed-report",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "description": "Consult the A1000 API documentation for the supported values in the 'fields' parameter.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "hash_values": {
+                                    "title": "hash_values",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "hash_values"
+                                },
+                                "fields": {
+                                    "title": "fields",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "Fields that will be returned in the report. Consult the A1000 API documentation for the supported values in the 'fields' parameter."
+                                },
+                                "skip_reanalysis": {
+                                    "type": "string",
+                                    "description": "Lowercase stringified boolean",
+                                    "title": "skip_reanalysis"
+                                }
+                            },
+                            "required": [
+                                "hash_values"
+                            ]
+                        },
+                        "x-ms-summary": "Body"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The request has succeeded."
+                    },
+                    "400": {
+                        "description": "Malformed hash or invalid field name."
+                    },
+                    "403": {
+                        "description": "Authentication credentials were not provided. / Invalid token."
+                    },
+                    "404": {
+                        "description": "Malformed endpoint."
+                    }
+                }
+            }
+        },
+        "/api/uploads/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "post": {
+                "summary": "Submit a sample for analysis",
+                "description": "Submit a sample for analysis from a local directory or from a URL.",
+                "operationId": "Submit-sample-for-analysis",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "file",
+                        "in": "formData",
+                        "type": "file",
+                        "description": "Submit a sample from a file. Required but mutually exclusive with the 'url' parameter.",
+                        "x-ms-summary": "File"
+                    },
+                    {
+                        "name": "url",
+                        "in": "formData",
+                        "type": "string",
+                        "description": "Submit a sample from a URL. Required but mutually exclusive with the 'file' parameter.",
+                        "x-ms-summary": "Url"
+                    },
+                    {
+                        "name": "filename",
+                        "in": "formData",
+                        "type": "string",
+                        "description": "Custom file name. Works only with the 'file' parameter.",
+                        "x-ms-summary": "Filename"
+                    },
+                    {
+                        "name": "analysis",
+                        "in": "formData",
+                        "type": "string",
+                        "enum": [
+                            "cloud"
+                        ],
+                        "description": "Select analysis type.",
+                        "x-ms-summary": "Analysis"
+                    },
+                    {
+                        "name": "tags",
+                        "in": "formData",
+                        "type": "string",
+                        "description": "Set custom tags. Works only with the 'file' parameter.",
+                        "x-ms-summary": "Tags"
+                    },
+                    {
+                        "name": "comment",
+                        "in": "formData",
+                        "type": "string",
+                        "description": "Set a custom comment. Works only with the 'file' parameter.",
+                        "x-ms-summary": "Comment"
+                    },
+                    {
+                        "name": "crawler",
+                        "in": "formData",
+                        "type": "string",
+                        "description": "Select a crawler type. Works only with the 'url' parameter.",
+                        "enum": [
+                            "local",
+                            "cloud"
+                        ],
+                        "x-ms-summary": "Crawler"
+                    },
+                    {
+                        "name": "archive_password",
+                        "in": "formData",
+                        "type": "string",
+                        "description": "Password for an archive.",
+                        "x-ms-summary": "Archive Password"
+                    },
+                    {
+                        "name": "rl_cloud_sandbox_platform",
+                        "in": "formData",
+                        "type": "string",
+                        "enum": [
+                            "windows7",
+                            "windows10",
+                            "macos_11"
+                        ],
+                        "description": "Cloud sandbox platform.",
+                        "x-ms-summary": "RL Cloud Sandbox Platform"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The request has succeeded."
+                    },
+                    "400": {
+                        "description": "Malformed hash or invalid field name."
+                    },
+                    "403": {
+                        "description": "Authentication credentials were not provided. / Invalid token."
+                    },
+                    "405": {
+                        "description": "Not Allowed. It is not possible to upload samples while the appliance is in maintenance mode."
+                    },
+                    "413": {
+                        "description": "Request Entity Too Large. The maximum supported file size for upload on A1000 is 400 MB."
+                    },
+                    "429": {
+                        "description": "Too Many Requests. This happens if system resources are depleted. This can mean that the system is using 90% or more of its available memory, or that it holds more than 50 items in the processing queue. Alternatively, this response may indicate that the TitaniumCloud quota has been exceeded."
+                    },
+                    "503": {
+                        "description": "The appliance storage space is close to being full. When there is less than 25% of free space on the disk, it is not possible to upload new samples until disk space is freed up."
+                    }
+                }
+            }
+        },
+        "/api/v2/samples/{hash_value}/ticore/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve the static analysis report",
+                "description": "Retrieve TitaniumCore analysis results for a local sample.",
+                "operationId": "Retrieve-static-analysis-report",
+                "parameters": [
+                    {
+                        "name": "hash_value",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "Hash string",
+                        "x-ms-summary": "Hash Value"
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Fields that will be returned in the report. Consult the A1000 API documentation for the supported values in the 'fields' parameter.",
+                        "x-ms-summary": "Fields"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    },
+                    "403": {
+                        "description": "Forbidden."
+                    },
+                    "404": {
+                        "description": "Not found."
+                    }
+                }
+            }
+        },
+        "/api/rl_dynamic_analysis/export/summary/{hash_value}/{format}/{endpoint}/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve the dynamic analysis report",
+                "description": "Create and download a PDF or HTLM report for samples that have gone through dynamic analysis in the ReversingLabs Cloud Sandbox.",
+                "operationId": "Retrieve-dynamic-analysis-report",
+                "parameters": [
+                    {
+                        "name": "hash_value",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "The hash value must be a SHA-1 string.",
+                        "x-ms-summary": "Hash Value"
+                    },
+                    {
+                        "name": "format",
+                        "description": "Analysis report format",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "html",
+                            "pdf"
+                        ],
+                        "x-ms-summary": "Format"
+                    },
+                    {
+                        "name": "endpoint",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "enum": [
+                            "create",
+                            "download",
+                            "status"
+                        ],
+                        "description": "Select a task type.",
+                        "x-ms-summary": "Endpoint"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/samples/v2/list/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "post": {
+                "summary": "Retrieve summary analysis report",
+                "description": "Retrieve a summary analysis report for local samples.",
+                "operationId": "Retrieve-summary-report",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "description": "Consult the A1000 API documentation for the supported values in the 'fields' parameter. If the 'include_networkthreatintelligence' parameter is set to 'true', 'networkthreatintelligence' and 'domainthreatintelligence' have to be included in the 'fields' parameter.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "hash_values": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "title": "hash_values"
+                                    },
+                                    "description": "hash_values"
+                                },
+                                "fields": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "title": "fields"
+                                    },
+                                    "description": "Consult the A1000 API documentation for the supported values in the 'fields' parameter. If the 'include_networkthreatintelligence' parameter is set to 'true', 'networkthreatintelligence' and 'domainthreatintelligence' have to be included in the 'fields' parameter."
+                                },
+                                "include_networkthreatintelligence": {
+                                    "type": "string",
+                                    "description": "Lowercase stringified boolean. Consult the A1000 API documentation for the supported values in the 'fields' parameter. If the 'include_networkthreatintelligence' parameter is set to 'true', 'networkthreatintelligence' and 'domainthreatintelligence' have to be included in the 'fields' parameter.",
+                                    "title": "include_networkthreatintelligence"
+                                },
+                                "skip_reanalysis": {
+                                    "type": "string",
+                                    "description": "Lowercase stringified boolean.",
+                                    "title": "skip_reanalysis"
+                                }
+                            },
+                            "required": [
+                                "hash_values"
+                            ]
+                        },
+                        "x-ms-summary": "Body"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    },
+                    "400": {
+                        "description": "Malformed hash or invalid field name."
+                    },
+                    "403": {
+                        "description": "Authentication credentials were not provided. / Invalid token."
+                    },
+                    "404": {
+                        "description": "Malformed endpoint."
+                    }
+                }
+            }
+        },
+        "/api/samples/status/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "post": {
+                "summary": "Retrieve processing status for files",
+                "description": "Check status of submitted files.",
+                "operationId": "Retrieve-processing-status-files",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Filter hashes by their status. Consult the documentation for available values.",
+                        "x-ms-summary": "Status"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "hash_values": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "description": "hash_values"
+                                }
+                            },
+                            "required": [
+                                "hash_values"
+                            ]
+                        },
+                        "x-ms-summary": "Body"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    },
+                    "400": {
+                        "description": "Validation error, JSON parse error, or other error related to the validity of the data passed in the request."
+                    }
+                }
+            }
+        },
+        "/api/uploads/v2/url-samples/{ID}": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve processing status for URL-s",
+                "description": "Check status of submitted URL-s.",
+                "operationId": "Retrieve-processing-status-urls",
+                "parameters": [
+                    {
+                        "name": "ID",
+                        "in": "path",
+                        "description": "Identification number of the URL submission task.",
+                        "required": true,
+                        "type": "integer",
+                        "x-ms-summary": "Id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/samples/v3/{hash_value}/classification/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "description": "Retrieve classification status for a sample.",
+                "summary": "Retrieve classification for a sample",
+                "operationId": "Retrieve-classification-for-sample",
+                "parameters": [
+                    {
+                        "name": "hash_value",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "Hash string",
+                        "x-ms-summary": "Hash Value"
+                    },
+                    {
+                        "name": "localonly",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "If set to 1, the request will only look for local samples on the appliance.",
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "x-ms-summary": "Localonly"
+                    },
+                    {
+                        "name": "av_scanners",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Include AV scanners summary information in the response.",
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "x-ms-summary": "AV Scanners"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    },
+                    "403": {
+                        "description": "Forbidden."
+                    },
+                    "404": {
+                        "description": "Invalid or malformed hash."
+                    },
+                    "429": {
+                        "description": "Too many requests (daily TitaniumCloud query max limit reached)."
+                    },
+                    "503": {
+                        "description": "Service unavailable (TitaniumCloud API-related errors, i.e., Unauthorized)."
+                    }
+                }
+            }
+        },
+        "/api/pdf/{hash}/create": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Create PDF report",
+                "description": "Create a PDF sample analysis report.",
+                "operationId": "Create-pdf-report",
+                "parameters": [
+                    {
+                        "name": "hash",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "Hash string",
+                        "x-ms-summary": "Hash"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    },
+                    "403": {
+                        "description": "Authentication credentials were not provided. / Invalid API token."
+                    },
+                    "404": {
+                        "description": "Malformed hash. / Sample does not exist on the appliance."
+                    }
+                }
+            }
+        },
+        "/api/pdf/{hash}/status": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Check PDF report creation status",
+                "description": "Check the creation status of a requested PDF report.",
+                "operationId": "Check-pdf-report-status",
+                "parameters": [
+                    {
+                        "name": "hash",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "Hash string",
+                        "x-ms-summary": "Hash"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF is ready for download. / The sample exists on the appliance, but there was no initial PDF creation request."
+                    },
+                    "403": {
+                        "description": "Authentication credentials were not provided. / Invalid token."
+                    },
+                    "404": {
+                        "description": "Malformed hash. / Sample does not exist on the appliance."
+                    }
+                }
+            }
+        },
+        "/api/pdf/{hash}/download": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Download PDF Report",
+                "description": "Download the generated PDF analysis Report.",
+                "operationId": "Download-pdf-report",
+                "parameters": [
+                    {
+                        "name": "hash",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "Hash string",
+                        "x-ms-summary": "Hash"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    },
+                    "403": {
+                        "description": "Authentication credentials were not provided. / Invalid token."
+                    },
+                    "404": {
+                        "description": "Malformed hash. / Sample does not exist on the appliance. / The sample exists on the appliance, but there was no initial PDF creation request."
+                    }
+                }
+            }
+        },
+        "/api/network-threat-intel/url/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve information for a URL",
+                "description": "Returns network threat intelligence about the provided URL.",
+                "operationId": "Retrieve-URL-intelligence",
+                "parameters": [
+                    {
+                        "name": "url",
+                        "in": "query",
+                        "required": true,
+                        "type": "string",
+                        "description": "URL string",
+                        "x-ms-summary": "Url"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/network-threat-intel/domain/{domain}/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve information for a domain",
+                "description": "Returns network threat intelligence about the provided domain.",
+                "operationId": "Retrieve-domain-intelligence",
+                "parameters": [
+                    {
+                        "name": "domain",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "Domain string",
+                        "x-ms-summary": "Domain"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/network-threat-intel/ip/{ip}/report/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve information for an IP address",
+                "operationId": "Retrieve-ip-intelligence",
+                "description": "Returns network threat intelligence about the provided IP address.",
+                "parameters": [
+                    {
+                        "name": "ip",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "IP address string",
+                        "x-ms-summary": "Ip"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/network-threat-intel/ip/{ip}/resolutions/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve IP address resolutions",
+                "description": "Provides a list of IP-to-domain mappings.",
+                "operationId": "Retrieve-ip-to-domain-resolutions",
+                "parameters": [
+                    {
+                        "name": "ip",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "IP address string",
+                        "x-ms-summary": "Ip"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "SHA1 hash of the next page of results.",
+                        "x-ms-summary": "Page"
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Results per page",
+                        "x-ms-summary": "Page Size"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/network-threat-intel/ip/{ip}/urls/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve URL-s hosted on the IP address",
+                "description": "Returns a list of URLs hosted on the submitted IP address.",
+                "operationId": "Retrieve-urls-from-ip",
+                "parameters": [
+                    {
+                        "name": "ip",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "IP address string",
+                        "x-ms-summary": "Ip"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "SHA1 hash of the next page of results.",
+                        "x-ms-summary": "Page"
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Results per page",
+                        "x-ms-summary": "Page Size"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/network-threat-intel/ip/{ip}/downloaded_files/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve a list of files from the IP address",
+                "description": "Provides a list of hashes and classifications for files found on the submitted IP address.",
+                "operationId": "Retrieve-files-from-ip",
+                "parameters": [
+                    {
+                        "name": "ip",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "IP address string",
+                        "x-ms-summary": "Ip"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "SHA1 hash of the next page of results,",
+                        "x-ms-summary": "Page"
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Results per page",
+                        "x-ms-summary": "Page Size"
+                    },
+                    {
+                        "name": "extended",
+                        "in": "query",
+                        "required": false,
+                        "type": "boolean",
+                        "description": "Include additional information on downloaded files.",
+                        "x-ms-summary": "Extended"
+                    },
+                    {
+                        "name": "classification",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "Return only samples with this classification",
+                        "x-ms-summary": "Classification"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK."
+                    }
+                }
+            }
+        },
+        "/api/samples/v2/search/": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/user-agent"
+                }
+            ],
+            "post": {
+                "summary": "Perform advanced search",
+                "description": "Search for samples available on the local A1000 instance and TitaniumCloud using the Advanced Search capabilities.",
+                "operationId": "Perform-advanced-search",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": false,
+                        "description": "Consult the A1000 API documentation for possible 'query' and 'sort' options.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "query": {
+                                    "type": "string",
+                                    "description": "query"
+                                },
+                                "page": {
+                                    "type": "integer",
+                                    "format": "int32",
+                                    "description": "Page number."
+                                },
+                                "records_per_page": {
+                                    "type": "integer",
+                                    "format": "int32",
+                                    "description": "records_per_page"
+                                },
+                                "sort": {
+                                    "type": "string",
+                                    "description": "Sorting criteria."
+                                }
+                            }
+                        },
+                        "x-ms-summary": "Body"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad request. E.g. invalid value for a field, or other validation error."
+                    },
+                    "403": {
+                        "description": "Forbidden. This response is returned when the request isn\u2019t authenticated"
+                    },
+                    "404": {
+                        "description": "Not found. E.g. wrong URL."
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {},
+    "parameters": {
+        "user-agent": {
+            "name": "User-Agent",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "ReversingLabs Azure Connector A1000 v1.0.0",
+            "x-ms-visibility": "internal"
+        }
+    },
+    "responses": {},
+    "securityDefinitions": {
+        "API Key": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization"
+        }
+    },
+    "security": [
+        {
+            "API Key": []
+        }
+    ],
+    "tags": [],
+    "x-ms-connector-metadata": [
+        {
+            "propertyName": "Website",
+            "propertyValue": "https://www.reversinglabs.com/"
+        },
+        {
+            "propertyName": "Privacy policy",
+            "propertyValue": "https://www.reversinglabs.com/privacy-policy"
+        },
+        {
+            "propertyName": "Categories",
+            "propertyValue": "Security"
+        }
+    ]
+}
