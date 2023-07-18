@@ -126,9 +126,9 @@ public class Script : ScriptBase
       var signatureTypesArray = new JArray();
 
       string [,] signatureTypes = { 
-        { "UniversalSignaturePen_ImageOnly" , "Electronic Signatures" }, 
-        { "UniversalSignaturePen_OpenTrust_Hash_TSP", "AES digital signatures" }, 
-        { "docusign_eu_qualified_idnow_tsp", "QES digital signatures" }
+        { "UniversalSignaturePen_ImageOnly" , "DS Electronic (SES)" }, 
+        { "UniversalSignaturePen_OpenTrust_Hash_TSP", "DS EU Advanced (AES)" }, 
+        { "docusign_eu_qualified_idnow_tsp", "DS EU Qualified (QES)" }
       };
 
       for (var i = 0; i < signatureTypes.GetLength(0); i++)
@@ -141,7 +141,7 @@ public class Script : ScriptBase
         signatureTypesArray.Add(signatureTypeObject);
       }
 
-      response["signatureType"] = signatureTypesArray;
+      response["signatureTypes"] = signatureTypesArray;
     }
 
     if (operationId.StartsWith("StaticResponseForFont", StringComparison.OrdinalIgnoreCase))
@@ -426,7 +426,12 @@ public class Script : ScriptBase
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var recipientType = query.Get("recipientType");
-      var signatureType = query.Get("signatureType");
+      var signatureType = "";
+
+      if (!string.IsNullOrEmpty(query.Get("signatureType")))
+      {
+        signatureType = query.Get("signatureType");
+      }
 
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
@@ -435,6 +440,29 @@ public class Script : ScriptBase
         ["type"] = "object",
         ["properties"] = new JObject()
       };
+
+      if (signatureType.Equals("DS EU Advanced (AES)", StringComparison.OrdinalIgnoreCase))
+      {
+        string aesMethodItems = @"[
+        'Access Code',
+        'SMS'
+       ]";
+        response["schema"]["properties"]["aesMethod"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* AES Method",
+          ["description"] = "AES Method",
+          ["enum"] = JArray.Parse(aesMethodItems)
+
+          
+        };
+        response["schema"]["properties"]["aesMethodValue"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* AES Method Value",
+          ["description"] = "AES Method Value"
+        };
+      }
 
       if (recipientType.Equals("inPersonSigners", StringComparison.OrdinalIgnoreCase))
       {
@@ -496,21 +524,6 @@ public class Script : ScriptBase
         {
           ["type"] = "string",
           ["x-ms-summary"] = "* Email"
-        };
-      }
-
-      if (signatureType.Equals("AES digital signatures", StringComparison.OrdinalIgnoreCase))
-      {
-        response["schema"]["properties"]["options"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "* Signature Options",
-          ["x-ms-test-value"] = "Input the options: oneTimePassword or sms"
-        };
-        response["schema"]["properties"]["options value"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "* Signature Options Value"
         };
       }
     }
