@@ -32,7 +32,7 @@ public class Script : ScriptBase
             response.Content = CreateJsonContent(result.ToString());
             return response;
         }
-        else 
+        else
         {
             HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
             return response;
