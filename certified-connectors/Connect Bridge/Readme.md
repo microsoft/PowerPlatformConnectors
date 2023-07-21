@@ -21,5 +21,3 @@ The connector supports the following operations:
 
 ## Known issues and limitations
 Not all SQL queries are currently supported by Connect Bridge. For example, Case expressions are not currently supported yet the functionality is under development. 
-
-
