@@ -426,12 +426,7 @@ public class Script : ScriptBase
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var recipientType = query.Get("recipientType");
-      var signatureType = "";
-
-      if (!string.IsNullOrEmpty(query.Get("signatureType")))
-      {
-        signatureType = query.Get("signatureType");
-      }
+      var signatureType = query.Get("signatureType") ?? "";
 
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
@@ -443,18 +438,12 @@ public class Script : ScriptBase
 
       if (signatureType.Equals("DS EU Advanced (AES)", StringComparison.OrdinalIgnoreCase))
       {
-        string aesMethodItems = @"[
-        'Access Code',
-        'SMS'
-       ]";
         response["schema"]["properties"]["aesMethod"] = new JObject
         {
           ["type"] = "string",
           ["x-ms-summary"] = "* AES Method",
           ["description"] = "AES Method",
-          ["enum"] = JArray.Parse(aesMethodItems)
-
-          
+          ["enum"] = new JArray("Access Code", "SMS")
         };
         response["schema"]["properties"]["aesMethodValue"] = new JObject
         {
@@ -1476,7 +1465,7 @@ public class Script : ScriptBase
 
     if (signatureType.Equals("DS EU Advanced (AES)"))
     {
-        var aesMethod = body["aesMethod"].Equals("SMS") ? "sms" : "oneTimePassword";
+        var aesMethod = (body["aesMethod"].Equals("SMS")) ? "sms" : "oneTimePassword";
         recipientSignatureProviders[0]["signatureProviderOptions"] = new JObject
         {
             [aesMethod] = body["aesMethodValue"]
