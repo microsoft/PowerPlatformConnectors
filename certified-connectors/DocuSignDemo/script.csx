@@ -1424,6 +1424,47 @@ public class Script : ScriptBase
       additionalNotifications.Add(additionalNotification);
       signers[0]["additionalNotifications"] = additionalNotifications;
     }
+
+    if (!string.IsNullOrEmpty(query.Get("signatureType")))
+    {
+      var signatureType = query.Get("signatureType");
+
+      var signatureTypeMap = new Dictionary<string, string>() {
+        {"DS Electronic (SES)", "UniversalSignaturePen_ImageOnly"},
+        {"DS EU Advanced (AES)", "UniversalSignaturePen_OpenTrust_Hash_TSP"},
+        {"DS EU Qualified (QES)", "idv_docusign_eu_qualified"},
+      };
+
+      if (signatureType.Equals("DS EU Advanced (AES)"))
+      {
+        var aesMethod = body["aesMethod"].Equals("SMS")? "sms" : "oneTimePassword";
+        var recipientSignatureProviders = new JArray
+        {
+          new JObject()
+          {
+            ["signatureProviderName"] = signatureTypeMap[query.Get("signatureType")],
+            ["signatureProviderOptions"] = new JObject()
+              {
+                [aesMethod] = body["aesMethodValue"]
+              }
+          }
+        };
+
+        signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
+      }
+      else
+      {
+        var recipientSignatureProviders = new JArray
+        {
+          new JObject()
+          {
+            ["signatureProviderName"] = signatureTypeMap[query.Get("signatureType")]
+          }
+        };
+
+      signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
+      }
+    }
   }
   
   private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
