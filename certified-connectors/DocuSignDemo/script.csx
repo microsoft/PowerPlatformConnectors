@@ -1206,6 +1206,11 @@ public class Script : ScriptBase
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
 
+    if (!string.IsNullOrEmpty(query.Get("signatureType")))
+    {
+      AddParamsForSelectedSignatureType(signers, body);
+    }
+
     body[recipientType] = signers;
 
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1424,47 +1429,6 @@ public class Script : ScriptBase
       additionalNotifications.Add(additionalNotification);
       signers[0]["additionalNotifications"] = additionalNotifications;
     }
-
-    if (!string.IsNullOrEmpty(query.Get("signatureType")))
-    {
-      var signatureType = query.Get("signatureType");
-
-      var signatureTypeMap = new Dictionary<string, string>() {
-        {"DS Electronic (SES)", "UniversalSignaturePen_ImageOnly"},
-        {"DS EU Advanced (AES)", "UniversalSignaturePen_OpenTrust_Hash_TSP"},
-        {"DS EU Qualified (QES)", "idv_docusign_eu_qualified"},
-      };
-
-      if (signatureType.Equals("DS EU Advanced (AES)"))
-      {
-        var aesMethod = body["aesMethod"].Equals("SMS")? "sms" : "oneTimePassword";
-        var recipientSignatureProviders = new JArray
-        {
-          new JObject()
-          {
-            ["signatureProviderName"] = signatureTypeMap[query.Get("signatureType")],
-            ["signatureProviderOptions"] = new JObject()
-              {
-                [aesMethod] = body["aesMethodValue"]
-              }
-          }
-        };
-
-        signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
-      }
-      else
-      {
-        var recipientSignatureProviders = new JArray
-        {
-          new JObject()
-          {
-            ["signatureProviderName"] = signatureTypeMap[query.Get("signatureType")]
-          }
-        };
-
-      signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
-      }
-    }
   }
   
   private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
@@ -1489,6 +1453,37 @@ public class Script : ScriptBase
       signers[0]["name"] = body["name"];
       signers[0]["email"] = body["email"];
     }
+  }
+
+  private void AddParamsForSelectedSignatureType(JArray signers, JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    var signatureType = query.Get("signatureType");
+    var signatureTypeMap = new Dictionary<string, string>() {
+      {"DS Electronic (SES)", "UniversalSignaturePen_ImageOnly"},
+      {"DS EU Advanced (AES)", "UniversalSignaturePen_OpenTrust_Hash_TSP"},
+      {"DS EU Qualified (QES)", "idv_docusign_eu_qualified"},
+    };
+
+    var recipientSignatureProviders = new JArray
+    {
+        new JObject
+        {
+            ["signatureProviderName"] = signatureTypeMap[signatureType]
+        }
+    };
+
+    if (signatureType.Equals("DS EU Advanced (AES)"))
+    {
+        var aesMethod = body["aesMethod"].Equals("SMS") ? "sms" : "oneTimePassword";
+        recipientSignatureProviders[0]["signatureProviderOptions"] = new JObject
+        {
+            [aesMethod] = body["aesMethodValue"]
+        };
+    }
+
+    signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
   }
 
   private int GenerateId()
