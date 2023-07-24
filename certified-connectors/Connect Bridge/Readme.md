@@ -29,4 +29,4 @@ To purchase a license, contact **office@connecting-software.com** to obtain a qu
 
 
 ## Deployment Instructions
-To purchase a license, contact **office@connecting-software.com** to obtain a quote for your use case. 
+To purchase a license, contact **office@connecting-software.com** to obtain a quote for your use case.
