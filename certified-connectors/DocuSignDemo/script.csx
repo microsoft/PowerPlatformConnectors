@@ -436,7 +436,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if (signatureType.Equals("DS EU Advanced (AES)", StringComparison.OrdinalIgnoreCase))
+      if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP", StringComparison.OrdinalIgnoreCase))
       {
         response["schema"]["properties"]["aesMethod"] = new JObject
         {
@@ -1447,23 +1447,17 @@ public class Script : ScriptBase
   private void AddParamsForSelectedSignatureType(JArray signers, JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-
     var signatureType = query.Get("signatureType");
-    var signatureTypeMap = new Dictionary<string, string>() {
-      {"DS Electronic (SES)", "UniversalSignaturePen_ImageOnly"},
-      {"DS EU Advanced (AES)", "UniversalSignaturePen_OpenTrust_Hash_TSP"},
-      {"DS EU Qualified (QES)", "idv_docusign_eu_qualified"},
-    };
 
     var recipientSignatureProviders = new JArray
     {
         new JObject
         {
-            ["signatureProviderName"] = signatureTypeMap[signatureType]
+            ["signatureProviderName"] = signatureType
         }
     };
 
-    if (signatureType.Equals("DS EU Advanced (AES)"))
+    if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP"))
     {
         var aesMethod = (body["aesMethod"].Equals("SMS")) ? "sms" : "oneTimePassword";
         recipientSignatureProviders[0]["signatureProviderOptions"] = new JObject
