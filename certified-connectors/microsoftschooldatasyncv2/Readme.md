@@ -1,4 +1,4 @@
-## # Microsoft School Data Sync CSV Upload
+# Microsoft School Data Sync CSV Upload
 
 Simplify class management in Office 365. School Data Sync reads rosters from your SIS and creates classes and groups for Microsoft Teams, Intune for Education, and third party applications.
 
