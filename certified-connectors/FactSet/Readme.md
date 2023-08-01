@@ -1,6 +1,6 @@
 # FactSet
 
-Prepare for client meetings using the FactSet connector to access key company information in a custom branded, presentation ready PDF. Stay on top of relevant news and events for companies of interest and highlight important topics to drive your discussion with FactSet Signals. Alternatively, use Digital Cards to collaborate with colleagues and send summaries of actionable insights via Teams.
+Automate your workflows using the FactSet Connector to stay on top of relevant news and events for companies of interest, highlight important topics to drive your discussions, prepare for meetings, and more.
 
 ## Publisher: FactSet Research Systems
 
@@ -23,6 +23,7 @@ This connector supports the following operations
 * `BookBuilder - Get Template List` : A template is a predefined list of content to be compiled in a PDF. Templates need to defined/created in FactSet workstation.
 * `BookBuilder - Create Book from Template` : This endpoint retrieves book status, book name, and book ID for ticker requested in JSON format.
 * `BookBuilder - Get PDF` : This endpoint will return the PDF output given a book_id.
+* `Symbology - Get Symbology : Translate Entity ID and market security symbols into FactSet Permanent Security Identifiers.
 
 ## Obtaining Credentials
 
