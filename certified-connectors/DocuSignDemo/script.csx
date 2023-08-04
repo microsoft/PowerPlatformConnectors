@@ -128,7 +128,7 @@ public class Script : ScriptBase
       string [,] signatureTypes = { 
         { "UniversalSignaturePen_ImageOnly" , "DS Electronic (SES)" }, 
         { "UniversalSignaturePen_OpenTrust_Hash_TSP", "DS EU Advanced (AES)" }, 
-        { "docusign_eu_qualified_idnow_tsp", "DS EU Qualified (QES)" }
+        { "idv_docusign_eu_qualified", "DS EU Qualified (QES)" }
       };
 
       for (var i = 0; i < signatureTypes.GetLength(0); i++)
