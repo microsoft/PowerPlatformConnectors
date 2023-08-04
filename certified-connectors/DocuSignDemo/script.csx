@@ -443,7 +443,7 @@ public class Script : ScriptBase
           ["type"] = "string",
           ["x-ms-summary"] = "* AES Method",
           ["description"] = "AES Method",
-          ["enum"] = new JArray("Access Code", "SMS")
+          ["enum"] = new JArray("Access Code", "SMS <+ CountryCode PhoneNumber>")
         };
         response["schema"]["properties"]["aesMethodValue"] = new JObject
         {
@@ -1459,7 +1459,7 @@ public class Script : ScriptBase
 
     if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP"))
     {
-        var aesMethod = body["aesMethod"].ToString().Equals("SMS") ? "sms" : "oneTimePassword";
+        var aesMethod = body["aesMethod"].ToString().Contains("SMS") ? "sms" : "oneTimePassword";
         recipientSignatureProviders[0]["signatureProviderOptions"] = new JObject
         {
             [aesMethod] = body["aesMethodValue"]
