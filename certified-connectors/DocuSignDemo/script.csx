@@ -1459,7 +1459,7 @@ public class Script : ScriptBase
 
     if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP"))
     {
-        var aesMethod = (body["aesMethod"].Equals("SMS")) ? "sms" : "oneTimePassword";
+        var aesMethod = body["aesMethod"].ToString().Equals("SMS") ? "sms" : "oneTimePassword";
         recipientSignatureProviders[0]["signatureProviderOptions"] = new JObject
         {
             [aesMethod] = body["aesMethodValue"]
