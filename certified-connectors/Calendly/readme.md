@@ -17,6 +17,13 @@ The connector supports the following triggers:
 
 - `invitee.created`: Triggers when an event is scheduled.
 - `invitee.canceled`: Triggers when an event is canceled.
+- `routing_form_submission.created`: Triggers when a routing form is submitted.
+
+## Supported Actions
+
+The connector supports the following action:
+
+- `GetEventTypes`: Retrieves event types associated with the Calendly organization.
 
 ## Obtaining Credentials
 
