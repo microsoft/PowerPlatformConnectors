@@ -36,7 +36,7 @@
         var uri = $"{this.GetBaseUri()}users/me";
         var requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, uri);
         requestMessage.Headers.Add("Authorization", this.Context.Request.Headers.Authorization.ToString());
-        requestMessage.Headers.Add("X-Calendly-Application", "ms_power_automate");
+        requestMessage.Headers.Add("X-Calendly-Consumer-Application", "ms_power_automate");
         return await this.Context.SendAsync(requestMessage, this.CancellationToken);
     }
 
