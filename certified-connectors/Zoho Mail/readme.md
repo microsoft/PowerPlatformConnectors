@@ -1,6 +1,6 @@
 # Zoho Mail
 
-This connector allows you to send emails from Zoho Mail.
+Zoho Mail connector gives you the power to manage your emails and perform actions such as saving them as drafts, receiving them, and triggering flows when new emails arrive.
 
 ## Publisher: Zoho Corporation
 
@@ -8,10 +8,9 @@ This connector allows you to send emails from Zoho Mail.
 
 A verified Zoho Mail account. Click [here](https://zoho.com/zohomail) to create your first account.
 
-
 ## How to get credentials
 
-Zoho Mail API uses OAuth2 to authenticate and hence no secondary authentication is required once the account has been setup.
+Zoho Mail API uses OAuth2.0 to authenticate and hence no secondary authentication is required once the account has been set up.
 
 ## Supported Operations
 
@@ -31,7 +30,7 @@ Get the email content based on message ID
 
 ### Search Mail
 
-List emails based on search parameters
+Search for emails based on search parameters.
 
 ## Supported Triggers
 
@@ -39,12 +38,12 @@ The connector supports the following operations:
 
 ### New Mail Notification
 
-New mail notification based on criteria
+Receive a new email notification based on specified criteria.
 
 ### Known Issues and Limitations
 
 * The total email size, including the email headers, body content, inline images, and attachments should not exceed the plan limit.
-* Zoho Mail cannot be used for sending out bulk emails and other emails that violates Zoho Mail usage policy. Click [here](https://www.zoho.com/mail/help/usage-policy.html)
+* Zoho Mail cannot be used for sending out bulk emails and other emails that violates Zoho Mail usage policy. Click [here](https://www.zoho.com/mail/help/usage-policy.html) for more details.
 
 ## FAQ
 
