@@ -15,8 +15,7 @@
 
         if ("GetEventTypes".Equals(this.Context.OperationId))
         {
-
-            var uriBuilder = new UriBuilder(this.Context.Request.RequestUri.ToString() + "&organization=" + organization);
+            var uriBuilder = new UriBuilder($"{this.Context.Request.RequestUri.ToString()}&organization={organization}");
             this.Context.Request.RequestUri = uriBuilder.Uri;
             HttpResponseMessage eventTypesResponse = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             return eventTypesResponse;

@@ -2,7 +2,7 @@
 
 Calendly helps you easily schedule meetings based on participants availability.
 
-This connector allows you to subscribe to `invitee.created` and `invitee.canceled` webhook events.
+This connector allows you to subscribe to `invitee.created`, `invitee.canceled`, and `routing_form_submission.created` webhook events.
 
 ## Publisher: Calendly
 
