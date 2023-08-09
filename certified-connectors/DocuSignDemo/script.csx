@@ -737,7 +737,7 @@ public class Script : ScriptBase
 
             string[] tabTypes = { "textTabs", "fullNameTabs", "dateSignedTabs", "companyTabs", "titleTabs", "numberTabs",
               "ssnTabs", "dateTabs", "zipTabs", "emailTabs", "noteTabs", "listTabs", "firstNameTabs", "lastNameTabs", "emailAddressTabs",
-              "formulaTabs" };
+              "formulaTabs", "checkboxTabs", "radioGroupTabs" };
             foreach (var tabType in tabTypes)
             {
               var tabStatusArray = tabs[tabType];
@@ -754,6 +754,22 @@ public class Script : ScriptBase
                     if (newTabs[tabLabel] == null)
                     {
                       newTabs.Add(tabLabel, tabValue);
+                    }
+                  }
+
+                  if (tabType.Equals("radioGroupTabs") && !string.IsNullOrWhiteSpace(tab["groupName"].ToString()) && !string.IsNullOrWhiteSpace(tabValue))
+                  {
+                    if (newTabs[tabLabel] == null)
+                    {
+                      newTabs.Add((string)tab["groupName"], tabValue);
+                    }
+                  }
+
+                  if (tabType.Equals("checkboxTabs") && !string.IsNullOrWhiteSpace(tab["name"].ToString()) && !string.IsNullOrWhiteSpace(tab["selected"].ToString()))
+                  {
+                    if (newTabs[tabLabel] == null)
+                    {
+                      newTabs.Add((string)tab["name"], (string)tab["selected"]);
                     }
                   }
                 }
