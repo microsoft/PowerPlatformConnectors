@@ -461,7 +461,7 @@ A request needs to be made to support@hivecpq.com requesting API credentials in 
 In case of a custom installation you also need to request your own client ID and secret.
 
 ## Known Issues and Limitations
-Required. Include any known issues and limitations a user may encounter.
+Query parameters which allow to pass a list of values will only have the first value respected by the underlying service. This is because of a conflict between the supported formats which powerautomate can use to send multi-value parameters and the format the underlying service accepts.
 
 
 ## Deployment Instructions
