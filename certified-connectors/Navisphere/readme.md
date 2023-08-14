@@ -6,7 +6,7 @@ Contact the expert from Navisphere to get required authorization details: https:
 
 ## Supported Operations
 The connector supports the following operations:
-* ```CreateOrder```: Create a new order for delivery
+* ```CreateOrder```: Create a new order for delivery.
 
 ## Obtaining Credentials
 "Client ID" and "Client Secret" will be provided by the expert from Navisphere.
