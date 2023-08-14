@@ -1,4 +1,4 @@
-# Title
+# HiveCPQ Product Configurator
 HiveCPQ is a comprehensive Configure Price Quote (CPQ) solution that empowers sales teams to generate accurate quotes for complex products. Streamline your sales process by seamlessly integrating HiveCPQ to automate workflows, sync data, and optimize your operations using our connector. Maximize efficiency and deliver exceptional sales experiences with HiveCPQ's powerful connector.
 
 ## Publisher: Publisher's Name
