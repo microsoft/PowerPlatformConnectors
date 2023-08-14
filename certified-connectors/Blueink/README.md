@@ -1,6 +1,6 @@
 
 ## Blueink Connector
-The Blueink Connector allows you to integrate Blueink eSignatures functionality into Power Automate workflows. With this connector you can send documents for eSignature, check the status of signing transactions, retreive the details of signers in your Blueink account, check statuses, and more.
+The Blueink Connector allows you to integrate Blueink's eSignature functionality into Power Automate workflows. With this connector you can send documents for eSignature, check the status of signing transactions, retreive the details of signers in your Blueink account, check statuses, and more.
 
 ## Prerequisites
 You will need the following to proceed:
