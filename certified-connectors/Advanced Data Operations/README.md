@@ -5,7 +5,7 @@ A suite of advanced operations designed to assist in the transformation of bulk 
 State Solutions
 
 ## Prerequisites
-You'll need to sign up for a subscription.  
+You'll need to sign up for a subscription.
 
 One can be obtained by signing up to a paid plan or by activating a trial subscription.  Details can be found on our website under the pricing page ... http://www.statesolutions.com.au/pricing/
 
