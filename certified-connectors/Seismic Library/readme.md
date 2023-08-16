@@ -1,6 +1,6 @@
 # Seismic Power Automate Library connector
 
-The Seismic Power Automate Library connector includes actions related to add, update, delete, publish and download library content.
+The Seismic Power Automate Library connector includes actions related to adding, updating, deleting, publishing, and downloading Library content.
 
 ## Publisher: Seismic
 
@@ -12,168 +12,172 @@ You need a Seismic Premium user account for the tenant with Full Control (System
 
 ### Add a file
 
-Adds a new file using a multipart/form-data POST containing the file's metadata and the file contents.
-
-### Change file information or properties
-
-This endpoint can be use to move a file or update its properties, including system properties such as the name, owner, description, as well as custom properties.
-
-### Get file information or properties
-
-Get library file content information.
-
-### Add a new file version
-
-Adds a new file version using a multipart/form-data POST containing the file's content in the content form data.
-
-### Download a file
-
-Downloads the binary contents of a file.
-
-### Download a file version
-
-Downloads the binary contents of a file version.
-
-### Copy a file
-
-Copy a file to any target folder.
+Adds a new file to the Seismic library.
 
 ### Add a folder
 
-Adds a new folder inside a given folder. Use the special keywork "root" as the parentFolderId to create a new folder in the teamsite's root.
+Adds a new subfolder to a specified library folder.
 
-### Change folder information
+### Add a new file version
 
-This endpoint can be use to move or rename a folder.
-
-### Get folder information
-
-Get folder information.
-
-### Copy a folder
-
-Copy any type of item such as a file, folder, url, article, etc... to any target folder.
-
-### Get list of items in a folder
-
-Gets the list of items in a given folder. Each item's structure is identical to the structure returned by the GET endpoint for that item type.
-
-### Delete an item
-
-Delete an item.
-
-### Get item information or properties
-
-This is the generalized endpoint to get information (both built in and custom properties) for any item type.
-
-### Copy an item
-
-Copy any type of item such as a file, folder, url, article, etc... to any target folder.
-
-### Get all versions for an item
-
-Gets the list of versions for a given item.
-
-### Get items via query
-
-Gets the list of items based on a set of filters up to a max of 50 items. Each item's structure is identical to the structure returned by the GET endpoint for that item type.
-
-### Replace thumbnail on an item
-
-Replace thumbnail on an item. Supported image types include jpg, png, and tif. Thumbnails shall be passed as a base64 encoded string in the body.
+Adds a new version of an existing Library file.
 
 ### Add a url
 
-Adds a new URL using an application/json POST with all required information in the POST body.
-
-### Change url information or properties
-
-This endpoint allows any of the url's properties to be modified including system properties such as the name, owner, description, as well as custom properties.
-
-### Get url information or properties
-
-Get url information or properties.
-
-### Copy a url
-
-Copy a url to any target folder.
+Adds a new URL content item to the Library.
 
 ### Add an instruction on an item
 
-Add an instruction on an item.
-
-### Get instructions on an item
-
-Get list of instructions on an item.
-
-### Delete an instruction on an item
-
-Delete an instruction on an item.
-
-### Submit a document into workflow
-
-Submit a document into workflow.
-
-### Recall a document from workflow
-
-Recall a document from workflow.
+Adds an instruction to a library content item.
 
 ### Approve or reject workflow step
 
-Approve or reject a given workflow step. Must be authenticated as the assigned user in order to complete this action.
+Approves or rejects a workflow step. You must be authenticated as the assigned user in order to complete this action.
+
+### Change file information or properties
+
+Moves a file or updates its properties, including system properties and custom properties.
+
+### Change folder information
+
+Moves a folder or updates its properties, including system properties and custom properties.
+
+### Change url information or properties
+
+Changes the properties for a URL, including system properties and custom properties.
+
+### Copy a file
+
+Copies a file to a specified target folder.
+
+### Copy a folder
+
+Copies a library folder to a specified target folder.
+
+### Copy a url
+
+Copies a URL to a specified target folder.
+
+### Copy an item
+
+Copies a library content item to a specified target folder.
+
+### Create or get folders by folder path
+
+Gets the ID value for the folder at the specified path. When a folder does not exist at the specified path, a folder is created.
+
+### Delete an instruction on an item
+
+Deletes a specified instruction on a library content item.
+
+### Delete an item
+
+Deletes a specified library content item.
+
+### Download a file
+
+Downloads the binary contents of a library content item file.
+
+### Download a file version
+
+Downloads the binary contents of a library content item file version.
+
+### Get all versions for an item
+
+Gets the list of versions for a specified library content item.
+
+### Get file information or properties
+
+Gets the properties for a library content item.
+
+### Get folder information
+
+Gets the information for a specified library folder.
 
 ### Get information for a particular workflow
 
-Get information for a particular workflow given by workflow id.
+Gets the information for a specified library approval workflow.
+
+### Get instructions on an item
+
+Gets the list of instructions for a specified library item.
+
+### Get item information or properties
+
+Gets the properties for a library content item.
+
+### Get items by query
+
+Gets a list of up to 50 items based on the specified External ID and External Connection ID values.
 
 ### Get list of approval workflows
 
-Get list of approval workflows. Use optional query string parameters to filter the response.
+Gets the list of library approval workflows configured for the Seismic tenant.
+
+### Get list of items in a folder
+
+Gets the list of items in a specified library folder.
+
+### Get url information or properties
+
+Gets the properties for a specified library URL content item.
 
 ### Publish one or more documents
 
-This endpoint can be used to immediately promote and publish content, or schedule publish of content for a future date for up to 10 unpublished documents.
+Immediately promotes and publishes content or schedules the publishing of content for a future date for up to 10 unpublished documents.
+
+### Recall a document from workflow
+
+Recalls a specified content item from a library approval workflow.
+
+### Replace thumbnail on an item
+
+Replaces the thumbnail for a library content item. Supported image types include jpg, png, and tif.
+
+### Submit a document into workflow
+
+Submits a specified library content item into an approval workflow.
 
 ### Unpublish a document
 
-This endpoint is to unpublish a document that has been published.
+Unpublishes a specified library content item.
 
 ## Getting Started
 
 The Seismic Power Automate Library connector includes the following actions. Each action corresponds to an API endpoint. Refer to the article for each corresponding API endpoint for further information on the fields and properties associated with the action.
 
 * [Add a file](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementaddafile)
-* [Change file information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementchangefileinformationproperties)
-* [Get file information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetfileinformationproperties)
+* [Add a folder](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementaddafolder)
 * [Add a new file version](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementaddanewfileversion)
+* [Add a url](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementaddaurl)
+* [Add an instruction on an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryinstructionsaddaninstructiononanitem)
+* [Approve or reject workflow step](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowapproveorrejectworkflowstep)
+* [Change file information or properties](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementchangefileinformationproperties)
+* [Change folder information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementchangefolderinformation)
+* [Change url information or properties](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementchangeurlinformationproperties)
+* [Copy a File](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyafile)
+* [Copy a folder](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyafolder)
+* [Copy a url](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyaurl)
+* [Copy an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyanitem)
+* [Create or get folders by folder path](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetcreatefolderbypath)
+* [Delete an instruction on an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryinstructionsdeleteaninstructiononanitem)
+* [Delete an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementdeleteanitem)
 * [Download a file](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementdownloadafile)
 * [Download a file version](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementdownloadafileversion)
-* [Copy a file](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyafile)
-* [Add a folder](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementaddafolder)
-* [Change folder information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementchangefolderinformation)
+* [Get all versions for an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetallversionsforanitem)
+* [Get file information or properties](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetfileinformationproperties)
 * [Get folder information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetfolderinformation)
-* [Copy a folder](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyafolder)
-* [Get list of items in a folder](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetlistofitemsinafolder)
-* [Delete an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementdeleteanitem)
-* [Get item information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetiteminformationproperties)
-* [Copy an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyanitem)
-* [Get all versions for an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetallversionsforanitem)
-* [Get items via query](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetitemsviaquery)
-* [Replace thumbnail on an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementreplacethumbnailonanitem)
-* [Add a url](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementaddaurl)
-* [Change url information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementchangeurlinformationproperties)
-* [Get url information](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgeturlinformationproperties)
-* [Get all versions for an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetallversionsforanitem)
-* [Copy a url](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementcopyaurl)
-* [Add an instruction on an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryinstructionsaddaninstructiononanitem)
-* [Get instructions on an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryinstructionsgetinstructionsonanitem)
-* [Get all versions for an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryinstructionsdeleteaninstructiononanitem)
-* [Submit a document into workflow](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowsubmitadocumentintoworkflow)
-* [Recall a document from workflow](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowrecalladocumentfromworkflow)
-* [Approve or reject workflow step](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowapproveorrejectworkflowstep)
 * [Get information for a particular workflow](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowgetinformationforaparticularworkflow)
+* [Get instructions on an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryinstructionsgetinstructionsonanitem)
+* [Get item information or properties](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetiteminformationproperties)
+* [Get items by query](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetitemsviaquery)
 * [Get list of approval workflows](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowgetlistofapprovalworkflows)
+* [Get list of items in a folder](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgetlistofitemsinafolder)
+* [Get url information or properties](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementgeturlinformationproperties)
 * [Publish one or more documents](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarypublishingpublishoneormoredocuments)
+* [Recall a document from workflow](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowrecalladocumentfromworkflow)
+* [Replace thumbnail on an item](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarycontentmanagementreplacethumbnailonanitem)
+* [Submit a document into workflow](https://developer.seismic.com/seismicsoftware/reference/seismiclibraryworkflowsubmitadocumentintoworkflow)
 * [Unpublish a document](https://developer.seismic.com/seismicsoftware/reference/seismiclibrarypublishingunpublishadocument)
 
 ## Obtaining Credentials
