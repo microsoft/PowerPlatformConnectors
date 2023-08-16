@@ -1,5 +1,5 @@
 # Hash Generator
-This hash generator allows you to generate hashes from your input string. You can choose between SHA1, SHA256, SHA512 and MD5.
+This hash generator allows you to generate hashes from your input string. You can choose between SHA1, SHA256, SHA512 and MD5. The hash is generated using custom code and does not connect to a 3rd party service. The custom code was started the example from [Maksym Martynov's post](https://www.linkedin.com/pulse/powerautomate-dummy-custom-code-connector-maksym-martynov).
 
 ## Publisher: Troy Taylor, Jeffrey Irwin, Ramiro Melgoza
 
