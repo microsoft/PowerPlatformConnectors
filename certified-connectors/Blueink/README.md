@@ -27,3 +27,6 @@ The connector supports the following operations:
 
 ## Known issues and limitations
 The Blueink API key must be preceded by 'Token ' in the connection dialog. Just pasting in the key will not work.
+
+## Deployment Instructions
+Please use [these instructions](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate.
