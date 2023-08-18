@@ -24,3 +24,16 @@ Setup a trigger to run when an event is canceled in your calendar.
 
 ### Create a new event
 Setup a spreadsheet or use another flow and enter event data to create a new event directly into your site.
+
+## Known Issues and Limitations
+Sending custom fields is not supported at this time.
+
+## Deployment Instructions
+
+* In the [Power Automate portal](https://make.powerautomate.com/), create a new flow or edit an existing one. 
+
+* Add a new action to your flow and in the "Choose an operation" menu, search for "The Events Calendar" under the Premium tab. 
+
+* Select your preferred trigger.
+
+* You will be prompted to supply an API key you create before. This Connection will be saved by Power Automate, and available for use in future flows.
