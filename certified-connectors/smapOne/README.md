@@ -27,5 +27,8 @@ Data can be exported as raw data in text format and as pdf or word documents
 ### Manage Datasources
 With Datasources you can import master data to smapOne to use it in your smaps.
 
+## Known Issues and Limitations
+Currently none
+
 # Deployment Instructions
 After deployment, you need to setup the connector with your API Key.
