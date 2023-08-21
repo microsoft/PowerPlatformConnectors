@@ -116,14 +116,10 @@
             HttpRequestMessage request = this.Context.Request;
             
             query["criterias"] = criterias.ToString();
-            query["webhookURL"] = (string)criteriaObj["webhookURL"];
             uriBuilder.Query = query.ToString();
             this.Context.Request.RequestUri = uriBuilder.Uri;
-            if(criterias != null) 
-            {
-                criteriaObj.Remove("criterias");
-                this.Context.Request.Content = new StringContent(string.Empty);
-            }
+            criteriaObj.Remove("criterias");
+			this.Context.Request.Content = new StringContent(criteriaObj.ToString());
             HttpResponseMessage response = await this.Context.SendAsync(request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             return response;
         }
