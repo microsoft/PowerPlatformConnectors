@@ -38,7 +38,7 @@ The connector supports the following operations:
 
 ### New Mail Notification
 
-Receive a new email notification based on specified criteria.
+Receive a new email notification from sender.
 
 ### Known Issues and Limitations
 

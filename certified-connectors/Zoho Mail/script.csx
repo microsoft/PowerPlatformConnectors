@@ -92,36 +92,6 @@
             HttpResponseMessage mailRes = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             return mailRes;
 
-        } 
-        else if(this.Context.OperationId == "New_Mail_Trigger"){
-            String requestText = await this.Context.Request.Content.ReadAsStringAsync();
-            JObject criteriaObj = JObject.Parse("{}");
-            JArray criterias = JArray.Parse("[]");
-            Uri originalUri = this.Context.Request.RequestUri;
-            string modifiedUri = originalUri.ToString().Replace("/newcriteriamail", "");
-            var uriBuilder = new UriBuilder(modifiedUri);
-            var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
-            if(!string.IsNullOrEmpty(requestText))
-            {
-                criteriaObj = JObject.Parse(requestText);
-            }
-            if(criteriaObj["criterias"] != null) 
-            {
-                criterias = (JArray)criteriaObj["criterias"];
-            }
-            else
-            {
-                query["matchingCondition"] = "all";
-            }
-            HttpRequestMessage request = this.Context.Request;
-            
-            query["criterias"] = criterias.ToString();
-            uriBuilder.Query = query.ToString();
-            this.Context.Request.RequestUri = uriBuilder.Uri;
-            criteriaObj.Remove("criterias");
-			this.Context.Request.Content = new StringContent(criteriaObj.ToString());
-            HttpResponseMessage response = await this.Context.SendAsync(request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-            return response;
         }
         else if(this.Context.OperationId == "Search_Mail")
         {
