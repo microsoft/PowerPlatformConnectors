@@ -746,30 +746,32 @@ public class Script : ScriptBase
               {
                 if (tab is JObject)
                 {
-                  var tabLabel = (string)tab["tabLabel"];
+                  if (tabType.Equals("checkboxTabs"))
+                  {
+                    if (newTabs[(string)tab["tabLabel"]] == null)
+                    {
+                      newTabs.Add((string)tab["tabLabel"], (string)tab["selected"]);
+                    }
+                  }
+
                   var tabValue = (string)tab["value"];
+
+                  if (tabType.Equals("radioGroupTabs") && !string.IsNullOrWhiteSpace(tabValue))
+                  {
+                    var tabGroupName = (string)tab["groupName"];
+                    if (newTabs[tabGroupName] == null)
+                    {
+                      newTabs.Add(tabGroupName, (string)tab["value"]);
+                    }
+                  }
+
+                  var tabLabel = (string)tab["tabLabel"];
 
                   if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue))
                   {
                     if (newTabs[tabLabel] == null)
                     {
                       newTabs.Add(tabLabel, tabValue);
-                    }
-                  }
-
-                  if (tabType.Equals("radioGroupTabs") && !string.IsNullOrWhiteSpace(tab["groupName"].ToString()) && !string.IsNullOrWhiteSpace(tabValue))
-                  {
-                    if (newTabs[tabLabel] == null)
-                    {
-                      newTabs.Add((string)tab["groupName"], tabValue);
-                    }
-                  }
-
-                  if (tabType.Equals("checkboxTabs") && !string.IsNullOrWhiteSpace(tab["name"].ToString()) && !string.IsNullOrWhiteSpace(tab["selected"].ToString()))
-                  {
-                    if (newTabs[tabLabel] == null)
-                    {
-                      newTabs.Add((string)tab["name"], (string)tab["selected"]);
                     }
                   }
                 }
