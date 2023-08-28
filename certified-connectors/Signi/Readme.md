@@ -1,6 +1,6 @@
-# Signi
+# Signi.com
 
-Signi connector allows you to sign your documents digitally with the [Signi](https://signi.com/) service. Streamline your paperwork!
+Signi.com connector allows you to sign your documents digitally with the [Signi.com](https://signi.com/) service. Streamline your paperwork!
 
 ## Publisher: NETWORG
 This connector is managed and published by NETWORG.
