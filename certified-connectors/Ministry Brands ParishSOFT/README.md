@@ -52,3 +52,6 @@ Please contact ParishSOFT to obtain the necessary credentials for access.
 
 ## Known Issues and Limitations
 - N/A
+
+## Deployment instructions
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector within Microsoft Power Automate and Power Apps.
