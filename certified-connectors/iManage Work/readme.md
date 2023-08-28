@@ -6,7 +6,13 @@ iManage is the industry-leading provider of document and email management soluti
 
 ## Prerequisites
 
-This connector is available for all iManage Work customers connecting to the cloudimanage.com or imanage.work endpoints. You will need the iManage Work URL specific to your environment and the login credentials for the account under which the connector can execute actions.
+The connector is available for all iManage Work customers connecting to cloudimanage.com. First, the Power Automate application will need to be enabled by an administrator of your iManage Work environment. Once enabled, you will need the specific URL for your environment and a login account and password under which the connector can execute actions. For more information, see the FAQ.
+
+## Supported Triggers
+
+### For a selected document
+
+This trigger allows you to start a workflow for a selected document in an iManage library.
 
 ## Supported Operations
 
@@ -60,7 +66,7 @@ Gets all the library subclasses that match the specified criteria.
 
 ### Get workspace templates
 
-Gets list of templates available in a library.
+Gets a list of workspace templates available in a library.
 
 ### Search for folders
 
@@ -76,24 +82,80 @@ Get details of users that belong to the specified group and match the specified 
 
 ### Get trustees
 
-Gets a list of trustees with certain permissions for a document, folder or workspace.
+Gets a list of trustees with certain permissions for a document, folder or workspace. A trustee can be a user or group.
 
 ### Edit name-value pairs
 
 Creates, updates or deletes name-value pair properties of a document, folder or workspace.
 
+### Update default security
+
+Updates the default security of a document, folder or workspace.
+
+### Update permissions
+
+Updates permissions of an object.
+
+### Copy document
+
+Copies a document to the specified folder.
+
+### Move document
+
+Moves a document to the specified folder.
+
+### Add document reference
+
+Adds document reference or document shortcut in another folder.
+
+### Get core extended metadata properties of a document
+
+Gets core extended metadata properties of a document.
+
+### Set core extended metadata properties on a document
+
+Sets core extended metadata properties on a document.
+
+### Search core extended metadata taxonomy node values
+
+Searches for core extended metadata taxonomy node values matching the specified search criteria.
+
+### Delete document reference
+
+Deletes the document reference from the specified folder.
+
+### Get permissions
+
+Gets user or group access permission properties of a document, folder or workspace. Response properties can vary with user or group permissions.
+
+### Promote document version
+
+Promotes an existing version of a document to the latest version. A new version is created from a specified Journal ID or Version and then promoted to latest.
+
+### Get document versions
+
+Gets profiles for all versions the current user has access to for a specified document.
+
+### Update workflow state
+
+Updates the state of a workflow run. This action can only be used in a workflow that has been created to start with a trigger provided by iManage.
+
+### Add document history entry
+
+Adds an entry as an event in the document's history.
+
 ## Obtaining Credentials
 
-If you are an existing iManage Work user, provide your iManage Work credentials to login. Otherwise, contact your System Administrator for assistance.
+If you are an existing iManage Work user, provide your iManage Work credentials to sign in. Otherwise, contact your System Administrator for assistance.
 
 ## Known Issues and Limitations
 
-For a list of known issues and limitations, please visit https://docs.imanage.com.
+For a list of known issues and limitations, visit https://docs.imanage.com/power-automate/index.html.
 
 ## Frequently Asked Questions
 
-For a list of Frequently Asked Questions, please visit https://docs.imanage.com.
+For a list of Frequently Asked Questions, visit https://docs.imanage.com/power-automate/index.html.
 
 ## Deployment Instructions
 
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
+To deploy this connector as custom connector in Microsoft Power Automate and Power Apps, visit https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli
