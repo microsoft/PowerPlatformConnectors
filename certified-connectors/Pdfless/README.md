@@ -34,3 +34,9 @@ This connector generates a PDF document through a template and data.
 ## Known issues
 
 - `Create a new PDF document` connector list at most 100 document templates. If you have more than 100 document templates, you can insert directly document template id into the form.
+
+## Deployment Instructions
+To deploy the Pdfless connector as a custom connector, please follow these instructions:
+
+1. In Power Automate, search for the "Pdfless" connector.
+2. Fill in the API key
