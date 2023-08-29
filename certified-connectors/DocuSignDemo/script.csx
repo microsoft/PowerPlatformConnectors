@@ -331,7 +331,7 @@ public class Script : ScriptBase
           ["properties"] = new JObject()
         };
 
-        response["schema"]["properties"]["Certificate"] = new JObject
+        response["schema"]["properties"]["certificate"] = new JObject
         {
           ["type"] = "boolean",
           ["x-ms-summary"] = "* Certificate of completion",
@@ -1889,6 +1889,7 @@ public class Script : ScriptBase
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       var newPath = uriBuilder.Path;
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       string[] documentDownloadOptions = { "Combined", "Archive", "Certificate", "Portfolio" };
 
       acceptHeaderValue = "application/pdf";
@@ -1903,22 +1904,13 @@ public class Script : ScriptBase
         }
       }
 
-      if (documentId == null)
-      {
-        uriBuilder.Path = newPath.Replace("/documentsDownload", "/");
-      }
-      else
-      {
-        uriBuilder.Path = newPath.Replace(newPath.Substring(
-          newPath.IndexOf(documentId),
-          newPath.IndexOf("/documentsDownload") + ("/documentsDownload".Length)- newPath.IndexOf(documentId)),
-          HttpUtility.UrlDecode(documentId.ToLower()));
-      }
+      uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
 
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
     this.Context.Request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(acceptHeaderValue));
+    
   }
 
   private async Task UpdateResponse(HttpResponseMessage response)
