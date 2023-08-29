@@ -316,7 +316,7 @@ public class Script : ScriptBase
       }
     }
 
-    if (operationId.Equals("StaticResponseForDocumentDownloadOptionsSchema", StringComparison.OrdinalIgnoreCase))
+    if (operationId.Equals("StaticResponseForDocumentDownloadOptionsForCertificateSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var documentId = query.Get("documentId");
