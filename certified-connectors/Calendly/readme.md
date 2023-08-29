@@ -2,7 +2,7 @@
 
 Calendly helps you easily schedule meetings based on participants availability.
 
-This connector allows you to subscribe to `invitee.created`, `invitee.canceled`, and `routing_form_submission.created` webhook events.
+This connector allows you to subscribe to `invitee.created`, `invitee.canceled`, `invitee_no_show.created`, and `routing_form_submission.created` webhook events.
 
 ## Publisher: Calendly
 
@@ -17,6 +17,7 @@ The connector supports the following triggers:
 
 - `invitee.created`: Triggers when an event is scheduled.
 - `invitee.canceled`: Triggers when an event is canceled.
+- `invitee_no_show.created`: Triggers when an invitee is marked as a no show.
 - `routing_form_submission.created`: Triggers when a routing form is submitted.
 
 ## Supported Actions
