@@ -316,6 +316,35 @@ public class Script : ScriptBase
       }
     }
 
+    if (operationId.Equals("StaticResponseForDocumentDownloadOptionsSchema", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var documentId = query.Get("documentId");
+
+      if (documentId.Contains("Combined"))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject()
+        };
+
+        response["schema"]["properties"]["Certificate"] = new JObject
+        {
+          ["type"] = "boolean",
+          ["x-ms-summary"] = "* Certificate of completion",
+          ["description"] = "Certificate of completion",
+          ["x-ms-test-value"] = false,
+          ["enum"] = new JArray("false", "true")
+        };
+      }
+      else {
+        response["schema"] = null;
+      }
+    }
+
     if (operationId.Equals("StaticResponseForEmbeddedSenderSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
