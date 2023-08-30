@@ -1,19 +1,18 @@
 # Title
-Zellis connector helps organizations connect and automate how they fetch, act on, and manage data. 
+Zellis HCM contains operations to allow you to easily send and receive employee information between Zellis HCM and your other systems. 
 
 ## Prerequisites
-To use the connector, you first need to create the Client App in Azure Portal and get the required credentials (Tenant Id/Client Id/Client Secret). Using the Zellis trigger in this integration will automatically register the webhook for you.
+To use the connector, you will need credentials for the Zellis Intelligence Platform API suite and Notification Hub. Details on how to do this are available on the Zellis Customer Help Centre.   
 
 ## Obtaining Credentials
 
 
 ## Connector Documentation
-For detailed documentation around the connector please refer to
+For detailed documentation around the connector please refer to the Zellis Customer Help Centre.
 
 
 ## Known Issues and Limitations
-For issues with Zellis Connector please try this link first: (to be added)
-1) Pagination not working for Search Zellis records action
+Pagination does not function correctly for the Search Zellis Records action.
 
 ## Deployment Instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
