@@ -741,7 +741,6 @@ public class Script : ScriptBase
             foreach (var tabType in tabTypes)
             {
               var tabStatusArray = tabs[tabType];
-
               foreach (var tab in tabStatusArray as JArray ?? new JArray())
               {
                 if (tab is JObject)
@@ -755,7 +754,6 @@ public class Script : ScriptBase
                   }
 
                   var tabValue = (string)tab["value"];
-
                   if (tabType.Equals("radioGroupTabs") && !string.IsNullOrWhiteSpace(tabValue))
                   {
                     var tabGroupName = (string)tab["groupName"];
@@ -766,7 +764,6 @@ public class Script : ScriptBase
                   }
 
                   var tabLabel = (string)tab["tabLabel"];
-
                   if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue))
                   {
                     if (newTabs[tabLabel] == null)
