@@ -144,6 +144,10 @@ Updates the state of a workflow run. This action can only be used in a workflow 
 
 Adds an entry as an event in the document's history.
 
+### Copy permissions
+
+Copies the access permissions, and optionally the default security, from one iManage Work object to another. 'Copy Type' gives you options for how to handle the combination of source and destination permissions. 'Overwrite' updates the target object's users, groups, and permission levels to exactly match the source object's. 'Merge' keeps all the users and groups on the destination object and combines them with the source, but in case of a conflict of permission level on an individual or group: 'Merge (Pessimistic)' takes the lower permission, while 'Merge (Optimistic)' takes the higher permission for the conflicting user or group.
+
 ## Obtaining Credentials
 
 If you are an existing iManage Work user, provide your iManage Work credentials to sign in. Otherwise, contact your System Administrator for assistance.
