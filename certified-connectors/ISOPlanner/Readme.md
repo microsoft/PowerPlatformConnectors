@@ -27,6 +27,9 @@ Adds an existing item in the library to a task.
 ### Add a library item to an event
 Adds an existing item in the library to an event.
 
+### Add context to a KPI data point
+Adds context (e.g. Risk, Asset, Control, Task) to a KPI data point.
+
 ### Create a KPI data point
 Creates a new date point for the specified KPI.
 
