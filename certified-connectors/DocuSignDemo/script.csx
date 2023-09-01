@@ -737,18 +737,33 @@ public class Script : ScriptBase
 
             string[] tabTypes = { "textTabs", "fullNameTabs", "dateSignedTabs", "companyTabs", "titleTabs", "numberTabs",
               "ssnTabs", "dateTabs", "zipTabs", "emailTabs", "noteTabs", "listTabs", "firstNameTabs", "lastNameTabs", "emailAddressTabs",
-              "formulaTabs" };
+              "formulaTabs", "checkboxTabs", "radioGroupTabs" };
             foreach (var tabType in tabTypes)
             {
               var tabStatusArray = tabs[tabType];
-
               foreach (var tab in tabStatusArray as JArray ?? new JArray())
               {
                 if (tab is JObject)
                 {
-                  var tabLabel = (string)tab["tabLabel"];
-                  var tabValue = (string)tab["value"];
+                  if (tabType.Equals("checkboxTabs"))
+                  {
+                    if (newTabs[(string)tab["tabLabel"]] == null)
+                    {
+                      newTabs.Add((string)tab["tabLabel"], (string)tab["selected"]);
+                    }
+                  }
 
+                  var tabValue = (string)tab["value"];
+                  if (tabType.Equals("radioGroupTabs") && !string.IsNullOrWhiteSpace(tabValue))
+                  {
+                    var tabGroupName = (string)tab["groupName"];
+                    if (newTabs[tabGroupName] == null)
+                    {
+                      newTabs.Add(tabGroupName, (string)tab["value"]);
+                    }
+                  }
+
+                  var tabLabel = (string)tab["tabLabel"];
                   if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue))
                   {
                     if (newTabs[tabLabel] == null)
