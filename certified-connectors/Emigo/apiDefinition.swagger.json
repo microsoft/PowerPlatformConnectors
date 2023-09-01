@@ -15,15 +15,137 @@
   "schemes": [
     "https"
   ],
-  "consumes": [],
-  "produces": [],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
+    "/trigger/{endpoint}/feeds/{feed}/newItem": {
+      "x-ms-notification-content": {
+        "description": "Details for OData NewItem Webhook",
+        "schema": {
+          "$ref": "#/definitions/FeedItem"
+        }
+      },
+      "post": {
+        "description": "This operation triggers a flow when a new OData item arrives.",
+        "summary": "When a new OData item arrives",
+        "operationId": "NewODataItem",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "endpoint",
+            "in": "path",
+            "description": "Please enter endpoint",
+            "required": true,
+            "x-ms-url-encoding": "double",
+            "x-ms-dynamic-values": {
+              "operationId": "GetTriggerEndpoints",
+              "value-collection": "value",
+              "value-path": "Name",
+              "value-title": "DisplayName"
+            },
+            "x-ms-summary": "Endpoint name",
+            "type": "string"
+          },
+          {
+            "name": "feed",
+            "in": "path",
+            "description": "Please enter feed name",
+            "required": true,
+            "x-ms-url-encoding": "double",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFeeds",
+              "parameters": {
+                "endpoint": {
+                  "parameter": "endpoint"
+                }
+              },
+              "value-collection": "value",
+              "value-path": "Name",
+              "value-title": "DisplayName"
+            },
+            "x-ms-summary": "Feed name",
+            "type": "string"
+          },
+          {
+            "name": "Request body of webhook",
+            "in": "body",
+            "description": "This is the request body of the Webhook",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "login": {
+                  "title": "Login",
+                  "description": "Please enter login",
+                  "type": "string"
+                },
+                "automateaccesskey": {
+                  "title": "Automate Access Key",
+                  "description": "Please enter automate access key",
+                  "type": "string",
+                  "format": "password"
+                },
+                "config": {
+                  "description": "Configuration of the Trigger",
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "URl",
+                      "title": "URL",
+                      "x-ms-notification-url": true,
+                      "x-ms-visibility": "internal"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ]
+                }
+              },
+              "required": [
+                "login",
+                "automateaccesskey",
+                "config"
+              ]
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/WebhookCreationResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "deprecated": false
+      }
+    },
     "/$metadata.json/datasets/{type}/tables/{table}": {
       "get": {
         "tags": [
           "Metadata"
         ],
-        "summary": "Get table metadata",
+        "summary": "Get table metadata (deprecated)",
         "description": "Get table metadata",
         "operationId": "GetTable",
         "consumes": [],
@@ -73,6 +195,97 @@
             "schema": {
               "$ref": "#/definitions/TableMetadata"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/$metadata.json/datasets/{endpoint}/feeds/{feed}": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Get feed metadata",
+        "description": "Get feed metadata",
+        "operationId": "GetFeed",
+        "consumes": [],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "endpoint",
+            "in": "path",
+            "description": "Endpoint name",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetEndpoints",
+              "value-collection": "value",
+              "value-path": "Name",
+              "value-title": "DisplayName"
+            },
+            "x-ms-url-encoding": "double",
+            "x-ms-summary": "Endpoint name",
+            "type": "string"
+          },
+          {
+            "name": "feed",
+            "in": "path",
+            "description": "Feed name",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetFeeds",
+              "parameters": {
+                "endpoint": {
+                  "parameter": "endpoint"
+                }
+              },
+              "value-collection": "value",
+              "value-path": "Name",
+              "value-title": "DisplayName"
+            },
+            "x-ms-url-encoding": "double",
+            "x-ms-summary": "Feed name",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FeedMetadata"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
         "deprecated": false,
@@ -84,7 +297,7 @@
         "tags": [
           "List"
         ],
-        "summary": "Get table type list",
+        "summary": "Get table type list (deprecated)",
         "description": "Get table type list",
         "operationId": "GetTypes",
         "consumes": [],
@@ -97,6 +310,99 @@
             "schema": {
               "$ref": "#/definitions/TablesList"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/datasets/endpoints": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "Get endpoint list",
+        "description": "Get endpoint list",
+        "operationId": "GetEndpoints",
+        "consumes": [],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FeedList"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/datasets/triggerendpoints": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "Get trigger endpoint list",
+        "description": "Get trigger endpoint list",
+        "operationId": "GetTriggerEndpoints",
+        "consumes": [],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FeedList"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
         "deprecated": false,
@@ -108,7 +414,7 @@
         "tags": [
           "List"
         ],
-        "summary": "Get table name list by type",
+        "summary": "Get table name list by type (deprecated)",
         "description": "This operation will return the tables according to the indicated value in field table type name",
         "operationId": "GetTables",
         "consumes": [],
@@ -122,7 +428,7 @@
             "description": "Please enter table type name",
             "required": true,
             "x-ms-summary": "Table type name",
-			"x-ms-url-encoding": "single",
+            "x-ms-url-encoding": "single",
             "type": "string"
           }
         ],
@@ -132,6 +438,70 @@
             "schema": {
               "$ref": "#/definitions/TablesList"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/datasets/{endpoint}/feeds": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "Get feed name list",
+        "description": "This operation will return the feeds according to the indicated value in field endpoint name",
+        "operationId": "GetFeeds",
+        "consumes": [],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "endpoint",
+            "in": "path",
+            "description": "Please enter endpoint name",
+            "required": true,
+            "x-ms-summary": "Endpoint name",
+            "x-ms-url-encoding": "single",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FeedList"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
         "deprecated": false
@@ -142,7 +512,7 @@
         "tags": [
           "Item"
         ],
-        "summary": "Get items by table type",
+        "summary": "Get items by table type (deprecated)",
         "description": "This operation will return the items according to the indicated value in field table type name and tyble name",
         "operationId": "GetItems",
         "consumes": [],
@@ -192,6 +562,99 @@
             "schema": {
               "$ref": "#/definitions/ItemsList"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "deprecated": false,
+        "x-ms-pageable": {
+          "nextLinkName": "@odata.nextLink"
+        }
+      }
+    },
+    "/datasets/{endpoint}/feeds/{feed}/items": {
+      "get": {
+        "tags": [
+          "Item"
+        ],
+        "summary": "Get OData items",
+        "description": "This operation will return the items according to the indicated value in field endpoint and feed name",
+        "operationId": "GetODataItems",
+        "consumes": [],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "endpoint",
+            "in": "path",
+            "description": "Please enter endpoint",
+            "required": true,
+            "x-ms-url-encoding": "double",
+            "x-ms-dynamic-values": {
+              "operationId": "GetEndpoints",
+              "value-collection": "value",
+              "value-path": "Name",
+              "value-title": "DisplayName"
+            },
+            "x-ms-summary": "Endpoint name",
+            "type": "string"
+          },
+          {
+            "name": "feed",
+            "in": "path",
+            "description": "Please enter feed name",
+            "required": true,
+            "x-ms-url-encoding": "double",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFeeds",
+              "parameters": {
+                "endpoint": {
+                  "parameter": "endpoint"
+                }
+              },
+              "value-collection": "value",
+              "value-path": "Name",
+              "value-title": "DisplayName"
+            },
+            "x-ms-summary": "Feed name",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FeedList"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
         "deprecated": false,
@@ -216,17 +679,16 @@
             "in": "query",
             "required": false,
             "type": "string",
-            "x-ms-summary": "Get product list by ID",
-            "description": "Get product list by ID (use \"all\" when you get to all list )"
+            "x-ms-summary": "Get product list by Id",
+            "description": "Get product list by Id (use \"all\" when you get to all list )"
           },
           {
             "name": "Select",
             "in": "query",
             "required": false,
-			"description": "Please select columns",
+            "description": "Comma-separated list of columns to retrieve",
             "type": "string",
-            "x-ms-summary": "Use $select",
-            "description": "Comma-separated list of columns to retrieve"
+            "x-ms-summary": "Use $select"
           }
         ],
         "responses": {
@@ -235,10 +697,26 @@
             "schema": {
               "$ref": "#/definitions/GetProductList"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
-        "summary": "Get all list product",
-        "description": "This operation retrieves all list product in tenant Emigo"
+        "summary": "Get product list",
+        "description": "This operation retrieves all list product in tenant Emigo",
+        "deprecated": false
       }
     },
     "/Product/GetItem": {
@@ -258,13 +736,13 @@
             "required": true,
             "type": "string",
             "description": "Please enter the Product Id",
-            "x-ms-summary": "Product ID"
+            "x-ms-summary": "Product Id"
           },
           {
             "name": "Select",
             "in": "query",
             "required": false,
-			"description": "Please select columns",
+            "description": "Comma-separated list of columns to retrieve",
             "type": "string",
             "x-ms-summary": "Use $select"
           }
@@ -275,10 +753,26 @@
             "schema": {
               "$ref": "#/definitions/GetProduct"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
-        "summary": "Get product by ID",
-        "description": "This operation retrieves information about product by ID"
+        "summary": "Get product by Id",
+        "description": "This operation retrieves information about product by Id",
+        "deprecated": false
       }
     },
     "/OperationalUnit/GetList": {
@@ -297,14 +791,14 @@
             "in": "query",
             "required": false,
             "type": "string",
-            "x-ms-summary": "Get Operational Unit by ID",
+            "x-ms-summary": "Get Operational Unit by Id",
             "description": "Use \"all\" when you get to all Operational Unit"
           },
           {
             "name": "Select",
             "in": "query",
             "required": false,
-			"description": "Please select columns",
+            "description": "Comma-separated list of columns to retrieve",
             "type": "string",
             "x-ms-summary": "Use $select"
           }
@@ -315,10 +809,26 @@
             "schema": {
               "$ref": "#/definitions/GetOperationalUnitList"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
-        "summary": "Get all Operational Unit",
-        "description": "This operation retrieves information about all Operation Unit"
+        "summary": "Get Operational Unit list",
+        "description": "This operation retrieves information about all Operation Unit",
+        "deprecated": false
       }
     },
     "/OperationalUnit/GetItem": {
@@ -344,7 +854,7 @@
             "name": "Select",
             "in": "query",
             "required": false,
-			"description": "Please select columns",
+            "description": "Comma-separated list of columns to retrieve",
             "type": "string",
             "x-ms-summary": "$select"
           }
@@ -355,10 +865,26 @@
             "schema": {
               "$ref": "#/definitions/GetOperationalUnit"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
-        "summary": "Get details by Operational Unit Id",
-        "description": "This operation retrieves information about Operational Unit"
+        "summary": "Get Operational Unit by Id",
+        "description": "This operation retrieves information about Operational Unit",
+        "deprecated": false
       }
     },
     "/OperationalUnit/SendMessage": {
@@ -406,10 +932,26 @@
             "schema": {
               "type": "object"
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error. Unknown error occurred"
+          },
+          "default": {
+            "description": "Operation Failed."
           }
         },
         "summary": "Send a message to the Operational Unit",
-        "description": "Action that allows to send a message to Operational Unit"
+        "description": "Action that allows to send a message to Operational Unit",
+        "deprecated": false
       }
     }
   },
@@ -915,6 +1457,33 @@
         }
       }
     },
+    "FeedMetadata": {
+      "description": "Metadata feed",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Feed name",
+          "type": "string"
+        },
+        "title": {
+          "description": "Feed title",
+          "type": "string"
+        },
+        "x-ms-permission": {
+          "description": "Feed permission",
+          "type": "string"
+        },
+        "x-ms-capabilities": {
+          "$ref": "#/definitions/FeedCapabilitiesMetadata"
+        },
+        "schema": {
+          "$ref": "#/definitions/Object"
+        },
+        "referencedEntities": {
+          "$ref": "#/definitions/Object"
+        }
+      }
+    },
     "TableCapabilitiesMetadata": {
       "description": "Metadata tabele",
       "type": "object",
@@ -924,6 +1493,78 @@
         },
         "filterRestrictions": {
           "$ref": "#/definitions/TableFilterRestrictionsMetadata"
+        },
+        "isOnlyServerPagable": {
+          "description": "Is Only Server Pagable",
+          "type": "boolean"
+        },
+        "filterFunctionSupport": {
+          "description": "List of supported filter capabilities",
+          "type": "array",
+          "items": {
+            "enum": [
+              "eq",
+              "ne",
+              "gt",
+              "ge",
+              "lt",
+              "le",
+              "and",
+              "or",
+              "contains",
+              "startswith",
+              "endswith",
+              "length",
+              "indexof",
+              "replace",
+              "substring",
+              "substringof",
+              "tolower",
+              "toupper",
+              "trim",
+              "concat",
+              "year",
+              "month",
+              "day",
+              "hour",
+              "minute",
+              "second",
+              "date",
+              "time",
+              "now",
+              "totaloffsetminutes",
+              "totalseconds",
+              "floor",
+              "ceiling",
+              "round",
+              "not",
+              "negate",
+              "add",
+              "sub",
+              "mul",
+              "div",
+              "mod",
+              "sum",
+              "min",
+              "max",
+              "average",
+              "countdistinct",
+              "null"
+            ],
+            "type": "string"
+          }
+        }
+      }
+    },
+    "FeedCapabilitiesMetadata": {
+      "description": "Metadata feed",
+      "type": "object",
+      "properties": {
+        "sortRestrictions": {
+          "$ref": "#/definitions/FeedSortRestrictionsMetadata"
+        },
+        "filterRestrictions": {
+          "$ref": "#/definitions/FeedFilterRestrictionsMetadata"
         },
         "isOnlyServerPagable": {
           "description": "Is Only Server Pagable",
@@ -1015,12 +1656,60 @@
         }
       }
     },
+    "FeedSortRestrictionsMetadata": {
+      "description": "Metadana feed (sorting restrictions)",
+      "type": "object",
+      "properties": {
+        "sortable": {
+          "description": "Indicates whether this feed has sortable columns",
+          "type": "boolean"
+        },
+        "unsortableProperties": {
+          "description": "List of properties by which you cannot sort",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ascendingOnlyProperties": {
+          "description": "List of properties that support only ascending order",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "TableFilterRestrictionsMetadata": {
       "description": "Metadana table (sorting restrictions)",
       "type": "object",
       "properties": {
         "filterable": {
           "description": "Indicates whether this table has sortable columns",
+          "type": "boolean"
+        },
+        "nonFilterableProperties": {
+          "description": "List of properties by which you cannot filter",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requiredProperties": {
+          "description": "List of required properties",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "FeedFilterRestrictionsMetadata": {
+      "description": "Metadana feed (sorting restrictions)",
+      "type": "object",
+      "properties": {
+        "filterable": {
+          "description": "Indicates whether this feed has sortable columns",
           "type": "boolean"
         },
         "nonFilterableProperties": {
@@ -1053,6 +1742,20 @@
         }
       }
     },
+    "Feed": {
+      "description": "Represents the feed",
+      "type": "object",
+      "properties": {
+        "Name": {
+          "description": "Feed name",
+          "type": "string"
+        },
+        "DisplayName": {
+          "description": "Feed display name",
+          "type": "string"
+        }
+      }
+    },
     "Item": {
       "description": "Unit of table element",
       "type": "object",
@@ -1080,6 +1783,33 @@
         "value-path": "Schema/Items"
       }
     },
+    "FeedItem": {
+      "description": "Unit of feed element",
+      "type": "object",
+      "properties": {
+        "dynamicProperties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Object"
+          }
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/Object"
+      },
+      "x-ms-dynamic-schema": {
+        "operationId": "GetFeed",
+        "parameters": {
+          "endpoint": {
+            "parameter": "endpoint"
+          },
+          "feed": {
+            "parameter": "feed"
+          }
+        },
+        "value-path": "Schema/Items"
+      }
+    },
     "TablesList": {
       "description": "Represents a list of tables",
       "type": "object",
@@ -1089,6 +1819,19 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/Table"
+          }
+        }
+      }
+    },
+    "FeedList": {
+      "description": "Represents a list of feeds",
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "List of feeds",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FeedItem"
           }
         }
       }
@@ -1105,6 +1848,56 @@
           }
         }
       }
+    },
+    "WebhookRequestBody": {
+      "type": "object",
+      "properties": {
+        "login": {
+          "title": "Login",
+          "description": "Please enter login",
+          "type": "string"
+        },
+        "automateaccesskey": {
+          "title": "Automate Access Key",
+          "description": "Please enter automate access key",
+          "type": "string",
+          "format": "password"
+        },
+        "config": {
+          "description": "Configuration of the Trigger",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "URl",
+              "title": "URL",
+              "x-ms-notification-url": true,
+              "x-ms-visibility": "internal"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        }
+      },
+      "required": [
+        "login",
+        "automateaccesskey",
+        "config"
+      ]
+    },
+    "WebhookCreationResponse": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   },
   "parameters": {},
@@ -1113,7 +1906,7 @@
     "oauth2_auth": {
       "type": "oauth2",
       "flow": "accessCode",
-      "authorizationUrl": "https://login.windows.net/common/oauth2/authorize",
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
       "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
       "scopes": {}
     }
