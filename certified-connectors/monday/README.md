@@ -33,7 +33,7 @@ In order to use this connector, you will need the following:
 - `Create a workspace` - Creates an open workspace in monday.com. Returns the ID of the workspace.
 - `Create an update` - Creates an update for a specified item in monday.com. Returns the ID of the update.
 - `Update an item's column value` - Updates a single column value for an item given the item ID. Can also be used to update the item name. If the value is blank, the column value is cleared. Returns the ID of the updated item.
-- `Update multiple item column values` - Updates multiple item column valuess. If the column value is blank, that column is not updated. Returns the updated item ID.
+- `Update multiple item column values` - Updates multiple item column values. If the column value is blank, that column is not updated. Returns the updated item ID.
 - `Move an item to a group` - Moves an item to another group within the same board. Returns the ID of the moved item.
 
 #### Data Retrieval
