@@ -21,10 +21,14 @@ Use your AWS Access Key ID as the username and AWS Access Key Secret as the pass
 
 ## Supported Operations
 
-* List Objects v2
-* Get Object
-* Put Object
-* Delete Object
+AWS S3 Rest API operations is documented here: [AWS S3 Rest API Documentation](https://docs.aws.amazon.com/AmazonS3/latest/API/API_Operations.html)
+
+This connector supports the following operations:
+
+* [List Objects v2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html) 
+* [Get Object](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
+* [Put Object](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html)
+* [Delete Object](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 
 ## Known Issues and Limitations
 
