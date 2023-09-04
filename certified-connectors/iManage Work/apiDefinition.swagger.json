@@ -3,7 +3,7 @@
   "info": {
     "title": "iManage Work",
     "description": "iManage Work connector enables users to automate repetitive tasks and approval processes while they keep all their files secure in the iManage Work environment.",
-    "version": "3.0",
+    "version": "4.0",
     "contact": {
       "name": "iManage LLC",
       "url": "https://docs.imanage.com",
@@ -362,108 +362,7 @@
           "200": {
             "description": "The request succeeded.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "default_security": {
-                      "type": "string",
-                      "enum": [
-                        "inherit",
-                        "public",
-                        "view",
-                        "private"
-                      ],
-                      "title": "Default Security",
-                      "description": "Indicates the default security of the object. Possible values are 'inherit', 'public', 'view' or 'private'.",
-                      "x-ms-visibility": "important"
-                    },
-                    "acl": {
-                      "type": "array",
-                      "title": "Access Permissions",
-                      "description": "Indicates a collection of access permissions for one or more users and/or groups.",
-                      "x-ms-visibility": "important",
-                      "items": {
-                        "type": "object",
-                        "title": "Each Access Permission",
-                        "description": "Indicates access permission for one or more users and/or groups.",
-                        "properties": {
-                          "id": {
-                            "title": "Trustee ID",
-                            "type": "string",
-                            "description": "Indicates the ID of the trustee. This can be a user ID or a group ID."
-                          },
-                          "is_external": {
-                            "title": "Is External",
-                            "type": "boolean",
-                            "description": "Indicates that the entity is an external user or group."
-                          },
-                          "sid": {
-                            "title": "Trustee SID",
-                            "type": "string",
-                            "description": "Indicates the security identifier of the user or group."
-                          },
-                          "type": {
-                            "title": "Trustee Type",
-                            "type": "string",
-                            "enum": [
-                              "user",
-                              "group"
-                            ],
-                            "description": "Indicates the type of trustee returned. Possible values are 'user' or 'group'."
-                          },
-                          "access": {
-                            "title": "Access",
-                            "type": "number",
-                            "description": "Indicates the numeric value of the access permission the user or group has on the object. Possible values are 0 (no_access), 1 (read), 2 (read_write) or 3 (full_access)."
-                          },
-                          "access_level": {
-                            "title": "Access Level",
-                            "type": "string",
-                            "enum": [
-                              "no_access",
-                              "read",
-                              "read_write",
-                              "full_access"
-                            ],
-                            "description": "Indicates the access permission the user or group has on the object. Possible values are 'no_access', 'read', 'read_write' or 'full_access'."
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "is_external",
-                          "sid",
-                          "type",
-                          "access_level"
-                        ]
-                      }
-                    },
-                    "all_user_ids": {
-                      "type": "string",
-                      "title": "All User IDs",
-                      "description": "Indicates a list of all user IDs, concatenated as a string and separated by semicolons.",
-                      "x-ms-visibility": "important"
-                    },
-                    "all_group_ids": {
-                      "type": "string",
-                      "title": "All Group IDs",
-                      "description": "Indicates a list of all group IDs, concatenated as a string and separated by semicolons.",
-                      "x-ms-visibility": "important"
-                    }
-                  },
-                  "required": [
-                    "acl",
-                    "default_security",
-                    "all_user_ids",
-                    "all_group_ids"
-                  ]
-                }
-              },
-              "required": [
-                "data"
-              ],
-              "additionalProperties": false
+              "$ref": "#/definitions/UpdatePermissionsResponse"
             }
           }
         }
@@ -555,7 +454,7 @@
                       "items": {
                         "type": "object",
                         "title": "Each Access Permission",
-                        "description": "Indicates access permission for one or more users and/or groups.",
+                        "description": "Indicates the access permission for one or more users and/or groups.",
                         "properties": {
                           "name": {
                             "type": "string",
@@ -603,7 +502,7 @@
                               "Change Security"
                             ],
                             "title": "Access-level Display Name",
-                            "description": "Indicates the human-readable access-level display name assigned to the user or group for this object. Possible values are 'No Access', 'Read Only', 'Read/Write', 'Full Access' or 'Change Security'."
+                            "description": "Indicates the human-readable access-level display name assigned to the user or group for this object. Possible values are 'No Access', 'Read Only', 'Read/Write' or 'Full Access'."
                           },
                           "access": {
                             "type": "integer",
@@ -665,6 +564,101 @@
                 "data"
               ],
               "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "/copyPermissions": {
+      "post": {
+        "summary": "Copy permissions",
+        "description": "Copies the access permissions, and optionally the default security, from one iManage Work object to another. 'Copy Type' gives you options for how to handle the combination of source and destination permissions. 'Overwrite' updates the target object's users, groups, and permission levels to exactly match the source object's. 'Merge' keeps all the users and groups on the destination object and combines them with the source, but in case of a conflict of permission level on an individual or group: 'Merge (Pessimistic)' takes the lower permission, while 'Merge (Optimistic)' takes the higher permission for the conflicting user or group.",
+        "tags": [
+          "Documents, Folders, Workspaces"
+        ],
+        "x-im-controller": "common.controllers",
+        "operationId": "CopyPermissions",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sourceObjectType": {
+                  "type": "string",
+                  "enum": [
+                    "document",
+                    "folder",
+                    "workspace"
+                  ],
+                  "title": "Source Object Type",
+                  "description": "Specifies the type of the source object.",
+                  "x-ms-visibility": "important"
+                },
+                "sourceObjectId": {
+                  "type": "string",
+                  "pattern": "^[^!]+![0-9.]*[0-9]+$",
+                  "title": "Source Object ID",
+                  "description": "Specifies the ID of the object from which the permissions are copied. An example of a document ID is 'ACTIVE_US!453.1'. An example of a folder or workspace ID is 'ACTIVE_US!123'.",
+                  "x-ms-visibility": "important"
+                },
+                "targetObjectType": {
+                  "type": "string",
+                  "enum": [
+                    "document",
+                    "folder",
+                    "workspace"
+                  ],
+                  "title": "Target Object Type",
+                  "description": "Specifies the type of the target object.",
+                  "x-ms-visibility": "important"
+                },
+                "targetObjectId": {
+                  "type": "string",
+                  "pattern": "^[^!]+![0-9.]*[0-9]+$",
+                  "title": "Target Object ID",
+                  "description": "Specifies the ID of the object to which the permissions are copied. An example of a document ID is 'ACTIVE_US!453.1'. An example of a folder or workspace ID is 'ACTIVE_US!123'.",
+                  "x-ms-visibility": "important"
+                },
+                "copyType": {
+                  "type": "string",
+                  "enum": [
+                    "Overwrite",
+                    "Merge (Pessimistic)",
+                    "Merge (Optimistic)"
+                  ],
+                  "title": "Copy Type",
+                  "description": "Specifies to merge the source object permissions with target object permissions or to overwrite target object permissions with source permissions. For details, see the action description.",
+                  "x-ms-visibility": "important",
+                  "default": "Overwrite"
+                },
+                "copyDefaultSecurity": {
+                  "type": "boolean",
+                  "title": "Copy Default Security",
+                  "description": "Specifies to copy the default security of the source object to the target object. If the default security of the source object is 'inherit', the inherited default security is copied from the source to the target object.",
+                  "x-ms-visibility": "important",
+                  "default": true
+                }
+              },
+              "required": [
+                "sourceObjectType",
+                "sourceObjectId",
+                "targetObjectType",
+                "targetObjectId",
+                "copyType",
+                "copyDefaultSecurity"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the permissions of the target object.",
+            "schema": {
+              "$ref": "#/definitions/UpdatePermissionsResponse"
             }
           }
         }
@@ -1755,7 +1749,7 @@
     "/getWorkspaceTemplates": {
       "get": {
         "summary": "Get workspace templates",
-        "description": "Gets a list of workspace templates available in a library. A workspace template is a predefined workspace whose structure is copied for the new workspace.",
+        "description": "Gets list of templates available in a library. A workspace template is a predefined workspace whose structure is copied for the new workspace.",
         "tags": [
           "Library"
         ],
@@ -2261,7 +2255,7 @@
                 "workspace_name": {
                   "type": "string",
                   "title": "Workspace Name",
-                  "description": "Specifies the of the parent workspace to which the folder belongs. This search is not case-sensitive. Partial matches are supported.",
+                  "description": "Specifies the name of the parent workspace to which the folder belongs. This search is not case-sensitive. Partial matches are supported.",
                   "x-ms-visibility": "advanced"
                 }
               },
@@ -3818,8 +3812,8 @@
                 },
                 "comments": {
                   "type": "string",
-                  "title": "Comments",
-                  "description": "Specifies additional information about the operation.",
+                  "title": "Timeline Comments",
+                  "description": "Specifies additional information about the operation. These comments are visible in the timeline of the document.",
                   "x-ms-visibility": "important"
                 }
               },
@@ -12411,6 +12405,110 @@
         "id",
         "ssid"
       ]
+    },
+    "UpdatePermissionsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "default_security": {
+              "type": "string",
+              "enum": [
+                "inherit",
+                "public",
+                "view",
+                "private"
+              ],
+              "title": "Default Security",
+              "description": "Indicates the default security of the object. Possible values are 'inherit', 'public', 'view' or 'private'.",
+              "x-ms-visibility": "important"
+            },
+            "acl": {
+              "type": "array",
+              "title": "Access Permissions",
+              "description": "Indicates a collection of access permissions for one or more users and/or groups.",
+              "x-ms-visibility": "important",
+              "items": {
+                "type": "object",
+                "title": "Each Access Permission",
+                "description": "Indicates the access permission for one or more users and/or groups.",
+                "properties": {
+                  "id": {
+                    "title": "Trustee ID",
+                    "type": "string",
+                    "description": "Indicates the ID of the trustee. This can be a user ID or a group ID."
+                  },
+                  "is_external": {
+                    "title": "Is External",
+                    "type": "boolean",
+                    "description": "Indicates that the entity is an external user or group."
+                  },
+                  "sid": {
+                    "title": "Trustee SID",
+                    "type": "string",
+                    "description": "Indicates the security identifier of the user or group."
+                  },
+                  "type": {
+                    "title": "Trustee Type",
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "group"
+                    ],
+                    "description": "Indicates the type of trustee returned. Possible values are 'user' or 'group'."
+                  },
+                  "access": {
+                    "title": "Access",
+                    "type": "number",
+                    "description": "Indicates the numeric value of the access permission the user or group has on the object. Possible values are 0 (no_access), 1 (read), 2 (read_write) or 3 (full_access)."
+                  },
+                  "access_level": {
+                    "title": "Access Level",
+                    "type": "string",
+                    "enum": [
+                      "no_access",
+                      "read",
+                      "read_write",
+                      "full_access"
+                    ],
+                    "description": "Indicates the access permission the user or group has on the object. Possible values are 'no_access', 'read', 'read_write' or 'full_access'."
+                  }
+                },
+                "required": [
+                  "id",
+                  "is_external",
+                  "sid",
+                  "type",
+                  "access_level"
+                ]
+              }
+            },
+            "all_user_ids": {
+              "type": "string",
+              "title": "All User IDs",
+              "description": "Indicates a list of all user IDs, concatenated as a string and separated by semicolons.",
+              "x-ms-visibility": "important"
+            },
+            "all_group_ids": {
+              "type": "string",
+              "title": "All Group IDs",
+              "description": "Indicates a list of all group IDs, concatenated as a string and separated by semicolons.",
+              "x-ms-visibility": "important"
+            }
+          },
+          "required": [
+            "acl",
+            "default_security",
+            "all_user_ids",
+            "all_group_ids"
+          ]
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "additionalProperties": false
     }
   },
   "parameters": {
