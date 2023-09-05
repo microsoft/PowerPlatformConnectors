@@ -1,25 +1,27 @@
-The [Muhimbi PDF Converter Online](http://www.muhimbi-online.com/) is the market leading solution to Convert, Merge, Watermark, Secure and OCR files using Power Automate, SharePoint Online and your own custom code.
+The [Muhimbi PDF Converter for Power Automate](https://www.muhimbi.com/products/pdf-converter-for-power-automate/) is the market-leading solution for converting, merging, splitting, watermarking, compressing, securing, archiving, and OCRing files using Power Automate flows. 
 
-It supports a [large number of file formats](https://support.muhimbi.com/hc/en-us/articles/228089047-What-file-formats-types-are-supported-for-conversion-) including MS-Word, Excel, InfoPath, PowerPoint, MSG, EML, Visio, Images, HTML and AutoCAD. 
+It supports more than [100 file types](https://www.muhimbi.com/knowledge-base/what-file-formats-types-are-supported-for-conversion/), including MS Word, Excel, InfoPath, PowerPoint, MSG, email, Visio, images, HTML, and AutoCAD.
 
-It fits in any business process, but common uses are archiving content in PDF(A) format, sharing files in a universally recognised file format, preparing content for display on mobile devices and generating meeting packs. 
+PDF Converter provides a quick solution for building automated document workflows that streamline business processes. Workflows are easily built on any of the platforms supported by Power Automate, including SharePoint, OneDrive, Google Drive, and Dropbox.
 
-Various tutorials and videos [can be found here](https://support.muhimbi.com/hc/en-us/articles/115005900168-Microsoft-Flow-Logic-Apps-PowerApps-Tutorials-and-Blog-posts).
+Some common use cases include preserving and archiving emails, Office files, PDFs, or images by converting them to PDF/A format; securing documents by adding passwords, encryption, and dynamic watermarks like a user ID, IP address, or timestamp; unlocking text from images and scanned PDFs by setting up an automated OCR and text extraction workflow; compressing, splitting and merging documents.
+
 
 <br/>
 
 
 ## Prerequisites
 
-In order to use this connector you require either a free or paid account for Muhimbi PDF Online.  
+To use this connector, you’ll need a Free or Trial account for Muhimbi PDF Converter for Power Automate. Please familiarize yourself with the [differences between the Free and Trial accounts](https://www.muhimbi.com/licensing/what-is-the-difference-between-the-trial-and-free-subscription/).
 
 <br/>
 
-## How to get credentials
+## How to get started
 
-Create an account the first time the connector is used, or [pre-generate an account here](https://api.muhimbi.com/Auth/Pages/Signup.aspx). 
+Fill out the form [here](https://api.muhimbi.com/Auth/Pages/Register.aspx) to sign up for a 30-day trial and get immediate access to the Muhimbi PDF Converter for Power Automate connector. Watch [this getting started video](https://www.youtube.com/watch?v=GyEJGtXg1vg) to see the whole process.
+After completing the form, you’ll automatically be redirected to a page where you can activate your trial subscription.
 
-Please familiarise yourself with the [differences between the 'Free' and 'Trial' accounts](https://support.muhimbi.com/hc/en-us/articles/115015480568-What-is-the-difference-between-the-Trial-and-Free-Subscription). 
+Read the [Muhimbi Power Automate documentation](https://www.muhimbi.com/guides/pdf-converter/power-automate/) or refer to this list of [Power Automate and Logic Apps tutorials](https://www.muhimbi.com/knowledge-base/microsoft-flow-logic-apps-powerapps-tutorials-and-blog-posts/) for help. 
 
 
 <br/>
@@ -27,7 +29,7 @@ Please familiarise yourself with the [differences between the 'Free' and 'Trial'
 
 ## Known issues and limitations
 
-Please note that source documents [secured via IRM /RDM / RMS /AIP based solutions](https://support.muhimbi.com/hc/en-us/articles/228088867-Dealing-with-the-conversion-of-IRM-DRM-RMS-AIP-protected-documents) cannot be processed due to security restrictions.
+Please note that source documents secured via [IRM / RDM / RMS / AIP solutions](https://www.muhimbi.com/troubleshooting/dealing-with-the-conversion-of-irm-drm-rms-aip-protected-documents/) cannot be processed due to security restrictions.
 
-If you have any questions, or would like to setup a screen share, please [contact our friendly Support Desk](http://www.muhimbi-online.com/Contact).
+If you have any questions, please contact our [friendly Support Desk](https://www.muhimbi.com/Contact/).
 
