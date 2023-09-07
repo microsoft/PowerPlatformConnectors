@@ -16,21 +16,21 @@ Create an app in the tenant's Azure Active Directory with Edu permissions for ro
 
 Get the Delegated Token to communicate with School Data Sync.
 
-### CheckValidationResult
+### GetDataconnectorList
 
-Check to see if the validation result of the uploaded CSV files returned errors.
+Get the DataConnector list.
 
 ### CallGetuploadsession
 
 Get the session for the CSV file upload.
 
-### GetDataconnectorList
-
-Get the DataConnector list.
-
 ### CallValidate
 
 Call the operation to validate the uploaded CSV files.
+
+### CheckValidationResult
+
+Check to see if the validation result of the uploaded CSV files returned errors.
 
 ## Obtaining Credentials
 
