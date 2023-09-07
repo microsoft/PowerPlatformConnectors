@@ -1904,13 +1904,26 @@ public class Script : ScriptBase
         }
       }
 
-      uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
+      if (documentId.Contains("Combined"))
+      {
+        var body = ParseContentAsJObject(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
+        uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
 
+        if (body.GetValue("certificate").ToString() == "true")
+        {
+          query["certificate"] = "true";
+          uriBuilder.Query = query.ToString();
+        }
+      }
+      else
+      {
+        uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
+      }
+      
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
     this.Context.Request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(acceptHeaderValue));
-    
   }
 
   private async Task UpdateResponse(HttpResponseMessage response)
@@ -2584,7 +2597,10 @@ public class Script : ScriptBase
       if (("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
       ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
       {
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+        response.Content.Headers.ContentType = uriBuilder.Path.Contains("Archive") ? new MediaTypeHeaderValue("application/zip") :
+          new MediaTypeHeaderValue("application/pdf");
       }
       else
       {
