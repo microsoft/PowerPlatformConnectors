@@ -1,6 +1,6 @@
 
 ## Encodian for Power Automate
-[Encodian for Power Automate](https://www.encodian.com/products/encodian-for-microsoft-power-automate/) - Supercharge your Microsoft Power Automate and Azure Logic Apps solutions with our enhanced document management actions, providing PDF conversion, document merging, watermarks, OCR and advanced document and image clean-up capabilities..
+[Encodian for Power Automate](https://www.encodian.com/products/encodian-for-microsoft-power-automate/) - Supercharge your Microsoft Power Automate and Azure Logic Apps solutions with our Power Automate connector, which provides providing 100+ actions covering file format conversion, file creation, merging, watermarks, OCR, advanced document and image clean-up capabilities + lots more, our connector also provides 50+ utility actions which can simplfy the creation of your Power Automate solutions. 
 
 ## Setup
 - [Register](https://www.encodian.com/apikey/) for an Encodian Subscription
@@ -8,7 +8,10 @@
 - [Create](https://support.encodian.com/hc/en-gb/articles/360012267353-Create-an-Encodian-Connector-in-Flow) an Encodian Connector in Microsoft Power Automate
 
 ## Encodian Power Automate Action Documentation
-The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
+Discover all of our actions in the [Power Automate Action Documentation](https://support.encodian.com/hc/en-gb/sections/360002169954)
+
+## Encodian Power Automate Utility Action Documentation
+Discover all of our utility actions in the [Power Automate Utility Action Documentation](https://support.encodian.com/hc/en-gb/sections/9223785167517)
 
 ## Standard Actions
 
@@ -270,6 +273,27 @@ Process Tracked Changes within the Microsoft Word document provided - https://su
 ### Add Image Watermark to Image
 Add an image watermark to the image provided - https://support.encodian.com/hc/en-gb/articles/8967068141597
 
+### Add Rows to Excel 
+Add rows from the Excel file provided - https://support.encodian.com/hc/en-gb/articles/11551842583581
+
+### Get Rows from Excel
+Get rows from the Excel file provided - https://support.encodian.com/hc/en-gb/articles/9390845334172
+
+### Delete Rows from Excel
+Delete rows from the Excel file provided - https://support.encodian.com/hc/en-gb/articles/9936160309148
+
+### Extract Attachments from PDF
+Extract attachments from the PDF provided - https://support.encodian.com/hc/en-gb/articles/9896328763932
+
+### Flip Image
+Flip the image provided - https://support.encodian.com/hc/en-gb/articles/9798473339292
+
+### Rotate an Image
+Rotate an image by specified degrees - https://support.encodian.com/hc/en-gb/articles/10041551840796
+
+### Populate PowerPoint
+Populate a Microsoft PowerPoint file (PPTX) with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/9715390966300
+
 ## Utility Actions
 
 ### Utility - Clean Text
@@ -355,3 +379,9 @@ Split the text provided using the set delimiter - https://support.encodian.com/h
 
 ### Utility - Parse HTML Table
 Parse a table contained within the HTML provided to JSON - https://support.encodian.com/hc/en-gb/articles/11505625014685
+
+### Utility - Remove Text between Values
+Remove text from a string between the two values provided - https://support.encodian.com/hc/en-gb/articles/10003667972892
+
+### Utility - Array Reverse Items
+Reverse the items in the JSON array provided - https://support.encodian.com/hc/en-gb/articles/9993904693660
