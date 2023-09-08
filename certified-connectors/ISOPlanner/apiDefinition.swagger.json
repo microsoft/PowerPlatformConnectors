@@ -24,7 +24,7 @@
       "propertyValue": "Productivity"
     }
   ],
-  "host": "svc.isoplanner.app",
+  "host": "6gn1mbqn-44377.euw.devtunnels.ms",
   "basePath": "/",
   "schemes": [
     "https"
@@ -36,6 +36,92 @@
     "application/json"
   ],
   "paths": {
+    "/api/v1/events/{EventId}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Ok"
+          },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
+          },
+          "default": {
+            "$ref": "#/responses/default"
+          }
+        },
+        "summary": "Delete an event",
+        "operationId": "DeleteEvent",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/OrgUnitId"
+          },
+          {
+            "name": "EventId",
+            "in": "path",
+            "required": true,
+            "type": "number",
+            "description": "The Id of the event.",
+            "x-ms-summary": "Event Id",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "description": "Delete an event."
+      }
+    },
+    "/api/v1/tasks/{TaskId}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Ok"
+          },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
+          },
+          "default": {
+            "$ref": "#/responses/default"
+          }
+        },
+        "summary": "Delete a task",
+        "operationId": "DeleteTask",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/OrgUnitId"
+          },
+          {
+            "name": "TaskId",
+            "in": "path",
+            "required": true,
+            "type": "number",
+            "description": "The Id of the task.",
+            "x-ms-summary": "Task Id",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "description": "Delete a task."
+      }
+    },
     "/api/v1/kpis/data/context/types": {
       "get": {
         "responses": {
@@ -2018,7 +2104,7 @@
         "x-ms-visibility": "important"
       }
     },
-    "/api/v1/hooks/{WebhookId}": {
+    "/api/v1/hooks/orgunit/{OrgUnitId}/{WebhookId}": {
       "delete": {
         "responses": {
           "200": {
@@ -2044,6 +2130,14 @@
         "summary": "Delete as webhook",
         "operationId": "DeleteTrigger",
         "parameters": [
+          {
+            "name": "OrgUnitId",
+            "in": "path",
+            "description": "The Id of the Org Unit.",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single"
+          },
           {
             "name": "WebhookId",
             "in": "path",
@@ -2341,61 +2435,6 @@
         "TaskId"
       ]
     },
-    "eventForCreate": {
-      "type": "object",
-      "properties": {
-        "Name": {
-          "type": "string",
-          "description": "The name of the task.",
-          "title": "Name"
-        },
-        "Description": {
-          "type": "string",
-          "description": "The description of the task.",
-          "title": "Description"
-        },
-        "FormId": {
-          "type": "integer",
-          "description": "The form Id of the task.",
-          "title": "Form Id",
-          "x-ms-dynamic-values": {
-            "operationId": "FetchAvailableForms",
-            "value-path": "FormId",
-            "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
-          },
-          "x-ms-dynamic-list": {
-            "operationId": "FetchAvailableForms",
-            "itemValuePath": "FormId",
-            "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
-          }
-        },
-        "Status": {
-          "type": "string",
-          "description": "The status of the task.",
-          "title": "Status",
-          "enum": [
-            "Request",
-            "Accepted",
-            "InProgress",
-            "Completed",
-            "Rejected"
-          ]
-        }
-      },
-      "required": [
-        "Name"
-      ]
-    },
     "eventForUpdate": {
       "type": "object",
       "properties": {
@@ -2489,10 +2528,24 @@
           "description": "The description of the task.",
           "title": "Description"
         },
+        "Created": {
+          "type": "string",
+          "description": "Date and time when the task was created.",
+          "format": "date-time",
+          "title": "Task Created"
+        },
+        "Creator": {
+          "$ref": "#/definitions/creator"
+        },
         "AssigneeId": {
           "type": "string",
           "description": "The user Id to which the task is assigned.",
           "title": "Assignee Id"
+        },
+        "AssigneeName": {
+          "type": "string",
+          "description": "The user name to which the task is assigned.",
+          "title": "Assignee Name"
         },
         "AssigneeEmail": {
           "type": "string",
@@ -2578,6 +2631,9 @@
           "description": "Date and time when the template was created.",
           "format": "date-time",
           "title": "Event Created"
+        },
+        "Creator": {
+          "$ref": "#/definitions/creator"
         },
         "FormId": {
           "type": "integer",
@@ -3116,6 +3172,26 @@
           "type": "integer",
           "title": "Entity Id",
           "description": "The Id of the entity that matches the type."
+        }
+      }
+    },
+    "creator": {
+      "type": "object",
+      "properties": {
+        "UserId": {
+          "type": "string",
+          "title": "Creator Id",
+          "description": "The Id of the creator."
+        },
+        "Name": {
+          "type": "string",
+          "title": "Creator Name",
+          "description": "The name of the creator."
+        },
+        "Email": {
+          "type": "string",
+          "title": "Creator Email",
+          "description": "The email address of the creator."
         }
       }
     }
