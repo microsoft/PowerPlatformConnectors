@@ -1,5 +1,5 @@
 # ISOPlanner
-ISOPlanner is an easy to use and powerfull Compliance Management solution, integrated in Microsoft 365.
+ISOPlanner is an easy to use and powerfull Compliance Management solution, integrated with Microsoft 365.
 This integration allows you to build workflows that respond to events or execute various actions in ISOPlanner.
 
 ## Publisher: REDLAB
@@ -49,10 +49,16 @@ Creates a new event.
 Creates a new approval.
 
 ### Create or Update Library item
-Create or update an item in the library.
+Creates or updates an item in the library.
+
+### Delete an event
+Deletes an Event.
+
+### Delete a task
+Deletes a task.
 
 ### Delete a KPI data point
-Delete a KPI datapoint.
+Deletes a KPI datapoint.
 
 ### Delete a subtask of an event
 Deletes a subtask from an event.
@@ -67,10 +73,10 @@ Gets a KPI datapoint.
 Gets an item from the library.
 
 ### Get a subtask of an event based on Id
-Get a subtask from an event by specifying the subtask Id.
+Gets a subtask from an event by specifying the subtask Id.
 
 ### Get a subtask of an event based on Name
-Get a subtask from an event by specifying the subtask Name.
+Gets a subtask from an event by specifying the subtask Name.
 
 ### Update a KPI data point
 Updates a KPI data point.
