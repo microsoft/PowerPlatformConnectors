@@ -78,6 +78,10 @@
       "description": "Operations on Programs"
     },
     {
+      "name": "Project Comments",
+      "description": "Operations on Project Comments"
+    },
+    {
       "name": "Projects",
       "description": "Operations on Projects"
     },
@@ -1713,7 +1717,7 @@
           "Absences"
         ],
         "summary": "Replace Absences",
-        "description": "This endpoint lets you replace all absences of a resource. The result will be the same as if all existing absences are deleted and the passed absences are created again.",
+        "description": "This endpoint lets you replace all absences of a resource. The result will be the same as if all existing absences are deleted and the passed absences are created again. You can use the 'start' and 'end' query parameters to specify a time range for replacing existing absences. If you do not use these parameters, all absences will be replaced by the newly sent absences.",
         "operationId": "ReplaceAbsences",
         "produces": [
           "application/json"
@@ -2927,7 +2931,7 @@
           {
             "name": "filter",
             "in": "query",
-            "description": "Stringified JSON object with a subset of properties of the expected object. Selects all objects that exactly match the specified properties. Projects are searchable by projectKey, name, externalId, programId, portfolioId, status and custom fields. Lookup fields can be filtered by a list of String values (logically OR link). Filtering on custom Currency, Date or Decimal fields is currently not supported. The filter programId = null will yield all projects that are not associated with a program. Furthermore, the filter portfolioId = null will yield all projects. Note: take care to URL encode your parameter. { \"projectKey\": string, \"name\": string, \"externalId\": string, \"programId\": string, \"portfolioId\": string, \"status\": [string, string, ...], \"customFields\": { \"cust_string_field_1\": string, \"cust_lookup_field_2\": [string, string, ...], \"cust_boolean_field_3\": true, \"cust_integer_field_4\": integer, .... } }",
+            "description": "Stringified JSON object with a subset of properties of the expected object. Selects all objects that exactly match the specified properties. Projects are searchable by projectKey, name, externalId, programId, portfolioId, status and custom fields. Lookup fields can be filtered by a list of String values (logically OR link). Filtering on custom Currency, Date or Decimal fields is currently not supported. The filter programId = null will yield all projects that are not associated with a program. Furthermore, the filter portfolioId = null will yield all projects. Note: take care to URL encode your parameter. { \"projectKey\": string, \"name\": string, \"externalId\": string, \"programId\": string, \"portfolioId\": string, \"status\": [string, string, ...], \"customFields\": { \"cust_string_field_1\": string, \"cust_lookup_field_2\": [string, string, ...], \"cust_boolean_field_3\": true .... } }",
             "required": false,
             "type": "string",
             "x-example": "{\"status\": \"Critical\", \"customFields\": {\"cust_prj_number\": \"PR001\"}}",
@@ -3330,7 +3334,7 @@
           "Actual Time Worked"
         ],
         "summary": "Create or Update Actual Time Worked",
-        "description": "This endpoint lets you create new Actual Time Worked and update the existing Actual Time Worked of a project by an entity (resource or role). We will not update Actual Time Worked for booking dates that are not specified in the request for a given project and entity. With the mode property you can control if an existing Actual Time Worked value is replaced by the new value or if its value is added to the booking in the request.Please note that actual time worked data itself is independent from its scenario. It will be the same across all scenarios for a given project.",
+        "description": "This endpoint lets you create new actual time worked and update the existing actual time worked of a project by an entity (resource or role). We will not update actual time worked for booking dates that are not specified in the request for a given project and entity. With the mode property you can control if an existing actual time worked value is replaced by the new value or if its value is added to the booking in the request. Please note that actual time worked data itself is independent from its scenario. It will be the same across all scenarios for any given project. A request is limited to 5000 actual time worked values per project and resource/role.",
         "operationId": "CreateOrUpdateActualTimeWorked",
         "produces": [
           "application/json"
@@ -3860,6 +3864,154 @@
         }
       }
     },
+    "/v1/scenarios/{scenarioId}/projects/{projectId}/comments": {
+      "get": {
+        "tags": [
+          "Project Comments"
+        ],
+        "summary": "Get a List of Project Comments",
+        "description": "Returns a list of project comments.",
+        "operationId": "GetAllProjectComments",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "pageAfter",
+            "in": "query",
+            "description": "The cursor after which to retrieve results. The cursor can be taken from a preceding request.",
+            "required": false,
+            "type": "string",
+            "x-example": "opaque cursor",
+            "x-ms-summary": "PageAfter"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Can be between 1 and 100.",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "format": "int32",
+            "x-example": 200,
+            "x-ms-summary": "PageSize"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ProjectId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "scenarioId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ScenarioId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PaginatedResponseOfProjectCommentResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/v1/scenarios/{scenarioId}/projects/{projectId}/comments/{commentId}": {
+      "get": {
+        "tags": [
+          "Project Comments"
+        ],
+        "summary": "Get a Project Comment by ID",
+        "description": "Returns a project comment.",
+        "operationId": "GetProjectComment",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "CommentId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ProjectId",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "scenarioId",
+            "in": "path",
+            "description": "Internal Meisterplan identifier",
+            "required": true,
+            "type": "string",
+            "x-example": "UUID",
+            "x-ms-summary": "ScenarioId",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ProjectCommentResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
     "/v1/scenarios/{scenarioId}/projects/{projectId}/financialActuals": {
       "get": {
         "tags": [
@@ -3991,7 +4143,7 @@
           "Financial Actuals"
         ],
         "summary": "Replace Actual Financial Events",
-        "description": "Replaces actual financial events of a given project within a scenario.",
+        "description": "Replaces actual financial events of a given project within a scenario. A request is limited to 5000 actual financial events per project.",
         "operationId": "ReplaceFinancialActuals",
         "produces": [
           "application/json"
@@ -5277,7 +5429,7 @@
           {
             "name": "filter",
             "in": "query",
-            "description": "Stringified JSON object with a subset of properties of the expected object. Selects all objects that exactly match the specified properties. Note: take care to URL encode your parameter. { \"userName\": string }",
+            "description": "Stringified JSON object with a subset of properties of the expected object. Selects all objects that exactly match the specified properties. Note: take care to URL encode your parameter. { \"userName\": string, \"externalId\": string }",
             "required": false,
             "type": "string",
             "x-example": "{ \"userName\": \"myUserName\" }",
@@ -5882,6 +6034,17 @@
             },
             "cust_risk": {
               "value": "Medium"
+            },
+            "cust_direction": {
+              "display": "North, East",
+              "items": [
+                {
+                  "value": "North"
+                },
+                {
+                  "value": "East"
+                }
+              ]
             }
           },
           "additionalProperties": {
@@ -6656,6 +6819,11 @@
       },
       "title": "Cursor"
     },
+    "CustomFieldRequest": {
+      "type": "object",
+      "title": "CustomFieldRequest",
+      "description": "Missing lookup values created automatically\n\nIf you create or update a project with a custom lookup field, unknown lookup values will be automatically created."
+    },
     "CustomFieldResponse": {
       "type": "object",
       "properties": {
@@ -6665,14 +6833,6 @@
         }
       },
       "title": "CustomFieldResponse"
-    },
-    "CustomFieldValueType": {
-      "type": "object",
-      "properties": {
-        "value": {}
-      },
-      "title": "CustomFieldValueType",
-      "description": "Missing lookup values created automatically\n\nIf you create or update a project with a custom lookup field, unknown lookup values will be automatically created."
     },
     "DynamicSchemaPropertiesResponse": {
       "type": "object",
@@ -7705,6 +7865,22 @@
       },
       "title": "PaginatedResponseOfMilestoneDependencyResponse"
     },
+    "PaginatedResponseOfProjectCommentResponse": {
+      "type": "object",
+      "properties": {
+        "_pagination": {
+          "$ref": "#/definitions/Pagination"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProjectCommentResponse"
+          },
+          "x-ms-summary": "Items"
+        }
+      },
+      "title": "PaginatedResponseOfProjectCommentResponse"
+    },
     "PaginatedResponseOfResourceResponse": {
       "type": "object",
       "properties": {
@@ -8029,6 +8205,36 @@
       },
       "title": "ProgramUpdateRequest"
     },
+    "ProjectCommentResponse": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "$ref": "#/definitions/UserRefResponse"
+        },
+        "content": {
+          "type": "string",
+          "example": "Here is an example of a comment on a project.",
+          "x-ms-summary": "Content"
+        },
+        "createdDate": {
+          "type": "string",
+          "example": "2022-12-22T16:50:10Z",
+          "x-ms-summary": "Created Date"
+        },
+        "id": {
+          "type": "string",
+          "example": "UUID",
+          "x-ms-summary": "ID"
+        },
+        "mentions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserRefResponse"
+          }
+        }
+      },
+      "title": "ProjectCommentResponse"
+    },
     "ProjectCreateRequest": {
       "type": "object",
       "required": [
@@ -8072,7 +8278,7 @@
         "customFields": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/CustomFieldValueType"
+            "$ref": "#/definitions/CustomFieldRequest"
           },
           "x-ms-summary": "Custom Fields"
         },
@@ -8226,6 +8432,17 @@
             },
             "cust_risk": {
               "value": "Medium"
+            },
+            "cust_direction": {
+              "display": "North, East",
+              "items": [
+                {
+                  "value": "North"
+                },
+                {
+                  "value": "East"
+                }
+              ]
             }
           },
           "additionalProperties": {
@@ -8350,10 +8567,21 @@
             },
             "cust_risk": {
               "value": "Medium"
+            },
+            "cust_direction": {
+              "display": "North, East",
+              "items": [
+                {
+                  "value": "North"
+                },
+                {
+                  "value": "East"
+                }
+              ]
             }
           },
           "additionalProperties": {
-            "$ref": "#/definitions/CustomFieldValueType"
+            "$ref": "#/definitions/CustomFieldRequest"
           },
           "x-ms-summary": "Custom Fields"
         },
@@ -10233,6 +10461,11 @@
         }
       },
       "title": "WorkingHoursResponse"
+    },
+    "CustomFieldValueType": {
+      "properties": {
+        "value": {}
+      }
     }
   },
   "x-ms-capabilities": {
