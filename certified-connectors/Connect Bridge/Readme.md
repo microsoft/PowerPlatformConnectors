@@ -28,5 +28,11 @@ Not all SQL queries are currently supported by Connect Bridge. For example, Case
 To purchase a license, contact **office@connecting-software.com** to obtain a quote for your use case. 
 
 
+### Obtaining Credentials
+
+Download and Install Connect Bridge on any server or client machine that can communicate with the server where Dynamics NAV is installed. 
+
+The latest installation package can be downloaded at: [ConnectBridge.exe](https://share.connecting-software.com/download.php?id=202&token=mOXNc6YR9XaF3D9Q9W0QNOBoUEm7n4vz)
+
 ## Deployment Instructions
 To purchase a license, contact **office@connecting-software.com** to obtain a quote for your use case.
