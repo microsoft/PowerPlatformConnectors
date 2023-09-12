@@ -1865,7 +1865,6 @@ public class Script : ScriptBase
 
       acceptHeaderValue = "application/pdf";
       string documentId = null;
-      this.Context.Logger.LogInformation("********uriBuilder.Path" + HttpUtility.UrlDecode(uriBuilder.Path).Trim());
 
       foreach(var downloadOption in documentDownloadOptions)
       {
