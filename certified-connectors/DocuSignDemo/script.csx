@@ -316,35 +316,6 @@ public class Script : ScriptBase
       }
     }
 
-    if (operationId.Equals("StaticResponseForDocumentDownloadOptionsForCertificateSchema", StringComparison.OrdinalIgnoreCase))
-    {
-      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
-      var documentId = query.Get("documentId");
-
-      if (documentId.Contains("Combined"))
-      {
-        response["name"] = "dynamicSchema";
-        response["title"] = "dynamicSchema";
-        response["schema"] = new JObject
-        {
-          ["type"] = "object",
-          ["properties"] = new JObject()
-        };
-
-        response["schema"]["properties"]["certificate"] = new JObject
-        {
-          ["type"] = "boolean",
-          ["x-ms-summary"] = "* Certificate of completion",
-          ["description"] = "Certificate of completion",
-          ["x-ms-test-value"] = false,
-          ["enum"] = new JArray("false", "true")
-        };
-      }
-      else {
-        response["schema"] = null;
-      }
-    }
-
     if (operationId.Equals("StaticResponseForEmbeddedSenderSchema", StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
@@ -1894,6 +1865,7 @@ public class Script : ScriptBase
 
       acceptHeaderValue = "application/pdf";
       string documentId = null;
+      this.Context.Logger.LogInformation("********uriBuilder.Path" + HttpUtility.UrlDecode(uriBuilder.Path).Trim());
 
       foreach(var downloadOption in documentDownloadOptions)
       {
@@ -1904,22 +1876,13 @@ public class Script : ScriptBase
         }
       }
 
-      if (documentId.Contains("Combined"))
+      if (HttpUtility.UrlDecode(uriBuilder.Path).Trim().Contains("Combined with COC"))
       {
-        var body = ParseContentAsJObject(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
-        uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
-
-        if (body.GetValue("certificate").ToString() == "true")
-        {
-          query["certificate"] = "true";
-          uriBuilder.Query = query.ToString();
-        }
-      }
-      else
-      {
-        uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
+        query["certificate"] = "true";
+        uriBuilder.Query = query.ToString();
       }
       
+      uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
