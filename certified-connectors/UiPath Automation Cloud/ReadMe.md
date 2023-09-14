@@ -1,49 +1,52 @@
-## Author:
-UiPath - [UiPath Website](https://uipath.com)
+# Title
+UiPath is a leading provider of Robotic Process Automation technology. Its Orchestrator service provides a web-based platform for managing, deploying, scheduling, monitoring, and automating processes. It is designed to run business processes on multiple robots in a consistent and efficient manner, making it easier to scale automation projects of any size. With this connector users can run automated processes in UiPath Automation Cloud. 
 
-## Contact:
-UiPath Support Team - [UiPath Support Website](https://www.uipath.com/support)
+## Publisher: UiPath
+[UiPath Website](https://uipath.com)
 
-## Version: 
-2.0 - Update Release
+## Prerequisites
+If you do not already have a UiPath Automation Cloud account, you will need to register for one. [Sign up](https://www.uipath.com/developers/studio-download) for a trial. Once registered, an UiPath administrator can then invite you to their Automation Cloud project. 
 
-## Changes: 
-Changes to previous *UiPath Orchestrator version 1.0*:
-
-- Introduction of new global app registration feature for improved security. 
-    The app needs now  admin consent to be used.
-    Due to this change, existing workflows created with version 1 cannot be migrated.
-- Two new operations *Get Job* and *Get Queue Item*.
-    This will allow you to optimze your workflow execution.
-- Minor UI enhancements.
-
-## Description
-This is a Power Automate Connector for UiPath Cloud Orchestrator.
+Before connecting with Automation Cloud, your admin must register Power Automate integration in the *UiPath -> External applications -> App registrations* section.
 
 ## Supported Operations
-The connector supports the following operations:
-- [Run Job](https://docs.uipath.com/orchestrator/docs/about-jobs)
+The UiPath Orchestrator Connector supports operations that allow users to run jobs, get job statuses, add queue items to specific queues, and get queue item information. The connector enables the user to monitor the status of each of these operations using UiPath Orchestrator features, such as the "Do Until" and "Initialize and Set Variable" functions.
+
+### [Run Job](https://docs.uipath.com/orchestrator/docs/about-jobs)
 Run a job in UiPath Orchestrator.
-- [Get Job](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/job-states)
+
+### [Get Job](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/job-states)
 Utilize the "Get Job" function to acquire specifics related to a task initiated through the "Run Job" feature. You may assess for statuses such as "Successful, Running or Faulted". In workflows, you may pair the "Do Until" and "Initialize and Set Variable" features with the "Get Job" function to monitor the "State" property of the preceding "Run Job" phase.
-- [Add Queue Items](https://docs.uipath.com/orchestrator/docs/about-queues-and-transactions)
+
+### [Add Queue Items](https://docs.uipath.com/orchestrator/docs/about-queues-and-transactions)
 Add a queue item to a specific queue.
-- [Get Queue Item](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/queue-item-statuses)
+
+### [Get Queue Item](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/queue-item-statuses)
 Obtain information about an item in the queue created during a prior step. For instance, you can verify its status, such as "Successful" or "Failed". In your workflow, you can employ the "Get Queue Item" functionality, coupled with "Do Until" and "Initialize and Set Variable", to inspect the "Status" attribute of the preceding "Add Queue Items" phase.
 
-## Getting Help or Providing Feedback
-If you have any issues, requests for functionality, or have general feedback, please reach out to UiPath Support Team - [UiPath Support Website](https://www.uipath.com/support).
+## Obtaining Credentials
+To get credentials for Automation Cloud, you need to register for an account on the [Automation Cloud website](https://www.uipath.com/developers/studio-download), or you can reach out to your UiPath Automation Cloud administrator. After registering, you will be provided with a username and password that will enable you to log in and view the services available to you.
 
-## Pre-requisites
-Please make sure you have an automation cloud account. [Sign up](https://www.uipath.com/developers/studio-download) for a trial.
-You will need an UiPath administrator to register your Power Automate integration under *UiPath -> External applications -> App registrations*, before you can successfully connect.
+## Getting Started
+1. Add the UiPath Automation Cloud Connector as a step in your Power Automate Flow. 
+2. Enter your Organization ID and Tenant ID in the provided text fields (Ask your admin if you are not sure where to get this from or check FAQ below). 
+3. Log in using your credentials (Ensure that the Power Automate Connector has been registered by an admin in advance). 
+4. After successful authentication, you can choose folders, processes, and queues from the form. 
+5. You can now start using the Connector in your environment to create apps and flows!
 
-## Using the Connector
-1. Select UiPath Connector as a step in your Power Automate Flow.
-2. Enter your UiPath Cloud Organization ID and Tenant ID in the text fields.
-3. Sign into UiPath platform with your credentials (Make sure your app has been registered by an admin upfront).
-4. Once successfully authenticated you can select folders, processes and queues in the form.
-5. Begin using the connector in your environment to build apps and flows!
-
-## Limitations
+## Known Issues and Limitations
+This connector does not work with OnPremsies deplyoments.
 For security reasons you need to reauthenticate your connections after 90 days.
+
+## Frequently Asked Questions
+### Why is the UiPath Automation Cloud sign in process not working
+If you have working credetials, please make sure the Power Automate Connector has been registered for your UiPath Automation Cloud organization before you connect. Contact your admin for further help.
+### Does this connector work for OnPremise deployments
+No, this connector works only with UiPath Automation Cloud.
+### Why is process breaking after 90 days
+You will have to reauthenticate after 90 days for security reasons.
+### Where do I get Organization ID and Tenant ID from
+If you browse to your Orchestrator instance, you can check the URL https://cloud.uipath.com/{Organization ID}/{Tenant ID}.
+
+## Deployment Instructions
+This connector cannot be deployed as custom connector.
