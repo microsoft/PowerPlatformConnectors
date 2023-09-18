@@ -3,7 +3,7 @@
   "info": {
     "title": "Team Forms",
     "description": "Teams Forms brings digital forms into Microsoft Teams. The software will empower your teams to build and deliver forms from within the productivity tools that they already know and trust. Unlike many other forms solutions on the market, Team Forms talks directly with your Teams SharePoint so that data captured by forms remains in your ownership and never leaves your trusted office 365 environment.",
-    "version": "1.0",
+    "version": "1.1.0",
     "termsOfService": "https://teamforms.app/terms",
     "contact": {
       "name": "Team Forms",
@@ -176,7 +176,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/dynamicResponseSchema"
+              "type":"object"
             }
           }
         },
@@ -188,14 +188,11 @@
           {
             "name": "groupId",
             "in": "query",
-            "type": "string",
-            "description": "",
-            "required": true
+            "type": "string"
           },
           {
             "name": "formId",
             "in": "query",
-            "required": true,
             "type": "string"
           }
         ]
@@ -225,13 +222,35 @@
           { "$ref": "#/parameters/groupId" },
           { "$ref": "#/parameters/formId" },
           { "$ref": "#/parameters/environment" },
+          { "$ref": "#/parameters/triggers" },
           {
-            "name": "body",
+            "name": "requestBody",
             "in": "body",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
+                "additionalFormIds":{
+                  "type": "array",
+                  "description": "Additional forms to trigger your workflow.",
+                  "x-ms-summary": "Additional Forms",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "string",
+                    "description": "Additional form to trigger your workflow.",
+                    "x-ms-summary": " ",
+                    "x-ms-dynamic-values": {
+                      "operationId": "Forms",
+                      "value-path": "fields/tfFormId",
+                      "value-title": "fields/tfTitle",
+                      "parameters": {
+                        "groupId": {
+                          "parameter":"groupId"
+                        }
+                      }
+                    }
+                  }
+                },
                 "webHookUrl": {
                   "type": "string",
                   "x-ms-visibility": "internal",
@@ -278,7 +297,13 @@
           {
             "name": "webHookId",
             "in": "query",
-            "required": true,
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
             "type": "string"
           }
         ],
@@ -546,11 +571,6 @@
     },
     "dynamicResponseSchema": {
       "type": "object",
-      "properties": {
-        "schema": {
-          "type": "object"
-        }
-      },
       "x-ms-dynamic-schema": {
         "operationId": "ResponseSchema",
         "value-path": "schema",
@@ -640,6 +660,15 @@
       "required": true,
       "x-ms-summary": "Response",
       "x-ms-visibility": "important"
+    },
+    "triggers":{
+      "name": "triggers",
+      "in": "query",
+      "type":"string",
+      "description": "Types of events to trigger this workflow. Submitted and Resubmitted by default",
+      "enum": ["Submitted", "Resubmitted", "Submitted and Resubmitted"],
+      "x-ms-summary": "Triggers",
+      "x-ms-visibility": "advanced"
     },
     "environment": {
       "name": "environment",
