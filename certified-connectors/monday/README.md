@@ -32,6 +32,9 @@ In order to use this connector, you will need the following:
 - `Create a subitem` - Creates a subitem in monday.com for a specific parent item in the specified workspace and board. It allows the user to specify all the supported column values for the subitem. Returns the ID of the subitem and the ID of the subitem board.
 - `Create a workspace` - Creates an open workspace in monday.com. Returns the ID of the workspace.
 - `Create an update` - Creates an update for a specified item in monday.com. Returns the ID of the update.
+- `Update an item's column value` - Updates a single column value for an item given the item ID. Can also be used to update the item name. If the value is blank, the column value is cleared. Returns the ID of the updated item.
+- `Update multiple item column values` - Updates multiple item column values. If the column value is blank, that column is not updated. Returns the updated item ID.
+- `Move an item to a group` - Moves an item to another group within the same board. Returns the ID of the moved item.
 
 #### Data Retrieval
 - `Get tags` - Gets all the tags in your monday.com account. Returns the name of each tag.
@@ -45,16 +48,16 @@ You need an active monday.com account. You also need to have installed the Micro
 Once this has been done, sign in to the monday connector in Power Automate. This will authenticate your connection between monday.com and Power Automate to allow you to start using the connector.
 
 ### Getting Started
-1. In monday.com, search the marketplace for the Microsoft Power Automate app.
-2. Subscribe to one of the app's plans and install the app. 
-3. If desired, add the board views: Power Automate Help or Power Automate App Usage. The Power Automate Help view links to the documentation for the connector. The Power Automate App Usage view can be used to track the number of executions for each trigger/action for this connector to help avoid reaching your subscription limit.
-4. In Power Automate, search for the "monday" connector for an action or a trigger. 
-5. After adding the monday action/trigger, sign in to start using it.
+1. In monday.com, search the marketplace for the Microsoft Power Automate app and add the app to your account.
+2. If desired, add the Power Automate App Usage board view. The Power Automate App Usage view can be used to track the number of executions for each trigger/action for this connector to help avoid reaching your subscription limit.
+3. In Power Automate, search for the "monday" connector for an action or a trigger. 
+4. After adding the monday action/trigger, sign in and authorize the app to start using it.
 
 ## Known Issues and Limitations
 ### Supported Column Types
 Currently, only the following column types can be read or created in actions and triggers:
 - Boolean
+- Connect Boards (read only)
 - Date
 - Dropdown
 - Email
@@ -63,6 +66,7 @@ Currently, only the following column types can be read or created in actions and
 - Link
 - Location
 - Long Text
+- Mirror (read only)
 - Numeric
 - People
 - Phone
@@ -80,14 +84,12 @@ The following column types are not supported:
 - Auto number
 - Button
 - Color Picker
-- Connect Boards
 - Country
 - Creation Log
 - Dependency
 - Files (assets)
 - Formula
 - Last Updated At
-- Mirror
 - Person (deprecated)
 - Progress Tracking
 - Team (deprecated)
