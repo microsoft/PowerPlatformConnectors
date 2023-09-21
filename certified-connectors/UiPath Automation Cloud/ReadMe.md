@@ -1,28 +1,27 @@
-# Title
-UiPath is a leading provider of Robotic Process Automation technology. Its Orchestrator service provides a web-based platform for managing, deploying, scheduling, monitoring, and automating processes. It is designed to run business processes on multiple robots in a consistent and efficient manner, making it easier to scale automation projects of any size. With this connector users can run automated processes in UiPath Automation Cloud. 
+# UiPath Automation Cloud
+This connector allows you to connect and run automated workflows in UiPath Automation Cloud. UiPath is a leading provider of Robotic Process Automation technology. Its Orchestrator service provides a web-based platform for managing, deploying, scheduling, monitoring, and automating processes. It is designed to run business processes on multiple robots in a consistent and efficient manner, making it easier to scale automation projects of any size.
 
-## Publisher: UiPath
+## Publisher: UiPath Inc.
 [UiPath Website](https://uipath.com)
 
 ## Prerequisites
-If you do not already have a UiPath Automation Cloud account, you will need to register for one. [Sign up](https://www.uipath.com/developers/studio-download) for a trial. Once registered, an UiPath administrator can then invite you to their Automation Cloud project. 
-
-Before connecting with Automation Cloud, your admin must register Power Automate integration in the *UiPath -> External applications -> App registrations* section.
+- If you do not already have a UiPath Automation Cloud account, you will need to register for one. [Sign up](https://www.uipath.com/developers/studio-download) for a trial. Once registered, an UiPath administrator can then invite you to their Automation Cloud project. 
+- Before connecting with Automation Cloud, your admin must register Power Automate integration in the *UiPath -> External applications -> App registrations* section.
 
 ## Supported Operations
 The UiPath Orchestrator Connector supports operations that allow users to run jobs, get job statuses, add queue items to specific queues, and get queue item information. The connector enables the user to monitor the status of each of these operations using UiPath Orchestrator features, such as the "Do Until" and "Initialize and Set Variable" functions.
 
-### [Run Job](https://docs.uipath.com/orchestrator/docs/about-jobs)
-Run a job in UiPath Orchestrator.
+### Run Job
+[Run Jobs](https://docs.uipath.com/orchestrator/docs/about-jobs) in UiPath Orchestrator.
 
-### [Get Job](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/job-states)
-Utilize the "Get Job" function to acquire specifics related to a task initiated through the "Run Job" feature. You may assess for statuses such as "Successful, Running or Faulted". In workflows, you may pair the "Do Until" and "Initialize and Set Variable" features with the "Get Job" function to monitor the "State" property of the preceding "Run Job" phase.
+### Get Job
+Utilize the [Get Job](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/job-states) function to acquire specifics related to a task initiated through the "Run Job" feature. You may assess for statuses such as "Successful, Running or Faulted". In workflows, you may pair the "Do Until" and "Initialize and Set Variable" features with the "Get Job" function to monitor the "State" property of the preceding "Run Job" phase.
 
-### [Add Queue Items](https://docs.uipath.com/orchestrator/docs/about-queues-and-transactions)
-Add a queue item to a specific queue.
+### Add Queue Items
+[Add a Queue Item](https://docs.uipath.com/orchestrator/docs/about-queues-and-transactions) to a specific queue.
 
-### [Get Queue Item](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/queue-item-statuses)
-Obtain information about an item in the queue created during a prior step. For instance, you can verify its status, such as "Successful" or "Failed". In your workflow, you can employ the "Get Queue Item" functionality, coupled with "Do Until" and "Initialize and Set Variable", to inspect the "Status" attribute of the preceding "Add Queue Items" phase.
+### Get Queue Item
+Obtain information about a [Queue Item](https://docs.uipath.com/orchestrator/automation-cloud/latest/user-guide/queue-item-statuses) created during a prior step. For instance, you can verify its status, such as "Successful" or "Failed". In your workflow, you can employ the "Get Queue Item" functionality, coupled with "Do Until" and "Initialize and Set Variable", to inspect the "Status" attribute of the preceding "Add Queue Items" phase.
 
 ## Obtaining Credentials
 To get credentials for Automation Cloud, you need to register for an account on the [Automation Cloud website](https://www.uipath.com/developers/studio-download), or you can reach out to your UiPath Automation Cloud administrator. After registering, you will be provided with a username and password that will enable you to log in and view the services available to you.
@@ -49,4 +48,4 @@ You will have to reauthenticate after 90 days for security reasons.
 If you browse to your Orchestrator instance, you can check the URL https://cloud.uipath.com/{Organization ID}/{Tenant ID}.
 
 ## Deployment Instructions
-This connector cannot be deployed as custom connector.
+There is no manual deployment process required as both the PowerAutomate and UiPath platforms handle all aspects of deployment, app registration and privilege management.
