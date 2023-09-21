@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.3.0",
+    "version": "1.3.4",
     "title": "Dokobit Portal",
     "description": "Use Dokobit portal with all the features that it has but make it automated so that you don't have to waste your time on the administrative job. Put together an automated document signing process puzzle from only the parts you need: signing, sharing, downloading or deleting documents, removing and replacing signers, getting details about signers and signature information.",
     "contact": {
@@ -26,7 +26,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create a PDF or ASIC file for signing.",
+        "description": "Create a PDF, ASIC or ADOC file for signing.",
         "operationId": "Portal-CreateSigning",
         "parameters": [
           {
@@ -35,6 +35,7 @@
             "required": true,
             "schema": {
               "type": "object",
+              "required": ["name", "type", "files"],
               "properties": {
                 "name": {
                   "type": "string",
@@ -49,7 +50,8 @@
                   "x-ms-visibility": "important",
                   "enum": [
                     "pdf",
-                    "asic"
+                    "asic",
+                    "adoc"
                   ]
                 },
                 "postback_url": {
@@ -60,14 +62,14 @@
                 },
                 "deadline": {
                   "type": "string",
-                  "description": "Example: 2019-11-25T13:15:30Z",
+                  "description": "Signing deadline date with specified timezone fragment. Example: 2018-11-05T13:15:30Z",
                   "x-ms-summary title": "Deadline",
                   "x-ms-visibility": "important",
                   "format": "date-time"
                 },
                 "hard_deadline": {
                   "type": "boolean",
-                  "description": "If set to true participants won’t be able to sign or approve this document after set `deadline`",
+                  "description": "If set to `true` participants won’t be able to sign or approve this document after set `deadline`. Default: `false`",
                   "x-ms-summary title": "Hard Deadline",
                   "enum": [
                     false,
@@ -76,8 +78,18 @@
                 },
                 "require_qualified_signatures": {
                   "type": "boolean",
-                  "description": "Allow to sign only with qualified signatures",
+                  "description": "Allow to sign only with qualified signatures. Default: `false`",
                   "x-ms-summary title": "Require Qualified Signatures",
+                  "x-ms-visibility": "important",
+                  "enum": [
+                    false,
+                    true
+                  ]
+                },
+                "allow_video_identification": {
+                  "type": "boolean",
+                  "description": "Allow to sign using video-based identification. Default: `false`",
+                  "x-ms-summary title": "Allow Video Identification",
                   "x-ms-visibility": "important",
                   "enum": [
                     false,
@@ -86,7 +98,7 @@
                 },
                 "annotation_position": {
                   "type": "string",
-                  "description": "You can choose the position of signature annotations on a PDF document. Default: first_top",
+                  "description": "You can choose the position of signature annotations on a PDF document. Default: `first_top`",
                   "x-ms-summary title": "Annotation Position",
                   "x-ms-visibility": "important",
                   "enum": [
@@ -99,7 +111,7 @@
                 },
                 "annotation_personal_code": {
                   "type": "boolean",
-                  "description": "If set to true personal code will be visible in annotation. Only applicable for pdf type signing",
+                  "description": "If set to `true` personal code will be visible in annotation. Only applicable for pdf type signing. Default: `false`",
                   "x-ms-summary title": "Annotation Personal Code",
                   "enum": [
                     false,
@@ -113,7 +125,7 @@
                 },
                 "require_account": {
                   "type": "boolean",
-                  "description": "Require user to have a Dokobit account before signing",
+                  "description": "Require user to have a Dokobit account before signing. Default: `true`",
                   "x-ms-summary title": "Require Account",
                   "x-ms-visibility": "important",
                   "enum": [
@@ -125,6 +137,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "required": ["name", "content"],
                     "properties": {
                       "name": {
                         "type": "string",
@@ -172,13 +185,14 @@
                       },
                       "role": {
                         "type": "string",
-                        "description": "Participant's role",
+                        "description": "Participant's role. Default: `signer`",
                         "x-ms-summary title": "Role",
                         "x-ms-visibility": "important",
                         "enum": [
                           "approver",
                           "signer",
-                          "viewer"
+                          "viewer",
+                          "receiver"
                         ]
                       },
                       "company": {
@@ -343,7 +357,7 @@
       "get": {
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "object",
               "properties": {
@@ -370,6 +384,16 @@
                         "type": "string",
                         "description": "Document Number",
                         "x-ms-summary title": "Document Number"
+                      },
+                      "client_code": {
+                        "type": "string",
+                        "description": "Client Code",
+                        "x-ms-summary title": "Client Code"
+                      },
+                      "is_in_trash_bin": {
+                        "type": "boolean",
+                        "description": "is_in_trash_bin",
+                        "x-ms-summary title": "is_in_trash_bin"
                       },
                       "last_signature_date": {
                         "type": "string",
@@ -440,23 +464,20 @@
           {
             "name": "filter",
             "in": "query",
-            "required": false,
             "type": "string",
-            "description": "Filter document status. E.g completed, pending",
+            "description": "Filter documents by status. Possible values: `completed`, `pending` or `declined`",
             "x-ms-summary": "Filter"
           },
           {
             "in": "query",
             "name": "date_from",
             "type": "string",
-            "required": false,
             "description": "Filter signings which were created on or after this date (Example: 2022-01-01)",
             "x-ms-summary": "Date From"
           },
           {
             "in": "query",
             "name": "date_to",
-            "required": false,
             "type": "string",
             "description": "Filter signings which were created on or before this date (Example: 2022-01-31)",
             "x-ms-summary": "Date To"
@@ -488,7 +509,7 @@
               "properties": {
                 "status": {
                   "type": "string",
-                  "description": "Status",
+                  "description": "Signing status",
                   "x-ms-summary title": "Status"
                 },
                 "name": {
@@ -515,7 +536,7 @@
                   "properties": {
                     "url": {
                       "type": "string",
-                      "description": "url",
+                      "description": "Signed file url",
                       "x-ms-summary title": "URL"
                     }
                   }
@@ -562,12 +583,27 @@
                       },
                       "status": {
                         "type": "string",
-                        "description": "Status",
+                        "description": "Participant's status",
                         "x-ms-summary title": "Status"
                       }
                     }
                   },
                   "description": "Participant information"
+                },
+                "template": {
+                  "type": "object",
+                  "properties": {
+                    "name":{
+                      "type": "string",
+                      "description": "Template name",
+                      "x-ms-summary": "Template Name"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "Tempalte token",
+                      "x-ms-summary": "Tempalte Token"
+                    }
+                  }
                 }
               }
             }
@@ -628,8 +664,10 @@
       "get": {
         "responses": {
           "200": {
-            "description": "default",
-            "schema": {}
+            "description": "200",
+            "schema": {
+              "type": "object"
+            }
           },
           "400": {
             "description": "400",
@@ -704,7 +742,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "object",
               "properties": {
@@ -814,7 +852,7 @@
         "x-ms-visibility": "important",
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "object",
               "properties": {
@@ -851,29 +889,6 @@
                       "country_code": {
                         "type": "string",
                         "description": "Participant's country"
-                      },
-                      "role": {
-                        "type": "string",
-                        "description": "Participant's role",
-                        "title": "",
-                        "x-ms-visibility": "important",
-                        "enum": [
-                          "approver",
-                          "signer",
-                          "viewer"
-                        ]
-                      },
-                      "company": {
-                        "type": "string",
-                        "description": "Participant's company"
-                      },
-                      "position": {
-                        "type": "string",
-                        "description": "Participant's position"
-                      },
-                      "phone": {
-                        "type": "string",
-                        "description": "Participant's phone"
                       }
                     }
                   },
@@ -981,13 +996,14 @@
                       },
                       "role": {
                         "type": "string",
-                        "description": "Participant's role",
+                        "description": "Participant's role. Default: `signer`",
                         "x-ms-summary title": "Role",
                         "x-ms-visibility": "important",
                         "enum": [
                           "approver",
                           "signer",
-                          "viewer"
+                          "viewer",
+                          "receiver"
                         ]
                       },
                       "company": {
@@ -1033,7 +1049,7 @@
         "x-ms-visibility": "important",
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "object",
               "properties": {
@@ -1115,7 +1131,7 @@
         ],
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "object",
               "properties": {
@@ -1225,7 +1241,7 @@
         "x-ms-visibility": "important",
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "object",
               "properties": {
@@ -1308,7 +1324,7 @@
         "x-ms-visibility": "important",
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "object",
               "properties": {
@@ -1383,6 +1399,147 @@
         ]
       }
     },
+    "/signing/{token}/update.json": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Status",
+                  "x-ms-summary title": "Status"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary title": "Status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message",
+                  "x-ms-summary title": "Message"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "message",
+                        "x-ms-summary title": "Message"
+                      },
+                      "error_code": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "error_code",
+                        "x-ms-summary title": "Error Code"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "field"
+                      }
+                    }
+                  },
+                  "description": "errors"
+                },
+                "error_code": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error_code",
+                  "x-ms-summary title": "Error Code"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Portal - Update Signing",
+        "description": "Allows to update attributes of an existing document signing.",
+        "operationId": "Portal-Update",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "description": "Signing token",
+            "x-ms-summary": "token"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deadline": {
+                  "type": "string",
+                  "description": "Signing deadline date with specified timezone fragment. Example: 2018-11-05T13:15:30Z",
+                  "x-ms-summary title": "Deadline",
+                  "x-ms-visibility": "important",
+                  "format": "date-time"
+                },
+                "hard_deadline": {
+                  "type": "boolean",
+                  "description": "If set to `true` participants won’t be able to sign or approve this document after set `deadline`. Default: `false`",
+                  "x-ms-summary title": "Hard Deadline",
+                  "enum": [
+                    false,
+                    true
+                  ]
+                },
+                "require_qualified_signatures": {
+                  "type": "boolean",
+                  "description": "Allow to sign only with qualified signatures. Default: `false`",
+                  "x-ms-summary title": "Require Qualified Signatures",
+                  "x-ms-visibility": "important",
+                  "enum": [
+                    false,
+                    true
+                  ]
+                },
+                "allow_video_identification": {
+                  "type": "boolean",
+                  "description": "Allow to sign using video-based identification. Default: `false`",
+                  "x-ms-summary title": "Allow Video Identification",
+                  "x-ms-visibility": "important",
+                  "enum": [
+                    false,
+                    true
+                  ]
+                },
+                "require_account": {
+                  "type": "boolean",
+                  "description": "Require user to have a Dokobit account before signing. Default: `true`",
+                  "x-ms-summary title": "Require Account",
+                  "x-ms-visibility": "important",
+                  "enum": [
+                    false,
+                    true
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
     "/category/list.json": {
       "get": {
         "summary": "Portal - Get Categories",
@@ -1391,7 +1548,7 @@
         "x-ms-visibility": "internal",
         "responses": {
           "200": {
-            "description": "default",
+            "description": "200",
             "schema": {
               "type": "array",
               "items": {
@@ -1460,6 +1617,409 @@
             }
           }
         }
+      }
+    },
+    "/validation/upload.json": {
+      "post": {
+        "summary": "Portal - Validation",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dokobit is an eIDAS-certified service provider for qualified e-signature and e-seal validations. Use this action to upload a signed file for validation. Supported file types: `.asice` - application/vnd.etsi.asic-e+zip|`.asics` - application/vnd.etsi.asic-s+zip|`.sce` - application/vnd.etsi.asic-e+zip|`.bdoc` - application/vnd.etsi.asic-e+zip|`.edoc` - application/vnd.etsi.asic-e+zip|`.pdf` - application/pdf|`.p7s` - application/pkcs7-signature|`.xml` - application/xml",
+        "operationId": "Portal-Validation",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["file"],
+              "properties": {
+                "file": {
+                  "type": "object",
+                  "required": ["name", "content"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "File name.",
+                      "x-ms-summary title": "Name",
+                      "x-ms-visibility": "important"
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "Base64 encoded file content."
+                      }
+                    }
+                  }
+                }
+              },
+            "x-ms-visibility": "important"
+            }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Upload status"
+                },
+                "token": {
+                  "type": "string",
+                  "description": "Validation token",
+                  "title": "token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "message"
+                      },
+                      "error_code": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "error_code"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "field"
+                      }
+                    }
+                  },
+                  "description": "errors"
+                },
+                "error_code": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error_code"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/validation/{token}/download/detailed-report-pdf": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "400",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary title": "Status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message",
+                  "x-ms-summary title": "Message"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "message",
+                        "x-ms-summary title": "Message"
+                      },
+                      "error_code": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "error_code",
+                        "x-ms-summary title": "Error Code"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "field"
+                      }
+                    }
+                  },
+                  "description": "errors"
+                },
+                "error_code": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error_code",
+                  "x-ms-summary title": "Error Code"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Portal - Validation - Detailed PDF Report",
+        "description": "Download detailed validation report in PDF.",
+        "operationId": "Portal-Validation-DetailedPDFReport",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Validation file token received from Portal-Validation action",
+            "x-ms-summary": "token"
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/validation/{token}/download/diagnostic-data-xml": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "400",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary title": "Status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message",
+                  "x-ms-summary title": "Message"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "message",
+                        "x-ms-summary title": "Message"
+                      },
+                      "error_code": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "error_code",
+                        "x-ms-summary title": "Error Code"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "field"
+                      }
+                    }
+                  },
+                  "description": "errors"
+                },
+                "error_code": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error_code",
+                  "x-ms-summary title": "Error Code"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Portal - Validation - XML Diagnostic Data",
+        "description": "Download diagnostic data in XML.",
+        "operationId": "Portal-Validation-XMLDiagnosticData",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Validation file token received from Portal-Validation action",
+            "x-ms-summary": "token"
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/validation/{token}/download/report-pdf": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "400",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary title": "Status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message",
+                  "x-ms-summary title": "Message"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "message",
+                        "x-ms-summary title": "Message"
+                      },
+                      "error_code": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "error_code",
+                        "x-ms-summary title": "Error Code"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "field"
+                      }
+                    }
+                  },
+                  "description": "errors"
+                },
+                "error_code": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error_code",
+                  "x-ms-summary title": "Error Code"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Portal - Validation - PDF Report",
+        "description": "Download validation report in PDF.",
+        "operationId": "Portal-Validation-PDFReport",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Validation file token received from Portal-Validation action",
+            "x-ms-summary": "token"
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/validation/{token}/download/report-xml": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "400",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary title": "Status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "message",
+                  "x-ms-summary title": "Message"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "message",
+                        "x-ms-summary title": "Message"
+                      },
+                      "error_code": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "error_code",
+                        "x-ms-summary title": "Error Code"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "field"
+                      }
+                    }
+                  },
+                  "description": "errors"
+                },
+                "error_code": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error_code",
+                  "x-ms-summary title": "Error Code"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Portal - Validation - XML Report",
+        "description": "Download validation report in XML.",
+        "operationId": "Portal-Validation-XMLReport",
+        "parameters": [
+          {
+            "x-ms-url-encoding": "single",
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Validation file token received from Portal-Validation action",
+            "x-ms-summary": "token"
+          }
+        ],
+        "x-ms-visibility": "important"
       }
     }
   },
