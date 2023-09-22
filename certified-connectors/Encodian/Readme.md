@@ -1,6 +1,6 @@
 
 ## Encodian for Power Automate
-[Encodian for Power Automate](https://www.encodian.com/products/encodian-for-microsoft-power-automate/) - Supercharge your Microsoft Power Automate and Azure Logic Apps solutions with our enhanced document management actions, providing PDF conversion, document merging, watermarks, OCR and advanced document and image clean-up capabilities..
+[Encodian for Power Automate](https://www.encodian.com/products/encodian-for-microsoft-power-automate/) - Supercharge your Microsoft Power Automate and Azure Logic Apps solutions with our Power Automate connector, which provides providing 100+ actions covering file format conversion, file creation, merging, watermarks, OCR, advanced document and image clean-up capabilities + lots more, our connector also provides 50+ utility actions which can simplfy the creation of your Power Automate solutions. 
 
 ## Setup
 - [Register](https://www.encodian.com/apikey/) for an Encodian Subscription
@@ -8,7 +8,10 @@
 - [Create](https://support.encodian.com/hc/en-gb/articles/360012267353-Create-an-Encodian-Connector-in-Flow) an Encodian Connector in Microsoft Power Automate
 
 ## Encodian Power Automate Action Documentation
-The [Encodian Support Portal](https://support.encodian.com/hc/en-gb/sections/360002169954-Power-Automate-Action-Documentation) provides detailed documentation and sample solutions.
+Discover all of our actions in the [Power Automate Action Documentation](https://support.encodian.com/hc/en-gb/sections/360002169954)
+
+## Encodian Power Automate Utility Action Documentation
+Discover all of our utility actions in the [Power Automate Utility Action Documentation](https://support.encodian.com/hc/en-gb/sections/9223785167517)
 
 ## Standard Actions
 
@@ -258,6 +261,39 @@ Convert the JSON data to provided to a Microsoft Excel or CSV document - https:/
 ### Convert PDF to PNG
 Converts every page contained within the PDF document provided to a single PNG image - https://support.encodian.com/hc/en-gb/articles/10086003836701-Convert-PDF-to-PNG
 
+### Convert PDF to JPG
+Converts every page contained within the PDF document provided to a single JPG image - https://support.encodian.com/hc/en-gb/articles/11096881397277
+
+### Get Email Attachments
+Extract attachments from the email provided and return an array of files - https://support.encodian.com/hc/en-gb/articles/10531671561629
+
+### Manage Tracked Changes
+Process Tracked Changes within the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/10074318228765
+
+### Add Image Watermark to Image
+Add an image watermark to the image provided - https://support.encodian.com/hc/en-gb/articles/8967068141597
+
+### Add Rows to Excel 
+Add rows from the Excel file provided - https://support.encodian.com/hc/en-gb/articles/11551842583581
+
+### Get Rows from Excel
+Get rows from the Excel file provided - https://support.encodian.com/hc/en-gb/articles/9390845334172
+
+### Delete Rows from Excel
+Delete rows from the Excel file provided - https://support.encodian.com/hc/en-gb/articles/9936160309148
+
+### Extract Attachments from PDF
+Extract attachments from the PDF provided - https://support.encodian.com/hc/en-gb/articles/9896328763932
+
+### Flip Image
+Flip the image provided - https://support.encodian.com/hc/en-gb/articles/9798473339292
+
+### Rotate an Image
+Rotate an image by specified degrees - https://support.encodian.com/hc/en-gb/articles/10041551840796
+
+### Populate PowerPoint
+Populate a Microsoft PowerPoint file (PPTX) with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/9715390966300
+
 ## Utility Actions
 
 ### Utility - Clean Text
@@ -283,3 +319,69 @@ Checks whether the URL provided is available - https://support.encodian.com/hc/e
 
 ### Utility - Validate URL Syntax
 Validates whether the string value provided is a valid URL - https://support.encodian.com/hc/en-gb/articles/9601816944413
+
+### Utility - Generate Password
+Create a password conforming to the specified configuration - https://support.encodian.com/hc/en-gb/articles/10720449877789
+
+### Utility - Get File Extension
+Create a password conforming to the specified configuration - https://support.encodian.com/hc/en-gb/articles/10720449877789
+
+### Utility - Format Text Case
+Set the case of the text (string) provided - https://support.encodian.com/hc/en-gb/articles/11009856518557
+
+### Utility - Extract URL's from Text
+Extract URL's from the text value provided - https://support.encodian.com/hc/en-gb/articles/11056297407261
+
+### Utility - Generate Random Number
+Generate a random number conforming to the configuration supplied - https://support.encodian.com/hc/en-gb/articles/10641115110045
+
+### Utility - Format Date
+Format the date value to the format configuration selected - https://support.encodian.com/hc/en-gb/articles/11053469626525
+
+### Utility - Create HMAC
+Create a Hash-based message authentication code (HMAC) using a secret key - https://support.encodian.com/hc/en-gb/articles/360012782058-Create-HMAC
+
+### Utility - Create Hash Code
+Create a hashcode for the string provided - https://support.encodian.com/hc/en-gb/articles/360013996077-Create-Hash-Code
+
+### Utility - Search Text (Regex)
+Search the text provided to find matches using the regex provided - https://support.encodian.com/hc/en-gb/articles/360006764638-Search-Text-Regex
+
+### Utility - Get Date and Time Difference
+Calculate the difference between two dates and times - https://support.encodian.com/hc/en-gb/articles/11753070117661
+
+### Utility - Escape HTML
+Escape the HTML value provided - https://support.encodian.com/hc/en-gb/articles/11749992433437
+
+### Utility - Unescape HTML
+Unescape the HTML value provided - https://support.encodian.com/hc/en-gb/articles/11751174595357
+
+### Utility - Replace values with Text
+Replace a value within the text provided - https://support.encodian.com/hc/en-gb/articles/11774858455709
+
+### Utility - Replace Value with Regex
+Replace a value within the text provided using a regex query - https://support.encodian.com/hc/en-gb/articles/11743215056413
+
+### Utility - Trim Text
+Trim the text value provided aligined to the set configuration - https://support.encodian.com/hc/en-gb/articles/11769860640413
+
+### Utility - Remove Diacritics
+Remove diacritic marks from the text provided - https://support.encodian.com/hc/en-gb/articles/11774131045661
+
+### Utility - Compare Text
+Compare the text values provided - https://support.encodian.com/hc/en-gb/articles/11782390540957
+
+### Utility - Concatenate Text
+Concatenate text values provided - https://support.encodian.com/hc/en-gb/articles/11873576674077
+
+### Utility - Split Text
+Split the text provided using the set delimiter - https://support.encodian.com/hc/en-gb/articles/11846521179805
+
+### Utility - Parse HTML Table
+Parse a table contained within the HTML provided to JSON - https://support.encodian.com/hc/en-gb/articles/11505625014685
+
+### Utility - Remove Text between Values
+Remove text from a string between the two values provided - https://support.encodian.com/hc/en-gb/articles/10003667972892
+
+### Utility - Array Reverse Items
+Reverse the items in the JSON array provided - https://support.encodian.com/hc/en-gb/articles/9993904693660
