@@ -3,8 +3,6 @@ Smart Communications is a leading cloud-based platform for enterprise customer c
 
 The SmartCOMM On Demand Connector for Power Apps includes a pre-built integration for producing Customer Communications. In addition, the connector provides RESTful webservice calls to SmartCOMM for on-demand use cases.
 
-For this connector the region is fixed to ap10-sb (ap-southeast-2 - Sydney), so only ap10-sb.smartcommunications.cloud can be connected.
-
 ## Publisher: Smart Communications
 
 ## Features
@@ -70,7 +68,7 @@ The property value (A list of optional configuration properties). E.g. `true`
 ## Frequently Asked Questions
 
 ### Where Can I find further information about the `GenerateDocument` service?
-This can be found here - https://ap10-sb.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
+This can be found here - https://{region}.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
 
 ### Is data encrypted using this connector?
 Yes, if HTTPS is configured the connection will be encrypted end to end.
@@ -82,7 +80,7 @@ Contact your SmartCOMM user Admin.
 OAuth 2.0
 
 ### How can I get the OAuth2 Client ID and secret?
-Contact your SmartCOMM admin or refer to https://ap10-sb.smartcommunications.cloud/one/help/oneplatform/en/index.htm#EditClient.htm
+Contact your SmartCOMM admin or refer to https://{region}.smartcommunications.cloud/one/help/oneplatform/en/index.htm#EditClient.htm
 
 ### How can I get the authorization code?
 Refer to section 'How to get credentials' above for full details.
@@ -94,20 +92,20 @@ Contact support@smartcommunications.com for all support enquiries
 https://www.smartcommunications.com
 
 ### How can I get the batchConfigResId?
-Contact your SmartCOMM SME or refer to https://ap10-sb.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm. 
+Contact your SmartCOMM SME or refer to https://{region}.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm. 
 
 ### How can I get the projectId?
-Contact your SmartCOMM SME or refer to https://ap10-sb.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm.
+Contact your SmartCOMM SME or refer to https://{region}.smartcommunications.cloud/one/help/oneplatform/en/index.htm#ResourceProperties.htm.
 
 ### How soon will I get the response?
 The response time can vary based on your network speed, payload size and resource complexity, etc. SmartCOMM recommends to run a performance baseline to collect the maximum response time and average response time
 
 ### How can I get the output from the response?
-The successful response includes the base64 encoded byte[] output. To view the output, actions have to be taken to decode the byte[] output and save the copy in a format as specified in the "mimeType". For more details please refer to https://ap10-sb.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
+The successful response includes the base64 encoded byte[] output. To view the output, actions have to be taken to decode the byte[] output and save the copy in a format as specified in the "mimeType". For more details please refer to https://{region}.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
 
 ## Deployment instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
 
 ## Further information
-* Further information regarding the functionality of the SmartCOMM API (specifically `GenerateDocument`) can be found here - https://ap10-sb.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
+* Further information regarding the functionality of the SmartCOMM API (specifically `GenerateDocument`) can be found here - https://{region}.smartcommunications.cloud/one/apiViewer/#!api=doc-gen&operation=generateDocumentNonMultiPart&resource=Job
 * Ensure HTTPS is configured for end to end encryption
