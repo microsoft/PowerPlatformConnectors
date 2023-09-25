@@ -4,7 +4,9 @@ The primary purpose of this connector is to provide easy and efficient access to
 ## Publisher: Kelcho Tech​
 
 ## Prerequisites
-The tool is free to use no authentication or licenses is required.​
+You will need the following to use the World Academia connector:
+* A Microsoft Power Apps or Power Automate plan with custom connector feature
+* The tool is free to use no authentication or licenses is required.​
 
 ## Supported Operations
 The connector will enable users to retrieve data such as lists of universities, university details, continents, countries, and more
@@ -48,5 +50,8 @@ The is no authentication needed to access this connector​
 Optional. How to get started with your connector.
 
 ## Known Issues and Limitations
-There is no any known issues, this connector currently works fine.
+The connector may not cover all universities in the world yet but we are working day and night to achieve this goal.​
+
+## Deployment Instructions
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps
 
