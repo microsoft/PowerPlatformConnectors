@@ -19,96 +19,39 @@ The environment requirements are:
 
 # Supported operations
 
-## Retrieve consent page
-Retrieve a given consent page information
-
-## Search consent pages
-Search consent pages, by name for example
-
-## Create contact
-Create a contact
-
-## Retrieve contact
-Retrieve a given contact information
-
-## Delete contact</mark> : Delete a contact
-
-## Update contact</mark>
-Update a contact information
-
-## Search contacts
-Search contacts, by last name for example
-
-## Retrieve the metadata mapping
-Retrieve the metadata mapping of your tenant
-
-## Create signature profile
- Create a signature profile
-
-## Retrieve signature profile
-Retrieve a given signature profile information
-
-## Update signature profile
-Update a signature profile information
-
-## Search signature profiles
- Search signature profiles, by name for example
-
-## Retrieve me
-Retrieve the connected user information (the user id is needed to create a workflow)
-
-## Create workflow 
-Create a workflow
-
-## Retrieve workflow
-Retrieve a given workflow information
-
-## Delete workflow
-Delete a workflow
-
-## Update workflow
-Update a workflow information
-
-## Search workflows
-Search workflows, by name for example
-
-## Retrieve consent page url
-Retrieve the url of the consent page for a given signer
-
-## Download evidences file
-Download the evidences file for a workflow
-
-## Create part
-Create a document part
-
-## Create document
- Create a document from parts
-
-## Retrieve document
-Retrieve a document information
-## Delete document
-Delete a document
-
-## Update document
-Update a document information
-
-## Search documents
-Search documents, by file name for example
-
-## Download a workflow documents
-Download the documents of a given workflow
-
-## Create metadata layout
-Create a metadata layout
-
-## Retrieve metadata layout
-Rertieve a given metadata layout information
-
-## Update metadata layout
-Update a given metadata layout information
-
-## Search metadata layouts
-Search metadata layouts, by name for example
+|Operation             |Description |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+|Retrieve consent page |[Retrieve a given consent page information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-consent-page) |
+|Search consent pages |[Search consent pages, by name for example](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#search-consent-pages) |
+|Create contact |[Create a contact](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#create-contact) |
+|Retrieve contact | [Retrieve a given contact information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-contact) |
+|Delete contact |[Delete a contact](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#delete-contact) |
+|Update contact |[Update a contact information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#update-contact) |
+|Search contacts |[Search contacts, by last name for example](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#search-contacts) |
+|Retrieve the metadata mapping |[Retrieve the metadata mapping of your tenant](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-metadata-mapping) |
+|Create signature profile |[Create a signature profile](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#create-signature-profile) |
+|Retrieve signature profile |[Retrieve a given signature profile information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-signature-profile) |
+|Update signature profile |[Update a signature profile information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#update-signature-profile) |
+|Search signature profiles |[Search signature profiles, by name for example](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#search-signature-profiles) |
+|Retrieve me |[Retrieve the connected user information (the user id is needed to create a workflow)](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-me) |
+|Create workflow  |[Create a workflow](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#create-workflow) |
+|Retrieve workflow |[Retrieve a given workflow information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-workflow) |
+|Delete workflow |[Delete a workflow](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#delete-workflow) |
+|Update workflow|[Update a workflow information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#update-workflow) |
+|Search workflows |[Search workflows, by name for example](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#search-workflows) |
+|Retrieve consent page url |[Retrieve the url of the consent page for a given signer](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#create-workflow-invite) |
+|Download evidence files |[Download the evidence files for a workflow](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#download-evidence-files) |
+|Create part |[Create a document part](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#create-parts) |
+|Create document | [Create a document from parts](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#create-document) |
+|Retrieve document |[Retrieve a document information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-document) |
+|Delete document |[Delete a document](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#delete-document) |
+|Update document |[Update a document information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#update-document) |
+|Search documents |[Search documents, by file name for example](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#search-documents) |
+|Download a workflow documents |[Download the documents of a given workflow](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#download-workflow-documents)
+|Create metadata layout |[Create a metadata layout](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#create-layout) |
+|Retrieve metadata layout |[Rertieve a given metadata layout information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#retrieve-layout) |
+|Update metadata layout |[Update a given metadata layout information](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#update-layout) |
+|Search metadata layouts |[Search metadata layouts, by name for example](https://sgs-demo-test01.sunnystamp.com/wm-docs/api.html#search-layouts) |
 
 # Obtaining credentials
 
