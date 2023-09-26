@@ -1,39 +1,35 @@
 # AutoPylot Connect
+AutoPylot Connect allows AutoPylot users to send and receive text messages using an AutoPylot phone number.
 
-The AutoPylot API allows you to send and receive text messages from your application using AutoPylot phone numbers.
+## Publisher: AutoPylot Technologies Corp
 
-## Getting Started
-
+## Prerequisites
 To use this connector, you will need:
-
-- An AutoPylot account - Sign up at [https://autopylot.com](https://autopylot.com)  
-- Your AutoPylot User authentication credentials
-
-## Authentication 
-
-The AutoPylot API uses OAuth 2.0 authentication. Use your AutoPylot User authentication credentials to authenticate your requests from our connector.
+* A Microsoft Power Apps or Power Automate plan with custom connector feature
+* An AutoPylot account, credentials and AutoPylot phone number - Sign up at [https://www.autopylot.com/](https://www.autopylot.com/)
 
 ## Supported Operations
-
 The AutoPylot connector supports the following operations:
-
 ### Send Text Message
-
-Sends a text message from your AutoPylot phone number to a recipient. 
-
-**Parameters:**
-
-- `to` - Recipient's phone number
-- `body` - Message text  
-
-**Returns:** A JSON response with details of the sent message.
-
+Sends a text message from your AutoPylot phone number to a recipient.
 ### Receive Text Message (Trigger)
+Triggers when an inbound text is received on any of your AutoPylot phone numbers.
 
-Triggers when an inbound text is received on any of your AutoPylot phone numbers. 
+## Obtaining Credentials
+Go to [https://portal.autopylot.com/signup](https://portal.autopylot.com/signup) to Sign Up and setup your credentials.
+AutoPylot Connect uses OAuth 2.0 authentication. Use your AutoPylot User authentication credentials to authenticate with this connector.
 
-**Returns:** A JSON payload containing details of the received text message.
+## Getting Started
+To get started with AutoPylot Connect, first obtain an account at [https://portal.autopylot.com/signup](https://portal.autopylot.com/signup), user credentials, and AutoPylot phone number through the AutoPylot portal. Once you have this information, you can begin sending and receiving texts.
 
-## Additional Information
+# Known Issues and Limitations
+For issues with AutoPylot Connect please try this link first: [https://www.autopylot.com/contact-us/](https://www.autopylot.com/contact-us/).
 
-- [AutoPylot portal](https://portal.autopylot.com)
+## Frequently Asked Questions
+### How do I get AutoPylot Connect support
+If you need support for AutoPylot Connect, please visit our support page at [https://www.autopylot.com/contact-us/](https://www.autopylot.com/contact-us/).
+### Is there any documentation about AutoPylot
+Our Resource Center contains useful information on how the product works and how to use it [https://www.autopylot.com/contact-us/](https://www.autopylot.com/contact-us/).
+
+## Deployment Instructions
+After downloading the Connector and successfully authenticating with AutoPylot, the connector will be activated for the workflow.
