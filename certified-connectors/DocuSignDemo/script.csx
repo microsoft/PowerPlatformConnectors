@@ -1871,6 +1871,35 @@ public class Script : ScriptBase
       acceptHeaderValue = "application/pdf";
     }
 
+    if ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var newPath = uriBuilder.Path;
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      string[] documentDownloadOptions = { "Combined", "Archive", "Certificate", "Portfolio" };
+
+      acceptHeaderValue = "application/pdf";
+      string documentId = null;
+
+      foreach(var downloadOption in documentDownloadOptions)
+      {
+        if (newPath.Contains(downloadOption))
+        {
+          documentId = downloadOption;
+          break;
+        }
+      }
+
+      if (HttpUtility.UrlDecode(uriBuilder.Path).Trim().Contains("Combined with COC"))
+      {
+        query["certificate"] = "true";
+        uriBuilder.Query = query.ToString();
+      }
+      
+      uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     this.Context.Request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(acceptHeaderValue));
   }
 
@@ -2542,9 +2571,13 @@ public class Script : ScriptBase
 
     if (response.Content?.Headers?.ContentType != null)
     {
-      if ("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+      if (("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
+      ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
       {
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+        response.Content.Headers.ContentType = uriBuilder.Path.Contains("Archive") ? new MediaTypeHeaderValue("application/zip") :
+          new MediaTypeHeaderValue("application/pdf");
       }
       else
       {
