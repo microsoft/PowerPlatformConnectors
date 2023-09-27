@@ -1,5 +1,5 @@
 # SearchAPI - Google Search
-Google Search API scrapes SERP for real-time results. Scrape organic results, ads, related searches, inline questions and more.
+Google Search service scrapes SERP for real-time results. Scrape organic results, ads, related searches, inline questions and more.
 
 ## Publisher: Troy Taylor, Hitachi Solutions
 
