@@ -17,9 +17,6 @@ To obtain an API key, simply register with your email through [https://www.namea
 ### Name Parser
 Name parsing is the process of splitting a person's name into its individual components, such as first name, middle name, last name, suffix, salutation, and title.
 
-### Person genderizer
-Attempts to detect the person's gender based on the inputs, especially the person's name.
-
 ### Disposable email address detector
 Detects disposable email addresses "DEA", also known as trash email addresses such as "foo@mailinator.com".
 
