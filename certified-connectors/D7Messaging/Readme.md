@@ -13,18 +13,24 @@ You will need the following to proceed:
 - [Sign In](https://app.d7networks.com/signin) with your email and password and navigate to [API Tokens](https://app.d7networks.com/api-tokens)
 
 Click on "Create Token" and provide a token "Name". 
-On the next window, click on Generate Token and copy the Token
+
+On the next window, click on "Generate Token" and copy the Token
+
 You're now ready to start using this integration.
 
 ## Supported Operations
 The connector supports the following operations:
 * `D7-Balance`: Get D7API account balance
-	No parameters required. 
+
+	No parameters are required. 
 * `SMS-SendMessage`: Send SMS through D7 SMS Gateway.
+
 	Required parameters: content, originator and recipients
-* `NumberLookup`: D7's Number Lookup service to determine the current status of the number..
+* `NumberLookup`: D7's Number Lookup service to determine the current status of the number.
+
 	Required parameters: recipient
 * `OTP-SendOTP`: Generate and dispatch an OTP (One-Time Password) to a mobile number.
+
 	Required parameters: originator, recipients and content
 * `OTP-ResendOTP`: Request a new OTP (One-Time Password) to be sent to a mobile number.
 	Required parameters: otp_id
