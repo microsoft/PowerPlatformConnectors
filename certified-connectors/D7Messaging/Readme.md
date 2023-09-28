@@ -23,21 +23,27 @@ The connector supports the following operations:
 * `D7-Balance`: Get D7API account balance
 
 	No parameters are required. 
+
 * `SMS-SendMessage`: Send SMS through D7 SMS Gateway.
 
 	Required parameters: content, originator, and recipients
+
 * `NumberLookup`: D7's Number Lookup service to determine the current status of the number.
 
 	Required parameters: recipient
+
 * `OTP-SendOTP`: Generate and dispatch an OTP (One-Time Password) to a mobile number.
 
 	Required parameters: originator, recipients, and content
+
 * `OTP-ResendOTP`: Request a new OTP (One-Time Password) to be sent to a mobile number.
 
 	Required parameters: otp_id
+
 * `OTP-VerifyOTP`: Verify the OTP (One-Time Password) sent to your mobile number.
 
 	Required parameters: otp_id, otp_code
+
 * `Viber-SendMessage`: Send a message to a Viber number.
 
 	Required parameters: originator, label, recipients, and content
