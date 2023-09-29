@@ -3,7 +3,7 @@
   "info": {
     "title": "IA-Connect Web Browser",
     "description": "IA-Connect is a Robotic Process Automation (RPA) platform which adds RPA functionality from the Cloud to on-premises virtual machines or over Citrix or Microsoft Remote Desktop (RDS) connections. This is the module for Web Browser automation.",
-    "version": "9.1",
+    "version": "9.4",
     "contact": {
       "name": "Ultima Labs",
       "url": "https://www.ultima.com/ultima-labs",
@@ -187,13 +187,37 @@
                 "ChromeDriverDownloadParentFolder": {
                   "type": "string",
                   "title": "ChromeDriver download parent folder",
-                  "description": "The parent folder where all ChromeDrivers are stored. Each ChromeDriver is stored in a versioned sub-folder to match the major version of Google Chrome. This folder structure will be checked for a suitable ChromeDriver and, if one is not located, one will be downloaded from the Internet into this folder."
+                  "description": "The parent folder where all ChromeDrivers are stored locally on disk. Each ChromeDriver is stored in a versioned sub-folder to match the major version of Google Chrome. This folder structure will be checked for a suitable ChromeDriver and, if one is not located, one will be downloaded from the Internet into this folder."
+                },
+                "AttemptToLocateChromeDriverURLViaXMLIndex": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Attempt to locate URL via XML index",
+                  "description": "Set to true to attempt to use an XML index to locate the relevant ChromeDriver for download. The 'ChromeDriver root webpage URL' (ChromeDriverRootWebPageURL) will be used to determine which URL to use. Since Google Chrome version 115, Google have stopped updating the XML index and use a JSON index instead."
                 },
                 "ChromeDriverRootWebPageURL": {
                   "type": "string",
                   "default": "https://chromedriver.storage.googleapis.com/",
                   "title": "ChromeDriver root webpage URL",
-                  "description": "The root web page URL beneath which all of the downloaded ChromeDrivers are available for download. This defaults to the correct root webpage for Google's ChromeDriver website but you can change this if an alternative location exists."
+                  "description": "The root web page URL which contains an XML index that can be used to locate the relevant ChromeDriver for download. This defaults to the correct XML index URL on Google's ChromeDriver website, but you can change this if an alternative location is required (for example if Google change the address, or you decide to host it yourself). Since Google Chrome version 115, Google have stopped updating the XML index and use a JSON index instead, making this option redundant unless you have an old version of Google Chrome (or use an alternative XML index)."
+                },
+                "AttemptToLocateChromeDriverURLViaJSONIndex": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Attempt to locate URL via JSON index",
+                  "description": "Set to true to attempt to use an JSON index to locate the relevant ChromeDriver for download. The 'ChromeDriver JSON index webpage URL' (ChromeDriverJSONIndexWebPageURL) will be used to determine which URL to use. JSON indexes are used for Google Chrome versions 115 and later."
+                },
+                "ChromeDriverJSONIndexWebPageURL": {
+                  "type": "string",
+                  "default": "https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json",
+                  "title": "ChromeDriver JSON index webpage URL",
+                  "description": "The URL of a web page JSON index that can be used to locate the relevant ChromeDriver for download. This defaults to the correct JSON index URL on Google's Chrome-for-testing website, but you can change this if an alternative location is required (for example if Google change the address, or you decide to host it yourself). A JSON index is only used for Google Chrome versions 115 onwards."
+                },
+                "Prefer64bitChromeDriver": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Prefer 64-bit ChromeDriver",
+                  "description": "Set to true to attempt to download a 64-bit ChromeDriver if one exists. A 32-bit ChromeDriver will be downloaded if a 64-bit one is not available. Note that a 32-bit ChromeDriver works with both 32-bit and 64-bit versions of the Google Chrome Browser."
                 },
                 "Workflow": {
                   "type": "string",
@@ -205,7 +229,6 @@
               },
               "required": [
                 "ChromeDriverDownloadParentFolder",
-                "ChromeDriverRootWebPageURL",
                 "Workflow"
               ]
             }
@@ -381,7 +404,7 @@
           "application/json"
         ],
         "summary": "Open Google Chrome browser",
-        "description": "Opens the Google Chrome web browser, allowing it to to be automated using the actions in this IA-Connect module. If the web browser was opened manually, by another application or using the 'Run Process' action then it can only be automated using UIA actions and not by the actions in this IA-Connect module.",
+        "description": "Opens the Google Chrome web browser, allowing it to be automated using the actions in this IA-Connect module. If the web browser was opened manually, by another application or using the 'Run Process' action then it can only be automated using UIA actions and not by the actions in this IA-Connect module.",
         "parameters": [
           {
             "in": "body",
@@ -405,7 +428,7 @@
                 "UserDataDir": {
                   "type": "string",
                   "title": "User data directory",
-                  "description": "An optional path to the Google Chrome user data directory if it has been changed from the default (normally this is '%LOCALAPPDATA%\\Google\\Chrome\\User Data').",
+                  "description": "An optional path to a persistent Google Chrome user data directory to use for your Browser session. This input is blank by default and causes the IA-Connect Agent to use a new temporary browser profile for each browser session, ensuring that each session is clean. If you enter a path to a user data directory, the browser will use this as a persistent profile which is maintained between browser sessions. For example: %LOCALAPPDATA%\\Google\\Chrome\\AutomationProfile.",
                   "x-ms-visibility": "advanced"
                 },
                 "PrintToDefaultPrinter": {
@@ -454,7 +477,7 @@
                 "AdditionalArguments": {
                   "type": "string",
                   "title": "Additional arguments",
-                  "description": "An optional space separated list of additional arguments to pass to the browser. A full list of command line switches can be found on the Chromium website.",
+                  "description": "An optional space separated list of additional command-line options / arguments or user profile preferences to send to the browser. Command-line options are in the format --Option while user profile preferences are in the format UserProfilePreference:Preference=Value. Place a space between each separate option and do not use spaces within an option unless required. Put double quotes around an option if it must have spaces in it. For example: The following enables incognito mode (via an argument) and turns off auto saving of passwords (via a user profile preference): --Incognito UserProfilePreference:credentials_enable_service=false.",
                   "x-ms-visibility": "advanced"
                 },
                 "Workflow": {
@@ -578,7 +601,7 @@
           "application/json"
         ],
         "summary": "Open Internet Explorer browser",
-        "description": "Opens the Internet Explorer web browser, allowing it to to be automated using the actions in this IA-Connect module. If the web browser was opened manually, by another application or using the 'Run Process' action then it can only be automated using UIA actions and not by the actions in this IA-Connect module.",
+        "description": "Opens the Internet Explorer web browser, allowing it to be automated using the actions in this IA-Connect module. If the web browser was opened manually, by another application or using the 'Run Process' action then it can only be automated using UIA actions and not by the actions in this IA-Connect module.",
         "parameters": [
           {
             "in": "body",
@@ -638,6 +661,12 @@
                   "default": true,
                   "title": "Disable IE first run customise",
                   "description": "Should the first-run customisation dialogs be suppressed? These dialogs can typically interrupt an automated process.",
+                  "x-ms-visibility": "advanced"
+                },
+                "AdditionalArguments": {
+                  "type": "string",
+                  "title": "Additional arguments",
+                  "description": "Additional command-line arguments to pass to Internet Explorer on launch. For example: -private will open the Browser in Private (Incognito) mode. Use this option at your own risk since the use of custom arguments is not extensively tested or supported.",
                   "x-ms-visibility": "advanced"
                 },
                 "Workflow": {
@@ -887,7 +916,6 @@
               },
               "required": [
                 "ChromiumEdgeDriverDownloadParentFolder",
-                "ChromiumEdgeDriverRootWebPageURL",
                 "Workflow"
               ]
             }
@@ -1063,7 +1091,7 @@
           "application/json"
         ],
         "summary": "Open Chromium Edge browser",
-        "description": "Opens the Chromium Edge web browser, allowing it to to be automated using the actions in this IA-Connect module. If the web browser was opened manually, by another application or using the 'Run Process' action then it can only be automated using UIA actions and not by the actions in this IA-Connect module.",
+        "description": "Opens the Chromium Edge web browser, allowing it to be automated using the actions in this IA-Connect module. If the web browser was opened manually, by another application or using the 'Run Process' action then it can only be automated using UIA actions and not by the actions in this IA-Connect module.",
         "parameters": [
           {
             "in": "body",
@@ -1081,7 +1109,7 @@
                 "UserDataDir": {
                   "type": "string",
                   "title": "User data directory",
-                  "description": "An optional path to the Chromium Edge user data directory if it has been changed from the default (normally this is '%LOCALAPPDATA%\\Microsoft\\Edge\\User Data').",
+                  "description": "An optional path to a persistent Chromium Edge user data directory to use for your Browser session. This input is blank by default and causes the IA-Connect Agent to use a new temporary browser profile for each browser session, ensuring that each session is clean. If you enter a path to a user data directory, the browser will use this as a persistent profile which is maintained between browser sessions. For example: %LOCALAPPDATA%\\Microsoft\\Edge\\AutomationProfile.",
                   "x-ms-visibility": "advanced"
                 },
                 "KillExistingChromiumEdgeDriver": {
@@ -1143,7 +1171,7 @@
                 "AdditionalArguments": {
                   "type": "string",
                   "title": "Additional arguments",
-                  "description": "An optional space separated list of additional arguments to pass to the browser. A full list of command line switches can be found on the Chromium website.",
+                  "description": "An optional space separated list of additional command-line options / arguments or user profile preferences to send to the browser. Command-line options are in the format --Option while user profile preferences are in the format UserProfilePreference:Preference=Value. Place a space between each separate option and do not use spaces within an option unless required. Put double quotes around an option if it must have spaces in it. For example: The following enables In-Private mode (via an argument) and turns off auto saving of passwords (via a user profile preference): --InPrivate UserProfilePreference:credentials_enable_service=false.",
                   "x-ms-visibility": "advanced"
                 },
                 "Workflow": {
@@ -1789,13 +1817,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -1837,7 +1865,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -1870,7 +1898,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -1959,13 +1987,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -2007,7 +2035,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -2040,7 +2068,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -2135,13 +2163,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -2183,7 +2211,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -2216,7 +2244,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -2279,7 +2307,7 @@
                 "ElementTagName": {
                   "type": "string",
                   "title": "Element tag name",
-                  "description": "The HTML tag name of the matching elementd."
+                  "description": "The HTML tag name of the matching element."
                 }
               }
             }
@@ -2311,13 +2339,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -2359,7 +2387,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -2392,7 +2420,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -2576,7 +2604,7 @@
           "application/json"
         ],
         "summary": "Get multiple web element properties",
-        "description": "Gets the properties of all HTML elements that matches search criteria.",
+        "description": "Returns the properties of all HTML elements that matches search criteria. The search is relative to the root of the document (Parent Element handle = 0) or a previously located element (Parent Element handle > 0).",
         "parameters": [
           {
             "in": "body",
@@ -2590,7 +2618,7 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -2625,7 +2653,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -2658,7 +2686,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -2856,13 +2884,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -2904,7 +2932,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -2937,7 +2965,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -3034,7 +3062,7 @@
           "application/json"
         ],
         "summary": "Get web element children properties",
-        "description": "Gets the properties of the child elements of the matching HTML element.",
+        "description": "Returns the properties of the immediate child elements (Search sub tree = false) or all descendants (Search sub tree = true) of the main document (Parent Element handle = 0) or a previously located element (Parent Element handle > 0) which match the search criteria.",
         "parameters": [
           {
             "in": "body",
@@ -3048,7 +3076,7 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -3068,7 +3096,7 @@
                 "SearchElementXPath": {
                   "type": "string",
                   "title": "Search Element XPath",
-                  "description": "An optional XPath query to identify the element. Wildcards are supported."
+                  "description": "Unused. This action uses XPath internally to perform a child or descendant search, so this input is ignored."
                 },
                 "SearchElementClassName": {
                   "type": "string",
@@ -3083,7 +3111,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -3116,7 +3144,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -3320,13 +3348,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -3368,7 +3396,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -3401,7 +3429,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -3455,7 +3483,6 @@
                 }
               },
               "required": [
-                "TextToInput",
                 "Workflow"
               ]
             }
@@ -3550,13 +3577,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -3598,7 +3625,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -3631,7 +3658,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -3717,13 +3744,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -3765,7 +3792,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -3798,7 +3825,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -3878,13 +3905,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -3926,7 +3953,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -3959,7 +3986,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -4039,13 +4066,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -4087,7 +4114,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -4120,7 +4147,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -4254,13 +4281,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -4302,7 +4329,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -4335,7 +4362,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -4443,13 +4470,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -4491,7 +4518,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -4524,7 +4551,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -4621,13 +4648,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -4669,7 +4696,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -4702,7 +4729,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -4799,13 +4826,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -4847,7 +4874,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -4880,7 +4907,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -4960,28 +4987,28 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
                   "title": "Search Element name",
-                  "description": "The optional HTML name of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementID": {
                   "type": "string",
                   "title": "Search Element ID",
-                  "description": "The optional HTML ID of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML ID of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementTagName": {
                   "type": "string",
                   "title": "Search Element tag name",
-                  "description": "The optional HTML tag name of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML tag name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementXPath": {
                   "type": "string",
@@ -4991,7 +5018,7 @@
                 "SearchElementClassName": {
                   "type": "string",
                   "title": "Search Element class name",
-                  "description": "The optional HTML class name of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML class name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementCSSSelector": {
                   "type": "string",
@@ -5008,17 +5035,17 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
                   "title": "Search Element match text",
-                  "description": "The optional HTML text value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML text value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementType": {
                   "type": "string",
                   "title": "Search Element type",
-                  "description": "The optional HTML type of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML type of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMinimumWidth": {
                   "type": "number",
@@ -5041,7 +5068,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -5122,18 +5149,18 @@
                   "type": "number",
                   "format": "double",
                   "title": "Number of rows",
-                  "description": "The number of rows in the HTML table"
+                  "description": "The number of rows in the HTML table."
                 },
                 "NumberOfColumns": {
                   "type": "number",
                   "format": "double",
                   "title": "Number of columns",
-                  "description": "The number of columns in the HTML table"
+                  "description": "The number of columns in the HTML table."
                 },
                 "TableContentsJSON": {
                   "type": "string",
                   "title": "Table contents JSON",
-                  "description": "The content of the HTML table, in JSON format"
+                  "description": "The content of the HTML table, in JSON format."
                 }
               }
             }
@@ -5165,13 +5192,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -5213,7 +5240,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -5246,7 +5273,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -5383,13 +5410,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -5431,7 +5458,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -5464,7 +5491,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -5584,13 +5611,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -5632,7 +5659,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -5665,7 +5692,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -5883,13 +5910,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -5931,7 +5958,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -5964,7 +5991,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -6094,13 +6121,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -6142,7 +6169,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -6175,7 +6202,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -6255,13 +6282,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -6303,7 +6330,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -6336,7 +6363,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -6416,13 +6443,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -6464,7 +6491,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -6497,7 +6524,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -6583,13 +6610,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -6631,7 +6658,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -6664,7 +6691,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -6750,13 +6777,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -6798,7 +6825,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -6831,7 +6858,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -6911,13 +6938,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -6959,7 +6986,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -6992,7 +7019,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -7087,13 +7114,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -7135,7 +7162,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -7168,7 +7195,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -7268,13 +7295,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -7316,7 +7343,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -7349,7 +7376,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -7773,13 +7800,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -7821,7 +7848,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -7854,7 +7881,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -8130,13 +8157,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -8178,7 +8205,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -8211,7 +8238,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -8300,13 +8327,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -8348,7 +8375,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -8381,7 +8408,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -8461,13 +8488,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -8509,7 +8536,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -8542,7 +8569,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -8592,7 +8619,7 @@
                   "type": "boolean",
                   "default": false,
                   "title": "Password contains stored password",
-                  "description": "Set to true if the password contains (or is entirely) an IA-Connect stored password identifier, in the format {IAConnectPassword:StoredPasswordIdentifier}. This stored password could have been generated by the 'Generate password' action, for example."
+                  "description": "Set to true if the password contains (or is entirely) an IA-Connect stored password identifier, in the format {IAConnectPassword:StoredPasswordIdentifier} or an IA-Connect Orchestrator generic credential, in the format {OrchestratorCredential:FriendlyName}. This stored password could have been generated by the 'Generate password' action, for example."
                 },
                 "Workflow": {
                   "type": "string",
@@ -8641,13 +8668,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -8689,7 +8716,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -8722,7 +8749,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -8952,13 +8979,13 @@
                   "type": "number",
                   "format": "double",
                   "title": "Parent Element handle",
-                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value is provided then the whole page DOM structure is searched."
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
                 },
                 "SearchElementHandle": {
                   "type": "number",
                   "format": "double",
                   "title": "Search Element handle",
-                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a value is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required."
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
                 },
                 "SearchElementName": {
                   "type": "string",
@@ -9000,7 +9027,7 @@
                 "SearchElementMatchValue": {
                   "type": "string",
                   "title": "Search Element match value",
-                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection.Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
                 },
                 "SearchElementMatchText": {
                   "type": "string",
@@ -9033,7 +9060,7 @@
                   "format": "double",
                   "default": -99999,
                   "title": "Search Element bounding box left",
-                  "description": "An optional HTML document coordinate value for the left side of the bounding box in whichthe search element should be found. By default, this is set to -99999 to return all elements.",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
                   "x-ms-visibility": "advanced"
                 },
                 "SearchElementBoundingBoxRight": {
@@ -9088,6 +9115,683 @@
           }
         },
         "operationId": "BrowserSelectAllOnElement"
+      }
+    },
+    "/BrowserControl/WaitForElementToExist": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Wait for web element to exist",
+        "description": "Waits for the specified web element to exist.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "BrowserWaitForElementToExist",
+            "description": "Inputs for IA-Connect BrowserWaitForElementToExist action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ParentElementHandle": {
+                  "type": "number",
+                  "format": "double",
+                  "title": "Parent Element handle",
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
+                },
+                "SearchElementName": {
+                  "type": "string",
+                  "title": "Search Element name",
+                  "description": "The optional HTML name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementID": {
+                  "type": "string",
+                  "title": "Search Element ID",
+                  "description": "The optional HTML ID of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementTagName": {
+                  "type": "string",
+                  "title": "Search Element tag name",
+                  "description": "The optional HTML tag name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementXPath": {
+                  "type": "string",
+                  "title": "Search Element XPath",
+                  "description": "An optional XPath query to identify the element. Wildcards are supported."
+                },
+                "SearchElementClassName": {
+                  "type": "string",
+                  "title": "Search Element class name",
+                  "description": "The optional HTML class name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementCSSSelector": {
+                  "type": "string",
+                  "title": "Search Element CSS selector",
+                  "description": "An optional CSS selector to identify the element. Wildcards are supported."
+                },
+                "SearchElementIndex": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 1,
+                  "title": "Search Element index",
+                  "description": "If multiple elements match the search, which element (starting at 1) should be matched."
+                },
+                "SearchElementMatchValue": {
+                  "type": "string",
+                  "title": "Search Element match value",
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementMatchText": {
+                  "type": "string",
+                  "title": "Search Element match text",
+                  "description": "The optional HTML text value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementType": {
+                  "type": "string",
+                  "title": "Search Element type",
+                  "description": "The optional HTML type of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementMinimumWidth": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 1,
+                  "title": "Search Element minimum width",
+                  "description": "An optional minimum width of elements to be returned. By default, this is set to 1 to avoid returning hidden elements which typically have a width of 0.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementMinimumHeight": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 1,
+                  "title": "Search Element minimum height",
+                  "description": "An optional minimum height of elements to be returned. By default, this is set to 1 to avoid returning hidden elements which typically have a height of 0.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxLeft": {
+                  "type": "number",
+                  "format": "double",
+                  "default": -99999,
+                  "title": "Search Element bounding box left",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxRight": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 99999,
+                  "title": "Search Element bounding box right",
+                  "description": "An optional HTML document coordinate value for the right side of the bounding box in which the search element should be found. By default, this is set to 99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxTop": {
+                  "type": "number",
+                  "format": "double",
+                  "default": -99999,
+                  "title": "Search Element bounding box top",
+                  "description": "An optional HTML document coordinate value for the top side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxBottom": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 99999,
+                  "title": "Search Element bounding box bottom",
+                  "description": "An optional HTML document coordinate value for the bottom side of the bounding box in which the search element should be found. By default, this is set to 99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "OnlyElementTopLeftNeedsToBeInBoundingBox": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Only Element top left needs to be in bounding box",
+                  "description": "Should only the top left of the search element found within the bounding box, or the entire element. By default, this is set to false.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SecondsToWait": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "title": "Seconds to wait",
+                  "description": "The maximum number of seconds to wait for the web element to exist."
+                },
+                "RaiseExceptionIfElementNotFound": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Raise exception if web element not found",
+                  "description": "Should IA-Connect raise an exception if the web element does not exist after the wait period?"
+                },
+                "UseExplicitWaitConditionsIfPossible": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Use explicit wait conditions if possible",
+                  "description": "If set to true, IA-Connect will attempt to use explicit wait conditions to wait for the element, if suitable for the chosen search properties. If set to false, IA-Connect will always perform a wait loop. This is an advanced setting which influences the code path taken by the IA-Connect Agent.",
+                  "x-ms-visibility": "advanced"
+                },
+                "WaitForSearchElementToBeDisplayed": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Wait for search element to be displayed",
+                  "description": "If set to true, IA-Connect will additionally wait for the search element to be displayed. Displayed means that the element has been drawn within the browser document, it does not refer to whether it is visible on-screen (for example, it could be scrolled off the bottom of the screen but still be considered as displayed)."
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "SecondsToWait",
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ElementExists": {
+                  "type": "boolean",
+                  "title": "Element exists",
+                  "description": "Returns true if the web element exists or false if not."
+                },
+                "ElementHandle": {
+                  "type": "number",
+                  "format": "double",
+                  "title": "Element handle",
+                  "description": "The handle for the matching web element. This can be used as an input to further actions acting on this web element. If the web element was not found, this output will be set to 0."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "BrowserWaitForElementToExist"
+      }
+    },
+    "/BrowserControl/WaitForElementToNotExist": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Wait for web element to not exist",
+        "description": "Waits for the specified web element to no longer exist.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "BrowserWaitForElementToNotExist",
+            "description": "Inputs for IA-Connect BrowserWaitForElementToNotExist action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ParentElementHandle": {
+                  "type": "number",
+                  "format": "double",
+                  "title": "Parent Element handle",
+                  "description": "The parent element handle to act as the starting point for the search. This can be discovered via Inspection using actions like 'Create handle to element'. If no value or 0 is provided then the whole page DOM structure is searched."
+                },
+                "SearchElementHandle": {
+                  "type": "number",
+                  "format": "double",
+                  "title": "Search Element handle",
+                  "description": "The element handle to the target element. This could be located using 'Get multiple element properties' or some other search which returns an element handle. If a handle value (a value of 1 or higher) is entered into this field then all other search criteria are ignored since this handle uniquely identifies an element and hence no other details are required. By default, no value (or 0) is used to specify that an element handle is not being provided."
+                },
+                "SearchElementName": {
+                  "type": "string",
+                  "title": "Search Element name",
+                  "description": "The optional HTML name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementID": {
+                  "type": "string",
+                  "title": "Search Element ID",
+                  "description": "The optional HTML ID of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementTagName": {
+                  "type": "string",
+                  "title": "Search Element tag name",
+                  "description": "The optional HTML tag name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementXPath": {
+                  "type": "string",
+                  "title": "Search Element XPath",
+                  "description": "An optional XPath query to identify the element. Wildcards are supported."
+                },
+                "SearchElementClassName": {
+                  "type": "string",
+                  "title": "Search Element class name",
+                  "description": "The optional HTML class name of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementCSSSelector": {
+                  "type": "string",
+                  "title": "Search Element CSS selector",
+                  "description": "An optional CSS selector to identify the element. Wildcards are supported."
+                },
+                "SearchElementIndex": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 1,
+                  "title": "Search Element index",
+                  "description": "If multiple elements match the search, which element (starting at 1) should be matched."
+                },
+                "SearchElementMatchValue": {
+                  "type": "string",
+                  "title": "Search Element match value",
+                  "description": "The optional HTML value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementMatchText": {
+                  "type": "string",
+                  "title": "Search Element match text",
+                  "description": "The optional HTML text value of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementType": {
+                  "type": "string",
+                  "title": "Search Element type",
+                  "description": "The optional HTML type of the element to search for. This can be discovered via inspection. Wildcards are not supported in this parameter but can instead be used as part of an XPath or CSS selector."
+                },
+                "SearchElementMinimumWidth": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 1,
+                  "title": "Search Element minimum width",
+                  "description": "An optional minimum width of elements to be returned. By default, this is set to 1 to avoid returning hidden elements which typically have a width of 0.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementMinimumHeight": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 1,
+                  "title": "Search Element minimum height",
+                  "description": "An optional minimum height of elements to be returned. By default, this is set to 1 to avoid returning hidden elements which typically have a height of 0.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxLeft": {
+                  "type": "number",
+                  "format": "double",
+                  "default": -99999,
+                  "title": "Search Element bounding box left",
+                  "description": "An optional HTML document coordinate value for the left side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxRight": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 99999,
+                  "title": "Search Element bounding box right",
+                  "description": "An optional HTML document coordinate value for the right side of the bounding box in which the search element should be found. By default, this is set to 99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxTop": {
+                  "type": "number",
+                  "format": "double",
+                  "default": -99999,
+                  "title": "Search Element bounding box top",
+                  "description": "An optional HTML document coordinate value for the top side of the bounding box in which the search element should be found. By default, this is set to -99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SearchElementBoundingBoxBottom": {
+                  "type": "number",
+                  "format": "double",
+                  "default": 99999,
+                  "title": "Search Element bounding box bottom",
+                  "description": "An optional HTML document coordinate value for the bottom side of the bounding box in which the search element should be found. By default, this is set to 99999 to return all elements.",
+                  "x-ms-visibility": "advanced"
+                },
+                "OnlyElementTopLeftNeedsToBeInBoundingBox": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Only Element top left needs to be in bounding box",
+                  "description": "Should only the top left of the search element found within the bounding box, or the entire element. By default, this is set to false.",
+                  "x-ms-visibility": "advanced"
+                },
+                "SecondsToWait": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 10,
+                  "title": "Seconds to wait",
+                  "description": "The maximum number of seconds to wait for the web element to exist."
+                },
+                "RaiseExceptionIfElementStillExists": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Raise exception if web element still exists",
+                  "description": "Should IA-Connect raise an exception if the web element still exists after the wait period?"
+                },
+                "SearchElementMustBeDisplayed": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Search element must be displayed",
+                  "description": "If set to true, IA-Connect will only consider the element to exist if it is displayed. Once the element is not displayed, it will be considered to not exist and therefore meet the wait criteria. Displayed means that the element has been drawn within the browser document, it does not refer to whether it is visible on-screen (for example, it could be scrolled off the bottom of the screen but still be considered as displayed)."
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "SecondsToWait",
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ElementExistsBeforeWait": {
+                  "type": "boolean",
+                  "title": "Element exists before wait",
+                  "description": "Returns true if the web element existed before waiting or false if not."
+                },
+                "ElementExistsAfterWait": {
+                  "type": "boolean",
+                  "title": "Element exists after wait",
+                  "description": "Returns true if the web element existed after waiting or false if not."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "BrowserWaitForElementToNotExist"
+      }
+    },
+    "/BrowserControl/GetWebElementAtScreenCoordinates": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get web element at screen coordinates",
+        "description": "Returns the web element located at the given screen coordinates. These will be mapped to browser document window and frame coordinates to obtain the element.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "BrowserGetWebElementAtScreenCoordinates",
+            "description": "Inputs for IA-Connect BrowserGetWebElementAtScreenCoordinates action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "XCoord": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "title": "X coordinate",
+                  "description": "The screen X coordinate value (in pixels) where the web element should be searched for."
+                },
+                "YCoord": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "title": "Y coordinate",
+                  "description": "The screen Y coordinate value (in pixels) where the web element should be searched for."
+                },
+                "RaiseExceptionIfElementNotFound": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Raise exception if element not found",
+                  "description": "Should IA-Connect raise an exception if a web element was not located at the specified location?"
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ElementExists": {
+                  "type": "boolean",
+                  "title": "Element exists",
+                  "description": "Returns true if the web element exists or false if not."
+                },
+                "ElementHandle": {
+                  "type": "number",
+                  "format": "double",
+                  "title": "Element handle",
+                  "description": "The handle for the located web element. This can be used as an input to further actions acting on this web element. If the web element was not found, this output will be set to 0."
+                },
+                "ElementTagName": {
+                  "type": "string",
+                  "title": "Element tag name",
+                  "description": "The HTML tag name of the located element."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "BrowserGetWebElementAtScreenCoordinates"
+      }
+    },
+    "/BrowserControl/GetWebElementAtBrowserDocumentWindowCoordinates": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get web element at browser document window coordinates",
+        "description": "Returns the web element located at the given browser document window coordinates. This coordinate is in pixels relative to the top-left of the browser document window or frame (if IA-Connect has stepped into a frame).",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "BrowserGetWebElementAtBrowserDocumentWindowCoordinates",
+            "description": "Inputs for IA-Connect BrowserGetWebElementAtBrowserDocumentWindowCoordinates action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "XCoord": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "title": "Browser document window X coordinate",
+                  "description": "The browser document window X coordinate value (in pixels relative to the top-left of the browser document window or frame) where the web element should be searched for."
+                },
+                "YCoord": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "title": "Browser document window Y coordinate",
+                  "description": "The browser document window Y coordinate value (in pixels relative to the top-left of the browser document window or frame) where the web element should be searched for."
+                },
+                "RaiseExceptionIfElementNotFound": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Raise exception if element not found",
+                  "description": "Should IA-Connect raise an exception if a web element was not located at the specified location?"
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ElementExists": {
+                  "type": "boolean",
+                  "title": "Element exists",
+                  "description": "Returns true if the web element exists or false if not."
+                },
+                "ElementHandle": {
+                  "type": "number",
+                  "format": "double",
+                  "title": "Element handle",
+                  "description": "The handle for the located web element. This can be used as an input to further actions acting on this web element. If the web element was not found, this output will be set to 0."
+                },
+                "ElementTagName": {
+                  "type": "string",
+                  "title": "Element tag name",
+                  "description": "The HTML tag name of the located element."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "BrowserGetWebElementAtBrowserDocumentWindowCoordinates"
+      }
+    },
+    "/BrowserControl/BrowserGetWebElementPropertiesAsList": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get web element properties as list",
+        "description": "Returns the properties of a web element as a single line list (single line collection / data table) instead of individual items, this maybe useful depending on how you intend to use the data.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "BrowserGetWebElementPropertiesAsList",
+            "description": "Inputs for IA-Connect BrowserGetWebElementPropertiesAsList action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ElementHandle": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Element handle",
+                  "description": "The handle for the target web element."
+                },
+                "GetHTMLCode": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Get HTML code",
+                  "description": "Should the HTML code (both Inner and Outer) for the elements be returned?",
+                  "x-ms-visibility": "advanced"
+                },
+                "ReturnValue": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Return value",
+                  "description": "Should IA-Connect return the HTML value of the element?",
+                  "x-ms-visibility": "advanced"
+                },
+                "ReturnText": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Return text",
+                  "description": "Should IA-Connect return the HTML text value of the element?",
+                  "x-ms-visibility": "advanced"
+                },
+                "MaxValueLength": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "title": "Max value length",
+                  "description": "The maximum number of characters from the HTML value to be returned. This is useful to limit the amount of data returned if the HTML element has a long value. If set to 0, the entire value will be returned.",
+                  "x-ms-visibility": "advanced"
+                },
+                "MaxTextLength": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 0,
+                  "title": "Max text length",
+                  "description": "The maximum number of characters from the HTML text value to be returned. This is useful to limit the amount of data returned if the HTML element had a long text value. If set to 0, the entire text value will be returned.",
+                  "x-ms-visibility": "advanced"
+                },
+                "ReturnCoordinates": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Return coordinates",
+                  "description": "Should IA-Connect return the coordinates of the element?",
+                  "x-ms-visibility": "advanced"
+                },
+                "ReturnParentTag": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Return parent tag",
+                  "description": "Should IA-Connect return the HTML tag of the parent of the element?",
+                  "x-ms-visibility": "advanced"
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "ElementHandle",
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "NumberOfElementsFound": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of elements found",
+                  "description": "The number of elements found."
+                },
+                "NumberOfElementsReturned": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Number of elements returned",
+                  "description": "The number of elements returned."
+                },
+                "ElementPropertiesJSON": {
+                  "type": "string",
+                  "title": "Element properties JSON",
+                  "description": "The properties of the web element, in JSON format."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "BrowserGetWebElementPropertiesAsList"
       }
     }
   },
