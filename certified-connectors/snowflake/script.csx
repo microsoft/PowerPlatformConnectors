@@ -10,8 +10,14 @@ public class Script : ScriptBase
 
         // Check if the operation ID matches what is specified in the OpenAPI definition of the connector
         // Presence is enforced in swagger
-        var domain = this.Context.Request.Headers.GetValues("Domain").First();
-
+        
+        var domain = this.Context.Request.Headers.GetValues("Instance").First();
+        string pattern = "http";
+        Match m = Regex.Match(domain,pattern,RegexOptions.IgnoreCase);
+        if (m.Success) {
+            string subs[] = domain.Split(':\\');
+            domain = subs[1];
+        }
         var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
         uriBuilder.Host = domain;
         this.Context.Request.RequestUri = uriBuilder.Uri;
@@ -30,13 +36,13 @@ public class Script : ScriptBase
             var contentAsJson = JObject.Parse(contentAsString);
 
             // check for parameters
-            if (contentAsJson["data"] == null || contentAsJson["rowType"]==null)
+            if (contentAsJson["data"] == null || contentAsJson["resultSetMetaData"]==null)
             {
-                return createErrorResponse("rowType or data parameter are empty!", HttpStatusCode.BadRequest);
+                return createErrorResponse("resultSetMetaData or data parameter are empty!", HttpStatusCode.BadRequest);
             }
 
             // get metadata
-            var cols = JArray.Parse(contentAsJson["rowType"].ToString());
+            var cols = JArray.Parse(contentAsJson["resultSetMetaData"].ToString());
             var rows = JArray.Parse(contentAsJson["data"].ToString());
 
             JArray newRows = new JArray();
@@ -54,8 +60,16 @@ public class Script : ScriptBase
                     switch (type)
                     {
                         case "fixed":
-                            long myLong = long.Parse(row[i].ToString());
-                            newRow.Add(new JProperty(name.ToString(), myLong));
+                            long scale = 0;
+                            long.TryParse(col["scale"].ToString(), out scale);
+                            if (scale == 0)
+                            {
+                              long myLong = long.Parse(row[i].ToString());
+                              newRow.Add(new JProperty(name.ToString(), myLong));
+                            } else {
+                              double myDouble = double.Parse(row[i].ToString());
+                              newRow.Add(new JProperty(name.ToString(), myDouble));
+                            }
                             break;
                         case "float":
                             float myFloat = float.Parse(row[i].ToString());
@@ -97,11 +111,11 @@ public class Script : ScriptBase
             };
             response = new HttpResponseMessage(HttpStatusCode.OK);
             response.Content = CreateJsonContent(output.ToString());
-            return response;
+            return response; 
         }
         catch (JsonReaderException ex)
         {
-            return createErrorResponse("'rowType' or 'data' are in an invalid format: " + ex, HttpStatusCode.BadRequest);
+            return createErrorResponse("'resultSetMetadata' or 'data' are in an invalid format: " + ex, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {
