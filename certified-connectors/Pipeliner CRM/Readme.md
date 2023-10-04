@@ -1,5 +1,5 @@
 # Pipeliner CRM
-Pipeliner is a next generation sales CRM software designed to empower sales teams and grow profitable customer relationships. The conector provides an API to work with Pipeliner objects.
+Pipeliner is a next generation sales CRM software designed to empower sales teams and grow profitable customer relationships. The conector provides an API to work with Pipeliner records.
 
 ## Publisher
 Pipelinersales, Inc.
@@ -42,8 +42,10 @@ Basic access authentication credentials for API.
 ## Obtaining Credentials
 Pipeliner CRM API is using Basic authentication which consists of username and password. [Accessing the Pipeliner API credentials]https://help.pipelinersales.com/en/articles/3811347-accessing-the-pipeliner-api-key
 
-## Known Issues and Limitations
 User needs to provide [Service URL and Space ID]https://developers.pipelinersales.com/api-docs/overview/authentication
+
+## Known Issues and Limitations
+The API returns a maximum of 100 records per request. [Pagination]https://developers.pipelinersales.com/api-docs/core-api-concepts/pagination
 
 ## Deployment Instructions
 N/A
