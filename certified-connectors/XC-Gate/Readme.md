@@ -22,10 +22,10 @@ Login to XC-Gate to obtain credentials.
 
 ### ActionFind (/webapi/action/find)
 Searches for and retrieves a list of achievements.
+(Restrictions : Only 20 pieces from DATA1~DATA20 can be obtained.)
 
 ### ActionGet (/webapi/action/get)
 Obtains various types of information on designated performance.  
-(Restrictions : Only 20 pieces from DATA1~DATA20 can be obtained.)
 
 ## Obtaining Credentials
 The connector itself does not require an authentication process.
