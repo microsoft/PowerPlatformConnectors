@@ -1,15 +1,16 @@
-# Actsoft Mobile Workforce Plus
-Mobile Workforce Plus allows you to create and capture digital form information, capture employee timekeeping information, and manage work orders with a dispatching system.
+# Actsoft TeamWherx
+TeamWherx allows you to create and capture digital form information, capture employee timekeeping information, and manage work orders with a dispatching system.
 
-This connector uses the [Mobile Workforce Plus APIs]( https://developer.wfmplatform.com/) to make it easy to interact with information captured using the application.  You can utilize various triggers or actions in the connector to easily extract data from Mobile Workforce Plus and integrate with other applications.
+This connector uses the [TeamWherx APIs]( https://developer.wfmplatform.com/) to make it easy to interact with information captured using the application.  You can utilize various triggers or actions in the connector to easily extract data from TeamWherx and integrate with other applications.
 
+# Publisher
+Actsoft, Inc
 # Prerequisites
 In order to use this connector, you will need the following:
 
-- An active Mobile Workforce Plus Account
-- Mobile Workforce Plus API Key
+- An active TeamWherx Account
+- TeamWherx API Key
 - Microsoft Power Apps or Power Automate plan
-
 
 # Supported Operations
 
@@ -70,6 +71,7 @@ In order to use this connector, you will need the following:
 - Activate a user
 - Deactivate a user
 - Update a user
+- Update a partial user
 - Get a single user
 - Get a list of users 
 
@@ -77,6 +79,7 @@ In order to use this connector, you will need the following:
 - Create a vehicle
 - Activate a vehicle
 - Update a vehicle
+- Update partial vehicle information
 - Deactivate a vehicle
 - Delete a vehicle
 - Get a single vehicle
@@ -84,9 +87,20 @@ In order to use this connector, you will need the following:
 
 
 ## Obtaining Credentials
-Developer API portal credentials are managed in the Mobile Workforce Plus web application. Please contact the application administrator for access.
+Developer API portal credentials are managed in the TeamWherx web application. Please contact the application administrator for access.
 
-After credentials are created, the developer portal can be accessed at: [Mobile Workforce Plus APIs](https://developer.wfmplatform.com/)
+After credentials are created, the developer portal can be accessed at: [TeamWherx APIs](https://developer.wfmplatform.com/)
 
+## Known Issues and Limitations
+- Audio file binary uploads (POST) for all endpoints are limited to MP4 only.
+- Dates for all endpoints that require date-time information must be specified according to RFC3339 guidelines, as in the following example: 2021-09-22T02:36:56.52Z. It is not necessary to specify the exact seconds in the timestamp; 00 is acceptable.
 
+## Deployment Instructions
+- N/A
+
+## Throttling Limits
+| Name	| Calls	| Renewal Period |
+| ----- | ------ | ------- |
+API calls per connection | 100 | 15 seconds 
+Frequency of trigger polls | 1 | 48 seconds
 

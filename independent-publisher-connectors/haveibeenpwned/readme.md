@@ -13,10 +13,9 @@ An API key must be obtained to call these actions, which costs at least one mont
 ### Getting all breaches for an account
 The most common use of this service is to return a list of all breaches a particular account has been involved in. The action takes a single parameter which is the account to be searched for. The account is not case sensitive and will be trimmed of leading or trailing white spaces.
 ### Getting all breached sites in the system
-A breach is an instance of a system having been compromised by an attacker and the data disclosed. For example, Adobe was a breach, Gawker was a breach etc. It is possible to return the details of each of breach in the system.
+A breach is an instance of a system having been compromised by an attacker and the data disclosed. It is possible to return the details of each of breach in the system.
 ### Getting a single breached site
 Sometimes just a single breach is required and this can be retrieved by the breach name. This is the stable value which may or may not be the same as the breach title (which can change).
-
 ### Getting all data classes in the system
 A "data class" is an attribute of a record compromised in a breach. For example, many breaches expose data classes such as "Email addresses" and "Passwords". The values returned by this service are ordered alphabetically in a string array and will expand over time as new breaches expose previously unseen classes of data.
 ### Getting all pastes for an account
