@@ -1,4 +1,4 @@
-# Tribal Connector
+# Tribal - Maytas
 Streamline the day-to-day administration of training, reduce administration costs and improving efficiency, manage courses, monitor learner success rates.
 
 ## Publisher: Tribal
