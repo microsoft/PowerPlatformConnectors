@@ -15,7 +15,7 @@ We provide the expertise, software and services required to underpin student suc
 - Connect to the web hooks
 
 ## Supported Operations
-**Entity** refers to one of the available business entities in Tribal like such as Person, Schools, Desks, Applications etc.
+**Entity** refers to one of the available business entities in Tribal Maytas like such as Trainees, Assessors or Employers.
 
 ### Triggers
 - `When an event happens`: Triggers anytime an event on an entity happens within Tribal Maytas.
