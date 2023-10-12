@@ -18,8 +18,8 @@ The connector supports the following operations:
 - `CreateImage`: The image generations endpoint allows you to create an original image given a text prompt.
 - `Embeddings`: Get a vector representation of a given text input.
 - `Completion`: Deprecated completion action, use the other one.
-- `Translate Audio` : Create an english translated text of the audio
-- `Transcribe Audio` : Convert the Audio into Text
+- `Create Audio Translation` : Create an english translated text of the audio
+- `Create Audio Transcription` : Convert the audio into Text
 
 ## Obtaining Credentials
 
