@@ -9,17 +9,28 @@ Unlock the power of a versatile connector designed for effortless setup and seam
 1. Sign up for a Xero account https://www.xero.com/signup/api/.
 2. Enable your company.
 3. Create an OAuth 2.0 application https://developer.xero.com/app/manage.
-4. Copy Client id and Client secret.
 
-## Supported Actions
+## Supported Operations
 
-As part of this sample following actions are supported:
+### Xero sign in
+Log in to your Xero account to get started.
 
-- `Xero sign in` : Log in to your Xero account to get started.
-- `List contacts` : This action allows you to list the contacts from Xero that match the selected options.
-- `List invoices` : This action allows you to list the invoices from Xero that match the selected options.
-- `Add a new contact` : This action allows you to add a new contact in Xero.
-- `Add a new invoice` : This action allows you to add a new invoice in Xero.
+### List contacts
+This action allows you to list the contacts from Xero that match the selected options.
+
+### List invoices
+This action allows you to list the invoices from Xero that match the selected options.
+
+### Add a new contact
+This action allows you to add a new contact in Xero.
+
+### Add a new invoice
+This action allows you to add a new invoice in Xero.
+
+## Obtaining Credentials
+
+1. Log in to OAuth 2.0 application https://developer.xero.com/app/manage
+2. Copy Client id and Client secret.
 
 ## Known Issues and Limitations
 
