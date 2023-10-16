@@ -21,20 +21,6 @@
   "produces": [
     "application/json"
   ],
-  "x-ms-connector-metadata": [
-    {
-      "propertyName": "Website",
-      "propertyValue": "https://calendly.com"
-    },
-    {
-      "propertyName": "Privacy policy",
-      "propertyValue": "https://calendly.com/privacy"
-    },
-    {
-      "propertyName": "Categories",
-      "propertyValue": "Productivity"
-    }
-  ],
   "paths": {
     "/webhook_subscriptions": {
       "x-ms-notification-content": {
@@ -346,7 +332,7 @@
           }
         },
         "x-ms-trigger": "single",
-        "summary": "Create Webhook Subscription",
+        "summary": "Create Webhook Subscription (Invitee)",
         "operationId": "CreateWebhookSubscription",
         "parameters": [
           {
@@ -371,7 +357,8 @@
                     "default": "invitee.created",
                     "enum": [
                       "invitee.created",
-                      "invitee.canceled"
+                      "invitee.canceled",
+                      "invitee_no_show.created"
                     ],
                     "x-ms-visibility": "important"
                   },
@@ -411,7 +398,329 @@
             }
           }
         ],
-        "description": "Create a Webhook Subscription for an Organization that is triggered when an event is scheduled, canceled, or a routing form is submitted."
+        "description": "Create a Webhook Subscription for an Organization that is triggered when an event is scheduled or canceled."
+      }
+    },
+    "/webhook_subscriptions/routing_form_submission": {
+      "x-ms-notification-content": {
+        "description": "Webhook Response",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "created_at": {
+              "type": "string",
+              "description": "The moment when the webhook was created (e.g. \"2020-01-02T03:04:05.678123Z\").",
+              "x-ms-summary": "Webhook Created At"
+            },
+            "created_by": {
+              "type": "string",
+              "description": "A reference to the user who created the webhook subscription.",
+              "x-ms-summary": "Webhook Creator URI"
+            },
+            "event": {
+              "type": "string",
+              "description": "The event that caused the webhook to fire.",
+              "x-ms-summary": "Webhook Event"
+            },
+            "payload": {
+              "type": "object",
+              "properties": {
+                "uri": {
+                  "type": "string",
+                  "description": "Canonical reference (unique identifier) for the routing form submission.",
+                  "title": "Routing Form Submission URI"
+                },
+                "routing_form": {
+                  "type": "string",
+                  "description": "The URI of the routing form that's associated with the submission.",
+                  "title": "Routing Form URI"
+                },
+                "questions_and_answers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "question_uuid": {
+                        "type": "string",
+                        "description": "Unique identifier for the routing form question.",
+                        "title": "Question UUID"
+                      },
+                      "question": {
+                        "type": "string",
+                        "description": "Question name (in human-readable format).",
+                        "title": "Question"
+                      },
+                      "answer": {
+                        "type": "string",
+                        "description": "Answer provided by the respondent when the form was submitted.",
+                        "title": "Answer"
+                      }
+                    }
+                  },
+                  "description": "questions_and_answers"
+                },
+                "tracking": {
+                  "type": "object",
+                  "properties": {
+                    "utm_campaign": {
+                      "type": "string",
+                      "description": "The UTM parameter used to track a campaign.",
+                      "x-ms-summary": "UTM Campaign"
+                    },
+                    "utm_source": {
+                      "type": "string",
+                      "description": "The UTM parameter that identifies the source (platform where the traffic originates).",
+                      "x-ms-summary": "UTM Source"
+                    },
+                    "utm_medium": {
+                      "type": "string",
+                      "description": "The UTM parameter that identifies the type of input (e.g. Cost Per Click (CPC), social media, affiliate or QR code).",
+                      "x-ms-summary": "UTM Medium"
+                    },
+                    "utm_content": {
+                      "type": "string",
+                      "description": "UTM content tracking parameter.",
+                      "x-ms-summary": "UTM Content"
+                    },
+                    "utm_term": {
+                      "type": "string",
+                      "description": "The UTM parameter used to track keyword.",
+                      "x-ms-summary": "UTM Term"
+                    },
+                    "salesforce_uuid": {
+                      "type": "string",
+                      "description": "The Salesforce record unique identifier.",
+                      "x-ms-summary": "Salesforce UUID"
+                    }
+                  },
+                  "description": "tracking"
+                },
+                "result": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "Indicates if the routing form submission resulted in a custom message, event type, or external URL.",
+                      "title": "Result Type"
+                    }
+                  },
+                  "description": "result"
+                },
+                "submitter": {
+                  "type": "string",
+                  "description": "The reference to the Invitee resource when routing form submission results in a scheduled meeting.",
+                  "title": "Submitter URI"
+                },
+                "submitter_type": {
+                  "type": "string",
+                  "description": "Type of the respondent resource that submitted the form and scheduled a meeting.",
+                  "title": "Submitter Type"
+                },
+                "created_at": {
+                  "type": "string",
+                  "description": "The moment the routing form was submitted.",
+                  "title": "Routing Form Submission Created At"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "description": "The moment when the routing form submission was last updated.",
+                  "title": "Routing Form Submission Updated At"
+                }
+              },
+              "description": "payload"
+            }
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "payload",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string",
+                  "description": "created_at"
+                },
+                "created_by": {
+                  "type": "string",
+                  "description": "created_by"
+                },
+                "event": {
+                  "type": "string",
+                  "description": "event"
+                },
+                "payload": {
+                  "type": "object",
+                  "properties": {
+                    "cancel_url": {
+                      "type": "string",
+                      "description": "cancel_url"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "created_at"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "email"
+                    },
+                    "event": {
+                      "type": "string",
+                      "description": "event"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "name"
+                    },
+                    "new_invitee": {
+                      "type": "string",
+                      "description": "new_invitee"
+                    },
+                    "old_invitee": {
+                      "type": "string",
+                      "description": "old_invitee"
+                    },
+                    "questions_and_answers": {
+                      "type": "array",
+                      "items": {},
+                      "description": "questions_and_answers"
+                    },
+                    "reschedule_url": {
+                      "type": "string",
+                      "description": "reschedule_url"
+                    },
+                    "rescheduled": {
+                      "type": "boolean",
+                      "description": "rescheduled"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "status"
+                    },
+                    "text_reminder_number": {
+                      "type": "string",
+                      "description": "text_reminder_number"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "description": "timezone"
+                    },
+                    "tracking": {
+                      "type": "object",
+                      "properties": {
+                        "utm_campaign": {
+                          "type": "string",
+                          "description": "utm_campaign"
+                        },
+                        "utm_source": {
+                          "type": "string",
+                          "description": "utm_source"
+                        },
+                        "utm_medium": {
+                          "type": "string",
+                          "description": "utm_medium"
+                        },
+                        "utm_content": {
+                          "type": "string",
+                          "description": "utm_content"
+                        },
+                        "utm_term": {
+                          "type": "string",
+                          "description": "utm_term"
+                        },
+                        "salesforce_uuid": {
+                          "type": "string",
+                          "description": "salesforce_uuid"
+                        }
+                      },
+                      "description": "tracking"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "updated_at"
+                    },
+                    "uri": {
+                      "type": "string",
+                      "description": "uri"
+                    },
+                    "canceled": {
+                      "type": "boolean",
+                      "description": "canceled"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ms-trigger": "single",
+        "summary": "Create Webhook Subscription (Routing Form Submission)",
+        "operationId": "CreateWebhookSubscriptionRoutingFormSubmission",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "url"
+                },
+                "events": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "title": "events",
+                    "default": "routing_form_submission.created",
+                    "enum": [
+                      "routing_form_submission.created"
+                    ],
+                    "x-ms-visibility": "important"
+                  },
+                  "description": "events"
+                },
+                "organization": {
+                  "type": "string",
+                  "description": "organization",
+                  "title": "organization",
+                  "x-ms-visibility": "internal"
+                },
+                "user": {
+                  "type": "string",
+                  "description": "user",
+                  "title": "",
+                  "x-ms-visibility": "internal"
+                },
+                "scope": {
+                  "type": "string",
+                  "description": "scope",
+                  "title": "scope",
+                  "default": "organization",
+                  "x-ms-visibility": "internal"
+                },
+                "signing_key": {
+                  "type": "string",
+                  "description": "signing_key",
+                  "title": "signing_key",
+                  "x-ms-visibility": "internal"
+                }
+              },
+              "required": [
+                "url",
+                "events",
+                "scope"
+              ]
+            }
+          }
+        ],
+        "description": "Create a Webhook Subscription for an Organization that is triggered when a routing form is submitted."
       }
     },
     "/webhook_subscriptions/{uuid}": {
@@ -501,6 +810,228 @@
         "description": "Retrieves current user info",
         "x-ms-visibility": "internal"
       }
+    },
+    "/event_types": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "collection": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/EventType"
+                  },
+                  "description": "collection"
+                },
+                "pagination": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The number of rows to return.",
+                      "x-ms-summary": "Pagination Count",
+                      "title": "Pagination Count"
+                    },
+                    "next_page": {
+                      "type": "string",
+                      "description": "URI to return the next page of an ordered list (\"null\" indicates no additional results are available).",
+                      "x-ms-summary": "Next Page URI",
+                      "title": "Next Page URI"
+                    },
+                    "previous_page": {
+                      "type": "string",
+                      "description": "URI to return the previous page of an ordered list (\"null\" indicates no additional results are available).",
+                      "x-ms-summary": "Previous Page URI",
+                      "title": "Previous Page URI"
+                    },
+                    "next_page_token": {
+                      "type": "string",
+                      "description": "Token to return the next page of an ordered list (\"null\" indicates no additional results are available).",
+                      "x-ms-summary": "Next Page Token",
+                      "title": "Next Page Token"
+                    },
+                    "previous_page_token": {
+                      "type": "string",
+                      "x-ms-summary": "Previous Page Token",
+                      "description": "Token to return the previous page of an ordered list (\"null\" indicates no additional results are available).",
+                      "title": "Previous Page Token"
+                    }
+                  },
+                  "description": "pagination"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Event Types",
+        "description": "Returns all Event Types associated with your organization.",
+        "operationId": "GetEventTypes",
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Active",
+            "description": "Return only active event types if true, only inactive if false, or all event types if this parameter is omitted."
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "x-ms-summary": "Count",
+            "description": "The number of rows to return."
+          },
+          {
+            "name": "organization",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "View available personal, team, and organization event types associated with the organization's URI.",
+            "x-ms-summary": "Organization URI",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "page_token",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Page Token",
+            "description": "The token to pass to get the next or previous portion of the collection."
+          },
+          {
+            "name": "admin_managed",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Admin Managed",
+            "description": "Return only admin managed event types if true, exclude admin managed event types if false, or include all event types if this parameter is omitted."
+          }
+        ]
+      }
+    },
+    "/invitee_no_shows": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "resource": {
+                  "type": "object",
+                  "properties": {
+                    "uri": {
+                      "type": "string",
+                      "description": "Canonical reference (unique identifier) for the no show",
+                      "x-ms-summary": "No Show URI",
+                      "title": "No Show URI"
+                    },
+                    "invitee": {
+                      "type": "string",
+                      "description": "Canonical reference (unique identifier) for the associated Invitee",
+                      "x-ms-summary": "Invitee URI",
+                      "title": "Invitee URI"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The moment when the no show was created",
+                      "x-ms-summary": "Created At",
+                      "title": "Created At"
+                    }
+                  },
+                  "description": "resource"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create Invitee No Show",
+        "description": "Marks an Invitee as a No Show.",
+        "operationId": "CreateInviteeNoShow",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "required": ["invitee"],
+              "properties": {
+                "invitee": {
+                  "type": "string",
+                  "description": "URI of the invitee who is being marked as No Show for a scheduled event",
+                  "title": "Invitee URI"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/event_types/{uuid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "resource": {
+                  "$ref": "#/definitions/EventType"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Event Type",
+        "operationId": "GetEventType",
+        "description": "Returns information about a specified Event Type.",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the Event Type being requested",
+            "x-ms-summary": "Event Type UUID",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
+    },
+    "/invitee_no_shows/{uuid}": {
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "default",
+            "schema": {
+              "description": "No Show successfully deleted",
+              "title": "204"
+            }
+          }
+        },
+        "summary": "Delete Invitee No Show",
+        "description": "Undoes marking an Invitee as a No Show",
+        "operationId": "DeleteInviteeNoShow",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the invitee whose No Show record is being removed",
+            "x-ms-summary": "Invitee No Show UUID",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -520,10 +1051,6 @@
         },
         "status": {
           "type": "string",
-          "enum": [
-            "active",
-            "canceled"
-          ],
           "description": "Indicates if the event is \"active\" or \"canceled\".",
           "title": "Event Status"
         },
@@ -644,10 +1171,6 @@
         },
         "canceler_type": {
           "type": "string",
-          "enum": [
-            "host",
-            "invitee"
-          ],
           "description": "Indicates whether the event was canceled by the \"Host\" or \"Invitee\".",
           "title": "Canceler Type"
         }
@@ -683,30 +1206,12 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "ask_invitee",
-            "physical",
-            "outbound_call",
-            "inbound_call",
-            "custom",
-            "gotomeeting",
-            "zoom",
-            "google",
-            "microsoft_teams",
-            "webex"
-          ],
           "x-ms-summary": "Location type",
           "description": "Indicates the event location type.",
           "title": "Location Type"
         },
         "status": {
           "type": "string",
-          "enum": [
-            "initiated",
-            "processing",
-            "pushed",
-            "failed"
-          ],
           "x-ms-summary": "Web conference status",
           "description": "This field only applies to zoom_conference, webex_conference, google_conference, gotomeeting, and microsoft_teams_conference location types.",
           "title": "Web Conference Status"
@@ -739,13 +1244,6 @@
         "kind": {
           "type": "string",
           "description": "Indicates the calendar provider the event belongs to.",
-          "enum": [
-            "exchange",
-            "google",
-            "icloud",
-            "outlook",
-            "outlook_desktop"
-          ],
           "title": "Calendly Event Kind"
         },
         "external_id": {
@@ -767,10 +1265,6 @@
         "provider": {
           "type": "string",
           "description": "Payment provider.",
-          "enum": [
-            "stripe",
-            "paypal"
-          ],
           "x-ms-summary": "Payment Provider"
         },
         "amount": {
@@ -782,13 +1276,6 @@
         "currency": {
           "type": "string",
           "description": "The currency format that the payment is in.",
-          "enum": [
-            "AUD",
-            "CAD",
-            "EUR",
-            "GBP",
-            "USD"
-          ],
           "x-ms-summary": "Payment Currency"
         },
         "terms": {
@@ -817,6 +1304,196 @@
           "format": "date-time",
           "x-ms-summary": "No Show Created At",
           "description": "The moment when the no show was created."
+        }
+      }
+    },
+    "EventType": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "Canonical reference (unique identifier) for the event type.",
+          "title": "Event Type URI"
+        },
+        "name": {
+          "type": "string",
+          "description": "The event type name (in human-readable format).",
+          "x-ms-summary": "Event Type Name",
+          "title": "Event Type Name"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Indicates if the event is active or not.",
+          "title": "Active"
+        },
+        "booking_method": {
+          "type": "string",
+          "description": "Indicates if the event type is for a poll or an instant booking.",
+          "x-ms-summary": "Booking Method",
+          "title": "Booking Method"
+        },
+        "slug": {
+          "type": "string",
+          "description": "The portion of the event type's URL that identifies a specific web page (in a human-readable format).",
+          "x-ms-summary": "Slug",
+          "title": "Slug"
+        },
+        "scheduling_url": {
+          "type": "string",
+          "description": "The URL of the user’s scheduling site where invitees book this event type.",
+          "x-ms-summary": "Scheduling URL",
+          "title": "Scheduling URL"
+        },
+        "duration": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The length of sessions booked with this event type.",
+          "x-ms-summary": "Duration",
+          "title": "Duration"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Indicates if the event type is \"solo\" (belongs to an individual user) or \"group\".",
+          "x-ms-summary": "Kind",
+          "title": "Kind"
+        },
+        "pooling_type": {
+          "type": "string",
+          "description": "Indicates if the event type is \"round robin\" (alternates between hosts) or \"collective\" (invitees pick a time when all participants are available) or \"null\" (the event type doesn’t consider the availability of a group participants).",
+          "x-ms-summary": "Pooling Type",
+          "title": "Pooling Type"
+        },
+        "type": {
+          "type": "string",
+          "description": "Indicates if the event type is \"AdhocEventType\" (ad hoc event) or \"StandardEventType\" (standard event type).",
+          "x-ms-summary": "Type",
+          "title": "Type"
+        },
+        "color": {
+          "type": "string",
+          "description": "The hexadecimal color value of the event type's scheduling page.",
+          "x-ms-summary": "Color",
+          "title": "Color"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "The moment the event type was created (e.g. \"2020-01-02T03:04:05.678123Z\").",
+          "x-ms-summary": "Created At",
+          "title": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "The moment the event type was last updated (e.g. \"2020-01-02T03:04:05.678123Z\").",
+          "x-ms-summary": "Updated At",
+          "title": "Updated At"
+        },
+        "internal_note": {
+          "type": "string",
+          "description": "Contents of a note that may be associated with the event type.",
+          "x-ms-summary": "Internal Note",
+          "title": "Internal Note"
+        },
+        "description_plain": {
+          "type": "string",
+          "description": "The event type's description (in non formatted text).",
+          "x-ms-summary": "Description (Plain)",
+          "title": "Description (Plain)"
+        },
+        "description_html": {
+          "type": "string",
+          "description": "The event type's description (formatted with HTML).",
+          "x-ms-summary": "Description (HTML)",
+          "title": "Description (HTML)"
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Indicates if the profile belongs to a \"user\" (individual) or \"team\".",
+              "x-ms-summary": "Profile Type",
+              "title": "Profile Type"
+            },
+            "name": {
+              "type": "string",
+              "description": "Human-readable name for the profile of the user that's associated with the event type.",
+              "x-ms-summary": "Profile Name",
+              "title": "Profile Name"
+            },
+            "owner": {
+              "type": "string",
+              "description": "The unique reference to the user associated with the profile.",
+              "x-ms-summary": "Profile Owner URI",
+              "title": "Profile Owner URI"
+            }
+          },
+          "description": "profile"
+        },
+        "secret": {
+          "type": "boolean",
+          "description": "Indicates if the event type is hidden on the owner's main scheduling page.",
+          "x-ms-summary": "Secret",
+          "title": "Secret"
+        },
+        "deleted_at": {
+          "type": "string",
+          "description": "The moment the event type was deleted (e.g. \"2020-01-02T03:04:05.678123Z\").",
+          "x-ms-summary": "Deleted At",
+          "title": "Deleted At"
+        },
+        "admin_managed": {
+          "type": "boolean",
+          "description": "Indicates if this event type is managed by an organization admin.",
+          "title": "Admin Managed",
+          "x-ms-summary": "Admin Managed"
+        },
+        "custom_questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "name",
+                "x-ms-summary": "Custom Question Name"
+              },
+              "type": {
+                "type": "string",
+                "description": "type",
+                "x-ms-summary": "Custom Question Type"
+              },
+              "position": {
+                "type": "integer",
+                "format": "int32",
+                "description": "position",
+                "x-ms-summary": "Custom Question Position"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "enabled",
+                "x-ms-summary": "Custom Question Enabled"
+              },
+              "required": {
+                "type": "boolean",
+                "description": "required",
+                "x-ms-summary": "Custom Question Required"
+              },
+              "answer_choices": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "answer_choices",
+                "x-ms-summary": "Custom Question Answer Choices"
+              },
+              "include_other": {
+                "type": "boolean",
+                "description": "include_other",
+                "x-ms-summary": "Include Other"
+              }
+            }
+          },
+          "description": "custom_questions"
         }
       }
     },
@@ -854,6 +1531,20 @@
     }
   ],
   "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://calendly.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://calendly.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity"
+    }
+  ],
   "x-ms-capabilities": {
     "testConnection": {
       "operationId": "CurrentUserInfo",
