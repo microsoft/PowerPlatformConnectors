@@ -1850,6 +1850,7 @@ public class Script : ScriptBase
       }
 
       query["include"] = "custom_fields,recipients,documents";
+      query["order"] = "desc";
       uriBuilder.Query = query.ToString();
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
@@ -1870,6 +1871,7 @@ public class Script : ScriptBase
         query.Get("startDateTime");
 
       query["include"] = "custom_fields, recipients, documents";
+      query["order"] = "desc";
       uriBuilder.Query = query.ToString();
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
@@ -2237,8 +2239,9 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JObject newBody = new JObject();
 
-      JArray Activity = (body["envelopes"] as JArray) ?? new JArray();
+      JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredActivities = new JArray();
+      JArray activities = new JArray();
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
@@ -2249,38 +2252,49 @@ public class Script : ScriptBase
 
       foreach (var filter in filters.Where(filter => filter != null)) 
       {
-        foreach (var envelope in Activity)
+        foreach (var envelope in envelopes)
         {
-          if (envelope.ToString().Contains(filter))
+          if (envelope.ToString().ToLower().Contains(filter.ToLower()))
           {
-            JObject additionalPropertiesForActivity = new JObject()
-            {
-              ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
-              ["Owner"] = envelope["sender"]["userName"],
-              ["Status"] = envelope["status"],
-              ["EnvelopeId"] = envelope["envelopeId"],
-              ["Date"] = envelope["statusChangedDateTime"]
-            };
-            filteredActivities.Add(new JObject()
-            {
-              ["title"] = envelope["emailSubject"],
-              ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
-              ["dateTime"] = envelope["statusChangedDateTime"],
-              ["url"] = GetEnvelopeUrl(envelope),
-              ["additionalProperties"] = additionalPropertiesForActivity
-            });
+            filteredActivities.Add(envelope);
           }
         }
 
         if (filteredActivities.Count > 0)
         {
-          Activity = new JArray(filteredActivities);
+          envelopes.Clear();
+          envelopes = new JArray(filteredActivities);
           filteredActivities.Clear();
+        }
+        else
+        {
+          envelopes.Clear();
+          break;
         }
       }
 
-      newBody["value"] = (Activity.Count < top) ? Activity : new JArray(Activity.Skip(skip).Take(top).ToArray());
-      newBody["hasMoreResults"] = (skip + top < Activity.Count) ? true : false;
+      foreach (var envelope in envelopes)
+      {
+        JObject additionalPropertiesForActivity = new JObject()
+        {
+          ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
+          ["Owner"] = envelope["sender"]["userName"],
+          ["Status"] = envelope["status"],
+          ["EnvelopeId"] = envelope["envelopeId"],
+          ["Date"] = envelope["statusChangedDateTime"]
+        };
+        activities.Add(new JObject()
+        {
+          ["title"] = envelope["emailSubject"],
+          ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
+          ["dateTime"] = envelope["statusChangedDateTime"],
+          ["url"] = GetEnvelopeUrl(envelope),
+          ["additionalProperties"] = additionalPropertiesForActivity,
+        });
+      }
+
+      newBody["value"] = (activities.Count < top) ? activities : new JArray(activities.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < activities.Count) ? true : false;
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
@@ -2291,8 +2305,9 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JObject newBody = new JObject();
 
-      JArray DocumentRecord = (body["envelopes"] as JArray) ?? new JArray();
+      JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredRecords = new JArray();
+      JArray documentRecords = new JArray();
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
@@ -2303,40 +2318,51 @@ public class Script : ScriptBase
 
       foreach (var filter in filters.Where(filter => filter != null)) 
       {
-        foreach (var envelope in DocumentRecord)
+        foreach (var envelope in envelopes)
         {
-          if (envelope.ToString().Contains(filter))
+          if (envelope.ToString().ToLower().Contains(filter.ToLower()))
           {
-            JObject additionalPropertiesForDocumentRecords = new JObject()
-            {
-              ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
-              ["Owner"] = envelope["sender"]["userName"],
-              ["EnvelopeId"] = envelope["envelopeId"],
-              ["Date"] = envelope["statusChangedDateTime"]
-            };
-
-            filteredRecords.Add(new JObject()
-            {
-              ["recordId"] = envelope["envelopeId"],
-              ["recordTypeDisplayName"] = "Agreement",
-              ["recordTypePluralDisplayName"] = "Agreements",
-              ["recordType"] = "Agreement",
-              ["recordTitle"] = envelope["emailSubject"],
-              ["url"] = GetEnvelopeUrl(envelope),
-              ["additionalProperties"] = additionalPropertiesForDocumentRecords
-            });
+            filteredRecords.Add(envelope);
           }
         }
 
         if (filteredRecords.Count > 0)
         {
-          DocumentRecord = new JArray(filteredRecords);
+          envelopes.Clear();
+          envelopes = new JArray(filteredRecords);
           filteredRecords.Clear();
+        }
+        else
+        {
+          envelopes.Clear();
+          break;
         }
       }
 
-      newBody["value"] = (DocumentRecord.Count < top) ? DocumentRecord : new JArray(DocumentRecord.Skip(skip).Take(top).ToArray());
-      newBody["hasMoreResults"] = (skip + top < DocumentRecord.Count) ? true : false;
+      foreach (var envelope in envelopes)
+      {
+        JObject additionalPropertiesForDocumentRecords = new JObject()
+        {
+          ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
+          ["Owner"] = envelope["sender"]["userName"],
+          ["EnvelopeId"] = envelope["envelopeId"],
+          ["Date"] = envelope["statusChangedDateTime"]
+        };
+
+        documentRecords.Add(new JObject()
+        {
+          ["recordId"] = envelope["envelopeId"],
+          ["recordTypeDisplayName"] = "Agreement",
+          ["recordTypePluralDisplayName"] = "Agreements",
+          ["recordType"] = "Agreement",
+          ["recordTitle"] = envelope["emailSubject"],
+          ["url"] = GetEnvelopeUrl(envelope),
+          ["additionalProperties"] = additionalPropertiesForDocumentRecords
+        });
+      }
+
+      newBody["value"] = (documentRecords.Count < top) ? documentRecords : new JArray(documentRecords.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < documentRecords.Count) ? true : false;
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
