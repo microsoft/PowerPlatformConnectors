@@ -2254,7 +2254,6 @@ public class Script : ScriptBase
       {
         foreach (var envelope in envelopes)
         {
-
           if (envelope.ToString().ToLower().Contains(filter.ToLower()))
           {
             filteredActivities.Add(envelope);
