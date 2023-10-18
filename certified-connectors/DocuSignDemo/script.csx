@@ -2241,7 +2241,7 @@ public class Script : ScriptBase
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredActivities = new JArray();
-      JArray Activity = new JArray();
+      JArray activities = new JArray();
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
@@ -2283,7 +2283,7 @@ public class Script : ScriptBase
           ["EnvelopeId"] = envelope["envelopeId"],
           ["Date"] = envelope["statusChangedDateTime"]
         };
-        Activity.Add(new JObject()
+        activities.Add(new JObject()
         {
           ["title"] = envelope["emailSubject"],
           ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
@@ -2293,8 +2293,8 @@ public class Script : ScriptBase
         });
       }
 
-      newBody["value"] = (Activity.Count < top) ? Activity : new JArray(Activity.Skip(skip).Take(top).ToArray());
-      newBody["hasMoreResults"] = (skip + top < Activity.Count) ? true : false;
+      newBody["value"] = (activities.Count < top) ? activities : new JArray(activities.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < activities.Count) ? true : false;
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
@@ -2307,7 +2307,7 @@ public class Script : ScriptBase
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredRecords = new JArray();
-      JArray DocumentRecord = new JArray();
+      JArray documentRecords = new JArray();
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
@@ -2349,7 +2349,7 @@ public class Script : ScriptBase
           ["Date"] = envelope["statusChangedDateTime"]
         };
 
-        DocumentRecord.Add(new JObject()
+        documentRecords.Add(new JObject()
         {
           ["recordId"] = envelope["envelopeId"],
           ["recordTypeDisplayName"] = "Agreement",
@@ -2361,8 +2361,8 @@ public class Script : ScriptBase
         });
       }
 
-      newBody["value"] = (DocumentRecord.Count < top) ? DocumentRecord : new JArray(DocumentRecord.Skip(skip).Take(top).ToArray());
-      newBody["hasMoreResults"] = (skip + top < DocumentRecord.Count) ? true : false;
+      newBody["value"] = (documentRecords.Count < top) ? documentRecords : new JArray(documentRecords.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < documentRecords.Count) ? true : false;
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
