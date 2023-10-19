@@ -23,13 +23,7 @@ Directions: After your account is approved, the FAA will issue an API key.
 2. Add your assigned API key to the new connection reference
 3. Use this connection reference with the FAA connector. See figure 1 and figure 2. The following example demonstrates adding data from Notams to an activity record. 
 However, you have the abiliy to add this data to an entity record.
-![Alt text](image.png)
-![Alt text](image-1.png)
-Figure 3. 
-![Alt text](image-2.png)
-![Alt text](image-3.png)
-Figure 3. Notam data inside of a view.
-![Alt text](image-4.png)
+
 ##Known Issues and Limitations
 In the event the NOTAM database is down for enhancements, then the connector may not function as expected. Wait until you are notified that the database back up and running and then proceed to run your power automate flow again.
 
