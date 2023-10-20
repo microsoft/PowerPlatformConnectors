@@ -2169,11 +2169,18 @@ public class Script : ScriptBase
 
       foreach (var envelope in envelopes)
       {
+        JArray recipientNames = new JArray();
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
         JObject additionalPropertiesForActivity = new JObject()
         {
-          ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
+          ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
-          ["Status"] = envelope["status"],
+          ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
           ["EnvelopeId"] = envelope["envelopeId"],
           ["Date"] = envelope["statusChangedDateTime"]
         };
@@ -2235,9 +2242,15 @@ public class Script : ScriptBase
 
       foreach (var envelope in envelopes)
       {
+        JArray recipientNames = new JArray();
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
         JObject additionalPropertiesForDocumentRecords = new JObject()
         {
-          ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
+          ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
           ["EnvelopeId"] = envelope["envelopeId"],
           ["Date"] = envelope["statusChangedDateTime"]
