@@ -1365,12 +1365,21 @@ public class Script : ScriptBase
     int recipientCount = envelope["recipients"]["recipientCount"].ToObject<int>();
     var recipientCountInNaturalLanguage = (recipientCount > 1) ?
         (" and " + (recipientCount - 1).ToString() + " others have ") : " "; 
-
+ 
     JArray documentArray = (envelope["envelopeDocuments"] as JArray) ?? new JArray();
-    var documentCountInNaturalLanguage = (documentArray.Count > 1) ?
-      (" and " + (documentArray.Count - 1).ToString() + " other documents ") : " ";
+    var documentCount = documentArray.Count;
+    string documentCountInNaturalLanguage = "";
 
-    if (envelope["status"].Equals("sent"))
+    if (documentCount == 3)
+    {
+      documentCountInNaturalLanguage = $" and 1 other document";
+    }
+    else if (documentCount > 3)
+      {
+        documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
+      }
+
+    if (envelope["status"].ToString().Equals("sent"))
     {
       descriptionNLP = envelope["sender"]["userName"] + " " +
         envelope["status"] + " " +
@@ -2275,11 +2284,18 @@ public class Script : ScriptBase
 
       foreach (var envelope in envelopes)
       {
+        JArray recipientNames = new JArray();
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
         JObject additionalPropertiesForActivity = new JObject()
         {
-          ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
+          ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
-          ["Status"] = envelope["status"],
+          ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
           ["EnvelopeId"] = envelope["envelopeId"],
           ["Date"] = envelope["statusChangedDateTime"]
         };
@@ -2341,9 +2357,15 @@ public class Script : ScriptBase
 
       foreach (var envelope in envelopes)
       {
+        JArray recipientNames = new JArray();
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
         JObject additionalPropertiesForDocumentRecords = new JObject()
         {
-          ["Recipient"] = envelope["recipients"]["signers"][0]["name"],
+          ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
           ["EnvelopeId"] = envelope["envelopeId"],
           ["Date"] = envelope["statusChangedDateTime"]
