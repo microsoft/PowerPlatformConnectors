@@ -1367,10 +1367,17 @@ public class Script : ScriptBase
         (" and " + (recipientCount - 1).ToString() + " others have ") : " "; 
  
     JArray documentArray = (envelope["envelopeDocuments"] as JArray) ?? new JArray();
-    var documentCountInNaturalLanguage = (documentArray.Count == 2) ? ""
-      : (documentArray.Count == 3) ? (" and " + (documentArray.Count - 2).ToString() + " other document")
-      : (documentArray.Count > 3) ? (" and " + (documentArray.Count - 2).ToString() + " other documents")
-      : "";
+    var documentCount = documentArray.Count;
+    string documentCountInNaturalLanguage = "";
+
+    if (documentCount == 3)
+    {
+      documentCountInNaturalLanguage = $" and 1 other document";
+    }
+    else if (documentCount > 3)
+      {
+        documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
+      }
 
     if (envelope["status"].ToString().Equals("sent"))
     {
