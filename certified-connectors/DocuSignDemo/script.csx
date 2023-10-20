@@ -1314,9 +1314,9 @@ public class Script : ScriptBase
       documentCountInNaturalLanguage = $" and 1 other document";
     }
     else if (documentCount > 3)
-      {
-        documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
-      }
+    {
+      documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
+    }
 
     if (envelope["status"].ToString().Equals("sent"))
     {
