@@ -2296,7 +2296,6 @@ public class Script : ScriptBase
           ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
           ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
-          ["EnvelopeId"] = envelope["envelopeId"],
           ["Date"] = envelope["statusChangedDateTime"]
         };
         activities.Add(new JObject()
@@ -2367,7 +2366,6 @@ public class Script : ScriptBase
         {
           ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
-          ["EnvelopeId"] = envelope["envelopeId"],
           ["Date"] = envelope["statusChangedDateTime"]
         };
 
