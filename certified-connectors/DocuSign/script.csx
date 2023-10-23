@@ -1546,7 +1546,7 @@ public class Script : ScriptBase
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
-    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://account-d.docusign.com/oauth/userinfo");
+    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://account.docusign.com/oauth/userinfo");
 
     // Access token is in the authorization header already
     userInfoRequest.Headers.Authorization = this.Context.Request.Headers.Authorization;
