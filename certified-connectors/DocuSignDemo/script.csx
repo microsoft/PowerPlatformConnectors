@@ -2164,8 +2164,39 @@ public class Script : ScriptBase
         }
       }
 
+<<<<<<< HEAD
       newBody["value"] = (Activity.Count < top) ? Activity : new JArray(Activity.Skip(skip).Take(top).ToArray());
       newBody["hasMoreResults"] = (skip + top < Activity.Count) ? true : false;
+=======
+      foreach (var envelope in envelopes)
+      {
+        JArray recipientNames = new JArray();
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
+        JObject additionalPropertiesForActivity = new JObject()
+        {
+          ["Recipients"] = recipientNames,
+          ["Owner"] = envelope["sender"]["userName"],
+          ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+          ["Date"] = envelope["statusChangedDateTime"]
+        };
+        activities.Add(new JObject()
+        {
+          ["title"] = envelope["emailSubject"],
+          ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
+          ["dateTime"] = envelope["statusChangedDateTime"],
+          ["url"] = GetEnvelopeUrl(envelope),
+          ["additionalProperties"] = additionalPropertiesForActivity,
+        });
+      }
+
+      newBody["value"] = (activities.Count < top) ? activities : new JArray(activities.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < activities.Count) ? true : false;
+>>>>>>> 6f7712ca (Merge pull request #38 from harshitav-docusign/swagger_updates)
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
@@ -2220,8 +2251,40 @@ public class Script : ScriptBase
         }
       }
 
+<<<<<<< HEAD
       newBody["value"] = (DocumentRecord.Count < top) ? DocumentRecord : new JArray(DocumentRecord.Skip(skip).Take(top).ToArray());
       newBody["hasMoreResults"] = (skip + top < DocumentRecord.Count) ? true : false;
+=======
+      foreach (var envelope in envelopes)
+      {
+        JArray recipientNames = new JArray();
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
+        JObject additionalPropertiesForDocumentRecords = new JObject()
+        {
+          ["Recipients"] = recipientNames,
+          ["Owner"] = envelope["sender"]["userName"],
+          ["Date"] = envelope["statusChangedDateTime"]
+        };
+
+        documentRecords.Add(new JObject()
+        {
+          ["recordId"] = envelope["envelopeId"],
+          ["recordTypeDisplayName"] = "Agreement",
+          ["recordTypePluralDisplayName"] = "Agreements",
+          ["recordType"] = "Agreement",
+          ["recordTitle"] = envelope["emailSubject"],
+          ["url"] = GetEnvelopeUrl(envelope),
+          ["additionalProperties"] = additionalPropertiesForDocumentRecords
+        });
+      }
+
+      newBody["value"] = (documentRecords.Count < top) ? documentRecords : new JArray(documentRecords.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < documentRecords.Count) ? true : false;
+>>>>>>> 6f7712ca (Merge pull request #38 from harshitav-docusign/swagger_updates)
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
