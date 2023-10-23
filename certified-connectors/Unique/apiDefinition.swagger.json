@@ -1,0 +1,467 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Unique",
+    "description": "Managing Unique recording flow",
+    "contact": {
+      "name": "Unique Dev Team",
+      "url": "https://unique.ch",
+      "email": "development@unique.ch"
+    },
+    "version": "1.0"
+  },
+  "host": "api.prod.unique.app",
+  "basePath": "/public",
+  "schemes": ["https"],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/v1/trigger/transcription-ready": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/TranscriptionReadyWebhookPayloadDto"
+        },
+        "headers": {
+          "Accept": {
+            "description": "application/json",
+            "type": "string"
+          }
+        },
+        "description": "Payload of the transcription ready webhook notification"
+      },
+      "post": {
+        "tags": ["LogicApps"],
+        "summary": "Registers the Logic App transcription ready webhook",
+        "description": "Registers the Logic App trigger to receive events when transcription is ready",
+        "operationId": "registerTranscriptionReadyWebhook",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": true,
+            "type": "string",
+            "description": "Api Key",
+            "x-ms-summary": "Api Key"
+          },
+          {
+            "in": "header",
+            "name": "x-company-id",
+            "description": "Company id of the calling company",
+            "type": "string",
+            "x-ms-summary": "Company Id"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "required": ["url"],
+              "type": "object",
+              "properties": {
+                "url": {
+                  "description": "Webhook url",
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successfully registered to the transcription ready webhook",
+            "schema": {
+              "$ref": "#/definitions/CreateWebhookResponseDto"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "x-ms-trigger": "single"
+      }
+    },
+    "/v1/recording/analyze-recording/{recordingId}": {
+      "post": {
+        "tags": ["Recording", "LogicApps"],
+        "summary": "Analyze Speaking Time and Sentiment",
+        "description": "Analyze Participants speaking time and overall sentiment of the recording",
+        "operationId": "AnalyzeSpeakingTime",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recordingId",
+            "description": "Id of the recording",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Recording Id",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "in": "header",
+            "name": "x-company-id",
+            "description": "Company id of the calling company",
+            "type": "string",
+            "x-ms-summary": "Company Id"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Returns recording with participants speaking times & sentiment analysis",
+            "schema": {
+              "$ref": "#/definitions/RecordingDto"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.unique.ch"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.unique.ch/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Finance"
+    }
+  ],
+  "definitions": {
+    "TranscriptionReadyWebhookPayloadDto": {
+      "required": ["recordingId"],
+      "type": "object",
+      "properties": {
+        "recordingId": {
+          "title": "RecordingId",
+          "description": "Id of the recording",
+          "type": "string"
+        }
+      }
+    },
+    "CreateWebhookDto": {
+      "required": ["url"],
+      "type": "object",
+      "properties": {
+        "url": {
+          "description": "webhookUrl",
+          "type": "string",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        }
+      }
+    },
+    "CreateWebhookResponseDto": {
+      "required": ["id", "url"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Id",
+          "type": "string",
+          "x-ms-summary": "Id"
+        },
+        "url": {
+          "description": "webhookUrl",
+          "type": "string",
+          "x-ms-summary": "Webhook Url"
+        }
+      }
+    },
+    "RecordingDto": {
+      "required": [
+        "recordingStartTime",
+        "recordingEndTime",
+        "storedVideo",
+        "spokenLanguage",
+        "meetingTypeInstance",
+        "conversation",
+        "source"
+      ],
+      "type": "object",
+      "properties": {
+        "recordingId": {
+          "type": "string"
+        },
+        "recordingStartTime": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "recordingEndTime": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "storedVideo": {
+          "type": "string"
+        },
+        "spokenLanguage": {
+          "type": "string"
+        },
+        "meetingTypeInstance": {
+          "$ref": "#/definitions/MeetingTypeInstanceDto"
+        },
+        "conversation": {
+          "$ref": "#/definitions/ConversationDto"
+        },
+        "source": {
+          "enum": ["UNKNOWN", "ZOOM", "TEAMS", "GOOGLE_MEET", "AIRCALL"],
+          "type": "string"
+        }
+      }
+    },
+    "MeetingTypeInstanceDto": {
+      "required": ["id", "name", "meetingStages"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "meetingStages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MeetingStageDto"
+          }
+        }
+      }
+    },
+    "ConversationDto": {
+      "required": ["participants", "cues"],
+      "type": "object",
+      "properties": {
+        "stats": {
+          "$ref": "#/definitions/StatsDto"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ParticipantDto"
+          }
+        },
+        "cues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CueDto"
+          }
+        }
+      }
+    },
+    "MeetingStageDto": {
+      "required": ["id", "name", "target", "confidence", "expressions"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "target": {
+          "enum": ["INTERNAL", "EXTERNAL", "BOTH"],
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "expressions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExpressionDto"
+          }
+        }
+      }
+    },
+    "StatsDto": {
+      "required": [
+        "overallSentiment",
+        "externalTalkPercentage",
+        "speakTimeInternalSeconds",
+        "speakTimeExternalSeconds",
+        "internalMonologues",
+        "longestInternalMonologueInMin",
+        "externalViews",
+        "internalViews"
+      ],
+      "type": "object",
+      "properties": {
+        "overallSentiment": {
+          "type": "number"
+        },
+        "externalTalkPercentage": {
+          "type": "number"
+        },
+        "speakTimeInternalSeconds": {
+          "type": "number"
+        },
+        "speakTimeExternalSeconds": {
+          "type": "number"
+        },
+        "internalMonologues": {
+          "type": "number"
+        },
+        "longestInternalMonologueInMin": {
+          "type": "number"
+        },
+        "externalViews": {
+          "type": "number"
+        },
+        "internalViews": {
+          "type": "number"
+        }
+      }
+    },
+    "ParticipantDto": {
+      "required": ["id", "name", "internal", "organizer", "role", "stats"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "internal": {
+          "type": "boolean"
+        },
+        "organizer": {
+          "type": "boolean"
+        },
+        "uniqueUserId": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "invited": {
+          "type": "boolean"
+        },
+        "stats": {
+          "$ref": "#/definitions/ParticipantStatsDto"
+        }
+      }
+    },
+    "CueDto": {
+      "required": [
+        "id",
+        "name",
+        "text",
+        "start",
+        "end",
+        "internal",
+        "diarizationService",
+        "transcriptionService"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "start": {
+          "type": "number"
+        },
+        "end": {
+          "type": "number"
+        },
+        "internal": {
+          "type": "boolean"
+        },
+        "isLive": {
+          "type": "boolean"
+        },
+        "isTranslation": {
+          "type": "boolean"
+        },
+        "diarizationService": {
+          "enum": [
+            "MICROSOFT",
+            "REVAI",
+            "ZOOM",
+            "TEAMS",
+            "BOT",
+            "WHISPERRAW",
+            "WHISPERDERIVED"
+          ],
+          "type": "string"
+        },
+        "transcriptionService": {
+          "enum": ["MICROSOFT", "REVAI", "TEAMS", "WHISPERPROMPT"],
+          "type": "string"
+        }
+      }
+    },
+    "ExpressionDto": {
+      "required": ["id", "confidence", "expression"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "expression": {
+          "type": "string"
+        }
+      }
+    },
+    "ParticipantStatsDto": {
+      "required": [
+        "talkPercentage",
+        "speakTimeSeconds",
+        "monologues",
+        "longestMonologueInMin"
+      ],
+      "type": "object",
+      "properties": {
+        "talkPercentage": {
+          "type": "number"
+        },
+        "speakTimeSeconds": {
+          "type": "number"
+        },
+        "monologues": {
+          "type": "number"
+        },
+        "longestMonologueInMin": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-api-key"
+    }
+  }
+}
