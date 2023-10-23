@@ -33,10 +33,10 @@ Convert a YAML to a JSON
 ### Convert HTML Table to JSON
 Convert an HTML table to a JSON or extract the first HTML table from an URL and convert it to a JSON
 
-### Convert HTML / URL to JPG Image
+### Convert HTML or URL to JPG Image
 Convert an HTML to an JPG (JPEG) Image or convert an URL containing HTML to an JPG (JPEG) Image
 
-### Convert HTML / URL to PDF
+### Convert HTML or URL to PDF
 Convert an HTML to a PDF or convert an URL containing HTML to a PDF
 
 ### Convert File (DOCX, PPTX, XLSX, HTML, ...) to PDF
@@ -60,7 +60,7 @@ Add a text to a Word file (DOCX) or create a new Word file (DOCX) with a text
 ### Extract Bookmarks from Word File
 Extract all bookmarks from a Word fie (DOCX) and get them as a list
 
-### Extract results from 'Send HTTP request to SharePoint'
+### Extract results from Send HTTP request to SharePoint
 Extract results from the action 'Send HTTP request to SharePoint'
 
 ### Extract Information from PDF
@@ -90,10 +90,10 @@ Protect a PDF with a password
 ### Unprotect PDF
 Remove the protection from a pdf
 
-### Read QR / Barcode
+### Read QR or Barcode
 Read a QR code or Barcode from an image
 
-### Create QR / Barcode
+### Create QR or Barcode
 Create a QR code or a Barcode from a string
 
 ### Get File from URL
