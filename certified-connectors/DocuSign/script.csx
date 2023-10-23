@@ -1304,12 +1304,21 @@ public class Script : ScriptBase
     int recipientCount = envelope["recipients"]["recipientCount"].ToObject<int>();
     var recipientCountInNaturalLanguage = (recipientCount > 1) ?
         (" and " + (recipientCount - 1).ToString() + " others have ") : " "; 
-
+ 
     JArray documentArray = (envelope["envelopeDocuments"] as JArray) ?? new JArray();
-    var documentCountInNaturalLanguage = (documentArray.Count > 1) ?
-      (" and " + (documentArray.Count - 1).ToString() + " other documents ") : " ";
+    var documentCount = documentArray.Count;
+    string documentCountInNaturalLanguage = "";
 
-    if (envelope["status"].Equals("sent"))
+    if (documentCount == 3)
+    {
+      documentCountInNaturalLanguage = $" and 1 other document";
+    }
+    else if (documentCount > 3)
+      {
+        documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
+      }
+
+    if (envelope["status"].ToString().Equals("sent"))
     {
       descriptionNLP = envelope["sender"]["userName"] + " " +
         envelope["status"] + " " +
