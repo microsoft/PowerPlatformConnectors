@@ -7,67 +7,82 @@ Convert your data easily from one format to another with Microsoft Power Automat
 ## Supported Operations
 
 ### Convert CSV to JSON
-Convert CSV data to JSON
+Convert a CSV to a JSON
 
 ### Convert JSON to CSV
-Convert JSON to CSV data
-
-### Convert JSON to XML
-Convert JSON to XML
+Convert a JSON to a CSV
 
 ### Convert XML to JSON
-Convert XML to JSON
+Convert an XML to a JSON
 
-### Convert CSV to Excel
-Convert CSV data to Excel file
+### Convert JSON to XML
+Convert a JSON to an XML
 
-### Convert JSON to Excel
-Convert JSON to Excel file
+### Convert CSV to Excel File
+Convert a CSV to an Excel file (XLSX)
 
-### Convert HTTP request SharePoint results to list
-Convert SharePoint search results to a simple list
+### Convert JSON to Excel File
+Convert a JSON to an Excel file (XLSX)
 
-### Convert file (DOCX, PPTX, XLSX, HTML, ...) to PDF
-Convert a document (Word, Powerpoint, Excel, ..) to a PDF-File
+### Convert JSON to YAML
+Convert a JSON to a YAML
 
-### Regular Expression (RegEx)
-Searches a specified input string for all occurrences of a specified regular expression
+### Convert YAML to JSON
+Convert a YAML to a JSON
 
-### Create Word (DOCX) file
-Create a Word (DOCX) file
+### Convert HTML Table to JSON
+Convert an HTML table to a JSON or extract the first HTML table from an URL and convert it to a JSON
 
-### Add Image to a Word (DOCX) file
-Add Image to a Word (DOCX) file or create new Word (DOCX) file with image
+### Convert HTML or URL to JPG Image
+Convert an HTML to an JPG (JPEG) Image or convert an URL containing HTML to an JPG (JPEG) Image
 
-### Add Image within a Table to a Word (DOCX) file 
-Add Image within a Table to a Word (DOCX) file or create new Word (DOCX) file with image
+### Convert HTML or URL to PDF
+Convert an HTML to a PDF or convert an URL containing HTML to a PDF
 
-### Add Table to a Word (DOCX) file
-Add Table to a Word (DOCX) file or create new Word (DOCX) file with image
+### Convert File (DOCX, PPTX, XLSX, HTML, ...) to PDF
+Convert a document file (Word, Powerpoint, Excel, ..) to a PDF file
 
-### Add Text to a Word (DOCX) file
-Add Text to a Word (DOCX) file or create new Word (DOCX) file with image
+### Create Word File
+Create a Word file (DOCX) with multiple text sections or add multiple text sections to a Word file (DOCX)
 
-### Extract Word (DOCX) bookmarks to a list
-Extract all Word (DOCX) bookmarks to a list
+### Add Image to Word File
+Add Image to a Word file (DOCX) or create a new Word file (DOCX) with image
 
-### Resize an image
-Resize an image (JPEG, JPG, PNG, BMP, GIF, TIFF, ..)
+### Add Image to Word File within a Table 
+Add an image to a Word file (DOCX) within a table or create a new Word file (DOCX) with an image within a table
 
-### Rotate an image
-Rotate an image (JPEG, JPG, PNG, BMP, GIF, TIFF, ..)
+### Add Table to Word File
+Add Table to a Word file (DOCX) or create a new Word file (DOCX) with a table
 
-### Compress an image
-Compress an image
+### Add Text to Word File
+Add a text to a Word file (DOCX) or create a new Word file (DOCX) with a text
 
-### Convert an image
-Convert an image to JPEG, JPG, PNG, BMP, GIF, TIFF, ..
+### Extract Bookmarks from Word File
+Extract all bookmarks from a Word fie (DOCX) and get them as a list
 
-### Merge PDFs
-Merge PDFs
+### Extract results from Send HTTP request to SharePoint
+Extract results from the action 'Send HTTP request to SharePoint'
 
-### Get PDF Metadata
-Get the meta data of a PDF
+### Extract Information from PDF
+Get the metadata of a PDF
+
+### Extract Information from Image
+Get the metadata information from an image (JPEG, JPG, PNG, BMP, GIF, TIFF, ...)
+
+### Convert Image to another Image Format
+Convert an image to another format (JPEG, JPG, PNG, BMP, GIF, TIFF)
+
+### Resize Image
+Adjust the width and height of an image (JPEG, JPG, PNG, BMP, GIF, TIFF)
+
+### Rotate Image
+Rotate an image (JPEG, JPG, PNG, BMP, GIF, TIFF) by an angle (degree) of your choice
+
+### Compress JPG Image
+Compress a JPG (JPEG) image
+
+### Merge PDF Files
+Merge two PDF files into one PDF file
 
 ### Protect PDF
 Protect a PDF with a password
@@ -75,11 +90,14 @@ Protect a PDF with a password
 ### Unprotect PDF
 Remove the protection from a pdf
 
-### Convert HTML table to JSON
-Convert HTML table to JSON
-
 ### Read QR or Barcode
-Read a QR or Barcode from an image
+Read a QR code or Barcode from an image
 
-### Create a QR or Barcode
-Create a QR or Barcode from an string
+### Create QR or Barcode
+Create a QR code or a Barcode from a string
+
+### Get File from URL
+Get a file (PDF, JPG, JPEG, PNG, CSV, ...) from an URL
+
+### Regular Expression (RegEx)
+Searches the specified input string for all occurrences of a specified .NET regular expression (RegEx), using the specified matching options.
