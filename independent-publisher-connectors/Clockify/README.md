@@ -2,6 +2,10 @@
 
 Clockify is a popular, easy to use, free time tracking software solution. This connector helps to connect your Clockify account to the Power Platform so you can pull data like Workspaces, Projects, Tasks and TimeEntries.
 
+## Change Notes 
+
+- 28 Oct 2023 : Added support for the new v1 version of clockify. Old Version deprecated but the existing flows will continue to run.
+
 ## Publisher: Dr Adrian Colquhoun (Strategik)
 
 ## Prerequisites
@@ -42,7 +46,6 @@ There are no known issues at time of publishing.
 
 ## Rate Limits
 There's a rate limit of 10 requests per second. If you get over the limit, you'll get "Too many requests" error.
-
 
 
 ## Deployment Instructions
