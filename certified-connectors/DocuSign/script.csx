@@ -263,7 +263,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1002"
+          ["x-ms-summary"] = "DS1003"
       };
     }
 
@@ -1314,9 +1314,9 @@ public class Script : ScriptBase
       documentCountInNaturalLanguage = $" and 1 other document";
     }
     else if (documentCount > 3)
-    {
-      documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
-    }
+      {
+        documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
+      }
 
     if (envelope["status"].ToString().Equals("sent"))
     {
@@ -2181,7 +2181,10 @@ public class Script : ScriptBase
           ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
           ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+<<<<<<< HEAD
           ["EnvelopeId"] = envelope["envelopeId"],
+=======
+>>>>>>> 7bdd290b4e8e7f6c31652835e9bc5983e72f39cb
           ["Date"] = envelope["statusChangedDateTime"]
         };
         activities.Add(new JObject()
@@ -2252,7 +2255,10 @@ public class Script : ScriptBase
         {
           ["Recipients"] = recipientNames,
           ["Owner"] = envelope["sender"]["userName"],
+<<<<<<< HEAD
           ["EnvelopeId"] = envelope["envelopeId"],
+=======
+>>>>>>> 7bdd290b4e8e7f6c31652835e9bc5983e72f39cb
           ["Date"] = envelope["statusChangedDateTime"]
         };
 
