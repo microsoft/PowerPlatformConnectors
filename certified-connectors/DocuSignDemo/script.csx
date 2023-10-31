@@ -2132,6 +2132,7 @@ public class Script : ScriptBase
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JObject newBody = new JObject();
+      TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredActivities = new JArray();
@@ -2169,6 +2170,8 @@ public class Script : ScriptBase
 
       foreach (var envelope in envelopes)
       {
+        DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+        DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
         JArray recipientNames = new JArray();
         System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
         foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
@@ -2178,16 +2181,16 @@ public class Script : ScriptBase
 
         JObject additionalPropertiesForActivity = new JObject()
         {
-          ["Recipients"] = recipientNames,
-          ["Owner"] = envelope["sender"]["userName"],
+          ["Recipients"] = string.Join(", ", recipientNames),
+          ["Sender Name"] = envelope["sender"]["userName"],
           ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
-          ["Date"] = envelope["statusChangedDateTime"]
+          ["Date"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy")
         };
         activities.Add(new JObject()
         {
           ["title"] = envelope["emailSubject"],
           ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
-          ["dateTime"] = envelope["statusChangedDateTime"],
+          ["dateTime"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
           ["url"] = GetEnvelopeUrl(envelope),
           ["additionalProperties"] = additionalPropertiesForActivity,
         });
@@ -2204,6 +2207,7 @@ public class Script : ScriptBase
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JObject newBody = new JObject();
+      TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredRecords = new JArray();
@@ -2241,6 +2245,9 @@ public class Script : ScriptBase
 
       foreach (var envelope in envelopes)
       {
+        DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+        DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
         JArray recipientNames = new JArray();
         foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
         {
@@ -2249,9 +2256,10 @@ public class Script : ScriptBase
 
         JObject additionalPropertiesForDocumentRecords = new JObject()
         {
-          ["Recipients"] = recipientNames,
-          ["Owner"] = envelope["sender"]["userName"],
-          ["Date"] = envelope["statusChangedDateTime"]
+          ["Recipients"] = string.Join(", ", recipientNames),
+          ["Sender Name"] = envelope["sender"]["userName"],
+          ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+          ["Date"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy")
         };
 
         documentRecords.Add(new JObject()
