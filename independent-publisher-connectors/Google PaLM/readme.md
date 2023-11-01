@@ -1,5 +1,9 @@
 # Google PaLM
 
+## Publisher
+
+Name: Priyaranjan KS
+
 ## Overview
 The Google Palm API offers advanced text generation and manipulation capabilities. This documentation covers the endpoints, their parameters, and other essential details.
 
