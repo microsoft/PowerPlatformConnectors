@@ -15,12 +15,18 @@ The Google Palm API offers advanced text generation and manipulation capabilitie
 
 ## Security
 ### Obtaining an API Key
-To use the Google Palm API, you need an API key. Follow these steps to obtain one:
-1. Sign in to the [Google Cloud Platform Console](https://console.cloud.google.com/).
-2. Create a new project or select an existing one.
-3. Navigate to "APIs & Services" > "Credentials".
-4. Click on "Create credentials" and select "API key".
-5. Your new API key will appear. Restrict the API key for security purposes and note it down for use.
+
+To start using the PaLM API, you need to obtain an API key. Follow these steps to get your API key:
+
+1. **Visit the API Key Generation Page**
+   - Go to [Google MakerSuite](https://makersuite.google.com/app/apikey) to access the API key generation interface.
+
+2. **Create API Key**
+   - Once on the page, you have two options:
+     - **Create API Key in New Project**: Select this if you want to create a new project for your API key.
+     - **Create API Key in Existing Project**: Choose this if you prefer to use an existing project for your API key.
+
+By following these steps, you will obtain an API key that is required to authenticate and use the PaLM API.
 
 **Note**: Ensure to keep your API key secure and do not share it publicly.
 
