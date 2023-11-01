@@ -1,7 +1,7 @@
-# Google Palm API Documentation
+# Google PaLM API Documentation
 
 ## Overview
-The Google Palm API offers advanced text generation and manipulation capabilities. This documentation covers all endpoints, their parameters, and other essential details.
+The Google Palm API offers advanced text generation and manipulation capabilities. This documentation covers the endpoints, their parameters, and other essential details.
 
 ## API Information
 - **Swagger Version**: 2.0
@@ -111,6 +111,34 @@ Deletes a specific model.
 
 *Please replace `{model}`, `{modelName}`, and `{modelType}` with appropriate values as per your use case.*
 
+
+## Known Issues and Limitations
+The PaLM API has several limitations which users should be aware of:
+
+1. **Edge Cases**
+   - The API may struggle with rare or unusual situations that are not well-represented in the training data.
+   - This can lead to issues like model overconfidence, misinterpretation of context, or inappropriate outputs.
+
+2. **Model Hallucinations, Grounding, and Factuality**
+   - The API can lack grounding in real-world knowledge, leading to outputs that are plausible but factually incorrect, irrelevant, or nonsensical.
+
+3. **Data Quality and Tuning**
+   - The performance of the API is heavily dependent on the quality and accuracy of the input data.
+   - Inaccurate or biased input data can lead to suboptimal performance or false model outputs.
+
+4. **Bias Amplification**
+   - The API may inadvertently amplify existing biases in the training data, leading to outputs that reinforce societal prejudices.
+
+5. **Language Quality**
+   - The API's multilingual capabilities are stronger in English, with potential for reduced performance in non-English languages or less-represented English dialects.
+   - Fairness evaluations are primarily conducted in English, which may not cover all potential biases in other languages.
+
+6. **Limited Domain Expertise**
+   - The API may not provide accurate or detailed responses on highly specialized or technical topics.
+   - For complex use cases, domain-specific tuning and human supervision are recommended.
+
+7. **Length and Structure of Inputs and Outputs**
+   - The API has a maximum input token limit of 8k and output token limit of 1k.
+   - Safety classifiers are not applied if these limits are exceeded, potentially leading to poor model performance.
+   - The API's performance can be affected by inputs with unusual or complex structures.
 ---
-
-
