@@ -10,133 +10,87 @@
                 "https://api.thomsonreuters.com/auth/3e.ewh"
             ],
             "redirectMode": "Global",
-            "additionalParameters": {
-              "prodClientId":{
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "prodClientSecret": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "previewClientId": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.preview.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "previewClientSecret": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.preview.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              },
-              "ciamAuthority": {
-                "type": "string",
-                "applicableWhen": [
-                  {
-                    "parameter": "envName",
-                    "oneOf": [
-                      "api.us.3e.thomsonreuters.com",
-                      "api.us.preview.3e.thomsonreuters.com"
-                    ]
-                  }
-                ]
-              }
-            },
+            "redirectUrl": "https://global.consent.azure-apim.net/redirect",
             "customParameters": {
-              "prodClientId": {
-                "value": "{{PROD_CLIENT_id}}"
-              },
-              "prodClientSecret": {
-                "value": "{{PROD_SECRET}}"
-              },
-              "previewClientId": {
-                "value": "{{PREVIEW_CLIENT_ID}}"
-              },
-              "previewClientSecret": {
-                "value": "{{PREVIEW_SECRET}}"
-              },
               "ciamAuthority": {
-                "value": "https://auth.thomsonreuters.com/"
+                "value": "https://auth-nonprod.thomsonreuters.com/"
               },
               "authorizationUrlTemplate": {
-                "value": "https://{envName}/webhook/v1/authorize"
+                "value": "https://{customHost}/3e/events/connector/v1/authorize"
               },
               "authorizationUrlQueryStringTemplate": {
-                "value": "?response_type=code&client_id={prodClientId}{previewClientId}&scope={scopes}&redirect_uri={redirectUrl}&tenantId={tenantId}&state={State}"
+                "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
               },
               "tokenUrlTemplate": {
                 "value": "{ciamAuthority}oauth/token"
               },
               "tokenBodyTemplate": {
-                "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={prodClientId}{previewClientId}&client_secret={prodClientSecret}{previewClientSecret}"
+                "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
               },
               "refreshUrlTemplate": {
                 "value": "{ciamAuthority}oauth/token"
               },
               "refreshBodyTemplate": {
-                "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={prodClientId}{previewClientId}&client_secret={prodClientSecret}{previewClientSecret}"
+                "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
               }
             }
-          }
+          },
+          "uiDefinition": {
+            "displayName": "Login",
+            "description": "Sign in with your 3E credentials",
+            "tooltip": "Provide 3E credentials",
+            "constraints": {
+              "required": "true",
+              "hidden": "false"
+            }
+        }
       },
-      "token:envName": {
+      "token:customHost": {
         "type": "string",
         "uiDefinition": {
           "constraints": {
-            "allowedValues": [
-              {
-                "text": "prod",
-                "value": "api.us.3e.thomsonreuters.com"
-              },
-              {
-                "text": "preview",
-                "value": "api.us.preview.3e.thomsonreuters.com"
-              }
-            ],
             "required": "true",
             "tabIndex": 1
           },
-          "description": "The Preview environment will enable you to accurately preview the forthcoming release before it is available to your Production environment.",
-          "displayName": "Environment",
-          "tooltip": "Select Production environment or Preview environment."
+          "description": "The APIM host domain.",
+          "displayName": "Host",
+          "tooltip": "Enter host domain."
         }
       },
-      "token:tenantId": {
+      "token:3eInstanceId": {
         "type": "string",
         "uiDefinition": {
           "constraints": {
             "required": "true",
             "tabIndex": 2
           },
-          "description": "The Tenant ID of the 3E instance.",
-          "displayName": "3E Tenant",
-          "tooltip": "Enter the 3E Instance TRS ID."
+          "description": "ID of the 3E instance.",
+          "displayName": "3E Instance ID",
+          "tooltip": "Enter the 3E Instance ID."
+        }
+      },
+      "token:clientId": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "tabIndex": 3
+          },
+          "description": "Client Id",
+          "displayName": "Client Id",
+          "tooltip": "Enter Client Id"
+        }
+      },
+      "token:clientSecret": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "tabIndex": 4
+          },
+          "description": "Client Secret.",
+          "displayName": "Client Secret",
+          "tooltip": "Enter CIAM Client Secret"
         }
       },
       "token:notes": {
@@ -144,13 +98,1824 @@
         "uiDefinition": {
           "constraints": {
             "required": "false",
-            "tabIndex": 3
+            "tabIndex": 5
           },
           "description": "Notes for connection.",
           "displayName": "Notes",
           "tooltip": "Save your notes about this connection."
         }
+      },
+      "token:usePam": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "allowedValues": [
+              {
+                "text": "false",
+                "value": "false"
+              },
+              {
+                "text": "true",
+                "value": "true"
+              }
+            ],
+            "required": "false",
+            "tabIndex": 6
+          },
+          "description": "Use to login with PAM user.",
+          "displayName": "Use PAM User",
+          "tooltip": "Select true to login with PAM user."
+        }
       }
+    },
+    "connectionParameterSets": {
+      "uiDefinition": {
+        "displayName": "Environment",
+        "description": "Select the name of the environment."
+      },
+      "values": [
+        {
+          "name": "aadProd",
+          "uiDefinition": {
+            "displayName": "Production (Elite ID)",
+            "description": "Production (Elite ID)."
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "clientId": "[[DUMMY]]",
+                "clientSecret": "[[DUMMY]]",
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "scopes": [
+                  "https://elite.com/prod/live/3e/ewh.all",
+                  "offline_access",
+                  "openid",
+                  "profile"
+                ],
+                "customParameters": {
+                  "authorizationUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&state={State}&prompt=select_account"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/organizations/oauth2/v2.0/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/organizations/oauth2/v2.0/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Sign in with your Azure Active Directory credentials",
+                "description": "Sign in with your Azure Active Directory credentials",
+                "tooltip": "Provide Azure Active Directory credentials",
+                "constraints": {
+                  "required": "false",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID.",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.elite.com",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.elite.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false"
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "aadPreview",
+          "uiDefinition": {
+            "displayName": "Preview (Elite ID)",
+            "description": "Preview (Elite ID)."
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "clientId": "[[DUMMY]]",
+                "clientSecret": "[[DUMMY]]",
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "scopes": [
+                  "https://elite.com/prod/preview/3e/ewh.all",
+                  "offline_access",
+                  "openid",
+                  "profile"
+                ],
+                "customParameters": {
+                  "authorizationUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&state={State}&prompt=select_account"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/organizations/oauth2/v2.0/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/organizations/oauth2/v2.0/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Sign in with your Azure Active Directory credentials",
+                "description": "Sign in with your Azure Active Directory credentials",
+                "tooltip": "Provide Azure Active Directory credentials",
+                "constraints": {
+                  "required": "false",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID.",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.elite.com/preview",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.elite.com/preview"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false"
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "aadNonprod",
+          "uiDefinition": {
+            "displayName": "Development (For Elite use only) (Elite ID)",
+            "description": "For non-production Elite environments."
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "authorizationUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={customScopes}&redirect_uri={redirectUrl}&state={State}&prompt=select_account"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Sign in with your Azure Active Directory credentials",
+                "description": "Sign in with your Azure Active Directory credentials",
+                "tooltip": "Provide Azure Active Directory credentials",
+                "constraints": {
+                  "required": "false",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true"
+                },
+                "description": "The APIM host domain.",
+                "displayName": "Host",
+                "tooltip": "Enter host domain, e.g. api.us.nprd.elite.com/dev"
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID.",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:TenantId": {
+              "type": "string",
+              "metadata": {
+                "sourceType": "AzureActiveDirectoryTenant"
+              },
+              "uiDefinition": {
+                "displayName": "Tenant ID",
+                "description": "Tenant ID of your Azure Active Directory application.",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:clientId": {
+              "type": "string",
+              "uiDefinition": {
+                "displayName": "Client ID",
+                "description": "Client (or Application) ID of your Azure Active Directory application.",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:clientSecret": {
+              "type": "securestring",
+              "uiDefinition": {
+                "displayName": "Client Secret",
+                "description": "Client secret of your Azure Active Directory application.",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customScopes": {
+              "type": "string",
+              "uiDefinition": {
+                "displayName": "Scopes",
+                "description": "Please enter the scopes.",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false"
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            }
+          }
+        },
+        {
+          "name": "liveus",
+          "uiDefinition": {
+            "displayName": "Production - United States (Deprecated)",
+            "description": "Production - United States.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveusCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveusCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.us.elite.com",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.us.elite.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "liveuks",
+          "uiDefinition": {
+            "displayName": "Production - United Kingdom (Deprecated)",
+            "description": "Production - United Kingdom.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveukCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveukCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.uk.elite.com",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.uk.elite.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "livecac",
+          "uiDefinition": {
+            "displayName": "Production - Canada (Deprecated)",
+            "description": "Production - Canada.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{livecacCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{livecacCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.ca.elite.com",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.ca.elite.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "liveweu",
+          "uiDefinition": {
+            "displayName": "Production - West Europe (Deprecated)",
+            "description": "Production - West Europe.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveweuCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveweuCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.eu.elite.com",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.eu.elite.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "liveanz",
+          "uiDefinition": {
+            "displayName": "Production - Australia (Deprecated)",
+            "description": "Production - Australia.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{liveanzCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{liveanzCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.au.elite.com",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.au.elite.com"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewus",
+          "uiDefinition": {
+            "displayName": "Preview - United States (Deprecated)",
+            "description": "Preview - United States.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewusCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewusCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.us.elite.com/preview",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.us.elite.com/preview"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewuk",
+          "uiDefinition": {
+            "displayName": "Preview - United Kingdom (Deprecated)",
+            "description": "Preview - United Kingdom.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewukCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewukCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.uk.elite.com/preview",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.uk.elite.com/preview"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewca",
+          "uiDefinition": {
+            "displayName": "Preview - Canada (Deprecated)",
+            "description": "Preview - Canada.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewcaCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewcaCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.ca.elite.com/preview",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.ca.elite.com/preview"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "previeweu",
+          "uiDefinition": {
+            "displayName": "Preview - West Europe (Deprecated)",
+            "description": "Preview - West Europe.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previeweuCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previeweuCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.eu.elite.com/preview",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.eu.elite.com/preview"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "previewau",
+          "uiDefinition": {
+            "displayName": "Preview - Australia (Deprecated)",
+            "description": "Preview - Australia.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth.thomsonreuters.com/"
+                  },
+                  "clientId": {
+                    "value": "{{previewauCustomClientId}}"
+                  },
+                  "clientSecret": {
+                    "value": "{{previewauCustomClientSecret}}"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "defaultValue": "api.au.elite.com/preview",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1,
+                  "hidden": "true",
+                  "allowedValues": [
+                    {
+                      "text": "default",
+                      "value": "api.au.elite.com/preview"
+                    }
+                  ]
+                },
+                "description": "Select default to continue.",
+                "displayName": "Host",
+                "tooltip": "Select default to continue."
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 3
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 4
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        },
+        {
+          "name": "nonprod",
+          "uiDefinition": {
+            "displayName": "Development (For Elite use only) (Deprecated)",
+            "description": "For non-production Elite environments.",
+            "constraints": {
+              "hidden": "false"
+            }
+          },
+          "metadata": {
+            "allowSharing": false
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "scopes": [
+                    "offline_access",
+                    "https://api.thomsonreuters.com/auth/3e.ewh"
+                ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+                "customParameters": {
+                  "ciamAuthority": {
+                    "value": "https://auth-nonprod.thomsonreuters.com/"
+                  },
+                  "authorizationUrlTemplate": {
+                    "value": "https://{customHost}/3e/events/connector/v1/authorize"
+                  },
+                  "authorizationUrlQueryStringTemplate": {
+                    "value": "?response_type=code&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&3eInstanceId={3eInstanceId}&state={State}&usePam={usePam}"
+                  },
+                  "tokenUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "tokenBodyTemplate": {
+                    "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  },
+                  "refreshUrlTemplate": {
+                    "value": "{ciamAuthority}oauth/token"
+                  },
+                  "refreshBodyTemplate": {
+                    "value": "code={code}&grant_type=refresh_token&refresh_token={refreshToken}&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Login",
+                "description": "Sign in with your 3E credentials",
+                "tooltip": "Provide 3E credentials",
+                "constraints": {
+                  "required": "true",
+                  "hidden": "false"
+                }
+              }
+            },
+            "token:customHost": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 1
+                },
+                "description": "The APIM host domain.",
+                "displayName": "Host",
+                "tooltip": "Enter host domain, e.g. api.us.nonprod.elite.com/dev"
+              }
+            },
+            "token:3eInstanceId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 2
+                },
+                "description": "ID of the 3E instance.",
+                "displayName": "3E Instance ID",
+                "tooltip": "Enter the 3E Instance ID."
+              }
+            },
+            "token:clientId": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 3
+                },
+                "description": "Client Id",
+                "displayName": "Client Id",
+                "tooltip": "Enter Client Id"
+              }
+            },
+            "token:clientSecret": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "true",
+                  "tabIndex": 4
+                },
+                "description": "Client Secret.",
+                "displayName": "Client Secret",
+                "tooltip": "Enter CIAM Client Secret"
+              }
+            },
+            "token:notes": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "required": "false",
+                  "tabIndex": 5
+                },
+                "description": "Notes for connection.",
+                "displayName": "Notes",
+                "tooltip": "Save your notes about this connection."
+              }
+            },
+            "token:usePam": {
+              "type": "string",
+              "uiDefinition": {
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "text": "false",
+                      "value": "false"
+                    },
+                    {
+                      "text": "true",
+                      "value": "true"
+                    }
+                  ],
+                  "required": "false",
+                  "tabIndex": 6
+                },
+                "description": "Use to login with PAM user.",
+                "displayName": "Use PAM User",
+                "tooltip": "Select true to login with PAM user."
+              }
+            }
+          }
+        }
+      ]
     },
     "iconBrandColor": "#FA6400",
     "capabilities": [],
@@ -159,20 +1924,43 @@
         "templateId": "dynamichosturl",
         "title": "Set host for connection",
         "parameters": {
-          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('token:envName')/webhook"
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('token:customHost')/3e/events/webhook"
         }
       },
       {
         "templateId": "setqueryparameter",
         "title": "Set Tenant ID",
         "parameters": {
-          "x-ms-apimTemplateParameter.name": "tenantId",
-          "x-ms-apimTemplateParameter.value": "@connectionParameters('token:tenantId')",
+          "x-ms-apimTemplateParameter.name": "3eInstanceId",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('token:3eInstanceId')",
           "x-ms-apimTemplateParameter.existsAction": "skip"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Notes header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "X-notes",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('token:notes','')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "DataObjectEventTrigger",
+            "DataObjectAttributeEventTrigger",
+            "WorkflowActionTrigger",
+            "MatterCreatedEventTrigger",
+            "MatterUpdatedEventTrigger",
+            "ClientCreatedEventTrigger",
+            "ClientUpdatedEventTrigger",
+            "TimekeeperUpdatedEventTrigger",
+            "RcptMasterCreatedEventTrigger",
+            "TrustReceiptCreatedEventTrigger",
+            "CdsDocumentTrigger"
+          ]
         }
       }
     ],
-    "publisher": "Thomson Reuters",
-    "stackOwner": "Thomson Reuters"
+    "publisher": "Elite",
+    "stackOwner": "Elite"
   }
 }
