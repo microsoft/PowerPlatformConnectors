@@ -63,6 +63,11 @@ The connector supports the following operations:
 * `Get Room Space`: Retrieves one or more records from the Room Space table.
 * `Create Room Space`: Creates a new record in the Room Space table.
 
+### Room Space Maintenance
+* `Get Room Space Maintenance`: Retrieves one or more records from the Room Space Maintenance table.
+* `Create Room Space Maintenance`: Creates a new record in the Room Space Maintenance table.
+* `Update Room Space Maintenance`: Updates an existing record in the Room Space Maintenance table.
+
 ### Term
 * `Get Term`: Retrieves one or more records from the Term table.
 
