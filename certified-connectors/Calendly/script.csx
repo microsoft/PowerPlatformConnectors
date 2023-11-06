@@ -13,6 +13,14 @@
         var userData = JObject.Parse(content)["resource"];
         var organization = userData["current_organization"];
 
+        if ("GetEventTypes".Equals(this.Context.OperationId))
+        {
+            var uriBuilder = new UriBuilder($"{this.Context.Request.RequestUri.ToString()}&organization={organization}");
+            this.Context.Request.RequestUri = uriBuilder.Uri;
+            HttpResponseMessage eventTypesResponse = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+            return eventTypesResponse;
+        }
+
         var requestContent = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
         var requestJson = JObject.Parse(requestContent);
         requestJson.Add("organization", organization);
@@ -27,6 +35,7 @@
         var uri = $"{this.GetBaseUri()}users/me";
         var requestMessage = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, uri);
         requestMessage.Headers.Add("Authorization", this.Context.Request.Headers.Authorization.ToString());
+        requestMessage.Headers.Add("X-Calendly-Consumer-Application", "ms_power_automate");
         return await this.Context.SendAsync(requestMessage, this.CancellationToken);
     }
 
