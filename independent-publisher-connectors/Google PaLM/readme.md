@@ -123,7 +123,7 @@ Deletes a specific model.
 | `model`| No       | The identifier of the model to delete. |
 | `APIVersion` | No      | The version number of the PaLM API. |
 
-*Please replace `{model}`, `{modelName}`, and `{modelType}` with appropriate values as per your use case.*
+*Please replace `{APIVersion}`,`{model}`, `{modelName}`, and `{modelType}` with appropriate values as per your use case.*
 
 
 ## Known Issues and Limitations
