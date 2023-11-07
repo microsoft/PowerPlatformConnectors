@@ -35,7 +35,7 @@ By following these steps, you will obtain an API key that is required to authent
 ## Endpoints
 
 ### 1. List Models
-#### GET `/v1beta2/models`
+#### GET `/{APIVersion}/models`
 Retrieves a list of available models for text generation.
 
 #### Parameters
@@ -43,18 +43,20 @@ Retrieves a list of available models for text generation.
 |------------|----------|-----------------------------------------|
 | `pageSize` | Yes      | The maximum number of models to return. |
 | `pageToken`| Yes      | A token for pagination across multiple pages. |
+| `APIVersion` | No      | The version number of the PaLM API. |
 
 ### 2. Get Model
-#### GET `/v1beta2/models/{name}`
+#### GET `/{APIVersion}/models/{name}`
 Retrieves the details of a specific model.
 
 #### Parameters
 | Name  | Optional | Description                             |
 |-------|----------|-----------------------------------------|
 | `name`| No       | The unique identifier of the model.     |
+| `APIVersion` | No      | The version number of the PaLM API. |
 
 ### 3. Generate Text
-#### POST `/v1beta2/{modelType}/{modelName}:generateText`
+#### POST `/{APIVersion}/{modelType}/{modelName}:generateText`
 Generates text based on a provided prompt.
 
 #### Path Parameters
@@ -62,6 +64,7 @@ Generates text based on a provided prompt.
 |-------------|----------|-----------------------------------|
 | `modelType` | No       | The type of the model.            |
 | `modelName` | No       | The name of the model.            |
+| `APIVersion` | No      | The version number of the PaLM API. |
 
 #### Request Body Parameters
 | Name              | Optional | Description                                       |
@@ -76,13 +79,14 @@ Generates text based on a provided prompt.
 | `topK`            | Yes      | The number of top tokens to consider during generation. |
 
 ### 4. Generate Message
-#### POST `/v1beta2/models/{model}:generateMessage`
+#### POST `/{APIVersion}/models/{model}:generateMessage`
 Generates a response message based on the input prompt.
 
 #### Path Parameters
 | Name   | Optional | Description                       |
 |--------|----------|-----------------------------------|
 | `model`| No       | The name of the model.            |
+| `APIVersion` | No      | The version number of the PaLM API. |
 
 #### Request Body Parameters
 | Name        | Optional | Description                                   |
@@ -94,13 +98,14 @@ Generates a response message based on the input prompt.
 | `topK`      | Yes      | The number of top tokens to consider during sampling. |
 
 ### 5. Update Model
-#### PUT `/v1beta2/models/{model}`
+#### PUT `/{APIVersion}/models/{model}`
 Updates the specified model's details.
 
 #### Path Parameters
 | Name   | Optional | Description                       |
 |--------|----------|-----------------------------------|
 | `model`| No       | The identifier of the model to update. |
+| `APIVersion` | No      | The version number of the PaLM API. |
 
 #### Request Body Parameters
 | Name        | Optional | Description                                   |
@@ -109,13 +114,14 @@ Updates the specified model's details.
 | `parameters`  | Yes    | The updated parameters for the model.        |
 
 ### 6. Delete Model
-#### DELETE `/v1beta2/models/{model}`
+#### DELETE `/{APIVersion}/models/{model}`
 Deletes a specific model.
 
 #### Path Parameters
 | Name   | Optional | Description                       |
 |--------|----------|-----------------------------------|
 | `model`| No       | The identifier of the model to delete. |
+| `APIVersion` | No      | The version number of the PaLM API. |
 
 *Please replace `{model}`, `{modelName}`, and `{modelType}` with appropriate values as per your use case.*
 
