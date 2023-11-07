@@ -2049,6 +2049,15 @@ public class Script : ScriptBase
           body.GetValue("connectId").ToString()));
     }
 
+    if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var reminderEnabled = body["reminders"]["reminderEnabled"];
+
+      body["reminderEnabled"] = reminderEnabled;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
