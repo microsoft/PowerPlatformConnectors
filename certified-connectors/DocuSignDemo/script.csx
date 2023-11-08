@@ -950,6 +950,27 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject AddRemindersBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var newBody = new JObject()
+    {
+      ["useAccountDefaults"] = "false",
+      ["reminders"] = new JObject()
+      {
+        ["reminderDelay"] = query.Get("reminderDelay"),
+        ["reminderEnabled"] = query.Get("reminderEnabled"),
+        ["reminderFrequency"] = query.Get("reminderFrequency")
+      },
+      ["expirations"] = new JObject()
+      {
+        ["expireAfter"] = "120"
+      }
+    };
+
+    return newBody;
+  }
+
   private JObject CreateEnvelopeFromTemplateV1BodyTransformation(JObject body)
   {
     var templateRoles = new JArray();
@@ -1757,6 +1778,11 @@ public class Script : ScriptBase
     {
       await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV1BodyTransformation).ConfigureAwait(false);
     }
+
+    if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddRemindersBodyTransformation).ConfigureAwait(false);
+    }
     
     if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
@@ -2021,6 +2047,15 @@ public class Script : ScriptBase
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
           body.GetValue("connectId").ToString()));
+    }
+
+    if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var reminderEnabled = body["reminders"]["reminderEnabled"];
+
+      body["reminderEnabled"] = reminderEnabled;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
