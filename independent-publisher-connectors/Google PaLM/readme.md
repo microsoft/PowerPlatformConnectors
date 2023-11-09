@@ -10,7 +10,7 @@ You need to get an API key from Google Make Suite site for authenticating the co
 
 ### Obtaining an API Key
 
-To start using the PaLM API, you need to obtain an API key. Follow these steps to get your API key:
+Follow these steps to get your API key:
 
 1. **Visit the API Key Generation Page**
    - Go to [Google MakerSuite](https://makersuite.google.com/app/apikey) to access the API key generation interface.
