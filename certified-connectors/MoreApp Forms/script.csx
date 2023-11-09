@@ -22,7 +22,7 @@
             // The url we get from Microsoft contains some escaped characters, which breaks the webhook. The url should be decoded
             String url = HttpUtility.UrlDecode(jObject["url"].ToString());
             jObject["url"] = url;
-            jObject.Add("type", JArray.Parse(this.Context.OperationId == "NewSubmission" ? @"['submission.created']" : @"['submission.instruction.fulfilled']"));
+            jObject.Add("type", JArray.Parse(this.Context.OperationId == "NewSubmission" ? @"['submission.created']" : @"['submission.task.fulfilled']"));
             this.Context.Request.Content = CreateJsonContent(jObject.ToString());
             HttpResponseMessage webhookResponse = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
             // Add the location header to the response
