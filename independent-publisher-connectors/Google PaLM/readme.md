@@ -15,7 +15,9 @@ The Google Palm API offers advanced text generation and manipulation capabilitie
 - **Consumes**: application/json
 - **Produces**: application/json
 
-## Security
+## Prerequisites
+You need to get an API key from Google Make Suite site for authenticating the connector. 
+
 ### Obtaining an API Key
 
 To start using the PaLM API, you need to obtain an API key. Follow these steps to get your API key:
@@ -155,4 +157,7 @@ The PaLM API has several limitations which users should be aware of:
    - The API has a maximum input token limit of 8k and output token limit of 1k.
    - Safety classifiers are not applied if these limits are exceeded, potentially leading to poor model performance.
    - The API's performance can be affected by inputs with unusual or complex structures.
+
+## API Documentation
+Visit [Google PaLM APIs reference](https://developers.generativeai.google/tutorials/curl_quickstart) page for further details.
 ---
