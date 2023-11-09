@@ -44,7 +44,7 @@ Retrieves the details of a specific model.
 #### Parameters
 | Name  | Optional | Description                             |
 |-------|----------|-----------------------------------------|
-| `name`| No       | The unique identifier of the model.     |
+| `Model Name`| No       | The unique identifier of the model.     |
 | `APIVersion` | No      | The version number of the PaLM API. |
 
 ### 3. Generate Text
@@ -84,36 +84,47 @@ Generates a response message based on the input prompt.
 | Name        | Optional | Description                                   |
 |-------------|----------|-----------------------------------------------|
 | `prompt`    | No       | The structured textual input given as a prompt. |
-| `context`   | Yes      | Additional input provided to the model.      |
 | `temperature`| Yes     | Controls the randomness of the output.       |
 | `topP`      | Yes      | Cumulative probability for token selection.  |
 | `topK`      | Yes      | The number of top tokens to consider during sampling. |
 
-### 5. Update Model
-#### PUT `/{APIVersion}/models/{model}`
-Updates the specified model's details.
+### 5. Count Text Tokens
+#### POST /{APIVersion}/models/{model}:countTextTokens
+Counts the number of tokens in the provided text prompt.
 
-#### Path Parameters
-| Name   | Optional | Description                       |
-|--------|----------|-----------------------------------|
-| `model`| No       | The identifier of the model to update. |
-| `APIVersion` | No      | The version number of the PaLM API. |
+#### Parameters
 
-#### Request Body Parameters
-| Name        | Optional | Description                                   |
-|-------------|----------|-----------------------------------------------|
-| `description` | Yes    | A detailed description of the model.         |
-| `parameters`  | Yes    | The updated parameters for the model.        |
+| Parameter      | Optional | Description                                                                                   |
+|----------------|----------|-----------------------------------------------------------------------------------------------|
+| APIVersion     | No       | API version to use for the endpoint. Examples: v1beta3.                                       |
+| model          | No       | The model's resource name. Eg: text-bison-001.                                                |
+| Text | No    | The text prompt to analyze.                                                                   |
 
-### 6. Delete Model
-#### DELETE `/{APIVersion}/models/{model}`
-Deletes a specific model.
 
-#### Path Parameters
-| Name   | Optional | Description                       |
-|--------|----------|-----------------------------------|
-| `model`| No       | The identifier of the model to delete. |
-| `APIVersion` | No      | The version number of the PaLM API. |
+### 6. Count Message Tokens
+#### POST /{APIVersion}/models/{model}:countMessageTokens
+Counts the number of tokens in the provided message prompt.
+
+#### Parameters
+
+| Parameter          | Optional | Description                                                                                 |
+|--------------------|----------|---------------------------------------------------------------------------------------------|
+| APIVersion         | No       | API version to use for the endpoint. Examples: v1beta2, v1beta3.                             |
+| model              | No       | The model's resource name. Eg: chat-bison-001.                                              |
+| Message Content | No    | The prompt, whose token count is to be returned.                                            |
+
+
+### 7. Text Embedding
+#### POST /{APIVersion}/models/{model}:embedText
+Turns the provided free-form input text into an embedding.
+
+#### Parameters
+
+| Parameter   | Optional | Description                                                                       |
+|-------------|----------|-----------------------------------------------------------------------------------|
+| APIVersion  | No       | API version to use for the endpoint. Examples: v1beta3.                           |
+| model       | No       | The model's resource name. Eg: text-bison-001.                                    |
+| Text | No  | The free-form input text for embedding.                                          |
 
 *Please replace `{APIVersion}`,`{model}`, `{modelName}`, and `{modelType}` with appropriate values as per your use case.*
 
