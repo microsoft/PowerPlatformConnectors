@@ -5,16 +5,6 @@
 ## Overview
 The Google Palm API offers advanced text generation and manipulation capabilities. This documentation covers the endpoints, their parameters, and other essential details.
 
-## API Information
-- **Swagger Version**: 2.0
-- **API Version**: 1.0
-- **API Title**: Google Text Generation API
-- **Host**: generativelanguage.googleapis.com
-- **Base Path**: /
-- **Schemes**: HTTPS
-- **Consumes**: application/json
-- **Produces**: application/json
-
 ## Prerequisites
 You need to get an API key from Google Make Suite site for authenticating the connector. 
 
