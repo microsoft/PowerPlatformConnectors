@@ -160,5 +160,6 @@ The PaLM API has several limitations which users should be aware of:
    - The API's performance can be affected by inputs with unusual or complex structures.
 
 ## API Documentation
-Visit [Google PaLM APIs reference](https://developers.generativeai.google/tutorials/curl_quickstart) page for further details.
+ Visit [Google PaLM APIs reference](https://developers.generativeai.google/tutorials/curl_quickstart) page for further details.
+
 ---
