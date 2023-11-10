@@ -20,6 +20,6 @@ The paraphrase and rephrase endpoints offer paraphrasing for particular styles. 
 For some use cases, grammar and phrase-level edits may not be necessary. If your application only requires spellcheck, the Sapling spellcheck endpoint is a faster, cheaper solution.
 
 ## Known Issues and Limitations
-There are no known issues or limitations for the connector at this time.
+There are no known issues for the connector at this time. Limitations might apply, for example not supporting all existing endpoint or some of the new response data. If you encounter any, please reach out.
 
 Be aware that the underlying service itself (Sapling.ai) does come with some limitations, such as 5.000 character reqeust per 24 hours for the free account. You can get more information about the actual limitations at: [https://sapling.ai/docs/api/api-access](https://sapling.ai/docs/api/api-access)
