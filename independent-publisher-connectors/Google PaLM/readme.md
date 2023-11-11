@@ -28,7 +28,7 @@ By following these steps, you will obtain an API key that is required to authent
 
 ### 1. List Models
 #### GET `/{APIVersion}/models`
-Retrieves a list of available models for text generation.
+Retrieves a list of available models through the API.
 
 #### Parameters
 | Name       | Optional | Description                             |
