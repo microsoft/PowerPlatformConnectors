@@ -33,9 +33,9 @@ Retrieves a list of available models for text generation.
 #### Parameters
 | Name       | Optional | Description                             |
 |------------|----------|-----------------------------------------|
-| `pageSize` | Yes      | The maximum number of models to return. |
-| `pageToken`| Yes      | A token for pagination across multiple pages. |
-| `APIVersion` | No      | The version number of the PaLM API. |
+| `Page Size` | Yes      | The maximum number of models to return. |
+| `Page Token`| Yes      | A token for pagination across multiple pages. |
+| `API Version` | No      | The version number of the PaLM API. |
 
 ### 2. Get Model
 #### GET `/{APIVersion}/models/{name}`
@@ -45,7 +45,7 @@ Retrieves the details of a specific model.
 | Name  | Optional | Description                             |
 |-------|----------|-----------------------------------------|
 | `Model Name`| No       | The unique identifier of the model.     |
-| `APIVersion` | No      | The version number of the PaLM API. |
+| `API Version` | No      | The version number of the PaLM API. |
 
 ### 3. Generate Text
 #### POST `/{APIVersion}/{modelType}/{modelName}:generateText`
@@ -54,21 +54,21 @@ Generates text based on a provided prompt.
 #### Path Parameters
 | Name        | Optional | Description                       |
 |-------------|----------|-----------------------------------|
-| `modelType` | No       | The type of the model.            |
-| `modelName` | No       | The name of the model.            |
-| `APIVersion` | No      | The version number of the PaLM API. |
+| `Model Type` | No       | The type of the model.            |
+| `Model Name` | No       | The name of the model.            |
+| `API Version` | No      | The version number of the PaLM API. |
 
 #### Request Body Parameters
 | Name              | Optional | Description                                       |
 |-------------------|----------|---------------------------------------------------|
-| `prompt`          | No       | The input text prompt.                            |
-| `safetySettings`  | Yes      | Settings for filtering unsafe content.            |
-| `stopSequences`   | Yes      | Sequences that signal the end of text generation. |
-| `temperature`     | Yes      | Controls the randomness of generated text.        |
-| `candidateCount`  | Yes      | Number of response options to generate.           |
-| `maxOutputTokens` | Yes      | The maximum size of the generated text.           |
-| `topP`            | Yes      | Cumulative probability for token selection.       |
-| `topK`            | Yes      | The number of top tokens to consider during generation. |
+| `Prompt`          | No       | The input text prompt.                            |
+| `Safety Settings`  | Yes      | Settings for filtering unsafe content.            |
+| `Stop Sequences`   | Yes      | Sequences that signal the end of text generation. |
+| `Temperature`     | Yes      | Controls the randomness of generated text.        |
+| `Candidate Count`  | Yes      | Number of response options to generate.           |
+| `Max Output Tokens` | Yes      | The maximum size of the generated text.           |
+| `Top P`            | Yes      | Cumulative probability for token selection.       |
+| `Top K`            | Yes      | The number of top tokens to consider during generation. |
 
 ### 4. Generate Message
 #### POST `/{APIVersion}/models/{model}:generateMessage`
@@ -77,16 +77,16 @@ Generates a response message based on the input prompt.
 #### Path Parameters
 | Name   | Optional | Description                       |
 |--------|----------|-----------------------------------|
-| `model`| No       | The name of the model.            |
-| `APIVersion` | No      | The version number of the PaLM API. |
+| `Model Name`| No       | The name of the model.            |
+| `API Version` | No      | The version number of the PaLM API. |
 
 #### Request Body Parameters
 | Name        | Optional | Description                                   |
 |-------------|----------|-----------------------------------------------|
-| `prompt`    | No       | The structured textual input given as a prompt. |
-| `temperature`| Yes     | Controls the randomness of the output.       |
-| `topP`      | Yes      | Cumulative probability for token selection.  |
-| `topK`      | Yes      | The number of top tokens to consider during sampling. |
+| `Messages`    | No       | The structured textual input given as a prompt. |
+| `Temperature`| Yes     | Controls the randomness of the output.       |
+| `Top P`      | Yes      | Cumulative probability for token selection.  |
+| `Top K`      | Yes      | The number of top tokens to consider during sampling. |
 
 ### 5. Count Text Tokens
 #### POST /{APIVersion}/models/{model}:countTextTokens
@@ -96,8 +96,8 @@ Counts the number of tokens in the provided text prompt.
 
 | Parameter      | Optional | Description                                                                                   |
 |----------------|----------|-----------------------------------------------------------------------------------------------|
-| APIVersion     | No       | API version to use for the endpoint. Examples: v1beta3.                                       |
-| model          | No       | The model's resource name. Eg: text-bison-001.                                                |
+| API Version     | No       | API version to use for the endpoint. Examples: v1beta3.                                       |
+| Model Name         | No       | The model's resource name. Eg: text-bison-001.                                                |
 | Text | No    | The text prompt to analyze.                                                                   |
 
 
@@ -109,9 +109,9 @@ Counts the number of tokens in the provided message prompt.
 
 | Parameter          | Optional | Description                                                                                 |
 |--------------------|----------|---------------------------------------------------------------------------------------------|
-| APIVersion         | No       | API version to use for the endpoint. Examples: v1beta2, v1beta3.                             |
-| model              | No       | The model's resource name. Eg: chat-bison-001.                                              |
-| Message Content | No    | The prompt, whose token count is to be returned.                                            |
+| API Version         | No       | API version to use for the endpoint. Examples: v1beta2, v1beta3.                             |
+| Model Name              | No       | The model's resource name. Eg: chat-bison-001.                                              |
+| Messages | No    | The prompt, whose token count is to be returned.                                            |
 
 
 ### 7. Text Embedding
@@ -122,8 +122,8 @@ Turns the provided free-form input text into an embedding.
 
 | Parameter   | Optional | Description                                                                       |
 |-------------|----------|-----------------------------------------------------------------------------------|
-| APIVersion  | No       | API version to use for the endpoint. Examples: v1beta3.                           |
-| model       | No       | The model's resource name. Eg: text-bison-001.                                    |
+| API Version  | No       | API version to use for the endpoint. Examples: v1beta3.                           |
+| Model       | No       | The model's resource name. Eg: text-bison-001.                                    |
 | Text | No  | The free-form input text for embedding.                                          |
 
 *Please replace `{APIVersion}`,`{model}`, `{modelName}`, and `{modelType}` with appropriate values as per your use case.*
