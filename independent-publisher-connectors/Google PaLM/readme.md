@@ -24,7 +24,7 @@ By following these steps, you will obtain an API key that is required to authent
 
 **Note**: Ensure to keep your API key secure and do not share it publicly.
 
-## Endpoints
+## Supported Operations
 
 ### 1. List Models
 #### GET `/{APIVersion}/models`
