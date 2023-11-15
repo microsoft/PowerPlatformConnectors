@@ -64,6 +64,9 @@ TitaniumCloud account with adequate roles for the desired API-s.
 `Get active YARA rulesets`: Returns information about the number of active YARA rulesets for the TitaniumCloud account that sent the request.  
 `Get API quota limits (current user)`: Returns current quota limits for APIs accessible to the authenticated user.  
 `Get API quota limits (company)`: Returns current quota limits for APIs available to all users belonging to the authenticated user’s company.  
+`Network Reputation Api`: Provides information regarding the reputation of requested URL, domain or IP address  
+`List User Override`: List user overrides for network locations  
+`Network Reputation User Override`: Enables URL classification overrides  
 
 
 ## Obtaining Credentials

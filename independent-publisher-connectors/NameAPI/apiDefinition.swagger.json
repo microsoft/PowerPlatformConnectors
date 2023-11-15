@@ -1,0 +1,308 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "NameAPI",
+    "description": "NameAPI is a web API to handle people's names in your software.",
+    "version": "1.0",
+    "contact": {
+      "name": "Fördős András",
+      "email": "fordosa90+ipc_nameapi@gmail.com"
+    }
+  },
+  "host": "api.nameapi.org",
+  "basePath": "/rest/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [],
+  "paths": {
+    "/v5.3/parser/personnameparser": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "matches": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "parsedPerson": {
+                        "$ref": "#/definitions/ParsedPersonRef"
+                      },
+                      "parserDisputes": {
+                        "$ref": "#/definitions/ParserDisputesRef"
+                      },
+                      "likeliness": {
+                        "$ref": "#/definitions/ParserLikelinessRef"
+                      },
+                      "confidence": {
+                        "$ref": "#/definitions/ParserConfidenceRef"
+                      }
+                    },
+                    "title": "Match",
+                    "description": "Details of a parsed match"
+                  },
+                  "description": "Array of matches.",
+                  "title": "Matches"
+                },
+                "bestMatch": {
+                  "type": "object",
+                  "properties": {
+                    "parsedPerson": {
+                      "$ref": "#/definitions/ParsedPersonRef"
+                    },
+                    "parserDisputes": {
+                      "$ref": "#/definitions/ParserDisputesRef"
+                    },
+                    "likeliness": {
+                      "$ref": "#/definitions/ParserLikelinessRef"
+                    },
+                    "confidence": {
+                      "$ref": "#/definitions/ParserConfidenceRef"
+                    }
+                  },
+                  "title": "Best match",
+                  "description": "Best match between parsed results"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Parse name",
+        "description": "Parses a person's raw name, identifies the individual name parts.",
+        "operationId": "ParseName",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "inputPerson": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "Type of the input person.",
+                      "default": "NaturalInputPerson",
+                      "x-ms-summary": "Type",
+                      "x-ms-visibility": "internal",
+                      "title": "Type"
+                    },
+                    "personName": {
+                      "type": "object",
+                      "properties": {
+                        "nameFields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          },
+                          "description": "Defines an array of a person's names such as given name(s) and surname(s).",
+                          "x-ms-summary": "Person names"
+                        }
+                      },
+                      "required": [
+                        "nameFields"
+                      ]
+                    },
+                    "gender": {
+                      "type": "string",
+                      "description": "The gender of the person.",
+                      "x-ms-summary": "Gender",
+                      "enum": [
+                        "MALE",
+                        "FEMALE",
+                        "UNKNOWN"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              },
+              "required": [
+                "inputPerson"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v5.3/email/disposableemailaddressdetector": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "disposable": {
+                  "type": "string",
+                  "description": "Indication, whether the email address is known to be disposable.",
+                  "title": "Disposable"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Detect disposable email address",
+        "description": "Tells whether an email address is a disposable one.",
+        "operationId": "DetectDea",
+        "parameters": [
+          {
+            "name": "emailAddress",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Email address",
+            "description": "A syntactically valid email address, example: 'DaDiDoo@mailinator.com'"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "ParsedPersonRef": {
+      "type": "object",
+      "properties": {
+        "personType": {
+          "type": "string",
+          "description": "The type of person, it can be types of natural and legal people, and groups of them.",
+          "title": "Person type"
+        },
+        "personRole": {
+          "type": "string",
+          "description": "The role of the person. For example it can be the receiver, the owner or just a contact.",
+          "title": "Person role"
+        },
+        "mailingPersonRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The roles of a person within a mailing address. It is of interest once not only a single, but multiple entities are mentioned.",
+          "title": "Mailing person roles"
+        },
+        "gender": {
+          "type": "object",
+          "properties": {
+            "gender": {
+              "type": "string",
+              "description": "The computed gender result.",
+              "title": "Gender"
+            },
+            "maleProportion": {
+              "type": "string",
+              "description": "If the computed gender is neutral this may be specified (but does not have to be). A value 0-1, the remaining percentage is for the female gender.",
+              "title": "Male proportion"
+            },
+            "confidence": {
+              "type": "number",
+              "format": "float",
+              "description": "A value in the range 0-1 that indicates how sure the server is about the result. The higher the better.",
+              "title": "Confidence"
+            }
+          },
+          "description": "The result of the Genderizer containing the gender, optionally the male proportion and the confidence.",
+          "title": "Gender"
+        },
+        "addressingGivenName": {
+          "type": "string",
+          "description": "The given name that may be used when addressing the person.",
+          "title": "Addressing given name"
+        },
+        "addressingSurname": {
+          "type": "string",
+          "description": "The surname that may be used when addressing the person.",
+          "title": "Addressing surname"
+        },
+        "outputPersonName": {
+          "type": "object",
+          "properties": {
+            "terms": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "string": {
+                    "type": "string",
+                    "description": "The string of the term.",
+                    "title": "String"
+                  },
+                  "termType": {
+                    "type": "string",
+                    "description": "The type of the term.",
+                    "title": "Term type"
+                  }
+                }
+              },
+              "description": "The list of extracted name related terms from the input person.",
+              "title": "Terms"
+            }
+          },
+          "description": "All the names identified in an input person name.",
+          "title": "Output person name"
+        }
+      },
+      "description": "Information about the person: the computed gender, the addressing given name, the addressing surname.",
+      "title": "Parsed person"
+    },
+    "ParserDisputesRef": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "A list of consistency problems detected by the parser is within this object.",
+      "title": "Parser disputes"
+    },
+    "ParserLikelinessRef": {
+      "type": "number",
+      "format": "float",
+      "description": "A value in the range 0-1 that indicates how likely is it that this is the correct way of parsing. The higher the better.",
+      "title": "Likeliness"
+    },
+    "ParserConfidenceRef": {
+      "type": "number",
+      "format": "float",
+      "description": "A value in the range 0-1 that indicates how sure the server is about the result. The higher the better.",
+      "title": "Confidence"
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "query",
+      "name": "apiKey"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.nameapi.org/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.nameapi.org/en/legal/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data"
+    }
+  ]
+}
