@@ -186,6 +186,12 @@ public class Script : ScriptBase
                   ["type"] = "string",
                   ["x-ms-summary"] = "anchor string *"
                 },
+                ["locked"] = new JObject
+                {
+                  ["x-ms-summary"] = "locked",
+                  ["default"] = "true",
+                  ["type"] = "boolean"
+                },
                 ["tabLabel"] = new JObject
                 {
                   ["type"] = "string",
@@ -1619,6 +1625,10 @@ public class Script : ScriptBase
       if (tabType.Equals("textTabs"))
       {
         tab["locked"] = "false";
+      }
+      else
+      {
+        tab["locked"] = tabs[i]["locked"].ToString();
       }
       res_tabs.Add(tab);
     }
