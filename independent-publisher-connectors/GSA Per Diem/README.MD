@@ -4,7 +4,7 @@ Provides access to the U.S. General Services Administration's per diem rate data
 
 ## Publisher: Richard Wilson
 
-## Prerequisite
+## Prerequisites
 
 Before you can start using the GSA Per Diem API, you'll need to obtain a free API key. This key will be used to authenticate your requests to the API. Obtaining the key is a straightforward process, which can be done through the GSA Per Diem API website. Once you have the key, you'll be able to make API requests to access the per diem rate data.
 
