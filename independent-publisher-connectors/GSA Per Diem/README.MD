@@ -1,12 +1,12 @@
 # GSA Per Diem
 
-**GSA Per Diem** provides access to the U.S. General Services Administration's per diem rate data, which includes lodging, meal, and incidental expense rates for federal travelers. This connector for Power Automate enables users to integrate these per diem rates into their workflows and applications.
+Provides access to the U.S. General Services Administration's per diem rate data, which includes lodging, meal, and incidental expense rates for federal travelers. This connector for Power Automate enables users to integrate these per diem rates into their workflows and applications. For a detailed understanding of how the GSA Per Diem API works, and for additional endpoint details, refer to the official [GSA Per Diem API documentation](https://open.gsa.gov/api/perdiem/).
 
 ## Publisher: Richard Wilson
 
 ## Prerequisite
 
-An API key for the GSA Per Diem API. You can obtain this key from the [GSA Per Diem API website](https://open.gsa.gov/api/perdiem/).
+Before you can start using the GSA Per Diem API, you'll need to obtain a free API key. This key will be used to authenticate your requests to the API. Obtaining the key is a straightforward process, which can be done through the GSA Per Diem API website. Once you have the key, you'll be able to make API requests to access the per diem rate data.
 
 ## Supported Operations
 
@@ -62,9 +62,9 @@ Provides a mapping of ZIP codes to their corresponding Destination-IDs and state
 - **Outputs**:
   - A list of ZIP codes with their corresponding Destination-IDs and state locations for the specified fiscal year.
 
-## API Documentation
+## Obtaining Credentials
 
-For a detailed understanding of how the GSA Per Diem API works, and for additional endpoint details, refer to the official [GSA Per Diem API documentation](https://open.gsa.gov/api/perdiem/).
+To access the GSA Per Diem API, an API key is required. You can obtain this key from the [GSA Per Diem API website](https://open.gsa.gov/api/perdiem/).
 
 ## Known Issues and Limitations
 
