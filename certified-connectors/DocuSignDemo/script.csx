@@ -186,6 +186,18 @@ public class Script : ScriptBase
                   ["type"] = "string",
                   ["x-ms-summary"] = "anchor string *"
                 },
+                ["locked"] = new JObject
+                {
+                  ["x-ms-summary"] = "locked",
+                  ["default"] = "true",
+                  ["type"] = "boolean"
+                },
+                ["optional"] = new JObject
+                {
+                  ["x-ms-summary"] = "optional",
+                  ["default"] = "false",
+                  ["type"] = "boolean"
+                },
                 ["tabLabel"] = new JObject
                 {
                   ["type"] = "string",
@@ -1616,15 +1628,10 @@ public class Script : ScriptBase
     for (var i = 0; i < tabs.Count; i++)
     {
       JObject tab = tabs[i] as JObject;
-      if (tabType.Equals("textTabs"))
-      {
-        tab["locked"] = "false";
-      }
       res_tabs.Add(tab);
     }
 
     body[tabType] = res_tabs;
-
     return body;
   }
 
