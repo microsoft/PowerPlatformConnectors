@@ -192,6 +192,12 @@ public class Script : ScriptBase
                   ["default"] = "true",
                   ["type"] = "boolean"
                 },
+                ["optional"] = new JObject
+                {
+                  ["x-ms-summary"] = "optional",
+                  ["default"] = "false",
+                  ["type"] = "boolean"
+                },
                 ["tabLabel"] = new JObject
                 {
                   ["type"] = "string",
