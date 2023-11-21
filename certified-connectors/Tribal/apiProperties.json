@@ -1,0 +1,344 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2generic",
+          "clientId": "[DUMMY]",
+          "scopes": [ "web_hooks", "openid", "edge_identity", "offline_access", "edge", "EventsConnector.Endpoint", "ReferenceData.Api.Read", "Maytas.UI", "SITS.UI" ],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False"
+          },
+          "customParameters": {
+            "authorizationUrlTemplate": {
+              "value": "https://identity{environment}/{region}/ids/{tenantId}/connect/authorize"
+            },
+            "tokenUrlTemplate": {
+              "value": "https://identity{environment}/{region}/ids/{tenantId}/connect/token"
+            },
+            "refreshUrlTemplate": {
+              "value": "https://identity{environment}/{region}/ids/{tenantId}/connect/token"
+            }
+          }
+        }
+      },
+      "token:environment": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 0,
+            "required": "true",
+            "allowedValues": [
+              {
+                "text": "Live",
+                "value": ".tribaledge.com"
+              },
+              {
+                "text": "Pre-Production",
+                "value": "-preprod.tribaledge.com"
+              },
+              {
+                "text": "Test",
+                "value": "-integr.edge.tribaldev.net"
+              },
+              {
+                "text": "Development",
+                "value": "-master.edge.tribaldev.net"
+              }
+            ]
+          },
+          "description": "Environment",
+          "displayName": "Environment",
+          "tooltip": "Environment"
+        }
+      },
+      "token:region": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 0,
+            "required": "true",
+            "allowedValues": [
+              {
+                "text": "Emea",
+                "value": "emea"
+              },
+              {
+                "text": "Apac",
+                "value": "apac"
+              }
+            ]
+          },
+          "description": "Region",
+          "displayName": "Region",
+          "tooltip": "Region"
+        }
+      },
+      "token:tenantId": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "tabIndex": 0,
+            "required": "true"
+          },
+          "description": "Tenant Id for Tribal Edge",
+          "displayName": "Edge Tenant Id",
+          "tooltip": "Tenant Id for Tribal Edge"
+        }
+      }
+    },
+    "iconBrandColor": "#0077C4",
+    "scriptOperations": [
+      "RawRequest"
+    ],
+    "capabilities": [],
+    "publisher": "Tribal Group",
+    "stackOwner": "Tribal Group",
+    "policyTemplateInstances": [
+      {
+        "templateId": "dynamichosturl",
+        "title": "Choose Host for connection",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://api@connectionParameters('token:environment')/@connectionParameters('token:region')/"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Tenant Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "tenantId",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('token:tenantId')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": ["CustomEvents"],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/{eventType}/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "CustomEvents Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": ["Services"],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/services/dynamicvalues"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "Services Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "CreatedEvents" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/Created/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "CreatedEvents Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "UpdatedEvents" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/Updated/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "UpdatedEvents Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "DeletedEvents" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/Deleted/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "DeletedEvents Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "LongRunningEvents" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/longrunningtrigger/{service}/{eventType}/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "LongRunningEvents Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "GetEntityTypes" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/entityTypes/{service}/{eventType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "GetEntityTypes Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "GetEntityTypesByService" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/entityTypes/{service}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "GetEntityTypesByService Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "GetEventTypes" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/eventTypes/{service}/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "GetEventTypes Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "GetSchemaFilters" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/events/filters/{service}/{eventType}/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "GetSchemaFilters Tenant Redirect"
+      },
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [ "GetDynamicSchema" ],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/eventSchema/{service}/{eventType}/{entityType}"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "GetDynamicSchema Tenant Redirect"
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "ActionEntities Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/entities/{service}/{actionType}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "ActionEntities" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "ActionParentEntities Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/entities/parents/{service}/{actionType}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "ActionParentEntities" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "ActionSchema Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/schema/{service}/{actionType}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "ActionSchema" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "UploadDocumentEntities Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/uploadDocumentEntities/{service}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "UploadDocumentEntities" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "UploadDocumentParentEntities Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/uploadDocumentEntities/parents/{service}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "UploadDocumentParentEntities" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "ReadCollectionCreateEntity Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{entityType}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "CreateEntity",
+            "ReadEntities"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "ReadDeleteUpdateEntity Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{entityType}/{id}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "ReadEntity",
+            "DeleteEntity",
+            "UpdateEntity"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "UploadDocument Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{entityType}/{id}/uploaddocument",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "UploadDocument"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "UploadChildDocument Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}/{childId}/uploaddocument",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "UploadChildDocument"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "ReadChildCollectionCreateChildEntity Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "CreateChildEntity", "ReadChildEntities" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "ReadUpdateDeleteChildEntity Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}/{childId}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "DeleteChildEntity",
+            "ReadChildEntity",
+            "UpdateChildEntity"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "GetTranslations Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/options/{entityCode}/{fieldCode}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "GetTranslations"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "GetRefDataTranslations Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/referencedata/@connectionParameters('token:tenantId')/referencedata/{entityName}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "GetRefDataTranslations"
+          ]
+        }
+      }
+    ]
+  }
+}

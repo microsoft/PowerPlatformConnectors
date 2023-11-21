@@ -18,15 +18,17 @@ Following are the internal and external actions used during connection flow to s
 | -------- | ------------------------- | ---------------- | --------------- | -------------- |
 | Select Project Name || /workspaceList | It will list out all the Asite's projects where you have access. | Internal |
 | Select Folder Name || /folderAndFileList | It will list out all the accessible folders based on your access from the selected Project. | Internal |
-| When an Asite workflow event is triggered | Trigger | /asitePullDataWebhook | To upload file with metadata and download file on defined folder based on triggered workflow. | Important |
+| When a workflow is triggered on file(s) | Trigger | /asitePullDataWebhook | This operation triggers a flow when a file is uploaded/updated on the project. The trigger is fired to include sub-folders based on the workflow configuration. | Important |
 | Get file content | Action | /downloadFileByUrl | Retrieves the file content from Asite | Important |
 | List of configured Triggers from Asite Platform | | /triggerList | To display list of configured Triggers from Asite Platform | Internal |
-| Delete configured trigger || /deleteAsitePullDataWebhook/{id} | To Delete configured trigger | Internal |
+| Delete configured trigger || /deleteAsitePullDataWebhook/{id}/{nameOfClass} | To Delete configured trigger | Internal |
 | Get Dynamic Schema based on project and folder | | /getFolderAttributes | Get Dynamic Schema based on project and folder | Internal |
 | Set file metadata | Action | /saveMetadataForUpload | Retrieves standard and custom metadata | Important |
 | Create file | Action | /uploadFileFromExternalSystem | Upload a file in Asite project folder. | Important |
 | Get dynamic schema based on project Id and trigger Id || /getFolderAttributesFromTrigger | Get dynamic schema based on project Id and trigger Id | Internal |
 | Select Folder Name || /getSubFolderList | List out all the accessible folders based on your access from the above selected Project. | Internal |
+| When a workflow is triggered on App(s) | Trigger | /asitePullAppFormDataWebhook | This operation triggers a flow when a form is created/updated on the project. Configure separate flows for each App. | Important |
+| Get dynamic schema based on project Id and trigger Id | Action | /getFormAttributesFromTrigger | Get dynamic schema based on project Id and trigger Id | Internal |
 
 # Reference Link:
 
