@@ -1,70 +1,80 @@
-﻿
-**Zoho-Sign**
+# Zoho-Sign
 
 Zoho Sign lets you digitally sign and verify legally binding documents without the hassles of transporting paper documents. It's a complete digital signature app for business signatories.
 
-**Prerequisites**
+## Prerequisites
 
 This connector is available only paid version of Zoho Sign. You can get the pricing details [here](https://www.zoho.com/sign/pricing.html). 
 
 You can create a new Zoho Sign account by clicking [here](https://zoho.com/sign)
 
-**How to get credentials**
+## How to get credentials
 
 Since Zoho-Sign API uses OAuth 2 to authenticate, no secondary authentication is needed once the account has been setup.
 
-**Supported Operations**
+## Supported Operations
 
 The connector supports the following operations:
 
-Account Details: Specifies the account details of the current user.
+### Download Completion Certificate
 
-Users List: Helps to fetch the list of users who are associated with the particular account
+Download the completion certificate
 
-Invite the users whom you want to join: Invite users with email id
+### Download Document
 
-Update the user access and roles of Zoho Sign users: You can update the access and role of a Zoho Sign User, one at a time
+Download the selected document
 
-Remove the specified user: Remove the specified user
+### Download File
 
-Download Completion Certificate: Download the completion certificate
+Downloads the particular document that is selected.
 
-Download Document:  Download the selected document
+### Get a document 
 
-Download File: Downloads the particular document that is selected.
+Get details of a particular document
 
-Get list of webhooks: Get list of webhooks
+### Get data of completed Requests
 
-Get Webhook details: Get detailed information about webhooks
+Get data of completed Requests
 
-Delete Webhook: Internal endpoint for deleting a webhook
+### Recall a particular document
 
-Get a document: Get details of a particular document
+Recall a particular document
 
-Form Data for all completed Requests: Form Data for all completed Requests
+### Reminder for recipients 
 
-Recall a particular document:  Recall a particular document
+Send a reminder to recipients of a particular document.
 
-Reminder for recipients: Send a reminder to recipients of a particular document.
+### Delete Document
 
-Delete Document: Delete a particular document
+Delete a particular document
 
-Create a document for signing: Create a document for signing
+### Create a document for signing
 
-Get particular template details : Get particular template details
+Create a document for signing
 
-Get list of templates: List of Templates
+### Get particular template details 
 
+Get particular template details
 
-**Supported Triggers**
+### Get list of templates
+
+List of Templates
+
+### Invoke API
+
+Invoke an API of Zoho Sign 
+
+## Supported Triggers
 
 The connector supports the following triggers:
 
-Zoho Sign Triggers: Register a callback for a particular event
+### Zoho Sign Triggers 
 
+Register a callback for a particular event
 
+## FAQ
 
-**FAQ**
+https://www.zoho.com/sign/api/
 
 https://www.zoho.com/sign/help/faqs.html
 
