@@ -1622,19 +1622,10 @@ public class Script : ScriptBase
     for (var i = 0; i < tabs.Count; i++)
     {
       JObject tab = tabs[i] as JObject;
-      if (tabType.Equals("textTabs"))
-      {
-        tab["locked"] = "false";
-      }
-      else
-      {
-        tab["locked"] = tabs[i]["locked"].ToString();
-      }
       res_tabs.Add(tab);
     }
 
     body[tabType] = res_tabs;
-
     return body;
   }
 
