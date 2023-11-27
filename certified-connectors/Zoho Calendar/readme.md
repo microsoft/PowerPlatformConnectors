@@ -28,8 +28,7 @@ Gets the list of events across all calendars.
 
 ### Update Event
 
-Updates an existing event in a user's calendar.	 	 
- 	 
+Updates an existing event in a user's calendar.	 	 	 
 
 ## Supported Triggers
 
@@ -47,9 +46,12 @@ When an event is updated to a calendar
 
 When an event is deleted in a calendar
 
+## Obtaining Credentials
+
+Zoho Calendar API uses OAuth2.0 to authenticate and hence no secondary authentication is required once the account has been set up.
 	
 ## Known Issues and Limitations
-Select the respective domain of your ZeptoMail account. Failing to do so will result in an authentication error.
+Select the respective domain of your Zoho Calendar account. Failing to do so will result in an authentication error.
 
 ## Frequently Asked Questions
 
