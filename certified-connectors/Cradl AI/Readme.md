@@ -46,7 +46,7 @@ The easiest way to retreive the processed documents in Power Automate is by sett
 
 ## Known Issues and Limitations
 
-* See [API Limits](https://docs.cradl.ai/reference/quotas).
+See [API Limits](https://docs.cradl.ai/reference/quotas).
 
 ## Frequently Asked Questions
 
@@ -56,7 +56,7 @@ JPEG, PNG, PDF and TIFF.
 
 ### How many models do I need?
 
-Ine per _document process_. For example, if you want to automate an expense approval process where you process receipts, invoices and airline tickets, we recommend using one model even if you process multiple document types with different layouts.
+One per _document process_. For example, if you want to automate an expense approval process where you process receipts, invoices and airline tickets, we recommend using one model even if you process multiple document types with different layouts.
 
 ### Where is my data stored?
 
