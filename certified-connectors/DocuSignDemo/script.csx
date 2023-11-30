@@ -2508,6 +2508,7 @@ public class Script : ScriptBase
         newBody["roleName"] = matchingSigner["roleName"];
         newBody["name"] = matchingSigner["name"];
         newBody["email"] = matchingSigner["email"];
+        newBody["recipientType"] = matchingSigner["recipientType"];
         newBody["verificationType"] = matchingSigner["verificationType"];
         newBody["recipientIdGuid"] = matchingSigner["recipientIdGuid"];
       }
