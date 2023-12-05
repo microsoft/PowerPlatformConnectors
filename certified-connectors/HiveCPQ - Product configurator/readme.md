@@ -116,6 +116,30 @@ Update a specific component in master data
 ### Delete components in bulk
 Delete multiple components in master data
 
+### Upsert component prices in bulk
+Create or update multiple component prices in master data.
+
+### Get a component tooltip
+Get a specific component tooltip in master data.
+
+### Update a component tooltip
+Update a specific component tooltip in master data.
+
+### Delete a component tooltip
+Delete a component tooltip from master data.
+
+### Get a component tooltip image
+Get a specific component tooltip image from master data.
+
+### Update a component tooltip image
+Update a specific component tooltip image in master data.
+
+### Delete a component tooltip image
+Delete a component tooltip image from master data.
+
+### Render a configuration screenshot
+Render a screenshot of a configuration.
+
 ### Search component prices
 Search prices of a component in master data.
 
@@ -257,6 +281,9 @@ Add one or more products to a project of a manufacturer.
 ### Copy a project
 Copies all data of a project to a new project.
 
+### Recalculate a project
+Start an asynchronous recalculation of the project.
+
 ### Generate a document for a project
 Generate a PDF document for a specific project. The template ID is optional only if the document type is QUOTE and a default template has been configured.
 
@@ -388,6 +415,15 @@ Update a specific trigger of a webhook.
 
 ### Search price catalogs
 Search price catalogs of a manufacturer.
+
+### Add a price catalog
+Add a price catalog for a manufacturer.
+
+### Get a price catalog
+Get a specific price catalog of a manufacturer.
+
+### Update a price catalog
+Update a specific price catalog of a manufacturer.
 
 ### Delete a price catalog
 Delete a specific price catalog.
