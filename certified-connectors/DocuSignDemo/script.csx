@@ -1883,7 +1883,7 @@ public class Script : ScriptBase
 
       query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
-        DateTime.UtcNow.AddDays(-7).ToString() :
+        "2000-01-02T12:45Z" :
         query.Get("startDateTime");
 
       if (!string.IsNullOrEmpty(query.Get("endDateTime")))
@@ -1909,7 +1909,7 @@ public class Script : ScriptBase
       query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
-        DateTime.UtcNow.AddDays(-7).ToString() :
+        "2000-01-02T12:45Z" :
         query.Get("startDateTime");
 
       query["include"] = "custom_fields, recipients, documents";
