@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
@@ -14,21 +14,23 @@ public class Script : ScriptBase
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
         // Check if the operation ID matches what is specified in the OpenAPI definition of the connector
-        if (Context.OperationId == "SendEmail")
+        if (Context.OperationId == "SendEmail" || Context.OperationId == "SendEmailGAVersion")
         {
             AddRepeatabilityHeadersToRequest();
-            await PrepareRequestEmailAttachments();
+            await PrepareRequestEmailAttachmentsAndHeaders();
         }
 
         string[] operationIds = {
             "SendEmail",
-            "GetMessageStatus"
+            "GetMessageStatus",
+            "SendEmailGAVersion",
+            "GetMessageStatusGAVersion"
         };
         if (Array.Exists(operationIds, opId => opId == Context.OperationId))
         {
             await PrepareRequestWithEndpointAndHMAC();
             return await Context.SendAsync(Context.Request, CancellationToken)
-                .ConfigureAwait(continueOnCapturedContext: false);
+                    .ConfigureAwait(continueOnCapturedContext: false);
         }
 
         // Handle an invalid operation ID
@@ -46,7 +48,7 @@ public class Script : ScriptBase
         Context.Request.Headers.TryAddWithoutValidation("repeatability-request-id", requestId);
     }
 
-    public async Task PrepareRequestEmailAttachments()
+    public async Task PrepareRequestEmailAttachmentsAndHeaders()
     {
         var requestContentAsString = await Context.Request.Content.ReadAsStringAsync();
         var requestContentAsJson = JObject.Parse(requestContentAsString);
@@ -59,6 +61,52 @@ public class Script : ScriptBase
                 var attachmentExtension = attachmentName.Substring(attachmentName.LastIndexOf(".") + 1);
                 attachment["attachmentType"] = attachmentExtension == "jpg" ? "jpeg" : attachmentExtension;
             }
+        }
+
+        if (Context.OperationId == "SendEmailGAVersion")
+        {
+            if (requestContentAsJson.ContainsKey("headers") || requestContentAsJson.ContainsKey("importance"))
+            {
+                var updatedHeader = string.Empty;
+                if (requestContentAsJson.ContainsKey("importance"))
+                {
+                    var importanceValue = "4";
+                    if ((string)requestContentAsJson["importance"] == "High")
+                    {
+                        importanceValue = "2";
+                    }
+                    else if ((string)requestContentAsJson["importance"] == "Normal")
+                    {
+                        importanceValue = "3";
+                    }
+
+                    updatedHeader = "{" + "\"x-priority\":\"" + importanceValue + "\"";
+                }
+
+                if (requestContentAsJson.ContainsKey("headers"))
+                {
+                    foreach (JObject jObject in requestContentAsJson["headers"])
+                    {
+                        if (updatedHeader != string.Empty)
+                        {
+                            updatedHeader = updatedHeader + ",";
+                        }
+                        else
+                        {
+                            updatedHeader = "{";
+                        }
+
+                        updatedHeader = updatedHeader + "\"" + jObject["name"] + "\":\"" + jObject["value"] + "\"";
+                    }
+                }
+
+                updatedHeader = updatedHeader + "}";
+                requestContentAsJson.Remove("headers");
+                requestContentAsJson.Add("headers", JObject.Parse(updatedHeader));
+            }
+
+            var builderUri = new UriBuilder(Context.Request.RequestUri.ToString().Replace("sendGAVersion", "send"));
+            Context.Request.RequestUri = builderUri.Uri;
         }
 
         var body = requestContentAsJson.ToString();
