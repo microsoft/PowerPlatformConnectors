@@ -1,10 +1,13 @@
 # Open-Elevation
-Open-Elevation is a free and open-source alternative to the Google Elevation API and similar offerings.
+Open-Elevation is a free and open-source alternative to the Google Elevation and similar offerings.
 
 ## Publisher: Fördős András
 
 ## Pre-requisites
 The service is available as a public and free service, hence no pre-requisites exists. That said, since it is for public use, it welcomes donations to keep the servers running: [https://www.open-elevation.com/](https://www.open-elevation.com/)
+
+## Obtainig credentials
+N/A
 
 ## Supported Operations
 ### Lookup
