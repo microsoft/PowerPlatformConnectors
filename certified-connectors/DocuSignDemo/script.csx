@@ -1881,7 +1881,11 @@ public class Script : ScriptBase
       this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
 
-      query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+      if (query.Get("crmType").ToString().Equals("Dynamics365"))
+      {
+        query["custom_field"] = query.Get("recordType");
+      }
+
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
         "2000-01-02T12:45Z" :
         query.Get("startDateTime");
@@ -1906,7 +1910,10 @@ public class Script : ScriptBase
       this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
 
-      query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+      if (query.Get("crmType").ToString().Equals("Dynamics365"))
+      {
+        query["custom_field"] = query.Get("recordType");
+      }
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
         "2000-01-02T12:45Z" :
@@ -2299,8 +2306,10 @@ public class Script : ScriptBase
 
       var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
       var recordId = query.Get("recordId") ?? null;
-      var crmType = "CRMToken";
-      string[] filters = { crmType, crmOrgUrl, recordId };
+      var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
+      var recordType = query.Get("recordType");
+
+      string[] filters = { crmType, crmOrgUrl, recordId, recordType };
 
       foreach (var filter in filters.Where(filter => filter != null)) 
       {
@@ -2374,8 +2383,10 @@ public class Script : ScriptBase
 
       var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
       var recordId = query.Get("recordId") ?? null;
-      var crmType = "CRMToken";
-      string[] filters = { crmType, recordId, crmOrgUrl};
+      var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
+      var recordType = query.Get("recordType");
+
+      string[] filters = { crmType, recordId, crmOrgUrl, recordType};
 
       foreach (var filter in filters.Where(filter => filter != null)) 
       {
