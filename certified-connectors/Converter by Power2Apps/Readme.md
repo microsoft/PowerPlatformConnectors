@@ -57,11 +57,23 @@ Add Table to a Word file (DOCX) or create a new Word file (DOCX) with a table
 ### Add Text to Word File
 Add a text to a Word file (DOCX) or create a new Word file (DOCX) with a text
 
+### Inset Text to Word File
+Inset a text to a Word file (DOCX)
+
+### Inset Image to Word File
+Inset a image to a Word file (DOCX)
+
+### Inset Table to Word File
+Inset a table to a Word file (DOCX)
+
 ### Extract Bookmarks from Word File
 Extract all bookmarks from a Word fie (DOCX) and get them as a list
 
-### Extract results from Send HTTP request to SharePoint
-Extract results from the action 'Send HTTP request to SharePoint'
+### Extract results from Send HTTP request to SharePoint search
+Extract results from the action 'Send HTTP request to SharePoint' search
+
+### Extract Information from IBAN
+Get the bank account details like account number, bank name, bank address and SWIFT code from International Bank Account Number (IBAN)
 
 ### Extract Information from PDF
 Get the metadata of a PDF
@@ -101,3 +113,6 @@ Get a file (PDF, JPG, JPEG, PNG, CSV, ...) from an URL
 
 ### Regular Expression (RegEx)
 Searches the specified input string for all occurrences of a specified .NET regular expression (RegEx), using the specified matching options.
+
+### Translate Text
+Translate a word or sentence
