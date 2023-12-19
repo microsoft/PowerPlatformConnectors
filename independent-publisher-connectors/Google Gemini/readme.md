@@ -14,8 +14,7 @@ An API key from Google is required to access the Google Gemini API.
 3. Keep your API key secure and do not share it publicly.
 
 ## API Base URL
-https://generativelanguage.googleapis.com/
-
+generativelanguage.googleapis.com
 
 ## Supported Operations
 
@@ -119,5 +118,5 @@ Retrieves details of a specific model based on the provided model name.
 - **Limited Domain Expertise**: Responses on highly specialized topics may lack accuracy.
 
 ## API Documentation
-For further details, visit the [Google Gemini API Documentation](https://ai.google.dev/).
+For further details, visit the [Google Gemini API Documentation](https://ai.google.dev/tutorials/rest_quickstart).
 
