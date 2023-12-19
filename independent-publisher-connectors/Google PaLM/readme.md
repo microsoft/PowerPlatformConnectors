@@ -3,7 +3,7 @@
 ## Publisher: Priyaranjan KS, Vidya Sagar Alti [Tata Consultancy Services]
 
 ## Overview
-The Google Palm API offers advanced text generation and manipulation capabilities. This documentation covers the endpoints, their parameters, and other essential details.
+The Google PaLM API offers advanced text generation and manipulation capabilities. This documentation covers the endpoints, their parameters, and other essential details.
 
 ## Prerequisites
 You need to get an API key from Google Make Suite site for authenticating the connector. 
