@@ -1,6 +1,6 @@
 # Google Gemini API
 
-## Publisher: Priyaranjan KS, Vidya Sagar Alti
+## Publisher: Priyaranjan KS, Vidya Sagar Alti [Tata Consultancy Services]
 
 ## Overview
 Custom connector for Google Gemini, providing advanced AI text generation functionalities.
