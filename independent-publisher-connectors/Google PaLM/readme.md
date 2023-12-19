@@ -1,6 +1,6 @@
 # Google PaLM
 
-## Publisher: Priyaranjan KS
+## Publisher: Priyaranjan KS, Vidya Sagar Alti [Tata Consultancy Services]
 
 ## Overview
 The Google Palm API offers advanced text generation and manipulation capabilities. This documentation covers the endpoints, their parameters, and other essential details.
