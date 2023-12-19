@@ -1,4 +1,4 @@
-# Google Gemini API
+# Google Gemini
 
 ## Publisher: Priyaranjan KS, Vidya Sagar Alti [Tata Consultancy Services]
 
