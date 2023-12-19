@@ -18,7 +18,7 @@ generativelanguage.googleapis.com
 
 ## Supported Operations
 
-- Generate Text Content
+- `Generate Text Content`
 - Stream Generate Content
 - Generate Multimodal Content
 - Count Tokens
