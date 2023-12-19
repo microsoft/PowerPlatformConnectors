@@ -19,11 +19,11 @@ generativelanguage.googleapis.com
 ## Supported Operations
 
 - `Generate Text Content`
-- Stream Generate Content
-- Generate Multimodal Content
-- Count Tokens
-- Get All Models
-- Get Model Details
+- `Stream Generate Content`
+- `Generate Multimodal Content`
+- `Count Tokens`
+- `Get All Models`
+- `Get Model Details`
   
 ### 1. Generate Text Content
 #### POST `/{apiVersion}/models/{modelName}:generateContent`
