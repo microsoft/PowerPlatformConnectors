@@ -152,7 +152,7 @@ Generates an embedding vector for provided text content, useful for tasks like t
 #### Responses
 - `200`: Successful response with embedding vector.
 
-### Batch Generate Embeddings
+### 8. Batch Generate Embeddings
 #### POST `/{apiVersion}/models/{modelName}:batchEmbedContents`
 This endpoint facilitates generating embedding vectors for a batch of text contents, suitable for various natural language processing tasks such as text similarity, classification, and clustering.
 
