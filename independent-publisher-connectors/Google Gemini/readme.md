@@ -6,7 +6,7 @@
 Custom connector for Google Gemini, providing advanced AI multi modal content generation functionalities.Gemini is a family of multimodal large language models developed by Google DeepMind, serving as the successor to LaMDA and PaLM 2. Comprising Gemini Ultra, Gemini Pro, and Gemini Nano, it was announced on December 6, 2023
 
 ## Prerequisites
-An API key from Google is required to access the Google Gemini API.
+An API key from Google AI Studio is required to access the Google Gemini API.
 
 ### Obtaining Credentials
 1. Go to [Google's AI Studio](https://makersuite.google.com/).
