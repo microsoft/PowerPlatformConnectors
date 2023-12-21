@@ -75,8 +75,7 @@ Generates a response from the model given text and visual input.
 | Name       | Required | Type   | Description                                     |
 |------------|----------|--------|-------------------------------------------------|
 | apiVersion | Yes      | string | API version to use for the vision endpoint.     |
-| modelName  | Yes      | string | Name of the base model for vision generation.Eg- Enter gemini-pro and corresponding vision
-            model (gemini-pro-vision) will be used  |
+| modelName  | Yes      | string | Name of the base model for vision generation.Eg- Enter gemini-pro and corresponding vision model (gemini-pro-vision) will be used |
 
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                        |
