@@ -80,12 +80,13 @@ Generates a response from the model given text and visual input.
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                        |
 |-------------------|----------|---------|----------------------------------------------------|
-| contents          | Yes      | array   | Contents for generating the vision response. The `parts` array must contain two objects: <br>1. A 'text' object with a prompt string value (e.g., `{ "text": "What is this picture?" }`). <br>2. An 'inlineData' object containing 'mimeType' and 'base64-encoded data' (e.g., `{ "inlineData": { "mimeType": "image/jpeg", "data": "base64-encoded-string" } }`). |
-| safetySettings    | No       | array   | Safety settings for vision content generation.     |
-| generationConfig  | No       | object  | Configuration settings for vision content generation. |
+| contents          | Yes      | array   | Contents for generating the vision response. The array should follow this structure:<br>`[ <br> { "text": "prompt string" }, <br> { "inlineData": { "mimeType": "media type", "data": "base64-encoded media data" } } <br> ]`<br>Where:<br>1. The first object is a 'text' object with a prompt string value (e.g., `{ "text": "What is this picture?" }`).<br>2. The second object is an 'inlineData' object containing 'mimeType' (e.g., "image/jpeg") and 'base64-encoded data' of the image or video (e.g., `{ "inlineData": { "mimeType": "image/jpeg", "data": "base64-encoded-string" } }`). |
+| safetySettings    | No       | array   | Optional. Safety settings to filter content based on certain categories and thresholds. Each item in the array should specify a `category` (e.g., "violence", "adult") and a `threshold` level for content filtering. |
+| generationConfig  | No       | object  | Optional. Configuration settings for vision content generation, including:<br>- `maxOutputTokens`: Integer specifying the maximum number of tokens in the generated content.<br>- `temperature`: Number controlling randomness in the response. Higher values lead to more varied responses.<br>- `topP`: Number controlling diversity of the response. Higher values lead to more diverse responses.<br>- `topK`: Integer limiting the number of high-probability tokens considered at each step.<br>- `stopSequences`: Array of strings specifying character sequences that will stop text output generation. |
 
 #### Responses
-- `200`: Successful vision response.
+- `200`: Successful vision response. Returns the generated content based on the provided text and visual inputs.
+
   
 ### 4. Count Tokens
 #### POST `/{apiVersion}/models/{modelName}:countTokens`
