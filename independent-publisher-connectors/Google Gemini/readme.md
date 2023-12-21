@@ -34,8 +34,8 @@ Generates a text response from the model given an input message.
 #### Path Parameters
 | Name       | Required | Type   | Description                                 |
 |------------|----------|--------|---------------------------------------------|
-| apiVersion | Yes      | string | API version to use for the endpoint.        |
-| modelName  | Yes      | string | Name of the model to be used for generation.|
+| apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
+| modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
 
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                 |
@@ -95,8 +95,8 @@ Counts the number of tokens in a given text using the Generative Language Model.
 #### Path Parameters
 | Name       | Required | Type   | Description                                 |
 |------------|----------|--------|---------------------------------------------|
-| apiVersion | Yes      | string | API version to use for the endpoint.        |
-| modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.             |
+| apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
+| modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
 
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                      |
@@ -146,8 +146,8 @@ Generates an embedding vector for provided text content, useful for tasks like t
 |-------------|----------|--------|----------------------------------------------------|
 | model       | Yes      | string | Model identifier for embedding generation.         |
 | content     | Yes      | object | Content containing text parts for embedding.       |
-| taskType    | No       | string | Type of task for which the embedding is intended.  |
-| title       | No       | string | Optional title for the content.                    |
+| taskType    | No       | string | Type of task for which the embedding is intended.Further configuration details are available in the [Task Type documentation](https://ai.google.dev/api/rest/v1beta/TaskType).  |
+| title       | No       | string | Optional title for the content. This is applicable for certain  task types like RETRIEVAL_DOCUMENT         |
 
 #### Responses
 - `200`: Successful response with embedding vector.
