@@ -40,13 +40,13 @@ Generates a text response from the model given an input message.
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                 |
 |-------------------|----------|---------|---------------------------------------------|
-| contents          | Yes      | array   | Contents for generating the text response.  |
-| safetySettings    | No       | array   | Safety settings for text content generation.|
-| generationConfig  | No       | object  | Configuration settings for text generation. |
+| contents          | Yes      | array   | Contents for generating the text response, formatted as an array of objects with text parts for the prompt. |
+| safetySettings    | No       | array   | Optional. An array of safety settings objects to manage content filters based on specified categories and thresholds. Each object can specify properties like `category` (e.g., violence, adult content) and `threshold`. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
+| generationConfig  | No       | object  | Optional. Configuration settings for text generation, such as `maxOutputTokens`, `temperature`, `topP`, `topK`, and `stopSequences`. More information is available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). |
 
 #### Responses
 - `200`: Successful text response.
-  
+
 ### 2. Stream Generate Content
 #### POST `/{apiVersion}/models/{modelName}:streamGenerateContent`
 Generates content in a streaming manner for faster interactions.
@@ -60,12 +60,13 @@ Generates content in a streaming manner for faster interactions.
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                 |
 |-------------------|----------|---------|---------------------------------------------|
-| contents          | Yes      | array   | Contents for stream generating content.     |
-| safetySettings    | No       | array   | Safety settings for stream content generation.|
-| generationConfig  | No       | object  | Configuration settings for stream generation. |
+| contents          | Yes      | array   | Contents for stream generating content, formatted as an array of objects with text parts for the prompt. |
+| safetySettings    | No       | array   | Optional. An array of safety settings objects to configure content filters based on categories like `category` and sensitivity levels like `threshold`. Consult the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting) for the exact structure. |
+| generationConfig  | No       | object  | Optional. Configuration settings for stream generation, covering aspects like the length of the response (`maxOutputTokens`), the randomness (`temperature`), the diversity (`topP`), token limitations (`topK`), and stopping points (`stopSequences`). The [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig) provides detailed information. |
 
 #### Responses
 - `200`: Successful response with generated content.
+
   
 ### 3. Generate Multimodal Content
 #### POST `/{apiVersion}/models/{modelName}-vision:generateContent`
