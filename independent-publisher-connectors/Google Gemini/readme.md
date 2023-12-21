@@ -9,7 +9,7 @@ Custom connector for Google Gemini, providing advanced AI multi modal content ge
 An API key from Google AI Studio is required to access the Google Gemini API.
 
 ### Obtaining Credentials
-1. Go to [Google's AI Studio](https://makersuite.google.com/).
+1. Go to [Google's AI Studio](https://makersuite.google.com/) .
 2. Create an API key in a new or existing project.
 3. Keep your API key secure and do not share it publicly.
 
