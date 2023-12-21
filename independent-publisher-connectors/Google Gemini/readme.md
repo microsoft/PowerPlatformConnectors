@@ -24,6 +24,8 @@ generativelanguage.googleapis.com
 - `Count Tokens`
 - `Get All Models`
 - `Get Model Details`
+- `Generate Embedding`
+- `Generate Batch Embeddings` 
   
 ### 1. Generate Text Content
 #### POST `/{apiVersion}/models/{modelName}:generateContent`
@@ -109,6 +111,43 @@ Retrieves details of a specific model based on the provided model name.
 |------------|----------|--------|-----------------------------------------|
 | apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
 | modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
+
+### 7. Generate Embedding
+#### POST `/{apiVersion}/models/{modelName}:embedContent`
+Generates an embedding vector for provided text content, useful for tasks like text similarity, classification, and clustering.
+
+#### Path Parameters
+| Name       | Required | Type   | Description                                 |
+|------------|----------|--------|---------------------------------------------|
+| apiVersion | Yes      | string | API version, e.g., 'v1beta'.                |
+| modelName  | Yes      | string | Model name, e.g., 'embedding-001'.          |
+
+#### Request Body Parameters
+| Name        | Required | Type   | Description                                        |
+|-------------|----------|--------|----------------------------------------------------|
+| model       | Yes      | string | Model identifier for embedding generation.         |
+| content     | Yes      | object | Content containing text parts for embedding.       |
+| taskType    | No       | string | Type of task for which the embedding is intended.  |
+| title       | No       | string | Optional title for the content.                    |
+
+### 8. Generate Batch Embeddings
+#### POST `/{apiVersion}/models/{modelName}:batchEmbedContents`
+Generates embedding vectors for a batch of text contents.
+
+#### Path Parameters
+| Name       | Required | Type   | Description                                 |
+|------------|----------|--------|---------------------------------------------|
+| apiVersion | Yes      | string | API version, e.g., 'v1beta'.                |
+| modelName  | Yes      | string | Model name, e.g., 'embedding-001'.          |
+
+#### Request Body Parameters
+| Name       | Required | Type   | Description                                      |
+|------------|----------|--------|--------------------------------------------------|
+| requests   | Yes      | array  | A batch of requests for embedding generation.    |
+
+#### Request Body Schema
+- `model`: String, model identifier for embedding generation. Default: 'models/embedding-001'
+- `content`: Object, containing the `parts` array with text content for embedding.
 
 ## Known Issues and Limitations
 - **Edge Cases**: The API may not perform optimally in rare or unusual situations.
