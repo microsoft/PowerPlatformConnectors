@@ -34,15 +34,15 @@ Generates a text response from the model given an input message.
 #### Path Parameters
 | Name       | Required | Type   | Description                                 |
 |------------|----------|--------|---------------------------------------------|
-| apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
-| modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
+| API Version | Yes      | string | API version, e.g., 'v1beta'.            |
+| Model Name  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
 
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                 |
 |-------------------|----------|---------|---------------------------------------------|
-| contents          | Yes      | array   | Contents for generating the text response, formatted as an array of objects with text parts for the prompt. |
-| safetySettings    | No       | array   | Optional. An array of safety settings objects to filter content based on specified categories and thresholds. Each object can specify properties like `category` to indicate the type of content to filter (e.g., violence, adult content) and `threshold` to set the sensitivity of the filter. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
-| generationConfig  | No       | object  | Optional. Configuration settings for vision content generation, including:<br>- `maxOutputTokens`: Integer specifying the maximum number of tokens in the generated content.<br>- `temperature`: Number controlling randomness in the response. Higher values lead to more varied responses.<br>- `topP`: Number controlling diversity of the response. Higher values lead to more diverse responses.<br>- `topK`: Integer limiting the number of high-probability tokens considered at each step.<br>- `stopSequences`: Array of strings specifying character sequences that will stop text output generation. Further configuration details are available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). | 
+| Contents          | Yes      | array   | Contents for generating the text response, formatted as an array of objects with text parts for the prompt. |
+| Safety Settings    | No       | array   | Optional. An array of safety settings objects to filter content based on specified categories and thresholds. Each object can specify properties like `category` to indicate the type of content to filter (e.g., violence, adult content) and `threshold` to set the sensitivity of the filter. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
+| Generation Config  | No       | object  | Optional. Configuration settings for vision content generation, including:<br>- `maxOutputTokens`: Integer specifying the maximum number of tokens in the generated content.<br>- `temperature`: Number controlling randomness in the response. Higher values lead to more varied responses.<br>- `topP`: Number controlling diversity of the response. Higher values lead to more diverse responses.<br>- `topK`: Integer limiting the number of high-probability tokens considered at each step.<br>- `stopSequences`: Array of strings specifying character sequences that will stop text output generation. Further configuration details are available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). | 
 
 #### Responses
 - `200`: Successful text response.
@@ -54,15 +54,15 @@ Generates content in a streaming manner for faster interactions.
 #### Path Parameters
 | Name       | Required | Type   | Description                             |
 |------------|----------|--------|-----------------------------------------|
-| apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
-| modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
+| API Version | Yes      | string | API version, e.g., 'v1beta'.            |
+| Model Name  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
 
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                 |
 |-------------------|----------|---------|---------------------------------------------|
-| contents          | Yes      | array   | Contents for stream generating content, formatted as an array of objects with text parts for the prompt. |
-| safetySettings    | No       | array   | Optional. An array of safety settings objects to filter content based on specified categories and thresholds. Each object can specify properties like `category` to indicate the type of content to filter (e.g., violence, adult content) and `threshold` to set the sensitivity of the filter. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
-| generationConfig  | No       | object  | Optional. Configuration settings for vision content generation, including:<br>- `maxOutputTokens`: Integer specifying the maximum number of tokens in the generated content.<br>- `temperature`: Number controlling randomness in the response. Higher values lead to more varied responses.<br>- `topP`: Number controlling diversity of the response. Higher values lead to more diverse responses.<br>- `topK`: Integer limiting the number of high-probability tokens considered at each step.<br>- `stopSequences`: Array of strings specifying character sequences that will stop text output generation. Further configuration details are available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). | 
+| Contents          | Yes      | array   | Contents for stream generating content, formatted as an array of objects with text parts for the prompt. |
+| Safety Settings    | No       | array   | Optional. An array of safety settings objects to filter content based on specified categories and thresholds. Each object can specify properties like `category` to indicate the type of content to filter (e.g., violence, adult content) and `threshold` to set the sensitivity of the filter. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
+| Generation Config  | No       | object  | Optional. Configuration settings for vision content generation, including:<br>- `maxOutputTokens`: Integer specifying the maximum number of tokens in the generated content.<br>- `temperature`: Number controlling randomness in the response. Higher values lead to more varied responses.<br>- `topP`: Number controlling diversity of the response. Higher values lead to more diverse responses.<br>- `topK`: Integer limiting the number of high-probability tokens considered at each step.<br>- `stopSequences`: Array of strings specifying character sequences that will stop text output generation. Further configuration details are available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). | 
 
 #### Responses
 - `200`: Successful response with generated content.
@@ -75,15 +75,15 @@ Generates a response from the model given text and visual input.
 #### Path Parameters
 | Name       | Required | Type   | Description                                     |
 |------------|----------|--------|-------------------------------------------------|
-| apiVersion | Yes      | string | API version to use for the vision endpoint.     |
-| modelName  | Yes      | string | Name of the base model for vision generation.Eg- Enter gemini-pro and corresponding vision model (gemini-pro-vision) will be used |
+| API Version | Yes      | string | API version to use for the vision endpoint.     |
+| Base Model Name  | Yes      | string | Name of the base model for vision generation.Eg- Enter gemini-pro and corresponding vision model (gemini-pro-vision) will be used |
 
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                        |
 |-------------------|----------|---------|----------------------------------------------------|
-| contents          | Yes      | array   | Contents for generating the vision response. The array should follow this structure: `[ { "text": "prompt string" }, { "inlineData": { "mimeType": "media type", "data": "base64-encoded media data" } } ]`<br>Where:<br>1. The first object is a 'text' object with a prompt string value.<br>2. The second object is an 'inlineData' object containing 'mimeType' and 'base64-encoded data' of the image or video. |
-| safetySettings    | No       | array   | Optional. An array of safety settings objects to filter content based on specified categories and thresholds. Each object can specify properties like `category` to indicate the type of content to filter (e.g., violence, adult content) and `threshold` to set the sensitivity of the filter. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
-| generationConfig  | No       | object  | Optional. Configuration settings for vision content generation, including:<br>- `maxOutputTokens`: Integer specifying the maximum number of tokens in the generated content.<br>- `temperature`: Number controlling randomness in the response. Higher values lead to more varied responses.<br>- `topP`: Number controlling diversity of the response. Higher values lead to more diverse responses.<br>- `topK`: Integer limiting the number of high-probability tokens considered at each step.<br>- `stopSequences`: Array of strings specifying character sequences that will stop text output generation. Further configuration details are available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). | 
+| Contents          | Yes      | array   | Contents for generating the vision response. The array should follow this structure: `[ { "text": "prompt string" }, { "inlineData": { "mimeType": "media type", "data": "base64-encoded media data" } } ]`<br>Where:<br>1. The first object is a 'text' object with a prompt string value.<br>2. The second object is an 'inlineData' object containing 'mimeType' and 'base64-encoded data' of the image or video. |
+| Safety Settings    | No       | array   | Optional. An array of safety settings objects to filter content based on specified categories and thresholds. Each object can specify properties like `category` to indicate the type of content to filter (e.g., violence, adult content) and `threshold` to set the sensitivity of the filter. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
+| Generation Config  | No       | object  | Optional. Configuration settings for vision content generation, including:<br>- `maxOutputTokens`: Integer specifying the maximum number of tokens in the generated content.<br>- `temperature`: Number controlling randomness in the response. Higher values lead to more varied responses.<br>- `topP`: Number controlling diversity of the response. Higher values lead to more diverse responses.<br>- `topK`: Integer limiting the number of high-probability tokens considered at each step.<br>- `stopSequences`: Array of strings specifying character sequences that will stop text output generation. Further configuration details are available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). | 
 
 #### Responses
 - `200`: Successful vision response. Returns the generated content based on the provided text and visual inputs.
@@ -95,13 +95,13 @@ Counts the number of tokens in a given text using the Generative Language Model.
 #### Path Parameters
 | Name       | Required | Type   | Description                                 |
 |------------|----------|--------|---------------------------------------------|
-| apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
-| modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
+| API Version | Yes      | string | API version, e.g., 'v1beta'.            |
+| Model Name  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
 
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                      |
 |-------------------|----------|---------|--------------------------------------------------|
-| contents          | Yes      | array   | The content for which token count is determined. |
+| Contents          | Yes      | array   | The content for which token count is determined. |
 
 #### Responses
 - `200`: Successful response with token count.
@@ -113,7 +113,7 @@ Retrieves a list of all available models with their details.
 #### Path Parameters
 | Name       | Required | Type   | Description                             |
 |------------|----------|--------|-----------------------------------------|
-| apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
+| API Version | Yes      | string | API version, e.g., 'v1beta'.            |
 
 #### Responses
 - `200`: A list of models with their details.
@@ -125,8 +125,8 @@ Retrieves details of a specific model based on the provided model name.
 #### Path Parameters
 | Name       | Required | Type   | Description                             |
 |------------|----------|--------|-----------------------------------------|
-| apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
-| modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
+| API Version | Yes      | string | API version, e.g., 'v1beta'.            |
+| Model Name  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
 
 #### Responses
 - `200`: Detailed information of the specified model.
@@ -138,41 +138,47 @@ Generates an embedding vector for provided text content, useful for tasks like t
 #### Path Parameters
 | Name       | Required | Type   | Description                                 |
 |------------|----------|--------|---------------------------------------------|
-| apiVersion | Yes      | string | API version, e.g., 'v1beta'.                |
-| modelName  | Yes      | string | Model name, e.g., 'embedding-001'.          |
+| API Version | Yes      | string | API version, e.g., 'v1beta'.                |
+| Model Name  | Yes      | string | Model name, e.g., 'embedding-001'.          |
 
 #### Request Body Parameters
 | Name        | Required | Type   | Description                                        |
 |-------------|----------|--------|----------------------------------------------------|
-| model       | Yes      | string | Model identifier for embedding generation.         |
-| content     | Yes      | object | Content containing text parts for embedding.       |
-| taskType    | No       | string | Type of task for which the embedding is intended.Further configuration details are available in the [Task Type documentation](https://ai.google.dev/api/rest/v1beta/TaskType).  |
-| title       | No       | string | Optional title for the content. This is applicable for certain  task types like RETRIEVAL_DOCUMENT         |
+| Model Resource Name   | Yes      | string | Model identifier for embedding generation.         |
+| Content     | Yes      | object | Content containing text parts for embedding.       |
+| Task Type    | No       | string | Type of task for which the embedding is intended.Further configuration details are available in the [Task Type documentation](https://ai.google.dev/api/rest/v1beta/TaskType).  |
+| Title       | No       | string | Optional title for the content. This is applicable for certain  task types like RETRIEVAL_DOCUMENT         |
 
 #### Responses
 - `200`: Successful response with embedding vector.
 
-### 8. Generate Batch Embeddings
+### Batch Generate Embeddings
 #### POST `/{apiVersion}/models/{modelName}:batchEmbedContents`
-Generates embedding vectors for a batch of text contents.
+This endpoint facilitates generating embedding vectors for a batch of text contents, suitable for various natural language processing tasks such as text similarity, classification, and clustering.
 
 #### Path Parameters
 | Name       | Required | Type   | Description                                 |
 |------------|----------|--------|---------------------------------------------|
-| apiVersion | Yes      | string | API version, e.g., 'v1beta'.                |
-| modelName  | Yes      | string | Model name, e.g., 'embedding-001'.          |
+| API Version | Yes      | string | API version, e.g., 'v1beta'.                |
+| Model Name  | Yes      | string | Model name, e.g., 'embedding-001'.          |
 
 #### Request Body Parameters
-| Name       | Required | Type   | Description                                      |
-|------------|----------|--------|--------------------------------------------------|
-| requests   | Yes      | array  | A batch of requests for embedding generation.    |
+| Name        | Required | Type   | Description                                        |
+|-------------|----------|--------|----------------------------------------------------|
+| Requests    | Yes      | array  | A batch of embedding request objects. Each object in the array must include the following fields: |
 
-#### Request Body Schema
-- `model`: String, model identifier for embedding generation. Default: 'models/embedding-001'
-- `content`: Object, containing the `parts` array with text content for embedding.
+Each object in the `requests` array should contain:
+
+| Field       | Required | Type    | Description |
+|-------------|----------|---------|-------------|
+| Model       | Yes      | string  | The identifier of the embedding model. Must follow the format 'models/{modelName}'. |
+| Content     | Yes      | object  | Contains the text parts for which embeddings are generated. Each `parts` array must contain objects with a `text` field. |
+| Task Type    | No       | string  | Type of task for which the embedding is intended.Further configuration details are available in the [Task Type documentation](https://ai.google.dev/api/rest/v1beta/TaskType).  |
+| Title       | No       | string  | An optional title for the content, applicable for certain task types like 'RETRIEVAL_DOCUMENT'. |
 
 #### Responses
-- `200`: Successful response with batch embeddings.
+- `200`: Successful response with batch embeddings. The response contains an array of embedding objects, each with numerical values representing the generated embedding.
+
   
 ## Known Issues and Limitations
 - **Edge Cases**: The API may not perform optimally in rare or unusual situations.
