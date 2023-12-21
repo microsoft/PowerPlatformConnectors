@@ -80,14 +80,7 @@ Generates a response from the model given text and visual input.
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                        |
 |-------------------|----------|---------|----------------------------------------------------|
-| contents          | Yes      | array   | Contents for generating the vision response. The array should follow this structure:  
-`[  
-  { "text": "prompt string" },  
-  { "inlineData": { "mimeType": "media type", "data": "base64-encoded media data" } }  
-]`  
-Where:  
-1. The first object is a 'text' object with a prompt string value.  
-2. The second object is an 'inlineData' object containing 'mimeType' and 'base64-encoded data' of the image or video. |
+| contents          | Yes      | array   | Contents for generating the vision response. The array should follow this structure: `[ { "text": "prompt string" }, { "inlineData": { "mimeType": "media type", "data": "base64-encoded media data" } } ]`<br>Where:<br>1. The first object is a 'text' object with a prompt string value.<br>2. The second object is an 'inlineData' object containing 'mimeType' and 'base64-encoded data' of the image or video. |
 | safetySettings    | No       | array   | Optional. An array of safety settings objects to filter content based on specified categories and thresholds. Each object can specify properties like `category` to indicate the type of content to filter (e.g., violence, adult content) and `threshold` to set the sensitivity of the filter. Detailed structure can be found in the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
 | generationConfig  | No       | object  | Optional. Configuration settings that control aspects of content generation. This can include `maxOutputTokens` for limiting the response length, `temperature` for adjusting the randomness, `topP` for controlling diversity, `topK` for limiting high-probability tokens, and `stopSequences` for specifying stopping points in generation. Further configuration details are available in the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). |
 
