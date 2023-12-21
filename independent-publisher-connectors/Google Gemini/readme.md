@@ -80,14 +80,7 @@ Generates a response from the model given text and visual input.
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                        |
 |-------------------|----------|---------|----------------------------------------------------|
-| contents          | Yes      | array   | Contents for generating the vision response. The array should follow this structure:  
-`[  
-  { "text": "prompt string" },  
-  { "inlineData": { "mimeType": "media type", "data": "base64-encoded media data" } }  
-]`  
-Where:  
-1. The first object is a 'text' object with a prompt string value.  
-2. The second object is an 'inlineData' object containing 'mimeType' and 'base64-encoded data' of the image or video. |
+| contents          | Yes      | array   | Contents for generating the vision response. The array should follow this structure:<br>`[ <br> { "text": "prompt string" }, <br> { "inlineData": { "mimeType": "media type", "data": "base64-encoded media data" } } <br> ]`<br>Where:<br>1. The first object is a 'text' object with a prompt string value.<br>2. The second object is an 'inlineData' object containing 'mimeType' and 'base64-encoded data' of the image or video. |
 | safetySettings    | No       | array   | Optional. Safety settings to filter content based on certain categories and thresholds. For more details, see the [SafetySetting documentation](https://ai.google.dev/api/rest/v1beta/SafetySetting). |
 | generationConfig  | No       | object  | Optional. Configuration settings for vision content generation. For detailed configuration options, refer to the [GenerationConfig documentation](https://ai.google.dev/api/rest/v1beta/GenerationConfig). |
 
