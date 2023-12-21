@@ -44,6 +44,9 @@ Generates a text response from the model given an input message.
 | safetySettings    | No       | array   | Safety settings for text content generation.|
 | generationConfig  | No       | object  | Configuration settings for text generation. |
 
+#### Responses
+- `200`: Successful text response.
+  
 ### 2. Stream Generate Content
 #### POST `/{apiVersion}/models/{modelName}:streamGenerateContent`
 Generates content in a streaming manner for faster interactions.
@@ -61,6 +64,9 @@ Generates content in a streaming manner for faster interactions.
 | safetySettings    | No       | array   | Safety settings for stream content generation.|
 | generationConfig  | No       | object  | Configuration settings for stream generation. |
 
+#### Responses
+- `200`: Successful response with generated content.
+  
 ### 3. Generate Multimodal Content
 #### POST `/{apiVersion}/models/{modelName}-vision:generateContent`
 Generates a response from the model given text and visual input.
@@ -74,10 +80,13 @@ Generates a response from the model given text and visual input.
 #### Request Body Parameters
 | Name              | Required | Type    | Description                                        |
 |-------------------|----------|---------|----------------------------------------------------|
-| contents          | Yes      | array   | Contents for generating the vision response.       |
+| contents          | Yes      | array   | Contents for generating the vision response. The `parts` array must contain two objects: <br>1. A 'text' object with a prompt string value (e.g., `{ "text": "What is this picture?" }`). <br>2. An 'inlineData' object containing 'mimeType' and 'base64-encoded data' (e.g., `{ "inlineData": { "mimeType": "image/jpeg", "data": "base64-encoded-string" } }`). |
 | safetySettings    | No       | array   | Safety settings for vision content generation.     |
 | generationConfig  | No       | object  | Configuration settings for vision content generation. |
 
+#### Responses
+- `200`: Successful vision response.
+  
 ### 4. Count Tokens
 #### POST `/{apiVersion}/models/{modelName}:countTokens`
 Counts the number of tokens in a given text using the Generative Language Model.
@@ -93,6 +102,9 @@ Counts the number of tokens in a given text using the Generative Language Model.
 |-------------------|----------|---------|--------------------------------------------------|
 | contents          | Yes      | array   | The content for which token count is determined. |
 
+#### Responses
+- `200`: Successful response with token count.
+  
 ### 5. Get All Models
 #### GET `/{apiVersion}/models`
 Retrieves a list of all available models with their details.
@@ -102,6 +114,9 @@ Retrieves a list of all available models with their details.
 |------------|----------|--------|-----------------------------------------|
 | apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
 
+#### Responses
+- `200`: A list of models with their details.
+  
 ### 6. Get Model Details
 #### GET `/{apiVersion}/models/{modelName}`
 Retrieves details of a specific model based on the provided model name.
@@ -112,6 +127,9 @@ Retrieves details of a specific model based on the provided model name.
 | apiVersion | Yes      | string | API version, e.g., 'v1beta'.            |
 | modelName  | Yes      | string | Model name, e.g., 'gemini-pro'.         |
 
+#### Responses
+- `200`: Detailed information of the specified model.
+  
 ### 7. Generate Embedding
 #### POST `/{apiVersion}/models/{modelName}:embedContent`
 Generates an embedding vector for provided text content, useful for tasks like text similarity, classification, and clustering.
@@ -129,6 +147,9 @@ Generates an embedding vector for provided text content, useful for tasks like t
 | content     | Yes      | object | Content containing text parts for embedding.       |
 | taskType    | No       | string | Type of task for which the embedding is intended.  |
 | title       | No       | string | Optional title for the content.                    |
+
+#### Responses
+- `200`: Successful response with embedding vector.
 
 ### 8. Generate Batch Embeddings
 #### POST `/{apiVersion}/models/{modelName}:batchEmbedContents`
@@ -149,6 +170,9 @@ Generates embedding vectors for a batch of text contents.
 - `model`: String, model identifier for embedding generation. Default: 'models/embedding-001'
 - `content`: Object, containing the `parts` array with text content for embedding.
 
+#### Responses
+- `200`: Successful response with batch embeddings.
+  
 ## Known Issues and Limitations
 - **Edge Cases**: The API may not perform optimally in rare or unusual situations.
 - **Model Hallucinations**: Outputs might be plausible but factually incorrect.
