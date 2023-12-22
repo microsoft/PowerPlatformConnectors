@@ -9,16 +9,17 @@
         private const string DEFAULT_STOP = "None";
         public override async Task<HttpResponseMessage> ExecuteAsync()
         {
-            Context.Logger.LogInformation($"started {DateTime.UtcNow}");
 
             switch (Context.OperationId)
             {
-                case "CreateCompletion":
-                    return await ProcessCompletion().ConfigureAwait(false);
+                case "BuildCompletionPrompt":
+                    return await ProcessBuildCompletionPrompt().ConfigureAwait(false);
                     break;
-                case "ChatCompletion":
-                    return await ProcessChatCompletion().ConfigureAwait(false);
+                case "GetCompletionHistoryAndAnswerFromResponse":
+                    return await ProcessGetCompletionHistoryAndAnswerFromResponse().ConfigureAwait(false);
                     break;
+                case "GetChatCompletionHistoryAndAnswerFromResponse":
+                    return await ProcessGetChatCompletionMessageAndAnswerFromResponse().ConfigureAwait(false);
                 default:
                     break;
             }
@@ -28,107 +29,68 @@
             return response;
         }
 
-        private async Task<HttpResponseMessage> ProcessChatCompletion()
+        // returns the ChatCompletions message and extracted answer from the raw chat completions result
+        // Extracts the assistant:content pair (message) as well as the content on it own (answer)
+        // from a raw chat completion response
+        private async Task<HttpResponseMessage> ProcessGetChatCompletionMessageAndAnswerFromResponse()
         {
-
-            Context.Logger.LogInformation("reading body");
-            var body = JsonConvert.DeserializeObject<IncomingChatRequestBody>(await Context.Request.Content.ReadAsStringAsync());
-
+            var body = JsonConvert.DeserializeObject<RawChatResult>(await Context.Request.Content.ReadAsStringAsync());
             if (body == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = CreateJsonContent(JsonConvert.SerializeObject(new { message = "error parsing body" })) };
             }
 
-            var newBody = new ChatRequestBody
+            return new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Messages = body.BuildMessages(),
-                MaxTokens = body?.MaxTokens ?? DEFAULT_MAX_TOKENS,
-                Temperature = body?.Temperature ?? DEFAULT_TEMPERATURE,
-                FrequencyPenalty = body?.FrequencyPenalty ?? DEFAULT_FREQUENCY_PENALTY,
-                PresencePenalty = body?.PresencePenalty ?? DEFAULT_PRESENCE_PENALTY,
-                Stop = body?.Stop ?? DEFAULT_STOP,
-                TopP = body?.TopP ?? DEFAULT_TOP_P,
-                Stream = body?.Stream ?? false,
-                N = body?.N ?? 1,
-                User = body?.User ?? DEFAULT_USER
+                Content = CreateJsonContent(
+                    JsonConvert.SerializeObject(
+                        new
+                        {
+                            message = body.Choices?[0]?.Message,
+                            answer = body.Choices?[0]?.Message.Content ?? "NO MATCH"
+                        }
+                    )
+                )
             };
 
-            Context.Request.Content = CreateJsonContent(JsonConvert.SerializeObject(newBody));
-
-            HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                // var responseJson = JObject.Parse(responseBody);
-                var rawResult = JsonConvert.DeserializeObject<RawChatResult>(responseBody);
-                body.Messages.Add(new ChatMessage { Role = Role.assistant, Content = rawResult.Choices?[0].Message.Content ?? "NO MATCH" });
-
-                var newResponseBody = new ChatResponseBody
-                {
-                    Messages = body.Messages,
-                    Answer = rawResult.Choices?[0].Message.Content ?? "NO MATCH",
-                    SystemInstruction = body.SystemInstruction,
-                    RawResult = rawResult
-                };
-
-                HttpResponseMessage newResponse = new HttpResponseMessage(HttpStatusCode.OK);
-                newResponse.Content = CreateJsonContent(JsonConvert.SerializeObject(newResponseBody));
-                return newResponse;
-            }
-
-            return response;
         }
 
-        private async Task<HttpResponseMessage> ProcessCompletion()
+        // returns the CompletionHistory and extracted answer from the raw completions result
+        // Given a prompt and a response from the CreateCompletion operation, get
+        // the qa pair to add to the history and the answer on its own
+        private async Task<HttpResponseMessage> ProcessGetCompletionHistoryAndAnswerFromResponse()
         {
-            const string DEFAULT_API_VERSION = "2021-08-01";
+            var body = JsonConvert.DeserializeObject<CompletionQuestionAndResponse>(await Context.Request.Content.ReadAsStringAsync());
+            if (body == null)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = CreateJsonContent(JsonConvert.SerializeObject(new { message = "error parsing body" })) };
+            }
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = CreateJsonContent(
+                    JsonConvert.SerializeObject(
+                        new
+                        {
+                            history = new QAPair { Question = body.Question, Answer = body.CompletionResponse.Choices[0]?.Text ?? "NO MATCH" },
+                            answer = body.CompletionResponse.Choices[0]?.Text ?? "NO MATCH"
+                        }
+                    )
+                )
+            };
+        }
 
-            Context.Logger.LogInformation("reading body");
-            var body = JsonConvert.DeserializeObject<IncomingRequestBody>(await Context.Request.Content.ReadAsStringAsync());
-
+        // Given a Question/Answer history, and system Instruction, and a new question, build a prompt in ChatML
+        private async Task<HttpResponseMessage> ProcessBuildCompletionPrompt()
+        {
+            var body = JsonConvert.DeserializeObject<CompletionHistoryQuestionAndSystemInstruction>(await Context.Request.Content.ReadAsStringAsync());
             if (body == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = CreateJsonContent(JsonConvert.SerializeObject(new { message = "error parsing body" })) };
             }
 
-            var newBody = new RequestBody
-            {
-                Prompt = body.BuildPrompt(),
-                MaxTokens = body?.MaxTokens ?? DEFAULT_MAX_TOKENS,
-                Temperature = body?.Temperature ?? DEFAULT_TEMPERATURE,
-                TopP = body?.TopP ?? DEFAULT_TOP_P,
-                FrequencyPenalty = body?.FrequencyPenalty ?? DEFAULT_FREQUENCY_PENALTY,
-                PresencePenalty = body?.PresencePenalty ?? DEFAULT_PRESENCE_PENALTY,
-                Stop = body?.Stop ?? DEFAULT_STOP
-            };
-
-            Context.Request.Content = CreateJsonContent(JsonConvert.SerializeObject(newBody));
-
-            HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                var responseJson = JObject.Parse(responseBody);
-                var completionObject = JsonConvert.DeserializeObject<AnswerObject>(responseJson?["choices"]?[0]?.ToString());
-                body.History.Add(new QAPair() { Question = body.Prompt, Answer = StripTrailingTokens(completionObject?.Text ?? "NO MATCH") });
-
-                var newResponseBody = new ResponseBody
-                {
-                    History = body.History,
-                    Answer = StripTrailingTokens(completionObject?.Text ?? "NO MATCH"),
-                    InitialScope = body.InitialScope
-                };
-
-                HttpResponseMessage newResponse = new HttpResponseMessage(HttpStatusCode.OK);
-                newResponse.Content = CreateJsonContent(JsonConvert.SerializeObject(newResponseBody));
-                return newResponse;
-            }
-
-            return response;
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = CreateJsonContent(JsonConvert.SerializeObject(new { prompt = body.BuildPrompt() })) };
         }
+
 
         const string END_TOKEN = "<|im_end|>";
 
@@ -206,35 +168,6 @@
         public string User { get; set; }
     }
 
-    public class IncomingChatRequestBody : ChatRequestBody
-    {
-        const string DEFAULT_SYSTEM_INSTRUCTION = "You are a helpful assistant. Answer in a friendly, informal tone.";
-        const string DEFAULT_MORE_INFO_QUESTION = "Tell me more about that";
-        [JsonProperty("user_message")]
-        public string UserMessage { get; set; } = DEFAULT_MORE_INFO_QUESTION;
-        [JsonProperty("system_instruction")]
-        public string SystemInstruction { get; set; } = DEFAULT_SYSTEM_INSTRUCTION;
-
-        public List<ChatMessage> BuildMessages()
-        {
-            if (Messages.Count == 0)
-            {
-                Messages.Add(new ChatMessage
-                {
-                    Role = Role.system,
-                    Content = SystemInstruction ?? DEFAULT_SYSTEM_INSTRUCTION
-                });
-            }
-
-            Messages.Add(new ChatMessage
-            {
-                Role = Role.user,
-                Content = UserMessage ?? DEFAULT_MORE_INFO_QUESTION
-            });
-            return Messages;
-        }
-    }
-
     public class ChatMessage
     {
         [JsonProperty("role")]
@@ -243,25 +176,7 @@
         public string Content { get; set; }
     }
 
-    public class RequestBody
-    {
-        [JsonProperty(PropertyName = "prompt")]
-        public string Prompt { get; set; } = string.Empty;
-        [JsonProperty(PropertyName = "max_tokens")]
-        public int MaxTokens { get; set; } = 2048;
-        [JsonProperty(PropertyName = "temperature")]
-        public double Temperature { get; set; } = 0.9d;
-        [JsonProperty(PropertyName = "top_p")]
-        public double TopP { get; set; } = 1d;
-        [JsonProperty(PropertyName = "frequency_penalty")]
-        public double FrequencyPenalty { get; set; } = 0d;
-        [JsonProperty(PropertyName = "presence_penalty")]
-        public double PresencePenalty { get; set; } = 0.6d;
-        [JsonProperty(PropertyName = "stop")]
-        public string Stop { get; set; } = "None";
-    }
-
-    public class IncomingRequestBody : RequestBody
+    public class CompletionHistoryQuestionAndSystemInstruction
     {
 
         const string START_SYSTEM_TOKEN = "<|im_start|>system";
@@ -271,6 +186,8 @@
         const string DEFAULT_QUESTION = "Tell me more about that";
         const string DEFAULT_SCOPE = @"You are a helpful assistant";
 
+        [JsonProperty(PropertyName = "question")]
+        public string Question { get; set; } = DEFAULT_QUESTION;
         [JsonProperty(PropertyName = "history")]
         public List<QAPair> History { get; set; } = new List<QAPair>();
         [JsonProperty(PropertyName = "initial_scope")]
@@ -291,23 +208,15 @@
                 prompt.AppendLine($"{qa.Answer}");
             }
 
-            prompt.AppendLine($"{START_USER_TOKEN}\n{Prompt}\n{END_TOKEN}");
+            prompt.AppendLine($"{START_USER_TOKEN}\n{Question}\n{END_TOKEN}");
             prompt.AppendLine($"{START_ASSISTANT_TOKEN}");
 
             return prompt.ToString();
         }
     }
 
-    public class ResponseBody
-    {
-        public List<QAPair> History { get; set; } = new List<QAPair>();
-        public string Answer { get; set; } = string.Empty;
-        [JsonProperty(PropertyName = "initial_scope")]
-        public string InitialScope { get; set; }
 
-    }
-
-    public class AnswerObject
+    public class Choice
     {
         [JsonProperty(PropertyName = "text")]
         public string Text { get; set; }
@@ -323,6 +232,28 @@
     {
         public string Question { get; set; }
         public string Answer { get; set; }
+    }
+
+    public class CompletionResponse
+    {
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
+        [JsonProperty(PropertyName = "object")]
+        public string Object { get; set; }
+        [JsonProperty(PropertyName = "created")]
+        public int Created { get; set; }
+        [JsonProperty(PropertyName = "model")]
+        public string Model { get; set; }
+        [JsonProperty(PropertyName = "choices")]
+        public List<Choice> Choices { get; set; }
+    }
+
+    public class CompletionQuestionAndResponse
+    {
+        [JsonProperty(PropertyName = "question")]
+        public string Question { get; set; }
+        [JsonProperty(PropertyName = "completionResponse")]
+        public CompletionResponse CompletionResponse { get; set; }
     }
 
 
