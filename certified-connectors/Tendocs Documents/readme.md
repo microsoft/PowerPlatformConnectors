@@ -1,4 +1,4 @@
-## Tendocs Templating Connector
+## Tendocs Documents
 Tendocs Templating is a fast, simple, and feature rich solution for automating the creation of office documents (docx, pptx and xlsx). It has connectors ready to go for Power Automate and Logic Apps, and can be integrated into any solution through an easy to use REST API.
 
 ## Pre-requisites
@@ -29,7 +29,9 @@ Use the following values for the the connector security page:
 ## Supported Operations
 The connector supports the following operations:
 * `Create New Document From Template`: Creates a new document based on a Template (Word, PowerPoint or Excel) that contains any number of Document Replacement Tokens (e.g. {{Name}}, {{Date}}, {{Invoice.Amount}}). The service match any number of text, image, document or tables to these tokens, returning a new document in it's original, PDF or HTML format, that merges it all together.
-* `Convert Document To New File Format`: Provides for the conversion of standard Office documents (docx, pptx, xlsx) to a variety of other document formats, including PDF and HTML.
+* `Convert a Document (PDF/HTML/TXT)`: Provides for the conversion of standard Office documents (docx, pptx, xlsx) to a variety of other document formats, including PDF and HTML.
+* `Compare documents (AI)`: Compares two documents, summarises the differences, identifying specific deifferences, and indicating how big the difference is. 
+* `Summarise a document (AI)`: Summarises a document down to an approximate length. 
 
 ## Known Issues and Limitations
 - Number of Text Token limited to a maximum of 128.
