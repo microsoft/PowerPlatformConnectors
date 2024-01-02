@@ -69,5 +69,5 @@ The `Get screenshot by scan ID` returns a screenshot of the site. However, there
 To deploy this connector, follow the instructions in [Deploying a custom connector](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#deploying-a-custom-connector). Then run the following command to create the connector:
 
 ```
-paconn create --api-prop src/apiProperties.json --api-def src/apiDefinition.swagger.json 
+paconn create --api-prop apiProperties.json --api-def apiDefinition.swagger.json 
 ```
