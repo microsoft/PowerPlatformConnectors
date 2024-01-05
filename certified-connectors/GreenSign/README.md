@@ -6,7 +6,9 @@ GreenSign's electronic signature software streamlines document workflows and boo
 
 In order to use this connector, you will need an account with GreenSign. you can sign up [here](https://app.greensign.io/signup).
 
-Once you've signed up, you can use GreenSign in PowerAutomate
+Once you've signed up, you can use GreenSign in PowerAutomate.
+
+If you're an organization using GreenSign, you can [contact us](https://www.greensign.io/contact-us) for enabling your Power Automate integration.
 
 ## Obtaining Credentials.
 
