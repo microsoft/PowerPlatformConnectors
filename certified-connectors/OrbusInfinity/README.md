@@ -1,23 +1,41 @@
 
-## Orbus Infinity Connector
+## OrbusInfinity Connector
 
-Orbus Infinity is a true SaaS multi-tenant solution that delivers the ultimate platform to enable your digital transformation.
-
-Orbus Infinity integrates directly with Microsoft Office to allow you easily link, exchange, visualize, and synchronize data with the Orbus Infinity repository.
-
-This connector is built on top of Orbus Infinity API, and provides operations to facilitate working with Orbus Infinity.
+OrbusInfinity is a true SaaS multi-tenant solution that delivers the ultimate platform to enable your digital transformation.
+OrbusInfinity integrates directly with Microsoft Office to allow you easily link, exchange, visualize, and synchronize data with the OrbusInfinity repository.
+This connector is built on top of OrbusInfinity API, and provides operations to facilitate working with OrbusInfinity.
 
 ## Publisher: Orbus Software
-
-## API Documentation
-
-https://docs.orbussoftware.com/articles/iserver365-api-guide
 
 ## Prerequisites
 
 You will need the following to proceed
 • A Power Automate plan with custom connector feature
-• A Orbus Infinity subscription which includes API access
+• A OrbusInfinity subscription which includes API access
+
+## Supported Operations
+
+The connector supports the following operations:
+* `Get Objects and their details`
+* `Get details of an Object`
+* `Create a new Object`
+* `Delete an Object`
+* `Update Attribute values of an existing Object`
+* `Get Relationships and their details`
+* `Get details of a Relationship`
+* `Create a new Relationship`
+* `Delete a Relationship`
+* `Update Attribute values of an existing Relationship`
+* `Webhooks sent when an event occurs`
+* `Delete an existing webhook`
+
+## Obtaining Credentials
+
+You will need to request an OrbusInfinity [account](https://www.orbussoftware.com).
+
+## Known Issues and Limitations
+
+There are no knowing issues so far.
 
 ## Deployment instructions
 
