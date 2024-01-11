@@ -102,31 +102,63 @@ Additional rules can be used to:
 - Disable or enable Sign Anywhere feature
 - Predefine value for signer name
 - enabling the input for signer name
+- enabling sending signature request from OK Dokument
+- enable email reminder
+- OTP (one time password) configuration via email or SMS
+- sign document with OTP
+- disable signing with the mouse
 
-|Parameter|Description|
-| ------------ | ------------ |
-| signAnywhereEnabled-false   | parameter for disabling sign anywhere function  |
-| signAnywhereEnabled-true  | parameter for enabling sign anywhere function  |
-| guiRequestSignerName-true | parameter for enabling the input for signer name  |
-| guiSignerName-John Smith | predefined value for signer name, max 40 characters. If guiRequestSignerName is enabled, signer name can be changed by signer. |
+|Rule Name|Parameter|Description|
+| ------------ | ------------ | ------------ |
+| signAnywhereEnabled| true/false | parameter for disabling sign anywhere function |
+| guiRequestSignerName| true/false | parameter for enabling the input for signer name  |
+| guiSignerName| Signer name | predefined value for signer name, max 40 characters. If guiRequestSignerName is enabled, signer name can be changed by signer. |
+| signAnywhereEnabled| true/false | parameter for disabling sign anywhere function |
+emailTo | Signer email | Signers email to which signature request url will
+be delivered. |
+emailFrom | Sender email | Senders email. Mandatory if emailTo rule is used |
+nameFrom | Sender name | Senders’ name, that will be used in the email templates |
+emailNotification | | Rule that enables email reminder. Email reminder sends email every morning at 7:00 for signature requests that are not signed. The email is sent to emailTo and emailFrom – according to - signatureRequest configuration. |
+emailFinal | Signer email | Email to deliver the signed document. If emailFinal is without parameter, the signed document will be sent to emailTo. | 
+openOtpPhone | Signer phone | Signers phone number to which the one-time password for accessing the document will be delivered. To use SMS OTP, you must buy signature request package with SMS. |
+openOtpEmail | Signer email | Signers email to which the one-time password for accessing the document will be delivered. |
+signOtpPhone | Signer phone | Signers phone number to which the one-time password for signing the document will be delivered. OTP signature requires signature acrofield.
+signOtpEmail | Signer email | Signers email to which the one-time password for signing the document will be delivered. OTP signature requires signature acrofield.
+lang | sk, cs, en, ro, uk, pl, pt, hu | Language of email and SMS template, If the rule is not set, Slovak as a default language is used.
+mouseSignature | false | Rule for disabling signing with the mouse. | 
 
-*Example of Signature request with enabled Sign Anywhere*
+*Syntaxt for writing signature request rules*\
+`RuleName-Value`
+
+*Syntaxt for writing multiple signature request rules*\
+`RuleName1-Value_RuleName2-Value_RuleName3-Value`
+
+*Example of Signature request with enabled Sign Anywhere*\
 `signAnywhereEnabled-true`
 
-*Example of Signature request with disabled Sign Anywhere and enabled Signer name with prefilled value*
-`guiSignerName-Tomáš Szarka_guiRequestSignerName-true_signAnywhereEnabled-false`
+*Example of Signature request with disabled Sign Anywhere and enabled Signer name with prefilled value*\
+`guiSignerName-John Doe_guiRequestSignerName-true_signAnywhereEnabled-false`
+
+*Example of Signature request with disabled Sign Anywhere, enabled Signer name with prefilled value, defined OTP email to open signature request, email where signature request is sent, email template language, signature request sender email*\
+`guiSignerName-John Doe_guiRequestSignerName-true_signAnywhereEnabled-false_openOtpEmail-john.doe@somefakeemail.com_emailTo-john.doe@somefakeemail.com_lang-sk_emailFrom-sender@someofficetenant.onmicrosoft.com_mouseSignature-false`
 
 ### Expiration time
 Default value for signature request expiration is 24 hours. You can extend this time range up to 10 days using this parameter **expirationTime**. Signature request ID expiration time. Time in Milliseconds since Jan 1, 1970 00:00:00 UTC
 
-###  Storing secret information
-OK dokument allows you to save secret information into encrypted part of signature directly in PDF structure. Within connector you can use in signature request action parameters:
-- Recipient email
-- Internal document ID
-- Additional info
+### Email
+OKdokument API allows you to share signatureRequest url via e-mail. To send email you have to use rules:
+- emailTo – email of the signer
+- emailFrom – email of the sender
+- nameFrom – name of the sender
 
-Data in these parameters will be used and saved directly into encrypted part of signature.
-
+Email will be delivered from okdokument@okdokument.sk, but when the signer hits reply/reply all button, the response will be sent directly to the sender (emailFrom). We recommend also using the following rules for additional setup in the signing process:
+- emailFinal – email for sending the signed document. By default, emailTo is used, but
+it can be changed. In case of multi-round signing, use this rule in the last signing
+round and fill all singers’ email addresses. Example: _emailFinalemail@address.com|email2@address.com_
+- emailNotification - email for sending reminder that document is awaiting signature.
+- language – language of the email template
+- filename – document name, that will be used in the email template. If filename is not
+filled, technical document ID will be used as a document name
 
 ## 3. Wait for Signature
 Trigger action „Wait for Signature“ can be used in your process. „Wait for Signature“ action is waiting till document signature is confirmed in *OK dokument* service by clicking the Submit button. Once signature is submitted this trigger action is completed. You can use this action if you need to wait for document signature confirmation in your process.  
@@ -141,4 +173,27 @@ Once your document is signed, you can delete the document from *OK dokument* ser
 You can get the API key required to use *OK dokument* service by subscribing at https://okdokument.com/en/about/api/.  
 
 # Limitations
-Currently there are limitations to using acrofields and tags. The only possible use of tags or acrofields is predefined string format in your process: `_SC1_, _SC2_, _SC3_, _SC4_, _SC5_` or `_SO1_, _SO2_, _SO3_, _SO4_, _SO5_`  . Custom acrofield internal names or tags are not supported in current version.  
+Currently there are limitations to using acrofields and tags. The only possible use of tags or acrofields is predefined string format in your process: `_SC1_, _SC2_, _SC3_, _SC4_, _SC5_` or `_SO1_, _SO2_, _SO3_, _SO4_, _SO5_`  .  
+
+Custom acrofield internal names are currently in use:
+
+
+| Checkbox| Acrofield |
+| ------------ | ------------ |
+|Optional Checkbox| CO|
+|Compulsory Checkbox |CR|
+
+| Text Field | Acrofield |
+| ------------ | ------------ |
+|Optional TextField| TO|
+|Compulsory Text Field |TC|
+
+| Radio Button Group  | Acrofield |
+| ------------ | ------------ |
+|Optional Radio button Group| RO|
+|Compulsory Radio button Group| RC|
+
+| Combo Box| Acrofield |
+| ------------ | ------------ |
+|Optional combobox |CBO|
+|Compulsory combobox| CBC|
