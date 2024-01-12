@@ -1,6 +1,6 @@
 
 ## Businessmap
-An official connector working with the Businessmap API.
+An official connector working with the [Businessmap API](https://demo.kanbanize.com/openapi/).
 
 ## Prerequisites
 You will need the following to proceed:
