@@ -1,7 +1,6 @@
 # OpenAI
 
 OpenAI is an artificial intelligence research laboratory. The company conducts research in the field of AI with the stated goal of promoting and developing friendly AI in a way that benefits humanity as a whole.
-Through this connector you can access the Generative Pre-trained Transformer 3 (GPT-3), an autoregressive language model that uses deep learning to produce human-like text.
 
 ## Publisher: Robin Rosengrün | R2Power, Marc van de Wijgaart (Speech2Text)
 
@@ -26,3 +25,8 @@ In your account you can create an API key [here](https://platform.openai.com/api
 ## API Documentation
 
 Visit [the OpenAI documentation page](https://platform.openai.com/docs/overview) for further details.
+
+## Known limitations
+
+- `Speech2Text` Endpoint doesn't work on mobile, because the generated file formats are not supported
+- to directly use function-calling or multimodal functionality in `ChatCompletion` directly from Power Apps you need to input your requests as escaped JSON objects via string
