@@ -1,12 +1,14 @@
 
 ## Businessmap
-An official connector working with the [Businessmap API](https://demo.kanbanize.com/openapi/).
+Businessmap is the most flexible software platform for outcomes-driven enterprise agility. The unmatched functionality consolidates multiple tools into one, enabling affordable deployment at scale, visibility across all projects/portfolios, and alignment on goals, to deliver quality work faster. The Businessmap connector can be used to reflect changes in external tools (e.g. issue trackers, email, time tracking tools, etc.) inside your Kanban cards. This is an official connector working with the [Businessmap API](https://demo.kanbanize.com/openapi/).
+
+
+## Publisher: Businessmap
 
 ## Prerequisites
-You will need the following to proceed:
-
 * A Microsoft Power Apps or Power Automate plan
-* A Businessmap subscription and user with enabled permissions to access API
+* To use this connector, you will need a Businessmap account and user with permissions to access the API. [Sign-Up here](https://businessmap.io/sign-up) and create and account to try it. Visit our [Knowledge Base](https://knowledgebase.businessmap.io/hc/en-us) to find answers to your questions regarding Businessmap.
+
 
 ## Supported Actions
 The connector supports the following actions:
@@ -41,7 +43,7 @@ The connector supports the following actions:
 * `Get Lanes`: Get all lanes for a specified board. Used internally.
 * `Get Stickers`: Get all stickers within the account. Can filter by board. Used internally.
 * `Get Tags`: Get all tags within the account. Can filter by board. Used internally.
-* `Get Templates`: Get all templates witin the account. Used internally.
+* `Get Templates`: Get all templates within the account. Used internally.
 * `Get Types`: Get all types within the account. Used internally.
 * `Get Users`: Get all users for a board. Used internally.
 * `Get Workflows`: Get all workflows for a specified board. Used internally.
@@ -52,3 +54,15 @@ The connector supports the following triggers:
 
 * `General Trigger`: Triggers for any action on the board. Use Control/Condition or Control/Switch to manage flow for different triggers. Here is partial list of supported event types: 
 "Card created", "Card moved", "Card details changed", "Card deleted", "Card blocked"
+
+
+## Obtaining Credentials
+A Businessmap account is needed to use the connector. You can register [here](https://businessmap.io/sign-up). You will find your API key within your account details.
+
+## Known Issues and Limitations
+Certain limits are applied to ensure the product and our APIs are running as smoothly and efficiently as possible. The exact API limits depend on your service plan.
+
+
+## Frequently Asked Questions
+Visit our [FAQ page](https://businessmap.io/faq) to read the most popular questions or contact our [customer support](https://businessmap.io/customer-support) with any specific request.
+
