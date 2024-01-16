@@ -66,3 +66,6 @@ Certain limits are applied to ensure the product and our APIs are running as smo
 ## Frequently Asked Questions
 Visit our [FAQ page](https://businessmap.io/faq) to read the most popular questions or contact our [customer support](https://businessmap.io/customer-support) with any specific request.
 
+
+## Deployment Instructions
+Please use the instructions on [Microsoft Power Platform Connectors CLI](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate or Power Apps.
