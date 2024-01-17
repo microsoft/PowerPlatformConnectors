@@ -172,7 +172,7 @@ Once your document is signed, you can delete the document from *OK dokument* ser
 # Obtaining Credentials
 You can get the API key required to use *OK dokument* service by subscribing at https://okdokument.com/en/about/api/.  
 
-# Limitations
+# Known Issues and Limitations
 Currently there are limitations to using acrofields and tags. The only possible use of tags or acrofields is predefined string format in your process: `_SC1_, _SC2_, _SC3_, _SC4_, _SC5_` or `_SO1_, _SO2_, _SO3_, _SO4_, _SO5_`  .  
 
 Custom acrofield internal names are currently in use:
@@ -197,3 +197,6 @@ Custom acrofield internal names are currently in use:
 | ------------ | ------------ |
 |Optional combobox |CBO|
 |Compulsory combobox| CBC|
+
+# Deployment Instructions
+Please use the instructions located [here](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate, Power Apps or Azure LogicApps.
