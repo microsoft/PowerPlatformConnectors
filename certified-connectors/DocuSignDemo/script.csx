@@ -2057,6 +2057,12 @@ public class Script : ScriptBase
     {
       var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
       var body = ParseContentAsJObject(content, false);
+
+      if (body["errorMessage"].Contains("MAX_CONNECT_CUSTOM_CONFIGURATION_FOR_ACTIVE_REST_PAYLOAD_EXCEEDED"))
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Maximum number of active connect custom configurations[10] for Rest Payload exceeded.");
+      }
+
       response.Headers.Location = new Uri(string.Format(
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
