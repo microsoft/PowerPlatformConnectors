@@ -1,0 +1,343 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "LCP - iCordis",
+    "version": "1.0",
+    "description": "Retrieve submissions for iCordis e-loket forms, either by polling for them or by subscribing to a webhook.",
+    "contact": {
+      "name": "LCP nv",
+      "url": "https://www.lcp.be",
+      "email": "helpdesk@lcp.be"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.lcp.be"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.lcp.be/privacybeleid"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity"
+    }
+  ],
+  "host": "export.icordis.be",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/api/Export/eloketjson": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Get submission(s) for an iCordis e-loket form",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "formid",
+            "description": "id of the form to get the submissions for",
+            "type": "integer",
+            "format": "int32",
+            "required": true,
+            "x-ms-summary": "eloket form id"
+          },
+          {
+            "in": "query",
+            "name": "entryid",
+            "description": "id of the submission to get",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "eloket submission id"
+          },
+          {
+            "in": "query",
+            "name": "lastsynch",
+            "description": "get submissions from this datetime on",
+            "type": "string",
+            "format": "date-time",
+            "x-ms-summary": "date from"
+          },
+          {
+            "in": "query",
+            "name": "includeFiles",
+            "description": "if true, will include the attachments as base64 string",
+            "type": "boolean",
+            "x-ms-summary": "include files"
+          },
+          {
+            "in": "query",
+            "name": "includePDF",
+            "description": "if true, a base64 pdf will be included which contains the form with its values",
+            "type": "boolean",
+            "x-ms-summary": "include PDF of submission"
+          },
+          {
+            "in": "query",
+            "name": "includeHTML",
+            "description": "if true, will contain a base64 html of the form with its values",
+            "type": "boolean",
+            "x-ms-summary": "include HTML of submission"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "if given, will only return 10 submissions and paging will be enabled. If not given, all submissions will be returned.",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/EloketExport"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "oauth2-auth": [
+              "Export"
+            ]
+          }
+        ],
+        "description": "Get the submissions for a specific form. There is a possibility to pass several parameters to customize the export.",
+        "operationId": "EloketExport"
+      }
+    },
+    "/api/export/eloket/{formid}/hooks": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "formid": {
+              "type": "integer",
+              "format": "int32",
+              "description": "formid"
+            },
+            "newrowid": {
+              "type": "integer",
+              "format": "int32",
+              "description": "newrowid"
+            }
+          }
+        },
+        "description": "New e-loket submission"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "consumes": ["application/json"],
+        "summary": "When a new submission is created for the e-loket form",
+        "operationId": "NewEntry",
+        "description": "subscribe to the webhook to get the new submissions for the specified form",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "formid",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "formid to get the new submissions for",
+            "description": "id of the form to get the new submissions for",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              
+              "properties": {
+                "webhookURL": {
+                  "type": "string",
+                  "description": "url the webhook needs to call",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "webhookURL"
+                }
+              },
+              "required": [
+                "webhookURL"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/export/eloket/{formid}/unsubscribe": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "consumes":["application/json"],
+        "parameters": [
+          {
+            "name": "formid",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "formid to unsubscribe",
+            "description": "the id of the form to stop receiving submissions from",
+            "x-ms-url-encoding":"single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webhookurl": {
+                  "type": "string",
+                  "description": "the subscriber url to delete",
+                  "title": "webhook url"
+                }
+              }
+            }
+          }
+        ],
+        "summary": "delete trigger",
+        "description": "unsubscribe for the webhook for this form",
+        "x-ms-summary": "delete trigger",
+        "operationId": "TriggerUnsubscribe"
+      }
+    }
+  },
+  "definitions": {
+    "EloketExport": {
+      "type": "object",
+      "properties": {
+        "nextPage": {
+          "type": "string",
+          "description": "link to use to get the next page when paging is enabled",
+          "title": "nextPage"
+        },
+        "errorMessage": {
+          "type": "string",
+          "description": "if there was an error, this field will contain the error message",
+          "title": "errormessage"
+        },
+        "formID": {
+          "format": "int32",
+          "type": "integer",
+          "description": "id of the exported form",
+          "title": "formID"
+        },
+        "formTitle": {
+          "type": "string",
+          "description": "title of the exported form",
+          "title": "formTitle"
+        },
+        "responseStatus": {
+          "type": "string",
+          "description": "status of the response.",
+          "title": "responseStatus"
+        },
+        "data": {
+          "type": "array",
+          "description":"Key-Value list of entered values where the key is the fieldname",
+          "title":"data",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "fields": {
+          "type": "array",
+          "description": "list of fields available for this form",
+          "title": "fields",
+          "items": {
+            "$ref": "#/definitions/EloketField"
+          }
+        }
+      }
+    },
+    "EloketField": {
+      "type": "object",
+      "properties": {
+        "fieldName": {
+          "type": "string",
+          "description": "name of the field",
+          "title": "fieldName"
+        },
+        "fieldType": {
+          "type": "string",
+          "description": "type of the field",
+          "title": "fieldType"
+        },
+        "fieldDescription": {
+          "type": "string",
+          "description": "description of the field",
+          "title": "fieldDescription"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://secure.icordis.be/connect/authorize",
+      "tokenUrl": "https://secure.icordis.be/connect/token",
+      "scopes": {
+        "Export": "Export"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": [
+        "Export"
+      ]
+    }
+  ],
+  "tags": []
+}
