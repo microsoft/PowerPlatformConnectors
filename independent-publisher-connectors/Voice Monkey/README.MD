@@ -1,27 +1,12 @@
 # Voice Monkey
 
-Voice Monkey is a platform that enhances the functionality of Amazon Alexa smart home devices. It enables the external triggering of Alexa Routines and introduces new capabilities such as custom Text To Speech (TTS) announcements. Users can schedule routines, respond to smart home events dynamically, and leverage features like media playback and action prompts based on responses.
-
-Voice Monkey integrates with various platforms to extend its utility. It connects with IFTTT, allowing Alexa to interact with a broad array of applications and smart home devices. Integration with Zapier opens avenues for connecting Alexa with numerous business applications. For Home Assistant users, Voice Monkey offers solutions for virtual device routine triggers and Alexa TTS integration. Additionally, its compatibility with Flic Buttons enables users to initiate Alexa Routines and Voice Monkey Flows conveniently. These integrations collectively enhance the smart home experience, linking Alexa with diverse services and devices in both personal and professional environments.
+Voice Monkey enhances Amazon Alexa's functionality by enabling external triggering of Alexa Routines and offering features like custom Text To Speech announcements and media playback. It integrates with platforms such as IFTTT, Zapier, and Home Assistant, facilitating Alexa's connection with a variety of applications and smart devices. These integrations collectively enrich the smart home experience, making Alexa a more versatile and dynamic tool for home automation.
 
 ## Publisher: Richard Wilson
 
 ## Prerequisites
 
-To utilize the Voice Monkey connector, you need to set up your account and acquire necessary tokens:
-
-### Setting Up Voice Monkey Account
-
-1. **Sign Up for Voice Monkey:**
-   - Visit [Voice Monkey's Website](https://voicemonkey.io) and sign up for an account.
-
-2. **Access Your Dashboard:**
-   - Once registered, navigate to the Dashboard page on Voice Monkey.
-
-3. **Get Your Tokens:**
-   - Find your Access token and Secret token within the Dashboard. These tokens are essential for using the Voice Monkey connector.
-
-Please ensure that you keep your tokens secure and do not share them publicly.
+To use Voice Monkey, you'll need to create a Voice Monkey account. Sign up on the [Voice Monkey website](https://voicemonkey.io/), where you can choose between the free and paid plans. The free plan covers essential features, while the paid plan offers advanced functionalities for more extensive use cases.
 
 ## Supported Operations
 
@@ -67,9 +52,18 @@ Start a specific Voice Monkey Flow based on your defined criteria.
   - **Device ID:** The unique identifier of the Alexa device.
   - **Flow ID:** The numeric ID of the Flow you wish to initiate.
 
-## API Documentation
+## Obtaining Credentials
 
-For detailed information about Voice Monkey's API capabilities, including endpoints, parameters, and response structures, refer to the [Voice Monkey API Documentation](https://voicemonkey.io/docs). This documentation provides comprehensive guidelines and examples to assist you in integrating and leveraging the API in your applications and systems.
+1. **Sign Up for Voice Monkey:**
+   - Visit [Voice Monkey's Website](https://voicemonkey.io) and sign up for an account.
+
+2. **Access Your Dashboard:**
+   - Once registered, navigate to the Dashboard page on Voice Monkey.
+
+3. **Get Your Tokens:**
+   - Find your Access token and Secret token within the Dashboard. These tokens are essential for using the Voice Monkey connector.
+
+Please ensure that you keep your tokens secure and do not share them publicly.
 
 ## Known Issues and Limitations
 
