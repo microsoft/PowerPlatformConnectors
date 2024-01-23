@@ -1,5 +1,5 @@
 # Doppler Secrets
-Doppler Secrets is a robust and user-friendly secrets management platform designed for developers and teams. It empowers users to efficiently handle and secure sensitive information such as API keys, tokens, and configuration variables across diverse projects. With features like version control, environment-specific configurations, and seamless integrations, Doppler simplifies the management of secrets, ensuring a streamlined and secure development workflow. Whether for small-scale projects or large enterprise applications, Doppler offers a scalable and reliable solution for maintaining and accessing critical secrets across various environments. With this connector, you can easily create, read, update, and delete secrets in Doppler’s Secret enabling you to automate the management of your secrets,configs,projects,project roles,project members.
+Doppler Secrets is a secrets management platform for developers and teams. It allows efficient handling of sensitive data like API keys and tokens across projects. It offers version control, environment-specific configurations, and integrations, simplifying secret management. The connector enables automation of secret, config, and project management, suitable for both small and large applications.
 
 ## Publisher: Farhan Latif
 
