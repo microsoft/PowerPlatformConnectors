@@ -18,7 +18,7 @@ public class Script : ScriptBase
         var path = this.Context.Request.RequestUri.AbsolutePath.ToString();
         
         switch (path) {
-            case "/v1/runs":
+            case "/v1/workflows":
                 return await CreateRun(accessToken);
                 break;
             case "/v1/documents": 
@@ -34,26 +34,10 @@ public class Script : ScriptBase
     
     private async Task<HttpResponseMessage> CreateRun(string accessToken)
     {
-        string workflowId = this.Context.Request.Headers.GetValues("WorkflowId").First();
-        string executionName = this.Context.Request.Headers.GetValues("Name").First();
-        
-        var documentResponse  = await this.CreateDocument(accessToken);
+        var request = this.Context.Request;
+        string workflowId = request.Headers.GetValues("WorkflowId").First();
+        request.RequestUri = new Uri($"{Script.API_ENDPOINT}/workflows/{workflowId}/executions");
 
-        var documentId = (string) (await ToJson(documentResponse))["documentId"];
-
-        var request = CreateAuthorizedRequest(
-            method: HttpMethod.Post,
-            path: $"/workflows/{workflowId}/executions",
-            accessToken: accessToken
-        );
-        
-        request.Content = CreateJsonContent(new JObject {
-            ["input"] = new JObject {
-                ["documentId"] = documentId,
-                ["title"] = executionName
-            }
-        }.ToString());
-        
         return await this.Context.SendAsync(request, this.CancellationToken);       
     }
     
