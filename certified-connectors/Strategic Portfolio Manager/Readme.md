@@ -31,7 +31,6 @@ The connector supports the following operations:
 
 ## Supported Triggers:
 The connector supports the following triggers:
-
 * `On Entity Created`: Executed when a new entity is created in the Strategic Portfolio Manager site.
 * `On Entity Deleted`: Executed when one or more entities are deleted from the Strategic Portfolio Manager site.
 * `On Entity Updated`: Executed when entity fields are updated.
