@@ -1,51 +1,56 @@
+﻿using System;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+
 public class Script : ScriptBase
 {
-
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        if (this.Context.OperationId == "Convert")
+        var domain = this.Context.Request.Headers.GetValues("Instance").First();
+        if (Uri.IsWellFormedUriString(domain, UriKind.Absolute))
         {
-            return await this.ConvertToObjects().ConfigureAwait(false);
+            Uri uri = new Uri(domain);
+            domain = uri.Host;
         }
 
-        // Check if the operation ID matches what is specified in the OpenAPI definition of the connector
-        // Presence is enforced in swagger
-        
-        var domain = this.Context.Request.Headers.GetValues("Instance").First();
-        string pattern = "http";
-        Match m = Regex.Match(domain,pattern,RegexOptions.IgnoreCase);
-        if (m.Success) {
-            string subs[] = domain.Split(':\\');
-            domain = subs[1];
-        }
         var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
         uriBuilder.Host = domain;
         this.Context.Request.RequestUri = uriBuilder.Uri;
 
         HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+        if (response.IsSuccessStatusCode && IsTransformable(this.Context))
+        {
+            var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            response = await ConvertToObjects(responseContent);
+        }
+
         return response;
     }
 
-    private async Task<HttpResponseMessage> ConvertToObjects()
+    private bool IsTransformable(IScriptContext Context)
+    {
+        return (this.Context.OperationId == "ExecuteSqlStatement" || this.Context.OperationId == "GetResults");
+    }
+
+    private async Task<HttpResponseMessage> ConvertToObjects(string content)
     {
         try
         {
-            HttpResponseMessage response;
-
-            var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var contentAsJson = JObject.Parse(contentAsString);
+            var contentAsJson = JObject.Parse(content);
 
             // check for parameters
-            if (contentAsJson["data"] == null || contentAsJson["resultSetMetaData"]==null)
+            if (contentAsJson["data"] == null || contentAsJson["resultSetMetaData"] == null || contentAsJson["resultSetMetaData"]["rowType"] == null)
             {
-                return createErrorResponse("resultSetMetaData or data parameter are empty!", HttpStatusCode.BadRequest);
+                throw new Exception("resultSetMetaData or data parameter are empty!");
             }
 
             // get metadata
-            var cols = JArray.Parse(contentAsJson["resultSetMetaData"].ToString());
+            var cols = JArray.Parse(contentAsJson["resultSetMetaData"]["rowType"].ToString());
             var rows = JArray.Parse(contentAsJson["data"].ToString());
 
             JArray newRows = new JArray();
+
             foreach (var row in rows)
             {
                 JObject newRow = new JObject();
@@ -60,15 +65,17 @@ public class Script : ScriptBase
                     switch (type)
                     {
                         case "fixed":
-                            long scale = 0;
-                            long.TryParse(col["scale"].ToString(), out scale);
-                            if (scale == 0)
+                            long scale = 0;
+                            long.TryParse(col["scale"].ToString(), out scale);
+                            if (scale == 0)
                             {
-                              long myLong = long.Parse(row[i].ToString());
-                              newRow.Add(new JProperty(name.ToString(), myLong));
-                            } else {
-                              double myDouble = double.Parse(row[i].ToString());
-                              newRow.Add(new JProperty(name.ToString(), myDouble));
+                                long myLong = long.Parse(row[i].ToString());
+                                newRow.Add(new JProperty(name.ToString(), myLong));
+                            }
+                            else
+                            {
+                                double myDouble = double.Parse(row[i].ToString());
+                                newRow.Add(new JProperty(name.ToString(), myDouble));
                             }
                             break;
                         case "float":
@@ -82,7 +89,6 @@ public class Script : ScriptBase
                         default:
                             if (type.ToString().IndexOf("time") >= 0)
                             {
-
                                 double unixTimeStamp = Convert.ToDouble(row[i].ToString());
 
                                 DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
@@ -97,21 +103,35 @@ public class Script : ScriptBase
                             }
                             break;
                     }
-                    i++;
 
+                    i++;
                 }
 
                 newRows.Add(newRow);
 
             }
 
-            JObject output = new JObject
+            var result = new ConnectorResponse
             {
-                ["data"] = newRows
+                Data = newRows,
+                Metadata = new ConnectorResponseMetadata
+                {
+                    Rows = Convert.ToInt64(contentAsJson["resultSetMetaData"]["numRows"]),
+                    Code = contentAsJson["code"].ToString(),
+                    StatementStatusUrl = contentAsJson["statementStatusUrl"].ToString(),
+                    RequestId = contentAsJson["requestId"].ToString(),
+                    SqlState = contentAsJson["sqlState"].ToString(),
+                    StatementHandle = contentAsJson["statementHandle"].ToString(),
+                    CreatedOn = contentAsJson["createdOn"].ToString()
+                }
             };
-            response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = CreateJsonContent(output.ToString());
-            return response; 
+
+            var responseObj = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = CreateJsonContent(JsonConvert.SerializeObject(result))
+            };
+
+            return responseObj;
         }
         catch (JsonReaderException ex)
         {
@@ -119,11 +139,11 @@ public class Script : ScriptBase
         }
         catch (Exception ex)
         {
-            return createErrorResponse(ex.GetType()+":"+ex, HttpStatusCode.InternalServerError);
+            return createErrorResponse(ex.GetType() + ":" + ex, HttpStatusCode.InternalServerError);
         }
     }
 
-    private static HttpResponseMessage createErrorResponse(String msg, HttpStatusCode code)
+    private HttpResponseMessage createErrorResponse(String msg, HttpStatusCode code)
     {
         JObject output = new JObject
         {
@@ -134,4 +154,27 @@ public class Script : ScriptBase
         return response;
     }
 
+    public class ConnectorResponseMetadata
+    {
+        public long Rows { get; set; }
+
+        public string Code { get; set; }
+
+        public string StatementStatusUrl { get; set; }
+
+        public string RequestId { get; set; }
+
+        public string SqlState { get; set; }
+
+        public string StatementHandle { get; set; }
+
+        public string CreatedOn { get; set; }
+    }
+
+    public class ConnectorResponse
+    {
+        public object Data { get; set; }
+
+        public ConnectorResponseMetadata Metadata { get; set; }
+    }
 }
