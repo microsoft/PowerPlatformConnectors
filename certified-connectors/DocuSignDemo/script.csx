@@ -459,16 +459,6 @@ public class Script : ScriptBase
         };
       }
 
-      if(embeddedRecipientType.Equals("Remote", StringComparison.OrdinalIgnoreCase))
-      {
-        response["schema"]["properties"]["embeddedRecipientStartURL"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "* Embedded recipient start URL",
-          ["description"] = "Embedded recipient start URL",
-        };
-      }
-
       if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP", StringComparison.OrdinalIgnoreCase))
       {
         response["schema"]["properties"]["aesMethod"] = new JObject
@@ -1574,7 +1564,7 @@ public class Script : ScriptBase
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var embeddedRecipientType = query.Get("embeddedRecipientType");
 
-    if (embeddedRecipientType.Equals("remote"))
+    if (embeddedRecipientType.Equals("Hybrid captive"))
     {
       signers[0]["embeddedRecipientStartURL"] = body["embeddedRecipientStartURL"];
     }
