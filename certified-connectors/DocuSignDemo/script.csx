@@ -439,6 +439,7 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var recipientType = query.Get("recipientType");
       var signatureType = query.Get("signatureType") ?? "";
+      var embeddedRecipientType = query.Get("embeddedRecipientType") ?? "";
 
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
@@ -447,6 +448,26 @@ public class Script : ScriptBase
         ["type"] = "object",
         ["properties"] = new JObject()
       };
+
+      if(embeddedRecipientType.Equals("Hybrid captive", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["embeddedRecipientStartURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Embedded recipient start URL",
+          ["default"] = "SIGN_AT_DOCUSIGN"
+        };
+      }
+
+      if(embeddedRecipientType.Equals("Remote", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["embeddedRecipientStartURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* Embedded recipient start URL",
+          ["description"] = "Embedded recipient start URL",
+        };
+      }
 
       if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP", StringComparison.OrdinalIgnoreCase))
       {
@@ -1243,6 +1264,11 @@ public class Script : ScriptBase
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
 
+    if (!string.IsNullOrEmpty(query.Get("embeddedRecipientType")))
+    {
+      AddParamsForEmbeddedRecipientType(signers, body);
+    }
+
     if (!string.IsNullOrEmpty(query.Get("signatureType")))
     {
       AddParamsForSelectedSignatureType(signers, body);
@@ -1540,6 +1566,17 @@ public class Script : ScriptBase
     {
       signers[0]["name"] = body["name"];
       signers[0]["email"] = body["email"];
+    }
+  }
+
+  private void AddParamsForEmbeddedRecipientType(JArray signers, JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var embeddedRecipientType = query.Get("embeddedRecipientType");
+
+    if (embeddedRecipientType.Equals("remote"))
+    {
+      signers[0]["embeddedRecipientStartURL"] = body["embeddedRecipientStartURL"];
     }
   }
 
