@@ -14,6 +14,24 @@ You will need the following to proceed:
 
 The connector supports the following operations:
 * `Common Search`: Search the Financial Services Register for a firm or an individual by name or unique reference number
+*  `Find Individuals Details`: Get information about the Individuals associated with its Individual Reference Number
+*  `Find Firm Details`: Get information about a specific firm using its Firm Reference Number
+*  `Product Details`: Get information about a product by using its Product Reference Number
+*  `Subfund Details`: Get information about subfund of a product by using its Product Reference Number
+*  `Product Other Name Details`: Get information about other names of a product by using its Product Reference Number
+*  `Individual Disciplinary History`: Get information about Disciplinary History on an Individual using its Individual Reference Number
+*  `Firm Other Names`: Get information about the other names used by the firms using its Firm Reference Number
+*  `Firm Address`: Get information about a specific firm using its Firm Reference Number
+*  `Firm Individuals`: Get information about the Individuals associated with a firm using its Firm Reference Number
+*  `Firm Activities and Permissions`: Get information about the activities and permissions associated with a specific firm using its Firm Reference Number
+*  `Firm Requirements`: Get information about the requirements associated with a specific firm using its Firm Reference Number
+*  `Firm Requirements Investment Types`: Get information about the investment types associated with a specific firm requirement using its Firm Reference Number and Requirement Reference
+*  `Firm Regulators`: Get information about a regulator on a firm using its Firm Reference Number
+*  `Firm Passport`: Get information about a passport details by using its Firm Reference Number
+*  `Firm Passport Permission`: Get information about a passport permission by using its Firm Reference Number and Country
+*  `Firm Exclusions`: Get information about an Exclusion on a firm using its Firm Reference Number
+*  `Firm Disciplinary History`: Get information about a Disciplinary History on a firm using its Firm Reference Number
+*  `Firm Waiver`: Get information about a Waiver on a firm using its Firm Reference Number
 
 
 ## Obtaining Credentials
