@@ -449,7 +449,7 @@ public class Script : ScriptBase
         ["properties"] = new JObject()
       };
 
-      if(embeddedRecipientType.Equals("Hybrid captive", StringComparison.OrdinalIgnoreCase))
+      if(embeddedRecipientType.ToString().Equals("Hybrid captive", StringComparison.OrdinalIgnoreCase))
       {
         response["schema"]["properties"]["embeddedRecipientStartURL"] = new JObject
         {
