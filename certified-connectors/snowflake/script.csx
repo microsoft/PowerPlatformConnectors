@@ -1,25 +1,51 @@
-﻿using System;
-using System.Net;
-using System.Text;
+﻿using System.Net;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
+using System;
 
 public class Script : ScriptBase
 {
+    #region Constants
+
+    private readonly string HEADER_INSTANCE = "Instance";
+    private readonly string OP_EXECUTE_SQL = "ExecuteSqlStatement";
+    private readonly string OP_GET_RESULTS = "GetResults";
+
+    private readonly string Attr_Metadata = "resultSetMetaData";
+    private readonly string Attr_RowType = "rowType";
+    private readonly string Attr_Data = "data";
+
+    private readonly string Attr_Column_Name = "name";
+    private readonly string Attr_Column_Type = "type";
+    private readonly string Attr_Column_Scale = "scale";
+
+    private const string Snowflake_Type_Fixed = "fixed";
+    private const string Snowflake_Type_Float = "float";
+    private const string Snowflake_Type_Boolean = "boolean";
+    private const string Snowflake_Type_Time = "time";
+
+    #endregion
+
+    public async Task<HttpResponseMessage> TestMethod(string content)
+    {
+        return await ConvertToObjects(content);
+    }
+
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        var domain = this.Context.Request.Headers.GetValues("Instance").First();
+        var domain = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
         if (Uri.IsWellFormedUriString(domain, UriKind.Absolute))
         {
             Uri uri = new Uri(domain);
             domain = uri.Host;
         }
 
-        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+        var uriBuilder = new UriBuilder(Context.Request.RequestUri);
         uriBuilder.Host = domain;
-        this.Context.Request.RequestUri = uriBuilder.Uri;
+        Context.Request.RequestUri = uriBuilder.Uri;
 
-        HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-        if (response.IsSuccessStatusCode && IsTransformable(this.Context))
+        HttpResponseMessage response = await Context.SendAsync(Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+        if (response.IsSuccessStatusCode && IsTransformable())
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             response = await ConvertToObjects(responseContent);
@@ -28,9 +54,9 @@ public class Script : ScriptBase
         return response;
     }
 
-    private bool IsTransformable(IScriptContext Context)
+    private bool IsTransformable()
     {
-        return (this.Context.OperationId == "ExecuteSqlStatement" || this.Context.OperationId == "GetResults");
+        return (Context.OperationId == OP_EXECUTE_SQL || Context.OperationId == OP_GET_RESULTS);
     }
 
     private async Task<HttpResponseMessage> ConvertToObjects(string content)
@@ -40,14 +66,14 @@ public class Script : ScriptBase
             var contentAsJson = JObject.Parse(content);
 
             // check for parameters
-            if (contentAsJson["data"] == null || contentAsJson["resultSetMetaData"] == null || contentAsJson["resultSetMetaData"]["rowType"] == null)
+            if (contentAsJson[Attr_Data] == null || contentAsJson[Attr_Metadata] == null || contentAsJson[Attr_Metadata][Attr_RowType] == null)
             {
-                throw new Exception("resultSetMetaData or data parameter are empty!");
+                throw new Exception($"'{Attr_Metadata}' or '{Attr_Data}' parameter are empty!");
             }
 
             // get metadata
-            var cols = JArray.Parse(contentAsJson["resultSetMetaData"]["rowType"].ToString());
-            var rows = JArray.Parse(contentAsJson["data"].ToString());
+            var cols = JArray.Parse(contentAsJson[Attr_Metadata][Attr_RowType].ToString());
+            var rows = JArray.Parse(contentAsJson[Attr_Data].ToString());
 
             JArray newRows = new JArray();
 
@@ -58,15 +84,15 @@ public class Script : ScriptBase
 
                 foreach (var col in cols)
                 {
-                    var name = col["name"].ToString();
-                    string type = col["type"].ToString();
+                    var name = col[Attr_Column_Name].ToString();
+                    string type = col[Attr_Column_Type].ToString();
                     if (newRow.ContainsKey(name)) name = name + "_" + Convert.ToString(i);
 
                     switch (type)
                     {
-                        case "fixed":
+                        case Snowflake_Type_Fixed:
                             long scale = 0;
-                            long.TryParse(col["scale"].ToString(), out scale);
+                            long.TryParse(col[Attr_Column_Scale].ToString(), out scale);
                             if (scale == 0)
                             {
                                 long myLong = long.Parse(row[i].ToString());
@@ -78,23 +104,22 @@ public class Script : ScriptBase
                                 newRow.Add(new JProperty(name.ToString(), myDouble));
                             }
                             break;
-                        case "float":
+
+                        case Snowflake_Type_Float:
                             float myFloat = float.Parse(row[i].ToString());
                             newRow.Add(new JProperty(name.ToString(), myFloat));
                             break;
-                        case "boolean":
+
+                        case Snowflake_Type_Boolean:
                             bool myBool = bool.Parse(row[i].ToString());
                             newRow.Add(new JProperty(name.ToString(), myBool));
                             break;
+
                         default:
-                            if (type.ToString().IndexOf("time") >= 0)
+                            if (type.ToString().IndexOf(Snowflake_Type_Time) >= 0)
                             {
-                                double unixTimeStamp = Convert.ToDouble(row[i].ToString());
-
-                                DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                                dateTime = dateTime.AddSeconds(unixTimeStamp);
-
-                                newRow.Add(new JProperty(name.ToString(), dateTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")));
+                                var utcTime = ConvertToUTC(row[i].ToString());
+                                newRow.Add(new JProperty(name.ToString(), utcTime));
                             }
                             else
                             {
@@ -108,7 +133,6 @@ public class Script : ScriptBase
                 }
 
                 newRows.Add(newRow);
-
             }
 
             var result = new ConnectorResponse
@@ -116,13 +140,13 @@ public class Script : ScriptBase
                 Data = newRows,
                 Metadata = new ConnectorResponseMetadata
                 {
-                    Rows = Convert.ToInt64(contentAsJson["resultSetMetaData"]["numRows"]),
+                    Rows = Convert.ToInt64(contentAsJson[Attr_Metadata]["numRows"]),
                     Code = contentAsJson["code"].ToString(),
                     StatementStatusUrl = contentAsJson["statementStatusUrl"].ToString(),
                     RequestId = contentAsJson["requestId"].ToString(),
                     SqlState = contentAsJson["sqlState"].ToString(),
                     StatementHandle = contentAsJson["statementHandle"].ToString(),
-                    CreatedOn = contentAsJson["createdOn"].ToString()
+                    CreatedOn = ConvertToUTC(contentAsJson["createdOn"].ToString(), TimeInterval.Milliseconds)
                 }
             };
 
@@ -135,7 +159,7 @@ public class Script : ScriptBase
         }
         catch (JsonReaderException ex)
         {
-            return createErrorResponse("'resultSetMetadata' or 'data' are in an invalid format: " + ex, HttpStatusCode.BadRequest);
+            return createErrorResponse($"'{Attr_Metadata}' or '{Attr_Data}' are in an invalid format: " + ex, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {
@@ -143,7 +167,7 @@ public class Script : ScriptBase
         }
     }
 
-    private HttpResponseMessage createErrorResponse(String msg, HttpStatusCode code)
+    private HttpResponseMessage createErrorResponse(string msg, HttpStatusCode code)
     {
         JObject output = new JObject
         {
@@ -154,27 +178,50 @@ public class Script : ScriptBase
         return response;
     }
 
+    private string ConvertToUTC(string epochTime, TimeInterval timeInterval = TimeInterval.Seconds)
+    {
+        DateTimeOffset utcTime;
+        long longEpochTime = Convert.ToInt64(Convert.ToDouble(epochTime));
+
+        if (timeInterval == TimeInterval.Milliseconds)
+        {
+            utcTime = DateTimeOffset.FromUnixTimeMilliseconds(longEpochTime);
+        }
+        else
+        {
+            utcTime = DateTimeOffset.FromUnixTimeSeconds(longEpochTime);
+        }
+
+        return utcTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+    }
+
+    public enum TimeInterval
+    {
+        Seconds = 1,
+        Milliseconds = 2,
+    }
+
     public class ConnectorResponseMetadata
     {
         public long Rows { get; set; }
 
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
-        public string StatementStatusUrl { get; set; }
+        public string? StatementStatusUrl { get; set; }
 
-        public string RequestId { get; set; }
+        public string? RequestId { get; set; }
 
-        public string SqlState { get; set; }
+        public string? SqlState { get; set; }
 
-        public string StatementHandle { get; set; }
+        public string? StatementHandle { get; set; }
 
-        public string CreatedOn { get; set; }
+        public string? CreatedOn { get; set; }
     }
 
     public class ConnectorResponse
     {
-        public object Data { get; set; }
+        public object? Data { get; set; }
 
-        public ConnectorResponseMetadata Metadata { get; set; }
+        public ConnectorResponseMetadata? Metadata { get; set; }
     }
 }
