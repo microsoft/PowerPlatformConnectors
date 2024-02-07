@@ -88,7 +88,11 @@ public class Script : ScriptBase
         putRequest.Headers.Add("Authorization", this.Context.Request.Headers.GetValues("Authorization").First());
         putRequest.Content = new ByteArrayContent(fileContent);
         var putResponse = await this.Context.SendAsync(putRequest, this.CancellationToken);
-
+        
+        if (!putResponse.IsSuccessStatusCode) {
+            return putResponse;
+        }
+        
         return response;
     }
     
