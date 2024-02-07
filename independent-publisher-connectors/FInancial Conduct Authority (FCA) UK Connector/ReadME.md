@@ -1,4 +1,4 @@
-# FCA-Connector
+# FCA Connector
 
 The Financial Conduct Authority (FCA) is a financial regulatory body in the United Kingdom. Their website allows people to search the Financial Services Register for firms and individuals and the activities firms have permissions for. The Financial Services Register is a public record of firms, individuals and other bodies that are authorised by the Prudential Regulation Authority (PRA) and/or FCA. The website can be used by anyone, looking to gather information.
 
