@@ -1562,7 +1562,7 @@ public class Script : ScriptBase
   private void AddParamsForEmbeddedRecipientType(JArray signers, JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    var embeddedRecipientType = query.Get("embeddedRecipientType");
+    var embeddedRecipientType = query.Get("embeddedRecipientType").ToString();
 
     if (embeddedRecipientType.Equals("Hybrid captive"))
     {
