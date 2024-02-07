@@ -439,7 +439,6 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var recipientType = query.Get("recipientType");
       var signatureType = query.Get("signatureType") ?? "";
-      var embeddedRecipientType = query.Get("embeddedRecipientType") ?? "";
 
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
@@ -448,16 +447,6 @@ public class Script : ScriptBase
         ["type"] = "object",
         ["properties"] = new JObject()
       };
-
-      if(embeddedRecipientType.ToString().Equals("Hybrid captive", StringComparison.OrdinalIgnoreCase))
-      {
-        response["schema"]["properties"]["embeddedRecipientStartURL"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "* Embedded recipient start URL",
-          ["default"] = "SIGN_AT_DOCUSIGN"
-        };
-      }
 
       if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP", StringComparison.OrdinalIgnoreCase))
       {
@@ -1254,7 +1243,7 @@ public class Script : ScriptBase
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
 
-    if (!string.IsNullOrEmpty(query.Get("embeddedRecipientType")))
+    if (!string.IsNullOrEmpty(query.Get("embeddedRecipientStartURL")))
     {
       AddParamsForEmbeddedRecipientType(signers, body);
     }
@@ -1562,12 +1551,9 @@ public class Script : ScriptBase
   private void AddParamsForEmbeddedRecipientType(JArray signers, JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    var embeddedRecipientType = query.Get("embeddedRecipientType").ToString();
+    var embeddedRecipientType = query.Get("embeddedRecipientStartURL").ToString();
 
-    if (embeddedRecipientType.Equals("Hybrid captive"))
-    {
-      signers[0]["embeddedRecipientStartURL"] = body["embeddedRecipientStartURL"];
-    }
+    signers[0]["embeddedRecipientStartURL"] = embeddedRecipientType;
   }
 
   private void AddParamsForSelectedSignatureType(JArray signers, JObject body)
