@@ -1243,6 +1243,11 @@ public class Script : ScriptBase
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
 
+    if (!string.IsNullOrEmpty(query.Get("embeddedRecipientStartURL")))
+    {
+      signers[0]["embeddedRecipientStartURL"] = query.Get("embeddedRecipientStartURL").ToString();
+    }
+
     if (!string.IsNullOrEmpty(query.Get("signatureType")))
     {
       AddParamsForSelectedSignatureType(signers, body);
