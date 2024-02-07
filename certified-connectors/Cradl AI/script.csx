@@ -12,27 +12,24 @@ public class Script : ScriptBase
 
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        string clientCredentials = this.Context.Request.Headers.GetValues("ClientCredentials").First();
-       
-        var accessToken = await this.GetAccessToken(clientCredentials);
         var path = this.Context.Request.RequestUri.AbsolutePath.ToString();
         
         switch (path) {
             case "/v1/workflows":
-                return await CreateRun(accessToken);
+                return await CreateRun();
                 break;
             case "/v1/documents": 
-                return await CreateDocument(accessToken);
+                return await CreateDocument();
                 break;
             case "/v1/models":
-                return await GetModels(accessToken);
+                return await GetModels();
                 break;
         }
 
         return null;
     }
     
-    private async Task<HttpResponseMessage> CreateRun(string accessToken)
+    private async Task<HttpResponseMessage> CreateRun()
     {
         var request = this.Context.Request;
         string workflowId = request.Headers.GetValues("WorkflowId").First();
@@ -41,13 +38,12 @@ public class Script : ScriptBase
         return await this.Context.SendAsync(request, this.CancellationToken);       
     }
     
-    private async Task<HttpResponseMessage> GetModels(string accessToken)
+    private async Task<HttpResponseMessage> GetModels()
     {
         var myModelsRes = this.Context.SendAsync(
             CreateAuthorizedRequest(
                 method: HttpMethod.Get,
-                path: $"/models",
-                accessToken: accessToken
+                path: $"/models"
             ),
             this.CancellationToken
         );
@@ -55,8 +51,7 @@ public class Script : ScriptBase
         var publicModelsRes = this.Context.SendAsync(
             CreateAuthorizedRequest(
                 method: HttpMethod.Get,
-                path: $"/models?owner=las:organization:cradl",
-                accessToken: accessToken
+                path: $"/models?owner=las:organization:cradl"
             ),
             this.CancellationToken
         );
@@ -74,25 +69,14 @@ public class Script : ScriptBase
         return response;
     }
 
-    private async Task<string> GetAccessToken(string authString)
-    {
-        var tokenRequest = new HttpRequestMessage(HttpMethod.Post, new Uri($"{Script.TOKEN_ENDPOINT}?grant_type=client_credentials"));
-        tokenRequest.Headers.Add("Authorization", $"Basic {authString}");
-        tokenRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>() {});
-        
-        var tokenResponse = await this.Context.SendAsync(tokenRequest, this.CancellationToken);
-        return (string) (await ToJson(tokenResponse))["access_token"];
-    }
-    
-    private async Task<HttpResponseMessage> CreateDocument(string accessToken)
+    private async Task<HttpResponseMessage> CreateDocument()
     {
         string fileName = this.Context.Request.Headers.GetValues("Name").First();
         var fileContent = await this.Context.Request.Content.ReadAsByteArrayAsync();
 
         var request = CreateAuthorizedRequest(
             method: HttpMethod.Post,
-            path: "/documents",
-            accessToken: accessToken
+            path: "/documents"
         );
 
         request.Content = CreateJsonContent(new JObject { ["name"] = fileName }.ToString());
@@ -101,17 +85,17 @@ public class Script : ScriptBase
         var fileUrl = (string) (await ToJson(response))["fileUrl"];
         
         var putRequest = new HttpRequestMessage(HttpMethod.Put, new Uri(fileUrl));
-        putRequest.Headers.Add("Authorization", $"Bearer {accessToken}");
+        putRequest.Headers.Add("Authorization", this.Context.Request.Headers.GetValues("Authorization").First());
         putRequest.Content = new ByteArrayContent(fileContent);
         var putResponse = await this.Context.SendAsync(putRequest, this.CancellationToken);
 
         return response;
     }
     
-    private static HttpRequestMessage CreateAuthorizedRequest(HttpMethod method, string path, string accessToken)
+    private HttpRequestMessage CreateAuthorizedRequest(HttpMethod method, string path)
     {
         var request = new HttpRequestMessage(method, new Uri($"{Script.API_ENDPOINT}{path}"));
-        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+        request.Headers.Add("Authorization", this.Context.Request.Headers.GetValues("Authorization").First());
         return request;
     }
     
