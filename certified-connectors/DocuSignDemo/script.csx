@@ -1245,7 +1245,7 @@ public class Script : ScriptBase
 
     if (!string.IsNullOrEmpty(query.Get("embeddedRecipientStartURL")))
     {
-      AddParamsForEmbeddedRecipientType(signers, body);
+      signers[0]["embeddedRecipientStartURL"] = query.Get("embeddedRecipientStartURL").ToString();
     }
 
     if (!string.IsNullOrEmpty(query.Get("signatureType")))
@@ -1546,14 +1546,6 @@ public class Script : ScriptBase
       signers[0]["name"] = body["name"];
       signers[0]["email"] = body["email"];
     }
-  }
-
-  private void AddParamsForEmbeddedRecipientType(JArray signers, JObject body)
-  {
-    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-    var embeddedRecipientType = query.Get("embeddedRecipientStartURL").ToString();
-
-    signers[0]["embeddedRecipientStartURL"] = embeddedRecipientType;
   }
 
   private void AddParamsForSelectedSignatureType(JArray signers, JObject body)
