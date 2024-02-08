@@ -1888,7 +1888,7 @@ public class Script : ScriptBase
 
       if (query.Get("crmType").ToString().Equals("Dynamics365"))
       {
-        query["custom_field"] = query.Get("recordType");
+        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
       }
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
@@ -1917,7 +1917,7 @@ public class Script : ScriptBase
 
       if (query.Get("crmType").ToString().Equals("Dynamics365"))
       {
-        query["custom_field"] = query.Get("recordType");
+        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
       }
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
