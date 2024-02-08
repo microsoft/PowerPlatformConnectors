@@ -30,7 +30,7 @@ The connector supports the following operations:
 * `Get music mockdata`: Generate music related data.
 * `Get numeric mockdata`: Generate different kinds of numbers.
 * `Get people mockdata`: Generate data for a person.
-* `Get phone mockdata`: Generate phone nuber and IMEI.
+* `Get phone mockdata`: Generate phone number and IMEI.
 * `Get product mockdata`: Generate product related data.
 * `Get science mockdata`: Generate science related data.
 * `Get string mockdata`: Generate random strings. Returns an array of properties, by default ten.
