@@ -4,7 +4,7 @@ Mockster is an implementation of [FakerJS](https://fakerjs.dev) exposed as an RE
 ## Publisher: Mockster
 
 ## Prerequisites
-As Mockster is a premium connector, you'll need a premium lisenced user or a *[Developer plan](https://powerapps.microsoft.com/en-gb/developerplan/)**, where you can test premium features without lisence. Information about license can be found from **[Microsoft Power Platform Licensing Guide](https://go.microsoft.com/fwlink/?linkid=2085130)
+As Mockster is a premium connector, you'll need a premium lisenced user or a **[Developer plan](https://powerapps.microsoft.com/en-gb/developerplan/)**, where you can test premium features without lisence. Information about license can be found from **[Microsoft Power Platform Licensing Guide](https://go.microsoft.com/fwlink/?linkid=2085130)**.
 
 ## Supported Operations
 The connector supports the following operations:
