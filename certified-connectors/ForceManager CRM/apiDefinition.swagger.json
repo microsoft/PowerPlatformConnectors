@@ -3,7 +3,7 @@
   "info": {
     "title": "ForceManager CRM",
     "description": "ForceManager CRM is designed by and for field sales representatives. Built with their needs and priorities in mind, ForceManager's goal is to make sales reps' jobs easier, so they can focus on what really matters: sales and building strong relationships with customers.",
-    "version": "0.9.2",
+    "version": "0.9.5",
     "contact": {
       "name": "ForceManager CRM",
       "url": "https://www.forcemanager.com/contact/",
@@ -42,7 +42,7 @@
     "/procedure/zapier_schema": {
       "post": {
         "operationId": "GetCustomFieldsSchema",
-        "summary": "Get account custom fields schema",
+        "summary": "Get entity custom fields schema",
         "x-ms-visibility": "internal",
         "parameters": [
           {
@@ -656,6 +656,61 @@
         }
       }
     },
+    "/salesorderStatuses": {
+      "get": {
+        "summary": "List Sales Order Statuses",
+        "description": "Returns all Sales Order Statuses available in the user's ForceManager implementation database.",
+        "operationId": "ListSalesOrderStatuses",
+        "x-ms-summary": "List Sales Order Statuses",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "getFullList",
+            "in": "query",
+            "required": true,
+            "type": "boolean",
+            "default": true,
+            "x-ms-visibility": "internal",
+            "description": "Download full list at code level"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SalesOrderStatusListResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication credentials are missing or incorrect.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "408": {
+            "description": "Request timed out. An operation has timed out on the client.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },    
     "/activityTypes": {
       "get": {
         "summary": "List Activity Types",
@@ -1028,7 +1083,10 @@
     "/accounts/hooks/insert": {
       "x-ms-notification-content": {
         "schema": {
-          "$ref": "#/definitions/AccountResponse"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AccountResponse"
+          }
         }
       },
       "post": {
@@ -1102,7 +1160,10 @@
     "/accounts/hooks/update": {
       "x-ms-notification-content": {
         "schema": {
-          "$ref": "#/definitions/AccountResponse"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AccountResponse"
+          }
         }
       },
       "post": {
@@ -1406,8 +1467,11 @@
     "/contacts/hooks/insert": {
       "x-ms-notification-content": {
         "schema": {
-          "$ref": "#/definitions/ContactResponse"
-        }
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContactResponse"
+          }
+        }        
       },
       "post": {
         "summary": "When an Contact is created",
@@ -1480,7 +1544,10 @@
     "/contacts/hooks/update": {
       "x-ms-notification-content": {
         "schema": {
-          "$ref": "#/definitions/ContactResponse"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContactResponse"
+          }
         }
       },
       "post": {
@@ -1784,8 +1851,11 @@
     "/opportunities/hooks/insert": {
       "x-ms-notification-content": {
         "schema": {
-          "$ref": "#/definitions/OpportunityResponse"
-        }
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OpportunityResponse"
+          }
+        }         
       },
       "post": {
         "summary": "When an Opportunity is created",
@@ -1858,8 +1928,11 @@
     "/opportunities/hooks/update": {
       "x-ms-notification-content": {
         "schema": {
-          "$ref": "#/definitions/OpportunityResponse"
-        }
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OpportunityResponse"
+          }
+        }  
       },
       "post": {
         "summary": "When an Opportunity is updated",
@@ -1928,7 +2001,618 @@
           }
         }
       }
-    }
+    },
+    "/salesorders": {
+      "get": {
+        "summary": "List Sales Orders",
+        "description": "Returns Sales Orders available in the user's ForceManager implementation database.",
+        "operationId": "ListSalesOrders",
+        "x-ms-summary": "List Sales Orders",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "where",
+            "x-ms-summary": "Where",
+            "description": "Allows to filter data using any SQL string parameter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "x-ms-summary": "Page",
+            "description": "Define the pagination data for the returned objects",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "order",
+            "x-ms-summary": "Order",
+            "description": "Organise and view the results for a specific attribute in descendent order",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "lang",
+            "x-ms-summary": "Language",
+            "description": "Define the language in which you want to receive the response",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "x-ms-summary": "Count",
+            "description": "The number of records to return in each page of results",
+            "in": "header",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SalesOrderResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication credentials are missing or incorrect.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "408": {
+            "description": "Request timed out. An operation has timed out on the client.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a Sales Order",
+        "description": "This operation allows you to create a Sales Order.",
+        "operationId": "CreateSalesOrder",
+        "x-ms-summary": "Create a Sales Order",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SalesOrderModel",
+              "required": [
+                "branchId",
+                "reference",
+                "salesRepId"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/PostResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication credentials are missing or incorrect.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "408": {
+            "description": "Request timed out. An operation has timed out on the client.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/salesorders/{id}": {
+      "get": {
+        "summary": "Get a Sales Order",
+        "description": "This operation retrieves data of a specific Sales Order.",
+        "operationId": "GetSalesOrder",
+        "x-ms-summary": "Get a Sales Order",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/IdInPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/SalesOrderResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Sales Order",
+        "description": "This operation allows you to update a specific Sales Order.",
+        "operationId": "UpdateSalesOrder",
+        "x-ms-summary": "Update a Sales Order",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/IdInPath"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SalesOrderModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/PutResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a Sales Order",
+        "description": "This operation allows you to delete a specific Sales Order from the user's ForceManager implementation database.",
+        "operationId": "DeleteSalesOrder",
+        "x-ms-summary": "Delete a Sales Order",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/IdInPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/DeleteResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/salesorders/hooks/insert": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SalesOrderResponse"
+          }
+        }          
+      },
+      "post": {
+        "summary": "When a Sales Order is created",
+        "description": "This operation triggers a flow when a new Sales Order is created.",
+        "operationId": "CreateSalesOrderWebhook",
+        "x-ms-summary": "When a Sales Order is created",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-visibility": "internal",
+            "schema": {
+              "type": "object",
+              "x-ms-visibility": "internal",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "name",
+                  "default": "Power Automate Webhook - Insert Sales Order",
+                  "x-ms-visibility": "internal",
+                  "title": "The name of the Webhook"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "action",
+                  "default": "insert",
+                  "x-ms-visibility": "internal",
+                  "title": "The action associated to the Webhook"
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "entity",
+                  "default": "salesorder",
+                  "x-ms-visibility": "internal",
+                  "title": "The entity associated to the Webhook"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "The endpoint of the Webhook"
+                }
+              },
+              "required": [
+                "name",
+                "action",
+                "entity",
+                "url"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/WebhookResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/salesorders/hooks/update": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SalesOrderResponse"
+          }
+        } 
+      },
+      "post": {
+        "summary": "When an Sales Order is updated",
+        "description": "This operation triggers a flow when a new Sales Order is updated.",
+        "operationId": "UpdateSalesOrderWebhook",
+        "x-ms-summary": "When a Sales Order is updated",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-visibility": "internal",
+            "schema": {
+              "type": "object",
+              "x-ms-visibility": "internal",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "name",
+                  "default": "Power Automate Webhook - Insert Sales Order",
+                  "x-ms-visibility": "internal",
+                  "title": "The name of the Webhook"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "action",
+                  "default": "update",
+                  "x-ms-visibility": "internal",
+                  "title": "The action associated to the Webhook"
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "entity",
+                  "default": "salesorder",
+                  "x-ms-visibility": "internal",
+                  "title": "The entity associated to the Webhook"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "The endpoint of the Webhook"
+                }
+              },
+              "required": [
+                "name",
+                "action",
+                "entity",
+                "url"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/WebhookResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/salesordersLines": {
+      "get": {
+        "summary": "List Sales Orders Lines",
+        "description": "Returns Sales Orders Lines available in the user's ForceManager implementation database.",
+        "operationId": "ListSalesOrdersLines",
+        "x-ms-summary": "List Sales Orders Lines",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "where",
+            "x-ms-summary": "Where",
+            "description": "Allows to filter data using any SQL string parameter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "x-ms-summary": "Page",
+            "description": "Define the pagination data for the returned objects",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "order",
+            "x-ms-summary": "Order",
+            "description": "Organise and view the results for a specific attribute in descendent order",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "lang",
+            "x-ms-summary": "Language",
+            "description": "Define the language in which you want to receive the response",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "x-ms-summary": "Count",
+            "description": "The number of records to return in each page of results",
+            "in": "header",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SalesOrderLineResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication credentials are missing or incorrect.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "408": {
+            "description": "Request timed out. An operation has timed out on the client.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a Sales Order Line",
+        "description": "This operation allows you to create a Sales Order Line.",
+        "operationId": "CreateSalesOrderLine",
+        "x-ms-summary": "Create a Sales Order Line",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SalesOrderLineModel",
+              "required": [
+                "quantity",
+                "price",
+                "productId",
+                "salesOrderId"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/PostResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Authentication credentials are missing or incorrect.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "408": {
+            "description": "Request timed out. An operation has timed out on the client.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/salesordersLines/{id}": {
+      "get": {
+        "summary": "Get a Sales Order Line",
+        "description": "This operation retrieves data of a specific Sales Order Line.",
+        "operationId": "GetSalesOrderLine",
+        "x-ms-summary": "Get a Sales Order Line",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/IdInPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/SalesOrderLineResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Sales Order Line",
+        "description": "This operation allows you to update a specific Sales Order Line.",
+        "operationId": "UpdateSalesOrderLine",
+        "x-ms-summary": "Update a Sales Order Line",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/IdInPath"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SalesOrderLineModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/PutResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a Sales Order Line",
+        "description": "This operation allows you to delete a specific Sales Order Line from the user's ForceManager implementation database.",
+        "operationId": "DeleteSalesOrderLine",
+        "x-ms-summary": "Delete a Sales Order Line",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/IdInPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation successful.",
+            "schema": {
+              "$ref": "#/definitions/DeleteResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be served.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }   
   },
   "parameters": {
     "IdInPath": {
@@ -3371,7 +4055,641 @@
           "title": "Sales Rep ID (Opportunity Deletion)"
         }
       }
+    },  
+    "SalesOrderModel": {
+      "type": "object",
+      "properties": {
+        "customFields": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "GetCustomFieldsSchema",
+            "value-path": "data",
+            "parameters": {
+              "entity": "tblSalesOrders",
+              "action": "create"
+            }
+          }
+        },
+        "reference": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "title": "Reference",
+          "description": "Sales Order's reference"
+        },
+        "number": {
+          "type": "number",
+          "x-ms-visibility": "important",
+          "title": "Number",
+          "description": "Sales Order's number"
+        },
+        "year": {
+          "type": "number",
+          "x-ms-visibility": "important",
+          "title": "Year",
+          "description": "Sales Order's year"
+        },                
+        "statusId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Status ID",
+          "description": "Status ID of the Sales Order",
+          "x-ms-dynamic-values": {
+            "operationId": "ListSalesOrderStatuses",
+            "value-path": "id",
+            "value-title": "description"
+          }
+        },
+        "total": {
+          "type": "number",
+          "x-ms-visibility": "important",
+          "title": "Total",
+          "description": "Total amount of the Sales Order"
+        },
+        "discount1": {
+          "type": "number",
+          "x-ms-visibility": "important",
+          "title": "Discount 1",
+          "description": "Discount 1 of the Sales Order"
+        },
+        "discount2": {
+          "type": "number",
+          "x-ms-visibility": "advanced",
+          "title": "Discount 2",
+          "description": "Discount 2 of the Sales Order"
+        },
+        "discount3": {
+          "type": "number",
+          "x-ms-visibility": "advanced",
+          "title": "Discount 3",
+          "description": "Discount 3 of the Sales Order"
+        },
+        "discount4": {
+          "type": "number",
+          "x-ms-visibility": "advanced",
+          "title": "Discount 4",
+          "description": "Discount 4 of the Sales Order"
+        },                                
+        "currencyId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Currency ID",
+          "description": "Currency ID of the Sales Order",
+          "x-ms-dynamic-values": {
+            "operationId": "ListCurrencies",
+            "value-path": "id",
+            "value-title": "description"
+          }
+        },
+        "accountId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Account ID",
+          "description": "Account to whom the Sales Order is linked to"
+        },
+        "salesForeCastDate": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-visibility": "important",
+          "title": "Sales Forecast Date",
+          "description": "Forecast sale date"
+        },
+        "salesRepId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Sales Rep ID",
+          "description": "User responsible for the Sales Order"
+        },
+        "comment": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "title": "Comment",
+          "description": "Comment added to the Sales Order"
+        },
+        "internalComment": {
+          "type": "string",
+          "x-ms-visibility": "advanced",
+          "title": "Internal Comment",
+          "description": "Comment added to the Sales Order only visible internally"
+        },        
+        "branchId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "advanced",
+          "title": "Branch ID",
+          "description": "Branch ID of the Sales Order",
+          "x-ms-dynamic-values": {
+            "operationId": "ListBranches",
+            "value-path": "id",
+            "value-title": "description"
+          }
+        },
+        "opportunityId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Opportunity ID",
+          "description": "Opportunity to whom the Sales Order is linked to"
+        },
+        "contactId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Contaact ID",
+          "description": "Contaact to whom the Sales Order is linked to"
+        },
+        "rateId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "advanced",
+          "title": "Rate ID",
+          "description": "Rate to whom the Sales Order is linked to"
+        },
+        "accountAddressId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "advanced",
+          "title": "Account Address ID",
+          "description": "Account Address to whom the Sales Order is linked to"
+        },                                
+        "closedDate": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-visibility": "advanced",
+          "title": "Closed Date",
+          "description": "Date when the Sales Order was closed"
+        },
+        "mainSalesorder": {
+          "type": "boolean",
+          "x-ms-visibility": "advanced",
+          "title": "Archived",
+          "description": "Flag to state if the Sales Order is relevant for the linked opportunity"
+        },
+        "archived": {
+          "type": "boolean",
+          "x-ms-visibility": "advanced",
+          "title": "Archived",
+          "description": "Flag to state if the Sales Order is archived"
+        },
+        "blocked": {
+          "type": "boolean",
+          "x-ms-visibility": "advanced",
+          "title": "Read-Only",
+          "description": "Flag to state if the Sales Order cannot be edited temporarly"
+        },                        
+        "extId": {
+          "type": "string",
+          "x-ms-visibility": "advanced",
+          "title": "External ID",
+          "description": "External ID of the Sales Order from a third party system"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "x-ms-visibility": "advanced",
+          "title": "Read-Only",
+          "description": "Flag to state if the Sales Order cannot be modified or deleted"
+        }
+      }
+    },    
+    "SalesOrderResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "title": "ID"
+        },
+        "reference": {
+          "type": "string",
+          "title": "Reference"
+        },
+        "number": {
+          "type":"integer",
+          "title":"Order Number"
+       },
+       "year": {
+          "type":"integer",
+          "title":"Year"
+       },        
+        "statusId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Status Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Status ID"
+            }
+          },
+          "type": "object"
+        },
+        "total": {
+          "type": "number",
+          "title": "Total"
+        },
+        "discount1": {
+          "type": "number",
+          "title": "Discount 1"
+        },  
+        "discount2": {
+          "type": "number",
+          "title": "Discount 2"
+        },  
+        "discount3": {
+          "type": "number",
+          "title": "Discount 3"
+        },  
+        "discount4": {
+          "type": "number",
+          "title": "Discount 4"
+        },                                
+        "currencyId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Currency Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Currency ID"
+            }
+          },
+          "type": "object"
+        },
+        "accountId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Account Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Account ID"
+            }
+          },
+          "type": "object"
+        },
+        "salesForeCastDate": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Sales Forecast Date"
+        },
+        "salesRepId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Sales Rep Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Sales Rep ID"
+            }
+          },
+          "type": "object"
+        },
+        "comment": {
+          "type": "string",
+          "title": "Comments"
+        },
+        "internalComment": {
+          "type": "string",
+          "title": "Comments"
+        },        
+        "branchId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Branch Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Branch ID"
+            }
+          },
+          "type": "object"
+        },
+        "opportunityId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Opportunity Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Opportunity ID"
+            }
+          },
+          "type": "object"
+        },
+        "contactId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Contact Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Contact ID"
+            }
+          },
+          "type": "object"
+        },
+        "rateId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Rate Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Rate ID"
+            }
+          },
+          "type": "object"
+        },        
+        "accountAddressId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Account Address Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Account Address ID"
+            }
+          },
+          "type": "object"
+        },
+        "closedDate": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Closed Date"
+        },
+        "dateCreated": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Date Created"
+        },
+        "dateDeleted": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Date Deleted"
+        },
+        "dateUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Date Updated"
+        },
+        "mainSalesorder": {
+          "type": "boolean",
+          "title": "Main Sales Order"
+        },
+        "archived": {
+          "type": "boolean",
+          "title": "Archived"
+        },
+        "blocked": {
+          "type": "boolean",
+          "title": "Blocked"
+        },        
+        "deleted": {
+          "type": "boolean",
+          "title": "Deleted"
+        },
+        "extId": {
+          "type": "string",
+          "title": "External ID"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "title": "Read-Only"
+        },
+        "salesRepIdCreated": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID (Opportunity Creation)"
+        },
+        "salesRepIdUpdated": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID (Opportunity Update)"
+        },
+        "salesRepIdDeleted": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID (Opportunity Deletion)"
+        }
+      }
     },
+    "SalesOrderLineModel": {
+      "type": "object",
+      "properties": {
+        "customFields": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "GetCustomFieldsSchema",
+            "value-path": "data",
+            "parameters": {
+              "entity": "tblSalesOrdersLines",
+              "action": "create"
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "x-ms-visibility": "important",
+          "title": "Description",
+          "description": "Sales Order Line's description"
+        },             
+        "productId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Product ID",
+          "description": "Product ID related to the Sales Order Line"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Quantity",
+          "description": "Sales Order Line's quantity"
+        },
+        "price": {
+          "type": "number",
+          "x-ms-visibility": "important",
+          "title": "Price",
+          "description": "Sales Order Line's price"
+        },          
+        "total": {
+          "type": "number",
+          "x-ms-visibility": "important",
+          "title": "Total",
+          "description": "Total amount of the Sales Order Line"
+        },
+        "discount1": {
+          "type": "number",
+          "x-ms-visibility": "important",
+          "title": "Discount 1",
+          "description": "Discount 1 of the Sales Order Line"
+        },
+        "discount2": {
+          "type": "number",
+          "x-ms-visibility": "advanced",
+          "title": "Discount 2",
+          "description": "Discount 2 of the Sales Order Line"
+        },
+        "discount3": {
+          "type": "number",
+          "x-ms-visibility": "advanced",
+          "title": "Discount 3",
+          "description": "Discount 3 of the Sales Order Line"
+        },
+        "discount4": {
+          "type": "number",
+          "x-ms-visibility": "advanced",
+          "title": "Discount 4",
+          "description": "Discount 4 of the Sales Order Line"
+        },
+        "salesOrderId": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Sales Order ID",
+          "description": "Sales Order to whom the Sales Order Line is linked to"
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-visibility": "important",
+          "title": "Order",
+          "description": "Order in which the Sales Order Line appears in the Sales Order"
+        }
+      }
+    },
+    "SalesOrderLineResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "title": "ID"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },      
+        "productId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Product Name"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Product ID"
+            }
+          },
+          "type": "object"
+        },
+        "quantity": {
+          "type":"integer",
+          "format": "int32",
+          "title":"Quantity"
+       },
+       "price": {
+          "type":"number",
+          "title":"Price"
+       },  
+        "total": {
+          "type": "number",
+          "title": "Total"
+        },
+        "discount1": {
+          "type": "number",
+          "title": "Discount 1"
+        },  
+        "discount2": {
+          "type": "number",
+          "title": "Discount 2"
+        },  
+        "discount3": {
+          "type": "number",
+          "title": "Discount 3"
+        },  
+        "discount4": {
+          "type": "number",
+          "title": "Discount 4"
+        },                                
+        "salesOrderId": {
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "Sales Order Reference"
+            },
+            "id": {
+              "type": "integer",
+              "format": "int32",
+              "title": "Sales Order ID"
+            }
+          },
+          "type": "object"
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Order"
+        },
+        "dateCreated": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Date Created"
+        },
+        "dateDeleted": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Date Deleted"
+        },
+        "dateUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Date Updated"
+        },       
+        "deleted": {
+          "type": "boolean",
+          "title": "Deleted"
+        },
+        "salesRepIdCreated": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID (Opportunity Creation)"
+        },
+        "salesRepIdUpdated": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID (Opportunity Update)"
+        },
+        "salesRepIdDeleted": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID (Opportunity Deletion)"
+        }
+      }
+    },       
     "UserResponse": {
       "type": "object",
       "properties": {
@@ -4637,6 +5955,192 @@
           "description": "Flag to state if the entry refers to a closed status"
         }
       }
-    }
+    },
+    "SalesOrderStatusListResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "title": "ID",
+          "description": "Unique identifier"
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Order",
+          "description": "The position of the entry in the value list"
+        },
+        "deleted": {
+          "type": "boolean",
+          "title": "Deleted",
+          "description": "Flag to state if the entry has been deleted"
+        },
+        "description": {
+          "type": "string",
+          "title": "description",
+          "description": "Entity label"
+        },
+        "descriptionES": {
+          "type": "string",
+          "title": "descriptionES",
+          "description": "Entity label in Spanish"
+        },
+        "descriptionEN": {
+          "type": "string",
+          "title": "descriptionEN",
+          "description": "Entity label in English"
+        },
+        "descriptionUS": {
+          "type": "string",
+          "title": "descriptionUS",
+          "description": "Entity label in American English"
+        },
+        "descriptionIT": {
+          "type": "string",
+          "title": "descriptionIT",
+          "description": "Entity label in Italian"
+        },
+        "descriptionDE": {
+          "type": "string",
+          "title": "descriptionDE",
+          "description": "Entity label in German"
+        },
+        "descriptionFR": {
+          "type": "string",
+          "title": "descriptionFR",
+          "description": "Entity label in French"
+        },
+        "descriptionBR": {
+          "type": "string",
+          "title": "descriptionBR",
+          "description": "Entity label in Brasilian Portuguese"
+        },
+        "descriptionDK": {
+          "type": "string",
+          "title": "descriptionDK",
+          "description": "Entity label in Dutch"
+        },
+        "descriptionPT": {
+          "type": "string",
+          "title": "descriptionPT",
+          "description": "Entity label in Portuguese"
+        },
+        "descriptionRU": {
+          "type": "string",
+          "title": "descriptionRU",
+          "description": "Entity label in Russian"
+        },
+        "statusDetails": {
+          "type": "string",
+          "title": "statusDetails",
+          "description": "Status Details"
+        }, 
+        "statusDetailsEN": {
+          "type": "string",
+          "title": "statusDetailsEN",
+          "description": "Status Details in English"
+        }, 
+        "statusDetailsUS": {
+          "type": "string",
+          "title": "statusDetailsUS",
+          "description": "Status Details in American English"
+        }, 
+        "statusDetailsIT": {
+          "type": "string",
+          "title": "statusDetailsIT",
+          "description": "Status Details in Italian"
+        }, 
+        "statusDetailsDE": {
+          "type": "string",
+          "title": "statusDetailsDE",
+          "description": "Status Details in German"
+        }, 
+        "statusDetailsFR": {
+          "type": "string",
+          "title": "statusDetailsFR",
+          "description": "Status Details in French"
+        }, 
+        "statusDetailsBR": {
+          "type": "string",
+          "title": "statusDetailsBR",
+          "description": "Status Details in Brasilian Portuguese"
+        }, 
+        "statusDetailsDK": {
+          "type": "string",
+          "title": "statusDetailsDK",
+          "description": "Status Details in Dutch"
+        },  
+        "statusDetailsPT": {
+          "type": "string",
+          "title": "statusDetailPTs",
+          "description": "Status Details in Portuguese"
+        },  
+        "statusDetailsRU": {
+          "type": "string",
+          "title": "statusDetailsRU",
+          "description": "Status Details in Russian"
+        },                      
+        "dateCreated": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "dateUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        },
+        "dateDeleted": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Deleted At"
+        },
+        "salesRepIdCreated": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID  (Account Creation)"
+        },
+        "salesRepIdUpdated": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID  (Account Update)"
+        },
+        "salesRepIdDeleted": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Sales Rep ID (Account Deletion)"
+        },
+        "branchVisibility": {
+          "type": "array",
+          "title": "Branch Visibility",
+          "description": "In which Branch the entry is visible",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string",
+                "title": "Branch Name"
+              },
+              "id": {
+                "type": "integer",
+                "format": "int32",
+                "title": "Branch ID"
+              }
+            }
+          }
+        },
+        "won": {
+          "type": "boolean",
+          "title": "Won",
+          "description": "Flag to state if the entry refers to a won status"
+        },
+        "lost": {
+          "type": "boolean",
+          "title": "Lost",
+          "description": "Flag to state if the entry refers to a lost status"
+        }
+      }
+    }    
   }
 }
