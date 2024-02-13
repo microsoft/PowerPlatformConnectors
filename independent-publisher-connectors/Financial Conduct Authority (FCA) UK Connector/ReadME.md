@@ -15,10 +15,9 @@ You will need the following to proceed:
 The connector supports the following operations:
 * `Common Search`: Search the Financial Services Register for a firm or an individual by name or unique reference number
 *  `Find Individuals Details`: Get information about the Individuals associated with its Individual Reference Number
-*  `Product Details`: Get information about a product by using its Product Reference Number
+*  `Individual Disciplinary History`: Get information about Disciplinary History on an Individual using its Individual Reference Number
 *  `Subfund Details`: Get information about subfund of a product by using its Product Reference Number
 *  `Product Other Name Details`: Get information about other names of a product by using its Product Reference Number
-*  `Individual Disciplinary History`: Get information about Disciplinary History on an Individual using its Individual Reference Number
 *  `Firm Other Names`: Get information about the other names used by the firms using its Firm Reference Number
 *  `Firm Address`: Get information about a specific firm using its Firm Reference Number
 *  `Firm Individuals`: Get information about the Individuals associated with a firm using its Firm Reference Number
@@ -44,3 +43,5 @@ There are no known issues with this connector. There are functions in the API no
 ## Deployment Instructions
 
 Upload the connector and create a connection using the API key along with the registered email address from the prerequisites.
+
+Go to the 'Definition' section of the connector (in edit mode), click on 'X-Auth-Email' policy under 'Policies' and ensure that, in 'Operations' field in the Policy Details that emerge on the screen, all operations listed there are ticked/checked.
