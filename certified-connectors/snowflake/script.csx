@@ -81,7 +81,7 @@ public class Script : ScriptBase
     {
         string patternAccount, patternLocator;
         //patternAccount = "[a-zA-Z0-9]{7}-[a-zA-Z0-9]{7}\\b.snowflakecomputing.com\\b";
-        patternAccount = "^([A-Za-z0-9](?:[A-Za-z0-9\\-]{0,61}[A-Za-z0-9])?)+(?:.snowflakecomputing.com)$";
+        patternAccount = "^[a-zA-Z0-9-_.]{0,255}.snowflakecomputing.com$";
         patternLocator = ".(aws|azure|gcp)\\b.snowflakecomputing.com\\b";
 
         var matchAccount = Regex.Match(url, patternAccount, RegexOptions.Singleline);
