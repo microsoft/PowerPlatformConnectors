@@ -18,8 +18,24 @@ The connector supports the following operations:
 * `Create Record`: Creates a new record in a Tulip Table. Note: requires a unique id to be defined. You can use the expression rand(100000000, 99999999) for example.
 * `Put Record`: Updates a record in a Tulip Table based on provided id and values to update
 
+## Managing Field Types 
+The Tulip fields types are mapped the follow way:
+
+|Tulip Table Field Type | Power Automate Variable Type | Comments |
+|-----------------------| ---------------------------- | ---------|
+|text| string | none |
+|number| number | none |
+|integer| integer| none |
+|boolean| boolean| none|
+|datetime| string | Needs to be a string in the W3 Complete date plus hours, minutes and seconds format : YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00) [[ref](https://www.w3.org/TR/NOTE-datetime)] |
+|interval| number | Number of seconds for the interval in number format, will be converted to MM:SS interval format in Tulip table |
+|color| object | needs to be an object in the format { "r": number, "g":number, "b": number, "a": number} e.g  For black with no transparency { "r":0, "g":0, "b":0, "a":0} [[ref](https://www.w3schools.com/html/html_colors_rgb.asp)]|
+|image / file / video| string | String needs to be a valid and accessable URL for the image / video / file |
+|user / station / machine| string | needs to be a valid id of a user/ station / machine in the instance you are connected to|
+
+
 ## Known Issues & Limitation
-* Files Type - The connector is currently limited to strings, numbers, integers and booleans. It will not handle images, videos and files.
+* Linked Record Type - The connector is known to be able to handle the creation or updating of linked records.
 * Individual Records - Only handling individual table records. Likely to be expanded in the future.
 * Duplication of Record ID in Update Record Function - The update record requires two ids, these must be identical. This is due to it being required by the Tulip API in both the path and the body. We are looking for a fix and will update here when it is implemented.
 
