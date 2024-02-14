@@ -53,15 +53,14 @@ public class Script : ScriptBase
         }
 
         var domain = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
-        if (!IsUrlValid(domain))
-        {
-            return createErrorResponse(HttpStatusCode.BadRequest, "Invalid Instance URL!", "https://docs.snowflake.com/en/developer-guide/sql-api/about-endpoints");
-        }
-
         if (Uri.IsWellFormedUriString(domain, UriKind.Absolute))
         {
             Uri uri = new Uri(domain);
             domain = uri.Host;
+        }
+        if (!IsUrlValid(domain))
+        {
+            return createErrorResponse(HttpStatusCode.BadRequest, "Invalid Instance URL!", "https://docs.snowflake.com/en/developer-guide/sql-api/about-endpoints");
         }
 
         var uriBuilder = new UriBuilder(Context.Request.RequestUri);
@@ -81,7 +80,8 @@ public class Script : ScriptBase
     private bool IsUrlValid(string url)
     {
         string patternAccount, patternLocator;
-        patternAccount = "[a-zA-Z0-9]{7}-[a-zA-Z0-9]{7}\\b.snowflakecomputing.com\\b";
+        //patternAccount = "[a-zA-Z0-9]{7}-[a-zA-Z0-9]{7}\\b.snowflakecomputing.com\\b";
+        patternAccount = "^[a-zA-Z0-9]{7}-[a-zA-Z0-9](?:.{5}|.{6}|.{7}|.{8}).snowflakecomputing.com$";
         patternLocator = ".(aws|azure|gcp)\\b.snowflakecomputing.com\\b";
 
         var matchAccount = Regex.Match(url, patternAccount, RegexOptions.Singleline);
