@@ -79,15 +79,10 @@ public class Script : ScriptBase
 
     private bool IsUrlValid(string url)
     {
-        string patternAccount, patternLocator;
-        //patternAccount = "[a-zA-Z0-9]{7}-[a-zA-Z0-9]{7}\\b.snowflakecomputing.com\\b";
-        patternAccount = "^[a-zA-Z0-9-_.]{0,255}.snowflakecomputing.com$";
-        patternLocator = ".(aws|azure|gcp)\\b.snowflakecomputing.com\\b";
-
+        string patternAccount;
+        patternAccount = "^[a-zA-Z0-9-_.]{0,255}.snowflakecomputing.com\/?$";
         var matchAccount = Regex.Match(url, patternAccount, RegexOptions.Singleline);
-        var matchLocator = Regex.Match(url, patternLocator, RegexOptions.Singleline);
-
-        return matchAccount.Success || matchLocator.Success;
+        return matchAccount.Success;
     }
 
     private bool IsTransformable()
