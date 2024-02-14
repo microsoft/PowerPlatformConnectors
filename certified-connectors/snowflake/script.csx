@@ -1,19 +1,29 @@
-﻿using System.Net;
-using System.Runtime.Remoting.Contexts;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System;
+using System.Net;
+using System.Runtime.Remoting.Contexts;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Web;
 
 public class Script : ScriptBase
 {
     #region Constants
 
     private readonly string HEADER_INSTANCE = "Instance";
+
     private readonly string OP_EXECUTE_SQL = "ExecuteSqlStatement";
     private readonly string OP_GET_RESULTS = "GetResults";
+    private readonly string OP_CONVERT = "Convert";
 
     private readonly string Attr_Metadata = "resultSetMetaData";
+    private readonly string Attr_PartitionInfo = "partitionInfo";
     private readonly string Attr_RowType = "rowType";
     private readonly string Attr_Data = "data";
+    private readonly string Attr_Schema = "schema";
 
     private readonly string Attr_Column_Name = "name";
     private readonly string Attr_Column_Type = "type";
@@ -24,16 +34,30 @@ public class Script : ScriptBase
     private const string Snowflake_Type_Boolean = "boolean";
     private const string Snowflake_Type_Time = "time";
 
+    private const string QueryString_Partition = "partition";
+
     #endregion
 
-    public async Task<HttpResponseMessage> TestMethod(string content)
+    public HttpResponseMessage TestConvert(string content, string operationId)
     {
-        return await ConvertToObjects(content);
+        return ConvertToObjects(content, operationId);
     }
 
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
+        if (Context.OperationId == OP_CONVERT)
+        {
+            var content = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            return ConvertToObjects(content, Context.OperationId);
+        }
+
         var domain = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
+        if (!IsUrlValid(domain))
+        {
+            return createErrorResponse(HttpStatusCode.BadRequest, "Invalid Instance URL!", "https://docs.snowflake.com/en/developer-guide/sql-api/about-endpoints");
+        }
+
         if (Uri.IsWellFormedUriString(domain, UriKind.Absolute))
         {
             Uri uri = new Uri(domain);
@@ -44,35 +68,76 @@ public class Script : ScriptBase
         uriBuilder.Host = domain;
         Context.Request.RequestUri = uriBuilder.Uri;
 
-        HttpResponseMessage response = await Context.SendAsync(Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+        HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
         if (response.IsSuccessStatusCode && IsTransformable())
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            response = await ConvertToObjects(responseContent);
+            response = ConvertToObjects(responseContent, Context.OperationId);
         }
 
         return response;
     }
 
-    private bool IsTransformable()
+    private bool IsUrlValid(string url)
     {
-        return (Context.OperationId == OP_EXECUTE_SQL || Context.OperationId == OP_GET_RESULTS);
+        string patternAccount, patternLocator;
+        patternAccount = "[a-zA-Z0-9]{7}-[a-zA-Z0-9]{7}\\b.snowflakecomputing.com\\b";
+        patternLocator = ".(aws|azure|gcp)\\b.snowflakecomputing.com\\b";
+
+        var matchAccount = Regex.Match(url, patternAccount, RegexOptions.Singleline);
+        var matchLocator = Regex.Match(url, patternLocator, RegexOptions.Singleline);
+
+        return matchAccount.Success || matchLocator.Success;
     }
 
-    private async Task<HttpResponseMessage> ConvertToObjects(string content)
+    private bool IsTransformable()
+    {
+        if (Context.OperationId == OP_EXECUTE_SQL)
+        {
+            return true;
+        }
+        else if (Context.OperationId == OP_GET_RESULTS)
+        {
+            var query = HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
+
+            return (query == null || query[QueryString_Partition] == null || query[QueryString_Partition] == "0");
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private HttpResponseMessage ConvertToObjects(string content, string operationId)
     {
         try
         {
             var contentAsJson = JObject.Parse(content);
+            string schema;
 
-            // check for parameters
-            if (contentAsJson[Attr_Data] == null || contentAsJson[Attr_Metadata] == null || contentAsJson[Attr_Metadata][Attr_RowType] == null)
+            if (operationId == OP_CONVERT)
             {
-                throw new Exception($"'{Attr_Metadata}' or '{Attr_Data}' parameter are empty!");
+                // check for parameters
+                if (contentAsJson[Attr_Data] == null || (contentAsJson["schema"] == null && contentAsJson["Schema"] == null))
+                {
+                    throw new Exception($"'{Attr_Schema}' or '{Attr_Data}' parameter are empty!");
+                }
+
+                schema = (contentAsJson["schema"] ?? contentAsJson["Schema"]).ToString();
+            }
+            else
+            {
+                // check for parameters
+                if (contentAsJson[Attr_Data] == null || contentAsJson[Attr_Metadata] == null || contentAsJson[Attr_Metadata][Attr_RowType] == null)
+                {
+                    throw new Exception($"'{Attr_Metadata}' or '{Attr_Data}' parameter are empty!");
+                }
+
+                schema = contentAsJson[Attr_Metadata][Attr_RowType].ToString();
             }
 
             // get metadata
-            var cols = JArray.Parse(contentAsJson[Attr_Metadata][Attr_RowType].ToString());
+            var cols = JArray.Parse(schema);
             var rows = JArray.Parse(contentAsJson[Attr_Data].ToString());
 
             JArray newRows = new JArray();
@@ -135,19 +200,35 @@ public class Script : ScriptBase
                 newRows.Add(newRow);
             }
 
-            var result = new ConnectorResponse
+            SnowflakeResponseMetadata? snowflakeMetadata = null;
+            string? partitionInfo = null;
+            if (contentAsJson[Attr_Metadata] != null)
             {
-                Data = newRows,
-                Metadata = new ConnectorResponseMetadata
+                snowflakeMetadata = new SnowflakeResponseMetadata
                 {
                     Rows = Convert.ToInt64(contentAsJson[Attr_Metadata]["numRows"]),
+                    Format = contentAsJson[Attr_Metadata]["format"].ToString(),
                     Code = contentAsJson["code"].ToString(),
                     StatementStatusUrl = contentAsJson["statementStatusUrl"].ToString(),
                     RequestId = contentAsJson["requestId"].ToString(),
                     SqlState = contentAsJson["sqlState"].ToString(),
                     StatementHandle = contentAsJson["statementHandle"].ToString(),
                     CreatedOn = ConvertToUTC(contentAsJson["createdOn"].ToString(), TimeInterval.Milliseconds)
+                };
+
+                if (contentAsJson[Attr_Metadata][Attr_PartitionInfo] != null)
+                {
+                    partitionInfo = contentAsJson[Attr_Metadata][Attr_PartitionInfo].ToString();
+                    IList<SnowflakePartitionInfo>? snowflakePartitions = JsonConvert.DeserializeObject<IList<SnowflakePartitionInfo>>(partitionInfo);
                 }
+            }
+
+            var result = new SnowflakeResponse
+            {
+                Data = newRows,
+                Schema = JsonConvert.DeserializeObject<IList<object>>(schema),
+                Partitions = partitionInfo != null ? JsonConvert.DeserializeObject<IList<SnowflakePartitionInfo>>(partitionInfo) : null,
+                Metadata = snowflakeMetadata
             };
 
             var responseObj = new HttpResponseMessage(HttpStatusCode.OK)
@@ -159,20 +240,22 @@ public class Script : ScriptBase
         }
         catch (JsonReaderException ex)
         {
-            return createErrorResponse($"'{Attr_Metadata}' or '{Attr_Data}' are in an invalid format: " + ex, HttpStatusCode.BadRequest);
+            return createErrorResponse(HttpStatusCode.BadRequest, $"'{Attr_Metadata}' or '{Attr_Data}' are in an invalid format: " + ex);
         }
         catch (Exception ex)
         {
-            return createErrorResponse(ex.GetType() + ":" + ex, HttpStatusCode.InternalServerError);
+            return createErrorResponse(HttpStatusCode.InternalServerError, ex.GetType() + ":" + ex);
         }
     }
 
-    private HttpResponseMessage createErrorResponse(string msg, HttpStatusCode code)
+    private HttpResponseMessage createErrorResponse(HttpStatusCode code, string msg, string? errorReference = null)
     {
         JObject output = new JObject
         {
-            ["Message"] = msg
+            ["Message"] = msg,
+            ["Reference"] = errorReference
         };
+
         var response = new HttpResponseMessage(code);
         response.Content = CreateJsonContent(output.ToString());
         return response;
@@ -201,9 +284,13 @@ public class Script : ScriptBase
         Milliseconds = 2,
     }
 
-    public class ConnectorResponseMetadata
+    #region Sub classes
+
+    public class SnowflakeResponseMetadata
     {
         public long Rows { get; set; }
+
+        public string? Format { get; set; }
 
         public string? Code { get; set; }
 
@@ -218,10 +305,50 @@ public class Script : ScriptBase
         public string? CreatedOn { get; set; }
     }
 
-    public class ConnectorResponse
+    public class SnowflakePartitionInfo
     {
+        public int RowCount { get; set; }
+
+        public int? UncompressedSize { get; set; }
+
+        public int? CompressedSize { get; set; }
+    }
+
+    public class SnowflakeEntitySchema
+    {
+        public string? Name { get; set; }
+
+        public string? Database { get; set; }
+
+        public string? Schema { get; set; }
+
+        public string? Table { get; set; }
+
+        public bool? Nullable { get; set; }
+
+        public long? Precision { get; set; }
+
+        public long? Scale { get; set; }
+
+        public long? ByteLength { get; set; }
+
+        public string? Collation { get; set; }
+
+        public long? Length { get; set; }
+
+        public string? Type { get; set; }
+    }
+
+    public class SnowflakeResponse
+    {
+        public IList<SnowflakePartitionInfo>? Partitions { get; set; }
+
+        public IList<object>? Schema { get; set; }
+
         public object? Data { get; set; }
 
-        public ConnectorResponseMetadata? Metadata { get; set; }
+        public SnowflakeResponseMetadata? Metadata { get; set; }
     }
+
+    #endregion
 }
