@@ -80,7 +80,7 @@ public class Script : ScriptBase
     private bool IsUrlValid(string url)
     {
         string patternAccount;
-        patternAccount = "^[a-zA-Z0-9-_.]{0,255}.snowflakecomputing.com\/?$";
+        patternAccount = "^[a-zA-Z0-9-_.]{0,255}.snowflakecomputing.com\\/?$";
         var matchAccount = Regex.Match(url, patternAccount, RegexOptions.Singleline);
         return matchAccount.Success;
     }
