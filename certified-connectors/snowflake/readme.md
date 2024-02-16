@@ -33,7 +33,7 @@ create security integration connector
 ```
 ## Using the Connector in Power Platform
 1. Add Snowflake connector in the Power App or Flow.
-2. Enter connection credentials as mentioned below:
+2. Enter connection credentials as below:
        Client Id: Snowflake OAuth Client ID from registered client app in Azure.
        Client Secret: Snowflake OAuth Client secret from registered client app in Azure.
        Resource URL: Application ID URI from registered resource app in Azure.
@@ -46,6 +46,8 @@ Submit SQL Statement for Execution
 Check the Status and Get Results
 
 Cancel the Execution of a Statement
+
+Convert result set rows from array to objects
 
 
 ## Known Issues and Limitations
