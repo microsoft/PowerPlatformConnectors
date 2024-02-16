@@ -36,6 +36,10 @@ The connector supports the following actions:
 
 * `Update Change`: Update an existing change request's details in ServiceDesk Plus Cloud
 
+* `Find Request`: Find an existing request details in ServiceDesk Plus Cloud
+
+* `Invoke API`: Make API calls to perform an action in ServiceDesk Plus Cloud
+
 ## Obtaining Credentials
 
 ServiceDesk Plus Cloud uses OAuth 2.0 to authenticate users automatically.
