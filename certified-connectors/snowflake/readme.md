@@ -25,7 +25,7 @@ create security integration connector
        enabled = true
        external_oauth_type = azure
        external_oauth_issuer = '<AZURE_AD_ISSUER>'     
-       external_oauth_jws_keys_url = 'https://login.windows.net/common/discovery/keys'
+       external_oauth_jws_keys_url = '<Keys URL from step C>'
        external_oauth_audience_list = ('[Application ID URI from registered resource app in Azure]')
        external_oauth_token_user_mapping_claim = 'upn'
        external_oauth_snowflake_user_mapping_attribute = 'login_name'
@@ -33,10 +33,10 @@ create security integration connector
 ```
 ## Using the Connector in Power Platform
 1. Add Snowflake connector in the Power App or Flow.
-2. Enter connection credentials as below:
-       Client Id: Snowflake OAuth Client ID from registered client app in Azure.
-       Client Secret: Snowflake OAuth Client secret from registered client app in Azure.
-       Resource URL: Application ID URI from registered resource app in Azure.
+2. Enter connection credentials as below:\
+       * Client Id: Snowflake OAuth Client ID from registered client app in Azure.\
+       * Client Secret: Snowflake OAuth Client secret from registered client app in Azure.\
+       * Resource URL: Application ID URI from registered resource app in Azure.
 3. Click on Sign in button and provider user credentials.
 
 ## Supported Operations
