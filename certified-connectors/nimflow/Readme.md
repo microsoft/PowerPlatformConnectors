@@ -23,7 +23,7 @@ The connector supports the following operations:
 
 ## Getting Started
 
-Complete the Connection parameters with the created Digital Worker for the Business Unit. For the Base URL, please complete with the protocol and the host without the last slash bar (e.g.: https://api.nimflow.com). If you use https://api.nimflow.com, you will also need to complete the Subscription Key parameter to authenticate. Please request the subscription key to [info](mailto:info@nimflow.com).
+Complete the Connection parameters with the created Digital Worker for the Business Unit. For the Base URL, please complete with the protocol and the host without the last slash bar (e.g.: https://api.nimflow.com). If you use https://api.nimflow.com, you will also need to complete the Subscription Key parameter to authenticate. Please request the subscription key to [support](mailto:support@nimflow.com).
 
 ## Known Limitations
 
