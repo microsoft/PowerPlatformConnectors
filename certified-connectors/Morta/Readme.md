@@ -1,6 +1,6 @@
 # Morta Connector
 
-[Morta](https://morta.io/) is dedicated to facilitating data-driven tracking within the construction industry. To achieve this, we offer a cloud-based solution that deeply integrates with the software you are accustomed to, while also providing the flexibility of spreadsheets. This empowers you to digitize, connect, and automate your tracking processes effectively. The Morta connector allows you to interact with all Morta functionality through the Microsoft Power Automate platform.
+[Morta](https://morta.io/) offers a cloud-based solution that deeply integrates with the software you are accustomed to, empowering you to digitize, connect, and automate your tracking processes effectively. The Morta connector allows you to interact with all Morta functionality through the Microsoft Power Automate platform.
 
 ## Publisher: Morta Technology Ltd
 
