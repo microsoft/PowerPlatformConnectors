@@ -349,11 +349,11 @@ You can also name your credentials appropriately for easily identifying them lat
 
  - **Client ID:** You can navigate to your desired QPP-NG tenants Admin app and then **Settings > Connections**. Here they can create a new connection or use an existing one. Just enter the connection name for Client Id. 
  - **Client Secret:** Like Client Id, navigate to **Connections** and just enter **Secret** for the existing connection. Regenerate the secret if you don’t have it. Secrets should be stored for existing connections securely, managed by admin. Check with admin before regenerating secret. 
- - Host name: The host name for QPPNG tenant you want to create connections to interact with our connector. example (yourtenantname.app.quark.com).Should be visible the url , when you access your qppng enviroment.
+ - Host name: The host name for QPPNG tenant you want to create connections to interact with our connector. example (yourtenantname.app.quark.com).Should be visible the url , when you access your qppng environment.
 
 After creating Credentials, you can test the credentials to see if credentials are correct.
 
-Simple actions like getUser can be used from our connector in a manual flow, Test the flow with default feilds.
+Simple actions like getUser can be used from our connector in a manual flow, Test the flow with default fields.
 
 While creating connection for first time, some error codes that can be faced are as below:
  - **Invalid host URL (500):** Check your host name for QPPNG environment again, the client id and secret should belong to this connection.
