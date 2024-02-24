@@ -41,7 +41,7 @@ This operation retrieves the routing groups associated with a collection, workfl
 ### Set Attribute Values
 This operation sets the attribute values for a specific entity or object. More information on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_setAttributeValues).
 
-| Parameter          | Defintion                                                     | Example                                                         	   |
+| Parameter          | Definition                                                     | Example                                                         	   |
 |--------------------|---------------------------------------------------------------|---------------------------------------------------------------------|
 | Impersonation User | Username for the QPP NG user that needs to be impersonated.	 | admin                                                        	   |
 | assetId            | QPP platform Asset Id.                                        | {Asset Id here}                                              	   |
@@ -106,7 +106,7 @@ This operation downloads a file or Blob from the system using the specified cont
 More information can be found on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_download).
 
 To use this action, provide the following param's – 
- - **Auth Token for Header:** This action is depenedant on the **Get Token as per Grant Type** action to get authentication token for this param. Considering this action is added before Download (Blob) action and you have kept its name as Get **Token as per Grant Type**, then add this value in Expression editor next to dynamic content: _outputs('Get_Token_as_per_Grant_Type')?['body/access_token']_. For more information, refer to **Get Token as per Grant Type** section.
+ - **Auth Token for Header:** This action is dependant on the **Get Token as per Grant Type** action to get authentication token for this param. Considering this action is added before Download (Blob) action and you have kept its name as Get **Token as per Grant Type**, then add this value in Expression editor next to dynamic content: _outputs('Get_Token_as_per_Grant_Type')?['body/access_token']_. For more information, refer to **Get Token as per Grant Type** section.
  - **Context Id:** Can be directly added through the previous action as dynamic content. Like GetAssetDownloadInfo will show context Id as dynamic content.
  - **File Identifier:** Need to use an Expression to extract information from download url of previous action. Let's say the previous action is getAssetDownloadInfo, then the expression will become like _split(outputs('Get_Asset_Download_Info')?['body/downloadUrl'],'/')[5]_. 
 
@@ -144,7 +144,7 @@ This operation creates a new query in the system with its definition and details
 
 Check the table below for the reference purpose –
 
-| Parameter                | Defintion                                                                                                         | Example                                                         	 |
+| Parameter                | Definition                                                                                                         | Example                                                         	 |
 |--------------------------|-------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | Impersonation User       | Username for the QPP NG user that needs to be impersonated.	                                                   | admin                                                        		 |
 | Query Name         	   | QPP platform Asset Id.                                                                                            | {Asset Id here}                                              		 |
@@ -225,7 +225,7 @@ This operation initiates the check-in and update process for a specific asset in
 ### Check Out
 This operation checks out a specific asset for editing. More information can be found on the [Quark developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_checkOut). 
 
-| Parameter              | Defintion                                                     						  | Example                  |
+| Parameter              | Definition                                                     						  | Example                  |
 |------------------------|----------------------------------------------------------------------------------------|--------------------------|
 | Impersonation User     | Username for the QPP NG user that needs to be impersonated.	 						  | admin              		 |
 | assetId                | Asset Id which needs to be checked out                        						  | {Asset Id here}          |
@@ -255,7 +255,7 @@ This operation initiates a new check-in process for an asset. Request will check
 
 More information can be found on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_initNewCheckin).
 
-| Parameter              | Defintion                                                     						  		  																			| Example					 |
+| Parameter              | Definition                                                     						  		  																			| Example					 |
 |------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
 | Impersonation User     | Username for the QPP NG user that needs to be impersonated.	 						  		   																			| admin						 |
 | createMinorVersion     | Variable createMinorVersion should refer to True or False for creating version for checking	   																			| False						 |
@@ -334,16 +334,16 @@ Fill in the required fields (default examples can be used). For example, if you 
 - **Filter Criteria:** In case you want to filter events, then you can enter value here in following Lucene pattern (https://lucenetutorial.com/lucene-query-syntax.html). For example, to filter events of asset added for only smart document content type. The filter value will be Content\ Type:Smart\ Document, where Content\ type is an QPP-NG attribute, and it could also be any other QPP-NG attribute here for asset. 
 
 In case you want to update the webhook-trigger details or connections once the webhook has been already registered, then follow the steps below. This is a work-around, as the native way to updating webhook-trigger will give you errors.
- - Delete the existing trigger, and create a new trigger from our connector with all the details. Once flow is saved an error might be shown in flow details page. If the error is (401:Unauthorized), then this can be ignored, as this once you will start recieving events this will go away. 
+ - Delete the existing trigger, and create a new trigger from our connector with all the details. Once flow is saved an error might be shown in flow details page. If the error is (401:Unauthorized), then this can be ignored, as this once you will start Receiving events this will go away. 
  - Other way of updating webhooks can be to Click on your existing flow and go to flow details, and then click on turn off the flow.
  - Once the flow is turned off, open the flow, delete the old webhook-trigger and create a new one from our connector, fill out the new details and then save the flow.
  - Now return to the flow details page and turn on flow.
- - In case you dont recive events,please check if there are any issues QPPNG tenant & webhooks, Also check if credentials & webhook details entered are correct, 
+ - In case you dont receive events,please check if there are any issues QPPNG tenant & webhooks, Also check if credentials & webhook details entered are correct.
 
 More information about Webhooks can be found on the [Quark Developer portal](https://developer.quark.com/v3/api/web-hook/).
 
 ## Obtaining Credentials
-While creating a new connection with our connector, you will sees 3 params. Details for aquiring each is shared below.Creating and manaWhile creating a new connection with our connector, users will see 3 params. Details for acquiring each are shared below. Creating and managing QPP-NG connections should be done by admin user. Please check with your QPP-NG environments admin. 
+While creating a new connection with our connector, you will sees 3 params. Details for acquiring each is shared below. Creating and managing QPP-NG connections should be done by admin user. Please check with your QPP-NG environment admin. 
 
 You can also name your credentials appropriately for easily identifying them later. Go to **Connections** in power automate, search for connector name, and edit existing connection, then provide appropriate name. 
 
@@ -364,10 +364,10 @@ While creating connection for first time, some error codes that can be faced are
 To get started, you can listen to a wide variety of events of Type Asset, Collections, etc. from your QPP-NG tenant using built-in trigger. 
  - Create a new Automation flow in power automate. 
  - Select our QPP-NG Connector and then choose trigger. 
- - Fill in the required feilds. Refer to the Webhook-trigger section. 
+ - Fill in the required fields. Refer to the Webhook-trigger section. 
  - Select the appropriate Connection for the QPP-NG tenant where you want to register webhook. You can also create new connection. Follow the Steps given in the **Obtaining Credentials** section. 
- - Save the flow. This will execute the registeration request in the back. When you return to flow details page(or click back button) you should see green underline at top mentioning that everthing went well and flow is ready to be triggered.
- - Once your flow runs once, you can further get the webhook response the the flow run, and use the response to generate dynamic content. For this, you can use parse json OOTB action. 
+ - Save the flow. This will execute the registration request in the back. When you return to flow details page(or click back button) you should see green underline at top mentioning that everything went well and flow is ready to be triggered.
+ - Once your flow runs, you can further get the webhook response from the flow run, and use the response to generate dynamic content. For this, you can use parse json OOTB action. 
  - In case this is the first webhook with this change type (event) registered on the QPP-NG tenant, you need to wait for 15 minutes before webhook is activated, and then you can expect the flow to be triggered.
 
 If there are errors in the flow checker with webhook trigger, the power automate will show red in flow checker. Please open it and check the error. Below are some of the errors you may encounter, and the steps to mitigate them. 
