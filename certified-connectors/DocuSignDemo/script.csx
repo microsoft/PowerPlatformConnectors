@@ -1208,6 +1208,20 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject EnvelopeVoidBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    body["status"] = "Voided";
+    body["voidedReason"] = query.Get("voidedReason");
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/voidEnvelope", "");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
       var signers = body["signers"] as JArray;
@@ -1784,6 +1798,11 @@ public class Script : ScriptBase
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if("VoidEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.EnvelopeVoidBodyTransformation).ConfigureAwait(false);
     }
 
     if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
