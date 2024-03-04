@@ -14,6 +14,10 @@ The connector is available for all iManage Work customers connecting to cloudima
 
 Adds a new folder under a workspace, tab or folder.
 
+### Add shortcuts to user's My Matters
+
+Adds workspace shortcuts to a user's 'My Matters'. If a Category ID is specified, shortcuts are placed under that category.
+
 ### Add tab
 
 Adds a new tab under a workspace.
@@ -34,9 +38,17 @@ Creates user and assigns the user to the preferred library.
 
 Gets the list of lookup aliases for the specified lookup field ID.
 
+### Update custom field
+
+Updates a custom field description or enabled state for custom1 through custom12, custom29, and custom30.
+
 ### Get library roles
 
 Gets the list of user roles for a library.
+
+### Get My Matters categories
+
+Gets categories created in 'My Matters'. Administrators can specify a user ID to get 'My Matters' categories for that user.
 
 ## Obtaining Credentials
 
