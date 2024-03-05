@@ -10,7 +10,7 @@ To use this connector, you must obtain an API key after registering on the VA se
 
 ## Supported Operations
 
-### Query Facilities based on Optional Parameters such as Location or ID
+### List facilities
 
 Query facilities with a combination of optional search parameters.
 
@@ -36,7 +36,7 @@ Query facilities with a combination of optional search parameters.
 
   Returns a list of VA facilities matching the search criteria, including facility details such as name, location, and services offered.
 
-### Retrieve a Specific Facility by ID
+### Get a facility by ID
 
 Returns detailed information about a specific facility, identified by its unique ID.
 
@@ -50,7 +50,7 @@ Returns detailed information about a specific facility, identified by its unique
 
   Detailed information about the specified VA facility, including services available, location details, and contact information.
 
-### Retrieve Services for a Specific Facility
+### List services for a specific facility
 
 Queries services offered by a facility, with optional parameters to refine results. Supports independent or combined use of `serviceIds` and `serviceType` for filtering.
 
@@ -66,7 +66,7 @@ Queries services offered by a facility, with optional parameters to refine resul
 
   A list of services provided by the specified facility, including detailed descriptions and availability.
 
-### Retrieve Detailed Service Information for a Specific Facility
+### Get details for a specific service at a facility
 
 Retrieves detailed information about a specific service offered by a facility, identified by both facility ID and service ID.
 
@@ -81,7 +81,7 @@ Retrieves detailed information about a specific service offered by a facility, i
 
   Detailed information about the specified service at the given facility, including contact information, service hours, and appointment scheduling details.
 
-### Retrieve All Facility IDs with Optional Type Filter
+### List all facility IDs
 
 Provides a bulk download option for all facility IDs, with the capability to filter by facility type for more targeted results.
 
@@ -95,9 +95,9 @@ Provides a bulk download option for all facility IDs, with the capability to fil
 
   A list of all facility IDs, optionally filtered by facility type.
 
-### Retrieve Nearby VA Health Facilities
+### List all nearby facilities
 
-Retrieves all VA health facilities within a specified drive time from a given location, with optional filtering by services.
+Retrieves all facilities within a specified drive time from a given location, with optional filtering by services.
 
 - **Inputs**:
 
