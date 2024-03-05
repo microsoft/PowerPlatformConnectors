@@ -1,6 +1,9 @@
-# Snowflake
+# Snowflake (Deprecated)
+
+_**NOTE:**_ This connector is deprecated, the latest version of the Snowflake connector is available [here](../Snowflake%20v2).
 
 This connector is based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html). Snowflake enables data storage, processing, and analytic solutions that are faster, easier to use, and more flexible than traditional offerings. The connector uses the Snowflake REST API V2 to submit synchronous and asynchronous queries and retrieve corresponding results.
+
 
 ## Publisher: Snowflake
 
