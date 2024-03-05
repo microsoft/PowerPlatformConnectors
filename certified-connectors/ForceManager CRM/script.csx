@@ -1,4 +1,4 @@
-﻿public class Script : ScriptBase
+public class Script : ScriptBase
 {
 
     string public_key = "public_key";

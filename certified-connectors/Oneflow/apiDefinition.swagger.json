@@ -35,6 +35,117 @@
   ],
   "tags": [],
   "paths": {
+    "/webhooks": {
+      "x-ms-notification-content": {
+        "description": "Webhook event sent by Oneflow.",
+        "schema": {
+          "$ref": "#/definitions/Webhook_Event"
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "API Key": []
+          }
+        ],
+        "summary": "When a contract is updated",
+        "description": "Register a webhook for a specified contract update event",
+        "operationId": "webhookRegister",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "callback_url": {
+                  "type": "string",
+                  "description": "callback_url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": ""
+                },
+                "filters": {
+                  "x-ms-visibility": "important",
+                  "x-ms-summary": "Update type",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Select event that will trigger this flow.",
+                    "enum": [
+                      "contract:publish",
+                      "contract:sign",
+                      "contract:delete",
+                      "contract:decline",
+                      "participant:first_visit",
+                      "participant:sign",
+                      "participant:create",
+                      "participant:decline",
+                      "participant:delete",
+                      "data_field:update",
+                      "contract:signing_period_expire",
+                      "contract:signing_period_revive",
+                      "contract:signature_reset"
+                    ]
+                  }
+                },
+                "template_group_id": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetTemplateTypes",
+                    "value-collection": "data",
+                    "value-path": "id",
+                    "value-title": "name"
+                  },
+                  "x-ms-summary": "Template Group Id",
+                  "description": "(Optional) Filter contracts by a template group."
+                }
+              },
+              "required": [
+                "callback_url",
+                "filters"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}": {
+      "delete": {
+        "x-ms-visibility": "internal",
+        "summary": "Delete Trigger",
+        "description": "Deletes Webhook",
+        "operationId": "DeleteTrigger",
+        "security": [
+          {
+            "API Key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "description": "ID of the Webhook being deleted",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string"
+          }
+        ]
+      }
+    },
     "/contracts/parties/create": {
       "post": {
         "summary": "Add Participant",
@@ -413,7 +524,7 @@
         }
       }
     },
-    "/contracts/{contract_id}/": {
+    "/contracts/{contract_id}/": {      
       "delete": {
         "summary": "Delete a contract",
         "description": "Delete a specific contract by its ID.",
@@ -465,51 +576,51 @@
           "401": {
             "description": "Unauthorized",
             "schema": {
-              "type": "object"
+              "type": "object"                
             }
           }
         }
       },
-      "get": {
-        "summary": "Get contract details",
-        "description": "Retrieve the details of a contract by its ID.",
-        "operationId": "GetContract",
-        "parameters": [
-          {
-            "name": "contract_id",
-            "in": "path",
-            "type": "string",
-            "required": true,
-            "x-ms-summary": "Contract Id",
-            "description": "Contract Id"
+        "get": {
+          "summary": "Get contract details",
+          "description": "Retrieve the details of a contract by its ID.",
+          "operationId": "GetContract",
+          "parameters": [
+            {
+              "name": "contract_id",
+              "in": "path",
+              "type": "string",
+              "required": true,
+              "x-ms-summary": "Contract Id",
+              "description": "Contract Id"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success",
+              "schema": {
+                "$ref": "#/definitions/Contract"
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "schema": {
+                "type": "object"
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "schema": {
+                "type": "object"
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "schema": {
+                "type": "object"
+              }
+            }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/Contract"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "object"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
       }
     },
     "/contracts/{contract_id}": {
@@ -2546,6 +2657,51 @@
             "updated_time": {
               "type": "string",
               "x-ms-summary": "Datafield updated time"
+            }
+          }
+        }
+      }
+    },
+    "Webhook_Event": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Contract id",
+              "x-ms-summary": "Contract id"
+            }
+          }
+        },
+        "callback_id": {
+          "type": "string",
+          "x-ms-summary": "Callback id",
+          "description": "Callback id"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "created_time": {
+                "type": "string",
+                "format": "date-time",
+                "x-ms-summary": "Event created time"
+              },
+              "id": {
+                "type": "number",
+                "x-ms-summary": "Event id"
+              },
+              "type": {
+                "type": "string",
+                "x-ms-summary": "Event type"
+              },
+              "signature": {
+                "type": "string",
+                "x-ms-summary": "Signature"
+              }
             }
           }
         }

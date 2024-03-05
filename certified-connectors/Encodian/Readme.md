@@ -141,6 +141,9 @@ Enables tracked changes for the Microsoft Word document provided - https://suppo
 ### Extract Attachments from PDF
 Extracts and returns embedded files from the PDF document provided - https://support.encodian.com/hc/en-gb/articles/9896328763932
 
+### Extract from Archive
+Enables files contained within supported archive package formats to be extracted - https://support.encodian.com/hc/en-gb/articles/11853992723484
+
 ### Extract Images from PDF
 Extract images from PDF using specified regions - https://support.encodian.com/hc/en-gb/articles/360006998058
 
@@ -162,6 +165,9 @@ Flips the image provided to the specified configuration - https://support.encodi
 ### Get Email Attachments
 Extracts and returns all attachments contained within the email provided - https://support.encodian.com/hc/en-gb/articles/10531671561629
 
+### Get Email Information
+Collects and returns detailed information about the email provided - https://support.encodian.com/hc/en-gb/articles/12237799140252
+
 ### Get Image Information
 Get Image Information (Height, Width, Resolution, Format, File Size + more) - https://support.encodian.com/hc/en-gb/articles/4431662425489
 
@@ -176,6 +182,9 @@ Get the text layer for the PDF document provided - https://support.encodian.com/
 
 ### Get Rows from Excel
 Obtains and returns rows as JSON from the file provided - https://support.encodian.com/hc/en-gb/articles/9390845334172
+
+### Get Text from Word
+Extracts and returns text contained within the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/10583756977180
 
 ### Get Tracked Changes
 Get all the tracked changes (Revisions and comments) for the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/6634950400669
@@ -200,6 +209,9 @@ Convert and merge the documents provided to a single PDF document - https://supp
 
 ### Merge Excel Files
 Merge an array of Microsoft Excel files to a single file (multiple formats) - https://support.encodian.com/hc/en-gb/articles/4469865776529
+
+### Merge Excel Rows
+Merges the rows contained witthin up to 1,000 Microsoft Excel files (and related formats) into single Microsoft Excel worksheet - https://support.encodian.com/hc/en-gb/articles/11345445953820
 
 ### Merge Presentations
 Merge an array of presentations to a single presentation - https://support.encodian.com/hc/en-gb/articles/4425652063761
@@ -252,6 +264,9 @@ Find and replace text contained within a PDF or DOCX document with an image - ht
 ### Resize an Image
 Resize and compress the image provided - https://support.encodian.com/hc/en-gb/articles/360018591034-Resize-an-Image
 
+### Resize PDF
+Resize the pages contained within the PDF document provided to the specified configuration - https://support.encodian.com/hc/en-gb/articles/12292028562588
+
 ### Rotate an Image
 Rotates the image provided to configuration specified - https://support.encodian.com/hc/en-gb/articles/10041551840796
 
@@ -285,8 +300,17 @@ Split a PDF Document into multiple PDF Documents using Text Search or Regular Ex
 ### Unlock PDF Document
 Decrypt and remove password protection from a PDF document - https://support.encodian.com/hc/en-gb/articles/360003714237
 
+### Update Rows In Excel 
+Update the specified rows in the Excel file provided - https://support.encodian.com/hc/en-gb/articles/11205752671004
+
+### Update Word - Add Headers and Footers
+Add a HTML header and/or footer to the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/11348579020572
+
 ### Update Word - Hyperlinks 
 Search for and update hyperlinks within a Microsoft Word document - https://support.encodian.com/hc/en-gb/articles/7136687719837
+
+### Update Word - Remove Headers and Footers
+Removes the specified headers and/or footers from the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/11349707504540
 
 ### Update Word - Table of Contents
 Updates the 'Table of Contents' in the Microsoft Word document provided - https://support.encodian.com/hc/en-gb/articles/10594864447260
@@ -311,8 +335,17 @@ Removes duplicates from the JSON array provided or targeted using a JSONPath exp
 ### Utility - Array Remove Items
 Removes the item(s) defined from the JSON array provided or targeted using a JSONPath expression - https://support.encodian.com/hc/en-gb/articles/10597605184028
 
+### Utility - Array Remove Items via Regex
+Remove the item(s) returned by the Regex query provided from the JSON array provided or targeted using a JSONPath expression - https://support.encodian.com/hc/en-gb/articles/11196894053020
+
+### Utility - Array Replace Values
+Replace targeted values found within the JSON array provided or targeted using a JSONPath expression, with the new value specified - https://support.encodian.com/hc/en-gb/articles/10624152774812
+
 ### Utility - Array Reverse Items
 Reverses the order of the items contained with the JSON array provided or selected using a JSONPath expression - https://support.encodian.com/hc/en-gb/articles/9993904693660
+
+### Utility - Calculate Date
+Format the date value provided to the date format provided - https://support.encodian.com/hc/en-gb/articles/11311253860508
 
 ### Utility - Clean Text
 Removes specified characters and performs specified clean operations upon the text value provided - https://support.encodian.com/hc/en-gb/articles/10072015106077
@@ -322,6 +355,9 @@ Compares the two text values provided, confirming whether they are equal - https
 
 ### Utility - Concatenate Text
 Concatenates the text values provided to a single text value, optionally delimited by the 'Delimiter' value provided - https://support.encodian.com/hc/en-gb/articles/11873576674077
+
+### Utility - Convert Time Zone 
+Convert the date value provided to the time zone configuration set - https://support.encodian.com/hc/en-gb/articles/11316002119196
 
 ### Utility - Create GUID
 Generates a new GUID - https://support.encodian.com/hc/en-gb/articles/9563119917597
@@ -343,6 +379,9 @@ Detects and returns all URL's found within the text provided - https://support.e
 
 ### Utility - Extract Text between Values
 Rreturns a string value extracted from two defined points within the string value provided - https://support.encodian.com/hc/en-gb/articles/9604938273565
+
+### Utility - Extract Text Instances between Values
+Return an array of string values extracted from instances of the two defined points within the string value provided - https://support.encodian.com/hc/en-gb/articles/11193212526108
 
 ### Utility - Format Date
 Formats the date value provided to the date format provided - https://support.encodian.com/hc/en-gb/articles/11053469626525
