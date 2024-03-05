@@ -15,8 +15,16 @@
                 await this.UpdateGetCustomFieldsSchemaRequest().ConfigureAwait(false);
             }
 
-            var response = await this.invokeAction(accessTokenResponse).ConfigureAwait(false);
-            return response;
+            HttpResponseMessage response = await this.invokeAction(accessTokenResponse).ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return response;
+            }
+            else
+            {
+                return createErrorMessage(response.StatusCode, await response.Content.ReadAsStringAsync());
+            }
         }
         else
         {
