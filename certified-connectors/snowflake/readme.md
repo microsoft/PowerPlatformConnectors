@@ -7,23 +7,6 @@ This connector is based on the [Snowflake SQL REST API](https://docs.snowflake.c
 
 ## Publisher: Snowflake
 
-## Prerequisites
-
-- Users must have Microsoft Entra ID for the external authentication.
-- Users must have a premium Power Apps license.
-- Users must have Snowflake account.
-
-## Supported Operations
-
-### Submit SQL Statement for Execution
-Submit SQL Statement for Execution
-### Check the Status and Get Results
-Check the Status and Get Results
-### Cancel the Execution of a Statement
-Cancels the Execution of a Statement
-### Convert result set rows from array to objects
-Converts result set rows from array to objects
-
 ## Obtaining Credentials
 Set up Azure AD authentication for Snowflake by following these steps:
 1. In [Step 1: Configure the OAuth Resource in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#configure-the-oauth-resource-in-azure-ad), follow steps 1-10 and define the scope as `SESSION:ROLE-ANY` by following these [instructions](https://docs.snowflake.com/en/user-guide/oauth-azure.html#using-any-role-with-external-oauth).
@@ -51,13 +34,24 @@ create security integration connector
        external_oauth_snowflake_user_mapping_attribute = 'login_name'
        external_oauth_any_role_mode = 'ENABLE';
 ```
-## Getting Started
+## Using the Connector in Power Platform
 1. Add Snowflake connector in the Power App or Flow.
 2. Enter connection credentials as below:\
        * Client Id: Snowflake OAuth Client ID from registered client app in Azure.\
        * Client Secret: Snowflake OAuth Client secret from registered client app in Azure.\
        * Resource URL: Application ID URI from registered resource app in Azure.
 3. Click on Sign in button and provider user credentials.
+
+## Supported Operations
+
+Submit SQL Statement for Execution
+
+Check the Status and Get Results
+
+Cancel the Execution of a Statement
+
+Convert result set rows from array to objects
+
 
 ## Known Issues and Limitations
 1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
@@ -67,8 +61,3 @@ create security integration connector
 ## Frequently Asked Questions
 1. How can the connector be used within Power Apps?
 Currently, Power Apps does not support dynamic schema. You can still use the connector from Power Apps by calling a flow from the app instead of directly from an  app. 
-
-## Deployment Instructions
-1. Download the connector source code and deploy it in the power platform environment.
-2. Follow the steps metnioned in [Obtaining Credentials](#obtaining-credentials) section to get credentials. 
-
