@@ -121,5 +121,3 @@ To obtain credentials for accessing the VA Facilities API, you must register on 
 ## Known Issues and Limitations
 
 Currently, no known issues or limitations exist. Always refer to this section for updated information.
-
-This comprehensive documentation includes all necessary details for using the Veterans Affairs Facilities custom connector, from prerequisites and supported operations to obtaining credentials and understanding any known issues.
