@@ -1970,6 +1970,22 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if("GetRecipientEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      uriBuilder.Path = uriBuilder.Path.Replace("/getRecipientEnvelopes", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
+      this.Context.Request.Headers.Add("generative-ai-request-id", Guid.NewGuid().ToString());
+      this.Context.Request.Headers.Add("generative-ai-user-agent", "sales-copilot");
+
+      query["include"] = "custom_fields, recipients, documents";
+      query["order"] = "desc";
+      query["from_date"] = "2000-01-02T12:45Z";
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("GetRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -2496,6 +2512,63 @@ public class Script : ScriptBase
       newBody["value"] = (documentRecords.Count < top) ? documentRecords : new JArray(documentRecords.Skip(skip).Take(top).ToArray());
       newBody["hasMoreResults"] = (skip + top < documentRecords.Count) ? true : false;
 
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetRecipientEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JObject newBody = new JObject();
+      TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+
+      JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
+      JArray filteredEnvelopes = new JArray();
+      JArray activities = new JArray();
+      var recipientName = query.Get("recipientName") ?? null;
+      var recipientEmailId = query.Get("recipientEmailId") ?? null;
+
+      foreach (var envelope in envelopes)
+      {
+        if (!string.IsNullOrEmpty(recipientName) &&
+        envelope.ToString().ToLower().Contains(recipientName.ToLower()) ||
+        !string.IsNullOrEmpty(recipientEmailId) &&
+        envelope.ToString().ToLower().Contains(recipientEmailId.ToLower()))
+        {
+          filteredEnvelopes.Add(envelope);
+        }
+      }
+
+      foreach (var envelope in filteredEnvelopes)
+      {
+        DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+        DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+        JArray recipientNames = new JArray();
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
+        JObject additionalPropertiesForActivity = new JObject()
+        {
+          ["Recipients"] = string.Join(", ", recipientNames),
+          ["Sender Name"] = envelope["sender"]["userName"],
+          ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+          ["Date"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy")
+        };
+        activities.Add(new JObject()
+        {
+          ["title"] = envelope["emailSubject"],
+          ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
+          ["dateTime"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+          ["url"] = GetEnvelopeUrl(envelope),
+          ["additionalProperties"] = additionalPropertiesForActivity,
+        });
+      }
+
+      newBody["value"] = activities;
+      newBody["hasMoreResults"] = false;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
