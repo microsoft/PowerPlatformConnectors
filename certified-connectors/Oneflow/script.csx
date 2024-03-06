@@ -61,37 +61,48 @@
 
   private async Task<HttpResponseMessage> HandleAddProduct(IScriptContext ctx)
   {
-
-    HttpRequestMessage req = ctx.Request;
-    string contractId = GetHeaderStringValue(req.Headers, Constants.ContractIdHeader);
-    string productGroupIndexStr = GetHeaderStringValue(req.Headers, Constants.ProductGroupIndexHeader);
-
-    var getProductGroupsRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(string.Format(Constants.Requests.ContractProductGroupsEndpoint, contractId)));
-    CopyHeaders(req, getProductGroupsRequest);
-
-    HttpResponseMessage getProductGroupsResponse = await ctx.SendAsync(getProductGroupsRequest, CancellationToken)
-        .ConfigureAwait(false);
-
-    if (!getProductGroupsResponse.IsSuccessStatusCode)
+    StringBuilder log = new StringBuilder();
+    try
     {
-      return getProductGroupsResponse;
+      HttpRequestMessage req = ctx.Request;
+      string contractId = GetHeaderStringValue(req.Headers, Constants.ContractIdHeader);
+      string productGroupIndexStr = GetHeaderStringValue(req.Headers, Constants.ProductGroupIndexHeader);
+      log.AppendLine($"contractId - {contractId}, productGroupIndex - {productGroupIndexStr}");
+      var getProductGroupsRequest = new HttpRequestMessage(
+          HttpMethod.Get,
+          new Uri(string.Format(Constants.Requests.ContractProductGroupsEndpoint, req.RequestUri.Host, contractId)));
+      CopyHeaders(req, getProductGroupsRequest);
+
+      HttpResponseMessage getProductGroupsResponse = await ctx.SendAsync(getProductGroupsRequest, CancellationToken)
+          .ConfigureAwait(false);
+
+      if (!getProductGroupsResponse.IsSuccessStatusCode)
+      {
+        return getProductGroupsResponse;
+      }
+
+      var getProductGroupsResponseJson = await getProductGroupsResponse.Content.ReadAsStringAsync();
+      var productGroups = JObject.Parse(getProductGroupsResponseJson);
+
+      int index = Convert.ToInt32(productGroupIndexStr);
+      int count = productGroups.Value<int>("count");
+
+      if (count < index)
+      {
+        throw new ScriptException(HttpStatusCode.BadRequest,
+        $"The selected contract contains only {count} product tables. Cannot populate table #{index} because it does not exist.");
+      }
+
+      int productGroupId = productGroups.Value<JArray>("data").ElementAt(index - 1).Value<int>("id");
+      log.AppendLine($"product groups count - {count}, product group id - {productGroupId}");
+      req.RequestUri = new Uri(String.Format(Constants.Requests.AddProductEndpoint, req.RequestUri.Host, contractId, productGroupId));
+      log.AppendLine($"composed put products uri - {req.RequestUri}");
+      return await ctx.SendAsync(req, CancellationToken);
     }
-
-    var getProductGroupsResponseJson = await getProductGroupsResponse.Content.ReadAsStringAsync();
-    var productGroups = JObject.Parse(getProductGroupsResponseJson);
-
-    int index = Convert.ToInt32(productGroupIndexStr);
-    int count = productGroups.Value<int>("count");
-    if (count < index)
+    catch (Exception ex)
     {
-      throw new ScriptException(HttpStatusCode.BadRequest,
-      $"The selected contract contains only {count} product tables. Cannot populate table #{index} because it does not exist.");
+      throw new ScriptException(HttpStatusCode.InternalServerError, log.ToString() + ex.Message, ex);
     }
-
-    int productGroupId = productGroups.Value<JArray>("data").ElementAt(index - 1).Value<int>("id");
-    req.RequestUri = new Uri(String.Format(Constants.Requests.AddProductEndpoint, contractId, productGroupId));
-
-    return await ctx.SendAsync(req, CancellationToken);
   }
 
   private async Task<HttpResponseMessage> HandleGetTemplates(IScriptContext ctx)
@@ -185,9 +196,14 @@
         return await CreateParty(req, contractId, inputParty, ctx);
       }
 
+
       // call getParties
       debugInfo.AppendLine("trying to get existing parties.");
-      var getPartiesRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(string.Format(Constants.Requests.PartyEndpoint, contractId)));
+
+      var getPartiesRequest = new HttpRequestMessage(
+          HttpMethod.Get,
+          new Uri(string.Format(Constants.Requests.PartyEndpoint, req.RequestUri.Host, contractId)));
+
       CopyHeaders(req, getPartiesRequest);
 
       var getPartiesResponse = await ctx.SendAsync(getPartiesRequest, CancellationToken)
@@ -250,7 +266,7 @@
     var templateId = GetHeaderStringValue(req.Headers, Constants.TemplateIdHeader);
     if (String.IsNullOrEmpty(templateId)) throw new ScriptException(HttpStatusCode.BadRequest, "template id is a required property.");
 
-    string requestUrl = string.Format(Constants.Requests.TemplatesEndpoint, templateId);
+    string requestUrl = string.Format(Constants.Requests.TemplatesEndpoint, req.RequestUri.Host, templateId);
     var getTemplateRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(requestUrl));
     CopyHeaders(req, getTemplateRequest);
 
@@ -281,7 +297,7 @@
     try
     {
       party.AlignParticipants();
-      string requestUrl = string.Format(Constants.Requests.PartyEndpoint, contractId);
+      string requestUrl = string.Format(Constants.Requests.PartyEndpoint, initialRequest.RequestUri.Host, contractId);
       debugInfo.AppendLine($"requestUri - {requestUrl}");
       HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, new Uri(requestUrl));
       CopyHeaders(initialRequest, req);
@@ -301,7 +317,7 @@
     StringBuilder debugInfo = new StringBuilder();
     try
     {
-      string requestUrl = String.Format(Constants.Requests.ParticipantEndpoint, contractId, existingPartyId);
+      string requestUrl = String.Format(Constants.Requests.ParticipantEndpoint, initialRequest.RequestUri.Host, contractId, existingPartyId);
       debugInfo.AppendLine($"requestUri - {requestUrl}");
       if (participant == null)
       {
@@ -409,11 +425,11 @@
   {
     public static class Requests
     {
-      public const string PartyEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties";
-      public const string ParticipantEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties/{1}/participants";
-      public const string ContractProductGroupsEndpoint = "https://api.oneflow.com/v1/contracts/{0}/product_groups";
-      public const string AddProductEndpoint = "https://api.oneflow.com/v1/contracts/{0}/product_groups/{1}/products";
-      public const string TemplatesEndpoint = "https://api.oneflow.com/v1/templates/{0}";
+      public const string PartyEndpoint = "https://{0}/v1/contracts/{1}/parties";
+      public const string ParticipantEndpoint = "https://{0}/v1/contracts/{1}/parties/{2}/participants";
+      public const string ContractProductGroupsEndpoint = "https://{0}/v1/contracts/{1}/product_groups";
+      public const string AddProductEndpoint = "https://{0}/v1/contracts/{1}/product_groups/{2}/products";
+      public const string TemplatesEndpoint = "https://{0}/v1/templates/{1}";
     }
     public static class PartyTypes
     {
