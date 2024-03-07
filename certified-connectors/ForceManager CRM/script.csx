@@ -15,8 +15,16 @@ public class Script : ScriptBase
                 await this.UpdateGetCustomFieldsSchemaRequest().ConfigureAwait(false);
             }
 
-            var response = await this.invokeAction(accessTokenResponse).ConfigureAwait(false);
-            return response;
+            HttpResponseMessage response = await this.invokeAction(accessTokenResponse).ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return response;
+            }
+            else
+            {
+                return createErrorMessage(response.StatusCode, await response.Content.ReadAsStringAsync());
+            }
         }
         else
         {
@@ -112,11 +120,11 @@ public class Script : ScriptBase
         HttpResponseMessage response = await this.Context.SendAsync(request, cancellationToken).ConfigureAwait(false);
         string responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         JArray lastResponseAsJsonArray = JArray.Parse(responseAsString);
-        foreach (var item in lastResponseAsJsonArray.ToList())
+        foreach (var item in lastResponseAsJsonArray)
         {
-            if ((bool)item["deleted"])
+            if (item["deleted"] == null || !(bool)item["deleted"])
             {
-                item.Remove();
+                newResponseAsJsonArray.Add(item);
             }
         }
         return newResponseAsJsonArray;
@@ -183,12 +191,36 @@ public class Script : ScriptBase
 
                 var fieldProcessor = new FieldProcessor();
                 var (customFields, requiredFields) = fieldProcessor.DynamicFields(responseAsString, "create");
-                newResponseAsJson.Add("data", new JObject
+                if (customFields.Count > 0)
                 {
-                    ["type"] = "object",
-                    // ["required"] = requiredFields,
-                    ["properties"] = (JObject)JToken.FromObject(customFields)
-                });
+                    newResponseAsJson.Add("data", new JObject
+                    {
+                        ["type"] = "object",
+                        // ["required"] = requiredFields,
+                        ["properties"] = (JObject)JToken.FromObject(customFields)
+                    });
+                }
+                else
+                {
+                    Dictionary<string, ApiProperty> missingProperties = new Dictionary<string, ApiProperty>();
+
+                    var apiProperty = new ApiProperty();
+                    apiProperty.type = "string";
+                    apiProperty.format = "string";
+                    apiProperty.title = "Custom Field Placeholder";
+                    apiProperty.description = "This is just a workaround to support the case in which no custom fields exist " +
+                        "for the specific entity in ForceManager. Since the dynamic schema of Power Automate expects some data, " +
+                        " we return this useless internal property to avoid UI issue in Power Automate modules.";
+                    apiProperty.xmssummary = "Custom Field Placeholder";
+                    apiProperty.xmsvisibility = "internal";
+
+                    missingProperties.Add("Z_NoCustomFieldsPresent", apiProperty);
+                    newResponseAsJson.Add("data", new JObject
+                    {
+                        ["type"] = "object",
+                        ["properties"] = (JObject)JToken.FromObject(missingProperties)
+                    });
+                }
                 newResponse.Content = CreateJsonContent(newResponseAsJson.ToString());
                 break;
             case "ListCountries":
@@ -301,7 +333,7 @@ public class Script : ScriptBase
                 apiProperty.description = item.Label;
                 apiProperty.xmssummary = item.Label;
 
-                var required = (item.Required && action == "create");
+                var required = (item.Required_Via_Api && action == "create");
 
                 // apiProperty.required = required;
                 apiProperty.xmsvisibility = required ? "important" : "advanced";
@@ -370,7 +402,9 @@ public class Script : ScriptBase
     {
         public string Key { get; set; }
         public string Label { get; set; }
+        public string Help_Text { get; set; }
         public bool Required { get; set; }
+        public bool Required_Via_Api { get; set; }
         public string Type { get; set; }
         public string Choices { get; set; }
         public bool? List { get; set; }
