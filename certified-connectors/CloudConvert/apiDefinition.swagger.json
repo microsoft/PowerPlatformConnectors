@@ -588,6 +588,259 @@
         ]
       }
     },
+    "/flow/jobs/merge": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Conversion Successful.",
+            "schema": {
+              "description": "Output File Content",
+              "title": "File Content",
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Filename": {
+                "description": "Output Filename",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Conversion Failed."
+          }
+        },
+        "summary": "Merge Files",
+        "operationId": "MergeFiles",
+        "description": "Merge multiple files in one PDF",
+        "parameters": [
+          {
+            "name": "Content-type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "number_of_inputs": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 100,
+                  "description": "Number of input files to merge.",
+                  "title": "Number of Files",
+                  "x-ms-visibility": "important",
+                  "default": 2
+                },
+                "additional_inputs": {
+                  "type": "object",
+                  "x-ms-dynamic-properties": {
+                    "operationId": "GetMergeInputs",
+                    "parameters": {
+                      "number_of_inputs": {
+                        "parameterReference": "body/number_of_inputs"
+                      }
+                    },
+                    "itemValuePath": "data"
+                  }
+                },
+                "tasks": {
+                  "type": "object",
+                  "properties": {
+                    "import-1": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the import task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "import/base64"
+                        },
+                        "file": {
+                          "type": "string",
+                          "description": "File content of the 1. input file.",
+                          "title": "Input 1 File Content",
+                          "format": "byte",
+                          "x-ms-visibility": "important"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Filename of the 1. input file, including extension.",
+                          "title": "Input 1 Filename",
+                          "x-ms-visibility": "important"
+                        }
+                      },
+                      "description": "import-1",
+                      "required": [
+                        "operation",
+                        "file",
+                        "filename"
+                      ]
+                    },
+                    "import-2": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the import task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "import/base64"
+                        },
+                        "file": {
+                          "type": "string",
+                          "description": "File content of the 2. input file.",
+                          "title": "Input 2 File Content",
+                          "format": "byte",
+                          "x-ms-visibility": "important"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Filename of the 2. input file, including extension.",
+                          "title": "Input 2 Filename",
+                          "x-ms-visibility": "important"
+                        }
+                      },
+                      "description": "import-2",
+                      "required": [
+                        "operation",
+                        "file",
+                        "filename"
+                      ]
+                    },
+                    "merge": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the convert task.",
+                          "title": "Operation",
+                          "x-ms-visibility": "internal",
+                          "default": "merge"
+                        },
+                        "input": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Input of the merge task.",
+                          "title": "Input",
+                          "default": ["import-1", "import-2"],
+                          "x-ms-visibility": "internal"
+                        },
+                        "output_format": {
+                          "type": "string",
+                          "description": "Output Format",
+                          "title": "Output Format",
+                          "default": "pdf",
+                          "x-ms-visibility": "important",
+                          "x-ms-dynamic-list": {
+                            "operationId": "GetMergeOutputFormats",
+                            "itemsPath": "data",
+                            "parameters": {
+                            }
+                          }
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "The filename of the merged output file. If it is not provided, output filename will be automatically generated.",
+                          "title": "Output Filename",
+                          "x-ms-visibility": "important"
+                        },
+                        "options": {
+                          "type": "object",
+                          "x-ms-dynamic-properties": {
+                            "operationId": "GetMergeOptions",
+                            "parameters": {
+                              "output_format": {
+                                "parameterReference": "body/tasks/merge/output_format"
+                              }
+                            },
+                            "itemValuePath": "data"
+                          }
+                        }
+                      },
+                      "description": "merge",
+                      "required": [
+                        "input",
+                        "operation",
+                        "output_format"
+                      ]
+                    },
+                    "export": {
+                      "type": "object",
+                      "properties": {
+                        "operation": {
+                          "type": "string",
+                          "description": "Operation name of the export task.",
+                          "title": "Operation",
+                          "default": "export/url",
+                          "x-ms-visibility": "internal"
+                        },
+                        "input": {
+                          "type": "string",
+                          "description": "Input of the export task.",
+                          "title": "Input",
+                          "default": "merge",
+                          "x-ms-visibility": "internal"
+                        },
+                        "inline": {
+                          "type": "boolean",
+                          "description": "This option makes the export URLs return the Content-Disposition inline header, which tells browser to display the file instead of downloading it.",
+                          "title": "Inline",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "default": false,
+                          "x-ms-visibility": "internal"
+                        },
+                        "archive_multiple_files": {
+                          "type": "boolean",
+                          "description": "By default, multiple files will create multiple export URLs. When enabling this option, one export URL with a ZIP file will be created.",
+                          "title": "Archive Multiple Files",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "x-ms-visibility": "internal",
+                          "default": true
+                        }
+                      },
+                      "description": "export",
+                      "required": [
+                        "archive_multiple_files",
+                        "inline",
+                        "input",
+                        "operation"
+                      ]
+                    }
+                  },
+                  "description": "tasks",
+                  "required": [
+                    "merge",
+                    "export",
+                    "import-1",
+                    "import-2"
+                  ]
+                }
+              },
+              "required": [
+                "tasks",
+                "number_of_inputs"
+              ]
+            }
+          }
+        ]
+      }
+    },
     "/flow/options/convert": {
       "get": {
         "responses": {
@@ -679,6 +932,66 @@
             "name": "output_format",
             "in": "query",
             "type": "string"
+          }
+        ]
+      }
+    },
+    "/flow/options/merge": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Merge Options",
+        "operationId": "GetMergeOptions",
+        "parameters": [
+          {
+            "name": "output_format",
+            "in": "query",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/flow/inputs/merge": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Merge Inputs",
+        "operationId": "GetMergeInputs",
+        "parameters": [
+          {
+            "name": "number_of_inputs",
+            "in": "query",
+            "type": "integer"
           }
         ]
       }
@@ -788,6 +1101,33 @@
         "x-ms-visibility": "internal",
         "summary": "Get Capture Website Output Formats",
         "operationId": "GetCaptureWebsiteOutputFormats",
+        "parameters": []
+      }
+    },
+    "/flow/formats/merge/output_formats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation Failed."
+          }
+        },
+        "x-ms-visibility": "internal",
+        "summary": "Get Merge Output Formats",
+        "operationId": "GetMergeOutputFormats",
         "parameters": []
       }
     }
