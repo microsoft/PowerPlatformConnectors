@@ -1970,11 +1970,11 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if("GetRecipientEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if("GetEnvelopesByRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-      uriBuilder.Path = uriBuilder.Path.Replace("/getRecipientEnvelopes", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("/getEnvelopesByRecipient", "");
       uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
       this.Context.Request.Headers.Add("generative-ai-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("generative-ai-user-agent", "sales-copilot");
@@ -2515,7 +2515,7 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if ("GetRecipientEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetEnvelopesByRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -2527,6 +2527,11 @@ public class Script : ScriptBase
       JArray activities = new JArray();
       var recipientName = query.Get("recipientName") ?? null;
       var recipientEmailId = query.Get("recipientEmailId") ?? null;
+
+      if (string.IsNullOrEmpty(recipientName) && string.IsNullOrEmpty(recipientEmailId))
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Recipient name to retrieve Recipient information");
+      }
 
       foreach (var envelope in envelopes)
       {
@@ -2550,25 +2555,21 @@ public class Script : ScriptBase
           recipientNames.Add(recipient["name"]);
         }
 
-        JObject additionalPropertiesForActivity = new JObject()
-        {
-          ["Recipients"] = string.Join(", ", recipientNames),
-          ["Sender Name"] = envelope["sender"]["userName"],
-          ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
-          ["Date"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy")
-        };
         activities.Add(new JObject()
         {
           ["title"] = envelope["emailSubject"],
           ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
-          ["dateTime"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+          ["envelopeId"] = envelope["envelopeId"],
+          ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
           ["url"] = GetEnvelopeUrl(envelope),
-          ["additionalProperties"] = additionalPropertiesForActivity,
+          ["recipients"] = string.Join(", ", recipientNames),
+          ["sender"] = envelope["sender"]["userName"],
+          ["status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+          ["dateSent"] = envelope["sentDateTime"]
         });
       }
 
       newBody["value"] = activities;
-      newBody["hasMoreResults"] = false;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
