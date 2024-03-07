@@ -1,11 +1,26 @@
-# Snowflake (Deprecated)
-
-_**NOTE:**_ This connector is deprecated, the latest version of the Snowflake connector is available [here](../Snowflake%20v2).
+# Snowflake 
 
 This connector is based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html). Snowflake enables data storage, processing, and analytic solutions that are faster, easier to use, and more flexible than traditional offerings. The connector uses the Snowflake REST API V2 to submit synchronous and asynchronous queries and retrieve corresponding results.
 
 
 ## Publisher: Snowflake
+
+## Prerequisites
+
+- Users must have Microsoft Entra ID for the external authentication.
+- Users must have a premium Power Apps license.
+- Users must have Snowflake account.
+
+## Supported Operations
+
+### Submit SQL Statement for Execution
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Submit SQL statement for execution on snowflake.
+### Check the Status and Get Results
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check the status of the execution and get the results, by providing the statementHandle.
+### Cancel the Execution of a Statement
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cancels the execution of a statement, by providing the statementHandle.
+### Convert result set rows from array to objects
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Converts result set rows from array of string to JSON object.
 
 ## Obtaining Credentials
 Set up Azure AD authentication for Snowflake by following these steps:
@@ -23,7 +38,7 @@ Set up Azure AD authentication for Snowflake by following these steps:
     * Make sure you've set your role as `ACCOUNTADMIN`. Now you can execute your query. 
 
 ```
-create security integration connector
+CREATE SECURITY INTEGRATION <integration name>
        type = external_oauth
        enabled = true
        external_oauth_type = azure
@@ -34,24 +49,13 @@ create security integration connector
        external_oauth_snowflake_user_mapping_attribute = 'login_name'
        external_oauth_any_role_mode = 'ENABLE';
 ```
-## Using the Connector in Power Platform
+## Getting Started
 1. Add Snowflake connector in the Power App or Flow.
 2. Enter connection credentials as below:\
        * Client Id: Snowflake OAuth Client ID from registered client app in Azure.\
        * Client Secret: Snowflake OAuth Client secret from registered client app in Azure.\
        * Resource URL: Application ID URI from registered resource app in Azure.
 3. Click on Sign in button and provider user credentials.
-
-## Supported Operations
-
-Submit SQL Statement for Execution
-
-Check the Status and Get Results
-
-Cancel the Execution of a Statement
-
-Convert result set rows from array to objects
-
 
 ## Known Issues and Limitations
 1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
@@ -61,3 +65,10 @@ Convert result set rows from array to objects
 ## Frequently Asked Questions
 1. How can the connector be used within Power Apps?
 Currently, Power Apps does not support dynamic schema. You can still use the connector from Power Apps by calling a flow from the app instead of directly from an  app. 
+
+## Deployment Instructions
+1. Download the connector source code from GitHub repository.
+2. Follow the instructions provided in [Create a New Custom Connector](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#create-a-new-custom-connector) to deploy the connector in your favourite Power Platform Environment.
+3. Follow the steps metnioned in [Obtaining Credentials](#obtaining-credentials) section to get credentials.
+4. Test the connector with the above obtained credentials.
+
