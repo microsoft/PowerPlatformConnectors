@@ -4,6 +4,10 @@ Clockify is a popular, easy to use, free time tracking software solution. This c
 
 ## Publisher: Dr Adrian Colquhoun (Strategik)
 
+## Change Notes 
+
+- 28 Oct 2023 : Added support for the new v1 version of clockify. Old Version deprecated but the existing flows will continue to run.
+
 ## Prerequisites
 
 To use this connector, you need the following
