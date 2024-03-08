@@ -2524,7 +2524,7 @@ public class Script : ScriptBase
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredEnvelopes = new JArray();
-      JArray activities = new JArray();
+      JArray filteredEnvelopesDetails = new JArray();
       var recipientName = query.Get("recipientName") ?? null;
       var recipientEmailId = query.Get("recipientEmailId") ?? null;
 
@@ -2548,14 +2548,14 @@ public class Script : ScriptBase
       {
         DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
         DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
-        JArray recipientNames = new JArray();
         System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
-        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
-        {
-          recipientNames.Add(recipient["name"]);
-        }
+        JArray recipientNames = new JArray(
+        (envelope["recipients"]["signers"] as JArray)?.Select(recipient => recipient["name"]));
 
-        activities.Add(new JObject()
+        JArray documentNames = new JArray(
+        (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
+
+        filteredEnvelopesDetails.Add(new JObject()
         {
           ["title"] = envelope["emailSubject"],
           ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
@@ -2563,13 +2563,14 @@ public class Script : ScriptBase
           ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
           ["url"] = GetEnvelopeUrl(envelope),
           ["recipients"] = string.Join(", ", recipientNames),
+          ["documents"] = string.Join(",", documentNames),
           ["sender"] = envelope["sender"]["userName"],
           ["status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
           ["dateSent"] = envelope["sentDateTime"]
         });
       }
 
-      newBody["value"] = activities;
+      newBody["value"] = filteredEnvelopesDetails;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
