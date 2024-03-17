@@ -432,7 +432,7 @@
     },
     "/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}": {
       "get": {
-        "summary": "Get documents from envelope",
+        "summary": "DEPRECATED: Get documents from envelope",
         "description": "Get documents from envelope",
         "operationId": "GetDocuments",
         "parameters": [
@@ -487,6 +487,136 @@
             "description": "default",
             "schema": {
               "$ref": "#/definitions/GetDocumentsResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "advanced"
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/documents/{documentId}/documentsDownload": {
+      "get": {
+        "summary": "Get documents from an envelope",
+        "description": "Get documents from an envelope",
+        "operationId": "GetDocumentsV2",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "description": "Envelope id",
+            "required": true,
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id",
+            "type": "string"
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "description": "Provide specific document Id or use an output format from the dropdown",
+            "x-ms-summary": "Output format",
+            "required": true,
+            "x-ms-test-value": "insert document id",
+            "type": "string",
+            "enum": [
+              "Archive : Get ZIP archive with documents and COC",
+              "Certificate : Get only certificate of completion as pdf",
+              "Combined with COC : Get all documents as single pdf",
+              "Combined without COC : Get all documents as single pdf",
+              "Portfolio : Get envelope documents as a PDF Portfolio"
+            ]
+          }
+         ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "$ref": "#/definitions/GetDocumentsResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "advanced"
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/notification": {
+      "put": {
+        "summary": "Add reminders for an envelope",
+        "description": "Add reminders for an envelope",
+        "operationId": "AddReminders",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "description": "Envelope id",
+            "required": true,
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id",
+            "type": "string"
+          },
+          {
+            "name": "reminderEnabled",
+            "in": "query",
+            "description": "When set to false the reminders are disabled. Default is false",
+            "required": true,
+            "x-ms-summary": "Reminder Enabled",
+            "x-ms-test-value": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "reminderDelay",
+            "in": "query",
+            "description": "Add number of days after which recipient receives reminder email.",
+            "required": true,
+            "x-ms-summary": "Reminder Delay",
+            "type": "string",
+            "default": "0"
+          },
+          {
+            "name": "reminderFrequency",
+            "in": "query",
+            "description": "Add number of days between reminder emails.",
+            "required": true,
+            "x-ms-summary": "Reminder Frequency",
+            "type": "string",
+            "default": "0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "$ref": "#/definitions/AddRemindersResponse"
             }
           }
         },
@@ -973,7 +1103,8 @@
             "description": "CRM type",
             "in": "query",
             "enum": [
-              "Dynamics365"
+              "Dynamics365",
+              "Salesforce"
             ],
             "type": "string"
           },
@@ -1085,7 +1216,8 @@
             "description": "CRM type",
             "in": "query",
             "enum": [
-              "Dynamics365"
+              "Dynamics365",
+              "Salesforce"
             ],
             "type": "string"
           },
@@ -2298,6 +2430,15 @@
             "type": "string"
           },
           {
+            "name": "embeddedRecipientStartURL",
+            "in": "query",
+            "description": "A sender-provided URL string for redirecting an embedded recipient.",
+            "x-ms-summary": "Embedded recipient start URL",
+            "required": false,
+            "x-ms-visibility": "advanced",
+            "type": "string"
+          },
+          {
             "name": "routingOrder",
             "in": "query",
             "description": "The signing order of the recipient.",
@@ -2406,6 +2547,20 @@
             "x-ms-summary": "SMS Phone Number",
             "x-ms-visibility": "advanced",
             "type": "integer"
+          },
+          {
+            "name": "signatureType",
+            "in": "query",
+            "description": "DocuSign standards-based-signature (SBS) types.",
+            "x-ms-summary": "Signature type",
+            "x-ms-visibility": "advanced",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "StaticResponseForSignatureTypes",
+              "value-collection": "signatureTypes",
+              "value-path": "type",
+              "value-title": "name"
+            }
           },
           {
             "name": "additionalRecipientParams",
@@ -2563,6 +2718,20 @@
             "type": "string"
           },
           {
+            "name": "signatureType",
+            "in": "query",
+            "description": "DocuSign standards-based-signature (SBS) types.",
+            "x-ms-summary": "Signature type",
+            "x-ms-visibility": "advanced",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "StaticResponseForSignatureTypes",
+              "value-collection": "signatureTypes",
+              "value-path": "type",
+              "value-title": "name"
+            }
+          },
+          {
             "name": "recipientType",
             "in": "query",
             "required": true,
@@ -2582,6 +2751,15 @@
             "description": "Client user ID for embedded signer",
             "required": false,
             "x-ms-summary": "Client User ID",
+            "x-ms-visibility": "advanced",
+            "type": "string"
+          },
+          {
+            "name": "embeddedRecipientStartURL",
+            "in": "query",
+            "description": "A sender-provided URL string for redirecting an embedded recipient.",
+            "x-ms-summary": "Embedded recipient start URL",
+            "required": false,
             "x-ms-visibility": "advanced",
             "type": "string"
           },
@@ -3782,6 +3960,25 @@
         "x-ms-visibility": "internal"
       }
     },
+    "/signature_types": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get signature types.",
+        "operationId": "StaticResponseForSignatureTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SignatureTypesResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+    }
+  },
     "/anchortab_schema": {
       "get": {
         "tags": [
@@ -3824,6 +4021,13 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "recipient type"
+          },
+          {
+            "name": "signatureType",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "signature type"
           }
         ],
         "responses": {
@@ -4310,7 +4514,10 @@
             "envelope-deleted",
             "envelope-discard",
             "click-agreed",
-            "click-declined"
+            "click-declined",
+            "recipient-autoresponded",
+            "recipient-authenticationfailed",
+            "recipient-finish-later"
           ],
           "type": "string",
           "x-ms-summary": "Envelope event",
@@ -4550,6 +4757,17 @@
       "x-ms-summary": "File Content",
       "x-ms-visibility": "important"
     },
+    "AddRemindersResponse": {
+      "type":"object",
+      "properties": {
+        "reminderEnabled": {
+          "description": "Reminder enabled",
+          "type": "string",
+          "x-ms-summary": "Reminder enabled",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
     "DynamicSigners": {
       "description": "An object that represents signers based on a template.",
       "type": "object",
@@ -4576,6 +4794,9 @@
         "parameters": {
           "recipientType": {
             "parameter": "recipientType"
+          },
+          "signatureType": {
+            "parameter": "signatureType"
           }
         },
         "value-path": "Schema"
@@ -5249,6 +5470,19 @@
         }
       }
     },
+    "SignatureTypesResponse":{
+      "type": "object",
+      "properties": {
+        "tabTypes": {
+          "description": "Signature types",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SignatureType"
+          },
+          "x-ms-summary": "Signature types"
+        }
+      }
+    },
     "FontNamesResponse": {
       "type": "object",
       "properties": {
@@ -5313,6 +5547,21 @@
         },
         "type": {
           "description": "Type of the recipient.",
+          "type": "string",
+          "x-ms-summary": "Type"
+        }
+      }
+    },
+    "SignatureType": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Display name of the signature type.",
+          "type": "string",
+          "x-ms-summary": "Name"
+        },
+        "type": {
+          "description": "Type of the signature.",
           "type": "string",
           "x-ms-summary": "Type"
         }
