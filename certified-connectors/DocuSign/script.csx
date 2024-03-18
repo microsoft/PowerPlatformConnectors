@@ -298,7 +298,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1004"
+          ["x-ms-summary"] = "DS1005"
       };
     }
 
@@ -2062,11 +2062,6 @@ public class Script : ScriptBase
     {
       var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
       var body = ParseContentAsJObject(content, false);
-
-      if (body["errorMessage"].Contains("MAX_CONNECT_CUSTOM_CONFIGURATION_FOR_ACTIVE_REST_PAYLOAD_EXCEEDED"))
-      {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Maximum number of active connect custom configurations[10] for Rest Payload exceeded.");
-      }
 
       response.Headers.Location = new Uri(string.Format(
           "{0}/{1}",
