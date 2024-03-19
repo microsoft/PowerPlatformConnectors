@@ -10,7 +10,7 @@ You will need the following to proceed:
 The connector supports the following operations:
 * `Create seal`: Hashes the file locally and creates a seal
 * `Verify seal`: Hashes the file locally and verifies a seal
-* `Get seals`: Hashes the file locally and gets all seals for current file
+* `Lists seals`: Hashes the file locally and lists all seals for current file
 
 ## Known issues and limitations
 Currently it is not possibe to seal Office 2013+ files. 
