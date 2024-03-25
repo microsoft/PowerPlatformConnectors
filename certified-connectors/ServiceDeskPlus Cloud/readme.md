@@ -28,13 +28,19 @@ Users in Standard, Professional, and Enterprise editions can execute actions usi
 
 The connector supports the following actions:
 
-* `Create Request`: Create a new request in ServiceDesk Plus Cloud
+* `Create Request`: Create new request in ServiceDesk Plus Cloud
 
-* `Update Request`: Update an existing request's details in ServiceDesk Plus Cloud
+* `Update Request`: Update an existing request in ServiceDesk Plus Cloud
 
-* `Create Change`: Create a new change request in ServiceDesk Plus Cloud
+* `Create Change`: Create a new change in ServiceDesk Plus Cloud
 
-* `Update Change`: Update an existing change request's details in ServiceDesk Plus Cloud
+* `Update Change`: Update an existing change in ServiceDesk Plus Cloud
+
+* `Invoke API`: Make API calls to perform an action in ServiceDesk Plus Cloud
+
+* `Get Request Detail`: Retrieve request details using the request ID from ServiceDesk Plus Cloud
+
+* `Get Request List`: Get a list of requests from ServiceDesk Plus Cloud that meets the additional criteria given in the input_data parameter
 
 ## Obtaining Credentials
 
