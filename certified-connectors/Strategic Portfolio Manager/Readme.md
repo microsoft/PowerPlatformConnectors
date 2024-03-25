@@ -1,16 +1,18 @@
-## Strategic Portfolio Manager
-The Strategic Portfolio Manager connector allows users to interact with initiatives, projects, epics, etc. and data from 360 Portfolio Insights using Microsoft Power Automate or Power Apps.
+### NOTE
+The Strategic Portfolio Manager connector allows users to interact with initiatives, projects, epics, etc. and data from NH360 Portfolio Insights using Microsoft Power Automate or Power Apps.
+
+## Strategic Portfolio Manager Connector
 Strategic Portfolio Manager enables you to continuously connect, align and orchestrate all investments with strategies to drive business agility more effectively.
 It connects disparate silos across the enterprise and provides 360 degrees of insight to help ensure that all investments are derived from – and continuously align with – strategic priorities.
 
 ## Publisher:
-UMT 360 LLC
+The North Highland Company
 
 ## Prerequisites
 You will need the following to proceed:
-* A 360 Portfolio Insights subscription
-* A 360 Portfolio Insights site which allows connection requests from the connector
-* User with access rights to the 360 Portfolio Insights site
+* A NH360 Portfolio Insights subscription
+* A NH360 Portfolio Insights site which allows connection requests from the connector
+* User with access rights to the NH360 Portfolio Insights site
 
 ## Supported Operations
 The connector supports the following operations:
@@ -28,6 +30,11 @@ The connector supports the following operations:
 * `Get resources assigned to entity`: Returns all the name and unique identifier of all resources assigned to a selected entity.
 * `Get financial custom field value`: Returns the value of a financial custom field.
 * `Update financial custom field`: Update the values of financial custom fields.
+* `Add a new entry to the entity history log`: Add a log entry to the selected entity's history.
+* `List entity history entries`: Retrieve a list containing of all history entries for the selected entity.
+* `Get the entity's stage validation status`: Indicates whether the selected entity passes all validations for the selected stage transition.
+* `Execute Stage Transition`: Executes an entity lifecycle stage transition.
+
 
 ## Supported Triggers:
 The connector supports the following triggers:
@@ -52,8 +59,8 @@ The connector supports the following triggers:
 * `On Actuals Approval Workflow Started`: Executed when Actuals Approval workflow starts
 * `On Actuals Period Status Changed`: Executed when the status of an Actuals Period has been changed. Status values: Any = 0, Opened = 1, Locked = 2, Archived = 3, Waiting For Approval = 4, Open For Edit = 5, Processing = 6, Not Open = 7.
 
-## Get access to 360 Portfolio Insights
-Contact us to start using 360 Portfolio Insights: [Contact Us](https://www.umt360.com/contact/)
+## Get access to NH360 Portfolio Insights
+Contact us to start using NH360 Portfolio Insights: [Contact Us](https://www.northhighland.com/contact-us)
 
 ## Known Issues and Limitations
 No known issues or limitations
