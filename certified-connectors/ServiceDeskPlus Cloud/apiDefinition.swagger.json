@@ -26,31 +26,75 @@
             "schema": {
               "type": "object",
               "properties": {
-                "request": {
-                  "$ref": "#/definitions/request"
-                },
-                "response_status": {
-                  "type": "object",
-                  "properties": {
-                    "status_code": {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "status_code"
-                    },
-                    "status": {
-                      "type": "string",
-                      "description": "status"
+                "requests": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "request",
+                    "properties": {
+                      "cancellation_requested": {
+                        "description": "cancellation_requested",
+                        "type": "boolean",
+                        "title": "cancellation_requested"
+                      },
+                      "id": {
+                        "description": "id",
+                        "type": "string",
+                        "title": "id"
+                      },
+                      "requester": {
+                        "$ref": "#/definitions/partial_user"
+                      },
+                      "has_notes": {
+                        "description": "has_notes",
+                        "type": "boolean",
+                        "title": "has_notes"
+                      },
+                      "status": {
+                        "$ref": "#/definitions/partial_status"
+                      },
+                      "template": {
+                        "$ref": "#/definitions/partial_request_template"
+                      },
+                      "is_service_request": {
+                        "description": "is_service_request",
+                        "type": "boolean",
+                        "title": "is_service_request"
+                      },
+                      "subject": {
+                        "description": "subject",
+                        "type": "string",
+                        "title": "subject"
+                      },
+                      "group": {
+                        "$ref": "#/definitions/partial_group"
+                      },
+                      "cancel_flag_comments": {
+                        "$ref": "#/definitions/partial_action_comment"
+                      },
+                      "display_id": {
+                        "description": "display_id",
+                        "type": "string",
+                        "title": "display_id"
+                      },
+                      "has_draft": {
+                        "description": "has_draft",
+                        "type": "boolean",
+                        "title": "has_draft"
+                      },
+                      "technician": {
+                        "$ref": "#/definitions/partial_technician"
+                      },
+                      "maintenance": {
+                        "$ref": "#/definitions/partial_pm_task"
+                      }
                     }
-                  },
-                  "description": "response_status"
+                  }
                 }
               }
             }
           }
         },
-        "summary": "Find Request",
-        "description": "Finds Request details using the Request ID.",
-        "operationId": "FindRequest",
         "parameters": [
           {
             "name": "serviceDeskInstance",
@@ -58,7 +102,7 @@
             "x-ms-summary": "Service Desk Instance",
             "required": true,
             "type": "string",
-            "description": "Select the ServiceDesk Plus Cloud instance where the API call must be placed",
+            "description": "The portal name in ServiceDesk Plus Cloud.",
             "x-ms-dynamic-values": {
               "operationId": "PortalList",
               "value-path": "name",
@@ -68,27 +112,26 @@
             "x-ms-url-encoding": "single"
           },
           {
-            "name": "IdType",
+            "name": "input_data",
             "in": "query",
-            "x-ms-summary": "Id Type",
-            "required": true,
+            "required": false,
             "type": "string",
-            "description": "Select the Id Type",
-            "default": "Display Id",
-            "enum": [
-              "Display Id",
-              "PK Id"
-            ]
-          },
-          {
-            "name": "Id",
-            "in": "query",
-            "x-ms-summary": "Id",
-            "required": true,
-            "type": "string",
-            "description": "Provide Id value"
+			"x-ms-summary": "input_data",
+			"description": "input_data to get the list of requests."
           }
-        ]
+        ],
+        "summary": "Get Request List",
+        "description": "Get a list of requests from ServiceDesk Plus Cloud that meets the additional criteria given in the input_data parameter",
+        "operationId": "GetRequestList",
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "GetRequestList",
+              "x-ms-require-user-confirmation": false
+            }
+          ]
+        }
       },
       "post": {
         "responses": {
@@ -105,7 +148,7 @@
           }
         },
         "summary": "Create Request",
-        "description": "Create new request in SDP Cloud",
+        "description": "Create new request in ServiceDesk Plus Cloud",
         "operationId": "CreateRequest",
         "parameters": [
           {
@@ -114,7 +157,7 @@
             "x-ms-summary": "Service Desk Instance",
             "required": true,
             "type": "string",
-            "description": "Select the ServiceDesk Plus Cloud instance where the API call must be placed",
+             "description": "The portal name in ServiceDesk Plus Cloud.",
             "x-ms-dynamic-values": {
               "operationId": "PortalList",
               "value-path": "name",
@@ -138,7 +181,7 @@
                       "properties": {
                         "subject": {
                           "type": "string",
-                          "description": "Specify request subject",
+                          "description": "Subject of the request",
                           "title": "Subject"
                         },
                         "template": {
@@ -146,7 +189,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request template name",
+                              "description": "Template name of the request",
                               "title": "Request Template"
                             }
                           }
@@ -156,7 +199,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request type",
+                              "description": "The type of the request",
                               "title": "Request Type"
                             }
                           },
@@ -167,13 +210,13 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Provide requester name",
+                              "description": "Requester's name in the request",
                               "title": "Requester Name"
                             },
                             "email_id": {
                               "type": "string",
-                              "description": "Provide requester Email id",
-                              "title": "Requester Email Id"
+                              "description": "Requester's email id in the request",
+                              "title": "Requester Email ID"
                             }
                           },
                           "description": "requester"
@@ -183,7 +226,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request status",
+                              "description": "Status of the request",
                               "title": "Status"
                             }
                           },
@@ -194,7 +237,7 @@
                           "properties": {
                             "email_id": {
                               "type": "string",
-                              "description": "Specify technician email address",
+                              "description": "Technician Email address in the request",
                               "title": "Technician Email Address"
                             }
                           },
@@ -205,7 +248,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request site",
+                              "description": "Site name of the request",
                               "title": "Site"
                             }
                           },
@@ -216,7 +259,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request group",
+                              "description": "Group of the request",
                               "title": "Group"
                             }
                           },
@@ -224,7 +267,7 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "Type request description",
+                          "description": "Description of the request",
                           "title": "Description"
                         },
                         "priority": {
@@ -232,7 +275,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request priority",
+                              "description": "Priority of the request",
                               "title": "Priority"
                             }
                           },
@@ -243,7 +286,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request urgency",
+                              "description": "Urgency of the request",
                               "title": "Urgency"
                             }
                           },
@@ -254,7 +297,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request impact",
+                              "description": "Impact of the request",
                               "title": "Impact"
                             }
                           },
@@ -265,7 +308,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request mode",
+                              "description": "Mode of the request",
                               "title": "Mode"
                             }
                           },
@@ -276,7 +319,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request category",
+                              "description": "Category fo the request",
                               "title": "Category"
                             }
                           },
@@ -287,7 +330,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request subcategory",
+                              "description": "Subcategory of the request",
                               "title": "Sub Category"
                             }
                           },
@@ -298,7 +341,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request item",
+                              "description": "Item in the request",
                               "title": "Item"
                             }
                           },
@@ -312,15 +355,15 @@
                             "properties": {
                               "name": {
                                 "type": "string",
-                                "description": "Provide assets to be associated with request"
+                                "description": "Assets to be associated with request"
                               }
                             }
                           },
-                          "description": "Provide assets to be associated with request"
+                          "description": "Assets to be associated with request"
                         },
                         "udf_fields": {
                           "type": "string",
-                          "description": "Specify additional fields(e.g.{\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
+                          "description": "Additional fields(e.g.{\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
                           "title": "Additional Fields"
                         }
                       },
@@ -345,6 +388,59 @@
       }
     },
     "/app/{serviceDeskInstance}/api/v3/requests/{id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "request": {
+                  "$ref": "#/definitions/request"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Request Detail",
+        "description": "Retrieve request details using the request ID from ServiceDesk Plus Cloud",
+        "operationId": "GetRequestDetail",
+		"x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "GetRequestDetail",
+              "x-ms-require-user-confirmation": false
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "serviceDeskInstance",
+            "in": "path",
+            "x-ms-summary": "Service Desk Instance",
+            "required": true,
+            "type": "string",
+            "description": "The portal name in ServiceDesk Plus Cloud.",
+            "x-ms-dynamic-values": {
+              "operationId": "PortalList",
+              "value-path": "name",
+              "value-collection": "portals",
+              "value-title": "name"
+            },
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "x-ms-summary": "Request Id",
+            "type": "string",
+            "description": "Id of the request to get detail.",
+            "x-ms-url-encoding": "single"
+          }
+        ]
+      },
       "put": {
         "responses": {
           "200": {
@@ -366,7 +462,7 @@
             "required": true,
             "x-ms-summary": "Service Desk Instance",
             "type": "string",
-            "description": "Select the ServiceDesk Plus Cloud instance where the API call must be placed",
+            "description": "The portal name in ServiceDesk Plus Cloud.",
             "x-ms-dynamic-values": {
               "operationId": "PortalList",
               "value-path": "name",
@@ -379,9 +475,9 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "x-ms-summary": "Request Id",
+            "x-ms-summary": "Request ID",
             "type": "string",
-            "description": "Specify request ID",
+            "description": "Request ID to update request",
             "x-ms-url-encoding": "single"
           },
           {
@@ -399,7 +495,7 @@
                       "properties": {
                         "subject": {
                           "type": "string",
-                          "description": "Specify request subject",
+                          "description": "Subject of the request",
                           "title": "Subject"
                         },
                         "template": {
@@ -407,7 +503,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request template name",
+                              "description": "Template name of the request",
                               "title": "Request Template"
                             }
                           }
@@ -417,7 +513,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request type",
+                              "description": "The type of the request",
                               "title": "Request Type"
                             }
                           },
@@ -428,13 +524,13 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Provide requester name",
+                              "description": "Requester's name in the request",
                               "title": "Requester Name"
                             },
                             "email_id": {
                               "type": "string",
-                              "description": "Provide requester Email id",
-                              "title": "Requester Email Id"
+                              "description": "Requester's email id in the request",
+                              "title": "Requester Email ID"
                             }
                           },
                           "description": "requester"
@@ -444,7 +540,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request status",
+                              "description": "Status of the request",
                               "title": "Status"
                             }
                           },
@@ -455,7 +551,7 @@
                           "properties": {
                             "email_id": {
                               "type": "string",
-                              "description": "Specify technician email address",
+                              "description": "Technician Email address in the request",
                               "title": "Technician Email Address"
                             }
                           },
@@ -466,7 +562,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request site",
+                              "description": "Site name of the request",
                               "title": "Site"
                             }
                           },
@@ -477,7 +573,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request group",
+                              "description": "Group of the request",
                               "title": "Group"
                             }
                           },
@@ -485,7 +581,7 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "Type request description",
+                          "description": "Description of the request",
                           "title": "Description"
                         },
                         "priority": {
@@ -493,7 +589,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request priority",
+                              "description": "Priority of the request",
                               "title": "Priority"
                             }
                           },
@@ -504,7 +600,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request urgency",
+                              "description": "Urgency of the request",
                               "title": "Urgency"
                             }
                           },
@@ -515,7 +611,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request impact",
+                              "description": "Impact of the request",
                               "title": "Impact"
                             }
                           },
@@ -526,7 +622,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request mode",
+                              "description": "Mode of the request",
                               "title": "Mode"
                             }
                           },
@@ -537,7 +633,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request category",
+                              "description": "Category fo the request",
                               "title": "Category"
                             }
                           },
@@ -548,7 +644,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request subcategory",
+                              "description": "Subcategory of the request",
                               "title": "Sub Category"
                             }
                           },
@@ -559,7 +655,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify request item",
+                              "description": "Item in the request",
                               "title": "Item"
                             }
                           },
@@ -573,15 +669,15 @@
                             "properties": {
                               "name": {
                                 "type": "string",
-                                "description": "Provide assets to be associated with request"
+                                "description": "Assets to be associated with request"
                               }
                             }
                           },
-                          "description": "Provide assets to be associated with request"
+                          "description": "Assets to be associated with request"
                         },
                         "udf_fields": {
                           "type": "string",
-                          "description": "Specify additional fields(e.g.{\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
+                          "description": "Additional fields(e.g.{\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
                           "title": "Additional Fields"
                         }
                       },
@@ -602,7 +698,7 @@
         ],
         "summary": "Update Request",
         "operationId": "UpdateRequest",
-        "description": "Update an existing request"
+        "description": "Update an existing request in ServiceDesk Plus Cloud"
       }
     },
     "/app/{serviceDeskInstance}/api/v3/changes": {
@@ -621,7 +717,7 @@
           }
         },
         "summary": "Create Change",
-        "description": "Create new change in SDP Cloud",
+        "description": "Create a new change in ServiceDesk Plus Cloud",
         "operationId": "CreateChange",
         "parameters": [
           {
@@ -630,7 +726,7 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Service Desk Instance",
-            "description": "Select the ServiceDesk Plus Cloud instance where the API call must be placed",
+             "description": "The portal name in ServiceDesk Plus Cloud.",
             "x-ms-dynamic-values": {
               "operationId": "PortalList",
               "value-path": "name",
@@ -654,12 +750,12 @@
                       "properties": {
                         "title": {
                           "type": "string",
-                          "description": "Specify change title",
+                          "description": "Title of the change",
                           "title": "Title"
                         },
                         "comment": {
                           "type": "string",
-                          "description": "Specify change status comment",
+                          "description": "Status comment of the change",
                           "title": "Status Comment"
                         },
                         "template": {
@@ -667,7 +763,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change template name",
+                              "description": "Template name of the change",
                               "title": "Change Template"
                             }
                           },
@@ -678,7 +774,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change requester name",
+                              "description": "Requester name of the change",
                               "title": "Change Requester"
                             }
                           },
@@ -689,7 +785,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify site for the change",
+                              "description": "Site of the change",
                               "title": "Site"
                             }
                           },
@@ -700,7 +796,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify group for the change",
+                              "description": "Group of the change",
                               "title": "Group"
                             }
                           },
@@ -708,7 +804,7 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "Type change description",
+                          "description": "Description of the change",
                           "title": "Description"
                         },
                         "change_owner": {
@@ -716,7 +812,7 @@
                           "properties": {
                             "email_id": {
                               "type": "string",
-                              "description": "Type change owner's email address",
+                              "description": "Change owner's email address",
                               "title": "Change Owner Email Address"
                             }
                           },
@@ -727,7 +823,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change type",
+                              "description": "The type of the change",
                               "title": "Change Type"
                             }
                           },
@@ -738,7 +834,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change priority",
+                              "description": "Priority of the change",
                               "title": "Priority"
                             }
                           },
@@ -749,7 +845,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change urgency",
+                              "description": "Urgency of the change",
                               "title": "Urgency"
                             }
                           },
@@ -760,7 +856,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change impact",
+                              "description": "Impact of the change",
                               "title": "Impact"
                             }
                           },
@@ -771,7 +867,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change risk",
+                              "description": "Risk of the change",
                               "title": "Change Risk"
                             }
                           },
@@ -782,7 +878,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify reason for initiating change",
+                              "description": "Reason for initiating change",
                               "title": "Reason for Change"
                             }
                           },
@@ -793,7 +889,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change category for the change",
+                              "description": "Category for the change",
                               "title": "Category"
                             }
                           },
@@ -804,7 +900,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change subcategory for a the change",
+                              "description": "Subcategory for the change",
                               "title": "Sub Category"
                             }
                           },
@@ -815,7 +911,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change item",
+                              "description": "Item for the change",
                               "title": "Item"
                             }
                           },
@@ -829,15 +925,15 @@
                             "properties": {
                               "name": {
                                 "type": "string",
-                                "description": "Provide assets to be associated with the change"
+                                "description": "Assets to be associated with the change"
                               }
                             }
                           },
-                          "description": "Provide assets to be associated with the change"
+                          "description": "Assets to be associated with the change"
                         },
                         "udf_fields": {
                           "type": "string",
-                          "description": "Specify additional fields(e.g. {\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
+                          "description": "Additional fields(e.g. {\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
                           "title": "Additional Fields"
                         }
                       },
@@ -877,7 +973,7 @@
           }
         },
         "summary": "Update Change",
-        "description": "Update an existing change",
+        "description": "Update an existing change in ServiceDesk Plus Cloud",
         "operationId": "UpdateChange",
         "parameters": [
           {
@@ -886,7 +982,7 @@
             "required": true,
             "x-ms-summary": "Service Desk Instance",
             "type": "string",
-            "description": "Select the ServiceDesk Plus Cloud instance where the API call must be placed",
+            "description": "The portal name in ServiceDesk Plus Cloud.",
             "x-ms-dynamic-values": {
               "operationId": "PortalList",
               "value-path": "name",
@@ -901,7 +997,7 @@
             "required": true,
             "x-ms-summary": "Change Id",
             "type": "string",
-            "description": "Specify change ID",
+            "description": "Change ID to update Change",
             "x-ms-url-encoding": "single"
           },
           {
@@ -919,12 +1015,12 @@
                       "properties": {
                         "title": {
                           "type": "string",
-                          "description": "Specify change title",
+                          "description": "Title of the change",
                           "title": "Title"
                         },
                         "comment": {
                           "type": "string",
-                          "description": "Specify change status comment",
+                          "description": "Status comment of the change",
                           "title": "Status Comment"
                         },
                         "template": {
@@ -932,7 +1028,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change template name",
+                              "description": "Template name of the change",
                               "title": "Change Template"
                             }
                           },
@@ -943,7 +1039,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change requester name",
+                              "description": "Requester name of the change",
                               "title": "Change Requester"
                             }
                           },
@@ -954,7 +1050,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify site for the change",
+                              "description": "Site of the change",
                               "title": "Site"
                             }
                           },
@@ -965,7 +1061,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify group for the change",
+                              "description": "Group of the change",
                               "title": "Group"
                             }
                           },
@@ -973,7 +1069,7 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "Type change description",
+                          "description": "Description of the change",
                           "title": "Description"
                         },
                         "change_owner": {
@@ -981,7 +1077,7 @@
                           "properties": {
                             "email_id": {
                               "type": "string",
-                              "description": "Type change owner's email address",
+                              "description": "Change owner's email address",
                               "title": "Change Owner Email Address"
                             }
                           },
@@ -992,7 +1088,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change type",
+                              "description": "The type of the change",
                               "title": "Change Type"
                             }
                           },
@@ -1003,7 +1099,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change priority",
+                              "description": "Priority of the change",
                               "title": "Priority"
                             }
                           },
@@ -1014,7 +1110,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change urgency",
+                              "description": "Urgency of the change",
                               "title": "Urgency"
                             }
                           },
@@ -1025,7 +1121,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change impact",
+                              "description": "Impact of the change",
                               "title": "Impact"
                             }
                           },
@@ -1036,7 +1132,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change risk",
+                              "description": "Risk of the change",
                               "title": "Change Risk"
                             }
                           },
@@ -1047,7 +1143,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify reason for initiating change",
+                              "description": "Reason for initiating change",
                               "title": "Reason for Change"
                             }
                           },
@@ -1058,7 +1154,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change category for the change",
+                              "description": "Category for the change",
                               "title": "Category"
                             }
                           },
@@ -1069,7 +1165,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change subcategory for a the change",
+                              "description": "Subcategory for the change",
                               "title": "Sub Category"
                             }
                           },
@@ -1080,7 +1176,7 @@
                           "properties": {
                             "name": {
                               "type": "string",
-                              "description": "Specify change item",
+                              "description": "Item for the change",
                               "title": "Item"
                             }
                           },
@@ -1094,15 +1190,15 @@
                             "properties": {
                               "name": {
                                 "type": "string",
-                                "description": "Provide assets to be associated with the change"
+                                "description": "Assets to be associated with the change"
                               }
                             }
                           },
-                          "description": "Provide assets to be associated with the change"
+                          "description": "Assets to be associated with the change"
                         },
                         "udf_fields": {
                           "type": "string",
-                          "description": "Specify additional fields(e.g. {\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
+                          "description": "Additional fields(e.g. {\"udf_char1\":\"value\",\"udf_char2\":\"value\",..})",
                           "title": "Additional Fields"
                         }
                       },
@@ -1207,7 +1303,7 @@
           }
         },
         "summary": "Portal List",
-        "description": "get the list of portals",
+        "description": "get the list of portals in ServiceDesk Plus Cloud",
         "operationId": "PortalList",
         "parameters": [],
         "x-ms-visibility": "internal"
@@ -1242,7 +1338,7 @@
         },
         "operationId": "InvokeAPI",
         "summary": "Invoke API",
-        "description": "Make API calls in ServiceDesk Plus Cloud to perform an action",
+        "description": "Make API calls to perform an action in ServiceDesk Plus Cloud",
         "parameters": [
           {
             "name": "serviceDeskInstance",
@@ -1250,7 +1346,7 @@
             "x-ms-summary": "Service Desk Instance",
             "required": true,
             "type": "string",
-            "description": "Select the ServiceDesk Plus Cloud instance where the API call must be placed",
+            "description": "The portal name in ServiceDesk Plus Cloud.",
             "x-ms-dynamic-values": {
               "operationId": "PortalList",
               "value-path": "name",
@@ -1266,7 +1362,7 @@
             "type": "string",
             "x-ms-url-encoding": "single",
             "x-ms-summary": "URL Path",
-            "description": "Provide url path"
+            "description": "The url path of the API call"
           },
           {
             "name": "method",
@@ -1278,7 +1374,7 @@
               "POST",
               "PUT"
             ],
-            "description": "Select API Method to be used",
+            "description": "Method to be used in API call",
             "x-ms-summary": "Method"
           },
           {
@@ -1290,7 +1386,7 @@
               "items": {
                 "type": "string",
                 "title": "Body",
-                "description": "Body param"
+                "description": "Body content of the API call."
               }
             }
           }
@@ -1756,7 +1852,8 @@
         },
         "unreplied_count": {
           "description": "unreplied_count",
-          "type": "string",
+          "format": "int32",
+          "type": "integer",
           "title": "unreplied_count"
         },
         "service_approvers": {
@@ -2719,7 +2816,8 @@
         },
         "unreplied_count": {
           "description": "request_summary -> unreplied_count",
-          "type": "string",
+          "format": "int32",
+          "type": "integer",
           "title": "unreplied_count"
         },
         "my_timer_enabled": {
