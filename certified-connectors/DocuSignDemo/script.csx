@@ -2015,8 +2015,6 @@ public class Script : ScriptBase
 
       query["include"] = "custom_fields, recipients, documents";
       query["order"] = "desc";
-      query["status"] = string.IsNullOrEmpty(query.Get("envelopeStatus")) ?
-        "any" : query.Get("envelopeStatus").ToString();
       
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
         "2000-01-02T12:45Z" : query.Get("startDateTime");
@@ -2564,7 +2562,6 @@ public class Script : ScriptBase
       var envelopeStatus = query.Get("envelopeStatus") ?? null;
       var envelopeTitle = query.Get("envelopeTitle") ?? null;
 
-      string[] filters = {recipientName, recipientEmailId, envelopeStatus, envelopeTitle};
       var envelopeFilterMap = new Dictionary<string, string>() {
         {"recipientName", recipientName},
         {"recipientEmailId", recipientEmailId},
@@ -2576,24 +2573,20 @@ public class Script : ScriptBase
       {
         if (envelopeFilterMap[filter] != null)
         {
-          this.Context.Logger.LogInformation("********Logging the recipientName" + envelopeFilterMap[filter]);
           switch (filter)
           {
             case "recipientName":
             case "recipientEmailId":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                  envelope.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
-                this.Context.Logger.LogInformation("********Logging the filteredEnvelopeCount" + filteredEnvelopes.Count());
+                 JsonConvert.SerializeObject(envelope["recipients"]).ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
               break;
             case "envelopeStatus":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
                   envelope["status"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
               break;
             case "envelopeTitle":
-            this.Context.Logger.LogInformation("********Logging the envelopeTitle");
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
                   envelope["emailSubject"].ToString().Contains(envelopeFilterMap[filter].ToString())));
-                  this.Context.Logger.LogInformation("********Logging the filteredCount" + filteredEnvelopes.Count());
               break;
             default:
               break;
@@ -2604,7 +2597,6 @@ public class Script : ScriptBase
             envelopes.Clear();
             envelopes = new JArray(filteredEnvelopes);
             filteredEnvelopes.Clear();
-            this.Context.Logger.LogInformation("********Logging the envelopesCount" + envelopes.Count());
           }
           else
           {
