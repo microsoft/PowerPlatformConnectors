@@ -1553,6 +1553,40 @@ public class Script : ScriptBase
       signers[0]["additionalNotifications"] = additionalNotifications;
     }
   }
+
+  private JArray GetFilteredEnvelopeDetails(JArray filteredEnvelopes)
+  {
+    TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+    var filteredEnvelopesDetails = new JArray();
+        
+    foreach (var envelope in filteredEnvelopes)
+    {
+      DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+      DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+      System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+
+      JArray recipientNames = new JArray(
+      (envelope["recipients"]["signers"] as JArray)?.Select(recipient => recipient["name"]));
+      JArray documentNames = new JArray(
+      (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
+
+      filteredEnvelopesDetails.Add(new JObject()
+      {
+        ["title"] = envelope["emailSubject"],
+        ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
+        ["envelopeId"] = envelope["envelopeId"],
+        ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+        ["url"] = GetEnvelopeUrl(envelope),
+        ["recipients"] = string.Join(", ", recipientNames),
+        ["documents"] = string.Join(",", documentNames),
+        ["sender"] = envelope["sender"]["userName"],
+        ["status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+        ["dateSent"] = envelope["sentDateTime"]
+      });
+    }
+
+    return filteredEnvelopesDetails;
+  }
   
   private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
   {
@@ -1970,18 +2004,23 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if("GetEnvelopesByRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-      uriBuilder.Path = uriBuilder.Path.Replace("/getEnvelopesByRecipient", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("/listEnvelopes", "");
       uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
       this.Context.Request.Headers.Add("generative-ai-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("generative-ai-user-agent", "sales-copilot");
 
       query["include"] = "custom_fields, recipients, documents";
       query["order"] = "desc";
-      query["from_date"] = "2000-01-02T12:45Z";
+      
+      query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
+        "2000-01-02T12:45Z" : query.Get("startDateTime");
+      query["to_date"] = string.IsNullOrEmpty(query.Get("endDateTime")) ? 
+        DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") : query.Get("endDateTime");
+
       uriBuilder.Query = query.ToString();
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
@@ -2510,62 +2549,64 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if ("GetEnvelopesByRecipient".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JObject newBody = new JObject();
-      TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredEnvelopes = new JArray();
-      JArray filteredEnvelopesDetails = new JArray();
       var recipientName = query.Get("recipientName") ?? null;
       var recipientEmailId = query.Get("recipientEmailId") ?? null;
+      var envelopeStatus = query.Get("envelopeStatus") ?? null;
+      var envelopeTitle = query.Get("envelopeTitle") ?? null;
 
-      if (string.IsNullOrEmpty(recipientName) && string.IsNullOrEmpty(recipientEmailId))
-      {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Recipient name to retrieve Recipient information");
-      }
+      var envelopeFilterMap = new Dictionary<string, string>() {
+        {"recipientName", recipientName},
+        {"recipientEmailId", recipientEmailId},
+        {"envelopeStatus", envelopeStatus},
+        {"envelopeTitle", envelopeTitle}
+      };
 
-      foreach (var envelope in envelopes)
+      foreach (var filter in envelopeFilterMap.Keys) 
       {
-        if (!string.IsNullOrEmpty(recipientName) &&
-        envelope.ToString().ToLower().Contains(recipientName.ToLower()) ||
-        !string.IsNullOrEmpty(recipientEmailId) &&
-        envelope.ToString().ToLower().Contains(recipientEmailId.ToLower()))
+        if (envelopeFilterMap[filter] != null)
         {
-          filteredEnvelopes.Add(envelope);
+          switch (filter)
+          {
+            case "recipientName":
+            case "recipientEmailId":
+              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
+                 JsonConvert.SerializeObject(envelope["recipients"]).ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
+              break;
+            case "envelopeStatus":
+              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
+                  envelope["status"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
+              break;
+            case "envelopeTitle":
+              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
+                  envelope["emailSubject"].ToString().Contains(envelopeFilterMap[filter].ToString())));
+              break;
+            default:
+              break;
+          }
+
+          if (filteredEnvelopes.Count > 0)
+          {
+            envelopes.Clear();
+            envelopes = new JArray(filteredEnvelopes);
+            filteredEnvelopes.Clear();
+          }
+          else
+          {
+            envelopes.Clear();
+            break;
+          }
         }
       }
 
-      foreach (var envelope in filteredEnvelopes)
-      {
-        DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
-        DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
-        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
-        JArray recipientNames = new JArray(
-        (envelope["recipients"]["signers"] as JArray)?.Select(recipient => recipient["name"]));
-
-        JArray documentNames = new JArray(
-        (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
-
-        filteredEnvelopesDetails.Add(new JObject()
-        {
-          ["title"] = envelope["emailSubject"],
-          ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
-          ["envelopeId"] = envelope["envelopeId"],
-          ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
-          ["url"] = GetEnvelopeUrl(envelope),
-          ["recipients"] = string.Join(", ", recipientNames),
-          ["documents"] = string.Join(",", documentNames),
-          ["sender"] = envelope["sender"]["userName"],
-          ["status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
-          ["dateSent"] = envelope["sentDateTime"]
-        });
-      }
-
-      newBody["value"] = filteredEnvelopesDetails;
+      newBody["value"] = GetFilteredEnvelopeDetails(envelopes);
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
