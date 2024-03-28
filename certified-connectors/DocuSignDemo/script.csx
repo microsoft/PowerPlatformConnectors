@@ -2013,9 +2013,15 @@ public class Script : ScriptBase
       this.Context.Request.Headers.Add("generative-ai-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("generative-ai-user-agent", "sales-copilot");
 
-      query["include"] = "custom_fields, recipients, documents";
+      query["include"] = "custom_fields, recipients, documents, folders";
       query["order"] = "desc";
       
+      query["status"] = string.IsNullOrEmpty(query.Get("envelopeStatus")) ? 
+        null : query.Get("envelopeStatus");
+      query["folder_ids"] = string.IsNullOrEmpty(query.Get("folder_ids")) ? 
+        null : query.Get("folder_ids").ToString();
+       query["order_by"] = string.IsNullOrEmpty(query.Get("order_by")) ? 
+        "status_changed" : query.Get("order_by");
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
         "2000-01-02T12:45Z" : query.Get("startDateTime");
       query["to_date"] = string.IsNullOrEmpty(query.Get("endDateTime")) ? 
@@ -2555,17 +2561,19 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JObject newBody = new JObject();
 
+      int top = string.IsNullOrEmpty(query.Get("top")) ? 10: int.Parse(query.Get("top"));
+      int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
+
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredEnvelopes = new JArray();
+      var filteredEnvelopesDetails = new JArray();
       var recipientName = query.Get("recipientName") ?? null;
       var recipientEmailId = query.Get("recipientEmailId") ?? null;
-      var envelopeStatus = query.Get("envelopeStatus") ?? null;
       var envelopeTitle = query.Get("envelopeTitle") ?? null;
 
       var envelopeFilterMap = new Dictionary<string, string>() {
         {"recipientName", recipientName},
         {"recipientEmailId", recipientEmailId},
-        {"envelopeStatus", envelopeStatus},
         {"envelopeTitle", envelopeTitle}
       };
 
@@ -2578,15 +2586,11 @@ public class Script : ScriptBase
             case "recipientName":
             case "recipientEmailId":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                 JsonConvert.SerializeObject(envelope["recipients"]).ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
-              break;
-            case "envelopeStatus":
-              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                  envelope["status"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
+                 envelope["recipients"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
               break;
             case "envelopeTitle":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                  envelope["emailSubject"].ToString().Contains(envelopeFilterMap[filter].ToString())));
+                  envelope["emailSubject"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
               break;
             default:
               break;
@@ -2606,7 +2610,11 @@ public class Script : ScriptBase
         }
       }
 
-      newBody["value"] = GetFilteredEnvelopeDetails(envelopes);
+      filteredEnvelopesDetails = GetFilteredEnvelopeDetails(envelopes);
+      newBody["value"] = (filteredEnvelopesDetails.Count < top) ? 
+        filteredEnvelopesDetails : 
+        new JArray(filteredEnvelopesDetails.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < filteredEnvelopesDetails.Count) ? true : false;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
