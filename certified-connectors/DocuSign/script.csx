@@ -1761,6 +1761,11 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("ResendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      this.Context.Request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+    }
+
     if ("SendDraftEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       this.Context.Request.Content = new StringContent("{ \"status\": \"sent\" }", Encoding.UTF8, "application/json");
