@@ -22,7 +22,7 @@ Users in Standard, Professional, and Enterprise editions can execute actions usi
 
 * __Power Automate__ - User
 
-* __External application__ - Privileges needed depend on the application configured
+* __External application__ - Provide privileges depending on the application configured
 
 ## Supported Actions
 
@@ -40,7 +40,7 @@ The connector supports the following actions:
 
 * `Get Request Detail`: Retrieve request details using the request ID from ServiceDesk Plus Cloud
 
-* `Get Request List`: Get a list of requests from ServiceDesk Plus Cloud that meets the additional criteria given in the input_data parameter
+* `Get Request List`: Get a list of requests from ServiceDesk Plus Cloud that meet the criteria given in input_data parameter
 
 ## Obtaining Credentials
 
