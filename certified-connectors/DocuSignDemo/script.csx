@@ -965,6 +965,9 @@ public class Script : ScriptBase
   private JObject AddRemindersBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var expiryAfter = string.IsNullOrEmpty(query.Get("expireAfter")) ?
+          "120" : query.Get("expireAfter");
+
     var newBody = new JObject()
     {
       ["useAccountDefaults"] = "false",
@@ -976,7 +979,7 @@ public class Script : ScriptBase
       },
       ["expirations"] = new JObject()
       {
-        ["expireAfter"] = "120"
+        ["expireAfter"] = expiryAfter
       }
     };
 
