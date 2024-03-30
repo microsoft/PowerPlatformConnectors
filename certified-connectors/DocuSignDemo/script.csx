@@ -2588,17 +2588,17 @@ public class Script : ScriptBase
             case "recipientName":
             case "recipientEmailId":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                 envelope["recipients"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
+                envelope["recipients"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
               break;
             case "envelopeTitle":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                  envelope["emailSubject"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
+                envelope["emailSubject"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
               break;
             case "customFieldValue":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
               {
-                  var customFields = envelope["customFields"] as JToken;
-                  return customFields?.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower()) ?? false;
+                var customFields = envelope["customFields"] as JToken;
+                return customFields?.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower()) ?? false;
               }));
               break;
             default:
