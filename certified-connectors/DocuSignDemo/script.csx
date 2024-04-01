@@ -2570,12 +2570,14 @@ public class Script : ScriptBase
       var recipientName = query.Get("recipientName") ?? null;
       var recipientEmailId = query.Get("recipientEmailId") ?? null;
       var envelopeTitle = query.Get("envelopeTitle") ?? null;
+      var customFieldName = query.Get("envelopeTitle") ?? null;
       var customFieldValue = query.Get("customFieldValue") ?? null;
 
       var envelopeFilterMap = new Dictionary<string, string>() {
         {"recipientName", recipientName},
         {"recipientEmailId", recipientEmailId},
         {"envelopeTitle", envelopeTitle},
+        {"customfFieldName", customFieldName},
         {"customFieldValue", customFieldValue}
       };
 
@@ -2594,6 +2596,7 @@ public class Script : ScriptBase
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
                 envelope["emailSubject"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
               break;
+            case "customFieldName":
             case "customFieldValue":
               filteredEnvelopes = new JArray(envelopes.Where(envelope =>
               {
