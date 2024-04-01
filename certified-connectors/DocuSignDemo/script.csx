@@ -2570,7 +2570,7 @@ public class Script : ScriptBase
       var recipientName = query.Get("recipientName") ?? null;
       var recipientEmailId = query.Get("recipientEmailId") ?? null;
       var envelopeTitle = query.Get("envelopeTitle") ?? null;
-      var customFieldName = query.Get("envelopeTitle") ?? null;
+      var customFieldName = query.Get("customFieldName") ?? null;
       var customFieldValue = query.Get("customFieldValue") ?? null;
 
       var envelopeFilterMap = new Dictionary<string, string>() {
