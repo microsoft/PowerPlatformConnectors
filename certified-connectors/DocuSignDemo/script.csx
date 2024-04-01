@@ -2577,7 +2577,7 @@ public class Script : ScriptBase
         {"recipientName", recipientName},
         {"recipientEmailId", recipientEmailId},
         {"envelopeTitle", envelopeTitle},
-        {"customfFieldName", customFieldName},
+        {"customFieldName", customFieldName},
         {"customFieldValue", customFieldValue}
       };
 
