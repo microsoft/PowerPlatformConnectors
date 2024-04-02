@@ -1,8 +1,8 @@
 ### NOTE
-The Strategic Portfolio Manager connector allows users to interact with initiatives, projects, epics, etc. and data from NH360 Portfolio Insights using Microsoft Power Automate or Power Apps.
+The NH360 Portfolio Insights connector allows users to interact with initiatives, projects, epics, etc. and data from NH360 Portfolio Insights using Microsoft Power Automate or Power Apps.
 
-## Strategic Portfolio Manager Connector
-Strategic Portfolio Manager enables you to continuously connect, align and orchestrate all investments with strategies to drive business agility more effectively.
+## NH360 Portfolio Insights Connector
+NH360 Portfolio Insights Connector enables you to continuously connect, align and orchestrate all investments with strategies to drive business agility more effectively.
 It connects disparate silos across the enterprise and provides 360 degrees of insight to help ensure that all investments are derived from – and continuously align with – strategic priorities.
 
 ## Publisher:
@@ -16,15 +16,15 @@ You will need the following to proceed:
 
 ## Supported Operations
 The connector supports the following operations:
-* `Create entity`: Create a new entity in the Strategic Portfolio Manager site.
+* `Create entity`: Create a new entity in the NH360 Portfolio Insights site.
 * `Get entity`: Returns properties of a selected entity.
-* `List all entities`: Returns a list with all Entities from the Strategic Portfolio Manager site.
-* `List entity types`: Returns a list with all Entity Types from the Strategic Portfolio Manager site.
+* `List all entities`: Returns a list with all Entities from the NH360 Portfolio Insights site.
+* `List entity types`: Returns a list with all Entity Types from the NH360 Portfolio Insights site.
 * `Get entity field value`: Returns a specific Entity Field value from an entity.
 * `Get entity fields values`: Returns a list with all Entity Fields and their values for a certain entity.
 * `Get entity fields`: Returns a list with an entity’s field names and their unique identifiers.
 * `Get option set values`: Returns a list with all available values of a selected Option Set
-* `List all options sets`: Returns a list with all options sets from the Strategic Portfolio Manager site.
+* `List all options sets`: Returns a list with all options sets from the NH360 Portfolio Insights site.
 * `Update entity field value`: Update the value of an Entity Field. For fields that use Option Sets, the Value should be set using the Option Set Value unique identifier.
 * `Add resource to entity`: Assign a resource to an entity.
 * `Get resources assigned to entity`: Returns all the name and unique identifier of all resources assigned to a selected entity.
@@ -38,19 +38,19 @@ The connector supports the following operations:
 
 ## Supported Triggers:
 The connector supports the following triggers:
-* `On Entity Created`: Executed when a new entity is created in the Strategic Portfolio Manager site.
-* `On Entity Deleted`: Executed when one or more entities are deleted from the Strategic Portfolio Manager site.
+* `On Entity Created`: Executed when a new entity is created in the NH360 Portfolio Insights site.
+* `On Entity Deleted`: Executed when one or more entities are deleted from the NH360 Portfolio Insights site.
 * `On Entity Updated`: Executed when entity fields are updated.
 * `On Financial Values Change`: Executed when a financial value is changed.
 * `On Resource Assignment Created`: Executed when one or more resources are added to an entity’s resource plan.
 * `On Resource Assignment Removed`: Executed when one or more resources are deleted.
 * `On Resource Assignment Updated`: Executed when one or more resources are re-assigned.
-* `On Milestone Created`: Executed when a milestone is created in the Strategic Portfolio Manager site.
-* `On Milestone Deleted`: Executed when a milestone is deleted in the Strategic Portfolio Manager site.
-* `On Milestone Updated`: Executed when a milestone is edited in the Strategic Portfolio Manager site.
-* `On Relationship Created`: Executed each time a new relationship is created in the Strategic Portfolio Manager site.
-* `On Relationship Deleted`: Executed each time a new relationship is deleted in the Strategic Portfolio Manager site.
-* `On Relationship Updated`: Executed each time a new relationship is edited in the Strategic Portfolio Manager site.
+* `On Milestone Created`: Executed when a milestone is created in the NH360 Portfolio Insights site.
+* `On Milestone Deleted`: Executed when a milestone is deleted in the NH360 Portfolio Insights site.
+* `On Milestone Updated`: Executed when a milestone is edited in the NH360 Portfolio Insights site.
+* `On Relationship Created`: Executed each time a new relationship is created in the NH360 Portfolio Insights site.
+* `On Relationship Deleted`: Executed each time a new relationship is deleted in the NH360 Portfolio Insights site.
+* `On Relationship Updated`: Executed each time a new relationship is edited in the NH360 Portfolio Insights site.
 * `On Process Stage Transition`: Executed when an entity changes its workflow stage.
 * `On Change Request Created`: Executed when a new Change Request is created.
 * `On Change Request Deleted`: Executed when a “Change request” is deleted.
