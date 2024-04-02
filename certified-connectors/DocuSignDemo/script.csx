@@ -298,7 +298,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1004"
+          ["x-ms-summary"] = "DS1005"
       };
     }
 
@@ -1243,6 +1243,11 @@ public class Script : ScriptBase
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
 
+    if (!string.IsNullOrEmpty(query.Get("embeddedRecipientStartURL")))
+    {
+      signers[0]["embeddedRecipientStartURL"] = query.Get("embeddedRecipientStartURL").ToString();
+    }
+
     if (!string.IsNullOrEmpty(query.Get("signatureType")))
     {
       AddParamsForSelectedSignatureType(signers, body);
@@ -1883,7 +1888,7 @@ public class Script : ScriptBase
 
       if (query.Get("crmType").ToString().Equals("Dynamics365"))
       {
-        query["custom_field"] = query.Get("recordType");
+        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
       }
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
@@ -1912,7 +1917,7 @@ public class Script : ScriptBase
 
       if (query.Get("crmType").ToString().Equals("Dynamics365"))
       {
-        query["custom_field"] = query.Get("recordType");
+        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
       }
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
@@ -2057,11 +2062,6 @@ public class Script : ScriptBase
     {
       var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
       var body = ParseContentAsJObject(content, false);
-
-      if (body["errorMessage"].Contains("MAX_CONNECT_CUSTOM_CONFIGURATION_FOR_ACTIVE_REST_PAYLOAD_EXCEEDED"))
-      {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Maximum number of active connect custom configurations[10] for Rest Payload exceeded.");
-      }
 
       response.Headers.Location = new Uri(string.Format(
           "{0}/{1}",
