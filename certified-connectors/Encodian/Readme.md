@@ -141,6 +141,9 @@ Enables tracked changes for the Microsoft Word document provided - https://suppo
 ### Extract Attachments from PDF
 Extracts and returns embedded files from the PDF document provided - https://support.encodian.com/hc/en-gb/articles/9896328763932
 
+### Extract Excel Worksheets
+Extract specified worksheets from the Excel file provided - https://support.encodian.com/hc/en-gb/articles/13230802892316
+
 ### Extract from Archive
 Enables files contained within supported archive package formats to be extracted - https://support.encodian.com/hc/en-gb/articles/11853992723484
 
@@ -224,6 +227,9 @@ Perform OCR on an existing PDF document - https://support.encodian.com/hc/en-gb/
 
 ### Parse CSV
 Parse CSV and return the extracted data in JSON format - https://support.encodian.com/hc/en-gb/articles/360005177297
+
+### Populate Excel
+Populate a Microsoft Excel workbook (XLSX) with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/12736409527324
 
 ### Populate PowerPoint
 Populate a Microsoft PowerPoint file (PPTX) with the JSON data provided - https://support.encodian.com/hc/en-gb/articles/9715390966300
@@ -317,6 +323,12 @@ Updates the 'Table of Contents' in the Microsoft Word document provided - https:
 
 ## Utility Actions
 
+### Utility - AES Decryption
+Decrypts a plain text value (string) using the AES decryption configuration set - https://support.encodian.com/hc/en-gb/articles/13200819253660
+
+### Utility - AES Encryption
+Encrypts a plain text value (string) using the AES encryption configuration set - set.https://support.encodian.com/hc/en-gb/articles/13200698504860
+
 ### Utility - Array Add Items
 Adds the item(s) provided to the JSON array provided or targeted using a JSONPath expression - https://support.encodian.com/hc/en-gb/articles/10565757970332
 
@@ -343,6 +355,9 @@ Replace targeted values found within the JSON array provided or targeted using a
 
 ### Utility - Array Reverse Items
 Reverses the order of the items contained with the JSON array provided or selected using a JSONPath expression - https://support.encodian.com/hc/en-gb/articles/9993904693660
+
+### Utility - Array to JSON
+Converts the array provided (or selected from a JSON object) to a named JSON object - https://support.encodian.com/hc/en-gb/articles/12731808723612
 
 ### Utility - Calculate Date
 Format the date value provided to the date format provided - https://support.encodian.com/hc/en-gb/articles/11311253860508
@@ -436,6 +451,9 @@ Validates the email address provided - https://support.encodian.com/hc/en-gb/art
 
 ### Utility - Validate GUID
 Validates whether the string value provided is a valid GUID - https://support.encodian.com/hc/en-gb/articles/9601440603421
+
+### Utility - Validate JSON
+Validates the JSON data provided, optionally against a JSON schema provided - https://support.encodian.com/hc/en-gb/articles/12722049993500
 
 ### Utility - Validate URL Availability
 Checks whether the URL provided is available - https://support.encodian.com/hc/en-gb/articles/9224582350365
