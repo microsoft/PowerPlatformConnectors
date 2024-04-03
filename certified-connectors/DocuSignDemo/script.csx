@@ -121,6 +121,29 @@ public class Script : ScriptBase
       response["recipientTypes"] = recipientTypesArray;
     }
 
+    if (operationId.Equals("StaticResponseForSignatureTypes", StringComparison.OrdinalIgnoreCase))
+    {
+      var signatureTypesArray = new JArray();
+
+      string [,] signatureTypes = { 
+        { "UniversalSignaturePen_ImageOnly" , "DS Electronic (SES)" }, 
+        { "UniversalSignaturePen_OpenTrust_Hash_TSP", "DS EU Advanced (AES)" }, 
+        { "docusign_eu_qualified_idnow_tsp", "DS EU Qualified (QES)" }
+      };
+
+      for (var i = 0; i < signatureTypes.GetLength(0); i++)
+      {
+        var signatureTypeObject = new JObject()
+        {
+          ["type"] = signatureTypes[i,0],
+          ["name"] = signatureTypes[i,1]
+        };
+        signatureTypesArray.Add(signatureTypeObject);
+      }
+
+      response["signatureTypes"] = signatureTypesArray;
+    }
+
     if (operationId.StartsWith("StaticResponseForFont", StringComparison.OrdinalIgnoreCase))
     {
       var fontNamesArray = new JArray();
@@ -162,6 +185,18 @@ public class Script : ScriptBase
                 {
                   ["type"] = "string",
                   ["x-ms-summary"] = "anchor string *"
+                },
+                ["locked"] = new JObject
+                {
+                  ["x-ms-summary"] = "locked",
+                  ["default"] = "true",
+                  ["type"] = "boolean"
+                },
+                ["optional"] = new JObject
+                {
+                  ["x-ms-summary"] = "optional",
+                  ["default"] = "false",
+                  ["type"] = "boolean"
                 },
                 ["tabLabel"] = new JObject
                 {
@@ -263,7 +298,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1003"
+          ["x-ms-summary"] = "DS1005"
       };
     }
 
@@ -403,6 +438,7 @@ public class Script : ScriptBase
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var recipientType = query.Get("recipientType");
+      var signatureType = query.Get("signatureType") ?? "";
 
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
@@ -411,6 +447,23 @@ public class Script : ScriptBase
         ["type"] = "object",
         ["properties"] = new JObject()
       };
+
+      if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"]["properties"]["aesMethod"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* AES Method",
+          ["description"] = "AES Method",
+          ["enum"] = new JArray("Access Code", "SMS <+ CountryCode PhoneNumber>")
+        };
+        response["schema"]["properties"]["aesMethodValue"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "* AES Method Value",
+          ["description"] = "AES Method Value"
+        };
+      }
 
       if (recipientType.Equals("inPersonSigners", StringComparison.OrdinalIgnoreCase))
       {
@@ -696,18 +749,33 @@ public class Script : ScriptBase
 
             string[] tabTypes = { "textTabs", "fullNameTabs", "dateSignedTabs", "companyTabs", "titleTabs", "numberTabs",
               "ssnTabs", "dateTabs", "zipTabs", "emailTabs", "noteTabs", "listTabs", "firstNameTabs", "lastNameTabs", "emailAddressTabs",
-              "formulaTabs" };
+              "formulaTabs", "checkboxTabs", "radioGroupTabs" };
             foreach (var tabType in tabTypes)
             {
               var tabStatusArray = tabs[tabType];
-
               foreach (var tab in tabStatusArray as JArray ?? new JArray())
               {
                 if (tab is JObject)
                 {
-                  var tabLabel = (string)tab["tabLabel"];
-                  var tabValue = (string)tab["value"];
+                  if (tabType.Equals("checkboxTabs"))
+                  {
+                    if (newTabs[(string)tab["tabLabel"]] == null)
+                    {
+                      newTabs.Add((string)tab["tabLabel"], (string)tab["selected"]);
+                    }
+                  }
 
+                  var tabValue = (string)tab["value"];
+                  if (tabType.Equals("radioGroupTabs") && !string.IsNullOrWhiteSpace(tabValue))
+                  {
+                    var tabGroupName = (string)tab["groupName"];
+                    if (newTabs[tabGroupName] == null)
+                    {
+                      newTabs.Add(tabGroupName, (string)tab["value"]);
+                    }
+                  }
+
+                  var tabLabel = (string)tab["tabLabel"];
                   if (!string.IsNullOrWhiteSpace(tabLabel) && !string.IsNullOrWhiteSpace(tabValue))
                   {
                     if (newTabs[tabLabel] == null)
@@ -892,6 +960,27 @@ public class Script : ScriptBase
     this.Context.Request.RequestUri = uriBuilder.Uri;
 
     return body;
+  }
+
+  private JObject AddRemindersBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var newBody = new JObject()
+    {
+      ["useAccountDefaults"] = "false",
+      ["reminders"] = new JObject()
+      {
+        ["reminderDelay"] = query.Get("reminderDelay"),
+        ["reminderEnabled"] = query.Get("reminderEnabled"),
+        ["reminderFrequency"] = query.Get("reminderFrequency")
+      },
+      ["expirations"] = new JObject()
+      {
+        ["expireAfter"] = "120"
+      }
+    };
+
+    return newBody;
   }
 
   private JObject CreateEnvelopeFromTemplateV1BodyTransformation(JObject body)
@@ -1153,6 +1242,16 @@ public class Script : ScriptBase
     };
     AddCoreRecipientParams(signers, body);
     AddParamsForSelectedRecipientType(signers, body);
+
+    if (!string.IsNullOrEmpty(query.Get("embeddedRecipientStartURL")))
+    {
+      signers[0]["embeddedRecipientStartURL"] = query.Get("embeddedRecipientStartURL").ToString();
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("signatureType")))
+    {
+      AddParamsForSelectedSignatureType(signers, body);
+    }
 
     body[recipientType] = signers;
 
@@ -1449,6 +1548,31 @@ public class Script : ScriptBase
     }
   }
 
+  private void AddParamsForSelectedSignatureType(JArray signers, JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var signatureType = query.Get("signatureType");
+
+    var recipientSignatureProviders = new JArray
+    {
+        new JObject
+        {
+            ["signatureProviderName"] = signatureType
+        }
+    };
+
+    if (signatureType.Equals("UniversalSignaturePen_OpenTrust_Hash_TSP"))
+    {
+        var aesMethod = body["aesMethod"].ToString().Contains("SMS") ? "sms" : "oneTimePassword";
+        recipientSignatureProviders[0]["signatureProviderOptions"] = new JObject
+        {
+            [aesMethod] = body["aesMethodValue"]
+        };
+    }
+
+    signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
+  }
+
   private int GenerateId()
   {
     DateTimeOffset now = DateTimeOffset.UtcNow;
@@ -1509,15 +1633,10 @@ public class Script : ScriptBase
     for (var i = 0; i < tabs.Count; i++)
     {
       JObject tab = tabs[i] as JObject;
-      if (tabType.Equals("textTabs"))
-      {
-        tab["locked"] = "false";
-      }
       res_tabs.Add(tab);
     }
 
     body[tabType] = res_tabs;
-
     return body;
   }
 
@@ -1671,6 +1790,11 @@ public class Script : ScriptBase
     {
       await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV1BodyTransformation).ConfigureAwait(false);
     }
+
+    if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.AddRemindersBodyTransformation).ConfigureAwait(false);
+    }
     
     if ("CreateEnvelopeFromTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
@@ -1762,9 +1886,13 @@ public class Script : ScriptBase
       this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
 
-      query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+      if (query.Get("crmType").ToString().Equals("Dynamics365"))
+      {
+        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+      }
+
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
-        DateTime.UtcNow.AddDays(-7).ToString() :
+        "2000-01-02T12:45Z" :
         query.Get("startDateTime");
 
       if (!string.IsNullOrEmpty(query.Get("endDateTime")))
@@ -1787,10 +1915,13 @@ public class Script : ScriptBase
       this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
 
-      query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+      if (query.Get("crmType").ToString().Equals("Dynamics365"))
+      {
+        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+      }
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
-        DateTime.UtcNow.AddDays(-7).ToString() :
+        "2000-01-02T12:45Z" :
         query.Get("startDateTime");
 
       query["include"] = "custom_fields, recipients, documents";
@@ -1892,6 +2023,35 @@ public class Script : ScriptBase
       acceptHeaderValue = "application/pdf";
     }
 
+    if ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var newPath = uriBuilder.Path;
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      string[] documentDownloadOptions = { "Combined", "Archive", "Certificate", "Portfolio" };
+
+      acceptHeaderValue = "application/pdf";
+      string documentId = null;
+
+      foreach(var downloadOption in documentDownloadOptions)
+      {
+        if (newPath.Contains(downloadOption))
+        {
+          documentId = downloadOption;
+          break;
+        }
+      }
+
+      if (HttpUtility.UrlDecode(uriBuilder.Path).Trim().Contains("Combined with COC"))
+      {
+        query["certificate"] = "true";
+        uriBuilder.Query = query.ToString();
+      }
+      
+      uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     this.Context.Request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(acceptHeaderValue));
   }
 
@@ -1902,10 +2062,20 @@ public class Script : ScriptBase
     {
       var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
       var body = ParseContentAsJObject(content, false);
+
       response.Headers.Location = new Uri(string.Format(
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
           body.GetValue("connectId").ToString()));
+    }
+
+    if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var reminderEnabled = body["reminders"]["reminderEnabled"];
+
+      body["reminderEnabled"] = reminderEnabled;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -2142,8 +2312,10 @@ public class Script : ScriptBase
 
       var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
       var recordId = query.Get("recordId") ?? null;
-      var crmType = "CRMToken";
-      string[] filters = { crmType, crmOrgUrl, recordId };
+      var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
+      var recordType = query.Get("recordType");
+
+      string[] filters = { crmType, crmOrgUrl, recordId, recordType };
 
       foreach (var filter in filters.Where(filter => filter != null)) 
       {
@@ -2217,8 +2389,10 @@ public class Script : ScriptBase
 
       var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
       var recordId = query.Get("recordId") ?? null;
-      var crmType = "CRMToken";
-      string[] filters = { crmType, recordId, crmOrgUrl};
+      var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
+      var recordType = query.Get("recordType");
+
+      string[] filters = { crmType, recordId, crmOrgUrl, recordType};
 
       foreach (var filter in filters.Where(filter => filter != null)) 
       {
@@ -2290,7 +2464,6 @@ public class Script : ScriptBase
       var recipientEmailId = query.Get("recipientEmail");
       var phoneNumber = query.Get("areaCode") + " " + query.Get("phoneNumber");
       var signerPhoneNumber = "";
-      char[] charsToTrimPhoneNumber = { '*', ' ', '\'', '/', '-', '(', ')', '+'};
 
       string [] signerTypes = {
         "signers", "agents", "editors", "carbonCopies", "certifiedDeliveries", "intermediaries",
@@ -2309,7 +2482,7 @@ public class Script : ScriptBase
 
           if (query.Get("phoneNumber") != null)
           {
-            phoneNumber = phoneNumber.Trim(charsToTrimPhoneNumber);
+            phoneNumber = Regex.Replace(phoneNumber, @"[^a-zA-Z0-9]", "");
 
             signerPhoneNumber = 
               signer.ToString().Contains("phoneAuthentication") ? 
@@ -2325,7 +2498,7 @@ public class Script : ScriptBase
               : signer.ToString().Contains("phoneNumber") ? 
                 signer["phoneNumber"]["countryCode"].ToString() + " " + signer["phoneNumber"]["number"].ToString() : "0";
 
-            signerPhoneNumber = signerPhoneNumber.Trim(charsToTrimPhoneNumber);
+            signerPhoneNumber = Regex.Replace(signerPhoneNumber, @"[^a-zA-Z0-9]", "");
 
             if (phoneNumber.ToString().Equals(signerPhoneNumber))
             {
@@ -2352,6 +2525,7 @@ public class Script : ScriptBase
         newBody["roleName"] = matchingSigner["roleName"];
         newBody["name"] = matchingSigner["name"];
         newBody["email"] = matchingSigner["email"];
+        newBody["recipientType"] = matchingSigner["recipientType"];
         newBody["verificationType"] = matchingSigner["verificationType"];
         newBody["recipientIdGuid"] = matchingSigner["recipientIdGuid"];
       }
@@ -2717,9 +2891,13 @@ public class Script : ScriptBase
 
     if (response.Content?.Headers?.ContentType != null)
     {
-      if ("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+      if (("GetDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
+      ("GetDocumentsV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
       {
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+        response.Content.Headers.ContentType = uriBuilder.Path.Contains("Archive") ? new MediaTypeHeaderValue("application/zip") :
+          new MediaTypeHeaderValue("application/pdf");
       }
       else
       {
