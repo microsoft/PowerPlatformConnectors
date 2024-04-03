@@ -17,7 +17,34 @@ As of right now, there are no known issues with this connector
 ## Supported Triggers
 
 ### When an event is created
-When an event is created in ISOPlanner based on the specified template.
+When an event is created based on the specified template.
+
+### When a task is created
+When a task is created based on the specified template.
+
+### When an annual plan task is started
+When a task in the annual plan is ready to start according to schedule.
+
+### When an event is updated
+When an event with the selected template is updated.
+
+### When a task is updated
+When a task with the selected template is updated.
+
+### When an event is deleted
+When an event is deleted based on the specified template.
+
+### When a task is deleted
+When a task is deleted based on the specified template.
+
+### When a risk is created
+When a risk is created.
+
+### When a risk is updated
+When a risk is updated.
+
+### When a risk is deleted
+When a risk is deleted.
 
 ## Supported Operations
 
@@ -51,17 +78,17 @@ Creates a new approval.
 ### Create or Update Library item
 Creates or updates an item in the library.
 
-### Delete an event
-Deletes an Event.
+### Delete a KPI data point
+Deletes a data point for a KPI.
+
+### Delete a subtask of an event
+Deletes a subtask from an event.
 
 ### Delete a task
 Deletes a task.
 
-### Delete a KPI data point
-Deletes a KPI datapoint.
-
-### Delete a subtask of an event
-Deletes a subtask from an event.
+### Delete an event
+Deletes an Event.
 
 ### Get a KPI
 Gets the details of a KPI.
@@ -72,11 +99,23 @@ Gets a KPI datapoint.
 ### Get a Library item
 Gets an item from the library.
 
+### Get a Library item by Url
+Gets an item from the library based on the Url.
+
 ### Get a subtask of an event based on Id
 Gets a subtask from an event by specifying the subtask Id.
 
 ### Get a subtask of an event based on Name
 Gets a subtask from an event by specifying the subtask Name.
+
+### Get events
+Gets events based on a filter.
+
+### Get tasks
+Gets tasks based on a filter.
+
+### Submit evidence to a KPI
+Submit evidence that is checked against an approved baseline.
 
 ### Update a KPI data point
 Updates a KPI data point.
@@ -92,4 +131,3 @@ Updates an event.
 
 ### Update an event from approval
 Updates an event based on the result of the Approval app.
-
