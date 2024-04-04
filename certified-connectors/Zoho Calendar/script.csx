@@ -24,6 +24,9 @@
         if (e.Message == "Invalid_Date") {
           return getErrorMessage(HttpStatusCode.BadRequest, "Invalid date format");
         }
+        else {
+            return getErrorMessage(HttpStatusCode.BadRequest, e.Message);
+        }
       }
     } else if (this.Context.OperationId == "Delete_Event") {
       HttpRequestMessage request = this.Context.Request;
@@ -54,7 +57,6 @@
       var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       query.Remove("cuid");
-      bool hasTimeZone = !String.IsNullOrEmpty("timezone");
       JObject rangeObj = new JObject();
       rangeObj["start"] = getConvertedTime(query["start"], DTFormat.Any, true);
       rangeObj["end"] = getConvertedTime(query["end"], DTFormat.Any, true);
@@ -164,7 +166,10 @@
     String[] datetimeformatWZ = {
       "yyyy/MM/dd'T'HH:mm:sszzz",
       "yyyy-MM-dd'T'HH:mm:sszzz",
-      "yyyyMMdd'T'HHmmsszzz"
+      "yyyyMMdd'T'HHmmsszzz",
+      "yyyy/MM/dd'T'HH:mm:ssZ",
+      "yyyy-MM-dd'T'HH:mm:ssZ",
+      "yyyyMMdd'T'HHmmssZ"
     };
     String[] datetimeformat = {
       "yyyy/MM/dd'T'HH:mm:ss",
@@ -180,7 +185,11 @@
     DateTime convertedDate;
 
     if (DateTime.TryParseExact(value, datetimeformat, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
-      newDate = convertedDate;
+      if (isOffsetNeeded ) {
+        newDate = convertedDate.ToUniversalTime();
+      } else {
+        newDate = convertedDate;
+      }
     }
     else if (DateTimeOffset.TryParseExact(value, datetimeformatWZ, null, System.Globalization.DateTimeStyles.None, out DateTimeOffset convertedDateOffset)) {
       if(dtFormat == DTFormat.Only_Date){
@@ -191,7 +200,11 @@
           return convertedDateOffset.ToString(outputDTFormat+"zzz").Replace(":","");
       }
     }  else if (DateTime.TryParseExact(value, dateformat, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
-      newDate = convertedDate;
+      if(dtFormat == DTFormat.Any){
+          return convertedDate.ToString(outputDFormat);
+      } else{
+          newDate = convertedDate;
+      }
 
     } else if (DateTime.TryParse(value, out convertedDate)) {
       newDate = convertedDate;
