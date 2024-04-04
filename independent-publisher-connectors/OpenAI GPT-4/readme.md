@@ -23,6 +23,13 @@ The connector supports the following operations:
 - `Cancel fine-tuning`: Immediately cancel a fine-tune job.
 - `List fine-tuning events`: Retrieve status updates for a fine-tuning job.
 - `Create moderation`: Classifies if text violates OpenAI's Content Policy.
+- `Create embedding`: Creates an embedding vector representing the input text.
+- `Create speech`: Generates audio from the input text.
+- `Create transcription`: Transcribes audio into the input language.
+- `Create translation`: Translates audio into English.
+- `Create image`: Creates an image given a prompt.
+- `Create image edit`: Creates an edited or extended image given an original image and a prompt.
+- `Create image variation`: Creates a variation of a given image.
 
 ## Obtaining Credentials
 
