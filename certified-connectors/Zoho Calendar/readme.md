@@ -12,19 +12,33 @@ A verified Zoho Calendar account. Click [here](https://zoho.com/calendar) to cre
 
 The connector supports the following operations:
 
+### Get calendar list
+
+Gets the list of all calendars with the calendar UID, name, and timezone.
+
+### Get calendar details
+
+Retrieves the details of a particular calendar using the Calendar UID such as its name and timezone
+
+### Get Event list
+
+Gets the list of all the events with Event UID, Calendar UID, Title, start date, end date, between the specified date range  in  yyyy-MM-ddTHH:mm:sszzz format.
+
 ### Create new event
 
 Adds a new event to the user's calendar.
  	 
 ### Delete event
+
 Deletes an event from the user's calendar.
 
 ### Get event
-Gets the details of a particular event from a specified calendar of the user.
+
+Gets the details of a particular event such as the Event Title, start date, end date, etc., based on the calendar UID and event UID
 
 ### Search Events
 
-Gets the list of events across all calendars.
+Gets the list of events from the specified calendar UID based on the date range in yyyy-MM-ddTHH:mm:sszzz format.
 
 ### Update Event
 

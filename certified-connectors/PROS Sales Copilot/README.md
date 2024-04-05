@@ -1,6 +1,6 @@
 # PROS AI for Sales Copilot Connector
 
-Unlock the full potential of your sales team with the seamless integration of PROS AI and Microsoft Sales Copilot. Our innovative connector is designed to streamline your sales processes and supercharge your decision-making capabilities, giving you a competitive edge in today's fast-paced business landscape.
+Unlock the full potential of your sales team with the seamless integration of PROS AI and Microsoft Copilot for Sales. Our innovative connector is designed to streamline your sales processes and supercharge your decision-making capabilities, giving you a competitive edge in today's fast-paced business landscape.
 
 ## Publisher: PROS
 
@@ -69,11 +69,11 @@ PROS Smart CPQ for Dynamics 365 is a cloud-based, enterprise-class CPQ solution 
 
 ### What is PROS AI for Sales Copilot?
 
-PROS AI for Sales Copilot is a cloud-based, enterprise-class AI solution that enables sales teams to quickly and accurately create quotes for all types of products and services. It is a native Dynamics 365 application that provides a seamless user experience and leverages Dynamics 365 data and security.
+Unlock the full potential of your sales team with the seamless integration of PROS AI and Microsoft Copilot for Sales. Our innovative connector is designed to streamline your sales processes and supercharge your decision-making capabilities, giving you a competitive edge in today's fast-paced business landscape.
 
 ### What is the PROS AI for Sales Copilot Connector?
 
-The PROS AI for Sales Copilot Connector is a custom connector that enables users to integrate PROS AI for Sales Copilot with other applications and services.
+The PROS AI for Sales Copilot Connector is a custom connector that enables users to integrate PROS AI with Microsoft Power Automate and Power Apps.
 
 ### What's the authentication type?
 
@@ -97,4 +97,4 @@ Please use [these instructions](https://docs.microsoft.com/en-us/connectors/cust
 
 ## Support
 
-For further support, please contact ConnectSupport@pros.com
+For further support, please contact ConnectSupport@pros.com.

@@ -7,29 +7,164 @@
       "token": {
         "type": "oauthSetting",
         "oAuthSettings": {
-          "identityProvider": "oauth2",
+          "identityProvider": "oauth2generic",
           "clientId": "PLACEHOLDER_CLIENTID",
-          "scopes": ["https://bluefield.cognitedata.com/.default"],
-          "redirectMode": "Global",
-          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "scopes": ["{Scope}"],
+          "redirectMode": "GlobalPerConnector",
           "properties": {
-            "IsFirstParty": "False"
+            "IsFirstParty": "False",
+            "IsOnbehalfofLoginSupported": true
           },
           "customParameters": {
-            "authorizationUrl": {
-              "value": "https://login.microsoftonline.com/PLACEHOLDER_TENANTID/oauth2/v2.0/authorize"
+            "authorizationUrlTemplate": {
+              "value": "{AuthorizationUrl}"
             },
-            "tokenUrl": {
-              "value": "https://login.microsoftonline.com/PLACEHOLDER_TENANTID/oauth2/v2.0/token"
+            "authorizationUrlQueryStringTemplate":{
+               "value":"?client_id={ClientId}&response_type=code&scope={Scope}&state={State}"
             },
-            "refreshUrl": {
-              "value": "https://login.microsoftonline.com/PLACEHOLDER_TENANTID/oauth2/v2.0/token"
+            "tokenUrlTemplate": {
+              "value": "{TokenUrl}"
+            },
+            "tokenBodyTemplate":{
+               "value":"code={code}&grant_type=authorization_code&client_id={ClientId}&client_secret={ClientSecret}&scope={Scope}"
+            },
+            "refreshUrlTemplate": {
+              "value": "{RefreshUrl}"
+            },
+            "refreshBodyTemplate":{
+               "value":"code={code}&grant_type=authorization_code&client_id={ClientId}&client_secret={ClientSecret}&scope={Scope}"
             }
           }
+        },
+        "uiDefinition": {
+					"displayName": "Login",
+					"description": "Sign in with your Cognite Data Fusion credentials",
+					"tooltip": "Sign in with your Cognite Data Fusion credentials",
+					"constraints": {
+						"required": "true"
+					}
+				}
+      },
+      "token:CDFCluster": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "displayName": "Enter your Cognite Data Fusion Cluster.",
+          "description": "Enter your Cognite Data Fusion Cluster.",
+          "tooltip": "api, greenfield, bluefield, az-eastus-1, etc..."
+        }
+      },
+      "token:TenantId": {
+        "metadata": {
+          "sourceType": "AzureActiveDirectoryTenant"
+        },
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "hidden": "true",
+            "required": "false"
+          }
+        }
+      },
+      "token:ClientId": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "Enter your Client ID.",
+          "displayName": "Enter your Client ID.",
+          "tooltip": "Contact Cognite Support for assistance if needed."
+        }
+      },
+      "token:ClientSecret": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "Enter your Client Secret.",
+          "displayName": "Enter your Client Secret.",
+          "tooltip": "Contact Cognite Support for assistance if needed."
+        }
+      },
+      "token:Scope": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "displayName": "Enter your Cognite Data Fusion Scope.",
+          "description": "Enter your Cognite Data Fusion Scope.",
+          "tooltip": "https://{CDFCluster}.cognitedata.com/.default"
+        }
+      },
+      "token:AuthorizationUrl": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "displayName": "Enter your AuthorizationUrl.",
+          "description": "Enter your AuthorizationUrl.",
+          "tooltip": "https://login.microsoftonline.com/{TenantId}/oauth2/v2.0/authorize"
+        }
+      },
+      "token:TokenUrl": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "displayName": "Enter your TokenUrl.",
+          "description": "Enter your TokenUrl.",
+          "tooltip": "https://login.microsoftonline.com/{TenantId}/oauth2/v2.0/token"
+        }
+      },
+      "token:RefreshUrl": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "displayName": "Enter your RefreshUrl.",
+          "description": "Enter your RefreshUrl.",
+          "tooltip": "https://login.microsoftonline.com/{TenantId}/oauth2/v2.0/token"
         }
       }
     },
     "iconBrandColor": "#000000",
+    "policyTemplateInstances": [
+      {
+        "templateId": "dynamichosturl",
+        "title": "Set host for connection",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('token:CDFCluster').cognitedata.com"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Cognite Mixpanel x-cdp-app",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-cdp-app",
+          "x-ms-apimTemplateParameter.value": "Cognite Power App Connector",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Cognite Mixpanel x-cdp-sdk",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-cdp-sdk",
+          "x-ms-apimTemplateParameter.value": "Cognite Power App Connector:1.0.0",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      }
+    ],
     "publisher": "Cognite AS",
     "stackOwner": "Cognite AS"
   }
