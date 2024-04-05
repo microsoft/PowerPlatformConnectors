@@ -1,0 +1,402 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "CB Blockchain Seal",
+    "description": "With CB Blockchain Seal, you can digitally seal documents using blockchain technology. This solution allows users to verify that documents are authentic and unchanged - anywhere and anytime after applying the timestamped seal. It is fast and cost-effective. It is also a thousand times more ecological than other blockchain solutions, and no prior knowledge of blockchain is required.",
+    "version": "V1",
+    "contact": {
+      "name": "Connecting Software s.r.o. & Co. KG",
+      "url": "https://www.connecting-software.com/contact/",
+      "email": "office@connecting-software.com"
+    }
+  },
+  "host": "https://digitalportoftrust.connecting-software.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/api/CreateSeal": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sealId": {
+                  "type": "string",
+                  "description": "The unique identifier for the newly created seal",
+                  "title": "Seal Id"
+                },
+                "isSuccess": {
+                  "type": "boolean",
+                  "description": "Indicates whether the action was successful or not",
+                  "title": "Is Success",
+                  "enum": [
+                    true,
+                    false
+                  ]
+                },
+                "error": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Detailed error message in case an error happens",
+                  "title": "Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create seal",
+        "description": "This action hashes the file locally and creates a seal for the current hash",
+        "operationId": "CreateSeal",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "authorizationId": {
+                  "type": "string",
+                  "description": "Your activation token",
+                  "title": "Activation token"
+                },
+                "file": {
+                  "type": "string",
+                  "description": "The file to be sealed",
+                  "title": "File",
+                  "format": "byte"
+                }
+              },
+              "required": [
+                "authorizationId",
+                "file"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/GetSeals": {
+      "post": {
+        "tags": [
+          "Seal handling"
+        ],
+        "summary": "List seals",
+        "operationId": "GetSeals",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Hash list request data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Coso.App.Trustpoint.AzureFunctions.Model.GetSealsInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Coso.App.Trustpoint.Logic.Contracts.Model.SealsOfHashResult"
+            }
+          }
+        },
+        "description": "This action hashes the file locally and lists all seals for the current hash."
+      }
+    },
+    "/api/VerifySeal": {
+      "post": {
+        "tags": [
+          "Seal handling"
+        ],
+        "summary": "Verify seal",
+        "operationId": "VerifySeal",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Seal identifiers",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Coso.App.Trustpoint.AzureFunctions.Model.VerifySealInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/Coso.App.Trustpoint.Logic.Contracts.Model.SealVerificationResult"
+            }
+          }
+        },
+        "description": "This action hashes the file locally and verifies a seal."
+      }
+    },
+    "/does-not-matter": {}
+  },
+  "definitions": {
+    "Coso.App.Trustpoint.AzureFunctions.Model.GetSealsInput": {
+      "type": "object",
+      "properties": {
+        "authorizationId": {
+          "type": "string",
+          "description": "Your activation token",
+          "title": "Activation token"
+        },
+        "file": {
+          "type": "string",
+          "description": "The file to be sealed",
+          "title": "File",
+          "format": "byte"
+        }
+      },
+      "required": [
+        "authorizationId",
+        "file"
+      ]
+    },
+    "Coso.App.Trustpoint.Logic.Contracts.Model.SealsOfHashResult": {
+      "type": "object",
+      "properties": {
+        "Seals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Coso.App.Trustpoint.Logic.Contracts.Model.SealDescriptionData"
+          }
+        },
+        "IsSuccess": {
+          "description": "Indicates whether the action was successful or not",
+          "type": "boolean",
+          "title": "Is Success",
+          "enum": [
+            true,
+            false
+          ]
+        },
+        "Error": {
+          "description": "Detailed error message in case an error happens",
+          "enum": [
+            "None",
+            "InvalidToken",
+            "SealNotFound",
+            "HashNotFound",
+            "SealNotInBlockchain",
+            "ApplicationLicenseMismatch"
+          ],
+          "type": "string",
+          "title": ""
+        }
+      }
+    },
+    "Coso.App.Trustpoint.Logic.Contracts.Model.SealDescriptionData": {
+      "type": "object",
+      "properties": {
+        "Id": {
+          "format": "uuid",
+          "description": "The unique identifier for the seal",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000",
+          "title": "Seal Id"
+        },
+        "RequestStamp": {
+          "format": "int64",
+          "description": "The timestamp of the request",
+          "type": "integer",
+          "title": "Request Stamp"
+        },
+        "TenantId": {
+          "format": "int32",
+          "description": "The tenant id of each seal",
+          "type": "integer",
+          "title": "Tenant Id"
+        },
+        "Provider": {
+          "description": "The provider of each seal",
+          "enum": [
+            "EthereumWithCW",
+            "BitcoinWithCW"
+          ],
+          "type": "string",
+          "title": "Provider"
+        },
+        "Hash": {
+          "description": "The hash of each seal",
+          "type": "string",
+          "title": "Hash"
+        },
+        "Metadata": {
+          "description": "The metadata of each seal",
+          "type": "string",
+          "title": "Metadata"
+        },
+        "Origin": {
+          "description": "The origin of each seal",
+          "enum": [
+            "Unknown",
+            "CustomApplication",
+            "Sharepoint",
+            "D365",
+            "Salesforce",
+            "Exchange",
+            "DigitalSealVerifier",
+            "PortOfTrustConsole"
+          ],
+          "type": "string",
+          "title": "Origin"
+        }
+      }
+    },
+    "Coso.App.Trustpoint.AzureFunctions.Model.VerifySealInput": {
+      "type": "object",
+      "properties": {
+        "sealId": {
+          "format": "uuid",
+          "description": "Gets or sets the seal identifier.",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000",
+          "title": "Seal Id"
+        },
+        "ignorePrivateBlockchains": {
+          "description": "Indicates whether or not to ignore private blockchains.",
+          "type": "boolean",
+          "title": "Ignore private blockchains",
+          "enum": [
+            true,
+            false
+          ],
+          "x-ms-visibility": "advanced"
+        },
+        "authorizationId": {
+          "type": "string",
+          "description": "Your activation token",
+          "title": "Activation token"
+        },
+        "file": {
+          "type": "string",
+          "description": "The file to be sealed",
+          "title": "File",
+          "format": "byte"
+        }
+      }
+    },
+    "Coso.App.Trustpoint.Logic.Contracts.Model.SealVerificationResult": {
+      "type": "object",
+      "properties": {
+        "ProviderVerificationResult": {
+          "$ref": "#/definitions/Coso.Security.Seal.Contracts.Model.VerifyResult"
+        },
+        "IsSuccess": {
+          "description": "Indicates whether the action was successful or not",
+          "type": "boolean",
+          "title": "Is Success",
+          "enum": [
+            true,
+            false
+          ]
+        },
+        "Error": {
+          "description": "Gets or sets the error description in case of failure.",
+          "enum": [
+            "None",
+            "InvalidToken",
+            "SealNotFound",
+            "HashNotFound",
+            "SealNotInBlockchain",
+            "ApplicationLicenseMismatch"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "Coso.Security.Seal.Contracts.Model.VerifyResult": {
+      "type": "object",
+      "properties": {
+        "IsSealValid": {
+          "type": "boolean",
+          "description": "Indicates whether or not the seal is valid",
+          "title": "Is Seal Valid",
+          "enum": [
+            true,
+            false
+          ]
+        },
+        "Reason": {
+          "enum": [
+            "None",
+            "InvalidFormat",
+            "SealNotFound",
+            "InvalidAtProvider",
+            "MissingDocument",
+            "TransactionNotPropagatedToBlock",
+            "PublicBlockchainSealNotAvailable"
+          ],
+          "type": "string",
+          "description": "Indicates the reason",
+          "title": "Reason"
+        },
+        "AdditionalInfo": {
+          "type": "string",
+          "description": "Additional Info",
+          "title": "Additional Info"
+        },
+        "Hash": {
+          "type": "string",
+          "description": "The hash of the seal",
+          "title": "Hash"
+        },
+        "ExternalId": {
+          "type": "string",
+          "description": "External Id",
+          "title": "External Id"
+        },
+        "ProviderId": {
+          "type": "string",
+          "description": "The provider of each seal",
+          "title": "Provider Id"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {},
+  "security": [],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.connecting-software.com"
+    },
+    {
+      "propertyName": "Privacy Policy",
+      "propertyValue": "https://www.connecting-software.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Productivity"
+    }
+  ]
+}
