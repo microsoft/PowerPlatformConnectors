@@ -1,6 +1,6 @@
 # Microsoft 365 Lighthouse
 
-This connector enables Microsoft 365 Lighthouse users to integrate with the Microsoft 365 Lighthouse API, allowing them to manage multiple customer tenants efficiently. With this connector, users can automate tasks, gather insights, and perform actions across all managed tenants across Microsoft 365 Lighthouse.
+This connector enables Microsoft 365 Lighthouse users to integrate with the Microsoft 365 Lighthouse, allowing them to manage multiple customer tenants efficiently. With this connector, users can automate tasks, gather insights, and perform actions across all managed tenants across Microsoft 365 Lighthouse.
 
 ## Publisher: Microsoft​
 
@@ -106,7 +106,7 @@ Get a list of all management template steps.
 
 ## Obtaining Credentials
 
-Access to Microsoft 365 Lighthouse is required to register this connector. Please refer to the [Microsoft 365 Lighthouse](https://learn.microsoft.com/en-us/microsoft-365/lighthouse/m365-lighthouse-requirements?view=o365-worldwide) documentation regarding access requirements. This connector uses Microsoft Azure Active Directy Open Authentication and multifactor authentiation (MFA). During connector authorization, users must first select their Microsoft partner account that has a conditional access policy assigned to it that requires MFA for all cloud apps. After authenticating via Azure Active Directory and completing MFA, users must approve AAD permissions that will be used by the connector. This step requires admin approval.
+Access to Microsoft 365 Lighthouse is required to register this connector. Please refer to the [Microsoft 365 Lighthouse](https://learn.microsoft.com/en-us/microsoft-365/lighthouse/m365-lighthouse-requirements?view=o365-worldwide) documentation regarding access requirements. This connector uses Microsoft Azure Active Directy Open Authentication and multifactor authentiation (MFA). During authorization, users must first select their Microsoft partner account that has a conditional access policy assigned to it that requires MFA for cloud apps. After authenticating via Azure Active Directory and completing MFA, a global admin must approve AAD permissions that will be used by the connector.
 
 ## Known Issues and Limitations
 
