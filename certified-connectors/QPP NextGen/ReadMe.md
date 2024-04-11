@@ -1,8 +1,5 @@
-# Quark Publishing Platform NextGen
-The Quark Publishing Platform NextGen connector offers a comprehensive suite of actions for seamless integration to the Quark Publishing Platform NextGen (QPP NG). With the help of the QPP-NG connector, you can.
- - Effortlessly retrieve and manage user metadata, asset information, group memberships, attribute values, and more. 
- - Streamline your processes by leveraging a wide range of actions, from checking group memberships to uploading and downloading files. 
- - Simplify your QPP NG interactions and enhance your workflows with this versatile and powerful connector.
+# QPP NextGen
+Quark Publishing Platform (QPP) NextGen is a cloud-based component content management system (CCMS) for automating the publishing of highly regulated enterprise content. The QPP NextGen connector helps move data from your content ecosystem in both directions to simplify processes and accelerate time to market.
 
 
 ## Publisher: Quark Software Inc.
@@ -39,7 +36,7 @@ This operation retrieves the routing groups associated with a collection, workfl
 
 
 ### Set Attribute Values
-This operation sets the attribute values for a specific entity or object. More information on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_setAttributeValues).
+This operation sets the attribute values for a specific entity or object. Please use Legacy designer view for best experience as there may be issues in new designer due to ongoing development. More information on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_setAttributeValues).
 
 | Parameter          | Definition                                                     | Example                                                         	   |
 |--------------------|---------------------------------------------------------------|---------------------------------------------------------------------|
@@ -140,7 +137,7 @@ This operation adds an attribute to specified content types. More information ca
 This operation retrieves information about content types based on their names. More information can be found on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_getContentTypesInfoByName).
 
 ### Create Query
-This operation creates a new query in the system with its definition and details. More information can be found on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_createQuery).
+This operation creates a new query in the system with its definition and details. Please use Legacy designer view for best experience as there may be issues in new designer due to ongoing development. More information can be found on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_createQuery).
 
 Check the table below for the reference purposes –
 
@@ -223,7 +220,7 @@ This operation retrieves the parent's asset relations for a specified child asse
 This operation initiates the check-in and update process for a specific asset in QPP-NG. The asset needs to be checked out beforehand. Use checkout action before. More information can be found on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_initCheckin). 
 
 ### Check Out
-This operation checks out a specific asset for editing. More information can be found on the [Quark developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_checkOut). 
+This operation checks out a specific asset for editing. Please use Legacy designer view for best experience as there may be issues in new designer due to ongoing development. More information can be found on the [Quark developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_checkOut). 
 
 | Parameter              | Definition                                                                             | Example                  |
 |------------------------|----------------------------------------------------------------------------------------|--------------------------|
@@ -252,6 +249,8 @@ This operation checks out a specific asset for editing. More information can be 
 
 ### Init New Checkin
 This operation initiates a new check-in process for an asset. The request will check-in a new QPP-NG asset, as per the given QPP attribute values array. For example, the Required Attribute values are Name, Collection, Extension, etc. to check-in an asset to the QPP-NG Platform. Upload Blob can be further used to upload files into the given blob location. 
+
+Please use Legacy designer view for best experience as there may be issues in new designer due to ongoing development. 
 
 More information can be found on the [Quark Developer portal](https://qppngsdk-rel3x.app.quark.com/Documentation/platformServices/restapi/api.html#Quark_application_API_3_0_0_SNAPSHOT_initNewCheckin).
 
@@ -386,6 +385,7 @@ If there are errors in the flow checker with the webhook trigger, the Power Auto
  - Saving certain actions with no params given (empty) gives an error (expect some value in the body). 
  - If this is the first webhook with this change type (event), you need to wait for 15 minutes before the webhook is activated and then you can expect the flow to be triggered.
  - These actions have been tested with Old Power Automate UI, If for some actions the UI is not behaving properly or not showing all params. Switch to the old UI from the top right toggle button.
+ - Please use the Legacy designer view for the best experience as there may be issues with the new designer due to ongoing development.
 
 ## Frequently Asked Questions
 
