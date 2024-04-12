@@ -19,3 +19,6 @@ Currently it is not possibe to seal Office 2013+ files.
  
 ### How to get an activation token
 To purchase an activation token, contact **office@connecting-software.com** to obtain a quote for your use case.
+
+## Deployment Instructions
+To purchase a license, contact **office@connecting-software.com** to obtain a quote for your use case.
