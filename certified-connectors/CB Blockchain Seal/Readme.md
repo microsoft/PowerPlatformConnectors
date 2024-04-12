@@ -1,4 +1,4 @@
-## CB Blockchain Seal
+## CB Blockchain Seal Connector
 With CB Blockchain Seal, you can digitally seal documents using blockchain technology. This solution allows users to verify that documents are authentic and unchanged - anywhere and anytime after applying the timestamped seal. It is fast and cost-effective. It is also a thousand times more ecological than other blockchain solutions, and no prior knowledge of blockchain is required.
  
  
@@ -10,7 +10,7 @@ You will need the following to proceed:
 The connector supports the following operations:
 * `Create seal`: Hashes the file locally and creates a seal
 * `Verify seal`: Hashes the file locally and verifies a seal
-* `Get seals`: Hashes the file locally and gets all seals for current file
+* `List seals`: Hashes the file locally and lists all seals for current file
  
 ## Known issues and limitations
 Currently it is not possibe to seal Office 2013+ files.
