@@ -7,7 +7,10 @@ TPS & CTPS Checker allows you to query the UK Telephone Preference Service for a
 There are no prerequisites needed for this connector apart from having credentials to tpsmydata.co.uk.
 
 ## Obtaining Credentials
-tpsmydata provides a pay as you go based model. Sign up on their website [https://tpsmydata.co.uk/](https://tpsmydata.co.uk/), and then head to your account details at: [https://tpsmydata.co.uk/your-details](https://tpsmydata.co.uk/your-details)
+You will need an account and API key with [https://tpsmydata.co.uk](https://tpsmydata.co.uk). A free trial including 500 credits is available with all new accounts. 
+The API key is found in the 'Your Details' section [https://tpsmydata.co.uk/your-details](https://tpsmydata.co.uk/your-details) of the tpsmydata portal.
+
+To register please visit https://tpsmydata.co.uk/register
 
 ## Supported Operations
 ### Query
