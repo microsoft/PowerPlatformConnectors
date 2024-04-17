@@ -1,20 +1,27 @@
 # TPS & CTPS Checker
-TPS & CTPS Checker allows you to query the UK Telephone Preference Service for a given UK Telephone Number.
+TPS & CTPS Checker returns the UK Telephone Preference Service Status for a given UK Telephone Number.
 
-## Publisher: QuartzData
+## Publisher: QuartzData Ltd
 
 ## Prerequisites
-There are no prerequisites needed for this connector apart from having credentials to tpsmydata.co.uk.
+There are no prerequisites needed for this connector other than having credentials to [https://tpsmydata.co.uk](https://tpsmydata.co.uk).
 
 ## Obtaining Credentials
 You will need an account and API key with [https://tpsmydata.co.uk](https://tpsmydata.co.uk). A free trial including 500 credits is available with all new accounts. 
 The API key is found in the 'Your Details' section [https://tpsmydata.co.uk/your-details](https://tpsmydata.co.uk/your-details) of the tpsmydata portal.
 
-To register please visit https://tpsmydata.co.uk/register
+To register please visit [https://tpsmydata.co.uk/register](https://tpsmydata.co.uk/register)
 
-## Supported Operations
+# Supported Operations
+## Actions
 ### Query
-Returns the TPS/CTPS status of a given UK telephone number
+- Get the TPS/CTPS status of a given UK telephone number
 
 ## Known Issues and Limitations
-There are no known issues at this time for the connector.
+Users are reminded that this service covers UK Telephone Numbers only.
+
+## Frequenty Asked Questions
+Visit [https://tpsmydata.co.uk/help](https://tpsmydata.co.uk/help)
+
+## Deployment Instructions
+N/A
