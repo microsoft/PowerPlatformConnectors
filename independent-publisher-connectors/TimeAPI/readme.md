@@ -4,7 +4,7 @@ Accurate and reliable time information for any location in the world. Say goodby
 ## Publisher: Fördős András
 
 ## Prerequisites: 
-There are no prerequisities for this connector.
+There are no Prerequisites for this connector.
 
 ## Obtaining Credentials
 Credentials are not required for this connector.
