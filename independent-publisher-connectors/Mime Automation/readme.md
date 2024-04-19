@@ -117,4 +117,3 @@ https://base64.guru/converter/decode/file
 
 ## Known Issues and Limitations
 There are no known issues at this time.
-
