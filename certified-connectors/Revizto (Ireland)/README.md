@@ -1,5 +1,4 @@
 # Title
-Revizto (Ireland)
 Revizto unifies BIM intelligence and makes it immediately accessible and actionable for the entire project team. With Revizto's advanced Issue Tracker project team members can identify and manage model-based issues in the 3D space and 2D sheets, including addressing clash groups. Revizto provides unified access to a project's data both for 2D and 3D workflows, so anyone can use it depending on project requirements.
 
 Revizto Connector allows you to seamlessly extract information about your projects, teams, and issue history from Revizto. This capability enables the utilization of Revizto data, and, if necessary, its integration with other data sources, to generate custom reports and dashboards featuring compelling visuals in Power BI. Revizto Connector streamlines the process of linking both applications with just a few clicks, eliminating the need to compose API requests.
