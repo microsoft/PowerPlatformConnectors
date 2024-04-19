@@ -13,7 +13,7 @@ The connector supports the following operations:
 * `List seals`: Hashes the file locally and lists all seals for current file
  
 ## Known issues and limitations
-Currently it is not possibe to seal Office 2013+ files.
+Currently it is not possible to seal Office 2013+ files.
  
 # Frequently Asked Questions
  
