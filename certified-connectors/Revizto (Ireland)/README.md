@@ -1,8 +1,9 @@
-# Revizto (Ireland)
+# Title
+Revizto (Ireland)
 Revizto unifies BIM intelligence and makes it immediately accessible and actionable for the entire project team. With Revizto's advanced Issue Tracker project team members can identify and manage model-based issues in the 3D space and 2D sheets, including addressing clash groups. Revizto provides unified access to a project's data both for 2D and 3D workflows, so anyone can use it depending on project requirements.
 
 Revizto Connector allows you to seamlessly extract information about your projects, teams, and issue history from Revizto. This capability enables the utilization of Revizto data, and, if necessary, its integration with other data sources, to generate custom reports and dashboards featuring compelling visuals in Power BI. Revizto Connector streamlines the process of linking both applications with just a few clicks, eliminating the need to compose API requests.
-## Publisher
+## Publisher: Publisher's Name
 Revizto SA
 ## Prerequisites
 Before you use Revizto Connector, ensure that the following conditions are met:
@@ -41,3 +42,10 @@ The following limitations apply:
 Ensure that you are signed in to the correct region and that Revizto Connector is configured to use that region (check whether the region specified in the connector's name matches the region that you selected during the authorization).
 ### I can't find my license in the list
 Ensure that you signed in to Revizto using the method provided by your license administrator. Different Revizto licenses might require different authentication methods
+## Deployment Instructions
+Required. Add instructions on how to deploy this connector as custom connector.
+1. Copy the "RevCon-ireland.mez" file into [Documents]/Power BI Desktop/Custom Connectors.
+2. Check the option (Not Recommended) Allow any extension to load without validation or warning in Power BI Desktop (under File | Options and settings | Options | Security | Data Extensions).
+3. Restart Power BI Desktop.
+4. In Power BI Desktop, click on Get Data, go to Other and navigate to Revizto (Ireland).
+5. Select the Revizto (Ireland) connector and click "Connect" button. 
