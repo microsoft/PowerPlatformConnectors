@@ -55,12 +55,10 @@ The result schema will be like this:
 [
     {
         fileName:"mypicture.jpg",
-        mimeType:"application/octet-stream",
         content:"/9j/4AAQSkZJRgABAgAAZABkAAD/7AARRHVja3kAAQAEAAAAPAAA/+4AJkFkb2JlAGTAAAAAAQMAFQQDBgoNAAADiAAABUwAAAfnAAALd//bAI..."
     },
     {
         fileName:"readme.txt",
-        mimeType:"application/octet-stream",
         content:"/9j/4AAQSkZJRgABAgAAZABkAAD/7AARRHVja3kAAQAEAAAAPAAA/+4AJkFkb2JlAGTAAAAAAQMAFQQDBgoNAAADiAAABUwAAAfnAAALd//bAI..."
     }
 ]
