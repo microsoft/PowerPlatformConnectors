@@ -39,7 +39,7 @@
                 JObject body = JObject.Parse(contentAsString);
                 var hash = ComputeSha256Hash((string)body["file"]);
 
-                string newUrl = $"https://functionapp220190802021802.azurewebsites.net/api/v2/CreateSeal/1/{hash}";
+                string newUrl = $"https://digitalportoftrust.connecting-software.com/api/v2/CreateSeal/1/{hash}";
 
                 var modifiedRequest = new HttpRequestMessage(HttpMethod.Post, newUrl);
 
@@ -61,7 +61,7 @@
                 JObject body = JObject.Parse(contentAsString);
                 var hash = ComputeSha256Hash((string)body["file"]);
 
-                string newUrl = $"https://functionapp220190802021802.azurewebsites.net/api/v2/GetSeals/{hash}";
+                string newUrl = $"https://digitalportoftrust.connecting-software.com/api/v2/GetSeals/{hash}";
             
                 var modifiedRequest = new HttpRequestMessage(HttpMethod.Get, newUrl);
 
@@ -81,7 +81,7 @@
                 var hash = ComputeSha256Hash((string)body["file"]);
                 var sealId = (string)body["sealId"];
 
-                string newUrl = $"https://functionapp220190802021802.azurewebsites.net/api/v2/VerifySeal/{hash}/{sealId}";
+                string newUrl = $"https://digitalportoftrust.connecting-software.com/api/v2/VerifySeal/{hash}/{sealId}";
             
                 var queryParams = new System.Collections.Specialized.NameValueCollection();
                 queryParams["ignorePrivateBlockchains"] = "false";
