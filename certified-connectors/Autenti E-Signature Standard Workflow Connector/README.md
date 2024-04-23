@@ -15,7 +15,7 @@ The Autenti E-Signature Standard Workflow Connector enables integration with the
 
 - An account on the Autenti platform.
 - OAuth application configuration in Autenti to obtain `clientId` and `clientSecret`.
-- To unlock all features, take advantage of the offer [Autenti Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps?search=Autenti&page=1).
+- To unlock all features, take advantage of the offer [Autenti Azure Marketplace](https://autenti.com/p-a).
 
 ## Configuration
 
@@ -82,7 +82,7 @@ For questions or problems, contact [Autenti support](https://autenti.com/en/cont
 
 ## License
 
-License information for this connector can be found in the [Autenti privacy policy](https://autenti.com/en/terms-and-conditions/privacy-policy).
+License information for this connector can be found in the [Autenti Commercial License](https://autenti.com/power-automate/license).
 
 ## Contribution
 
