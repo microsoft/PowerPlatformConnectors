@@ -90,4 +90,4 @@ We encourage contributions and suggestions for improvements to this connector. P
 
 ## About the Author
 
-This connector was developed by [AUTENTI Sp. z o.o.](https://autenti.com), a provider of advanced solutions for electronic document signing.
+This connector was developed by [AUTENTI Sp. z o.o.](https://autenti.com), a provider of advanced solutions for electronic document signing, remote identification and registered electronic delivery.
