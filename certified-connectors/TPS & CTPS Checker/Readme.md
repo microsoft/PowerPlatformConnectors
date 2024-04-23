@@ -15,7 +15,7 @@ To register please visit [https://tpsmydata.co.uk/register](https://tpsmydata.co
 # Supported Operations
 ## Actions
 ### Query
-- Get the TPS/CTPS status of a given UK telephone number
+Get the TPS/CTPS status of a given UK telephone number
 
 ## Known Issues and Limitations
 Users are reminded that this service covers UK Telephone Numbers only.
