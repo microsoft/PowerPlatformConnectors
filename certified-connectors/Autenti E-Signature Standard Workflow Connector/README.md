@@ -1,28 +1,53 @@
 # Autenti E-Signature Standard Workflow Connector for Power Automate
 
-## Description
-
 The Autenti E-Signature Standard Workflow Connector enables integration with the Autenti platform, offering functionalities related to managing processes of electronic signing of documents within Microsoft Power Automate workflows.
 
-## Key Features
+## Publisher: Autenti Sp. z o.o.
 
-- **Creating document process drafts**: Allows the creation of document process drafts in Autenti.
-- **Listing documents**: Enables retrieving a list of running document signing processes or processes not yet started (drafts).
-- **Adding files to document processes**: Allows for the addition of files to an existing document process drsft.
-- **Managing process participants**: Enables adding and managing participants in document processes.
-
-## Requirements
+## Prerequisites
 
 - An account on the Autenti platform.
 - OAuth application configuration in Autenti to obtain `clientId` and `clientSecret`.
 - To unlock all features, take advantage of the offer [Autenti Azure Marketplace](https://autenti.com/p-a).
 
-## Configuration
+## Supported Operations
+
+### List Documents
+This action provides an interface to list all documents within the system, allowing for incremental synchronization of document statuses and details between the Autenti platform and the client's system. Essential for maintaining up-to-date document workflows.
+
+### Create Document Process Draft
+Initiate the creation of a document process draft, which serves as the preliminary setup for document workflows before finalization and execution. This step is critical for configuring document parameters and participants.
+
+### Add Participant to Document Process
+Enables the addition of participants to an ongoing document process, facilitating the inclusion of new signatories or viewers as the document progresses through various stages. Essential for dynamic workflow adjustments.
+
+### Get Document Process Files
+Retrieve all files associated with a specific document process. This action is vital for accessing document attachments and related files necessary for review and processing.
+
+### Add File to Document Process
+Allows users to upload and attach files to a document process. This capability is crucial for including necessary documentation such as contracts or supplementary materials in the signing process.
+
+### Perform Action on Document Process
+Execute specific actions on a document process, such as starting the signing process, withdrawing documents, or sending reminders to participants. This functionality is key to managing and steering document flows effectively.
+
+### Get Document Process Details
+Obtain comprehensive details about a specific document process, including participant information, document status, and history. This detailed overview is crucial for monitoring and managing the lifecycle of document processes.
+
+### Retrieve Document Process File Content
+Download the content of files associated with a document process. This function is essential for participants who need to review documents in detail before proceeding with signing or approval.
+
+### Document Change (Webhook)
+Set up notifications for any changes in document status or modifications within the document process. This webhook ensures that all stakeholders are immediately informed of updates, maintaining workflow continuity.
+
+## Obtaining Credentials
 
 1. **Registering an application in Autenti**: Go to [Autenti API](https://autenti.com/en/contact) to register your application and obtain OAuth identifiers (clientId and clientSecret).
-2. **Configuring the connector in Power Automate**: During the connector setup in Power Automate, enter the obtained OAuth identifiers.
+2. **Configuring the connector in Power Automate**: During the connector setup in Power Automate, enter the obtained OAuth identifiers.\
 
-## Usage Examples
+## Deployment Instructions
+Please use the [instructions on Microsoft Power Platform Connectors CLI](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate (Flow) and Power Apps.
+
+## Getting Started
 
 The Autenti E-Signature Connector can automate various document and signature processes, integrating seamlessly into your existing workflows. Below are practical examples of how you can leverage this connector:
 
@@ -75,6 +100,10 @@ The Autenti E-Signature Connector can automate various document and signature pr
 6. **Action**: Once approval is received, automate the next steps in the project workflow, such as sending the artwork to print or publishing it online.
 
 These examples showcase the versatility of the Autenti E-Signature Connector in Power Automate, enabling organizations to automate complex document workflows, reduce manual tasks, and accelerate decision-making processes.
+
+## Limitations and Known Issues
+
+Currently, there are no known issues. If any issues arise, please contact [Autenti support](mailto:support@autenti.com).
 
 ## Support
 
