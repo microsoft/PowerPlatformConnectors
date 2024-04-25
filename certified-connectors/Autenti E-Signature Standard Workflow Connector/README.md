@@ -101,21 +101,9 @@ The Autenti E-Signature Connector can automate various document and signature pr
 
 These examples showcase the versatility of the Autenti E-Signature Connector in Power Automate, enabling organizations to automate complex document workflows, reduce manual tasks, and accelerate decision-making processes.
 
-## Limitations and Known Issues
+## Known Issues and Limitations
 
 Currently, there are no known issues. If any issues arise, please contact [Autenti support](mailto:support@autenti.com).
-
-## Support
-
-For questions or problems, contact [Autenti support](https://autenti.com/en/contact).
-
-## License
-
-License information for this connector can be found in the [Autenti Commercial License](https://autenti.com/power-automate/license).
-
-## Contribution
-
-We encourage contributions and suggestions for improvements to this connector. Please submit any proposals through the GitHub issue tracking system.
 
 ## About the Author
 
