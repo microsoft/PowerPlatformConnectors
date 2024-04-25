@@ -15,7 +15,7 @@ import requests
 from knack.util import CLIError
 from knack.log import get_logger
 
-from paconn.common.util import display, format_json
+from paconn.common.util import displayError, format_json
 from paconn.authentication.tokenmanager import (
     _ACCESS_TOKEN,
     _TOKEN_TYPE,
@@ -119,7 +119,7 @@ class APIManager:
                 LOGGER.debug(payload)
             LOGGER.debug('RESPONSE')
             LOGGER.debug(response_content)
-            display(response_content)
+            displayError(response_content)
             raise CLIError(exception_str)
 
         return response

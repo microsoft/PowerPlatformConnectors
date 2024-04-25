@@ -8,7 +8,7 @@ Update command.
 """
 
 from paconn import _UPDATE
-from paconn.common.util import display
+from paconn.common.util import displayMessage
 from paconn.settings.util import load_powerapps_and_flow_rp
 from paconn.operations.upsert import upsert
 from paconn.settings.settingsbuilder import SettingsBuilder
@@ -52,4 +52,4 @@ def update(
         is_update=True,
         overwrite_settings=False)
 
-    display('{} updated successfully.'.format(connector_id))
+    displayMessage('{} updated successfully.'.format(connector_id))

@@ -9,7 +9,7 @@ Create command.
 """
 
 from paconn import _CREATE
-from paconn.common.util import display
+from paconn.common.util import displayMessage
 from paconn.settings.util import load_powerapps_and_flow_rp
 from paconn.operations.upsert import upsert
 from paconn.settings.settingsbuilder import SettingsBuilder
@@ -53,4 +53,4 @@ def create(
         is_update=False,
         overwrite_settings=overwrite_settings)
 
-    display('{} created successfully.'.format(connector_id))
+    displayMessage('{} created successfully.'.format(connector_id))
