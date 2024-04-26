@@ -9,7 +9,7 @@ Download command.
 
 from paconn import _DOWNLOAD
 
-from paconn.common.util import displayMessage
+from paconn.common.util import display_message
 from paconn.settings.util import load_powerapps_and_flow_rp
 from paconn.settings.settingsbuilder import SettingsBuilder
 
@@ -50,4 +50,4 @@ def download(
         destination=destination,
         overwrite=overwrite)
 
-    displayMessage('The connector is downloaded to {}.'.format(directory))
+    display_message('The connector is downloaded to {}.'.format(directory))

@@ -8,7 +8,7 @@ Login command.
 """
 
 from paconn.authentication.auth import get_authentication
-from paconn.common.util import displayMessage
+from paconn.common.util import display_message
 from paconn.settings.settingsbuilder import SettingsBuilder
 
 
@@ -27,4 +27,4 @@ def login(client_id, tenant, authority_url, resource, settings_file, force):
     get_authentication(
         settings=settings,
         force_authenticate=force)
-    displayMessage('Login successful.')
+    display_message('Login successful.')

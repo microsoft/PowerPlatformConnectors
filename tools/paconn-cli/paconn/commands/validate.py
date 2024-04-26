@@ -9,7 +9,7 @@ Validate command.
 
 from paconn import _VALIDATE
 
-from paconn.common.util import displayMessage, displayError
+from paconn.common.util import display_message, display_error
 from paconn.settings.util import load_powerapps_and_flow_rp
 from paconn.settings.settingsbuilder import SettingsBuilder
 
@@ -45,6 +45,6 @@ def validate(
         settings=settings)
 
     if result:
-        displayError(result)
+        display_error(result)
     else:
-        displayMessage('{} validated successfully.'.format(settings.api_definition))
+        display_message('{} validated successfully.'.format(settings.api_definition))

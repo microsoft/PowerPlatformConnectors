@@ -8,7 +8,7 @@ Login command.
 """
 
 from paconn.authentication.auth import remove_authentication
-from paconn.common.util import displayMessage
+from paconn.common.util import display_message
 
 
 def logout():
@@ -16,4 +16,4 @@ def logout():
     Logout command.
     """
     remove_authentication()
-    displayMessage('Logout successful.')
+    display_message('Logout successful.')

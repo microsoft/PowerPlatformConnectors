@@ -9,7 +9,7 @@ Prompts the user for missing arguments
 """
 
 from knack.prompting import prompt_choice_list
-from paconn.common.util import displayMessage
+from paconn.common.util import display_message
 
 _PROPERTIES = 'properties'
 _VALUE = 'value'
@@ -35,7 +35,7 @@ def get_environment(flow_rp):
     sid = prompt_choice_list('Please select an environment:', environment_keys)
     environment = environments[environment_keys[sid]]
 
-    displayMessage('Environment selected: {}'.format(environment_keys[sid]))
+    display_message('Environment selected: {}'.format(environment_keys[sid]))
 
     return environment
 
@@ -57,6 +57,6 @@ def get_connector_id(powerapps_rp, environment):
     sid = prompt_choice_list('Please select a connector:', connectors_keys)
     connector_id = connectors[connectors_keys[sid]]
 
-    displayMessage('Connector selected: {}'.format(connectors_keys[sid]))
+    display_message('Connector selected: {}'.format(connectors_keys[sid]))
 
     return connector_id

@@ -11,7 +11,7 @@ import adal
 from urllib.parse import urljoin
 # AADTokenCredentials for multi-factor authentication
 from msrestazure.azure_active_directory import AADTokenCredentials
-from paconn.common.util import displayMessage
+from paconn.common.util import display_message
 
 
 class Profile:
@@ -42,7 +42,7 @@ class Profile:
             resource=self.resource,
             client_id=self.client_id)
 
-        displayMessage(code['message'], flush=True)
+        display_message(code['message'], flush=True)
 
         mgmt_token = context.acquire_token_with_device_code(
             resource=self.resource,
