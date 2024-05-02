@@ -2594,7 +2594,7 @@ public class Script : ScriptBase
     }
 
     if (("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) || 
-    ("SalesCopilotListEnvelopes".Equals((this.Context.OperationId, StringComparison.OrdinalIgnoreCase))))
+    ("SalesCopilotListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
