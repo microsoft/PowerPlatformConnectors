@@ -1553,6 +1553,43 @@ public class Script : ScriptBase
     }
   }
 
+  private JArray GetFilteredEnvelopeDetailsForSalesCopilot(JArray filteredEnvelopes)
+  {
+    TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+    var filteredEnvelopesDetails = new JArray();
+        
+    foreach (var envelope in filteredEnvelopes)
+    {
+      DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+      DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+      System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+
+      JArray recipientNames = new JArray(
+      (envelope["recipients"]["signers"] as JArray)?.Select(recipient => recipient["name"]));
+      JArray documentNames = new JArray(
+      (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
+
+      JObject additionalPropertiesForSalesEnvelope = new JObject()
+        {
+          ["documents"] = string.Join(",", documentNames),
+          ["recipients"] = string.Join(", ", recipientNames),
+          ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+          ["status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+          ["sender"] = envelope["sender"]["userName"]
+        };
+
+      filteredEnvelopesDetails.Add(new JObject()
+      {
+        ["title"] = envelope["emailSubject"],
+        ["subTitle"] = "Agreement",
+        ["url"] = GetEnvelopeUrl(envelope),
+        ["additionalProperties"] = additionalPropertiesForSalesEnvelope
+      });
+    }
+
+    return filteredEnvelopesDetails;
+  }
+
   private JArray GetFilteredEnvelopeDetails(JArray filteredEnvelopes)
   {
     TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
@@ -2003,11 +2040,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if(("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
+    ("SalesCopilotListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       uriBuilder.Path = uriBuilder.Path.Replace("/listEnvelopes", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("ForSalesCopilot", "");
       uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
       this.Context.Request.Headers.Add("generative-ai-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("generative-ai-user-agent", "sales-copilot");
@@ -2554,7 +2593,8 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if ("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if (("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) || 
+    ("SalesCopilotListEnvelopes".Equals((this.Context.OperationId, StringComparison.OrdinalIgnoreCase))))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -2621,7 +2661,8 @@ public class Script : ScriptBase
         }
       }
 
-      filteredEnvelopesDetails = GetFilteredEnvelopeDetails(envelopes);
+      filteredEnvelopesDetails = this.Context.OperationId.Contains("ListEnvelopes") ? GetFilteredEnvelopeDetails(envelopes) :
+        GetFilteredEnvelopeDetailsForSalesCopilot(envelopes);
       newBody["value"] = (filteredEnvelopesDetails.Count < top) ? 
         filteredEnvelopesDetails : 
         new JArray(filteredEnvelopesDetails.Skip(skip).Take(top).ToArray());
