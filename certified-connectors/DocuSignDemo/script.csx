@@ -1583,7 +1583,7 @@ public class Script : ScriptBase
         ["title"] = envelope["emailSubject"],
         ["subTitle"] = "Agreement",
         ["url"] = GetEnvelopeUrl(envelope),
-        ["additionalProperties"] = additionalPropertiesForSalesEnvelope
+        ["additionalPropertiesForSalesEnvelope"] = additionalPropertiesForSalesEnvelope
       });
     }
 
@@ -2661,8 +2661,8 @@ public class Script : ScriptBase
         }
       }
 
-      filteredEnvelopesDetails = this.Context.OperationId.Contains("ListEnvelopes") ? GetFilteredEnvelopeDetails(envelopes) :
-        GetFilteredEnvelopeDetailsForSalesCopilot(envelopes);
+      filteredEnvelopesDetails = this.Context.OperationId.Contains("SalesCopilot") ? GetFilteredEnvelopeDetailsForSalesCopilot(envelopes) :
+      GetFilteredEnvelopeDetails(envelopes);
       newBody["value"] = (filteredEnvelopesDetails.Count < top) ? 
         filteredEnvelopesDetails : 
         new JArray(filteredEnvelopesDetails.Skip(skip).Take(top).ToArray());
