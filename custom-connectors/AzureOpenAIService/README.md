@@ -49,6 +49,7 @@ After importing the connector, you should create a  connection. There are two pr
 * `Embeddings` - With this action, you are able to create an embedding vector representing the input text.
 * `List deployments` - With this action, you can list all deployments inside of your instance of the Azure OpenAI Service.
 * `List models` - With this action, you can list all models that are available to your instance of the Azure OpenAI Service.
+* `Request a generated image with DALL-E 3 (preview)` - With this action, you can generate an image with the DALL-E 3 model of your instance of the Azure OpenAI Service. DALL-E 3 is only available in the Sweden Central region.
 
 ## Connector Architecture
 

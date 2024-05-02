@@ -45,7 +45,7 @@ When you are ready to work with the public API ask your credentials by contactin
 ## Common errors and remedies
 Here are some issues you could face while using the connector:
 * `Error 400`: Appears when you make a bad request, it means that you wrongly enter the parameters. Check how to configure them correctly with our [documentation](https://docs.bloomflow.com/public/public-api.html).
-* `Error 401`: Appears when you are unautorized to access the requested information.
+* `Error 401`: Appears when you are unauthorized to access the requested information.
 * `Error 403`: Appears when you wrongly enter your API Key.
 ​
 If you have any questions about our APIs, check our [documentation](https://docs.bloomflow.com/public/public-api.html) or feel free to [contact us](hello@bloomflow.com). 

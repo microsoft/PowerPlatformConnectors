@@ -14,7 +14,6 @@
     "version": "v2"
   },
   "host": "api.seismic.com",
-  "basePath": "/integration/v2",
   "schemes": [
     "https"
   ],
@@ -25,7 +24,7 @@
     "application/json"
   ],
   "paths": {
-    "/contentProperties/{contentPropertyId}/values": {
+    "/integration/v2/contentProperties/{contentPropertyId}/values": {
       "get": {
         "tags": [
           "Content Properties"
@@ -106,7 +105,7 @@
         }
       }
     },
-    "/contentProperties": {
+    "/integration/v2/contentProperties": {
       "get": {
         "tags": [
           "Content Properties"
@@ -179,7 +178,7 @@
         }
       }
     },
-    "/system/optouts": {
+    "/integration/v2/system/optouts": {
       "get": {
         "tags": [
           "Privacy Management"
@@ -262,7 +261,7 @@
         }
       }
     },
-    "/system/optouts/{email}": {
+    "/integration/v2/system/optouts/{email}": {
       "delete": {
         "tags": [
           "Privacy Management"
@@ -287,7 +286,7 @@
         }
       }
     },
-    "/teamsites": {
+    "/integration/v2/teamsites": {
       "get": {
         "tags": [
           "Teamsites"
@@ -311,7 +310,7 @@
         }
       }
     },
-    "/teamsites/{teamsiteId}": {
+    "/integration/v2/teamsites/{teamsiteId}": {
       "get": {
         "tags": [
           "Teamsites"
@@ -342,7 +341,7 @@
         }
       }
     },
-    "/users/teamsites": {
+    "/integration/v2/users/teamsites": {
       "get": {
         "tags": [
           "Users"
@@ -366,7 +365,7 @@
         }
       }
     },
-    "/users/profiles": {
+    "/integration/v2/users/profiles": {
       "get": {
         "tags": [
           "Users"
@@ -407,9 +406,214 @@
           }
         }
       }
+    },
+    "/webhooks/v1/subscriptions": {
+      "x-ms-notification-content": {
+        "description": "Schema of the notification content",
+        "schema": {
+          "$ref": "#/definitions/NotificationContent"
+        }
+      },
+      "post": {
+        "summary": "Create a webhook subscription",
+        "description": "Create a webhook subscription for any Seismic webhook. See https://developer.seismic.com/seismicsoftware/docs/events for details.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "callbackUrl": {
+                  "type": "string",
+                  "description": "callbackUrl",
+                  "title": "callbackUrl",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true
+                },
+                "eventTypes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "eventTypes",
+                  "title": "eventTypes"
+                },
+                "filter": {
+                  "type": "string",
+                  "description": "Jsonpath based filter expression.",
+                  "title": "filter"
+                }
+              },
+              "required": [
+                "callbackUrl",
+                "eventTypes"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook subscription successfully created",
+            "schema": {
+              "$ref": "#/definitions/CreateWebhookResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request. User input is invalid.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "operationId": "SubscribeToEvents",
+        "x-ms-trigger": "single"
+      }
     }
   },
   "definitions": {
+    "NotificationContent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A unique identifier for the event.",
+          "format": "uuid"
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the event, e.g., \"ContentManagerCreateFileV1\"."
+        },
+        "occuredAt": {
+          "type": "string",
+          "description": "ISO 8601 timestamp when the event occurred in UTC.",
+          "format": "date-time"
+        },
+        "tenantId": {
+          "type": "string",
+          "description": "Unique identifier for the tenant.",
+          "format": "uuid"
+        },
+        "tenantName": {
+          "type": "string",
+          "description": "Name of the tenant."
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Specific event details (varies by event type)."
+        },
+        "application": {
+          "type": "string",
+          "description": "The application where the event originated."
+        },
+        "productArea": {
+          "description": "The product area related to the event.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "occuredAt",
+        "tenantId",
+        "tenantName",
+        "data",
+        "application",
+        "productArea"
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ]
+    },
+    "CreateWebhookRequest": {
+      "type": "object",
+      "required": [
+        "callbackUrl",
+        "eventTypes"
+      ],
+      "properties": {
+        "callbackUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL to which the events will be sent.",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        },
+        "eventTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of event types the webhook is interested in."
+        },
+        "filter": {
+          "type": "string",
+          "description": "Only delivers the webhook if it matches with filter"
+        }
+      }
+    },
+    "CreateWebhookResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the created webhook subscription."
+        },
+        "callbackUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "Confirmed URL to which events will be sent."
+        },
+        "eventTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Event type for which the webhook was created."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive"
+          ],
+          "description": "Status of the webhook subscription."
+        }
+      },
+      "required": [
+        "id",
+        "callbackUrl",
+        "eventTypes",
+        "status"
+      ]
+    },
     "Seismic.ContentManager.AddContentPropertyRequest": {
       "type": "object",
       "properties": {
@@ -554,7 +758,8 @@
         },
         "pageCap": {
           "format": "int32",
-          "type": "integer"
+          "type": "integer",
+          "x-ms-summary": "Page Cap"
         },
         "limit": {
           "format": "int32",
@@ -766,14 +971,14 @@
       "authorizationUrl": "https://auth.seismic.com/central/connect/authorize",
       "tokenUrl": "https://auth.seismic.com/central/connect/token",
       "scopes": {
-        "seismic.self.view seismic.self.manage seismic.user.view seismic.user.manage seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage offline_access": "seismic.self.view seismic.self.manage seismic.user.view seismic.user.manage seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage offline_access"
+        "seismic.webhook seismic.self.view seismic.self.manage seismic.user.view seismic.user.manage seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage offline_access": "seismic.webhook seismic.self.view seismic.self.manage seismic.user.view seismic.user.manage seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage offline_access"
       }
     }
   },
   "security": [
     {
       "oauth2-auth": [
-        "seismic.self.view seismic.self.manage seismic.user.view seismic.user.manage seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage offline_access"
+        "seismic.webhook seismic.self.view seismic.self.manage seismic.user.view seismic.user.manage seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage offline_access"
       ]
     }
   ],
