@@ -1231,12 +1231,8 @@ public class Script : ScriptBase
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/resendEnvelope", "");
     
-    if (query.Get("resendEnvelope").ToString().Equals("true"))
-    {
-      query["resend_envelope"] = "true";
-      uriBuilder.Query = query.ToString();
-    }
-
+    query["resend_envelope"] = "true";
+    uriBuilder.Query = query.ToString();
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
   }
