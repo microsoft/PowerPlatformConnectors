@@ -25,6 +25,18 @@ Send emails customized according to your needs.
 
 Send emails using pre-built templates available in your ZeptoMail account. 
 
+### Get all Mail Agent
+
+List all the Mail Agents in your ZeptoMail account.
+
+### Get processed email details
+
+This action fetches the processed email details for mentioned search criteria.
+
+### Processed emails analytics
+
+This action displays the delivery status analytics of the processed emails.
+
 ### Known Issues and Limitations
 
 The total email size, including the email headers, body content, inline images, and attachments should not exceed 15 MB.

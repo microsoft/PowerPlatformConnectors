@@ -20,7 +20,9 @@ public class Script : ScriptBase
             "ListParticipants",
             "ListMessages",
             "ListChatThreads",
-            "GetThreadProperties"
+            "GetThreadProperties",
+            "UpdateChatThreadProperties",
+            "DeleteChatThread"
         };
 
         if (Array.Exists(operationIds, opId => opId == Context.OperationId))

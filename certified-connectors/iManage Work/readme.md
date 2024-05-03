@@ -12,7 +12,11 @@ The connector is available for all iManage Work customers connecting to cloudima
 
 ### For a selected document
 
-This trigger allows you to start a workflow for a selected document in an iManage library.
+This trigger allows you to start a workflow for a selected document in iManage Work. Provide a display name that will be shown to users in iManage Work applications. If 'Wait For Completion' is set to 'Yes', you must use the 'Update workflow state' action in your workflow, otherwise applications will eventually time out without indicating the completion state to the user.
+
+### For multiple selected documents
+
+This trigger allows you to start a workflow for two or more selected documents in iManage Work. Provide a display name that will be shown to users in iManage Work applications. If 'Wait For Completion' is set to 'Yes', you must use the 'Update workflow state' action in your workflow, otherwise applications will eventually time out without indicating the completion state to the user.
 
 ## Supported Operations
 
@@ -147,6 +151,10 @@ Adds an entry as an event in the document's history.
 ### Copy permissions
 
 Copies the access permissions, and optionally the default security, from one iManage Work object to another. 'Copy Type' gives you options for how to handle the combination of source and destination permissions. 'Overwrite' updates the target object's users, groups, and permission levels to exactly match the source object's. 'Merge' keeps all the users and groups on the destination object and combines them with the source, but in case of a conflict of permission level on an individual or group: 'Merge (Pessimistic)' takes the lower permission, while 'Merge (Optimistic)' takes the higher permission for the conflicting user or group.
+
+### Search users
+
+Searches for iManage Work users matching the specified search criteria.
 
 ## Obtaining Credentials
 
