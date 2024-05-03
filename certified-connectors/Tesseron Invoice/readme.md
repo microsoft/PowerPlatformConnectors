@@ -16,6 +16,7 @@ You will need the following to proceed:
 The connector supports the following operations:
 * `Create Invoice Position Note`: Create position notes with or without tickets
 * `Create Activity Recording`: Add a new activity recordings to your profile
+* 'Get Service Assignments (Dispatcher)': Get all service assignments
 
 
 ## Obtaining Credentials
