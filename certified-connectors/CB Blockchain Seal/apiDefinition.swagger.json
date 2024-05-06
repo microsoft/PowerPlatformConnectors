@@ -15,10 +15,10 @@
   "schemes": [
     "https"
   ],
-  "consumes": ["application/json"],
+  "consumes": [ "application/json" ],
   "produces": [],
   "paths": {
-    "/v2/CreateSeal": {
+    "/does-not-matter": {
       "post": {
         "responses": {
           "200": {
@@ -26,33 +26,18 @@
             "schema": {
               "type": "object",
               "properties": {
-                "sealId": {
+                "hash": {
                   "type": "string",
-                  "description": "The seal Id",
-                  "title": "Seal Id"
-                },
-                "isSuccess": {
-                  "type": "boolean",
-                  "description": "Indicates whether or not the file was sealed successfully",
-                  "title": "Is Success",
-                  "enum": [
-                    true,
-                    false
-                  ]
-                },
-                "error": {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "Error message",
-                  "title": "Error"
+                  "description": "File hash",
+                  "title": "Hash"
                 }
               }
             }
           }
         },
-        "summary": "Create seal",
-        "description": "This action hashes the file locally and creates a seal for the current hash",
-        "operationId": "CreateSeal",
+        "summary": "Hash file",
+        "description": "This action hashes the file locally",
+        "operationId": "HashFile",
         "parameters": [
           {
             "name": "body",
@@ -63,7 +48,7 @@
               "properties": {
                 "file": {
                   "type": "string",
-                  "description": "File content",
+                  "description": "file",
                   "title": "File",
                   "format": "byte"
                 }
@@ -76,8 +61,149 @@
         ]
       }
     },
-    "/v2/ListSeals": {
+    "/api/v2/CreateSeal/1/{hash}": {
       "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sealId": {
+                  "type": "string",
+                  "description": "sealId",
+                  "title": "Seal Id"
+                },
+                "isSuccess": {
+                  "type": "boolean",
+                  "description": "isSuccess",
+                  "title": "Is Success",
+                  "enum": [
+                    true,
+                    false
+                  ]
+                },
+                "error": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error",
+                  "title": "Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create seal",
+        "description": "This action creates a seal for the given hash",
+        "operationId": "CreateSeal",
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The file hash to be sealed",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "The file hash to be sealed"
+          }
+        ]
+      }
+    },
+    "/api/v2/VerifySeal/{hash}/{sealId}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "providerVerificationResult": {
+                  "type": "object",
+                  "properties": {
+                    "isSealValid": {
+                      "type": "boolean",
+                      "description": "isSealValid",
+                      "title": "Is Seal Valid",
+                      "enum": [
+                        true,
+                        false
+                      ]
+                    },
+                    "reason": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "reason",
+                      "title": "Reason"
+                    },
+                    "additionalInfo": {
+                      "type": "string",
+                      "description": "additionalInfo",
+                      "title": "Additional Info"
+                    },
+                    "hash": {
+                      "type": "string",
+                      "description": "hash",
+                      "title": "Hash"
+                    },
+                    "externalId": {
+                      "type": "string",
+                      "description": "externalId",
+                      "title": "External Id"
+                    },
+                    "providerId": {
+                      "type": "string",
+                      "description": "providerId",
+                      "title": "Provider Id"
+                    }
+                  },
+                  "description": "providerVerificationResult"
+                },
+                "isSuccess": {
+                  "type": "boolean",
+                  "description": "isSuccess",
+                  "title": "Is Success",
+                  "enum": [
+                    true,
+                    false
+                  ]
+                },
+                "error": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "error",
+                  "title": "Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Verify seal",
+        "operationId": "VerifySeal",
+        "description": "This action verifies the given hash against the Seal ID",
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The file hash to be verified",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "The file hash to be verified"
+          },
+          {
+            "name": "sealId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The seal ID to be verified against",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "The seal ID to be verified against"
+          }
+        ]
+      }
+    },
+    "/api/v2/GetSeals/{hash}": {
+      "get": {
         "responses": {
           "200": {
             "description": "default",
@@ -91,31 +217,42 @@
                     "properties": {
                       "id": {
                         "type": "string",
-                        "description": "id"
+                        "description": "id",
+                        "title": "Id"
                       },
                       "requestStamp": {
                         "type": "integer",
                         "format": "int32",
-                        "description": "requestStamp"
+                        "description": "requestStamp",
+                        "title": "Request Stamp"
                       },
                       "tenantId": {
                         "type": "integer",
                         "format": "int32",
-                        "description": "tenantId"
+                        "description": "tenantId",
+                        "title": "Tenant Id"
                       },
                       "provider": {
                         "type": "integer",
                         "format": "int32",
-                        "description": "provider"
+                        "description": "provider",
+                        "title": "Provider"
                       },
                       "hash": {
                         "type": "string",
-                        "description": "hash"
+                        "description": "hash",
+                        "title": "Hash"
+                      },
+                      "metadata": {
+                        "type": "string",
+                        "description": "metadata",
+                        "title": "Metadata"
                       },
                       "origin": {
                         "type": "integer",
                         "format": "int32",
-                        "description": "origin"
+                        "description": "origin",
+                        "title": "Origin"
                       }
                     }
                   },
@@ -123,12 +260,18 @@
                 },
                 "isSuccess": {
                   "type": "boolean",
-                  "description": "isSuccess"
+                  "description": "isSuccess",
+                  "title": "Is Success",
+                  "enum": [
+                    true,
+                    false
+                  ]
                 },
                 "error": {
                   "type": "integer",
                   "format": "int32",
-                  "description": "error"
+                  "description": "error",
+                  "title": "Error"
                 }
               }
             }
@@ -136,72 +279,26 @@
         },
         "summary": "List seals",
         "operationId": "ListSeals",
-        "description": "This action hashes the file locally and lists all seals for the current hash",
+        "description": "This action lists all seals for the given hash",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": false,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "file": {
-                  "type": "string",
-                  "description": "File content",
-                  "title": "File",
-                  "format": "byte"
-                }
-              }
-            }
-          }
-        ]
-      }
-    },
-    "/v2/VerfiySeal": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "default",
-            "schema": {}
-          }
-        },
-        "summary": "Verify seal",
-        "operationId": "VerifySeal",
-        "description": "This action hashes the file locally and verifies it against the Seal ID",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": false,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "file": {
-                  "type": "string",
-                  "description": "File content",
-                  "title": "File",
-                  "format": "byte"
-                },
-                "sealId": {
-                  "type": "string",
-                  "description": "The seal Id to verify",
-                  "title": "Seal Id"
-                }
-              },
-              "required": [
-                "file",
-                "sealId"
-              ]
-            }
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The file hash to be listed",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "The file hash to be listed"
           }
         ]
       }
     }
   },
+  "definitions": {},
   "parameters": {},
   "responses": {},
   "securityDefinitions": {
-    "Activation Token": {
+    "api_key": {
       "type": "apiKey",
       "in": "header",
       "name": "authorizationId"
