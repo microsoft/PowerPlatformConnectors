@@ -10,7 +10,7 @@ You will need the following to proceed:
 The connector supports the following operations:
 * `Hash file`: Hashes the file locally
 * `Create seal`: Creates a seal for the given hash
-* `Verify seal`: Verifies the given hash against the given seal id.
+* `Verify seal`: Verifies the given hash against the given seal id
 * `List seals`: lists all seals for the given hash
  
 ## Known issues and limitations
