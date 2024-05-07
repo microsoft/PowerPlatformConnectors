@@ -15,10 +15,12 @@ You will need the following to proceed:
 ## Supported Operations
 The connector supports reading and/or updating the following Meisterplan entities:
 
+- Absences
 - Actual Time Worked
 - Allocations
 - Business Goals
 - Calendars
+- Financial Actuals
 - Financials
 - Milestones & Milestone Dependencies
 - OBS
@@ -26,10 +28,15 @@ The connector supports reading and/or updating the following Meisterplan entitie
 - Priorities
 - Programs
 - Projects
+- Project Comments (read only)
+- Allocation Comments (read only)
 - Resources
 - Role Capacities
 - Roles
 - Scenarios (read only)
+- Users (read only)
+
+The connector supports triggers for project created, project updated and project deleted events.
 
 You can find the complete REST API documentation [here](https://api.us.meisterplan.com/).
 
@@ -46,8 +53,7 @@ If you're building the connector yourself, please use an API token as described 
 
 ## Known Issues and Limitations
 
-* This connector does not yet support triggers.
-* Webhooks for the Meisterplan REST-API are coming soon.
+The Meisterplan Connector uses the Meisterplan REST API. A description including status codes can be found in the REST API [documentation](https://api.us.meisterplan.com/docs/api.html). Additional information can be found in the [Help Center](https://help.meisterplan.com/hc/en-us/articles/360011962979-REST-API-Overview).
 
 ## Deployment Instructions
 
