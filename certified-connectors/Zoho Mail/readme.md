@@ -20,13 +20,25 @@ Send a new email from a specified email address
 
 Save the email content either as a draft or as a template
 
-### Get email content
+### Get email details
 
 Get the email content based on message ID
 
-### Search Mail
+### Get account details
 
-Search for emails based on search parameters.
+Get account details of the currently authenticated user such as their Account ID and Account display name.
+
+### Get folders
+
+Get details of all folders for the specified user account such as Folder ID and Folder name.
+
+### Get labels
+
+Get details of all labels for the specified user account such as Label ID and Label name.
+
+### Search emails
+
+List emails based on search parameters that displays information like the Message ID, Summary, Sent on, Sender name, and From.
 
 ## Supported Triggers
 
