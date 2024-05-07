@@ -67,7 +67,25 @@ TitaniumCloud account with adequate roles for the desired API-s.
 `Network Reputation Api`: Provides information regarding the reputation of requested URL, domain or IP address  
 `List User Override`: List user overrides for network locations  
 `Network Reputation User Override`: Enables URL classification overrides  
-
+`Get specific dynamic analysis report for url (SHA1)`: Returns the specific dynamic analysis report for requested url based on provided SHA1  
+`Get specific dynamic analysis report for url (base64)`: Returns the specific dynamic analysis report for requested base64 encoded url  
+`Get dynamic analysis report for url (SHA1)`: Returns latest dynamic analysis reports for requested url on provided SHA1  
+`Get dynamic analysis report for url (base64)`: Returns latest dynamic analysis reports for requested base 64 encoded url  
+`Create YARA Ruleset`: Allows the authenticated user creation of YARA rulesets in ReversingLabs TitaniumCloud  
+`Get YARA Ruleset information`: Returns information about created user YARA ruleset  
+`Get YARA Ruleset Text`: Returns the text for specified YARA rule  
+`Get YARA Matches Feed`: Returns a recordset of YARA ruleset matches in the requested time range  
+`Delete YARA Ruleset`: Allows the authenticated user to delete YARA ruleset in ReversingLabs TitaniumCloud   
+`Start YARA Retro Hunt`: Allows users to start their own YARA retro hunts and retroactively match YARA rules against files from ReversingLabs TitaniumCloud  
+`Cancel YARA Retro Hunt`: Allows users to cancel their own YARA retro hunts  
+`Get YARA Retro Hunting Status`: Allows users to check status of their own YARA retro hunts and retroactively match YARA rules against files in TitaniumCloud  
+`Get YARA Retro Matches Feed`: Returns a recordset of YARA ruleset matches in the requested time range for authenticated user    
+`Advanced Search`: Allows users to find samples in ReversingLabs TitaniumCloud combining various search keywords    
+`Group By RHA1 Single Query`: Returns a list of all SHA1 hashes of functionally similar samples for the requested SHA1 sample hash and RHA1 precision level    
+`Import Hash Similarity`: Provides a list of all available SHA1 hashes for the requested import hash (imphash)  
+`Import Hash Similarity paginated`: Provides a list of all available SHA1 hashes for the requested import hash (imphash)  
+`File Reputation Override`: Enables sample classification user overrides
+`File Reputation List User Overrides`: Enables listing of the user overrides
 
 ## Obtaining Credentials
 Visit [reversinglabs.com](https://www.reversinglabs.com/products/file-reputation-service) to get in contact with ReversingLabs sales representatives.​  
