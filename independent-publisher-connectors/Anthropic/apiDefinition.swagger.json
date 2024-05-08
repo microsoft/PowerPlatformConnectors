@@ -8,7 +8,15 @@
       "name": "Troy Taylor",
       "url": "https://www.hitachisolutions.com",
       "email": "ttaylor@hitachisolutions.com"
-    }
+    },
+    "x-ms-keywords": [
+      "Anthropic",
+      "Claude",
+      "AI",
+      "LLM",
+      "prompt",
+      "message"
+    ]
   },
   "host": "api.anthropic.com",
   "basePath": "/",
@@ -72,6 +80,7 @@
         "summary": "Create a text completion",
         "description": "Send a prompt to Claude for completion.",
         "operationId": "ClaudePost",
+        "deprecated": true,
         "parameters": [
           {
             "name": "body",
@@ -140,7 +149,16 @@
               ]
             }
           }
-        ]
+        ],
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "ClaudePost",
+              "x-ms-require-user-confirmation": true
+            }
+          ]
+        }
       }
     },
     "/v1/messages": {
@@ -153,32 +171,45 @@
               "properties": {
                 "completion": {
                   "type": "string",
-                  "description": "completion"
+                  "description": "",
+                  "title": "completion"
                 },
                 "id": {
                   "type": "string",
-                  "description": "id"
+                  "description": "",
+                  "title": "id"
                 },
                 "model": {
                   "type": "string",
-                  "description": "model"
+                  "description": "",
+                  "title": "model"
                 },
                 "stop_reason": {
                   "type": "string",
-                  "description": "stop_reason"
+                  "description": "",
+                  "title": "stop_reason"
                 },
                 "type": {
                   "type": "string",
-                  "description": "type"
+                  "description": "",
+                  "title": "type"
                 }
               }
             }
           }
         },
         "summary": "Create a message",
-        "description": "Send a prompt to Claude for message.",
+        "description": "Send a prompt to Claude to return a message.",
         "operationId": "MessagePost",
         "parameters": [
+          {
+            "name": "anthropic-version",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "2023-06-01",
+            "x-ms-visibility": "internal"
+          },
           {
             "name": "body",
             "in": "body",
@@ -188,8 +219,8 @@
               "properties": {
                 "model": {
                   "type": "string",
-                  "description": "model",
-                  "title": "",
+                  "description": "The model that will complete your prompt.",
+                  "title": "Model",
                   "enum": [
                     "claude-3-opus-20240229",
                     "claude-3-sonnet-20240229",
@@ -198,7 +229,7 @@
                     "claude-2.0",
                     "claude-instant-1.2"
                   ],
-                  "default": "claude-3-opus-20240229"
+                  "default": "claude-3-haiku-20240307"
                 },
                 "messages": {
                   "type": "array",
@@ -207,13 +238,18 @@
                     "properties": {
                       "role": {
                         "type": "string",
-                        "description": "role",
-                        "title": ""
+                        "description": "The role.",
+                        "title": "Role",
+                        "enum": [
+                          "user",
+                          "assistant"
+                        ],
+                        "default": "user"
                       },
                       "content": {
                         "type": "string",
-                        "description": "content",
-                        "title": ""
+                        "description": "The conversation content.",
+                        "title": "Content"
                       }
                     },
                     "required": [
@@ -221,34 +257,41 @@
                       "content"
                     ]
                   },
-                  "description": "messages"
+                  "title": "Messages"
                 },
                 "max_tokens": {
                   "type": "integer",
                   "format": "int32",
-                  "description": "max_tokens",
-                  "title": ""
+                  "description": "The maximum number of tokens to generate before stopping.",
+                  "title": "Max Tokens",
+                  "default": 100
                 },
                 "metadata": {
                   "type": "object",
                   "properties": {},
-                  "description": "metadata"
+                  "description": "An object describing metadata about the request.",
+                  "title": "Metadata"
                 },
                 "stop_sequences": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   },
-                  "description": "stop_sequences"
+                  "description": "Custom text sequences that will cause the model to stop generating.",
+                  "title": "Stop Sequences"
                 },
                 "system": {
                   "type": "string",
-                  "description": "system"
+                  "description": "The system prompt.",
+                  "title": "System Prompt"
                 },
                 "temperature": {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "temperature"
+                  "type": "number",
+                  "format": "double",
+                  "description": "Amount of randomness injected into the response.",
+                  "title": "Temperature",
+                  "minimum": 0.0,
+                  "maximum": 1.0
                 },
                 "tools": {
                   "type": "array",
@@ -257,30 +300,35 @@
                     "properties": {
                       "name": {
                         "type": "string",
-                        "description": "name"
+                        "description": "The tool name.",
+                        "title": "Name"
                       },
                       "description": {
                         "type": "string",
-                        "description": "description"
+                        "description": "The description of the tool.",
+                        "title": "Description"
                       },
                       "input_schema": {
                         "type": "object",
                         "properties": {},
-                        "description": "input_schema"
+                        "description": "The input schema object.",
+                        "title": "Input Schema"
                       }
                     }
                   },
-                  "description": "tools"
+                  "title": "Tools"
                 },
                 "top_k": {
                   "type": "integer",
                   "format": "int32",
-                  "description": "top_k"
+                  "description": "Only sample from the top K options for each subsequent token.",
+                  "title": "Top K"
                 },
                 "top_p": {
                   "type": "number",
                   "format": "float",
-                  "description": "top_p"
+                  "description": "Use nucleus sampling.",
+                  "title": "Top P"
                 }
               },
               "required": [
@@ -290,7 +338,16 @@
               ]
             }
           }
-        ]
+        ],
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "MessagePost",
+              "x-ms-require-user-confirmation": true
+            }
+          ]
+        }
       }
     }
   },
@@ -323,5 +380,10 @@
       "propertyName": "Categories",
       "propertyValue": "AI"
     }
-  ]
+  ],
+  "x-ms-openai-manifest": {
+    "humanName": "Anthropic",
+    "modelDescription": "This is a Copilot plugin for the Anthropic Claude AI service.",
+    "contactEmail": "ttaylor@hitachisolutions.com"
+  }
 }
