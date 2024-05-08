@@ -1673,7 +1673,7 @@ public class Script : ScriptBase
     signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
   }
 
-  private JArray GetFilteredEnvelopes(JArray envelopes, string[] filter)
+  private JArray GetFilteredEnvelopes(JArray envelopes, string[] filters)
   {
     JArray filteredRecords = new JArray();
     foreach (var filter in filters.Where(filter => filter != null)) 
@@ -1698,6 +1698,8 @@ public class Script : ScriptBase
           break;
         }
       }
+
+    return envelopes;
   }
 
   private int GenerateId()
@@ -2012,6 +2014,35 @@ public class Script : ScriptBase
       };
 
       this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+    }
+
+    if("scp-get-email-summary".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      uriBuilder.Path = uriBuilder.Path.Replace("/getEmailSummary", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("salesCopilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
+      this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
+      this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
+
+      if (query.Get("crmType").ToString().Equals("Dynamics365"))
+      {
+        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+      }
+
+      query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
+        "2000-01-02T12:45Z" :
+        query.Get("startDateTime");
+
+      if (!string.IsNullOrEmpty(query.Get("endDateTime")))
+      {
+        query["to_date"] = query.Get("endDateTime");
+      }
+
+      query["include"] = "custom_fields,recipients,documents";
+      query["order"] = "desc";
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
     if("scp-get-related-activities".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -2465,6 +2496,53 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("scp-get-email-summary".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JObject newBody = new JObject();
+      TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+
+      JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
+      JArray emailSummary = new JArray();
+      int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
+      int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
+
+      var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
+      var recordId = query.Get("recordId") ?? null;
+      var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
+      var recordType = query.Get("recordType");
+      string[] recipientEmail = query.Get("emailContacts").Split(',');
+
+      string[] filters = { crmType, crmOrgUrl, recordId, recordType };
+      filters = recipientEmail.Concat(filters).ToArray();
+
+      envelopes = GetFilteredEnvelopes(envelopes, filters);
+
+      foreach (var envelope in envelopes)
+      {
+        DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+        DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+        JArray recipientNames = new JArray();
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
+        emailSummary.Add(new JObject()
+        {
+          ["Title"] = envelope["emailSubject"],
+          ["Description"] = GetDescriptionNLPForRelatedActivities(envelope)
+        });
+      }
+
+      newBody["value"] = (emailSummary.Count < top) ? emailSummary : new JArray(emailSummary.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < emailSummary.Count) ? true : false;
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("scp-get-related-activities".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
@@ -2473,7 +2551,6 @@ public class Script : ScriptBase
       TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
-      JArray filteredActivities = new JArray();
       JArray activities = new JArray();
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
@@ -2484,29 +2561,7 @@ public class Script : ScriptBase
       var recordType = query.Get("recordType");
 
       string[] filters = { crmType, crmOrgUrl, recordId, recordType };
-
-      foreach (var filter in filters.Where(filter => filter != null)) 
-      {
-        foreach (var envelope in envelopes)
-        {
-          if (envelope.ToString().ToLower().Contains(filter.ToLower()))
-          {
-            filteredActivities.Add(envelope);
-          }
-        }
-
-        if (filteredActivities.Count > 0)
-        {
-          envelopes.Clear();
-          envelopes = new JArray(filteredActivities);
-          filteredActivities.Clear();
-        }
-        else
-        {
-          envelopes.Clear();
-          break;
-        }
-      }
+      envelopes = GetFilteredEnvelopes(envelopes, filters);
 
       foreach (var envelope in envelopes)
       {
@@ -2572,8 +2627,10 @@ public class Script : ScriptBase
         {
           recipientNames.Add(recipient["name"]);
         }
+        JArray documentNames = new JArray(
+        (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
 
-        JObject additionalPropertiesForDocumentRecords = new JObject()
+        JObject additionalProperties = new JObject()
         {
           ["Recipients"] = string.Join(", ", recipientNames),
           ["Sender Name"] = envelope["sender"]["userName"],
@@ -2584,17 +2641,15 @@ public class Script : ScriptBase
 
         documentRecords.Add(new JObject()
         {
-          ["recordId"] = envelope["envelopeId"],
-          ["recordTypeDisplayName"] = "Agreement",
-          ["recordTypePluralDisplayName"] = "Agreements",
-          ["recordType"] = "Agreement",
           ["Title"] = envelope["emailSubject"],
+          ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
           ["url"] = GetEnvelopeUrl(envelope),
-          ["additionalProperties"] = additionalPropertiesForDocumentRecords
+          ["additionalProperties"] = additionalProperties
         });
       }
 
       newBody["value"] = (documentRecords.Count < top) ? documentRecords : new JArray(documentRecords.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < documentRecords.Count) ? true : false;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
