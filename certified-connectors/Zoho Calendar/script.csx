@@ -2,10 +2,16 @@
   public override async Task < HttpResponseMessage > ExecuteAsync() {
     if (this.Context.OperationId == "New_Event") {
       try {
-        JObject eventData = JObject.Parse(await this.Context.Request.Content.ReadAsStringAsync());
+          JsonSerializerSettings settings = new JsonSerializerSettings
+                                            {
+                                                DateParseHandling = DateParseHandling.None
+                                            };
+
+        JObject eventData = (JObject)JsonConvert.DeserializeObject(await this.Context.Request.Content.ReadAsStringAsync(),settings);
         HttpRequestMessage request = this.Context.Request;
         var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
         uriBuilder.Query = "";
+
         bool isAllDay = (eventData["isallday"] != null) ? (bool) eventData["isallday"] : false;
         eventData["dateandtime"] = getConvertedDateTime((JObject) eventData["dateandtime"], isAllDay);
         request.RequestUri = uriBuilder.Uri;
@@ -17,6 +23,9 @@
       } catch (Exception e) {
         if (e.Message == "Invalid_Date") {
           return getErrorMessage(HttpStatusCode.BadRequest, "Invalid date format");
+        }
+        else {
+            return getErrorMessage(HttpStatusCode.BadRequest, e.Message);
         }
       }
     } else if (this.Context.OperationId == "Delete_Event") {
@@ -35,7 +44,7 @@
         if (events.Count > 1 || eventObj.ContainsKey("rrule")) {
           return getErrorMessage(HttpStatusCode.BadRequest, "Cannot delete this event because it is a recurring event.");
         }
-        
+
         string etag = (string) eventObj["etag"];
         request.Headers.TryAddWithoutValidation("etag", etag);
       } else {
@@ -47,7 +56,15 @@
       HttpRequestMessage request = this.Context.Request;
       var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-      uriBuilder.Query = "";
+      query.Remove("cuid");
+      JObject rangeObj = new JObject();
+      rangeObj["start"] = getConvertedTime(query["start"], DTFormat.Any, true);
+      rangeObj["end"] = getConvertedTime(query["end"], DTFormat.Any, true);
+      query.Remove("start");
+      query.Remove("end");
+      query["range"] = rangeObj.ToString();
+      uriBuilder.Query = query.ToString();
+
       this.Context.Request.RequestUri = uriBuilder.Uri;
       HttpResponseMessage response = await this.Context.SendAsync(request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
       return response;
@@ -76,9 +93,10 @@
       var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       query.Remove("cuid");
-      query["start"] = getConvertedTime(query["start"], false, true);
+      DTFormat timeFormat = DTFormat.Any;
+      query["start"] = getConvertedTime(query["start"], timeFormat, true);
       if (query["end"] != null && !String.IsNullOrEmpty(query["end"])) {
-        query["end"] = getConvertedTime(query["end"], false, true);
+        query["end"] = getConvertedTime(query["end"], timeFormat, true);
       }
       uriBuilder.Query = query.ToString();
       this.Context.Request.RequestUri = uriBuilder.Uri;
@@ -97,7 +115,12 @@
         request.RequestUri = uriBuilder.Uri;
         HttpRequestMessage eventRequest = CloneHttpRequest(request, HttpMethod.Get);
         HttpResponseMessage eventResponseMsg = await this.Context.SendAsync(eventRequest, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-        JObject eventData = JObject.Parse(await this.Context.Request.Content.ReadAsStringAsync());
+        JsonSerializerSettings settings = new JsonSerializerSettings
+                                            {
+                                                DateParseHandling = DateParseHandling.None
+                                            };
+
+        JObject eventData = (JObject)JsonConvert.DeserializeObject(await this.Context.Request.Content.ReadAsStringAsync(),settings);
         string responseString = await eventResponseMsg.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
         JObject eventResp = JObject.Parse(responseString);
         JArray events = (JArray) eventResp["events"];
@@ -128,24 +151,25 @@
   public static JObject getConvertedDateTime(JObject eventData, bool isAllDay) {
     JObject covertedDateObj = JObject.Parse("{}");
     bool hasTimeZone = eventData.ContainsKey("timezone") && !string.IsNullOrEmpty((string) eventData["timezone"]);
-    covertedDateObj["start"] = getConvertedTime(eventData["start"].Value < string > (), isAllDay, !hasTimeZone);
-    covertedDateObj["end"] = getConvertedTime(eventData["end"].Value < string > (), isAllDay, !hasTimeZone);
+    DTFormat dtFormat = (isAllDay)?DTFormat.Only_Date:DTFormat.Date_Time;
+    covertedDateObj["start"] = getConvertedTime(eventData["start"].Value < string > (), dtFormat, !hasTimeZone);
+    covertedDateObj["end"] = getConvertedTime(eventData["end"].Value < string > (), dtFormat, !hasTimeZone);
     if (hasTimeZone) {
       covertedDateObj["timezone"] = (string) eventData["timezone"];
     }
     return covertedDateObj;
   }
-  public static string getConvertedTime(string value, bool isDateFormat, bool isOffsetNeeded) {
+  public static string getConvertedTime(string value, DTFormat dtFormat, bool isOffsetNeeded) {
 
     string outputDTFormat = "yyyyMMddTHHmmss";
     string outputDFormat = "yyyyMMdd";
     String[] datetimeformatWZ = {
       "yyyy/MM/dd'T'HH:mm:sszzz",
-      "yyyy/MM/dd'T'HH:mm:ssZ",
       "yyyy-MM-dd'T'HH:mm:sszzz",
+      "yyyyMMdd'T'HHmmsszzz",
+      "yyyy/MM/dd'T'HH:mm:ssZ",
       "yyyy-MM-dd'T'HH:mm:ssZ",
-      "yyyyMMdd'T'HHmmssZ",
-      "yyyyMMdd'T'HHmmsszzz"
+      "yyyyMMdd'T'HHmmssZ"
     };
     String[] datetimeformat = {
       "yyyy/MM/dd'T'HH:mm:ss",
@@ -159,31 +183,38 @@
     };
     DateTime newDate;
     DateTime convertedDate;
-    bool hasOffset = false;
 
     if (DateTime.TryParseExact(value, datetimeformat, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
-      if (isOffsetNeeded) {
+      if (isOffsetNeeded ) {
         newDate = convertedDate.ToUniversalTime();
       } else {
         newDate = convertedDate;
       }
-    } else if (DateTime.TryParseExact(value, datetimeformatWZ, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
-      newDate = convertedDate.ToUniversalTime();
-      hasOffset = true;
+    }
+    else if (DateTimeOffset.TryParseExact(value, datetimeformatWZ, null, System.Globalization.DateTimeStyles.None, out DateTimeOffset convertedDateOffset)) {
+      if(dtFormat == DTFormat.Only_Date){
+          return convertedDateOffset.ToString(outputDFormat);
+      } else if(dtFormat == DTFormat.Any){
+          newDate = convertedDateOffset.ToUniversalTime().DateTime;
+      } else {
+          return convertedDateOffset.ToString(outputDTFormat+"zzz").Replace(":","");
+      }
+    }  else if (DateTime.TryParseExact(value, dateformat, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
+      if(dtFormat == DTFormat.Any){
+          return convertedDate.ToString(outputDFormat);
+      } else{
+          newDate = convertedDate;
+      }
+
     } else if (DateTime.TryParse(value, out convertedDate)) {
-      newDate = convertedDate.ToUniversalTime();
-      hasOffset = true;
-    } else if (DateTime.TryParseExact(value, dateformat, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
       newDate = convertedDate;
-    } else if (long.TryParse(value, out long timeinmillis)) {
-      newDate = DateTimeOffset.FromUnixTimeMilliseconds(timeinmillis).UtcDateTime;
-      hasOffset = true;
+
     } else {
       throw new Exception("Invalid_Date");
     }
-    if (isDateFormat) {
+    if (dtFormat == DTFormat.Only_Date) {
       return newDate.ToString(outputDFormat);
-    } else if (isOffsetNeeded || hasOffset) {
+    } else if (isOffsetNeeded ) {
       return newDate.ToString(outputDTFormat + "Z");
     } else {
       return newDate.ToString(outputDTFormat);
@@ -233,5 +264,10 @@
     HttpResponseMessage errorResponse = new HttpResponseMessage(errorCode);
     errorResponse.Content = CreateJsonContent(errorObj.ToString());
     return errorResponse;
+  }
+    public enum DTFormat {
+      Only_Date,
+      Date_Time,
+      Any
   }
 }
