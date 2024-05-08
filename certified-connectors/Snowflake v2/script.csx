@@ -147,46 +147,54 @@ public class Script : ScriptBase
                     var name = col[Attr_Column_Name].ToString();
                     string type = col[Attr_Column_Type].ToString();
                     if (newRow.ContainsKey(name)) name = name + "_" + Convert.ToString(i);
-
-                    switch (type)
+                    JToken token = row[i];
+                    JToken tokenNull = JValue.CreateNull();
+                    if (token == null || Convert.ToString(token) == "null")
                     {
-                        case Snowflake_Type_Fixed:
-                            long scale = 0;
-                            long.TryParse(col[Attr_Column_Scale].ToString(), out scale);
-                            if (scale == 0)
-                            {
-                                long myLong = long.Parse(row[i].ToString());
-                                newRow.Add(new JProperty(name.ToString(), myLong));
-                            }
-                            else
-                            {
-                                double myDouble = double.Parse(row[i].ToString());
-                                newRow.Add(new JProperty(name.ToString(), myDouble));
-                            }
-                            break;
+                        newRow.Add(new JProperty(name.ToString(), tokenNull));
+                    }
+                    else
+                    {
+                        switch (type)
+                        {
+                            case Snowflake_Type_Fixed:
+                                long scale = 0;
+                                long.TryParse(col[Attr_Column_Scale].ToString(), out scale);
+                                if (scale == 0)
+                                {
+                                    long myLong = long.Parse(row[i].ToString());
+                                    newRow.Add(new JProperty(name.ToString(), myLong));
+                                }
+                                else
+                                {
+                                    double myDouble = double.Parse(row[i].ToString());
+                                    newRow.Add(new JProperty(name.ToString(), myDouble));
+                                }
+                                break;
 
-                        case Snowflake_Type_Float:
-                            float myFloat = float.Parse(row[i].ToString());
-                            newRow.Add(new JProperty(name.ToString(), myFloat));
-                            break;
+                            case Snowflake_Type_Float:
+                                float myFloat = float.Parse(row[i].ToString());
+                                newRow.Add(new JProperty(name.ToString(), myFloat));
+                                break;
 
-                        case Snowflake_Type_Boolean:
-                            bool myBool = bool.Parse(row[i].ToString());
-                            newRow.Add(new JProperty(name.ToString(), myBool));
-                            break;
+                            case Snowflake_Type_Boolean:
+                                bool myBool = bool.Parse(row[i].ToString());
+                                newRow.Add(new JProperty(name.ToString(), myBool));
+                                break;
 
-                        default:
-                            if (type.ToString().IndexOf(Snowflake_Type_Time) >= 0)
-                            {
-                                var utcTime = ConvertToUTC(row[i].ToString());
-                                newRow.Add(new JProperty(name.ToString(), utcTime));
-                            }
-                            else
-                            {
-                                var val = row[i];
-                                newRow.Add(new JProperty(name.ToString(), val));
-                            }
-                            break;
+                            default:
+                                if (type.ToString().IndexOf(Snowflake_Type_Time) >= 0)
+                                {
+                                    var utcTime = ConvertToUTC(row[i].ToString());
+                                    newRow.Add(new JProperty(name.ToString(), utcTime));
+                                }
+                                else
+                                {
+                                    var val = row[i];
+                                    newRow.Add(new JProperty(name.ToString(), val));
+                                }
+                                break;
+                        }
                     }
 
                     i++;
