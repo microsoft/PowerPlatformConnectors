@@ -233,10 +233,10 @@ public class Script : ScriptBase
                 Partitions = partitionInfo != null ? JsonConvert.DeserializeObject<IList<SnowflakePartitionInfo>>(partitionInfo) : null,
                 Metadata = snowflakeMetadata
             };
-
+            
             var responseObj = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = CreateJsonContent(JsonConvert.SerializeObject(result))
+                Content = CreateJsonContent(JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.None, new JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Include}))
             };
 
             return responseObj;
