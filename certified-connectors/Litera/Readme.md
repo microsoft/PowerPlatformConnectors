@@ -4,7 +4,7 @@ The Litera Copilot Plugin allows users to search for legal matters, and retrieve
 
 
 ## Prerequisites/How to use the Plugin
-Users can leverage the Litera plugin only if they have a Lattice user account. Since Lattice is an enterprise product, users must be authenticated against their firm's Entra tenant. As such, the following steps must be followed for a user to utilize the Lattice plugin:
+Users can leverage the Litera plugin only if they have a Lattice user account. Since Lattice is an enterprise product, users must be authenticated against their firm's Entra tenant. As such, the following steps must be followed for a user to utilize the Litera plugin:
 1. The user's firm must purchase Litera Lattice and subsequently supply Litera with its Entra Tenant ID. (For Microsoft Copilot Plugin Certification Testing, please provide the appropriate Microsoft Entra Tenant ID.) Litera will then give the firm the API key needed to create a connection to the Copilot plugin.
 2. The user must attempt to log into the Lattice application (For Microsoft Copilot Plugin Certification Testing, login at https://qa.lattice.lmscloudlab.com/.)
 3. During the login process, the user will be prompted to grant consent to use their credentials. Upon granting consent, they will have access to both Litera Lattice and the Litera plugin.
