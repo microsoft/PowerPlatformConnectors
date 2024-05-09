@@ -22,6 +22,10 @@ While sending a signature request, you can set the `sandbox` parameter to `true`
 | **Document Lifespan**  | Automatically deleted after 14 days | Never deleted automatically   |
 | **PDF Watermarks**     | Test watermarks, not legally valid  | No watermarks, legally valid  |
 
+## Region
+
+BoldSign operates in two regions: US and EU. The connector seamlessly supports both regions, allowing you to select your preferred region during the connection creation process.
+
 ## Deployment instructions
 
 If you would like to deploy this connector as a custom connector in Microsoft Power Automate and Power Apps, please follow the instructions provided in the [official documentation](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli). Also, please replace the `clientId` in the `apiProperties.json` file with your own credentials and the `clientSecret` with your own secret.
