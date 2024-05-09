@@ -70,3 +70,30 @@
 
     }
 }
+
+public class ConnectorException : Exception
+{
+    public HttpStatusCode StatusCode { get; }
+
+    public ConnectorException(HttpStatusCode statusCode, string message, Exception innerException = null) : base(message, innerException)
+    {
+        this.StatusCode = statusCode;
+    }
+
+    public override string ToString()
+    {
+        var error = new StringBuilder($"ConnectorException: Status code={this.StatusCode}, Message='{this.Message}'");
+        var inner = this.InnerException;
+        var level = 0;
+
+        while (inner != null && level < 10)
+        {
+            level += 1;
+            error.AppendLine($"Inner exception {level}: {inner.Message}");
+            inner = inner.InnerException;
+        }
+
+        error.AppendLine($"Stack trace: {this.StackTrace}");
+        return error.ToString();
+    }
+}
