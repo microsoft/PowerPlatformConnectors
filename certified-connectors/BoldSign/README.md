@@ -1,6 +1,6 @@
 # Introduction
 
-BoldSign is a legally binding, easy-to-use, secure electronic signature solution that allows you to send, sign, and manage documents.
+BoldSign is a secure, easy-to-use electronic signature solution that provides legally binding ways to send, sign, and manage documents.
 
 ## Prerequisites
 
