@@ -151,7 +151,7 @@ public class Script : ScriptBase
                     JToken tokenNull = JValue.CreateNull();
                     if (token == null || Convert.ToString(token) == "null")
                     {
-                        newRow.Add(new JProperty(name.ToString(), tokenNull));
+                        newRow.Add(new JProperty(name.ToString(), row[i]));
                     }
                     else
                     {
@@ -233,7 +233,7 @@ public class Script : ScriptBase
                 Partitions = partitionInfo != null ? JsonConvert.DeserializeObject<IList<SnowflakePartitionInfo>>(partitionInfo) : null,
                 Metadata = snowflakeMetadata
             };
-            
+
             var responseObj = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = CreateJsonContent(JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.None, new JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Include}))
