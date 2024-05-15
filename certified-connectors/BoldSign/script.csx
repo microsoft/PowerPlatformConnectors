@@ -1,4 +1,4 @@
-public class Script : ScriptBase
+﻿public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -53,6 +53,28 @@ public class Script : ScriptBase
                 ["x-ms-sort"] = "none",
                 ["x-ms-visibility"] = "important",
             };
+
+            var currentUri = this.Context.Request.RequestUri;
+            var uriBuilder = new UriBuilder(currentUri);
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            var autoReminder = query.Get("enableAutoReminder");
+
+            if (autoReminder != null && autoReminder.ToString() == "true")
+            {
+                var reminderFrequency = basePropertyDefinition.DeepClone();
+                reminderFrequency["type"] = "integer";
+                reminderFrequency["description"] = "Specify the number of days between reminder emails";
+                reminderFrequency["x-ms-visibility"] = "advanced";
+                reminderFrequency["default"] = 3;
+                itemProperties["Reminder frequency"] = reminderFrequency;
+
+                var reminderCount = basePropertyDefinition.DeepClone();
+                reminderCount["type"] = "integer";
+                reminderCount["description"] = "Set the maximum number of reminders to be sent";
+                reminderCount["x-ms-visibility"] = "advanced";
+                reminderCount["default"] = 5;
+                itemProperties["Reminder count"] = reminderCount;
+            }
 
             var signers = (body["roles"] as JArray) ?? new JArray();
 
@@ -255,6 +277,7 @@ public class Script : ScriptBase
         var templateRoles = new JArray();
         var signer = new JObject();
         var existingSignerFields = new JArray();
+        var autoReminderSettings = new JObject();
 
         var currentUri = this.Context.Request.RequestUri;
         var uriBuilder = new UriBuilder(currentUri);
@@ -266,10 +289,6 @@ public class Script : ScriptBase
             ["message"] = query.Get("message"),
             ["brandId"] = query.Get("brandId"),
             ["expiryValue"] = query.Get("expiryDays"),
-            ["reminderSettings"] = new JObject()
-            {
-                ["enableAutoReminder"] = query.Get("enableAutoReminder"),
-            },
             ["enablePrintAndSign"] = query.Get("enablePrintAndSign"),
             ["enableReassign"] = query.Get("enableReassign"),
             ["isSandbox"] = query.Get("isSandbox"),
@@ -311,6 +330,11 @@ public class Script : ScriptBase
         if (query.Get("onBehalfOf") != null)
         {
             newBody["onBehalfOf"] = query.Get("onBehalfOf");
+        }
+
+        if (query.Get("enableAutoReminder") != null && query.Get("enableAutoReminder").ToString() == "true")
+        {
+            autoReminderSettings["enableAutoReminder"] = query.Get("enableAutoReminder");
         }
 
         var templateId = query.Get("templateId");
@@ -404,11 +428,26 @@ public class Script : ScriptBase
                 };
                 existingSignerFields.Add(radioButtonField);
             }
+
+            if (key.Contains("Reminder frequency"))
+            {
+                autoReminderSettings["reminderDays"] = value;
+            }
+
+            if (key.Contains("Reminder count"))
+            {
+                autoReminderSettings["reminderCount"] = value;
+            }
         }
 
         if (existingSignerFields != null)
         {
             templateRoles[0]["existingFormFields"] = existingSignerFields;
+        }
+
+        if (autoReminderSettings != null)
+        {
+            newBody["reminderSettings"] = autoReminderSettings;
         }
 
         newBody["roles"] = templateRoles;
