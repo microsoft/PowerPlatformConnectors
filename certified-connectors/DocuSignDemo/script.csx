@@ -1673,6 +1673,21 @@ public class Script : ScriptBase
     signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
   }
 
+  private string GetHostFromUrl(string url)
+  {
+    if (!string.IsNullOrEmpty(url))
+    {
+      Uri uriResult;
+      bool result = Uri.TryCreate(url, UriKind.Absolute, out uriResult)
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+      if (result)
+      {
+        return uriResult.Host;
+      }
+    }
+    return null;
+  }
+
   private JArray GetFilteredEnvelopes(JArray envelopes, string[] filters)
   {
     JArray filteredRecords = new JArray();
@@ -2508,11 +2523,11 @@ public class Script : ScriptBase
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
-      var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
       var recordId = query.Get("recordId") ?? null;
       var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
       var recordType = query.Get("recordType");
-      string[] recipientEmail = query.Get("emailContacts").Split(',');
+      string[] recipientEmail = query.Get("emailContacts").Replace(" ","").Split(',');
 
       string[] filters = { crmType, crmOrgUrl, recordId, recordType };
       filters = recipientEmail.Concat(filters).ToArray();
@@ -2555,7 +2570,7 @@ public class Script : ScriptBase
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
-      var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
       var recordId = query.Get("recordId") ?? null;
       var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
       var recordType = query.Get("recordType");
@@ -2609,7 +2624,7 @@ public class Script : ScriptBase
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
-      var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
       var recordId = query.Get("recordId") ?? null;
       var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
       var recordType = query.Get("recordType");
@@ -2665,7 +2680,7 @@ public class Script : ScriptBase
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
-      var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
       var recordId = query.Get("recordId") ?? null;
       var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
       var recordType = query.Get("recordType");
