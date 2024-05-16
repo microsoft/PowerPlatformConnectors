@@ -1,4 +1,4 @@
-﻿public class Script : ScriptBase
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -13,7 +13,8 @@
     }
     private async Task<HttpResponseMessage> HandleInvokeAPI()
     {
-        Uri uri = this.Context.Request.RequestUri;
+    	var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+        Uri uri = uriBuilder.Uri;
         var query = HttpUtility.ParseQueryString(uri.Query);
         var apiMethod = HttpMethod.Get;
         switch (query["method"].ToString()) {
@@ -23,7 +24,7 @@
             case "POST":
                 apiMethod = HttpMethod.Post;
                 break;
-			case "PUT":
+	    case "PUT":
                 apiMethod = HttpMethod.Put;
                 break;
         }
