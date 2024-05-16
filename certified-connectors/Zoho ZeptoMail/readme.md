@@ -27,15 +27,15 @@ Send emails using pre-built templates available in your ZeptoMail account.
 
 ### Get all Mail Agent
 
-List all the Mail Agents in your ZeptoMail account.
+This endpoint fetches details of all the Mail Agents in the account. It returns data including Mail Agent name, Mail Agent key, Created time, Status.  \n\nData Fields Explained:\n- mailagent_name: Name of the Mail Agent.\n- mailagent_key: Mail Agent Key.\n- mailagent_alias: Mail Agent Alias.\n- created_time: Time at which the Mail Agent was created.\n- status: Status of the Mail Agent.\n\nExample 1: To retrieve details of all Mail Agents in the ZeptoMail account. Sample prompt 1: Get me details of all the Mail Agents in the account.
 
 ### Get processed email details
 
-This action fetches the processed email details for mentioned search criteria.
+This endpoint fetches detailed information about emails processed by Mail Agent identified by its Mail Agent key. It returns data including the Subject, From Address, Sent time and Request ID for emails sent for the time range. The mailagent_key parameter should match the  Mail Agent key of the Mail Agent as listed in our system.
 
 ### Processed emails analytics
 
-This action displays the delivery status analytics of the processed emails.
+This endpoint fetches emails analytics for emails sent by Mail Agent identified by its Mail Agent name. It returns data including total count of Hardbounce, Softbounce and Sent statistics over a period of time and each day . The mailagent parameter should match the Mail Agent name as listed in our system.
 
 ### Known Issues and Limitations
 
