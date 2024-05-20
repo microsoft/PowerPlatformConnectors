@@ -2,8 +2,8 @@
     {        
         public class ScriptOperation
         {
-            public const string RoundUp = "Math_RoundUp";
-            public const string Sum = "MathSum";
+            public const string RoundUp = "RoundUp";
+            public const string Sum = "Sum";
         }
 
         public override async Task<HttpResponseMessage> ExecuteAsync()
@@ -16,8 +16,8 @@
             }));
             try
             {
-                var output = await ExecuteAsync(Context.OperationId, content);
-                return output;
+                var result = await ExecuteAsync(Context.OperationId, content);
+                return BuildOutput(result);
             }
             catch (Exception ex)
             {
@@ -30,47 +30,61 @@
                 return BuildOutput(error, HttpStatusCode.InternalServerError);
             }
         }
-        public async Task<HttpResponseMessage> ExecuteAsync(string operationId, string content)
+        public async Task<object> ExecuteAsync(string operationId, string content)
         {
             return operationId switch
             {
-                ScriptOperation.RoundUp => BuildOutput(await HandleRoundUpOperation(content)),
-                ScriptOperation.Sum => BuildOutput(await HandleSumOperation(content)),
-                _ => BuildOutput($"Unknown operation ID '{this.Context.OperationId}'"),
-            };
+                ScriptOperation.Sum => await Sum(BuildInput<SumInput>(content)),
+                ScriptOperation.RoundUp => await RoundUp(BuildInput<RoundUpInput>(content)),
+                _ => $"Unknown operation ID '{operationId}'",
+            };            
         }
-        #region Math
+        #region Sum
         /// <summary>
-        /// get round up value for input number
+        /// input for sum
         /// </summary>
-        /// <returns></returns>
-        private async Task<HttpResponseMessage> HandleRoundUpOperation(string content)
+        public class SumInput
         {
-            // Parse as JSON object
-            var contentAsJson = JObject.Parse(content);
-            // Get the value of text to check
-            var input = (decimal)contentAsJson["Input"];
-            var result = Math.Ceiling(input);
-            return BuildOutput(result);
+            /// <summary>
+            /// data in json format
+            /// </summary>
+            public string Data { get; set; }
+            /// <summary>
+            /// path for value to sum
+            /// </summary>
+            public string Path { get; set; }
         }
         /// <summary>
         /// sum array values
         /// </summary>
         /// <returns></returns>
-        public async Task<double> HandleSumOperation(string content)
+        public async Task<decimal> Sum(SumInput input)
         {
-            var inputType = new
-            {
-                Data = "",
-                Path = ""
-            };
-            var input = JsonConvert.DeserializeAnonymousType(content, inputType);
             var dataValue = JToken.Parse(input.Data);
             var datas = dataValue.SelectTokens($"$.{input.Path}").ToList();
-            var result = datas.Sum(d => (double)d);
+            var result = datas.Sum(d => (decimal)d);
             return result;
         }
+        #endregion
+        #region RoundUp
+        public class RoundUpInput
+        {
+            public decimal Value { get; set; }
+        }
+        /// <summary>
+        /// get round up value for input number
+        /// </summary>
+        /// <returns></returns>
+        public async Task<decimal> RoundUp(RoundUpInput input)
+        {
+            var result = Math.Ceiling(input.Value);
+            return result;
+        }        
         #endregion 
+        private T BuildInput<T>(string input)
+        {
+            return JsonConvert.DeserializeObject<T>(input);
+        }
         private HttpResponseMessage BuildOutput(object result, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             var output = JsonConvert.SerializeObject(result);
