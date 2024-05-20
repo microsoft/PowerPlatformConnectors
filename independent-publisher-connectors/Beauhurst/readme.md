@@ -2,7 +2,7 @@
 Beauhurst is a UK-based platform that provides data, insights, and analysis on high-growth and innovative companies. It focuses on tracking startups, scale-ups, and high-growth companies across various sectors, including technology, finance, healthcare, and more. Beauhurst offers a comprehensive database that investors, entrepreneurs, and other stakeholders can use to gather information about companies' funding rounds, financial performance, leadership changes, and other relevant details.
 
 ## Publisher: Axazure
-![Icon](./img/AxazureLogo.png)
+![Icon](./AxazureLogo.png)
 
 https://www.axazure.com/en/
 
@@ -17,7 +17,7 @@ To use this connector is necessary to have an account in Beauhurst and get the A
 Once you have an account with Beauhurst, go to https://platform.beauhurst.com/user/subscription/ and get your API key 
 
 Then go to the connector and create the connexion.
-![Icon](./img/Connect.png)
+![Icon](./Connect.png)
 
 ## Connector methods
 
