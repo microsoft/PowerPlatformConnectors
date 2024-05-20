@@ -37,9 +37,7 @@ This connector supports the following operations:
 * Get Object
   * The content is returned as a string.
 * Put Object  
-  * Large file requests might run into timeout issues such as HTTP 500 "Request to the backend service timed out". This is caused by custom connector script that creates the AWS Signature Version 4. The script must be finished within 5 seconds. For large files, the script might take longer than 5 seconds to finish.
-
-    [See also: [FAQ] Script must be finished within 5 seconds](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code#custom-code-faq)
+  * Large file requests might run into timeout issues such as HTTP 500 "Request to the backend service timed out". This is caused by custom connector script that creates the AWS Signature Version 4. The script must be finished within 5 seconds. For large files, the script might take longer than 5 seconds to finish. ([Microsoft FAQ: Script must be finished within 5 seconds](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code#custom-code-faq))
 
 ### Fixed Issues
 
@@ -47,7 +45,7 @@ This connector supports the following operations:
   * The connector now supports files in sub folders (`folder1/folder2/myfile.csv`).
   * The connector now supports filenames with characters such as spaces (`folder 1/my file.csv`).
   * The connector now supports binary content such as PDF files.
-    *Note: Large files might run into timeout issues.*
+    *Note: Large files might run into timeout issues.([Microsoft FAQ: Script must be finished within 5 seconds](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code#custom-code-faq))
 
 ## AWS Signature Version 4
 
