@@ -41,6 +41,10 @@ Gets the list of TeamSites to which the current user has access.
 ### User - Get profiles
 Gets the list of content profiles to which the current user has access.
 
+### Create a webhook subscription
+Creates a webhook subscription for the specified event type. Refer to the [Seismic Developer portal](https://developer.seismic.com/seismicsoftware/docs/webhooksoverview) for more information on webhooks.
+
+
 ## Getting Started
 The Seismic Power Automate Configuration connector includes the following actions. Each action corresponds to an API endpoint. Refer to the article for each corresponding API endpoint for further information on the fields and properties associated with the action.
 
@@ -55,6 +59,7 @@ The Seismic Power Automate Configuration connector includes the following action
 * [Teamsite - Get teamsite information](https://developer.seismic.com/seismicsoftware/reference/seismicteamsitesgetinformationforaspecificteamsite)
 * [User - Get profiles](https://developer.seismic.com/seismicsoftware/reference/seismicusersgetlistofmyassignedprofiles)
 * [User - Get teamsites](https://developer.seismic.com/seismicsoftware/reference/seismicusersgetmyassignedteamsites)
+* [Create a webhook subscription](https://developer.seismic.com/seismicsoftware/docs/webhooksoverview) (Webhook)
 
 ## Obtaining Credentials
 You need a Seismic Premium user account for the tenant with Full Control (System Administrator) permissions. Contact your Seismic system administrator if you do not have sufficient permissions.
