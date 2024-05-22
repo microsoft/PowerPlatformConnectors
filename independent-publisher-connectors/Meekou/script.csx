@@ -2,6 +2,7 @@
     {        
         public class ScriptOperation
         {
+            public const string GetVersion = "GetVersion";
             public const string RoundUp = "RoundUp";
             public const string Sum = "Sum";
         }
@@ -36,6 +37,7 @@
             {
                 ScriptOperation.Sum => await Sum(BuildInput<SumInput>(content)),
                 ScriptOperation.RoundUp => await RoundUp(BuildInput<RoundUpInput>(content)),
+                ScriptOperation.GetVersion => await GetVersion(),
                 _ => $"Unknown operation ID '{operationId}'",
             };            
         }
@@ -81,6 +83,15 @@
             return result;
         }        
         #endregion 
+
+        /// <summary>
+        /// return the current version
+        /// </summary>
+        /// <returns></returns>
+        public async Task<string> GetVersion()
+        {
+            return "2024.05.22";
+        }
         private T BuildInput<T>(string input)
         {
             return JsonConvert.DeserializeObject<T>(input);
