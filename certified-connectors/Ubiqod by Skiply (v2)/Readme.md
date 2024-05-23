@@ -65,3 +65,6 @@ To obtain your Ubiqod API Key:
 
 ## Known Issues and Limitations
 No major issues or limitations are currently known for the Ubiqod connector.
+
+## Deployment Instructions
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Flow and PowerApps.
