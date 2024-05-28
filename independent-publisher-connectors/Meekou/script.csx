@@ -1,11 +1,21 @@
-﻿    public class Script : ScriptBase
-    {        
+﻿    #region Full Script
+    using Newtonsoft.Json.Serialization;
+    public class Script : ScriptBase
+    {
+        #region Common
         public class ScriptOperation
         {
             public const string GetVersion = "GetVersion";
             public const string RoundUp = "RoundUp";
             public const string Sum = "Sum";
+            public const string ImageInfo = "ImageInfo";
         }
+        [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+        public class OutputBase
+        {
+
+        }
+        #endregion
 
         public override async Task<HttpResponseMessage> ExecuteAsync()
         {
@@ -37,6 +47,7 @@
             {
                 ScriptOperation.Sum => await Sum(BuildInput<SumInput>(content)),
                 ScriptOperation.RoundUp => await RoundUp(BuildInput<RoundUpInput>(content)),
+                ScriptOperation.ImageInfo => await ImageInfo(BuildInput<ImageInfoInput>(content)),
                 ScriptOperation.GetVersion => await GetVersion(),
                 _ => $"Unknown operation ID '{operationId}'",
             };            
@@ -81,8 +92,51 @@
         {
             var result = Math.Ceiling(input.Value);
             return result;
-        }        
-        #endregion 
+        }
+        #endregion
+        #region ImageInfo
+        public class ImageInfoInput
+        {
+            public string ImageBase64 { get; set; }
+        }
+        [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+        public class ImageInfoOutput: OutputBase
+        {
+            public int Width { get; set; }
+            public int Height { get; set; }
+            public long Length { get; set; }
+        }
+        /// <summary>
+        /// get image info from image base64
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<ImageInfoOutput> ImageInfo(ImageInfoInput input)
+        {
+            var imageBase64 = input.ImageBase64.Split(',').LastOrDefault();
+            // Decode base64 string to byte array
+            byte[] imageBytes = Convert.FromBase64String(imageBase64);
+
+            // Create an image from the byte array
+            using (MemoryStream ms = new MemoryStream(imageBytes))
+            {
+                using (Image image = Image.FromStream(ms))
+                {
+                    // Get image dimensions
+                    int width = image.Width;
+                    int height = image.Height;
+                    // Get image size in bytes
+                    long sizeInBytes = imageBytes.Length;
+                    return new ImageInfoOutput
+                    {
+                        Width = width,
+                        Height = height,
+                        Length = sizeInBytes
+                    };
+                }
+            }
+        }
+        #endregion
 
         /// <summary>
         /// return the current version
@@ -90,7 +144,7 @@
         /// <returns></returns>
         public async Task<string> GetVersion()
         {
-            return "2024.05.22";
+            return "2024.05.28";
         }
         private T BuildInput<T>(string input)
         {
@@ -104,3 +158,4 @@
             return response;
         }
     }
+    #endregion
