@@ -29,6 +29,7 @@ The connector supports reading and/or updating the following Meisterplan entitie
 - Programs
 - Projects
 - Project Comments (read only)
+- Allocation Comments (read only)
 - Resources
 - Role Capacities
 - Roles
