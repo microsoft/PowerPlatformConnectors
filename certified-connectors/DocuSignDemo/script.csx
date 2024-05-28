@@ -1230,13 +1230,10 @@ public class Script : ScriptBase
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/resendEnvelope", "");
+    uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
     
-    if (query.Get("resendEnvelope").ToString().Equals("true"))
-    {
-      query["resend_envelope"] = "true";
-      uriBuilder.Query = query.ToString();
-    }
-
+    query["resend_envelope"] = "true";
+    uriBuilder.Query = query.ToString();
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
   }
@@ -2025,10 +2022,10 @@ public class Script : ScriptBase
         null : query.Get("folder_ids").ToString();
        query["order_by"] = string.IsNullOrEmpty(query.Get("order_by")) ? 
         "status_changed" : query.Get("order_by");
-      query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
-        "2000-01-02T12:45Z" : query.Get("startDateTime");
-      query["to_date"] = string.IsNullOrEmpty(query.Get("endDateTime")) ? 
-        DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") : query.Get("endDateTime");
+      query["from_date"] = string.IsNullOrEmpty(query.Get("from_date")) ? 
+        "2000-01-02T12:45Z" : query.Get("from_date");
+      query["to_date"] = string.IsNullOrEmpty(query.Get("to_date")) ? 
+        DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") : query.Get("to_date");
 
       uriBuilder.Query = query.ToString();
       this.Context.Request.RequestUri = uriBuilder.Uri;
