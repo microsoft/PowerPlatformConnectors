@@ -1,18 +1,18 @@
-# Title
+# InfoVetted Vetting Connector
 
 InfoVetted provides a connector to request pre-employment vetting services such as Identity Verification (IDV), Right to Work (RTW), and Disclosure & Barring Service (DBS).
 
 The connector also supports querying the status of a requested check and downloading the vetting results as a PDF.
 
-## Publisher: Publisher's Name
-
-**InfoVetted**
+## Publisher: InfoVetted
 
 ## Prerequisites
 
-You must have registered your business and subscribed to the particular vetting product at [InfoVetted](https://www.infovetted.com) to use the connector.
+- API key is required, must sign up and registered your business at [InfoVetted](https://www.infovetted.com) to use the connector.
 
 ## Supported Operations
+
+The connector supports the following operations:
 
 ### Process Check
 
@@ -78,3 +78,7 @@ You must have an active subscription for the relevant product or have invoicing 
 ## Known Issues and Limitations
 
 No known issues
+
+## Support
+
+For any questions please contact InfoVetted Ltd [here](https://www.infovetted.com/ "InfoVetted - Contact Us") or fire an email to info@infovetted.com
