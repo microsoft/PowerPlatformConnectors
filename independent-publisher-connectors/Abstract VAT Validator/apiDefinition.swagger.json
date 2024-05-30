@@ -1,0 +1,268 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Abstract VAT Validator",
+    "contact": {
+      "name": "Fördős András",
+      "email": "fordosa90+ipc_abstrvat@gmail.com"
+    },
+    "description": "Abstract's VAT Validation is a fast, lightweight, modern solution that allows you to stay compliant for all your domestic and cross-border sales.",
+    "version": "1.0"
+  },
+  "host": "vat.abstractapi.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/v1/validate/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "vat_number": {
+                  "type": "string",
+                  "description": "The VAT number to validate.",
+                  "title": "VAT number"
+                },
+                "valid": {
+                  "type": "boolean",
+                  "description": "Is true if the submitted VAT number is valid.",
+                  "title": "Is valid"
+                },
+                "company": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the company associated with the VAT number.",
+                      "title": "Name"
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "The address of the company associated with the VAT number.",
+                      "title": "Address"
+                    }
+                  },
+                  "description": "The company associated with the VAT number.",
+                  "title": "Company"
+                },
+                "country": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "The two letter ISO 3166-1 alpha-2 code of the country associated with the VAT number.",
+                      "title": "Code"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the country associated with the VAT number.",
+                      "title": "Name"
+                    }
+                  },
+                  "description": "The country of the company associated with the VAT number.",
+                  "title": "Country"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Validate VAT",
+        "operationId": "Validate",
+        "description": "Check whether the submitted VAT number is valid and, if it is, returns company details (registered country, name, address, etc).",
+        "parameters": [
+          {
+            "name": "vat_number",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "VAT number",
+            "description": "The VAT number to validate."
+          }
+        ]
+      }
+    },
+    "/v1/calculate/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "amount_excluding_vat": {
+                  "type": "number",
+                  "description": "The amount excluding the VAT.",
+                  "title": "Amount (excl. VAT)",
+                  "format": "float"
+                },
+                "amount_including_vat": {
+                  "type": "number",
+                  "description": "The sum of the base amount and the VAT, i.e., amount_excl_vat + vat_amount.",
+                  "title": "Amount (incl. VAT)",
+                  "format": "float"
+                },
+                "vat_amount": {
+                  "type": "number",
+                  "description": "The calculated amount of VAT.",
+                  "title": "VAT amount",
+                  "format": "float"
+                },
+                "vat_category": {
+                  "type": "string",
+                  "description": "The optional category of the purchase, used to determine whether it qualifies for a reduced rate. See below for a list of supported categories.",
+                  "title": "VAT category"
+                },
+                "vat_rate": {
+                  "type": "number",
+                  "description": "The VAT rate, from 0.01 to 0.99.",
+                  "title": "VAT rate",
+                  "format": "float"
+                },
+                "country": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "description": "The two letter ISO 3166-1 alpha-2 code of the country in which the transaction takes place.",
+                      "title": "Code"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the country the VAT is being calculated from.",
+                      "title": "Name"
+                    }
+                  },
+                  "description": "country"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Calculate VAT",
+        "operationId": "Calculate",
+        "description": "Determines VAT-compliant prices for a given value, country, purchase type, and more.",
+        "parameters": [
+          {
+            "name": "amount",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Amount",
+            "description": "The amount that you would like to get the VAT amount for or from."
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Country code",
+            "description": "The two letter ISO 3166-1 alpha-2 code of the country in which the transaction takes place."
+          },
+          {
+            "name": "is_vat_incl",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "description": "If the amount already has VAT added and you\u2019d like to do the reverse calculation and split out the amount and VAT, set this parameter to true. If this parameter is not explicitly included it will default to false.",
+            "x-ms-summary": "Is VAT included"
+          },
+          {
+            "name": "vat_category",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "VAT category",
+            "description": "Some countries offer a reduced VAT rate for certain categories of goods. To determine if a reduced VAT is available and to apply it to the final amount, include the vat_category in the request."
+          }
+        ]
+      }
+    },
+    "/v1/categories/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "country_code": {
+                    "type": "string",
+                    "description": "The two letter ISO 3166-1 alpha-2 code of the country in which the transaction takes place, which is returned from the request.",
+                    "title": "Country code"
+                  },
+                  "rate": {
+                    "type": "string",
+                    "description": "The VAT rate for this specific category.",
+                    "title": "Rate"
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "The name of the category.",
+                    "title": "Category"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A description about the category.",
+                    "title": "Description"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "List categories",
+        "operationId": "ListCategories",
+        "description": "List latest VAT rates for a specific country.",
+        "parameters": [
+          {
+            "name": "country_code",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Country code",
+            "description": "The two letter ISO 3166-1 alpha-2 code of the country in which the transaction takes place."
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "query",
+      "name": "api_key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://docs.abstractapi.com/vat-validation"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.abstractapi.com/legal/dpa"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Business Intelligence"
+    }
+  ]
+}

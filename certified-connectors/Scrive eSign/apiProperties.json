@@ -1,12 +1,19 @@
 {
   "properties": {
+    "publisher": "Scrive AB",
+    "stackOwner": "Scrive AB",
+    "iconBrandColor": "#27282D",
+    "capabilities": [
+      "triggers",
+      "actions"
+    ],
     "connectionParameters": {
       "username": {
         "type": "string",
-        "description": "The Scrive account email.",
-        "displayName": "Email for Scrive account",
-        "tooltip": "Provide the email for the Scrive account",
         "uiDefinition": {
+          "description": "The Scrive account email.",
+          "displayName": "Email for Scrive account",
+          "tooltip": "Provide the email for the Scrive account",
           "constraints": {
             "clearText": true,
             "required": "true",
@@ -16,10 +23,10 @@
       },
       "password": {
         "type": "securestring",
-        "description": "The Scrive account password.",
-        "displayName": "Password for Scrive account",
-        "tooltip": "Provide the password for the Scrive account",
         "uiDefinition": {
+          "description": "The Scrive account password.",
+          "displayName": "Password for Scrive account",
+          "tooltip": "Provide the password for the Scrive account",
           "constraints": {
             "clearText": false,
             "required": "true",
@@ -29,10 +36,10 @@
       },
       "customApiUrl": {
         "type": "securestring",
-        "description": "Specify Scrive API host. Default is https://scrive.com.",
-        "displayName": "API Host URL",
-        "tooltip": "Provide the host URL for the API.",
         "uiDefinition": {
+          "description": "Specify Scrive API host. Default is https://scrive.com.",
+          "displayName": "API Host URL",
+          "tooltip": "Provide the host URL for the API.",
           "constraints": {
             "clearText": true,
             "required": "false",
@@ -54,15 +61,15 @@
             "description": "Basic authentication using a Scrive email and password."
           },
           "metadata": {
-            "allowSharing": true
+            "allowSharing": false
           },
           "parameters": {
             "username": {
               "type": "securestring",
-              "description": "The Scrive account email.",
-              "displayName": "Email for Scrive account",
-              "tooltip": "Provide the email for the Scrive account",
               "uiDefinition": {
+                "description": "The Scrive account email.",
+                "displayName": "Email for Scrive account",
+                "tooltip": "Provide the email for the Scrive account",
                 "constraints": {
                   "clearText": true,
                   "required": "true",
@@ -72,10 +79,10 @@
             },
             "password": {
               "type": "securestring",
-              "description": "The Scrive account password.",
-              "displayName": "Password for Scrive account",
-              "tooltip": "Provide the password for the Scrive account",
               "uiDefinition": {
+                "description": "The Scrive account password.",
+                "displayName": "Password for Scrive account",
+                "tooltip": "Provide the password for the Scrive account",
                 "constraints": {
                   "clearText": false,
                   "required": "true",
@@ -85,10 +92,10 @@
             },
             "customApiUrl": {
               "type": "securestring",
-              "description": "Specify Scrive API host. Default is https://scrive.com.",
-              "displayName": "API Host URL",
-              "tooltip": "Provide the host URL for the API.",
               "uiDefinition": {
+                "description": "Specify Scrive API host. Default is https://scrive.com.",
+                "displayName": "API Host URL",
+                "tooltip": "Provide the host URL for the API.",
                 "constraints": {
                   "clearText": true,
                   "required": "false",
@@ -101,36 +108,43 @@
         {
           "name": "OAuth",
           "uiDefinition": {
-            "displayname": "OAuth",
-            "description": "OAuth authentication."
+            "displayname": "OAuth/SSO",
+            "description": "OAuth authentication through email/password or single sign-on (SSO)."
           },
           "metadata": {
-            "allowSharing": true
+            "allowSharing": false
           },
           "parameters": {
             "token": {
               "oAuthSettings": {
-                "clientId": "<<Please add your clientID here>>",
                 "identityProvider": "oauth2",
-                "redirectMode": "Global",
-                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
-                "customParameters": {
-                  "authorizationUrl": {
-                    "value": "https://power-automate-integration.scrive.com/oauth/authorization"
-                  },
-                  "refreshUrl": {
-                    "value": "https://power-automate-integration.scrive.com/oauth/refresh"
-                  },
-                  "tokenUrl": {
-                    "value": "https://power-automate-integration.scrive.com/oauth/token"
-                  }
-                },
+                "clientId": "[[Please add the clientId here]]",
                 "scopes": [
                   "FULL_ACCESS"
                 ],
+                "redirectMode": "Global",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect",
                 "properties": {
-                  "IsFirstParty": "False",
-                  "IsOnbehalfofLoginSupported": false
+                  "IsFirstParty": "False"
+                },
+                "customParameters": {
+                  "authorizationUrl": {
+                    "value": "https://ms-power-automate.scrive.com/oauth/authorization"
+                  },
+                  "tokenUrl": {
+                    "value": "https://ms-power-automate.scrive.com/oauth/token"
+                  },
+                  "refreshUrl": {
+                    "value": "https://ms-power-automate.scrive.com/oauth/refresh"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Log in with your credentials",
+                "description": "Log in with your credentials",
+                "tooltip": "Log in with your credentials",
+                "constraints": {
+                  "required": "true"
                 }
               },
               "type": "oauthSetting"
@@ -139,12 +153,21 @@
         }
       ]
     },
-    "publisher": "Scrive AB",
-    "stackOwner": "Scrive AB",
-    "iconBrandColor": "#27282D",
-    "capabilities": [
-      "triggers",
-      "actions"
+    "policyTemplateInstances": [
+      {
+        "parameters": {
+          "x-ms-apimTemplate-operationName": [
+            "PollSignedDocuments"
+          ],
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "mtime": "@{triggerBody().documents[0].mtime}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().documents"
+        },
+        "templateId": "pollingtrigger",
+        "title": "PollingTriggerPolicy_PollSignedDocuments",
+        "type": "PollingTrigger"
+      }
     ]
   }
 }
