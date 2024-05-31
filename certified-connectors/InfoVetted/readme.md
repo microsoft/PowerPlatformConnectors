@@ -82,3 +82,7 @@ No known issues
 ## Support
 
 For any questions please contact InfoVetted Ltd [here](https://www.infovetted.com/ "InfoVetted - Contact Us") or fire an email to info@infovetted.com
+
+## Deployment Instructions
+
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps
