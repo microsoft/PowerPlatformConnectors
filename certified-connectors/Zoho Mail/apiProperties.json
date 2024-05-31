@@ -1,0 +1,133 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "oauth2generic",
+          "clientId": "<Enter Your Client ID>",
+          "scopes": [
+            "VirtualOffice.accounts.READ",
+            "VirtualOffice.messages.ALL",
+            "VirtualOffice.folders.ALL",
+            "VirtualOffice.tags.ALL",
+            "VirtualOffice.filters.ALL",
+            "VirtualOffice.ogwebhooks.ALL"
+          ],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect/zohomail",
+          "properties": {
+            "IsFirstParty": "False",
+            "IsOnbehalfofLoginSupported": false
+          },
+          "customParameters": {
+            "authorizationUrlTemplate": {
+              "value": "https://accounts.zoho{CustomHost}/oauth/v2/auth"
+            },
+            "authorizationUrlQueryStringTemplate": {
+              "value": "?response_type=code&client_id={clientId}&redirect_uri={redirectUrl}&state={State}&scope={Scopes}&access_type=offline&prompt=consent"
+            },
+            "tokenUrlTemplate": {
+              "value": "https://accounts.zoho{CustomHost}/oauth/v2/token"
+            },
+            "tokenBodyTemplate": {
+              "value": "code={code}&grant_type=authorization_code&redirect_uri={redirectUrl}&client_id={clientId}&client_secret={clientSecret}&scope={Scopes}"
+            },
+            "refreshUrlTemplate": {
+              "value": "https://accounts.zoho{CustomHost}/oauth/v2/token"
+            },
+            "refreshBodyTemplate": {
+              "value": "grant_type=refresh_token&refresh_token={refreshToken}&client_id={clientId}&client_secret={clientSecret}"
+            }
+          }
+        }
+      },
+      "token:customHost": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "tabIndex": 3,
+            "allowedValues": [
+              {
+                "text": "US (zoho.com)",
+                "value": ".com"
+              },
+              {
+                "text": "EU (zoho.eu)",
+                "value": ".eu"
+              },
+              {
+                "text": "IN (zoho.in)",
+                "value": ".in"
+              },
+              {
+                "text": "AU (zoho.com.au)",
+                "value": ".com.au"
+              },
+              {
+                "text": "JP (zoho.jp)",
+                "value": ".jp"
+              }
+            ]
+          },
+          "displayName": "Select the region where your Zoho account data resides.",
+          "description": "Select the domain."
+        }
+      }
+    },
+    "scriptOperations": [
+      "Get_Sender_Details",
+      "Send_Mail",
+      "Save_Draft",
+      "Search_Mail",
+      "Get_Email_Content"
+    ],
+    "iconBrandColor": "#236eb4",
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "dynamichosturl",
+        "title": "Set host for connection",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://mail.zoho@connectionParameters('token:customHost')"
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Webhook Route",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/integPlatform/api/outgoingWebhooks",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "New_Mail_Trigger"
+          ]
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "User Agent",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "user-agent",
+          "x-ms-apimTemplateParameter.value": "MS PowerAutomate",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setqueryparameter",
+        "title": "SetFromMailParameter",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "criterias",
+          "x-ms-apimTemplateParameter.value": "[{\"lhs\":\"sender\",\"operator\":\"contains\",\"rhs\":\"@queryParameters('criterias')\"}]",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-operationName": [
+            "New_Mail_Trigger"
+          ]
+        }
+      }
+    ],
+    "publisher": "Zoho Corporation",
+    "stackOwner": "Zoho Corporation"
+  }
+}
