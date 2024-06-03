@@ -22,6 +22,7 @@ This connector supports the following endpoints from the Fleetio API
 - `v1/parts`
 - `v1/purchase_orders`
 - `v1/vehicle_assignments`
+- `v2/fuel_entries`
 
 ## Obtaining Credentials
 
