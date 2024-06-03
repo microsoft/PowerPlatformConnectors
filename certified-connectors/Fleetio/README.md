@@ -16,13 +16,13 @@ This connector supports the following endpoints from the Fleetio API
 - `v2/issues`
 - `v2/service_entries`
 - `v1/submitted_inspection_forms`
+- `v1/fuel_entries`
 - `v1/vehicles`
 - `v1/expense_entries`
 - `v2/contacts`
 - `v1/parts`
 - `v1/purchase_orders`
 - `v1/vehicle_assignments`
-- `v2/fuel_entries`
 
 ## Obtaining Credentials
 
