@@ -1017,6 +1017,12 @@ public class Script : ScriptBase
         templateRoles.Add(signer);
         signer = new JObject();
       }
+
+      if (key.Contains("/"))
+      {
+        var newKey = key.Split('/')[1];
+        signer[newKey] = value;
+      }
     }
 
     newBody["templateRoles"] = templateRoles;
