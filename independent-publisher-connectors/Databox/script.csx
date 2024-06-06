@@ -21,6 +21,12 @@ public class Script : ScriptBase
                 var dimensionValue = (string)item["dimension_value"];
                 obj[dimension] = dimensionValue;
             }
+            
+            if (item["date"] != null)
+            {
+                var dateValue = (string)item["date"];
+                obj[date] = dateValue;
+            }
 
             data.Add(obj);
         }
