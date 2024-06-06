@@ -25,7 +25,7 @@ public class Script : ScriptBase
             if (item["date"] != null)
             {
                 var dateValue = (string)item["date"];
-                obj[date] = dateValue;
+                obj["date"] = dateValue;
             }
 
             data.Add(obj);
