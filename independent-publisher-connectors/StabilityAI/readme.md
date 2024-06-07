@@ -10,6 +10,10 @@ To use the Stability.ai platform, you will need to sign up for an account with [
 Once logged in to DreamStudio, open your [Account page](https://dreamstudio.ai/account) to find your API key.
 
 ## Supported Operations
+### Get image with Stable Image Core
+Retrieve an image using the Stable Image Core text-to-image generation.
+### Get image with Stable Diffusion 3.0
+Retrieve an image using the Stable Diffusion 3.0 text-to-image generation.
 ### Generate image from text
 Generate images from text, existing images, or both.
 ### Generate image from image
