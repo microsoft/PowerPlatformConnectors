@@ -23,6 +23,46 @@ Request a vetting check. The following check types are available:
 - EnhancedDBS = 2
 - BasicDBS = 3
 
+If requesting a DBS vetting check use one of the following employment sectors
+
+## Employment Sectors
+
+- LocalGovernment = 0
+- CentralGovernment = 1
+- PublicSectorOther = 2
+- NHS = 3
+- PresechoolEducation = 4
+- SecondaryEducation = 5
+- AcademyEducation = 6
+- FurtherEducation = 7
+- HigherEducation = 8
+- IndependentEducation = 9
+- VoluntaryCharity = 10
+- PrivateHealthcare = 11
+- AgricultureForestryAndFishing = 12
+- MiningAndQuarrying = 13
+- Manufacturing = 14
+- Retail = 15
+- EnergyAndAirConditioning = 16
+- WaterandWasteManagement = 17
+- Construction = 18
+- TradeOrRepairOfVehicles = 19
+- TransportationAndStorage = 20
+- AccommodationAndFoodService = 21
+- InformationAndCommunication = 22
+- FinancialAndInsurance = 23
+- RealEstateActivities = 24
+- ProfessionalTechnical = 25
+- AdministrativeAndSupport = 26
+- SocialCare = 27
+- ArtsAndEntertainment = 28
+- LeisureSportAndTourism = 29
+- FosterAndAdoption = 30
+- ChildCare = 31
+- Drivers = 32
+- LawEnforcementAndSecurity = 33
+- RecruitmentAndHR = 34
+
 Vetting status updates will be sent to the (optional) webhook address provided in the following format
 
 **Webhook POST payload JSON:**
