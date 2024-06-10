@@ -25,6 +25,10 @@ Reduce and optimize the file size of PDF, PNG and JPG files.
 
 Capture a screenshot from an URL as PDF, PNG or JPG.
 
+### Merge Files
+
+Merge at least 2 files into one PDF. Any input format which is supported by CloudConvert can be merged.
+
 ## Obtaining Credentials
 A CloudConvert account (free or paid) is required to register the OAuth Client. To get a Client ID and Client Secret, follow these steps:
 
@@ -36,7 +40,7 @@ A CloudConvert account (free or paid) is required to register the OAuth Client. 
 
 ## Known Issues and Limitations
 
-* The file size of the input file is currently limited to 10MB.
+* The file size of the input file is currently limited to 50MB.
 
 ## API Documentation
 https://cloudconvert.com/api/v2
