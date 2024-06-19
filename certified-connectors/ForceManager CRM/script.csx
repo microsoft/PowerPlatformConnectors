@@ -1,4 +1,4 @@
-public class Script : ScriptBase
+﻿public class Script : ScriptBase
 {
 
     string public_key = "public_key";
@@ -9,12 +9,6 @@ public class Script : ScriptBase
         var accessTokenResponse = await this.getAccessTokenResponse().ConfigureAwait(false);
         if (accessTokenResponse.IsSuccessStatusCode)
         {
-
-            if (this.Context.OperationId == "GetCustomFieldsSchema")
-            {
-                await this.UpdateGetCustomFieldsSchemaRequest().ConfigureAwait(false);
-            }
-
             HttpResponseMessage response = await this.invokeAction(accessTokenResponse).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
@@ -30,14 +24,6 @@ public class Script : ScriptBase
         {
             return accessTokenResponse;
         }
-    }
-
-    private async Task UpdateGetCustomFieldsSchemaRequest()
-    {
-        var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-        var contentAsJson = new JObject();
-        contentAsJson.Add("entity", contentAsString.Trim('"'));
-        this.Context.Request.Content = CreateJsonContent(contentAsJson.ToString());
     }
 
     private async Task<HttpResponseMessage> getAccessTokenResponse()
@@ -147,6 +133,36 @@ public class Script : ScriptBase
 
         switch (this.Context.OperationId)
         {
+            case "CreateAccount":
+            case "UpdateAccount":
+            case "CreateContact":
+            case "UpdateContact":
+            case "CreateOpportunity":
+            case "UpdateOpportunity":
+            case "CreateSalesOrder":
+            case "UpdateSalesOrder":
+            case "CreateSalesOrderLine":
+            case "UpdateSalesOrderLine":
+                var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var contentAsJson = JObject.Parse(contentAsString);
+
+                if (contentAsJson["customFields"] != null)
+                {
+                    var keysToChange = contentAsJson["customFields"].Children<JProperty>().ToList();
+
+                    foreach (var key in keysToChange)
+                    {
+                        contentAsJson[key.Name] = key.Value;
+                        key.Remove();
+                    }
+
+                    ((JObject)contentAsJson).Remove("customFields");
+                }
+
+                this.Context.Request.Content = CreateJsonContent(contentAsJson.ToString());
+
+                newResponse = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
+                break;
             case "CreateAccountWebhook":
             case "UpdateAccountWebhook":
             case "CreateContactWebhook":
@@ -185,6 +201,11 @@ public class Script : ScriptBase
                 newResponse.Content = CreateJsonContent((await withoutDeletedItems(this.Context.Request, this.CancellationToken)).ToString());
                 break;
             case "GetCustomFieldsSchema":
+                var customFieldSchemaContentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var customFieldSchemaContentAsJson = new JObject();
+                customFieldSchemaContentAsJson.Add("entity", customFieldSchemaContentAsString.Trim('"'));
+                this.Context.Request.Content = CreateJsonContent(customFieldSchemaContentAsJson.ToString());
+
                 response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
                 responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 // var responseAsJson = JObject.Parse(responseAsString);
@@ -326,7 +347,19 @@ public class Script : ScriptBase
 
                 var apiProperty = new ApiProperty();
 
-                apiProperty.type = ConvertType(item.Type);
+
+                if (item.Type == "unicode" && !string.IsNullOrEmpty(item.Choices) && !(item.List == true))
+                {
+                    apiProperty.type = "array";
+                    apiProperty.items = new JObject
+                    {
+                        ["type"] = "integer"
+                    };
+                }
+                else
+                {
+                    apiProperty.type = ConvertType(item.Type);
+                }
                 apiProperty.format = ConvertFormat(item.Type);
 
                 apiProperty.title = item.Label;
@@ -424,6 +457,7 @@ public class Script : ScriptBase
         // public List<ApiProperty> spec { get; set; }
         // [JsonProperty("enum")]
         // public List<ApiOption> options { get; set; }
+        public JObject items { get; set; }
     }
 
     public class ApiOption
