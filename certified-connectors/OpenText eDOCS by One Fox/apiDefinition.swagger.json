@@ -1,20 +1,26 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "OpenText eDOCS by One Fox",
-        "description": "Empower OpenText eDOCS as the primary repository for all things content related. Together with the OpenText eDOCS Power Automate Connector by One Fox you can streamline content processes across a widespread application landscape and limit information silos.",
-        "version": "1.0",
+        "title": "OpenText™ eDOCS",
+        "description": "OpenText™ eDOCS is a flexible, collaborative enterprise content management (ECM) system designed to support legal and other professional services organizations. Now you can bring content and processes more together by combining it in your low code solutions to ensure that critical business content is managed and secure throughout the content lifecycle, while remaining easily accessible for day-to-day operations.",
+        "version": "1.1",
         "contact": {
             "name": "One Fox Support",
             "url": "https://www.onefox.com/service-desk/",
             "email": "servicedesk@onefox.nl"
         }
     },
-    "host": "onefox-pac.azurewebsites.net",
+    "host": "onefoxdev-pac.azurewebsites.net",
     "basePath": "/",
-    "schemes": [ "https" ],
-    "consumes": [ "application/json" ],
-    "produces": [ "application/json" ],
+    "schemes": [
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
     "paths": {
         "/api/document/create/{contentType}": {
             "post": {
@@ -162,6 +168,42 @@
                         "schema": {
                             "$ref": "#/definitions/File"
                         }
+                    }
+                ]
+            }
+        },
+        "/api/document/check-in/{id}": {
+            "put": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "Check in document",
+                "description": "Check in the document in eDOCS",
+                "operationId": "CheckInDocument",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/DocumentId"
+                    }
+                ]
+            }
+        },
+        "/api/document/check-out/{id}": {
+            "put": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "Check out document",
+                "description": "Check out the document in eDOCS",
+                "operationId": "CheckOutDocument",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/DocumentId"
                     }
                 ]
             }
@@ -365,6 +407,45 @@
                 ]
             }
         },
+        "/api/document/get-content/{id}/{versionId}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "x-ms-visibility": "important",
+                                    "x-ms-summary": "File Name",
+                                    "description": "The file name (with extension) of the document."
+                                },
+                                "content": {
+                                    "type": "string",
+                                    "x-ms-visibility": "important",
+                                    "format": "byte",
+                                    "x-ms-summary": "File Content",
+                                    "description": "The file content of the document."
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get document version content",
+                "description": "Get the content of the document version from eDOCS",
+                "operationId": "GetDocumentVersionContent",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/DocumentId"
+                    },
+                    {
+                        "$ref": "#/parameters/VersionId"
+                    }
+                ]
+            }
+        },
         "/api/document/delete/{id}": {
             "delete": {
                 "responses": {
@@ -375,6 +456,54 @@
                 "summary": "Delete document",
                 "description": "Delete the document in eDOCS",
                 "operationId": "DeleteDocument",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/DocumentId"
+                    }
+                ]
+            }
+        },
+        "/api/document/delete/{id}/version/{versionId}": {
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "Delete document version",
+                "description": "Delete the document version in eDOCS",
+                "operationId": "DeleteDocumentVersion",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/DocumentId"
+                    },
+                    {
+                        "$ref": "#/parameters/VersionId"
+                    }
+                ]
+            }
+        },
+        "/api/document/get-versions/{id}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "x-ms-visibility": "important",
+                            "x-ms-summary": "Versions",
+                            "description": "The versions of the document.",
+                            "items": {
+                                "$ref": "#/definitions/Version"
+                            }
+                        }
+                    }
+                },
+                "summary": "Get document versions",
+                "description": "Get the versions of the document from eDOCS",
+                "operationId": "GetDocumentVersions",
                 "x-ms-visibility": "important",
                 "parameters": [
                     {
@@ -883,6 +1012,415 @@
                     }
                 ]
             }
+        },
+        "/api/web-hook/create/DocumentCreated": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Document ID",
+                    "description": "The ID of the document that has been created in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When a document is created",
+                "description": "When a document has been created in eDOCS",
+                "operationId": "DocumentCreated",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/create/DocumentContentUpdated": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Document ID",
+                    "description": "The ID of the document that had a file content update in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When document content is updated",
+                "description": "When a document file content has been updated in eDOCS",
+                "operationId": "DocumentContentUpdated",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/create/DocumentPropertiesUpdated": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Document ID",
+                    "description": "The ID of the document of which the properties have been updated in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When document properties are updated",
+                "description": "When document properties have been updated in eDOCS",
+                "operationId": "DocumentPropertiesUpdated",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/create/DocumentDeleted": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Document ID",
+                    "description": "The ID of the document that has been deleted in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When a document is deleted",
+                "description": "When a document has been deleted in eDOCS (in case of queue for deletion)",
+                "operationId": "DocumentDeleted",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/create/FolderCreated": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Folder ID",
+                    "description": "The ID of the folder that has been created in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When a folder is created",
+                "description": "When a folder has been created in eDOCS",
+                "operationId": "FolderCreated",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/create/FolderUpdated": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Folder ID",
+                    "description": "The ID of the folder that has been updated in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When a folder is updated",
+                "description": "When a folder has been updated in eDOCS",
+                "operationId": "FolderUpdated",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/create/FolderDeleted": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Folder ID",
+                    "description": "The ID of the folder that has been deleted in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When a folder is deleted",
+                "description": "When a folder has been deleted in eDOCS (in case of queue for deletion)",
+                "operationId": "FolderDeleted",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/create/ItemDeleted": {
+            "x-ms-notification-content": {
+                "description": "NotificationId",
+                "schema": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Item ID",
+                    "description": "The ID of the folder or document that has been deleted in eDOCS."
+                }
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "When an item is deleted",
+                "description": "When a folder or document has been deleted in eDOCS (in case of hard delete)",
+                "operationId": "ItemDeleted",
+                "x-ms-visibility": "important",
+                "x-ms-trigger": "single",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "WebHookUri"
+                            ],
+                            "properties": {
+                                "WebHookUri": {
+                                    "type": "string",
+                                    "description": "WebHookUri",
+                                    "x-ms-notification-url": true,
+                                    "x-ms-visibility": "internal",
+                                    "title": "WebHookUri"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "/api/web-hook/delete/{id}": {
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "Delete WebHook",
+                "description": "Delete the WebHook subscription",
+                "operationId": "DeleteWebHook",
+                "x-ms-visibility": "internal",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-ms-visibility": "important",
+                        "x-ms-url-encoding": "single",
+                        "x-ms-summary": "ID",
+                        "description": "Specify the ID of the WebHook"
+                    }
+                ]
+            }
+        },
+        "/api/lookup-entry/create/{contentType}": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string",
+                            "x-ms-visibility": "important",
+                            "x-ms-summary": "Lookup Entry ID",
+                            "description": "The ID of the lookup entry."
+                        }
+                    }
+                },
+                "summary": "Create lookup entry",
+                "description": "Create the lookup entry in eDOCS",
+                "operationId": "CreateLookupEntry",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/LookupContentType"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "x-ms-visibility": "important",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "fieldValues"
+                            ],
+                            "properties": {
+                                "fieldValues": {
+                                    "$ref": "#/definitions/LookupFieldValues"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "/api/lookup-entry/update/{id}/{contentType}": {
+            "put": {
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "summary": "Update lookup entry",
+                "description": "Update the lookup entry in eDOCS",
+                "operationId": "UpdateLookupEntry",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/LookupEntryId"
+                    },
+                    {
+                        "$ref": "#/parameters/LookupContentType"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "x-ms-visibility": "important",
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "fieldValues"
+                            ],
+                            "properties": {
+                                "fieldValues": {
+                                    "$ref": "#/definitions/LookupFieldValues"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "/api/lookup-entry/get-all/{contentType}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "x-ms-visibility": "important",
+                            "x-ms-summary": "Lookup Entries",
+                            "description": "The entries of the lookup.",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "x-ms-visibility": "important",
+                                        "x-ms-summary": "ID",
+                                        "description": "The ID of the lookup entry."
+                                    },
+                                    "fields": {
+                                        "type": "object",
+                                        "x-ms-dynamic-schema": {
+                                            "operationId": "GetContentTypeSchema",
+                                            "parameters": {
+                                                "name": {
+                                                    "parameter": "contentType"
+                                                }
+                                            },
+                                            "value-path": "schema"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get lookup entries",
+                "description": "Get all lookup entries for the specified content type from eDOCS",
+                "operationId": "GetLookupEntries",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/LookupContentType"
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "x-ms-visibility": "important",
+                        "x-ms-summary": "Filter",
+                        "description": "Specify a filter to filter the lookup entries by the specified field"
+                    }
+                ]
+            }
         }
     },
     "definitions": {
@@ -971,11 +1509,96 @@
                 }
             }
         },
+        "Version": {
+            "type": "object",
+            "properties": {
+                "versionId": {
+                    "type": "string",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Version ID",
+                    "description": "The ID of the version."
+                },
+                "versionLabel": {
+                    "type": "string",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Version Label",
+                    "description": "The label of the version."
+                },
+                "modifiedDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Modified Date",
+                    "description": "The modification date of the version."
+                },
+                "createdBy": {
+                    "type": "string",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Created By",
+                    "description": "The typist of the version."
+                },
+                "modifiedBy": {
+                    "type": "string",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "Modified By",
+                    "description": "The author of the version."
+                },
+                "fileName": {
+                    "type": "string",
+                    "x-ms-visibility": "important",
+                    "x-ms-summary": "File Name",
+                    "description": "The file name of the version."
+                }
+            }
+        },
         "DocumentFieldValues": {
             "type": "array",
             "x-ms-visibility": "advanced",
             "x-ms-summary": "Fields",
             "description": "Specify the fields of the document",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "x-ms-visibility": "important",
+                        "x-ms-summary": "Name",
+                        "description": "Select the name of the field",
+                        "x-ms-dynamic-values": {
+                            "operationId": "GetContentTypeFields",
+                            "value-path": "value",
+                            "value-title": "displayName",
+                            "parameters": {
+                                "name": {
+                                    "parameter": "contentType"
+                                }
+                            }
+                        },
+                        "x-ms-dynamic-list": {
+                            "operationId": "GetContentTypeFields",
+                            "itemValuePath": "value",
+                            "itemTitlePath": "displayName",
+                            "parameters": {
+                                "name": {
+                                    "parameterReference": "contentType"
+                                }
+                            }
+                        }
+                    },
+                    "value": {
+                        "type": "string",
+                        "x-ms-visibility": "important",
+                        "x-ms-summary": "Value",
+                        "description": "Specify the value of the field"
+                    }
+                }
+            }
+        },
+        "LookupFieldValues": {
+            "type": "array",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "Fields",
+            "description": "Specify the fields of the lookup",
             "items": {
                 "type": "object",
                 "properties": {
@@ -1097,6 +1720,26 @@
             "x-ms-summary": "ID",
             "description": "Specify the ID of the document"
         },
+        "LookupEntryId": {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "ID",
+            "description": "Specify the ID of the lookup entry"
+        },
+        "VersionId": {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Version ID",
+            "description": "Specify the version ID"
+        },
         "DocumentContentType": {
             "name": "contentType",
             "in": "path",
@@ -1114,6 +1757,91 @@
                     "type": "Document"
                 }
             }
+        },
+        "LookupContentType": {
+            "name": "contentType",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Content Type",
+            "description": "Select the content type of the lookup",
+            "x-ms-dynamic-values": {
+                "operationId": "GetContentTypes",
+                "value-path": "value",
+                "value-title": "displayName",
+                "parameters": {
+                    "type": "Lookup"
+                }
+            }
+        },
+        "WebHook": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "type": "object",
+                "required": [
+                    "WebHookUri"
+                ],
+                "properties": {
+                    "WebHookUri": {
+                        "type": "string",
+                        "description": "WebHookUri",
+                        "x-ms-notification-url": true,
+                        "x-ms-visibility": "internal",
+                        "title": "WebHookUri"
+                    },
+                    "Filter": {
+                        "type": "object",
+                        "properties": {
+                            "parent": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "x-ms-visibility": "important",
+                                        "x-ms-summary": "Parent ID",
+                                        "description": "Specify the parent folder ID for which to trigger"
+                                    },
+                                    "depth": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "x-ms-visibility": "important",
+                                        "x-ms-summary": "Parent Depth",
+                                        "description": "Specify the max depth the parent should be searched for (where 1 is direct parent, when not provided the default will be used)"
+                                    }
+                                }
+                            },
+                            "metadata": {
+                                "type": "array",
+                                "x-ms-visibility": "advanced",
+                                "x-ms-summary": "Metadata",
+                                "description": "Specify the metadata the profile should contain",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "column": {
+                                            "type": "string",
+                                            "x-ms-visibility": "important",
+                                            "x-ms-summary": "Column",
+                                            "description": "Specify the column in the PROFILE table"
+                                        },
+                                        "value": {
+                                            "type": "string",
+                                            "x-ms-visibility": "important",
+                                            "x-ms-summary": "Value",
+                                            "description": "Specify the value that should be in this column"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "responses": {},
@@ -1129,7 +1857,7 @@
     "x-ms-connector-metadata": [
         {
             "propertyName": "Website",
-            "propertyValue": "https://www.onefox.nl/product/opentext-edocs-power-automate-connector-by-one-fox"
+            "propertyValue": "https://www.onefox.com/product/opentext-edocs-power-automate-by-one-fox/"
         },
         {
             "propertyName": "Privacy policy",
