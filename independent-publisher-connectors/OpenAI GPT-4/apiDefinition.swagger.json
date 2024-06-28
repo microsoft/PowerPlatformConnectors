@@ -3,12 +3,18 @@
   "info": {
     "title": "OpenAI GPT",
     "description": "OpenAI is an artificial intelligence research laboratory. The company conducts research in the field of AI with the stated goal of promoting and developing friendly AI in a way that benefits humanity as a whole. Through this connector you can access the Generative Pre-trained Transformer 4 (GPT-4), an autoregressive language model that uses deep learning to produce human-like text, plus many other models.",
-    "version": "1.1",
+    "version": "1.4",
     "contact": {
       "name": "Troy Taylor",
       "url": "https://www.hitachisolutions.com",
       "email": "ttaylor@hitachisolutions.com"
-    }
+    },
+    "x-ms-keywords": [
+      "OpenAI",
+      "AI",
+      "LLM",
+      "completion"
+    ]
   },
   "host": "api.openai.com",
   "basePath": "/",
@@ -27,7 +33,7 @@
         "description": "Creates a completion for the provided prompt and parameters.",
         "summary": "Create completion",
         "operationId": "CompletionPost",
-        "deprecated": false,
+        "deprecated": true,
         "parameters": [
           {
             "name": "body",
@@ -41,18 +47,13 @@
                   "type": "string",
                   "description": "ID of the model to use.",
                   "title": "Model",
-                  "default": "text-davinci-003",
-                  "enum": [
-                    "text-davinci-003",
-                    "text-davinci-002",
-                    "text-curie-001",
-                    "text-babbage-001",
-                    "text-ada-001",
-                    "davinci",
-                    "curie",
-                    "babbage",
-                    "ada"
-                  ]
+                  "default": "gpt-4-turbo",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ModelsGet",
+                    "value-path": "id",
+                    "value-collection": "data",
+                    "value-title": "id"
+                  }
                 },
                 "prompt": {
                   "description": "The prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens, or array of token arrays.",
@@ -194,6 +195,15 @@
               }
             }
           }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": false,
+          "operations": [
+            {
+              "operationId": "CompletionPost",
+              "x-ms-require-user-confirmation": true
+            }
+          ]
         }
       }
     },
@@ -305,15 +315,13 @@
                   "type": "string",
                   "description": "The chat model.",
                   "title": "Model",
-                  "default": "gpt-3.5-turbo",
-                  "enum": [
-                    "gpt-3.5-turbo",
-                    "gpt-3.5-turbo-0301",
-                    "gpt-4",
-                    "gpt-4-0314",
-                    "gpt-4-32k",
-                    "gpt-4-32k-0314"
-                  ]
+                  "default": "gpt-4-turbo",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ModelsGet",
+                    "value-path": "id",
+                    "value-collection": "data",
+                    "value-title": "id"
+                  }
                 },
                 "messages": {
                   "type": "array",
@@ -323,7 +331,8 @@
                       "role": {
                         "type": "string",
                         "description": "The role.",
-                        "title": "Role"
+                        "title": "Role",
+                        "default": "user"
                       },
                       "content": {
                         "type": "string",
@@ -391,7 +400,16 @@
               ]
             }
           }
-        ]
+        ],
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "ChatPost",
+              "x-ms-require-user-confirmation": true
+            }
+          ]
+        }
       }
     },
     "/v1/edits": {
@@ -399,7 +417,7 @@
         "description": "Creates a new edit for the provided input, instruction, and parameters.",
         "summary": "Edit Prompt",
         "operationId": "EditPost",
-        "deprecated": false,
+        "deprecated": true,
         "parameters": [
           {
             "name": "body",
@@ -658,7 +676,1361 @@
         "summary": "List models",
         "description": "Lists the currently available models, and provides basic information about each one such as the owner and availability.",
         "operationId": "ModelsGet",
-        "parameters": []
+        "parameters": [],
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "ModelsGet",
+              "x-ms-require-user-confirmation": false
+            }
+          ]
+        }
+      }
+    },
+    "/v1/fine_tuning/jobs": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "The object.",
+                  "title": "Object"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "The identifier.",
+                  "title": "ID"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "When created at.",
+                  "title": "Created At"
+                },
+                "fine_tuned_model": {
+                  "type": "string",
+                  "description": "The fine-tuned model.",
+                  "title": "Fine-Tuned Model"
+                },
+                "organization_id": {
+                  "type": "string",
+                  "description": "The organization identifier.",
+                  "title": "Organization ID"
+                },
+                "result_files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The result files.",
+                  "title": "Result Files"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "The status.",
+                  "title": "Status"
+                },
+                "validation_file": {
+                  "type": "string",
+                  "description": "The validation file.",
+                  "title": "Validation File"
+                },
+                "training_file": {
+                  "type": "string",
+                  "description": "The training file.",
+                  "title": "Training File"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create fine-tuning job",
+        "description": "Creates a job that fine-tunes a specified model from a given dataset.",
+        "operationId": "FineTuningPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "training_file": {
+                  "type": "string",
+                  "description": "The ID of an uploaded file that contains training data.",
+                  "title": "Training File"
+                },
+                "validation_file": {
+                  "type": "string",
+                  "description": "The ID of an uploaded file that contains validation data.",
+                  "title": "Validation File"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The name of the model to fine-tune.",
+                  "title": "Model"
+                },
+                "hyperparameters": {
+                  "type": "object",
+                  "properties": {
+                    "n_epochs": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.",
+                      "title": "Epochs"
+                    }
+                  },
+                  "title": "Hyperparameters"
+                },
+                "suffix": {
+                  "type": "string",
+                  "description": "A string of up to 40 characters that will be added to your fine-tuned model name.",
+                  "title": "Suffix"
+                }
+              },
+              "required": [
+                "training_file",
+                "model"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v1/fine_tuning/jobs/{fine_tuning_job_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "The object.",
+                  "title": "Object"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "The identifier.",
+                  "title": "ID"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "When created at.",
+                  "title": "Created At"
+                },
+                "finished_at": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "When finished at.",
+                  "title": "Finished At"
+                },
+                "fine_tuned_model": {
+                  "type": "string",
+                  "description": "The fine-tuned model.",
+                  "title": "Fine-Tuned Model"
+                },
+                "organization_id": {
+                  "type": "string",
+                  "description": "The organization identifier.",
+                  "title": "Organization ID"
+                },
+                "result_files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The result files.",
+                  "title": "Result Files"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "The status.",
+                  "title": "Status"
+                },
+                "validation_file": {
+                  "type": "string",
+                  "description": "The validation file.",
+                  "title": "Validation File"
+                },
+                "training_file": {
+                  "type": "string",
+                  "description": "The training file.",
+                  "title": "Training File"
+                },
+                "hyperparameters": {
+                  "type": "object",
+                  "properties": {
+                    "n_epochs": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The number of epochs.",
+                      "title": "epochs"
+                    }
+                  },
+                  "title": "Hyperparameters"
+                },
+                "trained_tokens": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The number of trained tokens.",
+                  "title": "Trained Tokens"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Retrieve fine-tuning job",
+        "description": "Retrieve info about a fine-tuning job.",
+        "operationId": "FineTuningGet",
+        "parameters": [
+          {
+            "name": "fine_tuning_job_id",
+            "in": "path",
+            "x-ms-summary": "Fine-tuning Job ID",
+            "x-ms-url-encoding": "single",
+            "description": "The fine-tuning job identifier.",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "/v1/fine_tuning/jobs/{fine_tuning_job_id}/cancel": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "The object.",
+                  "title": "Object"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "The identifier.",
+                  "title": "ID"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "When created at.",
+                  "title": "Created At"
+                },
+                "fine_tuned_model": {
+                  "type": "string",
+                  "description": "The fine-tuned model.",
+                  "title": "Fine-Tuned Model"
+                },
+                "organization_id": {
+                  "type": "string",
+                  "description": "The organization identifier.",
+                  "title": "Organization ID"
+                },
+                "result_files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The result files.",
+                  "title": "Result Files"
+                },
+                "hyperparameters": {
+                  "type": "object",
+                  "properties": {
+                    "n_epochs": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The number of epochs.",
+                      "title": "Epochs"
+                    }
+                  },
+                  "title": "Hyperparameters"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "The status.",
+                  "title": "Status"
+                },
+                "validation_file": {
+                  "type": "string",
+                  "description": "The validation file.",
+                  "title": "Validation File"
+                },
+                "training_file": {
+                  "type": "string",
+                  "description": "The training file.",
+                  "title": "Training File"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Cancel fine-tuning",
+        "parameters": [
+          {
+            "name": "fine_tuning_job_id",
+            "in": "path",
+            "x-ms-summary": "Fine-tuning Job ID",
+            "x-ms-url-encoding": "single",
+            "description": "The fine-tuning job identifier.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "description": "Immediately cancel a fine-tune job.",
+        "operationId": "FineTuningCancelPost"
+      }
+    },
+    "/v1/fine_tuning/jobs/{fine_tuning_job_id}/events": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "The object.",
+                  "title": "Object"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "object": {
+                        "type": "string",
+                        "description": "The object.",
+                        "title": "Object"
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "The identifier.",
+                        "title": "ID"
+                      },
+                      "created_at": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "When created at.",
+                        "title": "Created At"
+                      },
+                      "level": {
+                        "type": "string",
+                        "description": "The level.",
+                        "title": "Level"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "The message.",
+                        "title": "Message"
+                      },
+                      "data": {
+                        "type": "string",
+                        "description": "The data.",
+                        "title": "Data"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "The type.",
+                        "title": "Type"
+                      }
+                    }
+                  },
+                  "title": "Data"
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Whether has more.",
+                  "title": "Has More"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List fine-tuning events",
+        "parameters": [
+          {
+            "name": "fine_tuning_job_id",
+            "in": "path",
+            "x-ms-summary": "Fine-tuning Job ID",
+            "x-ms-url-encoding": "single",
+            "description": "The fine-tuning job identifier.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "x-ms-summary": "After",
+            "description": "The identifier for the last event from the previous pagination request.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "x-ms-summary": "Limit",
+            "description": "The number of events to retrieve.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "description": "Retrieve status updates for a fine-tuning job.",
+        "operationId": "FineTuningEventsGet"
+      }
+    },
+    "/v1/moderations": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The identifier.",
+                  "title": "ID"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model"
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "flagged": {
+                        "type": "boolean",
+                        "description": "Whether flagged.",
+                        "title": "Flagged"
+                      },
+                      "categories": {
+                        "type": "object",
+                        "properties": {
+                          "sexual": {
+                            "type": "boolean",
+                            "description": "Whether sexual.",
+                            "title": "Sexual"
+                          },
+                          "hate": {
+                            "type": "boolean",
+                            "description": "Whether hateful.",
+                            "title": "Hate"
+                          },
+                          "harassment": {
+                            "type": "boolean",
+                            "description": "Whether harrassment.",
+                            "title": "Harassment"
+                          },
+                          "self-harm": {
+                            "type": "boolean",
+                            "description": "Whether self-harm.",
+                            "title": "self-harm"
+                          },
+                          "sexual/minors": {
+                            "type": "boolean",
+                            "description": "Whether minor sexual.",
+                            "title": "sexual/minors"
+                          },
+                          "hate/threatening": {
+                            "type": "boolean",
+                            "description": "Whether threatening hateful.",
+                            "title": "hate/threatening"
+                          },
+                          "violence/graphic": {
+                            "type": "boolean",
+                            "description": "Whether graphic violence.",
+                            "title": "violence/graphic"
+                          },
+                          "self-harm/intent": {
+                            "type": "boolean",
+                            "description": "Whether intent to self-harm.",
+                            "title": "self-harm/intent"
+                          },
+                          "self-harm/instructions": {
+                            "type": "boolean",
+                            "description": "Whether self-harm instructions.",
+                            "title": "self-harm/instructions"
+                          },
+                          "harassment/threatening": {
+                            "type": "boolean",
+                            "description": "Whether threatening harassment.",
+                            "title": "harassment/threatening"
+                          },
+                          "violence": {
+                            "type": "boolean",
+                            "description": "Whether violence.",
+                            "title": "Violence"
+                          }
+                        },
+                        "title": "Categories"
+                      },
+                      "category_scores": {
+                        "type": "object",
+                        "properties": {
+                          "sexual": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of sexual.",
+                            "title": "Sexual"
+                          },
+                          "hate": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of hateful.",
+                            "title": "Hate"
+                          },
+                          "harassment": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of harassment.",
+                            "title": "Harassment"
+                          },
+                          "self-harm": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of self-harm.",
+                            "title": "self-harm"
+                          },
+                          "sexual/minors": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of minor sexual.",
+                            "title": "sexual/minors"
+                          },
+                          "hate/threatening": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of threatening hateful.",
+                            "title": "hate/threatening"
+                          },
+                          "violence/graphic": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of graphic violence.",
+                            "title": "violence/graphic"
+                          },
+                          "self-harm/intent": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of intent to self-harm.",
+                            "title": "self-harm/intent"
+                          },
+                          "self-harm/instructions": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of self-harm instructions.",
+                            "title": "self-harm/instructions"
+                          },
+                          "harassment/threatening": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of threatening harassment.",
+                            "title": "harassment/threatening"
+                          },
+                          "violence": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "The number of violence.",
+                            "title": "Violence"
+                          }
+                        },
+                        "title": "Category Scores"
+                      }
+                    }
+                  },
+                  "title": "Results"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create moderation",
+        "description": "Classifies if text violates OpenAI's Content Policy.",
+        "operationId": "ModerationPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "description": "The input text to classify.",
+                  "title": "Input"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model",
+                  "default": "text-moderation-latest",
+                  "enum": [
+                    "text-moderation-latest",
+                    "text-moderation-stable"
+                  ]
+                }
+              },
+              "required": [
+                "input"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v1/embeddings": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "The object.",
+                  "title": "Object"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "object": {
+                        "type": "string",
+                        "description": "The object.",
+                        "title": "Object"
+                      },
+                      "embedding": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "format": "float"
+                        },
+                        "description": "The embedding.",
+                        "title": "Embedding"
+                      },
+                      "index": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The index.",
+                        "title": "Index"
+                      }
+                    }
+                  },
+                  "title": "Data"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model"
+                },
+                "usage": {
+                  "type": "object",
+                  "properties": {
+                    "prompt_tokens": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The prompt tokens.",
+                      "title": "Prompt Tokens"
+                    },
+                    "total_tokens": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The total tokens.",
+                      "title": "Total Tokens"
+                    }
+                  },
+                  "title": "Usage"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create embedding",
+        "description": "Creates an embedding vector representing the input text.",
+        "operationId": "EmbedPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "input": {
+                  "type": "string",
+                  "description": "The input.",
+                  "title": "Input"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ModelsGet",
+                    "value-path": "id",
+                    "value-collection": "data",
+                    "value-title": "id"
+                  },
+                  "default": "gpt-4-1106-preview"
+                },
+                "encoding_format": {
+                  "type": "string",
+                  "description": "The encoding format.",
+                  "title": "Encoding Format",
+                  "default": "float",
+                  "enum": [
+                    "float",
+                    "base64"
+                  ]
+                },
+                "user": {
+                  "type": "string",
+                  "description": "The unique user string.",
+                  "title": "User"
+                }
+              },
+              "required": [
+                "input"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v1/audio/speech": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "$content": {
+                  "type": "string",
+                  "description": "The content.",
+                  "title": "Content"
+                },
+                "$content-type": {
+                  "type": "string",
+                  "description": "The content type.",
+                  "title": "Content Type"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create speech",
+        "description": "Generates audio from the input text.",
+        "operationId": "AudioSpeechPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model",
+                  "default": "tts-1",
+                  "enum": [
+                    "tts-1",
+                    "tts-1-hd"
+                  ]
+                },
+                "input": {
+                  "type": "string",
+                  "description": "The input.",
+                  "title": "Input"
+                },
+                "voice": {
+                  "type": "string",
+                  "description": "The voice.",
+                  "title": "Voice",
+                  "default": "alloy",
+                  "enum": [
+                    "alloy",
+                    "echo",
+                    "fable",
+                    "onyx",
+                    "nova",
+                    "shimmer"
+                  ]
+                },
+                "response_format": {
+                  "type": "string",
+                  "description": "The response format.",
+                  "title": "Response Format",
+                  "default": "mp3",
+                  "enum": [
+                    "mp3",
+                    "opus",
+                    "aac",
+                    "flac"
+                  ]
+                },
+                "speed": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The speed.",
+                  "title": "Speed",
+                  "default": 1,
+                  "minimum": 0.25,
+                  "maximum": 4
+                }
+              },
+              "required": [
+                "model",
+                "input",
+                "voice"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v1/audio/transcriptions": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "description": "The text.",
+                  "title": "Text"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create transcription",
+        "description": "Transcribes audio into the input language.",
+        "operationId": "AudioTranscriptionPost",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "The audio file object to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.",
+            "x-ms-summary": "File",
+            "type": "file",
+            "required": true
+          },
+          {
+            "name": "model",
+            "in": "formData",
+            "description": "ID of the model to use.",
+            "x-ms-summary": "Model",
+            "type": "string",
+            "required": true,
+            "default": "whisper-1"
+          },
+          {
+            "name": "language",
+            "in": "formData",
+            "description": "The language of the input audio.",
+            "x-ms-summary": "Language",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "prompt",
+            "in": "formData",
+            "description": "Text to guide the model's style or continue a previous audio segment.",
+            "x-ms-summary": "Prompt",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "description": "The format of the transcript output.",
+            "x-ms-summary": "Response Format",
+            "type": "string",
+            "required": true,
+            "default": "text",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "temperature",
+            "in": "formData",
+            "description": "The sampling temperature.",
+            "x-ms-summary": "Temperature",
+            "type": "number",
+            "format": "float",
+            "required": false,
+            "minimum": 0,
+            "maximum": 1
+          }
+        ]
+      }
+    },
+    "/v1/audio/translations": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "description": "The text.",
+                  "title": "Text"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create translation",
+        "description": "Translates audio into English.",
+        "operationId": "AudioTranslationPost",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "The audio file object to translate, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.",
+            "x-ms-summary": "File",
+            "type": "file",
+            "required": true
+          },
+          {
+            "name": "model",
+            "in": "formData",
+            "description": "ID of the model to use.",
+            "x-ms-summary": "Model",
+            "type": "string",
+            "required": true,
+            "default": "whisper-1"
+          },
+          {
+            "name": "prompt",
+            "in": "formData",
+            "description": "Text to guide the model's style or continue a previous audio segment.",
+            "x-ms-summary": "Prompt",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "description": "The format of the transcript output.",
+            "x-ms-summary": "Response Format",
+            "type": "string",
+            "required": true,
+            "default": "text",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "temperature",
+            "in": "formData",
+            "description": "The sampling temperature.",
+            "x-ms-summary": "Temperature",
+            "type": "number",
+            "format": "float",
+            "required": false,
+            "minimum": 0,
+            "maximum": 1
+          }
+        ]
+      }
+    },
+    "/v1/images/generations": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "When created.",
+                  "title": "Created"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL address.",
+                        "title": "URL"
+                      },
+                      "revised_prompt": {
+                        "type": "string",
+                        "description": "The revised prompt.",
+                        "title": "Revised Prompt"
+                      }
+                    }
+                  },
+                  "title": "Data"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create image",
+        "description": "Creates an image given a prompt.",
+        "operationId": "ImagePost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "The model.",
+                  "title": "Model",
+                  "default": "dall-e-2",
+                  "enum": [
+                    "dall-e-2",
+                    "dall-e-3"
+                  ]
+                },
+                "prompt": {
+                  "type": "string",
+                  "description": "The prompt.",
+                  "title": "Prompt"
+                },
+                "n": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The number of images.",
+                  "title": "Number of Images",
+                  "minimum": 1,
+                  "maximum": 10
+                },
+                "quality": {
+                  "type": "string",
+                  "description": "The quality.",
+                  "title": "Quality",
+                  "default": "standard",
+                  "enum": [
+                    "standard",
+                    "hd"
+                  ]
+                },
+                "response_format": {
+                  "type": "string",
+                  "description": "The response format.",
+                  "title": "Response Format",
+                  "default": "url",
+                  "x-ms-visibility": "internal"
+                },
+                "size": {
+                  "type": "string",
+                  "description": "The size.",
+                  "title": "Size",
+                  "default": "1024x1024",
+                  "enum": [
+                    "1024x1024",
+                    "256x256",
+                    "512x512",
+                    "1792x1024",
+                    "1024x1792"
+                  ]
+                },
+                "style": {
+                  "type": "string",
+                  "description": "The style.",
+                  "title": "Style",
+                  "enum": [
+                    "vivid",
+                    "natural"
+                  ]
+                },
+                "user": {
+                  "type": "string",
+                  "description": "The unique user string.",
+                  "title": "User"
+                }
+              },
+              "required": [
+                "prompt",
+                "response_format"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v1/images/edits": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "When created.",
+                  "title": "Created"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL address.",
+                        "title": "URL"
+                      },
+                      "revised_prompt": {
+                        "type": "string",
+                        "description": "The revised prompt.",
+                        "title": "Revised Prompt"
+                      }
+                    }
+                  },
+                  "title": "Data"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create image edit",
+        "description": "Creates an edited or extended image given an original image and a prompt.",
+        "operationId": "ImageEditPost",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "image",
+            "in": "formData",
+            "description": "The image to edit.",
+            "x-ms-summary": "Image",
+            "type": "file",
+            "required": true
+          },
+          {
+            "name": "prompt",
+            "in": "formData",
+            "description": "A text description of the desired image.",
+            "x-ms-summary": "Prompt",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "mask",
+            "in": "formData",
+            "description": "An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.",
+            "x-ms-summary": "Mask",
+            "type": "file"
+          },
+          {
+            "name": "model",
+            "in": "formData",
+            "description": "The model to use for image generation.",
+            "x-ms-summary": "Model",
+            "type": "string",
+            "required": false,
+            "default": "dall-e-2"
+          },
+          {
+            "name": "n",
+            "in": "formData",
+            "description": "The number of images to generate",
+            "x-ms-summary": "Number of Images",
+            "type": "integer",
+            "format": "int32",
+            "required": false,
+            "minimum": 1,
+            "maximum": 10
+          },
+          {
+            "name": "size",
+            "in": "formData",
+            "description": "The size of the generated images.",
+            "x-ms-summary": "Size",
+            "type": "string",
+            "required": false,
+            "default": "1024x1024",
+            "enum": [
+              "1024x1024",
+              "256x256",
+              "512x512"
+            ]
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "description": "The response format",
+            "x-ms-summary": "Response Format",
+            "type": "string",
+            "required": true,
+            "default": "url",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "user",
+            "in": "formData",
+            "description": "A unique identifer representing your end user.",
+            "x-ms-summary": "User",
+            "type": "string",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/v1/images/variations": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "When created.",
+                  "title": "Created"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "The URL address.",
+                        "title": "URL"
+                      },
+                      "revised_prompt": {
+                        "type": "string",
+                        "description": "The revised prompt.",
+                        "title": "Revised Prompt"
+                      }
+                    }
+                  },
+                  "title": "Data"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create image variation",
+        "description": "Creates a variation of a given image.",
+        "operationId": "ImageVariationPost",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "image",
+            "in": "formData",
+            "description": "The image to edit.",
+            "x-ms-summary": "Image",
+            "type": "file",
+            "required": true
+          },
+          {
+            "name": "model",
+            "in": "formData",
+            "description": "The model to use for image generation.",
+            "x-ms-summary": "Model",
+            "type": "string",
+            "required": false,
+            "default": "dall-e-2"
+          },
+          {
+            "name": "n",
+            "in": "formData",
+            "description": "The number of images to generate",
+            "x-ms-summary": "Number of Images",
+            "type": "integer",
+            "format": "int32",
+            "required": false,
+            "minimum": 1,
+            "maximum": 10
+          },
+          {
+            "name": "size",
+            "in": "formData",
+            "description": "The size of the generated images.",
+            "x-ms-summary": "Size",
+            "type": "string",
+            "required": false,
+            "default": "1024x1024",
+            "enum": [
+              "1024x1024",
+              "256x256",
+              "512x512"
+            ]
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "description": "The response format",
+            "x-ms-summary": "Response Format",
+            "type": "string",
+            "required": true,
+            "default": "url",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "user",
+            "in": "formData",
+            "description": "A unique identifer representing your end user.",
+            "x-ms-summary": "User",
+            "type": "string",
+            "required": false
+          }
+        ]
       }
     }
   },
@@ -691,5 +2063,10 @@
       "propertyName": "Categories",
       "propertyValue": "AI"
     }
-  ]
+  ],
+  "x-ms-openai-manifest": {
+    "humanName": "OpenAI",
+    "modelDescription": "This is Copilot plugin for the OpenAI service.",
+    "contactEmail": "ttaylor@hitachisolutions.com"
+  }
 }
