@@ -1,0 +1,454 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "3.12",
+    "title": "Survey123",
+    "description": "ArcGIS Survey123 is a simple and intuitive form-centric data gathering solution that makes creating, sharing, and analyzing surveys possible in just three easy steps: 1) Ask Questions; 2) Get the Answers; 3) Make the best Decisions.",
+    "contact": {
+      "name": "Survey123",
+      "url": "https://www.esri.com/survey123",
+      "email": "survey123@esri.com"
+    }
+  },
+  "host": "survey123.arcgis.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/api/survey/query": {
+      "get": {
+        "summary": "Get surveys",
+        "description": "This action retrieves a list of surveys owned by the logged in-user",
+        "operationId": "GetOwnedSurveyList",
+        "parameters": [
+          {
+            "name": "isPublished",
+            "in": "query",
+            "x-ms-visibility": "internal",
+            "type": "boolean",
+            "default": true,
+            "required": true
+          },
+          {
+            "name": "isQueryAll",
+            "in": "query",
+            "type": "boolean",
+            "default": true,
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/survey/{surveyId}/webhook/add": {
+      "x-ms-notification-content": {
+        "description": "addData response",
+        "schema": {
+          "$ref": "#/definitions/getWehhookPayloadSchema"
+        }
+      },
+      "post": {
+        "summary": "When a survey response is submitted",
+        "description": "Triggers a new flow when a survey response is submitted by a user",
+        "operationId": "AddData",
+        "parameters": [
+          {
+            "name": "surveyId",
+            "in": "path",
+            "description": "Choose a survey",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetOwnedSurveyList",
+              "parameters": {
+                "isPublished": true,
+                "isQueryAll": true
+              },
+              "value-path": "id",
+              "value-title": "title"
+            },
+            "x-ms-summary": "Choose a survey",
+            "type": "string"
+          },
+          {
+            "name": "addWebhookBody",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "webhook"
+              ],
+              "type": "object",
+              "properties": {
+                "webhook": {
+                  "description": "webhook",
+                  "required": [
+                    "name",
+                    "events",
+                    "url",
+                    "includePortalInfo",
+                    "includeUserInfo",
+                    "includeSurveyInfo",
+                    "includeServiceRequest",
+                    "includeServiceResponse"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "title": "name",
+                      "description": "The webhook name",
+                      "default": "MS-FLOW",
+                      "type": "string",
+                      "x-ms-summary": "name",
+                      "x-ms-visibility": "internal"
+                    },
+                    "events": {
+                      "description": "events",
+                      "default": [
+                        "addData"
+                      ],
+                      "type": "array",
+                      "items": {
+                        "title": "events",
+                        "description": "events",
+                        "default": "addData",
+                        "type": "string",
+                        "x-ms-visibility": "internal"
+                      },
+                      "x-ms-visibility": "internal",
+                      "x-ms-summary": "events"
+                    },
+                    "url": {
+                      "title": "url",
+                      "description": "url",
+                      "type": "string",
+                      "x-ms-summary": "url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true
+                    },
+                    "includePortalInfo": {
+                      "title": "Include portal info",
+                      "description": "Include the portal info in the payload, such as the portal URL.",
+                      "default": true,
+                      "type": "boolean",
+                      "x-ms-summary": "includePortalInfo",
+                      "x-ms-visibility": "internal"
+                    },
+                    "includeUserInfo": {
+                      "title": "Include user info",
+                      "description": "Include the user info in the payload, such as the user name, email address, first name and last name.",
+                      "default": true,
+                      "type": "boolean",
+                      "x-ms-summary": "includeUserInfo",
+                      "x-ms-visibility": "internal"
+                    },
+                    "includeSurveyInfo": {
+                      "title": "Include survey info",
+                      "description": "Include the survey info in the payload, such as the survey title and survey item id.",
+                      "default": true,
+                      "type": "boolean",
+                      "x-ms-summary": "includeSurveyInfo",
+                      "x-ms-visibility": "internal"
+                    },
+                    "includeServiceRequest": {
+                      "title": "Include submitted record",
+                      "description": "Include the submitted record info in the payload, such as attributes and geometry of the feature.",
+                      "default": true,
+                      "type": "boolean",
+                      "x-ms-summary": "includeServiceRequest",
+                      "x-ms-visibility": "internal"
+                    },
+                    "includeServiceResponse": {
+                      "title": "Include server response",
+                      "description": "Include the raw server response in the payload.",
+                      "type": "boolean",
+                      "x-ms-summary": "includeServiceResponse",
+                      "x-ms-visibility": "internal",
+                      "default": true
+                    }
+                  },
+                  "x-ms-summary": ""
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/getWehhookPayloadSchema"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single"
+      }
+    },
+    "/api/survey/{surveyItemId}/webhook/schema": {
+      "post": {
+        "summary": "get Webhook Payload Schema",
+        "description": "get Webhook Payload Schema",
+        "operationId": "GetWebhookPayloadSchema",
+        "parameters": [
+          {
+            "name": "surveyItemId",
+            "in": "path",
+            "description": "survey item id",
+            "required": true,
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetOwnedSurveyList",
+              "value-path": "id",
+              "value-title": "title"
+            },
+            "type": "string"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "default": "swagger",
+            "type": "string",
+            "x-ms-visibiltiy": "internal"
+          },
+          {
+            "name": "includeAllInfo",
+            "in": "query",
+            "x-ms-visibility": "internal",
+            "type": "boolean",
+            "default": true,
+            "required": true
+          },
+          {
+            "name": "webhookSchemaBody",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webhook": {
+                  "description": "webhook",
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "description": "events",
+                      "default": [
+                        "addData"
+                      ],
+                      "type": "array",
+                      "items": {
+                        "title": "event",
+                        "default": "addData",
+                        "type": "string",
+                        "x-ms-visibility": "internal",
+                        "x-ms-summary": "event"
+                      },
+                      "x-ms-summary": "events",
+                      "x-ms-visibility": "internal"
+                    },
+                    "includePortalInfo": {
+                      "title": "includePortalInfo",
+                      "description": "includePortalInfo",
+                      "default": true,
+                      "type": "boolean",
+                      "x-ms-summary": "includePortalInfo",
+                      "x-ms-visibility": "advanced"
+                    },
+                    "includeUserInfo": {
+                      "title": "includeUserInfo",
+                      "description": "includeUserInfo",
+                      "default": false,
+                      "type": "boolean",
+                      "x-ms-summary": "includeUserInfo",
+                      "x-ms-visibility": "advanced"
+                    },
+                    "includeSurveyInfo": {
+                      "title": "includeSurveyInfo",
+                      "description": "includeSurveyInfo",
+                      "default": false,
+                      "type": "boolean",
+                      "x-ms-summary": "includeSurveyInfo",
+                      "x-ms-visibility": "advanced"
+                    },
+                    "includeServiceResponse": {
+                      "title": "includeServiceResponse",
+                      "description": "includeServiceResponse",
+                      "default": false,
+                      "type": "boolean",
+                      "x-ms-summary": "includeServiceResponse",
+                      "x-ms-visibility": "advanced"
+                    },
+                    "includeServiceRequest": {
+                      "title": "includeServiceRequest",
+                      "description": "includeServiceRequest",
+                      "default": false,
+                      "type": "boolean",
+                      "x-ms-summary": "includeServiceRequest",
+                      "x-ms-visibility": "advanced"
+                    }
+                  },
+                  "x-ms-summary": "webhook",
+                  "required": [
+                    "events"
+                  ]
+                }
+              },
+              "required": [
+                "webhook"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "swagger": {
+                  "description": "dynamicSchema",
+                  "type": "object",
+                  "x-ms-summary": "dynamicSchema"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/api/survey/{surveyItemId}/webhook/{webhookId}": {
+      "delete": {
+        "summary": "remove webhook",
+        "description": "remove webhook",
+        "operationId": "RemoveWebhook",
+        "parameters": [
+          {
+            "name": "surveyItemId",
+            "in": "path",
+            "description": "survey item id",
+            "required": true,
+            "x-ms-summary": "survey item id",
+            "x-ms-visibility": "important",
+            "type": "string"
+          },
+          {
+            "name": "webhookId",
+            "in": "path",
+            "description": "webhook id",
+            "required": true,
+            "x-ms-summary": "webhook id",
+            "x-ms-visibility": "important",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "description": "success",
+                  "type": "boolean",
+                  "x-ms-summary": "success"
+                },
+                "id": {
+                  "description": "id",
+                  "type": "string",
+                  "x-ms-summary": "id"
+                },
+                "surveyName": {
+                  "description": "surveyName",
+                  "type": "string",
+                  "x-ms-summary": "surveyName"
+                },
+                "webhookId": {
+                  "description": "webhookId",
+                  "type": "string",
+                  "x-ms-summary": "webhookId"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    }
+  },
+  "definitions": {
+    "getWehhookPayloadSchema": {
+      "type": "object",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetWebhookPayloadSchema",
+        "parameters": {
+          "surveyItemId": {
+            "parameter": "surveyId"
+          },
+          "includeAllInfo": true
+        },
+        "value-path": "swagger"
+      }
+    }
+  },
+  "parameters": {
+    "portalUrl": {
+      "in": "query",
+      "name": "portalUrl",
+      "type": "string",
+      "description": "Url of ArcGIS Enterprise, https://gis.myserver.com/portalWebAdaptor",
+      "default": "https://www.arcgis.com",
+      "x-ms-summary": "Url of ArcGIS Enterprise",
+      "x-ms-visibility": "internal",
+      "required": true
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://www.arcgis.com/sharing/rest/oauth2/authorize",
+      "tokenUrl": "https://www.arcgis.com/sharing/rest/oauth2/token",
+      "scopes": {
+        "user": "user",
+        "admin": "admin"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": [
+        "user",
+        "admin"
+      ]
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.esri.com/survey123"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.esri.com/en-us/privacy/overview"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Website;Productivity"
+    }
+  ]
+}

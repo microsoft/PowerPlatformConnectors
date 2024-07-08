@@ -1,0 +1,611 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.15.0",
+    "title": "RAPID Platform",
+    "description": "RAPID Platform enables the creation of customised application for your business by allowing you to capture data, run workflows and create Power BI Dashboards. With the RAPID Platform connector you can unlock hundreds of integrations as well as more automation options to take your RAPID solution to the next level.",
+    "license": {
+      "name": "RAPID Platform License"
+    },
+    "contact": {
+      "name": "RAPID Support",
+      "url": "http://www.rapidplatform.com.au",
+      "email": "support@rapidplatform.com.au"
+    }
+  },
+  "host": "api.rapidplatform.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/hooks": {
+      "x-ms-notification-content": {
+        "description": "Register a webhook on your RAPID site.",
+        "schema": {}
+      },
+      "post": {
+        "x-ms-trigger": "single",
+        "operationId": "ListHookTrigger",
+        "description": "Creates a webhook for when something happens in your RAPID site.",
+        "summary": "When something happens to an item in your RAPID site",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "The item profile of the triggering item including fields and data."
+          }
+        },
+        "parameters": [
+          {
+            "name": "Request body of webhook",
+            "in": "body",
+            "description": "Provides RAPID with the list being watched for changes and the trigger we are looking for.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["config"],
+              "properties": {
+                "config": {
+                  "description": "The configuration of the Webhook to be registered.",
+                  "required": ["url", "list", "trigger"],
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "The location of this trigger that RAPID will update.",
+                      "title": "Callback URL",
+                      "x-ms-notification-url": true,
+                      "x-ms-visibility": "internal"
+                    },
+                    "list": {
+                      "type": "string",
+                      "description": "Select a Table to be watched.",
+                      "x-ms-summary": "Table",
+                      "x-ms-dynamic-values": {
+                        "operationId": "GetLists"
+                      }
+                    },
+                    "trigger": {
+                      "x-ms-summary": "Trigger Type",
+                      "description": "Choose a webhook trigger event we are watching for.",
+                      "type": "string",
+                      "enum": ["Item Created", "Item Updated", "Item Deleted"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/openapi/lists": {
+      "get": {
+        "description": "Get Table titles from your RAPID site.",
+        "summary": "Get all Tables",
+        "operationId": "GetLists",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "Returns a list of Table names currently registered to your RAPID site.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi/{listName}/schema": {
+      "get": {
+        "description": "Get the schema of one paticular item on your RAPID site.",
+        "summary": "Get the schema of selected Table",
+        "operationId": "GetFieldListSchema",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "listName",
+            "type": "string",
+            "in": "path",
+            "description": "Select Table you want to get schema from.",
+            "required": true,
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the object definition for the selected Table.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/openapi/{listName}/schema/single": {
+      "get": {
+        "description": "Get the schema of one paticular item on your RAPID site.",
+        "summary": "Get schema of a Table",
+        "operationId": "GetSingleItemSchema",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "listName",
+            "type": "string",
+            "in": "path",
+            "description": "Select Table you want to get the schema of.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Select Table"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The profile of the item fetched.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/lists/{listName-dynamic}/All/items": {
+      "get": {
+        "summary": "Get a page of items for a Table",
+        "description": "Gets a page of up to 250 items from a Table in your RAPID site.",
+        "operationId": "GetAllItems",
+        "tags": ["tasks"],
+        "security": [
+          {
+            "oauth2_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listName-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select the Table you want to get items from.",
+            "required": true,
+            "x-ms-summary": "Select Table",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$skip",
+            "required": false,
+            "description": "Set how many items down the list to start the page from.",
+            "x-ms-summary": "Items to skip",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "$filter",
+            "required": false,
+            "description": "OData filter expression to specifiy the items to fetch.",
+            "x-ms-summary": "Filter",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "$select",
+            "required": false,
+            "description": "OData select expression to specify which columns to return.",
+            "x-ms-summary": "Select",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "linkedTo",
+            "required": false,
+            "description": "Object Referance containing linked Table name and ID in the format listName/id.",
+            "x-ms-summary": "Linked To",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An object that contains all the tasks.",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetFieldListSchema",
+                "parameters": {
+                  "listName": {
+                    "parameter": "listName-dynamic"
+                  }
+                },
+                "value-path": "Schema"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create an item",
+        "operationId": "CreateListItem",
+        "description": "Create an item on a chosen Table.",
+        "tags": ["lists"],
+        "security": [
+          {
+            "oauth2_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listName-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select the Table you want to get items from.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Select Table",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists"
+            }
+          },
+          {
+            "name": "dynamicListSchema",
+            "in": "body",
+            "description": "Dynamic schema of selected list.",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetSingleItemSchema",
+                "parameters": {
+                  "listName": {
+                    "parameter": "listName-dynamic"
+                  }
+                },
+                "value-path": "Schema"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The item was created successfully.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "x-ms-dynamic-schema": {
+                  "operationId": "GetSingleItemSchema",
+                  "parameters": {
+                    "listName": {
+                      "parameter": "listName-dynamic"
+                    }
+                  },
+                  "value-path": "Schema"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lists/{listName-dynamic}/items/{itemId}": {
+      "get": {
+        "summary": "Get an item",
+        "operationId": "GetItem",
+        "description": "Fetches a specific item from a Table on your RAPID site. This will always return the full item profile of the fetched item.",
+        "parameters": [
+          {
+            "name": "listName-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select the list you want to fetch the item from.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Select List",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "description": "Numeric ID of the item to get",
+            "x-ms-summary": "Item ID",
+            "x-ms-url-encoding": "single",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The A specific item",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetSingleItemSchema",
+                "parameters": {
+                  "listName": {
+                    "parameter": "listName-dynamic"
+                  }
+                },
+                "value-path": "Schema"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an item",
+        "operationId": "UpdateListItem",
+        "description": "Update an item",
+        "x-ms-summary": "Update an item",
+        "tags": ["lists"],
+        "security": [
+          {
+            "oauth2_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listName-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select the list you want to update",
+            "required": true,
+            "x-ms-summary": "Select List",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "description": "Numeric ID of the item to update",
+            "type": "integer",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Item Id"
+          },
+          {
+            "x-ms-summary": "Item Profile",
+            "name": "dynamicListSchema",
+            "in": "body",
+            "description": "Dynamic schema of selected list",
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetSingleItemSchema",
+                "parameters": {
+                  "listName": {
+                    "parameter": "listName-dynamic"
+                  }
+                },
+                "value-path": "Schema"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The item was updated successfully"
+          }
+        }
+      }
+    },
+    "/lists/{listName-dynamic}/items/{itemId}/inherited-links": {
+      "get": {
+        "summary": "Get a inherit links list for a given item",
+        "x-ms-summary": "Get a inherit links list for a given item",
+        "description": "Gets a list of items that expect to be linked to the current item due to the inherit link configuration on your RAPID site.",
+        "operationId": "GetInheritLinks",
+        "security": [
+          {
+            "oauth2_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listName-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select the Table you want to get items from.",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Select Source Table",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "description": "Numeric ID of the item to get",
+            "type": "integer",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Item Id"
+          },
+          {
+            "name": "type",
+            "type": "string",
+            "in": "query",
+            "description": "Select the Table you want to get items for.",
+            "required": true,
+            "x-ms-summary": "Select Target Table",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of Object References for each item expected to be linked via inheritance.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lists/{listName-dynamic}/items/{itemId}/attachments": {
+      "post": {
+        "summary": "Add an attachment record to an item in your RAPID site",
+        "description": "Adds an attachment record to an item in your RAPID site. This record refers to the location of a file stored in SharePoint.",
+        "operationId": "SetAttachments",
+        "security": [
+          {
+            "oauth2_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "listName-dynamic",
+            "type": "string",
+            "in": "path",
+            "description": "Select the Table you want to get items from.",
+            "required": true,
+            "x-ms-summary": "Select Source Table",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLists"
+            }
+          },
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "description": "Numeric ID of the item to get",
+            "type": "integer",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Item ID"
+          },
+          {
+            "in": "body",
+            "name": "Attachments",
+            "required": true,
+            "description": "Numeric ID of the item to get",
+            "x-ms-summary": "Attachments",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "drive_id": {
+                    "type": "string",
+                    "x-ms-summary": "Drive ID"
+                  },
+                  "drive_item_id": {
+                    "type": "string",
+                    "x-ms-summary": "Drive Item ID"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "A created response indicating the attachment record has been made.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ListItemWebhookResponse": {
+      "type": "object",
+      "properties": {}
+    },
+    "WebhookRequestBody": {
+      "type": "object",
+      "required": ["config"],
+      "properties": {
+        "config": {
+          "description": "Creates a webhook for when something happens in your RAPID site.",
+          "required": ["url", "list", "trigger"],
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The location of this trigger that RAPID will update.",
+              "title": "HTML URL of Repo",
+              "x-ms-notification-url": true,
+              "x-ms-visibility": "internal"
+            },
+            "list": {
+              "type": "string",
+              "description": "Select a Table to be watched.",
+              "x-ms-summary": "Table",
+              "x-ms-dynamic-values": {
+                "operationId": "GetLists"
+              }
+            },
+            "trigger": {
+              "x-ms-summary": "Trigger Type",
+              "description": "Choose a webhook trigger event we are watching for.",
+              "type": "string",
+              "enum": ["Item Created", "Item Updated", "Item Deleted"]
+            }
+          }
+        }
+      }
+    },
+    "WebhookCreateResponse": {
+      "type": "object"
+    },
+    "DynamicFieldListSchema": {
+      "type": "object",
+      "x-ms-dynamic-schema": {
+        "operationId": "GetFieldListSchema",
+        "parameters": {
+          "listName": {
+            "parameter": "listName-dynamic"
+          }
+        },
+        "value-path": "Schema"
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.windows.net/common/oauth2/authorize",
+      "tokenUrl": "https://login.windows.net/common/oauth2/token",
+      "scopes": {
+        "cd5db0ec-1419-4ae6-9434-21cfb83fc42d/.default": "cd5db0ec-1419-4ae6-9434-21cfb83fc42d/.default"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": ["cd5db0ec-1419-4ae6-9434-21cfb83fc42d/.default"]
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "http://www.rapidplatform.com.au"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://rapidplatform.com.au/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management;Productivity"
+    }
+  ]
+}

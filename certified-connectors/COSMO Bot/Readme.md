@@ -1,0 +1,5 @@
+## COSMO Bot
+COSMO Bot by COSMO CONSULT increases your business success through more efficiency in everyday life. If you answer a standard question today, you are wasting time. In contact with your customers, this is often a good opportunity to get to know each other and establish a relationship. But internally, from employee to employee, or when there is simply too much to do, it is a luxury that not everyone can allow themselves. This Connector allows you to extend the bots functionality and integrate other systems.
+
+## Prerequisites
+To use this connector you need to have administrative access to a COSMO Bot Instance. [What is COSMO Bot?](https://cosma.cosmoconsult.com/?msg=Was+ist+COSMO+Bot%3F) [How do i get a COSMO Bot instance?](https://cosma.cosmoconsult.com/?msg=How+do+i+get+a+COSMO+Bot+instance%3F)

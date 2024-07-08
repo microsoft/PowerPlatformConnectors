@@ -35,6 +35,7 @@ def download(
         api_properties=None,
         api_definition=None,
         icon=None,
+        script=None,
         connector_id=connector_id,
         powerapps_url=powerapps_url,
         powerapps_version=powerapps_version)

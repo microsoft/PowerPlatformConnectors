@@ -15,7 +15,7 @@ You will need the following to proceed
 
 • To use the connector, you need to be a Fortellis user.
 
-• You need to create an solution in Fortellis to generate client id and secret to be used while calling the APIs
+• You need to create a solution in Fortellis to generate client id and secret to be used while calling the APIs
 
 ### Potential Use Cases
 

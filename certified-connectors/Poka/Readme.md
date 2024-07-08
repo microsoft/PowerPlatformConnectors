@@ -28,3 +28,6 @@ They can all be triggered on several items like:
 * Users
 * Workstations
 * And more
+
+## How you can leverage our connector?
+If you would like to learn more about how you can leverage this connector within your digital ecosystem, see our [blog post](https://blog.poka.io/digitally-connecting-the-factory-floor-with-poka-and-microsoft-power-automate), where we discuss common use cases.

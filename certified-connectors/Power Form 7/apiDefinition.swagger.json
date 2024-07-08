@@ -1,0 +1,326 @@
+{
+  "consumes": [],
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Power Form 7",
+    "description": "Power Form 7 connects Contact Form 7 to your flows. Once you install and configure the Power Form 7 WordPress plugin, all of your forms will be available as triggers or for submission.",
+    "contact": {
+      "name": "Reenhanced Team",
+      "url": "https://www.reenhanced.com/products/power-form-7",
+      "email": "support@reenhanced.com"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.reenhanced.com/"
+    },
+    {
+      "propertyName": "Privacy Policy",
+      "propertyValue": "https://reenhanced.com/privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Website"
+    }
+  ],
+  "host": "we.buildbettersoftware.com",
+  "basePath": "/pf7",
+  "responses": {
+    "403": {
+      "schema": {},
+      "description": "Unauthorized"
+    },
+    "429": {
+      "schema": {},
+      "description": "Throttled"
+    },
+    "500": {
+      "schema": {},
+      "description": "Server Error"
+    }
+  },
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "License-Authorization"
+    }
+  },
+  "schemes": [
+    "https"
+  ],
+  "produces": [],
+  "parameters": {
+    "wp_siteurl__in_header": {
+      "x-ms-summary": "Wordpress Site URL",
+      "x-ms-dynamic-values": {
+        "operationId": "GetDomains",
+        "value-path": "name",
+        "value-title": "name"
+      },
+      "required": true,
+      "in": "header",
+      "name": "WP_SITEURL",
+      "description": "Wordpress Site Address (URL) found in Settings > General",
+      "x-ms-visibility": "important",
+      "type": "string"
+    },
+    "form_id__in_path": {
+      "x-ms-summary": "Contact Form 7 Form",
+      "x-ms-dynamic-values": {
+        "parameters": {
+          "WP_SITEURL": {
+            "parameter": "WP_SITEURL"
+          }
+        },
+        "operationId": "GetCF7Forms",
+        "value-path": "id",
+        "value-title": "title"
+      },
+      "required": true,
+      "in": "path",
+      "name": "form_id",
+      "description": "Contact Form 7 form",
+      "x-ms-visibility": "important",
+      "x-ms-url-encoding": "single",
+      "type": "string"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "definitions": {
+    "formSchema": {
+      "x-ms-dynamic-properties": {
+        "itemValuePath": "schema",
+        "parameters": {
+          "form_id": {
+            "parameterReference": "form_id"
+          },
+          "WP_SITEURL": {
+            "parameterReference": "WP_SITEURL"
+          }
+        },
+        "operationId": "GetFormSchema"
+      },
+      "x-ms-dynamic-schema": {
+        "parameters": {
+          "form_id": {
+            "parameter": "form_id"
+          },
+          "WP_SITEURL": {
+            "parameter": "WP_SITEURL"
+          }
+        },
+        "operationId": "GetFormSchema",
+        "value-path": "schema"
+      },
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "paths": {
+    "/proxy/power-form-7/v1/webhooks/{form_id}": {
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/definitions/formSchema"
+        },
+        "description": "Form data"
+      },
+      "post": {
+        "summary": "When a Contact Form 7 form is submitted",
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "403": {
+            "schema": {},
+            "description": "Unauthorized"
+          }
+        },
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "$ref": "#/parameters/wp_siteurl__in_header"
+          },
+          {
+            "$ref": "#/parameters/form_id__in_path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "required": [
+                "callback_url"
+              ],
+              "type": "object",
+              "properties": {
+                "callback_url": {
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "type": "string"
+                }
+              }
+            },
+            "in": "body",
+            "name": "callback_url"
+          }
+        ],
+        "x-ms-visibility": "important",
+        "operationId": "CreateWebhook",
+        "description": "Fires when a Contact Form 7 form is submitted successfully"
+      }
+    },
+    "/proxy/contact-form-7/v1/contact-forms/{form_id}/feedback": {
+      "post": {
+        "summary": "Submit a Contact Form 7 form",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/parameters/wp_siteurl__in_header"
+          },
+          {
+            "$ref": "#/parameters/form_id__in_path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/formSchema"
+            },
+            "in": "body",
+            "name": "query"
+          }
+        ],
+        "x-ms-visibility": "important",
+        "operationId": "SubmitForm",
+        "description": "Submit a Contact Form 7 form"
+      }
+    },
+    "/domains": {
+      "get": {
+        "summary": "(private) Get list of domains",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "items": {
+                "type": "object",
+                "x-ms-dynamic-list": {
+                  "itemTitlePath": "name",
+                  "itemValuePath": "name",
+                  "operationId": "GetDomains"
+                },
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "format": "int32",
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": "array"
+            },
+            "description": "List of forms"
+          }
+        },
+        "x-ms-visibility": "internal",
+        "operationId": "GetDomains",
+        "description": "Returns licensed domains"
+      }
+    },
+    "/proxy/contact-form-7/v1/contact-forms": {
+      "get": {
+        "summary": "Get Contact Form 7 forms",
+        "responses": {
+          "200": {
+            "schema": {
+              "items": {
+                "type": "object",
+                "properties": {
+                  "slug": {
+                    "type": "string",
+                    "description": "slug"
+                  },
+                  "locale": {
+                    "type": "string",
+                    "description": "locale"
+                  },
+                  "id": {
+                    "format": "int32",
+                    "type": "integer",
+                    "description": "id"
+                  },
+                  "title": {
+                    "x-ms-summary": "Form Name",
+                    "type": "string",
+                    "description": "title"
+                  }
+                }
+              },
+              "type": "array"
+            },
+            "description": "200"
+          },
+          "403": {
+            "schema": {},
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/parameters/wp_siteurl__in_header"
+          }
+        ],
+        "x-ms-visibility": "important",
+        "operationId": "GetCF7Forms",
+        "description": "Gets a list of all Contact Form 7 forms"
+      }
+    },
+    "/proxy/power-form-7/v1/forms/{form_id}": {
+      "get": {
+        "summary": "(private) Retrieve form schema",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "schema": {},
+            "description": "Unauthorized"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/parameters/wp_siteurl__in_header"
+          },
+          {
+            "$ref": "#/parameters/form_id__in_path"
+          }
+        ],
+        "x-ms-visibility": "internal",
+        "operationId": "GetFormSchema",
+        "description": "Returns the schema for the specified form"
+      }
+    }
+  },
+  "tags": []
+}

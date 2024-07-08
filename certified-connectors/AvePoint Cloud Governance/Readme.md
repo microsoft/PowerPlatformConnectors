@@ -9,9 +9,9 @@ The AvePoint Cloud Governance connector offers automation and integration of Clo
 
 You will need the following to proceed:
 
-• You need to be an AvePoint Cloud Governance administrator.
+* You need to be an AvePoint Cloud Governance administrator.
 
-• You need to create an API Authentication Profile in AvePoint Cloud Governance to generate a client secret. The client secret will be used to call the Cloud Governance API.
+* You need to create an API Authentication Profile in AvePoint Cloud Governance to generate a client secret. The client secret will be used to call the Cloud Governance API.
 
 
 ## Supported Operations

@@ -19,6 +19,7 @@ class PowerAppsRP:
 
     def __init__(self, api_manager):
         self.api_manager = api_manager
+        self.rp_headers = {'x-ms-origin': 'paconn-cli'}
 
     @staticmethod
     def _get_filter_query(environment):
@@ -36,7 +37,8 @@ class PowerAppsRP:
 
         response = self.api_manager.request(
             verb='GET',
-            endpoint=endpoint)
+            endpoint=endpoint,
+            headers=self.rp_headers)
 
         return response.json()
 
@@ -51,7 +53,8 @@ class PowerAppsRP:
         response = self.api_manager.request(
             verb='POST',
             endpoint=endpoint,
-            payload=payload)
+            payload=payload,
+            headers=self.rp_headers)
 
         return response.text
 
@@ -68,7 +71,8 @@ class PowerAppsRP:
         response = self.api_manager.request(
             verb='PATCH',
             endpoint=endpoint,
-            payload=payload)
+            payload=payload,
+            headers=self.rp_headers)
 
         return response.text
 
@@ -82,7 +86,8 @@ class PowerAppsRP:
 
         response = self.api_manager.request(
             verb='GET',
-            endpoint=endpoint)
+            endpoint=endpoint,
+            headers=self.rp_headers)
 
         return response.json()
 
@@ -103,7 +108,8 @@ class PowerAppsRP:
         response = self.api_manager.request(
             verb='POST',
             endpoint=endpoint,
-            payload=payload)
+            payload=payload,
+            headers=self.rp_headers)
 
         return response.text
 
