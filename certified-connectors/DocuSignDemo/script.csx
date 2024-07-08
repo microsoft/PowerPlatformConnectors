@@ -2452,7 +2452,12 @@ public class Script : ScriptBase
           if((tab["tabLabel"].ToString()).Equals(tabLabel))
           {
             newBody["name"] = tab["name"];
+            newBody["tabLabel"] = tab["tabLabel"];
             newBody["value"] = tab["value"];
+            newBody["documentId"] = tab["documentId"];
+            newBody["tabId"] = tab["tabId"];
+            newBody["tabType"] = tab["tabType"];
+            newBody["recipientId"] = tab["recipientId"];
             break;
           }
         }
