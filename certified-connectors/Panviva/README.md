@@ -53,3 +53,5 @@ The connector supports the following actions:
   - `Folder Translations`: Get all the translations of a Panviva folder, along with each translated folders respective children
   - `Folder Root`: Get the root/home folder in all of Panviva, which can be drilled into using the Get Folder Children endpoint. Note this endpoint was formerly referred to as the 'Folder Search' endpoint
   - `Image`: Retrieve an image from Panviva. Image data is represented as a base64 string
+- **Generic Operations**
+  - `Echo`: Echo a request to verify connectivity with the Panviva API
