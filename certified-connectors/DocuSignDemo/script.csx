@@ -78,7 +78,8 @@ public class Script : ScriptBase
         { "titleTabs", "Title" },
         { "signerAttachmentTabs", "Attachment" },
         { "emailTabs", "Email" },
-        { "approveTabs", "Approval" }
+        { "approveTabs", "Approve" },
+        { "declineTabs", "Decline" }
       };
       for (var i = 0; i < tabTypes.GetLength(0); i++)
       {
