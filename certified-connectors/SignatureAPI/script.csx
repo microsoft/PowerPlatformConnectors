@@ -2,16 +2,70 @@ using System.Net;
 using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        if ("AddDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        try
+        {
+            return await InnerExecuteAsync();
+        }
+        catch(ClientException clientException)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            response.Content = new StringContent(clientException.Message);
+            return response;
+        }
+        catch(Exception exception)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            response.Content = new StringContent(exception.Message);
+            return response;
+        }
+    }
+
+
+    private async Task<HttpResponseMessage> InnerExecuteAsync()
+    {
+        if ("AddDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
+        "AddTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            var contentAsJson = JObject.Parse(contentAsString);
+            JObject contentAsJson;
+
+            try
+            {
+                contentAsJson = JObject.Parse(contentAsString);
+            }
+            catch (Exception exception)
+            {
+                throw new ClientException($"Could not parse JSON. Message: {exception.Message}");
+            }
+
+            var dataAsToken = contentAsJson.GetValue("data");
+
+            if(dataAsToken != null)
+            {
+                var dataAsString = (string)dataAsToken;
+
+                JObject dataAsJson;
+
+                try
+                {
+                    dataAsJson = JObject.Parse(dataAsString);
+                }
+                catch (Exception exception)
+                {
+                    throw new ClientException($"Could not parse Template Data JSON. Message: {exception.Message}");
+                }
+
+                DecodeBase64Properties(dataAsJson);
+
+                contentAsJson["data"] = dataAsJson;
+            }
 
             var fileContentBase64 = (string)contentAsJson["file_content"];
 
@@ -33,7 +87,17 @@ public class Script : ScriptBase
                 throw new Exception($"Could not create temporary file. Status code: {createFileResponse.StatusCode}");
             }
 
-            Uri locationUrl = createFileResponse.Headers.Location;
+            Uri initialLocationUrl = createFileResponse.Headers.Location;
+
+            // We force the host and scheme so that the API can recognize as an internal file url
+            UriBuilder uriBuilder = new UriBuilder(initialLocationUrl)
+            {
+                Scheme = "https",
+                Host = "api.signatureapi.com",
+                Port = -1 // Ensures default port is used (443 for HTTPS)
+            };
+
+            Uri locationUrl = uriBuilder.Uri;
 
             string createFileResponseString = await createFileResponse.Content.ReadAsStringAsync();
 
@@ -95,7 +159,6 @@ public class Script : ScriptBase
 
         }
 
-
         throw new NotImplementedException();
     }
 
@@ -108,4 +171,52 @@ public class Script : ScriptBase
         }
         return new Uri(baseUri);
     }
+
+    private static void DecodeBase64Properties(JToken token)
+    {
+        if (token is JValue value && value.Type == JTokenType.String)
+        {
+            string str = value.ToString();
+            if (str.StartsWith("base64:"))
+            {
+                string base64String = str.Substring(7);
+                
+                byte[] data;
+                try
+                {
+                    data = Convert.FromBase64String(base64String);
+                }
+                catch (Exception exception)
+                {
+                    throw new ClientException($"Could not convert base 64 string in {token.Path}.");
+                }
+
+                string decodedString = Encoding.UTF8.GetString(data);
+                value.Replace(JValue.FromObject(decodedString));
+            }
+        }
+        else if (token is JObject obj)
+        {
+            foreach (var property in obj.Properties())
+            {
+                DecodeBase64Properties(property.Value);
+            }
+        }
+        else if (token is JArray array)
+        {
+            foreach (var item in array)
+            {
+                DecodeBase64Properties(item);
+            }
+        }
+    }
+}
+
+public class ClientException : Exception
+{
+    public ClientException(string message) : base(message)
+    {
+
+    }
+    
 }
