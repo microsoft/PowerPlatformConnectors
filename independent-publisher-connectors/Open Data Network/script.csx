@@ -35,8 +35,6 @@ public class Script : ScriptBase
         HttpResponseMessage response;
         try
         {
-            LogRequestDetails(this.Context.Request); // Log the final request details
-            
             response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -49,32 +47,7 @@ public class Script : ScriptBase
         }
 
         return response;
-    }
-
-    private async void LogRequestDetails(HttpRequestMessage request)
-{
-    this.Context.Logger.LogInformation("Logging final request details");
-
-    this.Context.Logger.LogInformation($"Method: {request.Method}");
-    this.Context.Logger.LogInformation($"URI: {request.RequestUri}");
-
-    // Log headers
-    foreach (var header in request.Headers)
-    {
-        this.Context.Logger.LogInformation($"Header: {header.Key}, Value: {string.Join(", ", header.Value)}");
-    }
-
-    // Log content
-    if (request.Content != null)
-    {
-        var content = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
-        this.Context.Logger.LogInformation($"Content: {content}");
-    }
-    else
-    {
-        this.Context.Logger.LogInformation("Content: (none)");
-    }
-}
+    }    
 
     private async Task<HttpResponseMessage> HandleGetDatasetSchema()
     {
@@ -92,6 +65,15 @@ public class Script : ScriptBase
 
         var domain = domainHeaderValues.FirstOrDefault();
 
+        if (string.IsNullOrEmpty(domain))
+        {
+            this.Context.Logger.LogError("Domain header is empty.");
+            return new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = CreateJsonContent("Domain header is empty.")
+            };
+        }
+
         // Update the host in the URI
         var uriBuilder = new UriBuilder(this.Context.Request.RequestUri)
         {
@@ -102,26 +84,47 @@ public class Script : ScriptBase
         HttpResponseMessage response;
         try
         {
-            response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+            response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             this.Context.Logger.LogError($"Error sending request: {ex.Message}");
-            response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+            return new HttpResponseMessage(HttpStatusCode.InternalServerError)
             {
                 Content = CreateJsonContent($"Error sending request: {ex.Message}")
             };
-            return response;
         }
 
         if (response.IsSuccessStatusCode)
         {
             this.Context.Logger.LogInformation("Request successful");
 
-            var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+            var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             this.Context.Logger.LogInformation($"Response received: {responseString}");
 
-            var schema = JObject.Parse(responseString);
+            JObject schema;
+            try
+            {
+                schema = JObject.Parse(responseString);
+            }
+            catch (Exception ex)
+            {
+                this.Context.Logger.LogError($"Error parsing response: {ex.Message}");
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = CreateJsonContent($"Error parsing response: {ex.Message}")
+                };
+            }
+
+            if (schema["columns"] == null)
+            {
+                this.Context.Logger.LogError("Columns section is missing in the schema.");
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = CreateJsonContent("Columns section is missing in the schema.")
+                };
+            }
+
             var openApiSchema = new JObject
             {
                 ["type"] = "object",
@@ -129,14 +132,20 @@ public class Script : ScriptBase
                 ["required"] = new JArray()
             };
 
-            bool hasPointType = false;
+            bool hasGeoType = false;
 
             foreach (var column in schema["columns"])
             {
-                string columnName = column["name"].ToString();
-                string fieldName = column["fieldName"].ToString();
-                string columnType = ConvertToOpenApiType(column["dataTypeName"].ToString());
-                string columnDescription = column["description"].ToString();
+                string columnName = column["name"]?.ToString();
+                string fieldName = column["fieldName"]?.ToString();
+                string columnType = ConvertToOpenApiType(column["dataTypeName"]?.ToString());
+                string columnDescription = column["description"]?.ToString();
+
+                if (string.IsNullOrEmpty(columnName) || string.IsNullOrEmpty(fieldName) || string.IsNullOrEmpty(columnType))
+                {
+                    this.Context.Logger.LogWarning("Column information is incomplete.");
+                    continue;
+                }
 
                 var property = new JObject
                 {
@@ -167,31 +176,14 @@ public class Script : ScriptBase
                     property["description"] = columnDescription;
                 }
 
-                if (column["dataTypeName"].ToString() == "point")
-                {
-                    hasPointType = true;
-                }
-
                 openApiSchema["properties"][fieldName] = property;
-            }
-
-            if (hasPointType && !openApiSchema["properties"].Children<JProperty>().Any(prop => prop.Name == "Format"))
-            {
-                var formatProperty = new JObject
-                {
-                    ["type"] = "string",
-                    ["enum"] = new JArray("JSON", "GeoJSON")
-                };
-
-                ((JObject)openApiSchema["properties"]).AddFirst(new JProperty("Format", formatProperty));
-            }
+            }            
 
             this.Context.Logger.LogInformation($"Transformed schema: {openApiSchema}");
 
             var wrappedSchema = new JObject
             {
-                ["data"] = openApiSchema,
-                    ["schema"] = openApiSchema
+                ["data"] = openApiSchema,                
             };
 
             response.Content = CreateJsonContent(wrappedSchema.ToString());
@@ -251,22 +243,19 @@ public class Script : ScriptBase
 
         this.Context.Logger.LogInformation($"Request details before modification: Method={this.Context.Request.Method.Method}, URI={this.Context.Request.RequestUri}, Params={requestParams}");
 
-        // Modify the request to be a GET and update the URI with new query parameters
-        this.Context.Request.Method = HttpMethod.Get;
+        // Declare the uriBuilder
         var uriBuilder = new UriBuilder(this.Context.Request.RequestUri)
         {
             Query = requestParams.ToString(),
             Host = domain
         };
 
-        // Check if GeoJSON format is requested and update the path accordingly
-        if (requestParams["Format"] == "GeoJSON")
-        {
-            var newPath = uriBuilder.Path.Replace(".json", ".geojson");
-            uriBuilder.Path = newPath;
-            this.Context.Logger.LogInformation($"GeoJSON format selected. Updated path to: {newPath}");
-        }
+        // Update the URI with the new query parameters
+        uriBuilder.Query = requestParams.ToString();
         this.Context.Request.RequestUri = uriBuilder.Uri;
+
+        // Modify the request to be a GET
+        this.Context.Request.Method = HttpMethod.Get;
         this.Context.Request.Content = null; // Clear the body content
 
         this.Context.Logger.LogInformation($"Modified request details: Method={this.Context.Request.Method}, URI={this.Context.Request.RequestUri}, Params={requestParams}");
@@ -275,7 +264,6 @@ public class Script : ScriptBase
         HttpResponseMessage response;
         try
         {
-            LogRequestDetails(this.Context.Request); // Log the final request details
             response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -350,8 +338,7 @@ public class Script : ScriptBase
 
         return response;
     }
-
-
+    
     private async Task<HttpResponseMessage> HandleGetSearchDataOperation()
     {
         this.Context.Logger.LogInformation("HandleGetSearchDataOperation started");
@@ -402,7 +389,7 @@ public class Script : ScriptBase
 
         return response;
     }
-
+    
     private static HttpContent CreateJsonContent(string content)
     {
         return new StringContent(content, System.Text.Encoding.UTF8, "application/json");

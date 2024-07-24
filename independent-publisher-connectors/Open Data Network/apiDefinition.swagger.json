@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "CDC Open Data",
-    "description": "",
+    "title": "Open Data Network",
+    "description": "The Open Data Network connector enables users to access and utilize government data to improve decision-making and enrich lives. By leveraging data from various government sources, this connector allows developers, businesses, and public sector organizations to integrate valuable information into their applications and services, driving open data standards and best practices.",
     "version": "1.0",
     "contact": {
       "name": "Richard Wilson",
@@ -12,68 +12,106 @@
   },
   "host": "api.us.socrata.com",
   "basePath": "/api",
-  "schemes": [
-    "https"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
     "/catalog/v1": {
       "get": {
         "operationId": "SearchCatalog",
-        "summary": "Search Socrata assets",
-        "description": "Search for Socrata assets using various query parameters.",
+        "summary": "Search catalog for assets",
+        "description": "Search for open data network assets.",
         "parameters": [
-          {
-            "name": "domain",
-            "in": "header",
-            "type": "string"
-          },
           {
             "name": "ids",
             "in": "query",
             "description": "The unique identifier of an asset",
             "type": "string",
-            "x-ms-summary": "Ids"
+            "x-ms-summary": "Id"
           },
           {
             "name": "domains",
             "in": "query",
             "description": "The domain name",
             "type": "string",
-            "x-ms-summary": "Domains"
+            "x-ms-summary": "Domain",
+            "x-ms-dynamic-values": {
+              "operationId": "CountByDomain",
+              "value-collection": "results",
+              "value-path": "domain"
+            }
           },
           {
             "name": "names",
             "in": "query",
             "description": "The case-insensitive asset name",
             "type": "string",
-            "x-ms-summary": "Names"
+            "x-ms-summary": "Name"
           },
           {
             "name": "categories",
             "in": "query",
             "description": "A single category",
             "type": "string",
-            "x-ms-summary": "Categories"
+            "x-ms-summary": "Category",
+            "x-ms-dynamic-values": {
+              "operationId": "CountByCategory",
+              "value-collection": "results",
+              "value-path": "category"
+            }
           },
           {
             "name": "tags",
             "in": "query",
             "description": "A single tag",
             "type": "string",
-            "x-ms-summary": "Tags"
+            "x-ms-summary": "Tag",
+            "x-ms-dynamic-values": {
+              "operationId": "CountByTag",
+              "value-collection": "results",
+              "value-path": "tag"
+            }
           },
           {
             "name": "only",
             "in": "query",
             "description": "One of the asset types (e.g., dataset, chart, map)",
             "type": "string",
-            "x-ms-summary": "Only"
+            "x-ms-summary": "Only",
+            "enum": [
+              "api",
+              "calendar",
+              "chart",
+              "datalens",
+              "dataset",
+              "federated_href",
+              "file",
+              "filter",
+              "form",
+              "href",
+              "link",
+              "map",
+              "measure",
+              "story",
+              "visualization"
+            ],
+            "x-ms-enum-values": [
+              { "displayName": "API", "value": "api" },
+              { "displayName": "Calendar", "value": "calendar" },
+              { "displayName": "Chart", "value": "chart" },
+              { "displayName": "Datalens", "value": "datalens" },
+              { "displayName": "Dataset", "value": "dataset" },
+              { "displayName": "Federated Href", "value": "federated_href" },
+              { "displayName": "File", "value": "file" },
+              { "displayName": "Filter", "value": "filter" },
+              { "displayName": "Form", "value": "form" },
+              { "displayName": "Href", "value": "href" },
+              { "displayName": "Link", "value": "link" },
+              { "displayName": "Map", "value": "map" },
+              { "displayName": "Measure", "value": "measure" },
+              { "displayName": "Story", "value": "story" },
+              { "displayName": "Visualization", "value": "visualization" }
+            ]
           },
           {
             "name": "attribution",
@@ -92,9 +130,9 @@
           {
             "name": "q",
             "in": "query",
-            "description": "A string for full-text search",
+            "description": "Search for assets by any text in their name, description, category, tags, or other fields.",
             "type": "string",
-            "x-ms-summary": "Q"
+            "x-ms-summary": "Full-Text Search Query"
           },
           {
             "name": "min_should_match",
@@ -108,7 +146,7 @@
             "in": "query",
             "description": "The unique identifier of a parent asset",
             "type": "string",
-            "x-ms-summary": "Parent Ids"
+            "x-ms-summary": "Parent Id"
           },
           {
             "name": "derived_from",
@@ -122,7 +160,12 @@
             "in": "query",
             "description": "The provenance, either 'official' or 'community'",
             "type": "string",
-            "x-ms-summary": "Provenance"
+            "x-ms-summary": "Provenance",
+            "enum": ["official", "community"],
+            "x-ms-enum-values": [
+              { "displayName": "Official", "value": "official" },
+              { "displayName": "Community", "value": "community" }
+            ]
           },
           {
             "name": "for_user",
@@ -143,7 +186,7 @@
             "in": "query",
             "description": "The name of a column",
             "type": "string",
-            "x-ms-summary": "Column Names"
+            "x-ms-summary": "Column Name"
           },
           {
             "name": "public",
@@ -157,14 +200,25 @@
             "in": "query",
             "description": "The visibility status, either 'open' or 'internal'",
             "type": "string",
-            "x-ms-summary": "Visibility"
+            "x-ms-summary": "Visibility",
+            "enum": ["open", "internal"],
+            "x-ms-enum-values": [
+              { "displayName": "Open", "value": "open" },
+              { "displayName": "Internal", "value": "internal" }
+            ]
           },
           {
             "name": "audience",
             "in": "query",
             "description": "The audience, either 'private', 'site' or 'public'",
             "type": "string",
-            "x-ms-summary": "Audience"
+            "x-ms-summary": "Audience",
+            "enum": ["private", "site", "public"],
+            "x-ms-enum-values": [
+              { "displayName": "Private", "value": "private" },
+              { "displayName": "Site", "value": "site" },
+              { "displayName": "Public", "value": "public" }
+            ]
           },
           {
             "name": "published",
@@ -178,7 +232,26 @@
             "in": "query",
             "description": "The approval status (pending, rejected, approved, not_ready)",
             "type": "string",
-            "x-ms-summary": "Approval Status"
+            "x-ms-summary": "Approval Status",
+            "enum": ["pending", "rejected", "approved", "not_ready"],
+            "x-ms-enum-values": [
+              {
+                "displayName": "Pending",
+                "value": "pending"
+              },
+              {
+                "displayName": "Rejected",
+                "value": "rejected"
+              },
+              {
+                "displayName": "Approved",
+                "value": "approved"
+              },
+              {
+                "displayName": "Not Ready",
+                "value": "not_ready"
+              }
+            ]
           },
           {
             "name": "explicitly_hidden",
@@ -206,7 +279,121 @@
             "in": "query",
             "description": "The sort order of the results",
             "type": "string",
-            "x-ms-summary": "Order"
+            "x-ms-summary": "Order",
+            "enum": [
+              "relevance DESC",
+              "relevance ASC",
+              "name ASC",
+              "name DESC",
+              "owner ASC",
+              "owner DESC",
+              "dataset_id ASC",
+              "dataset_id DESC",
+              "datatype ASC",
+              "datatype DESC",
+              "domain_category ASC",
+              "domain_category DESC",
+              "createdAt DESC",
+              "createdAt ASC",
+              "updatedAt DESC",
+              "updatedAt ASC",
+              "page_views_total DESC",
+              "page_views_total ASC",
+              "page_views_last_month DESC",
+              "page_views_last_month ASC",
+              "page_views_last_week DESC",
+              "page_views_last_week ASC"
+            ],
+            "x-ms-enum-values": [
+              {
+                "displayName": "Relevance Descending",
+                "value": "relevance DESC"
+              },
+              {
+                "displayName": "Relevance Ascending",
+                "value": "relevance ASC"
+              },
+              {
+                "displayName": "Name Ascending",
+                "value": "name ASC"
+              },
+              {
+                "displayName": "Name Descending",
+                "value": "name DESC"
+              },
+              {
+                "displayName": "Owner Ascending",
+                "value": "owner ASC"
+              },
+              {
+                "displayName": "Owner Descending",
+                "value": "owner DESC"
+              },
+              {
+                "displayName": "Dataset ID Ascending",
+                "value": "dataset_id ASC"
+              },
+              {
+                "displayName": "Dataset ID Descending",
+                "value": "dataset_id DESC"
+              },
+              {
+                "displayName": "Datatype Ascending",
+                "value": "datatype ASC"
+              },
+              {
+                "displayName": "Datatype Descending",
+                "value": "datatype DESC"
+              },
+              {
+                "displayName": "Domain Category Ascending",
+                "value": "domain_category ASC"
+              },
+              {
+                "displayName": "Domain Category Descending",
+                "value": "domain_category DESC"
+              },
+              {
+                "displayName": "Created At Descending",
+                "value": "createdAt DESC"
+              },
+              {
+                "displayName": "Created At Ascending",
+                "value": "createdAt ASC"
+              },
+              {
+                "displayName": "Updated At Descending",
+                "value": "updatedAt DESC"
+              },
+              {
+                "displayName": "Updated At Ascending",
+                "value": "updatedAt ASC"
+              },
+              {
+                "displayName": "Page Views Total Descending",
+                "value": "page_views_total DESC"
+              },
+              {
+                "displayName": "Page Views Total Ascending",
+                "value": "page_views_total ASC"
+              },
+              {
+                "displayName": "Page Views Last Month Descending",
+                "value": "page_views_last_month DESC"
+              },
+              {
+                "displayName": "Page Views Last Month Ascending",
+                "value": "page_views_last_month ASC"
+              },
+              {
+                "displayName": "Page Views Last Week Descending",
+                "value": "page_views_last_week DESC"
+              },
+              {
+                "displayName": "Page Views Last Week Ascending",
+                "value": "page_views_last_week ASC"
+              }
+            ]
           },
           {
             "name": "offset",
@@ -259,90 +446,134 @@
                         "type": "object",
                         "properties": {
                           "name": {
-                            "type": "string"
+                            "type": "string",
+                            "x-ms-summary": "Asset Name",
+                            "description": "The name of the asset."
                           },
                           "id": {
-                            "type": "string"
+                            "type": "string",
+                            "x-ms-summary": "Asset ID",
+                            "description": "The unique identifier of the asset."
                           },
                           "description": {
-                            "type": "string"
+                            "type": "string",
+                            "x-ms-summary": "Description",
+                            "description": "A brief description of the asset."
                           },
                           "attribution": {
-                            "type": "string"
+                            "type": "string",
+                            "x-ms-summary": "Attribution",
+                            "description": "The entity attributed for the asset."
                           },
                           "type": {
-                            "type": "string"
+                            "type": "string",
+                            "x-ms-summary": "Type",
+                            "description": "The type of the asset."
                           },
                           "updatedAt": {
                             "type": "string",
-                            "format": "date-time"
+                            "format": "date-time",
+                            "x-ms-summary": "Updated At",
+                            "description": "The date and time when the asset was last updated."
                           },
                           "createdAt": {
                             "type": "string",
-                            "format": "date-time"
+                            "format": "date-time",
+                            "x-ms-summary": "Created At",
+                            "description": "The date and time when the asset was created."
                           },
                           "columns_name": {
                             "type": "array",
                             "items": {
                               "type": "string"
-                            }
+                            },
+                            "x-ms-summary": "Columns Name",
+                            "description": "Names of the columns in the asset."
                           },
                           "columns_field_name": {
                             "type": "array",
                             "items": {
                               "type": "string"
-                            }
+                            },
+                            "x-ms-summary": "Columns Field Name",
+                            "description": "Field names of the columns in the asset."
                           },
                           "columns_datatype": {
                             "type": "array",
                             "items": {
                               "type": "string"
-                            }
+                            },
+                            "x-ms-summary": "Columns Datatype",
+                            "description": "Datatypes of the columns in the asset."
                           },
                           "columns_description": {
                             "type": "array",
                             "items": {
                               "type": "string"
-                            }
+                            },
+                            "x-ms-summary": "Columns Description",
+                            "description": "Descriptions of the columns in the asset."
                           },
                           "page_views_total": {
-                            "type": "number"
+                            "type": "number",
+                            "x-ms-summary": "Page Views Total",
+                            "description": "Total number of page views."
                           },
                           "page_views_last_week": {
-                            "type": "number"
+                            "type": "number",
+                            "x-ms-summary": "Page Views Last Week",
+                            "description": "Number of page views in the last week."
                           },
                           "page_views_last_month": {
-                            "type": "number"
+                            "type": "number",
+                            "x-ms-summary": "Page Views Last Month",
+                            "description": "Number of page views in the last month."
                           },
                           "download_count": {
-                            "type": "number"
+                            "type": "number",
+                            "x-ms-summary": "Download Count",
+                            "description": "Total number of downloads."
                           },
                           "provenance": {
-                            "type": "string"
+                            "type": "string",
+                            "x-ms-summary": "Provenance",
+                            "description": "The provenance of the asset."
                           },
                           "categories": {
                             "type": "array",
                             "items": {
                               "type": "string"
-                            }
+                            },
+                            "x-ms-summary": "Categories",
+                            "description": "Categories of the asset."
                           },
                           "tags": {
                             "type": "array",
                             "items": {
                               "type": "string"
-                            }
+                            },
+                            "x-ms-summary": "Tags",
+                            "description": "Tags associated with the asset."
                           },
                           "domain": {
-                            "type": "string"
+                            "type": "string",
+                            "x-ms-summary": "Domain",
+                            "description": "The domain of the asset."
                           },
                           "is_public": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "x-ms-summary": "Is Public",
+                            "description": "Whether the asset is public."
                           },
                           "is_published": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "x-ms-summary": "Is Published",
+                            "description": "Whether the asset is published."
                           },
                           "is_hidden": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "x-ms-summary": "Is Hidden",
+                            "description": "Whether the asset is hidden."
                           }
                         }
                       }
@@ -350,13 +581,17 @@
                   }
                 },
                 "resultSetSize": {
-                  "type": "number"
+                  "type": "number",
+                  "x-ms-summary": "Result Set Size",
+                  "description": "The size of the result set."
                 },
                 "warnings": {
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "x-ms-summary": "Warnings",
+                  "description": "Warnings associated with the query."
                 }
               }
             }
@@ -367,23 +602,28 @@
     "/catalog/v1/domains": {
       "get": {
         "operationId": "CountByDomain",
-        "summary": "Count by Domain",
-        "description": "Returns each domain and the count of assets owned by that domain. The counts may be restricted according to any of the query parameters described in the Complete Search API, with the exception of the q text search param.",
+        "summary": "Count by domain",
+        "description": "Returns each domain and the count of assets owned by that domain.",
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "domain": {
-                    "type": "string",
-                    "description": "The domain name."
-                  },
-                  "count": {
-                    "type": "number",
-                    "description": "The count of assets owned by the domain."
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "domain": {
+                        "type": "string",
+                        "description": "The domain name."
+                      },
+                      "count": {
+                        "type": "number",
+                        "description": "The count of assets owned by the domain."
+                      }
+                    }
                   }
                 }
               }
@@ -392,7 +632,76 @@
           "400": {
             "description": "Invalid request"
           }
-        }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/catalog/v1/categories": {
+      "get": {
+        "operationId": "CountByCategory",
+        "summary": "Count by category",
+        "description": "Returns each category and the count of assets having that category.",
+        "responses": {
+          "200": {
+            "description": "A list of categories and their counts",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "category": {
+                        "type": "string",
+                        "description": "The domain-specific category."
+                      },
+                      "count": {
+                        "type": "number",
+                        "description": "The count of assets having that category."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/catalog/v1/tags": {
+      "get": {
+        "operationId": "CountByTag",
+        "summary": "Count by tag",
+        "description": "Returns each asset tag and the count of assets having that tag.",
+        "responses": {
+          "200": {
+            "description": "A list of tags and their counts",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "tag": {
+                        "type": "string",
+                        "description": "The asset tag."
+                      },
+                      "count": {
+                        "type": "number",
+                        "description": "The count of assets having that tag."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
       }
     },
     "/views/{asset_id}": {
@@ -405,7 +714,9 @@
             "name": "domain",
             "in": "header",
             "type": "string",
-            "required": true
+            "required": true,
+            "description": "Dataset domain",
+            "x-ms-summary": "Domain"
           },
           {
             "name": "asset_id",
@@ -413,39 +724,40 @@
             "required": true,
             "description": "The unique identifier of the asset",
             "type": "string",
-            "x-ms-summary": "Dataset"
+            "x-ms-summary": "Dataset",
+            "x-ms-url-encoding": "single"
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
             "description": "Invalid type specified"
-          },
-          "default": {
-            "description": "OK",
-            "schema": {
-              "type": "object"
-            }
           }
-        }
+        },
+        "x-ms-visibility": "internal"
       }
     },
     "/resource/{resource_id}.json": {
       "post": {
         "operationId": "SearchDataset",
-        "summary": "Search Dataset",
-        "description": "Retrieve data from a dataset",
+        "summary": "Search dataset",
+        "description": "Retrieve data from a dataset using basic filtering.",
         "parameters": [
           {
             "name": "domain",
             "in": "header",
             "required": true,
-            "description": "Dataset publishers",
+            "description": "Dataset publisher",
             "type": "string",
             "x-ms-summary": "Domain",
             "x-ms-dynamic-values": {
@@ -461,6 +773,7 @@
             "description": "The unique identifier of the dataset resource",
             "type": "string",
             "x-ms-summary": "Dataset",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "SearchCatalog",
               "value-path": "resource/id",
@@ -497,7 +810,7 @@
             "name": "$limit",
             "in": "query",
             "required": false,
-            "description": "The number of records to return.",
+            "description": "The number of records to return",
             "type": "integer",
             "x-ms-summary": "Limit"
           },
@@ -505,7 +818,7 @@
             "name": "$offset",
             "in": "query",
             "required": false,
-            "description": "The offset for pagination.",
+            "description": "The offset for pagination",
             "type": "integer",
             "x-ms-summary": "Offset"
           }
@@ -545,12 +858,6 @@
           },
           "400": {
             "description": "Invalid type specified"
-          },
-          "default": {
-            "description": "OK",
-            "schema": {
-              "type": "object"
-            }
           }
         }
       }
@@ -558,14 +865,14 @@
     "/resource/{resource_id}.json/SoQL": {
       "get": {
         "operationId": "SearchDatasetSoQL",
-        "summary": "Search Dataset with SoQL",
-        "description": "Retrieve data from a dataset using SoQL query",
+        "summary": "Search dataset with SoQL",
+        "description": "Retrieve data from a dataset using SoQL query.",
         "parameters": [
           {
             "name": "domain",
             "in": "header",
             "required": true,
-            "description": "Dataset publishers",
+            "description": "Dataset publisher",
             "type": "string",
             "x-ms-summary": "Domain",
             "x-ms-dynamic-values": {
@@ -581,6 +888,7 @@
             "description": "The unique identifier of the dataset resource",
             "type": "string",
             "x-ms-summary": "Dataset",
+            "x-ms-url-encoding": "single",
             "x-ms-dynamic-values": {
               "operationId": "SearchCatalog",
               "value-path": "resource/id",
@@ -598,7 +906,7 @@
             "name": "$limit",
             "in": "query",
             "required": false,
-            "description": "The number of records to return.",
+            "description": "The number of records to return",
             "type": "integer",
             "x-ms-summary": "Limit"
           },
@@ -606,7 +914,7 @@
             "name": "$offset",
             "in": "query",
             "required": false,
-            "description": "The offset for pagination.",
+            "description": "The offset for pagination",
             "type": "integer",
             "x-ms-summary": "Offset"
           },
@@ -654,7 +962,7 @@
             "name": "$q",
             "in": "query",
             "required": false,
-            "description": "Performs a full text search for a value.",
+            "description": "Performs a full text search for a value",
             "type": "string",
             "x-ms-summary": "Full Text Search"
           },
@@ -679,12 +987,6 @@
           },
           "400": {
             "description": "Invalid type specified"
-          },
-          "default": {
-            "description": "OK",
-            "schema": {
-              "type": "object"
-            }
           }
         }
       }
@@ -692,14 +994,16 @@
     "/resource/{resource_id}.json/GetSearchData": {
       "get": {
         "operationId": "GetSearchData",
-        "summary": "Get Search Data",
-        "description": "Get data for search fields",
+        "summary": "Get search data",
+        "description": "Get data for search fields.",
         "parameters": [
           {
             "name": "domain",
             "in": "header",
             "type": "string",
-            "required": true
+            "required": true,
+            "x-ms-summary": "Domain",
+            "description": "Dataset publisher"
           },
           {
             "name": "resource_id",
@@ -707,7 +1011,8 @@
             "required": true,
             "description": "The unique identifier of the dataset resource",
             "type": "string",
-            "x-ms-summary": "Dataset"
+            "x-ms-summary": "Dataset",
+            "x-ms-url-encoding": "single"
           },
           {
             "name": "$query",
@@ -735,14 +1040,9 @@
           },
           "400": {
             "description": "Invalid type specified"
-          },
-          "default": {
-            "description": "OK",
-            "schema": {
-              "type": "object"
-            }
           }
-        }
+        },
+        "x-ms-visibility": "internal"
       }
     }
   },
@@ -750,19 +1050,19 @@
   "parameters": {},
   "responses": {},
   "securityDefinitions": {
+    "basic-auth": {
+      "type": "basic"
+    },
     "api-auth": {
       "type": "apiKey",
       "in": "header",
       "name": "X-App-Token"
-    },
-    "basic-auth": {
-      "type": "basic"
     }
   },
   "security": [
     {
-      "api-auth": [],
-      "basic-auth": []
+      "basic-auth": [],
+      "api-auth": []
     }
   ],
   "tags": [],
