@@ -1,4 +1,10 @@
-﻿public class Script : ScriptBase
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
