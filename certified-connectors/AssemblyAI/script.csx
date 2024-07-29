@@ -2,7 +2,7 @@
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        this.Context.Request.Headers.Add("User-Agent", "AssemblyAI/1.0 (integration=msft-connector/1.0)");
+        this.Context.Request.Headers.Add("User-Agent", "AssemblyAI/1.0 (integration=msft-connector/1.1.0)");
 
         // Check if the operation ID matches what is specified in the OpenAPI definition of the connector
         if (this.Context.OperationId == "WordSearch")
