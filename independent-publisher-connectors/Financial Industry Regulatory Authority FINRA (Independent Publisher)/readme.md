@@ -32,9 +32,9 @@
 ## Supported Operations:
 
 	- Freemium to start, which includes:
-		- All data from Equity endpoints
-		- All data from Fixed Income endpoints
-
+		- Summaries from Equity endpoints (Weekly, Monthly, OTC)
+			COMING SOON: All other free Equity endpoints plus metadata.
+		
 	- The API platform supports both synchronous and asynchronous requests.
 		- The request type is specified using the "async" query parameter on GET requests: api.finra.org/{resource path}?async=true and as a request parameter on POST requests: "async" : true. 
 		- The async parameter defaults to false if not provided, which indicates a synchronous request.
