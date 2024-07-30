@@ -16,6 +16,7 @@ This connector supports the following endpoints from the Fleetio API
 - `v2/issues`
 - `v2/service_entries`
 - `v1/submitted_inspection_forms`
+- `v1/fuel_entries`
 - `v1/vehicles`
 - `v1/expense_entries`
 - `v2/contacts`
