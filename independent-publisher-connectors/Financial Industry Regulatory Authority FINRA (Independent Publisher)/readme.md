@@ -95,7 +95,7 @@
 				- How you can use these:
 					- Personal investing
 						- Follow the big players with the Blocks Summary and OTC Block Summary to make smarter moves.
-						- Watch the short interest to see if people are betting against your stocks, maybe you can make a move before things get bad.
+						- Watch the short interest to see if people are betting against stocks, maybe you can make a move before things get bad.
 
 					- Market analysis
 						- Use the Monthly and Weekly Summaries to see the trends and decide if the market is hot or not
@@ -107,7 +107,7 @@
 				- Key highlights:
 					- Weekly Treasury Aggregates - TRACE reported trading volume in US Treasury Securities aggregated weekly by security subtype.
 					- Market Breadth & Sentiment - TRACE fixed income market breadth and sentiment data.
-					- Capped Volume - TRACE structured product and coporate/agency capped volume data.
+					- Capped Volume - TRACE structured product and corporate/agency capped volume data.
 
 			- Agency Debt Market Breadth:
 				- What It Is: This tells you how many different agency bonds are being traded. Think of it as counting all the different types of pasta dishes at a big family dinner.
@@ -188,5 +188,5 @@
 			- Response-Payload_Max_Size response header: Returns the current maximum payload size (in MB) returned by the API platform. Use to build a flexible integration that can adapt to future payload response size changes. Applies only to synchronous API requests.
 		
 			- Notes:
-				- To maximize the number of records returned in a response minimize the number of fields you return and use the text/plain Accept header on  your requests whenever possible (e.g. the Equity datasets support text/plain).
+				- To maximize the number of records returned in a response minimize the number of fields you return and use the text/plain Accept header on  requests whenever possible (e.g. the Equity datasets support text/plain).
 				- API clients should count the number of records returned in each response in order to ensure all expected data is returned, and to adapt future requests if less data than expected was returned because the record and/or the response payload size limits are reached.
