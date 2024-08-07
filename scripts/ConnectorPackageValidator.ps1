@@ -24,6 +24,20 @@ function DisplayReferDocumentation() {
         [System.Console]::WriteLine("For a better understanding of how to create a connector package zip file, please refer to the public document placed at ${blue}${underline}$Url${reset}")
 }
 
+function CheckValidFile($expectedFiles, $actualFiles) {
+    $missingFiles = $null
+    foreach ($filePattern in $expectedFiles) {
+        $matchingFiles = $actualFiles | Where-Object { $_.Name -eq $filePattern }
+        if ($matchingFiles.Count -eq 0) {
+            if (-not $missingFiles) {
+                $missingFiles = @()
+            }
+            $missingFiles  +=  $filePattern            
+        } 
+    }
+    return $missingFiles   
+}
+
 function ValidateFolderAndFilesInPackage {
     param (
         [bool] $pluginEnabled,
@@ -295,6 +309,158 @@ try {
 
     # Call the function
     $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 3 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
+       
+    if (-not $resultOfValidation) {
+        DisplayReferDocumentation
+        Write-Host ""
+        Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+        Write-Host ""
+        RemoveTempFolder $tempFolder
+        RemoveTempFolder $tempFolder2
+        exit
+    }
+
+    # Check inside the solution zip
+    $secondLevelZipFiles = Get-ChildItem -Path  "$tempFolder2/$pkgAssetFoldereName" -Filter "*.zip" | Select-Object -ExpandProperty Name
+    $originalParentFolderPath = $parentFolderPath
+    $nodesToCheck = @()
+    foreach ($secondLevelZipFile in $secondLevelZipFiles) {
+        $tempFolder3 = New-Item -ItemType Directory -Path (Join-Path $env:TEMP (New-Guid))
+        # Update the corret currentFolder to the parentFolderPath
+        $parentFolderPath = "$originalParentFolderPath/$secondLevelZipFile"
+
+        $secondLevelZipFilePath = "$tempFolder2/$pkgAssetFoldereName/$secondLevelZipFile"
+        Expand-Archive -Path $secondLevelZipFilePath -DestinationPath $tempFolder3 -Force
+
+        $actualFiles = Get-ChildItem -Path $tempFolder3 -File
+        $expectedFiles = @("[Content_Types].xml", "customizations.xml", "solution.xml")
+        $missingFiles = $null
+        $missingFiles = CheckValidFile $expectedFiles $actualFiles
+        # Call the validation function
+        # $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 4 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
+        if ($missingFiles) {
+            Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain three files namely '[Content_Types].xml', 'customizations.xml', 'solution.xml'."
+            Write-Host "Please add the missing '$($missingFiles -join ', ')' to the solution zip file."
+            Write-Host "NOTE: These files are by default present in an exported solution and should not be manually modified/removed. If done, please revert the changes."
+            DisplayReferDocumentation
+            Write-Host ""
+            Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+            Write-Host ""
+            RemoveTempFolder $tempFolder
+            RemoveTempFolder $tempFolder2
+            RemoveTempFolder $tempFolder3
+            exit
+        }
+        # Read the customizations.xml and look for any node "Connector" or "Workflows". If they exist, validate if the folders also exist
+        # Define the path to your XML file and the node name you want to check
+        $xmlFilePath = "$tempFolder3/customizations.xml"
+        $nodeNameToCheck = "Connector"
+
+        # Load the XML file into an XmlDocument object
+        [xml]$xmlContent = Get-Content -Path $xmlFilePath
+
+        # Use XPath to find the node
+        $nodeToCheck = $xmlContent.SelectSingleNode("//$nodeNameToCheck")
+
+        # Check if the node exists and output the result
+        if ($nodeToCheck -ne $null) {
+            if ($nodeToCheck.HasChildNodes -or $nodeToCheck.Attributes.Count -gt 0) {
+                # check if the folder name is present with the same name
+                $nodeNameFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $nodeNameToCheck}
+                if (-not $nodeNameFolder) {
+                    Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain one folder namely '$nodeNameToCheck'."
+                    Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                    Write-Host "Please add the required folder to the solution zip or export the correctsolution again."
+                    DisplayReferDocumentation
+                    Write-Host ""
+                    Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                    Write-Host ""
+                    RemoveTempFolder $tempFolder
+                    RemoveTempFolder $tempFolder2
+                    RemoveTempFolder $tempFolder3
+                    exit
+                }
+            }
+        }
+
+        $nodeNameToCheck = "Workflows"
+        # Use XPath to find the node
+        $nodeToCheck = $xmlContent.SelectSingleNode("//$nodeNameToCheck")
+
+        # Check if the node exists and output the result
+        if ($nodeToCheck -ne $null) {
+            if ($nodeToCheck.HasChildNodes -or $nodeToCheck.Attributes.Count -gt 0) {
+                # check if the folder name is present with the same name
+                $nodeNameFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $nodeNameToCheck}
+                if (-not $nodeNameFolder) {
+                    Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain one folder namely '$nodeNameToCheck'."
+                    Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                    Write-Host "Please add the required folder to the solution zip or export the correct solution again."
+                    DisplayReferDocumentation
+                    Write-Host ""
+                    Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                    Write-Host ""
+                    RemoveTempFolder $tempFolder
+                    RemoveTempFolder $tempFolder2
+                    RemoveTempFolder $tempFolder3
+                    exit
+                }
+            }
+        }
+        # aiplugin operation
+        $nodeNameToCheck = "aicopilot_aiplugin"
+        # Use XPath to find the node
+        $nodeToCheck = $xmlContent.SelectSingleNode("//$nodeNameToCheck")
+
+        # Check if the node exists and output the result
+        if ($nodeToCheck -ne $null) {
+            if ($nodeToCheck.HasChildNodes -or $nodeToCheck.Attributes.Count -gt 0) {
+                # check if the folder name is present with the same name
+                $folderNameToCheck1 = "aiplugins"
+                $nodeNameFolder1 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $folderNameToCheck1}
+                $folderNameToCheck2 = "aipluginoperations"
+                $nodeNameFolder2 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $folderNameToCheck2}
+                if ((-not $nodeNameFolder1) -and (-not $nodeNameFolder2)) {
+                    Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain folders namely '$folderNameToCheck1, $folderNameToCheck2'."
+                    Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                    Write-Host "Please add the required folders to the solution zip or export the correct solution again."
+                    DisplayReferDocumentation
+                    Write-Host ""
+                    Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                    Write-Host ""
+                    RemoveTempFolder $tempFolder
+                    RemoveTempFolder $tempFolder2
+                    RemoveTempFolder $tempFolder3
+                    exit
+                } elseif (-not $nodeNameFolder1) {
+                    Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain a folder namely '$folderNameToCheck1'."
+                    Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                    Write-Host "Please add the required folder to the solution zip or export the correct solution again."
+                    DisplayReferDocumentation
+                    Write-Host ""
+                    Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                    Write-Host ""
+                    RemoveTempFolder $tempFolder
+                    RemoveTempFolder $tempFolder2
+                    RemoveTempFolder $tempFolder3
+                    exit
+                } elseif (-not $nodeNameFolder2) {
+                    Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain a folder namely '$folderNameToCheck2'."
+                    Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                    Write-Host "Please add the required folder to the solution zip or export the correct solution again."
+                    DisplayReferDocumentation
+                    Write-Host ""
+                    Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                    Write-Host ""
+                    RemoveTempFolder $tempFolder
+                    RemoveTempFolder $tempFolder2
+                    RemoveTempFolder $tempFolder3
+                    exit
+                }
+            }
+        }
+    }
+
     if ($resultOfValidation) {
         Write-Host "Validation successful: The package structure is correct." -ForegroundColor Green
         Write-Host ""
