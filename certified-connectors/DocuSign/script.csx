@@ -1465,9 +1465,9 @@ public class Script : ScriptBase
   {
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
 
-    var basePath = uriBuilder.Uri.ToString().Contains("demo") || uriBuilder.Uri.ToString().Contains("stage") ? 
+    var path = uriBuilder.Uri.ToString().Contains("demo") || uriBuilder.Uri.ToString().Contains("stage") ? 
     "/send/documents/details/" : "/documents/details/";
-    var envelopeUrl = GetDocusignApiBaseUri() + basePath + envelope["envelopeId"];
+    var envelopeUrl = GetDocusignApiBaseUri() + path + envelope["envelopeId"];
 
     return envelopeUrl;
   }
@@ -1475,7 +1475,7 @@ public class Script : ScriptBase
   private string GetDocusignApiBaseUri()
   {
     var host = this.Context.Request.RequestUri.Host.ToLower();
-    var applicationURL = host.Contains("demo") ?
+    var docusignApiBaseUri = host.Contains("demo") ?
         "https://apps-d.docusign.com"
       : host.Contains("stage") ?
         "https://apps-s.docusign.com"
@@ -1483,13 +1483,13 @@ public class Script : ScriptBase
         "https://app.docusign.mil"
       : "https://app.docusign.com";
 
-    return applicationURL;
+    return docusignApiBaseUri;
   }
 
   private string GetAccountServerBaseUri()
   {
     var host = this.Context.Request.RequestUri.Host.ToLower();
-    var hostURL = host.Contains("demo") ?
+    var accountServerBaseUri = host.Contains("demo") ?
         "https://account-d.docusign.com"
       : host.Contains("stage") ?
         "https://account-s.docusign.com"
@@ -1497,7 +1497,7 @@ public class Script : ScriptBase
         "https://account.docusign.mil"
       : "https://account.docusign.com";
 
-    return hostURL;
+    return accountServerBaseUri;
   }
 
   private void AddCoreRecipientParams(JArray signers, JObject body) 
