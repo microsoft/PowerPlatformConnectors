@@ -1322,14 +1322,7 @@ public class Script : ScriptBase
 
     if (returnUrl.Equals("DocuSign homepage"))
     {
-      if (url.Equals("demo.docusign.net"))
-      {
-        body["returnUrl"] = "https://appdemo.docusign.com/";
-      }
-      else
-      {
-        body["returnUrl"] = "https://app.docusign.com/";
-      }
+      body["returnUrl"] = GetApplicationURL();
     }
     else
     {
@@ -1471,11 +1464,44 @@ public class Script : ScriptBase
   private string GetEnvelopeUrl(JToken envelope)
   {
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    var envelopeUrl = uriBuilder.Uri.ToString().Contains("demo") ?
-      "https://apps-d.docusign.com/send/documents/details/" + envelope["envelopeId"] :
-      "https://app.docusign.com/documents/details/" + envelope["envelopeId"];
+    var envelopePath = uriBuilder.Uri.ToString().Contains("demo") ?
+        "/send/documents/details/" + envelope["envelopeId"]
+      : uriBuilder.Uri.ToString().Contains(".mil") ?
+        "/documents/details/" + envelope["envelopeId"]
+      : uriBuilder.Uri.ToString().Contains("stage") ?
+        "/send/documents/details/" + envelope["envelopeId"]
+      : "/documents/details/" + envelope["envelopeId"];
+    var envelopeUrl = GetApplicationURL() + envelopePath;
 
     return envelopeUrl;
+  }
+
+  private string GetApplicationURL()
+  {
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var applicationURL = host.Contains("demo") ?
+        "https://apps-d.docusign.com"
+      : host.Contains("stage") ?
+        "https://apps-s.docusign.com"
+      : host.Contains(".mil") ?
+        "https://app.docusign.mil"
+      : "https://app.docusign.com";
+
+    return applicationURL;
+  }
+
+  private string GetHostURL()
+  {
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var hostURL = host.Contains("demo") ?
+        "https://account-d.docusign.com"
+      : host.Contains("stage") ?
+        "https://account-s.docusign.com"
+      : host.Contains(".mil") ?
+        "https://account.docusign.mil"
+      : "https://account.docusign.com";
+
+    return hostURL;
   }
 
   private void AddCoreRecipientParams(JArray signers, JObject body) 
@@ -1738,7 +1764,7 @@ public class Script : ScriptBase
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
-    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://account.docusign.com/oauth/userinfo");
+    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, GetHostURL() + "/oauth/userinfo");
 
     // Access token is in the authorization header already
     userInfoRequest.Headers.Authorization = this.Context.Request.Headers.Authorization;
