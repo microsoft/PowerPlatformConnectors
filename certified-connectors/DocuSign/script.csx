@@ -1322,7 +1322,7 @@ public class Script : ScriptBase
 
     if (returnUrl.Equals("DocuSign homepage"))
     {
-      body["returnUrl"] = GetApplicationURL();
+      body["returnUrl"] = GetDocusignApiBaseUri();
     }
     else
     {
@@ -1464,19 +1464,15 @@ public class Script : ScriptBase
   private string GetEnvelopeUrl(JToken envelope)
   {
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    var envelopePath = uriBuilder.Uri.ToString().Contains("demo") ?
-        "/send/documents/details/" + envelope["envelopeId"]
-      : uriBuilder.Uri.ToString().Contains(".mil") ?
-        "/documents/details/" + envelope["envelopeId"]
-      : uriBuilder.Uri.ToString().Contains("stage") ?
-        "/send/documents/details/" + envelope["envelopeId"]
-      : "/documents/details/" + envelope["envelopeId"];
-    var envelopeUrl = GetApplicationURL() + envelopePath;
+
+    var basePath = uriBuilder.Uri.ToString().Contains("demo") || uriBuilder.Uri.ToString().Contains("stage") ? 
+    "/send/documents/details/" : "/documents/details/";
+    var envelopeUrl = GetDocusignApiBaseUri() + basePath + envelope["envelopeId"];
 
     return envelopeUrl;
   }
 
-  private string GetApplicationURL()
+  private string GetDocusignApiBaseUri()
   {
     var host = this.Context.Request.RequestUri.Host.ToLower();
     var applicationURL = host.Contains("demo") ?
@@ -1490,7 +1486,7 @@ public class Script : ScriptBase
     return applicationURL;
   }
 
-  private string GetHostURL()
+  private string GetAccountServerBaseUri()
   {
     var host = this.Context.Request.RequestUri.Host.ToLower();
     var hostURL = host.Contains("demo") ?
@@ -1764,7 +1760,7 @@ public class Script : ScriptBase
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
-    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, GetHostURL() + "/oauth/userinfo");
+    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, GetAccountServerBaseUri() + "/oauth/userinfo");
 
     // Access token is in the authorization header already
     userInfoRequest.Headers.Authorization = this.Context.Request.Headers.Authorization;
