@@ -49,29 +49,46 @@ public class Script : ScriptBase
         {
             var content = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            return ConvertToObjects(content, Context.OperationId);
+            return ConvertToObjects(content, Context.OperationId).GetAsResult();
         }
 
-        var domain = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
-        if (Uri.IsWellFormedUriString(domain, UriKind.Absolute))
+        var snowflakeInstanceURL = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
+        if (Uri.IsWellFormedUriString(snowflakeInstanceURL, UriKind.Absolute))
         {
-            Uri uri = new Uri(domain);
-            domain = uri.Host;
+            Uri uri = new Uri(snowflakeInstanceURL);
+            snowflakeInstanceURL = uri.Host;
         }
-        if (!IsUrlValid(domain))
+        if (!IsUrlValid(snowflakeInstanceURL))
         {
             return createErrorResponse(HttpStatusCode.BadRequest, "Invalid Instance URL!", "https://docs.snowflake.com/en/developer-guide/sql-api/about-endpoints");
         }
 
         var uriBuilder = new UriBuilder(Context.Request.RequestUri);
-        uriBuilder.Host = domain;
+        uriBuilder.Host = snowflakeInstanceURL;
         Context.Request.RequestUri = uriBuilder.Uri;
 
         HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
         if (response.IsSuccessStatusCode && IsTransformable())
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            response = ConvertToObjects(responseContent, Context.OperationId);
+            var results = ConvertToObjects(responseContent, Context.OperationId);
+            
+            // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
+            if(fixme_Params.FetchAllPartitions)
+            {
+                // yes, this starts at 1 because we've already fetched the first partition.
+                for(var i = 1;i < results.Partitions;i++)
+                {
+                    fixme_setPartitionParam = i;
+                    response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                    responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var partitionResult = ConvertObjectResult(responseContent, Context.OperationId);
+                    foreach(var item in partitionResult.Data)
+                    {
+                        results.Data.Add(item);
+                    }
+                }
+            }
         }
 
         return response;
@@ -103,7 +120,7 @@ public class Script : ScriptBase
         }
     }
 
-    private HttpResponseMessage ConvertToObjects(string content, string operationId)
+    private SnowflakeResponse ConvertToObjects(string content, string operationId)
     {
         try
         {
@@ -222,7 +239,6 @@ public class Script : ScriptBase
                 if (contentAsJson[Attr_Metadata][Attr_PartitionInfo] != null)
                 {
                     partitionInfo = contentAsJson[Attr_Metadata][Attr_PartitionInfo].ToString();
-                    IList<SnowflakePartitionInfo>? snowflakePartitions = JsonConvert.DeserializeObject<IList<SnowflakePartitionInfo>>(partitionInfo);
                 }
             }
 
@@ -234,21 +250,34 @@ public class Script : ScriptBase
                 Metadata = snowflakeMetadata
             };
 
-            var responseObj = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = CreateJsonContent(JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.None, new JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Include}))
-            };
-
-            return responseObj;
+            return result;
         }
         catch (JsonReaderException ex)
         {
-            return createErrorResponse(HttpStatusCode.BadRequest, $"'{Attr_Metadata}' or '{Attr_Data}' are in an invalid format: " + ex);
+            return new SnowflakeResponse()
+            {
+                Success = false,
+                ErrorStatusCode = HttpStatusCode.BadRequest,
+                ErrorMessage = $"'{Attr_Metadata}' or '{Attr_Data}' are in an invalid format: " + ex,
+            };
         }
         catch (Exception ex)
         {
-            return createErrorResponse(HttpStatusCode.InternalServerError, ex.GetType() + ":" + ex);
+            return new SnowflakeResponse()
+            {
+                Success = false,
+                ErrorStatusCode = InternalServerError.BadRequest,
+                ErrorMessage = ex.GetType() + ":" + ex,
+            };
         }
+    }
+
+    private HttpResponseMessage createResponse(HttpStatusCode code, object payload)
+    {
+        return new HttpResponseMessage(code)
+        {
+            Content = CreateJsonContent(JsonConvert.SerializeObject(payload,Newtonsoft.Json.Formatting.None, new JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Include}))
+        };
     }
 
     private HttpResponseMessage createErrorResponse(HttpStatusCode code, string msg, string? errorReference = null)
@@ -289,6 +318,24 @@ public class Script : ScriptBase
 
     #region Sub classes
 
+    public class ConvertObjectResult()
+    {
+        public SnowflakeResponse ResponseContent { get; set; }
+        public bool Success { get; set; }
+        public string ErrorMessage { get ;set; }
+        public HttpStatusCode ErrorStatusCode { get; set; }
+
+        public GetAsResponse()
+        {
+            if(Success)
+            {
+                return createResponse(HttpStatusCode.OK, ResponseContent);
+            }
+            else{
+                return createErrorResponse(ErrorStatusCode,ErrorMessage);
+            }
+        }
+    }
     public class SnowflakeResponseMetadata
     {
         public long Rows { get; set; }
@@ -348,7 +395,7 @@ public class Script : ScriptBase
 
         public IList<object>? Schema { get; set; }
 
-        public object? Data { get; set; }
+        public JArray Data { get; set; }
 
         public SnowflakeResponseMetadata? Metadata { get; set; }
     }
