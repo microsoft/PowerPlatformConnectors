@@ -19,7 +19,7 @@ Dan Romano (swolcat)
 To access the FINRA data services, you will need an API key. You can obtain this by registering on the FINRA API portal and requesting access. It is important to note that FINRA requires OAuth2 authentication. Follow the instructions provided in the FINRA documentation.
 
 - Instructions: https://developer.finra.org/docs
-- Further instructions: https//developments.substack.com/p/no-bull
+- Further instructions: https//developments.substack.com/p/paper-trails
 - It is recommended to create two credentials, one for Public datasets and another for Mock datasets.
 
 ## Supported Opeartions
