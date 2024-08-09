@@ -9,6 +9,7 @@
             public const string RoundUp = "RoundUp";
             public const string Sum = "Sum";
             public const string ImageInfo = "ImageInfo";
+            public const string Regex = "Regex";
         }
         [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
         public class OutputBase
@@ -49,6 +50,7 @@
                 ScriptOperation.RoundUp => await RoundUp(BuildInput<RoundUpInput>(content)),
                 ScriptOperation.ImageInfo => await ImageInfo(BuildInput<ImageInfoInput>(content)),
                 ScriptOperation.GetVersion => await GetVersion(),
+                ScriptOperation.Regex => await Regex(BuildInput<RegexInput>(content)),
                 _ => $"Unknown operation ID '{operationId}'",
             };            
         }
@@ -135,6 +137,32 @@
                     };
                 }
             }
+        }
+        #endregion
+        #region Regex
+        public class RegexInput
+        {
+            public string Content { get; set; }
+            public string Pattern { get; set; }
+        }
+        public async Task<List<string>> Regex(RegexInput input)
+        {
+            // Create a Regex object with the provided pattern
+            Regex regex = new Regex(input.Pattern);
+
+            // Find all matches in the input string
+            MatchCollection matches = regex.Matches(input.Content);
+
+            // Create a list to store all the matched strings
+            List<string> matchResults = new List<string>();
+
+            // Iterate through all the matches and add them to the list
+            foreach (Match match in matches)
+            {
+                matchResults.Add(match.Value);
+            }
+
+            return matchResults;
         }
         #endregion
 

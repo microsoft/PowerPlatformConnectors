@@ -14,6 +14,12 @@ You will need the following to proceed:
 
 ## Supported Operations
 
+### Regex
+
+use Regex to extract value from content
+
+
+
 ### ImageInfo
   
 get image base information like height, width and size by image base64
