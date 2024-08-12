@@ -34,7 +34,7 @@ Action 3 - OTC Block Summary - This endpoint offers a summary of significant blo
 
 ## Known Issues and Limitations
 
-There are no known issues at this time but paging datasets is recommended.
+There are no known issues at this time but paging datasets is recommended for handling large result sets.
 
 ## Frequently Asked Questions
 
