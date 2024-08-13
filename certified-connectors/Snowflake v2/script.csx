@@ -35,7 +35,7 @@ public class Script : ScriptBase
     private const string Snowflake_Type_Time = "time";
 
     private const string QueryString_Partition = "partition";
-
++    private const string QueryString_FetchAllPartitions = "fetchAllPartitions"
     #endregion
 
     public HttpResponseMessage TestConvert(string content, string operationId)
@@ -49,7 +49,7 @@ public class Script : ScriptBase
         {
             var content = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            return ConvertToObjects(content, Context.OperationId).GetAsResult();
+            return ConvertToObjects(content, Context.OperationId).GetAsResponse();
         }
 
         var snowflakeInstanceURL = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
@@ -74,12 +74,12 @@ public class Script : ScriptBase
             var results = ConvertToObjects(responseContent, Context.OperationId);
             
             // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
-            if(fixme_Params.FetchAllPartitions)
+            if(GetQueryStringParam(QueryString_FetchAllPartitions))
             {
                 // yes, this starts at 1 because we've already fetched the first partition.
                 for(var i = 1;i < results.Partitions;i++)
                 {
-                    fixme_setPartitionParam = i;
+                    SetQueryStringParam(QueryString_Partition) = i;
                     response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
                     responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var partitionResult = ConvertObjectResult(responseContent, Context.OperationId);
@@ -93,7 +93,24 @@ public class Script : ScriptBase
 
         return response;
     }
+    private NamedValueCollection GetQueryString()
+    {
+        return HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
+    }
 
+    private string GetQueryStringParam(string paramName)
+    {
+        return GetQueryString()[paramName];
+    }
+
+    private void SetQueryStringParam(string paramName, string value)
+    {
+        var parms = GetQueryString();
+        parms[paramName] = value;
+
+        Context.Request.RequestUri.Query = parms.ToString();
+    }
+    
     private bool IsUrlValid(string url)
     {
         string patternAccount;
@@ -127,7 +144,7 @@ public class Script : ScriptBase
                 // check for parameters
                 if (contentAsJson[Attr_Data] == null || (contentAsJson["schema"] == null && contentAsJson["Schema"] == null))
                 {
-                    throw new Exception($"'{Attr_Schema}' or '{Attr_Data}' parameter are empty!");
+                    throw new Exception($"['{Attr_Schema}'] or ['{Attr_Data}'] parameter are empty!");
                 }
 
                 schema = (contentAsJson["schema"] ?? contentAsJson["Schema"]).ToString();
@@ -137,7 +154,7 @@ public class Script : ScriptBase
                 // check for parameters
                 if (contentAsJson[Attr_Data] == null || contentAsJson[Attr_Metadata] == null || contentAsJson[Attr_Metadata][Attr_RowType] == null)
                 {
-                    throw new Exception($"'{Attr_Metadata}' or '{Attr_Data}' parameter are empty!");
+                    throw new Exception($"['{Attr_Metadata}] or ['{Attr_Data}'] parameter are empty!");
                 }
 
                 schema = contentAsJson[Attr_Metadata][Attr_RowType].ToString();
