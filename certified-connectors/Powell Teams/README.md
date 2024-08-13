@@ -19,6 +19,8 @@ In order to use this API, you need to be authorized. To do so, click on the "Aut
 - Notes.Read.All
 - Notes.ReadWrite.All
 - Sites.Read.All
+- User.Invite.All
+- User.Read
 - User.Read.All
 
 Note : Please refer to following Microsoft documentation if you need to know how to get a Microsoft Graph Access Token : https://docs.microsoft.com/fr-fr/graph/auth-v2-user

@@ -29,7 +29,8 @@ public class Script : ScriptBase
 
     private async Task<HttpResponseMessage> InnerExecuteAsync()
     {
-        if ("AddDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        if ("AddDocument".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) ||
+        "AddTemplate".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
             var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -86,7 +87,17 @@ public class Script : ScriptBase
                 throw new Exception($"Could not create temporary file. Status code: {createFileResponse.StatusCode}");
             }
 
-            Uri locationUrl = createFileResponse.Headers.Location;
+            Uri initialLocationUrl = createFileResponse.Headers.Location;
+
+            // We force the host and scheme so that the API can recognize as an internal file url
+            UriBuilder uriBuilder = new UriBuilder(initialLocationUrl)
+            {
+                Scheme = "https",
+                Host = "api.signatureapi.com",
+                Port = -1 // Ensures default port is used (443 for HTTPS)
+            };
+
+            Uri locationUrl = uriBuilder.Uri;
 
             string createFileResponseString = await createFileResponse.Content.ReadAsStringAsync();
 
