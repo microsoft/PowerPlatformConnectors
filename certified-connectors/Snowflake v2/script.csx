@@ -104,15 +104,10 @@ public class Script : ScriptBase
 
     private bool IsTransformable()
     {
-        if (Context.OperationId == OP_EXECUTE_SQL)
+        if (Context.OperationId == OP_EXECUTE_SQL
+            || Context.OperationId == OP_GET_RESULTS)
         {
             return true;
-        }
-        else if (Context.OperationId == OP_GET_RESULTS)
-        {
-            var query = HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
-
-            return (query == null || query[QueryString_Partition] == null || query[QueryString_Partition] == "0");
         }
         else
         {
