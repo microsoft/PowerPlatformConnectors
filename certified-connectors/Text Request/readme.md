@@ -32,6 +32,7 @@ Text Request supports a wide variety of operations (no triggers) for handling yo
 * Get Conversations
 * Get Dashboards
 * Create A New Dashboard
+* A Trigger for when messages are sent or received
 
 ## Obtaining Credentials
 Text Request plans with API access will be given an automatically generated API Key, found in the integrations section of the web app. Just copy this API Key into the connector's Auth box when creating this connection.
