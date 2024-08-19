@@ -35,7 +35,7 @@ public class Script : ScriptBase
     private const string Snowflake_Type_Time = "time";
 
     private const string QueryString_Partition = "partition";
-+    private const string QueryString_FetchAllPartitions = "fetchAllPartitions"
+    private const string QueryString_FetchAllPartitions = "fetchAllPartitions"
     #endregion
 
     public HttpResponseMessage TestConvert(string content, string operationId)
@@ -337,7 +337,7 @@ public class Script : ScriptBase
         public string ErrorMessage { get ;set; }
         public HttpStatusCode ErrorStatusCode { get; set; }
 
-        public GetAsResponse()
+        public HttpResponseMessage GetAsResponse()
         {
             if(Success)
             {
