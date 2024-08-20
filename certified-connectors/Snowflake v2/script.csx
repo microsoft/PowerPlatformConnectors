@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Web;
+using System.Collections.Specialized;
 
 public class Script : ScriptBase
 {
@@ -35,7 +36,7 @@ public class Script : ScriptBase
     private const string Snowflake_Type_Time = "time";
 
     private const string QueryString_Partition = "partition";
-    private const string QueryString_FetchAllPartitions = "fetchAllPartitions"
+    private const string QueryString_FetchAllPartitions = "fetchAllPartitions";
     #endregion
 
     public HttpResponseMessage TestConvert(string content, string operationId)
@@ -72,18 +73,18 @@ public class Script : ScriptBase
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var results = ConvertToObjects(responseContent, Context.OperationId);
-            
+
             // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
-            if(GetQueryStringParam(QueryString_FetchAllPartitions))
+            if (GetQueryStringParam(QueryString_FetchAllPartitions))
             {
                 // yes, this starts at 1 because we've already fetched the first partition.
-                for(var i = 1;i < results.Partitions;i++)
+                for (var i = 1; i < results.Partitions; i++)
                 {
                     SetQueryStringParam(QueryString_Partition) = i;
                     response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
                     responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var partitionResult = ConvertObjectResult(responseContent, Context.OperationId);
-                    foreach(var item in partitionResult.Data)
+                    foreach (var item in partitionResult.Data)
                     {
                         results.Data.Add(item);
                     }
@@ -110,7 +111,7 @@ public class Script : ScriptBase
 
         Context.Request.RequestUri.Query = parms.ToString();
     }
-    
+
     private bool IsUrlValid(string url)
     {
         string patternAccount;
@@ -288,7 +289,7 @@ public class Script : ScriptBase
     {
         return new HttpResponseMessage(code)
         {
-            Content = CreateJsonContent(JsonConvert.SerializeObject(payload,Newtonsoft.Json.Formatting.None, new JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Include}))
+            Content = CreateJsonContent(JsonConvert.SerializeObject(payload, Newtonsoft.Json.Formatting.None, new JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Include }))
         };
     }
 
@@ -330,24 +331,26 @@ public class Script : ScriptBase
 
     #region Sub classes
 
-    public class ConvertObjectResult()
+    public class ConvertObjectResult
     {
         public SnowflakeResponse ResponseContent { get; set; }
         public bool Success { get; set; }
-        public string ErrorMessage { get ;set; }
+        public string ErrorMessage { get; set; }
         public HttpStatusCode ErrorStatusCode { get; set; }
 
         public HttpResponseMessage GetAsResponse()
         {
-            if(Success)
+            if (Success)
             {
                 return createResponse(HttpStatusCode.OK, ResponseContent);
             }
-            else{
-                return createErrorResponse(ErrorStatusCode,ErrorMessage);
+            else
+            {
+                return createErrorResponse(ErrorStatusCode, ErrorMessage);
             }
         }
     }
+
     public class SnowflakeResponseMetadata
     {
         public long Rows { get; set; }
