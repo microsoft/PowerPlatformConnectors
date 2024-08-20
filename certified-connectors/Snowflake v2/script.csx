@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Web;
-using System.Collections.Specialized;
+using System.Linq;
 
 public class Script : ScriptBase
 {
@@ -41,7 +41,7 @@ public class Script : ScriptBase
 
     public HttpResponseMessage TestConvert(string content, string operationId)
     {
-        return ConvertToObjects(content, operationId);
+        return ConvertToObjects(content, operationId).GetAsResponse();
     }
 
     public override async Task<HttpResponseMessage> ExecuteAsync()
@@ -69,34 +69,48 @@ public class Script : ScriptBase
         Context.Request.RequestUri = uriBuilder.Uri;
 
         HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-        if (response.IsSuccessStatusCode && IsTransformable())
-        {
-            var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var results = ConvertToObjects(responseContent, Context.OperationId);
+        var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        return ConvertToObjects(responseContent, Context.OperationId).GetAsResponse();
 
-            // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
-            if (GetQueryStringParam(QueryString_FetchAllPartitions))
-            {
-                // yes, this starts at 1 because we've already fetched the first partition.
-                for (var i = 1; i < results.Partitions; i++)
-                {
-                    SetQueryStringParam(QueryString_Partition) = i;
-                    response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-                    responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var partitionResult = ConvertObjectResult(responseContent, Context.OperationId);
-                    foreach (var item in partitionResult.Data)
-                    {
-                        results.Data.Add(item);
-                    }
-                }
-            }
+        //if (response.IsSuccessStatusCode && IsTransformable())
+        //{
+        //    var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //    var converted = ConvertToObjects(responseContent, Context.OperationId);
+
+        //    // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
+        //    if (GetQueryStringParam(QueryString_FetchAllPartitions) == "true")
+        //    {
+        //        // yes, this starts at 1 because we've already fetched the first partition.
+        //        for (var i = 1; i < converted.Response.Partitions.Count(); i++)
+        //        {
+        //            SetQueryStringParam(QueryString_Partition, $"{i}");
+        //            response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+        //            responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //            var partitionResult = ConvertToObjects(responseContent, Context.OperationId);
+        //            foreach (var item in partitionResult.Response.Data)
+        //            {
+        //                converted.Response.Data.Add(item);
+        //            }
+        //        }
+        //    }
+
+        //    return converted.GetAsResponse();
+        //}
+        //else
+        //{
+        //    return response;
+        //}
+    }
+    private Dictionary<string, string> GetQueryString()
+    {
+        var queryStringCollection = HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
+        var result = new Dictionary<string, string>();
+        for (var i = 0; i < queryStringCollection.Count; i++)
+        {
+            result.Add(queryStringCollection.AllKeys[i], queryStringCollection[i]);
         }
 
-        return response;
-    }
-    private NamedValueCollection GetQueryString()
-    {
-        return HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
+        return result;
     }
 
     private string GetQueryStringParam(string paramName)
@@ -109,7 +123,8 @@ public class Script : ScriptBase
         var parms = GetQueryString();
         parms[paramName] = value;
 
-        Context.Request.RequestUri.Query = parms.ToString();
+        //Context.Request.RequestUri.Query = parms.ToString();
+        Context.Request.RequestUri = new Uri(Context.Request.RequestUri.AbsolutePath + parms.ToString());
     }
 
     private bool IsUrlValid(string url)
@@ -133,13 +148,12 @@ public class Script : ScriptBase
         }
     }
 
-    private SnowflakeResponse ConvertToObjects(string content, string operationId)
+    private ConvertObjectResult ConvertToObjects(string content, string operationId)
     {
         try
         {
             var contentAsJson = JObject.Parse(content);
             string schema;
-
             if (operationId == OP_CONVERT)
             {
                 // check for parameters
@@ -255,19 +269,22 @@ public class Script : ScriptBase
                 }
             }
 
-            var result = new SnowflakeResponse
+            return new ConvertObjectResult()
             {
-                Data = newRows,
-                Schema = JsonConvert.DeserializeObject<IList<object>>(schema),
-                Partitions = partitionInfo != null ? JsonConvert.DeserializeObject<IList<SnowflakePartitionInfo>>(partitionInfo) : null,
-                Metadata = snowflakeMetadata
+                Response = new SnowflakeResponse
+                {
+                    Data = newRows,
+                    Schema = JsonConvert.DeserializeObject<IList<object>>(schema),
+                    Partitions = partitionInfo != null ? JsonConvert.DeserializeObject<IList<SnowflakePartitionInfo>>(partitionInfo) : null,
+                    Metadata = snowflakeMetadata,
+                },
+                Success = true,
+                ErrorStatusCode = HttpStatusCode.OK,
             };
-
-            return result;
         }
         catch (JsonReaderException ex)
         {
-            return new SnowflakeResponse()
+            return new ConvertObjectResult()
             {
                 Success = false,
                 ErrorStatusCode = HttpStatusCode.BadRequest,
@@ -276,16 +293,16 @@ public class Script : ScriptBase
         }
         catch (Exception ex)
         {
-            return new SnowflakeResponse()
+            return new ConvertObjectResult()
             {
                 Success = false,
-                ErrorStatusCode = InternalServerError.BadRequest,
-                ErrorMessage = ex.GetType() + ":" + ex,
+                ErrorStatusCode = HttpStatusCode.InternalServerError,
+                ErrorMessage = $"{ex.GetType()}:{ex}",
             };
         }
     }
 
-    private HttpResponseMessage createResponse(HttpStatusCode code, object payload)
+    private static HttpResponseMessage createResponse(HttpStatusCode code, object payload)
     {
         return new HttpResponseMessage(code)
         {
@@ -293,7 +310,7 @@ public class Script : ScriptBase
         };
     }
 
-    private HttpResponseMessage createErrorResponse(HttpStatusCode code, string msg, string? errorReference = null)
+    private static HttpResponseMessage createErrorResponse(HttpStatusCode code, string msg, string? errorReference = null)
     {
         JObject output = new JObject
         {
@@ -333,7 +350,7 @@ public class Script : ScriptBase
 
     public class ConvertObjectResult
     {
-        public SnowflakeResponse ResponseContent { get; set; }
+        public SnowflakeResponse Response { get; set; }
         public bool Success { get; set; }
         public string ErrorMessage { get; set; }
         public HttpStatusCode ErrorStatusCode { get; set; }
@@ -342,7 +359,7 @@ public class Script : ScriptBase
         {
             if (Success)
             {
-                return createResponse(HttpStatusCode.OK, ResponseContent);
+                return createResponse(HttpStatusCode.OK, Response);
             }
             else
             {
