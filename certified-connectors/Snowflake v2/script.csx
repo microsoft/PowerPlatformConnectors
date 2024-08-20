@@ -69,37 +69,35 @@ public class Script : ScriptBase
         Context.Request.RequestUri = uriBuilder.Uri;
 
         HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-        var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        return ConvertToObjects(responseContent, Context.OperationId).GetAsResponse();
 
-        //if (response.IsSuccessStatusCode && IsTransformable())
-        //{
-        //    var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        //    var converted = ConvertToObjects(responseContent, Context.OperationId);
+        if (response.IsSuccessStatusCode && IsTransformable())
+        {
+            var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var converted = ConvertToObjects(responseContent, Context.OperationId);
 
-        //    // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
-        //    if (GetQueryStringParam(QueryString_FetchAllPartitions) == "true")
-        //    {
-        //        // yes, this starts at 1 because we've already fetched the first partition.
-        //        for (var i = 1; i < converted.Response.Partitions.Count(); i++)
-        //        {
-        //            SetQueryStringParam(QueryString_Partition, $"{i}");
-        //            response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-        //            responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        //            var partitionResult = ConvertToObjects(responseContent, Context.OperationId);
-        //            foreach (var item in partitionResult.Response.Data)
-        //            {
-        //                converted.Response.Data.Add(item);
-        //            }
-        //        }
-        //    }
+            // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
+            if (GetQueryStringParam(QueryString_FetchAllPartitions) == "true")
+            {
+                // yes, this starts at 1 because we've already fetched the first partition.
+                for (var i = 1; i < converted.Response.Partitions.Count(); i++)
+                {
+                    SetQueryStringParam(QueryString_Partition, $"{i}");
+                    response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                    responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var partitionResult = ConvertToObjects(responseContent, Context.OperationId);
+                    foreach (var item in partitionResult.Response.Data)
+                    {
+                        converted.Response.Data.Add(item);
+                    }
+                }
+            }
 
-        //    return converted.GetAsResponse();
-        //}
-        //else
-        //{
-        //    return response;
-        //}
+            return converted.GetAsResponse();
+        }
+        else
+        {
+            return response;
+        }
     }
     private Dictionary<string, string> GetQueryString()
     {
