@@ -41,66 +41,77 @@ public class Script : ScriptBase
 
     public HttpResponseMessage TestConvert(string content, string operationId)
     {
-        return ConvertToObjects(content, operationId).GetAsResponse();
+        return ConvertToObjects(content, operationId, content).GetAsResponse();
     }
 
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        if (Context.OperationId == OP_CONVERT)
+        try
         {
-            var content = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+            
+            var originalContent = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            return ConvertToObjects(content, Context.OperationId).GetAsResponse();
+            if (Context.OperationId == OP_CONVERT)
+            {
+                var content = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                return ConvertToObjects(content, Context.OperationId, originalContent).GetAsResponse();
+            }
+
+            var snowflakeInstanceURL = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
+            if (Uri.IsWellFormedUriString(snowflakeInstanceURL, UriKind.Absolute))
+            {
+                Uri uri = new Uri(snowflakeInstanceURL);
+                snowflakeInstanceURL = uri.Host;
+            }
+            if (!IsUrlValid(snowflakeInstanceURL))
+            {
+                return createErrorResponse(HttpStatusCode.BadRequest, "Invalid Instance URL!", "https://docs.snowflake.com/en/developer-guide/sql-api/about-endpoints");
+            }
+
+            var uriBuilder = new UriBuilder(Context.Request.RequestUri);
+            uriBuilder.Host = snowflakeInstanceURL;
+            Context.Request.RequestUri = uriBuilder.Uri;
+
+            if(Context.OperationId == OP_GET_RESULTS)
+            {
+                Context.Request.Method = HttpMethod.Get;
+            }
+            HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+
+            if (response.IsSuccessStatusCode && IsTransformable())
+            {
+                var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var converted = ConvertToObjects(responseContent, Context.OperationId, originalContent);
+
+                // // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
+                // if (GetQueryStringParam(QueryString_FetchAllPartitions) == "true")
+                // {
+                //     // yes, this starts at 1 because we've already fetched the first partition.
+                //     for (var i = 1; i < converted.Response.Partitions.Count(); i++)
+                //     {
+                //         SetQueryStringParam(QueryString_Partition, $"{i}");
+                //         response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                //         responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                //         var partitionResult = ConvertToObjects(responseContent, Context.OperationId);
+                //         foreach (var item in partitionResult.Response.Data)
+                //         {
+                //             converted.Response.Data.Add(item);
+                //         }
+                //     }
+                // }
+
+                return converted.GetAsResponse();
+            }
+            else
+            {
+                return response;
+            }
         }
-
-        var snowflakeInstanceURL = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
-        if (Uri.IsWellFormedUriString(snowflakeInstanceURL, UriKind.Absolute))
+        catch(Exception ex)
         {
-            Uri uri = new Uri(snowflakeInstanceURL);
-            snowflakeInstanceURL = uri.Host;
-        }
-        if (!IsUrlValid(snowflakeInstanceURL))
-        {
-            return createErrorResponse(HttpStatusCode.BadRequest, "Invalid Instance URL!", "https://docs.snowflake.com/en/developer-guide/sql-api/about-endpoints");
-        }
-
-        var uriBuilder = new UriBuilder(Context.Request.RequestUri);
-        uriBuilder.Host = snowflakeInstanceURL;
-        Context.Request.RequestUri = uriBuilder.Uri;
-
-        if(Context.OperationId == OP_GET_RESULTS)
-        {
-            Context.Request.Method = HttpMethod.Get;
-        }
-        HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
-        if (response.IsSuccessStatusCode && IsTransformable())
-        {
-            var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var converted = ConvertToObjects(responseContent, Context.OperationId);
-
-            // // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
-            // if (GetQueryStringParam(QueryString_FetchAllPartitions) == "true")
-            // {
-            //     // yes, this starts at 1 because we've already fetched the first partition.
-            //     for (var i = 1; i < converted.Response.Partitions.Count(); i++)
-            //     {
-            //         SetQueryStringParam(QueryString_Partition, $"{i}");
-            //         response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-            //         responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            //         var partitionResult = ConvertToObjects(responseContent, Context.OperationId);
-            //         foreach (var item in partitionResult.Response.Data)
-            //         {
-            //             converted.Response.Data.Add(item);
-            //         }
-            //     }
-            // }
-
-            return converted.GetAsResponse();
-        }
-        else
-        {
-            return response;
+            Context.Logger.LogError(ex.ToString(), ex);
+            throw;
         }
     }
     private Dictionary<string, string> GetQueryString()
@@ -150,12 +161,13 @@ public class Script : ScriptBase
         }
     }
 
-    private ConvertObjectResult ConvertToObjects(string content, string operationId)
+    private ConvertObjectResult ConvertToObjects(string content, string operationId, string originalContent)
     {
         try
         {
             var contentAsJson = JObject.Parse(content);
-            string schema;
+            var ogContentAsJson = JObject.Parse(originalContent);
+            string? schema;
             if (operationId == OP_CONVERT)
             {
                 // check for parameters
@@ -169,12 +181,19 @@ public class Script : ScriptBase
             else
             {
                 // check for parameters
-                if (contentAsJson[Attr_Data] == null || contentAsJson[Attr_Metadata] == null || contentAsJson[Attr_Metadata][Attr_RowType] == null)
+                if (contentAsJson[Attr_Data] == null)
                 {
-                    throw new Exception($"['{Attr_Metadata}] or ['{Attr_Data}'] parameter are empty!");
+                    throw new Exception($"['{Attr_Data}'] is missing.");
                 }
-
-                schema = contentAsJson[Attr_Metadata][Attr_RowType].ToString();
+                else
+                {
+                    schema =  (contentAsJson[Attr_Metadata]?[Attr_RowType] ?? ogContentAsJson["DataSchema"])?.ToString();
+                    
+                    if(schema is null)
+                    {
+                        throw new Exception($"['{Attr_Metadata}'] values are missing, very likely because you are fetching a non-zero partition. If that is the case then you are required to pass ['DataSchema'] in the request body.");
+                    }
+                }
             }
 
             // get metadata
