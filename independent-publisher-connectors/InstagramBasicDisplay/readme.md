@@ -57,7 +57,7 @@ Copy the user token to be used on the webpart.
 You must then enter this access token in the connector to get the instagram feeds from the authenticated user.
 
 ## Known Limitations
-nstagram Basic API only allows access to basic data such as user profiles and photos. It does not provide access to more advanced features such as direct messaging, insights, and analytics.
+Instagram Basic Display API only allows access to basic data such as user profiles and photos. It does not provide access to more advanced features such as direct messaging, insights, and analytics.
 
 ## Supported Operations
 ### Get My Details
@@ -68,3 +68,6 @@ Retrieves a list of media items posted by the authenticated user and additional 
  
 ### Get Media Details
 Retrieves details of a media item posted by the authenticated user and additional fields like media_type, media_url, caption, permalink and timestamp can be specified to be retrieved.
+
+### Refresh Token
+Refresh unexpired long-lived Instagram User Access tokens. Refreshing a long-lived token makes it valid for 60 days again. Long-lived tokens that have not been refreshed in 60 days will expire. Use a valid (unexpired) long-lived Instagram User Access Token in the query.
