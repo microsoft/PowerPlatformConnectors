@@ -36,7 +36,6 @@ public class Script : ScriptBase
     private const string Snowflake_Type_Time = "time";
 
     private const string QueryString_Partition = "partition";
-    private const string QueryString_FetchAllPartitions = "fetchAllPartitions";
     #endregion
 
     public HttpResponseMessage TestConvert(string content, string operationId)
@@ -48,7 +47,6 @@ public class Script : ScriptBase
     {
         try
         {
-            
             var originalContent = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             if (Context.OperationId == OP_CONVERT)
@@ -175,7 +173,7 @@ public class Script : ScriptBase
 
                     if(schema is null)
                     {
-                        throw new Exception($"['{Attr_Metadata}'] values are missing, very likely because you are fetching a non-zero partition. If that is the case then you are required to pass ['DataSchema'] in the request body.");
+                        throw new Exception($"['{Attr_Metadata}']['{Attr_RowType}'] values are missing from response, very likely because you are fetching a non-zero partition. If that is the case then you are required to pass ['DataSchema'] in the request body.");
                     }
                 }
             }
