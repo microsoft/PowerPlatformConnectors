@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Web;
-using System.Linq;
 
 public class Script : ScriptBase
 {
