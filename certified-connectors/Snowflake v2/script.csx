@@ -116,7 +116,6 @@ public class Script : ScriptBase
         var parms = GetQueryString();
         parms[paramName] = value;
 
-        //Context.Request.RequestUri.Query = parms.ToString();
         Context.Request.RequestUri = new Uri(Context.Request.RequestUri.AbsolutePath + parms.ToString());
     }
 
