@@ -84,23 +84,6 @@ public class Script : ScriptBase
                 var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var converted = ConvertToObjects(responseContent, Context.OperationId, originalContent);
 
-                // // if this parameter is set in PowerApps then fetch all partitions, instead of making them page manually.
-                // if (GetQueryStringParam(QueryString_FetchAllPartitions) == "true")
-                // {
-                //     // yes, this starts at 1 because we've already fetched the first partition.
-                //     for (var i = 1; i < converted.Response.Partitions.Count(); i++)
-                //     {
-                //         SetQueryStringParam(QueryString_Partition, $"{i}");
-                //         response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-                //         responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                //         var partitionResult = ConvertToObjects(responseContent, Context.OperationId);
-                //         foreach (var item in partitionResult.Response.Data)
-                //         {
-                //             converted.Response.Data.Add(item);
-                //         }
-                //     }
-                // }
-
                 return converted.GetAsResponse();
             }
             else
@@ -168,6 +151,7 @@ public class Script : ScriptBase
             var contentAsJson = JObject.Parse(content);
             var ogContentAsJson = JObject.Parse(originalContent);
             string? schema;
+            Context.Logger.LogDebug($"operationId: {operationId}");
             if (operationId == OP_CONVERT)
             {
                 // check for parameters
@@ -188,7 +172,7 @@ public class Script : ScriptBase
                 else
                 {
                     schema =  (contentAsJson[Attr_Metadata]?[Attr_RowType] ?? ogContentAsJson["DataSchema"])?.ToString();
-                    
+
                     if(schema is null)
                     {
                         throw new Exception($"['{Attr_Metadata}'] values are missing, very likely because you are fetching a non-zero partition. If that is the case then you are required to pass ['DataSchema'] in the request body.");
@@ -305,6 +289,7 @@ public class Script : ScriptBase
         }
         catch (JsonReaderException ex)
         {
+            Context.Logger.LogError(ex.ToString(), ex);
             return new ConvertObjectResult()
             {
                 Success = false,
@@ -314,6 +299,7 @@ public class Script : ScriptBase
         }
         catch (Exception ex)
         {
+            Context.Logger.LogError(ex.ToString(), ex);
             return new ConvertObjectResult()
             {
                 Success = false,
