@@ -35,6 +35,8 @@ public class Script : ScriptBase
     private const string Snowflake_Type_Time = "time";
 
     private const string QueryString_Partition = "partition";
+
+    private const string QueryString_Nullable = "nullable";
     #endregion
 
     public HttpResponseMessage TestConvert(string content, string operationId)
@@ -127,6 +129,14 @@ public class Script : ScriptBase
         return matchAccount.Success;
     }
 
+    private bool UseRealNulls()
+    {
+        var query = HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
+        var nullable = query[QueryString_Nullable] ?? "false";
+        Context.Logger.LogInformation("Use Real Nulls: " + nullable);
+        return (nullable == "true");
+    }
+
     private bool IsTransformable()
     {
         if (Context.OperationId == OP_EXECUTE_SQL
@@ -181,6 +191,7 @@ public class Script : ScriptBase
             var rows = JArray.Parse(contentAsJson[Attr_Data].ToString());
 
             JArray newRows = new JArray();
+            JToken tokenNull = JValue.CreateNull();
 
             foreach (var row in rows)
             {
@@ -193,10 +204,13 @@ public class Script : ScriptBase
                     string type = col[Attr_Column_Type].ToString();
                     if (newRow.ContainsKey(name)) name = name + "_" + Convert.ToString(i);
                     JToken token = row[i];
-                    JToken tokenNull = JValue.CreateNull();
-                    if (token == null || Convert.ToString(token) == "null")
+                    if (token.Type == JTokenType.Null || token == null)
                     {
-                        newRow.Add(new JProperty(name.ToString(), row[i]));
+                        newRow.Add(new JProperty(name.ToString(), tokenNull));
+                    }
+                    else if (!UseRealNulls() && Convert.ToString(token) == "null") // This mirrors the behavior of the API which returns the string "null" for null values when nullable is false.
+                    {
+                        newRow.Add(new JProperty(name.ToString(), token));
                     }
                     else
                     {
