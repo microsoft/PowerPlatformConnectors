@@ -179,19 +179,6 @@ public class Script : ScriptBase
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var tabType = query.Get("tabType");
-      var validationArray = new JArray();
-      validationArray.Add(new JObject
-      {
-        ["value"] = "true",
-        ["name"] = "first"
-      }
-      );
-      validationArray.Add(new JObject
-      {
-        ["value"] = "false",
-        ["name"] = "yo"
-      }
-      );
       if (tabType.Equals("radioGroupTabs", StringComparison.OrdinalIgnoreCase))
       {
         response["name"] = "dynamicSchema";
