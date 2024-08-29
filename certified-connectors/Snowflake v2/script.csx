@@ -37,6 +37,7 @@ public class Script : ScriptBase
     private const string QueryString_Partition = "partition";
 
     private const string QueryString_Nullable = "nullable";
+    private const string QueryString_Async = "async";
     #endregion
 
     public HttpResponseMessage TestConvert(string content, string operationId)
@@ -72,12 +73,13 @@ public class Script : ScriptBase
             uriBuilder.Host = snowflakeInstanceURL;
             Context.Request.RequestUri = uriBuilder.Uri;
 
+            // We had to change GetResults to a POST so that we could pass the DataSchema in the request body.
             if(Context.OperationId == OP_GET_RESULTS)
             {
                 Context.Request.Method = HttpMethod.Get;
             }
             HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
+            //Context.Logger.LogDebug($"ResponseDump:{await response.Content.ReadAsStringAsync().ConfigureAwait(false)}");
             if (response.IsSuccessStatusCode && IsTransformable())
             {
                 var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -96,6 +98,7 @@ public class Script : ScriptBase
             throw;
         }
     }
+    
     private Dictionary<string, string> GetQueryString()
     {
         var queryStringCollection = HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
@@ -110,7 +113,7 @@ public class Script : ScriptBase
 
     private string GetQueryStringParam(string paramName)
     {
-        return GetQueryString()[paramName];
+        return GetQueryString().TryGetValue(paramName, out var value) ? value : null;
     }
 
     private void SetQueryStringParam(string paramName, string value)
@@ -139,8 +142,9 @@ public class Script : ScriptBase
 
     private bool IsTransformable()
     {
-        if (Context.OperationId == OP_EXECUTE_SQL
-            || Context.OperationId == OP_GET_RESULTS)
+        if ((Context.OperationId == OP_EXECUTE_SQL || Context.OperationId == OP_GET_RESULTS)
+            && GetQueryStringParam(QueryString_Async) != "true"
+            && GetQueryStringParam(QueryString_Partition) != "0")
         {
             return true;
         }
