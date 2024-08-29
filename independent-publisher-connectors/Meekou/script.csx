@@ -1,5 +1,7 @@
 ﻿    #region Full Script
     using Newtonsoft.Json.Serialization;
+     using System.Data;
+    using System.Linq.Dynamic.Core;
     public class Script : ScriptBase
     {
         #region Common
@@ -10,6 +12,7 @@
             public const string Sum = "Sum";
             public const string ImageInfo = "ImageInfo";
             public const string Regex = "Regex";
+            public const string Eval = "Eval";
         }
         [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
         public class OutputBase
@@ -51,6 +54,7 @@
                 ScriptOperation.ImageInfo => await ImageInfo(BuildInput<ImageInfoInput>(content)),
                 ScriptOperation.GetVersion => await GetVersion(),
                 ScriptOperation.Regex => await Regex(BuildInput<RegexInput>(content)),
+                ScriptOperation.Eval => await Eval(BuildInput<EvalInput>(content)),
                 _ => $"Unknown operation ID '{operationId}'",
             };            
         }
@@ -163,6 +167,18 @@
             }
 
             return matchResults;
+        }
+        #endregion
+        #region Eval
+        public class EvalInput
+        {
+            public string Formula { get; set; }
+        }
+        public async Task<object> Eval(EvalInput input)
+        {
+            var lambda = DynamicExpressionParser.ParseLambda(
+                        new ParameterExpression[] { }, typeof(double), input.Formula);
+            return lambda.Compile().DynamicInvoke();
         }
         #endregion
 
