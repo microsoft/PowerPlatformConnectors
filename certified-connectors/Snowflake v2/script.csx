@@ -37,11 +37,12 @@ public class Script : ScriptBase
     private const string QueryString_Partition = "partition";
 
     private const string QueryString_Nullable = "nullable";
+    private const string QueryString_Async = "async";
     #endregion
 
     public HttpResponseMessage TestConvert(string content, string operationId)
     {
-        return ConvertToObjects(content, operationId, content).GetAsResponse();
+        return ConvertToObjects_FullReponseWithData(content, operationId, content).GetAsResponse();
     }
 
     public override async Task<HttpResponseMessage> ExecuteAsync()
@@ -54,7 +55,7 @@ public class Script : ScriptBase
             {
                 var content = await Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                return ConvertToObjects(content, Context.OperationId, originalContent).GetAsResponse();
+                return ConvertToObjects_FullReponseWithData(content, Context.OperationId, originalContent).GetAsResponse();
             }
 
             var snowflakeInstanceURL = Context.Request.Headers.GetValues(HEADER_INSTANCE).First();
@@ -72,18 +73,33 @@ public class Script : ScriptBase
             uriBuilder.Host = snowflakeInstanceURL;
             Context.Request.RequestUri = uriBuilder.Uri;
 
+            // We had to change GetResults to a POST so that we could pass the DataSchema in the request body.
             if(Context.OperationId == OP_GET_RESULTS)
             {
                 Context.Request.Method = HttpMethod.Get;
             }
+
             HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-
-            if (response.IsSuccessStatusCode && IsTransformable())
+            if (response.IsSuccessStatusCode)
             {
-                var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var converted = ConvertToObjects(responseContent, Context.OperationId, originalContent);
+                if(IsFullResponseWithData())
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var converted = ConvertToObjects_FullReponseWithData(responseContent, Context.OperationId, originalContent);
 
-                return converted.GetAsResponse();
+                    return converted.GetAsResponse();
+                }
+                else if(IsAsyncResponse())
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var converted = ConvertToObjects_AsyncResponse(responseContent, Context.OperationId);
+
+                    return converted.GetAsResponse();
+                }
+                else
+                {
+                    return response;
+                }
             }
             else
             {
@@ -96,6 +112,7 @@ public class Script : ScriptBase
             throw;
         }
     }
+    
     private Dictionary<string, string> GetQueryString()
     {
         var queryStringCollection = HttpUtility.ParseQueryString(Context.Request.RequestUri.Query);
@@ -110,7 +127,7 @@ public class Script : ScriptBase
 
     private string GetQueryStringParam(string paramName)
     {
-        return GetQueryString()[paramName];
+        return GetQueryString().TryGetValue(paramName, out var value) ? value : null;
     }
 
     private void SetQueryStringParam(string paramName, string value)
@@ -137,25 +154,72 @@ public class Script : ScriptBase
         return (nullable == "true");
     }
 
-    private bool IsTransformable()
+    private bool IsFullResponseWithData()
     {
-        if (Context.OperationId == OP_EXECUTE_SQL
-            || Context.OperationId == OP_GET_RESULTS)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (Context.OperationId == OP_EXECUTE_SQL || Context.OperationId == OP_GET_RESULTS)
+            && GetQueryStringParam(QueryString_Async) != "true";
     }
 
-    private ConvertObjectResult ConvertToObjects(string content, string operationId, string originalContent)
+    private bool IsAsyncResponse()
+    {
+        return Context.OperationId == OP_EXECUTE_SQL &&
+            GetQueryStringParam(QueryString_Async) == "true";
+    }
+
+    private ConvertObjectResult ConvertToObjects_AsyncResponse(string content, string operationId)
     {
         try
         {
             var contentAsJson = JObject.Parse(content);
-            var ogContentAsJson = JObject.Parse(originalContent);
+
+            // There isn't much to the async response besides a message to let you know the query is running in the background
+            // and a statement handle so you can retrieve the actual data later using GetResults operation.
+            var snowflakeMetadata = new SnowflakeResponseMetadata
+            {
+                Code = contentAsJson["code"]?.ToString(),
+                Message = contentAsJson["message"]?.ToString(),
+                StatementStatusUrl = contentAsJson["statementStatusUrl"]?.ToString(),
+                StatementHandle = contentAsJson["statementHandle"]?.ToString(),
+            };
+
+            return new ConvertObjectResult()
+            {
+                Response = new SnowflakeResponse
+                {
+                    Metadata = snowflakeMetadata,
+                },
+                Success = true,
+                ErrorStatusCode = HttpStatusCode.OK,
+            };
+        }
+        catch (JsonReaderException ex)
+        {
+            Context.Logger.LogError(ex.ToString(), ex);
+            return new ConvertObjectResult()
+            {
+                Success = false,
+                ErrorStatusCode = HttpStatusCode.BadRequest,
+                ErrorMessage = $"'{Attr_Metadata}' or '{Attr_Data}' are in an invalid format: " + ex,
+            };
+        }
+        catch (Exception ex)
+        {
+            Context.Logger.LogError(ex.ToString(), ex);
+            return new ConvertObjectResult()
+            {
+                Success = false,
+                ErrorStatusCode = HttpStatusCode.InternalServerError,
+                ErrorMessage = $"{ex.GetType()}:{ex}",
+            };
+        }
+    }
+    private ConvertObjectResult ConvertToObjects_FullReponseWithData(string content, string operationId, string originalContent)
+    {
+        try
+        {
+            var contentAsJson = JObject.Parse(content);
+            // When performing a GetResults on the 0 partition, the response body is empty and therefore cannot be parsed.
+            var ogContentAsJson = (originalContent ?? string.Empty) == string.Empty ? new JObject() : JObject.Parse(originalContent);
             string? schema;
             Context.Logger.LogDebug($"operationId: {operationId}");
             if (operationId == OP_CONVERT)
@@ -402,6 +466,7 @@ public class Script : ScriptBase
         public string? StatementHandle { get; set; }
 
         public string? CreatedOn { get; set; }
+        public string? Message { get; set; }
     }
 
     public class SnowflakePartitionInfo
