@@ -2047,9 +2047,12 @@ public class Script : ScriptBase
       this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
 
-      if (query.Get("crmType").ToString().Equals("Dynamics365"))
+      if (!string.IsNullOrEmpty(query.Get("crmType")))
       {
-        query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+        if (query.Get("crmType").ToString().Equals("Dynamics365"))
+        {
+          query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+        }
       }
 
       query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
@@ -2537,7 +2540,10 @@ public class Script : ScriptBase
 
       var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
       var recordId = query.Get("recordId") ?? null;
-      var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
+      var crmType = string.IsNullOrEmpty(query.Get("crmType")) ? null
+        : query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken"
+        : "SFToken";
+
       var recordType = query.Get("recordType");
       string[] recipientEmail = query.Get("emailContacts").Replace(" ","").Split(',');
 
@@ -2559,7 +2565,7 @@ public class Script : ScriptBase
 
         emailSummary.Add(new JObject()
         {
-          ["Title"] = envelope["emailSubject"],
+          ["Title"] = "Docusign: " + envelope["emailSubject"],
           ["Description"] = GetDescriptionNLPForRelatedActivities(envelope)
         });
       }
