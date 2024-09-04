@@ -24,6 +24,20 @@ function DisplayReferDocumentation() {
         [System.Console]::WriteLine("For a better understanding of how to create a connector package zip file, please refer to the public document placed at ${blue}${underline}$Url${reset}")
 }
 
+function CheckValidFile($expectedFiles, $actualFiles) {
+    $missingFiles = $null
+    foreach ($filePattern in $expectedFiles) {
+        $matchingFiles = $actualFiles | Where-Object { $_.Name -eq $filePattern }
+        if ($matchingFiles.Count -eq 0) {
+            if (-not $missingFiles) {
+                $missingFiles = @()
+            }
+            $missingFiles  +=  $filePattern            
+        } 
+    }
+    return $missingFiles   
+}
+
 function ValidateFolderAndFilesInPackage {
     param (
         [bool] $pluginEnabled,
@@ -295,6 +309,184 @@ try {
 
     # Call the function
     $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 3 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
+       
+    if (-not $resultOfValidation) {
+        DisplayReferDocumentation
+        Write-Host ""
+        Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+        Write-Host ""
+        RemoveTempFolder $tempFolder
+        RemoveTempFolder $tempFolder2
+        exit
+    }
+
+    # Check inside the solution zip
+    $secondLevelZipFiles = Get-ChildItem -Path  "$tempFolder2/$pkgAssetFoldereName" -Filter "*.zip" | Select-Object -ExpandProperty Name
+    $originalParentFolderPath = $parentFolderPath
+    $nodesToCheck = @()
+    $isConnectorSolutionPresent= $false
+    $isFlowSolutionPresent = $false
+    $isPluginSolutionPresent = $false
+    foreach ($secondLevelZipFile in $secondLevelZipFiles) {
+        $isConnectorFound = $false
+        $isWorkflowsFound = $false
+        $isPluginFound = $false
+
+        $tempFolder3 = New-Item -ItemType Directory -Path (Join-Path $env:TEMP (New-Guid))
+        # Update the corret currentFolder to the parentFolderPath
+        $parentFolderPath = "$originalParentFolderPath/$secondLevelZipFile"
+
+        $secondLevelZipFilePath = "$tempFolder2/$pkgAssetFoldereName/$secondLevelZipFile"
+        Expand-Archive -Path $secondLevelZipFilePath -DestinationPath $tempFolder3 -Force
+
+        $actualFiles = Get-ChildItem -Path $tempFolder3 -File
+        $expectedFiles = @("[Content_Types].xml", "customizations.xml", "solution.xml")
+        $missingFiles = $null
+        $missingFiles = CheckValidFile $expectedFiles $actualFiles
+        # Call the validation function
+        # $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 4 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
+        if ($missingFiles) {
+            Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain three files namely '[Content_Types].xml', 'customizations.xml', 'solution.xml'."
+            Write-Host "Please add the missing '$($missingFiles -join ', ')' to the solution zip file."
+            Write-Host "NOTE: These files are by default present in an exported solution and should not be manually modified/removed. If done, please revert the changes."
+            DisplayReferDocumentation
+            Write-Host ""
+            Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+            Write-Host ""
+            RemoveTempFolder $tempFolder
+            RemoveTempFolder $tempFolder2
+            RemoveTempFolder $tempFolder3
+            exit
+        }
+        # Read the customizations.xml and look for any node "Connector" or "Workflows". If they exist, validate if the folders also exist
+        # Define the path to your XML file and the node name you want to check
+        $xmlFilePath = "$tempFolder3/customizations.xml"
+        $connectorNodeName = "Connector"
+        # Load the XML file into an XmlDocument object
+        [xml]$xmlContent = Get-Content -Path $xmlFilePath
+        # Use XPath to find the node
+        $connectorNode = $xmlContent.SelectSingleNode("//$connectorNodeName")
+
+        # Check if the connector node exists and set the appropriate flags
+        if ($connectorNode -ne $null) {
+            if ($connectorNode.HasChildNodes -or $connectorNode.Attributes.Count -gt 0) {
+                $isConnectorFound = $true
+            }
+        }
+
+        $workflowsNodeName = "Workflows"
+        # Use XPath to find the node
+        $workflowsNode = $xmlContent.SelectSingleNode("//$workflowsNodeName")
+
+        # Check if the workflows node exists and set the appropriate flags
+        if ($workflowsNode -ne $null) {
+            if ($workflowsNode.HasChildNodes -or $workflowsNode.Attributes.Count -gt 0) {
+                $isWorkflowsFound = $true
+            }
+        }
+
+        if ($pluginEnabled) {
+            # aiplugin operation
+            $pluginNodeName = "aicopilot_aiplugin"
+            # Use XPath to find the node
+            $pluginNode = $xmlContent.SelectSingleNode("//$pluginNodeName")
+
+            # Check if the aicopilot_aiplugin node exists and set the appropriate flags
+            if ($pluginNode -ne $null) {
+                if ($pluginNode.HasChildNodes -or $pluginNode.Attributes.Count -gt 0) {
+                    $isPluginFound = $true
+                }
+            }
+        }
+        
+        # categorize each of the solution zip
+        if (($isConnectorFound) -and (-not $isWorkflowsFound) -and (-not $isPluginFound)) {
+            $isConnectorSolutionPresent = $true
+        }
+        if (($isConnectorFound) -and ($isWorkflowsFound) -and (-not $isPluginFound)) {
+            $isFlowSolutionPresent = $true
+        }
+        if (($isConnectorFound) -and (-not $isWorkflowsFound) -and ($isPluginFound)) {
+            $isPluginSolutionPresent = $true
+            $workFlowsFolderCount++  
+        }
+        # check if the connector folder name is present with the same name
+        if ($isConnectorFound) {
+            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $connectorNodeName}
+            if (-not $connectorFolder) {
+                Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain one folder namely '$connectorNodeName."
+                Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                Write-Host "Please add the required folder to the solution zip or export the correctsolution again."
+                DisplayReferDocumentation
+                Write-Host ""
+                Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                Write-Host ""
+                RemoveTempFolder $tempFolder
+                RemoveTempFolder $tempFolder2
+                RemoveTempFolder $tempFolder3
+                exit
+            }
+        }
+
+        if ($isWorkflowsFound) {
+            # check if the folder name is present with the same name
+            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $connectorNodeName}
+            $workFlowsFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $workflowsNodeName}
+            if ((-not $workFlowsFolder) -or (-not $connectorFolder)) {
+                $folderNameMissing = if ((-not $workFlowsFolder) -and $connectorFolder) {"folder namely '$workflowsNodeName'"} elseif ((-not $connectorFolder) -and $workFlowsFolder) {"folder namely '$connectorNodeName"} else {"folders namely '$connectorNodeName', '$workflowsNodeName'"}
+                Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain '$folderNameMissing'."
+                Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                Write-Host "Please add the required folder to the solution zip or export the correct solution again."
+                DisplayReferDocumentation
+                Write-Host ""
+                Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                Write-Host ""
+                RemoveTempFolder $tempFolder
+                RemoveTempFolder $tempFolder2
+                RemoveTempFolder $tempFolder3
+                exit
+            }
+        }
+        
+        if ($isPluginFound) {
+            # check if the AI plugin related folder names are present with the same name
+            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $connectorNodeName}
+            $folderNameToCheck1 = "aiplugins"
+            $nodeNameFolder1 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $folderNameToCheck1}
+            $folderNameToCheck2 = "aipluginoperations"
+            $nodeNameFolder2 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $folderNameToCheck2}
+            
+            if ((-not $connectorFolder) -or (-not $nodeNameFolder1) -or (-not $nodeNameFolder2)) {
+                $folderNameMissing = if ((-not $nodeNameFolder1) -and $connectorFolder -and $nodeNameFolder2) {"folder namely '$folderNameToCheck1'"} elseif ((-not $connectorFolder) -and $nodeNameFolder1 -and $nodeNameFolder2) {"folder namely '$connectorNodeName"} elseif ((-not $nodeNameFolder2) -and $connectorFolder -and $nodeNameFolder2) {"folder namely '$folderNameToCheck2"} elseif ((-not $nodeNameFolder1) -and (-not $connectorFolder) -and $nodeNameFolder2) {"folders namely '$connectorNodeName', '$folderNameToCheck1'"} elseif ((-not $nodeNameFolder2) -and (-not $connectorFolder) -and $nodeNameFolder1) {"folders namely '$connectorNodeName', '$folderNameToCheck2'"} elseif ((-not $nodeNameFolder1) -and (-not $nodeNameFolder2) -and $connectorFolder) {"folders namely '$folderNameToCheck1', '$folderNameToCheck2'"} else {"folders namely '$connectorNodeName', '$folderNameToCheck1'. '$folderNameToCheck2'"}
+                Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain '$folderNameMissing"
+                Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
+                Write-Host "Please add the required folders to the solution zip or export the correct solution again."
+                DisplayReferDocumentation
+                Write-Host ""
+                Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
+                Write-Host ""
+                RemoveTempFolder $tempFolder
+                RemoveTempFolder $tempFolder2
+                RemoveTempFolder $tempFolder3
+                exit
+            } 
+        }
+    }   
+    if (-not $isConnectorSolutionPresent) {
+        Write-Host "Connector solution in '$originalParentFolderPath' is invalid. Connector solution should only contain 'Connector' folder."
+        Write-Host "Validate the connector solution has no extra component except 'Connector'. If not so, please remove them from the solution and export again."
+        $resultOfValidation = $false
+    }
+    elseif (-not $isFlowSolutionPresent) {
+        Write-Host "Flow solution in '$originalParentFolderPath' is invalid. Flow solution should contain both 'Connector' and 'Workflows' folders."
+        Write-Host "Validate the flow solution has both 'Connector' and 'Workflows' components. If not so, please recreate the solution and export again."
+        $resultOfValidation = $false
+    }
+    elseif ($pluginEnabled -and (-not $isPluginSolutionPresent)) {
+        Write-Host "Plugin solution in '$originalParentFolderPath' is invalid. Plugin solution should contain 'Connector', 'aiplugins' and 'aipluginoperations' folders."
+        Write-Host "Validate the plugin solution has 'Connector', 'aiplugins' and 'aipluginoperations' components. If not so, please recreate the solution and export again."
+        $resultOfValidation = $false
+    }
     if ($resultOfValidation) {
         Write-Host "Validation successful: The package structure is correct." -ForegroundColor Green
         Write-Host ""
@@ -305,6 +497,7 @@ try {
         Write-Host ""
     }
 }
+
 catch {
     Write-Host "Validation failed: Internal issue while working with current folder as '$parentFolderPath' - error occurred: $($_.Exception.Message)" -ForegroundColor Yellow
     Write-Host ""
