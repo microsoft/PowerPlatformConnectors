@@ -2821,6 +2821,32 @@ public class Script : ScriptBase
     body[tabType] = res_tabs;
     return body;
   }
+  private JObject ApplyTemplateBodyTransformation(JObject body)
+  {
+    var documentTemplatesArray = new JArray();
+    var docTemplates = body["documentTemplates"] as JArray;
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var templateId = query.Get("templateId");
+    
+    if (docTemplates == null)
+    {
+      JObject tempObj = new JObject();
+      tempObj["templateId"] = templateId;
+      documentTemplatesArray.Add(tempObj);
+    }
+    else 
+    {
+      for (var i = 0; i < docTemplates.Count; i++)
+      {
+        JObject tempObj = docTemplates[i] as JObject;
+        tempObj["templateId"] = templateId;
+        documentTemplatesArray.Add(tempObj);
+      }
+    }
+
+    body["documentTemplates"] = documentTemplatesArray;
+    return body;
+  }
 
   private async Task UpdateDocgenFormFieldsBodyTransformation()
   {
@@ -3037,6 +3063,11 @@ public class Script : ScriptBase
     if ("AddRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("ApplyTemplatesToDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.ApplyTemplateBodyTransformation).ConfigureAwait(false);
     }
 
     if ("UpdateRecipientTabsValues".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
