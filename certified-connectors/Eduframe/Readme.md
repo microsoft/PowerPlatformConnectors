@@ -17,6 +17,9 @@ The connector supports the following operations:
 * `List all accounts`: List all the accounts in the administration.
 * `Add an account`: Add a account to your administration.
 * `Get an account`: Get an account by id.
+* `Add an authentication`: Add a new authentication to an user.
+* `List all authentications`: List all authentications of an user.
+* `Delete an authentication`: Delete an authentication of an user.
 * `List all categories`: List all the categories in the administration.
 * `Add a category`: Add a category to your administration.
 * `Get a category`: Get a category by id.

@@ -34,6 +34,12 @@
             string objectName = path.Skip(2).FirstOrDefault(); // Object Name;
             string objectKey  = path.Skip(3).FirstOrDefault(); // Object Key;
             
+            // Object key can include / in the name, so we need to decode it
+            if (! string.IsNullOrEmpty(objectKey))
+            {
+                objectKey = System.Web.HttpUtility.UrlDecode(objectKey);
+            }
+
             logger.LogInformation($"Service:     {(service ?? "---")}");
             logger.LogInformation($"Region:      {(region ?? "---")}");
             logger.LogInformation($"Object Name: {(objectName ?? "---")}");
@@ -367,8 +373,7 @@
             if (string.IsNullOrEmpty(endpointUri.AbsolutePath))
                 return "/";
 
-            // encode the path per RFC3986
-            return HttpHelpers.UrlEncode(endpointUri.AbsolutePath, true);
+            return endpointUri.AbsolutePath;
         }
 
         /// <summary>
