@@ -69,16 +69,30 @@ public class Script : ScriptBase
     {
       var tabTypesArray = new JArray();
       string [,] tabTypes = { 
-        { "signHereTabs", "Signature" }, 
-        { "dateSignedTabs", "Date Signed" }, 
-        { "textTabs", "Text" }, 
-        { "fullNameTabs", "Name" },
-        { "initialHereTabs", "Initial" },
+        { "approveTabs", "Approve" },
         { "checkboxTabs", "Checkbox" },
-        { "titleTabs", "Title" },
-        { "signerAttachmentTabs", "Attachment" },
+        { "companyTabs", "Company" },
+        { "dateSignedTabs", "Date Signed" },
+        { "dateTabs", "Date" },
+        { "declineTabs", "Decline" },
         { "emailTabs", "Email" },
-        { "approveTabs", "Approval" }
+        { "firstNameTabs", "First Name" },
+        { "formulaTabs", "Formula" },
+        { "fullNameTabs", "Full Name" },
+        { "initialHereTabs", "Initial" },
+        { "lastNameTabs", "Last Name" },
+        { "listTabs", "Dropdown" },
+        { "noteTabs", "Note" },
+        { "numberTabs", "Number" },
+        { "numericalTabs", "Numerical" },
+        { "radioGroupTabs", "Radio Group" },
+        { "signHereTabs", "Signature" }, 
+        { "signerAttachmentTabs", "Signer Attachment" },
+        { "ssnTabs", "SSN" },
+        { "tabGroups", "Tab Group"},
+        { "textTabs", "Text" },
+        { "titleTabs", "Title" },
+        { "zipTabs", "Zip" }
       };
       for (var i = 0; i < tabTypes.GetLength(0); i++)
       {
@@ -165,7 +179,1108 @@ public class Script : ScriptBase
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var tabType = query.Get("tabType");
-
+      if (tabType.Equals("radioGroupTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["groupName"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Group Name"
+                  },
+                  ["radios"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "object",
+                        ["x-ms-summary"] = "Radios",
+                        ["properties"] = new JObject
+                        {
+                          ["anchorString"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Anchor String"
+                          },
+                          ["anchorHorizontalAlignment"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Anchor Horizontal Alignment",
+                            ["type"] = "string",
+                            ["description"] = "left/right"
+                          },
+                          ["value"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Value"
+                          },
+                          ["selected"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Selected",
+                            ["description"] = "true/false"
+                          },
+                          ["locked"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Read Only",
+                            ["description"] = "Select",
+                            ["enum"] = new JArray ("true", "false")
+                          },
+                          ["required"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Required",
+                            ["description"] = "Select",
+                            ["enum"] = new JArray ("true", "false")
+                          },
+                          ["anchorXOffset"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Anchor X Offset",
+                            ["type"] = "string"
+                          }
+                          ["anchorYOffset"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Anchor Y Offset",
+                            ["type"] = "string"
+                          }
+                        }
+                      }
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("companyTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray("true", "false")
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("dateTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Value"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("approveTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "label"
+                  },
+                  ["buttonText"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Button Text"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("declineTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["buttonText"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Button Text"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("signerAttachmentTabs", StringComparison.OrdinalIgnoreCase) ||
+      tabType.Equals("signHereTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["optional"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Optional",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("firstNameTabs", StringComparison.OrdinalIgnoreCase) || 
+      tabType.Equals("lastNameTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("formulaTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["formula"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Formula"
+                  },
+                  ["hidden"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Hidden",
+                    ["description"] = "true/false"
+                  },
+                  ["roundDecimalPlaces"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Decimal places"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("listTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["listItems"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "object",
+                        ["x-ms-summary"] = "List Item",
+                        ["properties"] = new JObject
+                        {
+                          ["selected"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Selected",
+                            ["description"] = "true/false"
+                          },
+                          ["text"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Text",
+                            ["type"] = "string"
+                          },
+                          ["value"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Value",
+                            ["type"] = "string"
+                          }
+                        }
+                      }
+                  },
+                  ["listSelectedValue"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Default Option"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["tooltip"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Tooltip"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("noteTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Note Text"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("numberTabs", StringComparison.OrdinalIgnoreCase) ||
+      (tabType.Equals("ssnTabs", StringComparison.OrdinalIgnoreCase)) ||
+      (tabType.Equals("zipTabs", StringComparison.OrdinalIgnoreCase)))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Value"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("numericalTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["x-ms-summary"] = "Value",
+                    ["type"] = "string"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["validationType"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Type",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray("Currency", "Number")
+                  },
+                  ["minNumericalValue"] = new JObject
+                  {
+                    ["x-ms-summary"] = "Minimum Amount",
+                    ["type"] = "string"
+                  },
+                  ["maxNumericalValue"] = new JObject
+                  {
+                    ["x-ms-summary"] = "Maximum Amount",
+                    ["type"] = "string"
+                  },
+                  ["localePolicyTab"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["x-ms-summary"] = "Locale Policy",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "object",
+                        ["x-ms-summary"] = "Locale Policy",
+                        ["properties"] = new JObject
+                        {
+                          ["cultureName"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Culture Name",
+                            ["description"] = "The two letter ISO 639-1 language code.",
+                          },
+                          ["currencyCode"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Currency Code",
+                            ["description"] = "The ISO 4217 currency code.",
+                          },
+                          ["currencyPositiveFormat"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Currency Positive Format"
+                          },
+                          ["currencyNegativeFormat"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Currency Negative Format"
+                          },
+                          ["useLongCurrencyFormat"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Use Long Currency Format",
+                            ["description"] = "true/false",
+                          }
+                        }
+                      }
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("checkboxTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Tab Label"
+                  },
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["anchorHorizontalAlignment"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Horizontal Alignment"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["selected"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Selected",
+                    ["description"] = "true/false"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["tabGroupLabels"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["x-ms-summary"] = "Tab Group Labels",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "string",
+                        ["x-ms-summary"] = "",
+                      }
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("dateSignedTabs", StringComparison.OrdinalIgnoreCase) ||
+      tabType.Equals("emailTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("initialHereTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["optional"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Optional",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray("true", "false")
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("fullNameTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  },
+                  ["font"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                      {
+                        ["operationId"] = "StaticResponseForFontFaces",
+                        ["value-collection"] = "fontNames",
+                        ["value-path"] = "name",
+                        ["value-title"] = "name"
+                      },
+                    ["x-ms-summary"] = "Font"
+                  },
+                  ["fontColor"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontColors",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Color"
+                  },
+                  ["fontSize"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontSizes",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Size"
+                  },
+                  ["bold"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Bold",
+                    ["description"] = "true/false"
+                  },
+                  ["italic"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Italic",
+                    ["description"] = "true/false"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Value"
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("true", "false")
+                  },
+                  ["validationPattern"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Pattern",
+                    ["description"] = "enter custom regex pattern"
+                  },
+                  ["validationMessage"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Message"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  },
+                  ["font"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                      {
+                        ["operationId"] = "StaticResponseForFontFaces",
+                        ["value-collection"] = "fontNames",
+                        ["value-path"] = "name",
+                        ["value-title"] = "name"
+                      },
+                    ["x-ms-summary"] = "Font"
+                  },
+                  ["fontColor"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontColors",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Color"
+                  },
+                  ["fontSize"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontSizes",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Size"
+                  },
+                  ["bold"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Bold",
+                    ["description"] = "true/false"
+                  },
+                  ["italic"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Italic",
+                    ["description"] = "true/false"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("titleTabs", StringComparison.OrdinalIgnoreCase))
+      {
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
       response["schema"] = new JObject
@@ -184,103 +1299,101 @@ public class Script : ScriptBase
                 ["anchorString"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "anchor string *"
+                  ["x-ms-summary"] = "Anchor String"
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
                 },
                 ["locked"] = new JObject
                 {
-                  ["x-ms-summary"] = "locked",
-                  ["default"] = "true",
-                  ["type"] = "boolean"
-                },
-                ["optional"] = new JObject
-                {
-                  ["x-ms-summary"] = "optional",
-                  ["default"] = "false",
-                  ["type"] = "boolean"
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
                 },
                 ["tabLabel"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "label"
+                  ["x-ms-summary"] = "Label"
                 },
                 ["anchorXOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "x offset (pixels)"
+                  ["x-ms-summary"] = "Anchor X Offset"
                 },
                 ["anchorYOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "y offset (pixels)"
+                  ["x-ms-summary"] = "Anchor Y Offset"
+                }
+              }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("tabGroups", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["groupLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Group Label"
+                  },
+                  ["validationMessage"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Message"
+                  },
+                  ["groupRule"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Group Rule",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("SelectAtLeast", "SelectAtMost", "SelectExactly", "SelectARange")
+                  },
+                  ["minimumRequired"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Minimum Required"
+                  },
+                  ["maximumAllowed"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Maximum Allowed"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset",
+                  }
                 }
               }
             }
           }
-        }
-      };
-
-      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
-      {
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "value"
-        };
-      }
-
-      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("dateSignedTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("fullNameTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("titleTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("emailTabs", StringComparison.OrdinalIgnoreCase))
-      {
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["font"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-dynamic-values"] = new JObject
-            {
-              ["operationId"] = "StaticResponseForFontFaces",
-              ["value-collection"] = "fontNames",
-              ["value-path"] = "name",
-              ["value-title"] = "name"
-            },
-          ["x-ms-summary"] = "font"
-        };
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontColor"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-dynamic-values"] = new JObject
-          {
-            ["operationId"] = "StaticResponseForFontColors",
-            ["value-collection"] = "fontNames",
-            ["value-path"] = "name",
-            ["value-title"] = "name"
-          },
-          ["x-ms-summary"] = "font color"
-        };
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontSize"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-dynamic-values"] = new JObject
-          {
-            ["operationId"] = "StaticResponseForFontSizes",
-            ["value-collection"] = "fontNames",
-            ["value-path"] = "name",
-            ["value-title"] = "name"
-          },
-          ["x-ms-summary"] = "font size"
-        }; 
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "bold",
-          ["description"] = "true/false"
-        };
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["italic"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "italic",
-          ["description"] = "true/false"
         };
       }
     }
@@ -1812,10 +2925,41 @@ public class Script : ScriptBase
     for (var i = 0; i < tabs.Count; i++)
     {
       JObject tab = tabs[i] as JObject;
+      if (tabType.Equals("tabGroups"))
+      {
+        tab["documentId"] = "1";
+        tab["pageNumber"] = "1";
+      }
       res_tabs.Add(tab);
     }
 
     body[tabType] = res_tabs;
+    return body;
+  }
+  private JObject ApplyTemplateBodyTransformation(JObject body)
+  {
+    var documentTemplatesArray = new JArray();
+    var docTemplates = body["documentTemplates"] as JArray;
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var templateId = query.Get("templateId");
+    
+    if (docTemplates == null)
+    {
+      JObject tempObj = new JObject();
+      tempObj["templateId"] = templateId;
+      documentTemplatesArray.Add(tempObj);
+    }
+    else 
+    {
+      for (var i = 0; i < docTemplates.Count; i++)
+      {
+        JObject tempObj = docTemplates[i] as JObject;
+        tempObj["templateId"] = templateId;
+        documentTemplatesArray.Add(tempObj);
+      }
+    }
+
+    body["documentTemplates"] = documentTemplatesArray;
     return body;
   }
 
@@ -2034,6 +3178,11 @@ public class Script : ScriptBase
     if ("AddRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("ApplyTemplatesToDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.ApplyTemplateBodyTransformation).ConfigureAwait(false);
     }
 
     if ("UpdateRecipientTabsValues".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
