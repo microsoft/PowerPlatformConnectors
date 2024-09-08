@@ -3,25 +3,23 @@ param (
     [Parameter(HelpMessage = "Specify 'y'/'yes' (case-insensitive) if plugin is enabled else specify 'n'/'no' (case-insensitive).", Mandatory = $true)][string]$pluginEnabled
 )
 
-function RemoveTempFolder($tempFolderPath)
-{
+function RemoveTempFolder($tempFolderPath) {
     # Check if the folder exists before attempting to remove items
-    if ($tempFolderPath -and (Test-Path $tempFolderPath)) 
-    {
+    if ($tempFolderPath -and (Test-Path $tempFolderPath)) {
         # Remove all items (files and subfolders) within the temp folder
         Get-ChildItem -Path $tempFolderPath | Remove-Item -Force -Recurse
     } 
 }
 
 function DisplayReferDocumentation() {
-        Write-Host ""
-        $url = "https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission"
-        $escape = [char]27
-        $blue = "${escape}[33m" # ANSI escape code for yellow color
-        $underline = "${escape}[4m" # ANSI escape code for underline
-        $reset = "${escape}[0m" # ANSI escape code to reset formatting
-        # Display the URL as a clickable hyperlink
-        [System.Console]::WriteLine("For a better understanding of how to create a connector package zip file, please refer to the public document placed at ${blue}${underline}$Url${reset}")
+    Write-Host ""
+    $url = "https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission"
+    $escape = [char]27
+    $blue = "${escape}[33m" # ANSI escape code for yellow color
+    $underline = "${escape}[4m" # ANSI escape code for underline
+    $reset = "${escape}[0m" # ANSI escape code to reset formatting
+    # Display the URL as a clickable hyperlink
+    [System.Console]::WriteLine("For a better understanding of how to create a connector package zip file, please refer to the public document placed at ${blue}${underline}$Url${reset}")
 }
 
 function CheckValidFile($expectedFiles, $actualFiles) {
@@ -32,7 +30,7 @@ function CheckValidFile($expectedFiles, $actualFiles) {
             if (-not $missingFiles) {
                 $missingFiles = @()
             }
-            $missingFiles  +=  $filePattern            
+            $missingFiles += $filePattern            
         } 
     }
     return $missingFiles   
@@ -74,23 +72,21 @@ function ValidateFolderAndFilesInPackage {
         # Validation against expected counts
         $validationPassed = $true
         $validationMessages = @()
-        $currentFolderName = if ($levelOfHierarchy -eq 3) {Split-Path -Leaf $folderPath} else {""}
+        $currentFolderName = if ($levelOfHierarchy -eq 3) { Split-Path -Leaf $folderPath } else { "" }
         
         # Validate folder count
         if ($actualFolderCount -ne $expectedFolderCount) {
             $validationPassed = $false
             switch ($levelOfHierarchy) {
                 1 {
-                    if (-not $expectedFolderCount -and $actualFolderCount)
-                    {
+                    if (-not $expectedFolderCount -and $actualFolderCount) {
                         $validationMessages += "The provided zip file should not contain any folder inside '$parentFolderPath'."
-                        $strFolderNum = if ($actualFolderCount -eq 1) {"folder"} else {"folders"}
+                        $strFolderNum = if ($actualFolderCount -eq 1) { "folder" } else { "folders" }
                         $validationMessages += "Please remove the $strfolderNum $($folders -join ', ')."
                     }
                 }
                 2 {
-                    if ($expectedFolderCount -and -not $actualFolderCount)
-                    {
+                    if ($expectedFolderCount -and -not $actualFolderCount) {
                         $validationMessages += "The package zip file should contain a folder ideally named 'PkgAssets' inside '$parentFolderPath'."
                         $validationMessages += "Please add the folder containing the solution zip files"
                     }
@@ -98,7 +94,7 @@ function ValidateFolderAndFilesInPackage {
                 3 {     
                     if (-not $expectedFolderCount -and $actualFolderCount) {
                         $validationMessages += "The package folder '$currentFolderName' should not contain any folder inside '$parentFolderPath'."
-                        $strFolderNum = if ($actualFolderCount -eq 1) {"folder"} else {"folders"}
+                        $strFolderNum = if ($actualFolderCount -eq 1) { "folder" } else { "folders" }
                         $validationMessages += "Please remove the $strfolderNum  $($folders -join ', ')."
                     }
                 }
@@ -118,29 +114,25 @@ function ValidateFolderAndFilesInPackage {
                         $validationPassed = $false
                         switch ($levelOfHierarchy) {
                             1 {
-                                if ($expectedCount -and -not $actualCount)
-                                {
-                                    $missingFileDeatils = if ($countForMultipleMismatch -gt 1) {"The intro.md file and package zip file are"} else {if ($ext -eq "*.md") {"The intro.md file is"} else {"The package zip file is"}}
+                                if ($expectedCount -and -not $actualCount) {
+                                    $missingFileDeatils = if ($countForMultipleMismatch -gt 1) { "The intro.md file and package zip file are" } else { if ($ext -eq "*.md") { "The intro.md file is" } else { "The package zip file is" } }
                                     $validationMessages += "The provided zip file should contain both intro.md and package zip file in '$parentFolderPath'."
-                                    $strFileNum = if ($countForMultipleMismatch -gt 1) {"files"} else {"file"}
+                                    $strFileNum = if ($countForMultipleMismatch -gt 1) { "files" } else { "file" }
                                     $validationMessages += "$missingFileDeatils missing. Please add the required $strFileNum."
                                 }
                             }
                             3 {
-                                if ($expectedCount -and (-not $actualCount))
-                                {
+                                if ($expectedCount -and (-not $actualCount)) {
                                     $validationMessages += "The package folder '$currentFolderName' does not contain solution zip files in '$parentFolderPath'."
-                                    $detailsSolutionZip = if ($pluginEnabled) {"connector, flow and AIplugin "} else {"connector and flow"}
+                                    $detailsSolutionZip = if ($pluginEnabled) { "connector, flow and AIplugin " } else { "connector and flow" }
                                     $validationMessages += "Please add the required $detailsSolutionZip solution zip files."
                                 }
-                                elseif ((-not $pluginEnabled) -and (($expectedCount -eq 2) -and ($actualCount -gt 2)))
-                                {
-                                    $detailsSolutionZip = if ($pluginEnabled) {"connector, flow and AIplugin "} else {"only connector and flow"}
+                                elseif ((-not $pluginEnabled) -and (($expectedCount -eq 2) -and ($actualCount -gt 2))) {
+                                    $detailsSolutionZip = if ($pluginEnabled) { "connector, flow and AIplugin " } else { "only connector and flow" }
                                     $validationMessages += "The package folder '$currentFolderName' should contain $detailsSolutionZip solution zip files in '$parentFolderPath'."
                                 }
-                                elseif ($pluginEnabled -and (($expectedCount -eq 3) -and ($actualCount -lt 3)))
-                                {
-                                    $detailsSolutionZip = if ($pluginEnabled) {"connector, flow and AIplugin "} else {"connector and flow"}
+                                elseif ($pluginEnabled -and (($expectedCount -eq 3) -and ($actualCount -lt 3))) {
+                                    $detailsSolutionZip = if ($pluginEnabled) { "connector, flow and AIplugin " } else { "connector and flow" }
                                     $validationMessages += "The package folder '$currentFolderName' should contain $detailsSolutionZip solution zip files in '$parentFolderPath'."
                                     $validationMessages += "Please have all the three solution zip files as this is a plugin connector."
                                 }
@@ -154,13 +146,15 @@ function ValidateFolderAndFilesInPackage {
         # Output validation result
         if ($validationPassed) {
             return $true
-        } else {
+        }
+        else {
             foreach ($message in $validationMessages) {
                 Write-Host $message
             }
             return $false
         }
-    } else {
+    }
+    else {
         Write-Host  ""
         Write-Host "Folder not found: $folderPath while working with actual working folder path:'$parentFolderPath'"
         return $false
@@ -231,7 +225,7 @@ try {
     # Get the directory containing the file
     $parentFolderPath = Split-Path -Path $zipFilePath -Parent
 
-    $parentFolderPath  = "$parentFolderPath\$zipFileName"
+    $parentFolderPath = "$parentFolderPath\$zipFileName"
 
     # Step 1: Extract the contents of the zip file to a temporary folder
     $tempFolder = New-Item -ItemType Directory -Path (Join-Path $env:TEMP (New-Guid))
@@ -242,14 +236,13 @@ try {
     $folderPath = "$tempFolder"
     $expectedFolderCount = 0
     $expectedFileCounts = @{
-        "*.md" = 1
+        "*.md"  = 1
         "*.zip" = 1
     }
 
     # Call the validation function
     $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 1 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
-    if (-not $resultOfValidation)
-    {
+    if (-not $resultOfValidation) {
         DisplayReferDocumentation
         Write-Host ""
         Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
@@ -275,8 +268,7 @@ try {
 
     # Call the validation function
     $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 2 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
-    if (-not $resultOfValidation)
-    {
+    if (-not $resultOfValidation) {
         DisplayReferDocumentation
         Write-Host ""
         Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
@@ -295,12 +287,13 @@ try {
     $parentFolderPath = "$parentFolderPath/$pkgAssetFoldereName"
 
     $expectedFolderCount = 0
-    $expectedFileCounts  = if ($isPluginEnabled) { 
+    $expectedFileCounts = if ($isPluginEnabled) { 
         @{
             "*.zip" = 3
             # no need to consider the files present normally .xml .json as they are env specific
         } 
-    } else {
+    }
+    else {
         @{
             "*.zip" = 2
             # no need to consider the files present normally .xml .json as they are env specific
@@ -324,7 +317,7 @@ try {
     $secondLevelZipFiles = Get-ChildItem -Path  "$tempFolder2/$pkgAssetFoldereName" -Filter "*.zip" | Select-Object -ExpandProperty Name
     $originalParentFolderPath = $parentFolderPath
     $nodesToCheck = @()
-    $isConnectorSolutionPresent= $false
+    $isConnectorSolutionPresent = $false
     $isFlowSolutionPresent = $false
     $isPluginSolutionPresent = $false
     foreach ($secondLevelZipFile in $secondLevelZipFiles) {
@@ -412,7 +405,7 @@ try {
         }
         # check if the connector folder name is present with the same name
         if ($isConnectorFound) {
-            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $connectorNodeName}
+            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object { $_.Name -eq $connectorNodeName }
             if (-not $connectorFolder) {
                 Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain one folder namely '$connectorNodeName."
                 Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
@@ -430,10 +423,10 @@ try {
 
         if ($isWorkflowsFound) {
             # check if the folder name is present with the same name
-            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $connectorNodeName}
-            $workFlowsFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $workflowsNodeName}
+            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object { $_.Name -eq $connectorNodeName }
+            $workFlowsFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object { $_.Name -eq $workflowsNodeName }
             if ((-not $workFlowsFolder) -or (-not $connectorFolder)) {
-                $folderNameMissing = if ((-not $workFlowsFolder) -and $connectorFolder) {"folder namely '$workflowsNodeName'"} elseif ((-not $connectorFolder) -and $workFlowsFolder) {"folder namely '$connectorNodeName"} else {"folders namely '$connectorNodeName', '$workflowsNodeName'"}
+                $folderNameMissing = if ((-not $workFlowsFolder) -and $connectorFolder) { "folder namely '$workflowsNodeName'" } elseif ((-not $connectorFolder) -and $workFlowsFolder) { "folder namely '$connectorNodeName" } else { "folders namely '$connectorNodeName', '$workflowsNodeName'" }
                 Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain '$folderNameMissing'."
                 Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
                 Write-Host "Please add the required folder to the solution zip or export the correct solution again."
@@ -450,14 +443,14 @@ try {
         
         if ($isPluginFound) {
             # check if the AI plugin related folder names are present with the same name
-            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $connectorNodeName}
+            $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object { $_.Name -eq $connectorNodeName }
             $folderNameToCheck1 = "aiplugins"
-            $nodeNameFolder1 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $folderNameToCheck1}
+            $nodeNameFolder1 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object { $_.Name -eq $folderNameToCheck1 }
             $folderNameToCheck2 = "aipluginoperations"
-            $nodeNameFolder2 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $folderNameToCheck2}
+            $nodeNameFolder2 = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object { $_.Name -eq $folderNameToCheck2 }
             
             if ((-not $connectorFolder) -or (-not $nodeNameFolder1) -or (-not $nodeNameFolder2)) {
-                $folderNameMissing = if ((-not $nodeNameFolder1) -and $connectorFolder -and $nodeNameFolder2) {"folder namely '$folderNameToCheck1'"} elseif ((-not $connectorFolder) -and $nodeNameFolder1 -and $nodeNameFolder2) {"folder namely '$connectorNodeName"} elseif ((-not $nodeNameFolder2) -and $connectorFolder -and $nodeNameFolder2) {"folder namely '$folderNameToCheck2"} elseif ((-not $nodeNameFolder1) -and (-not $connectorFolder) -and $nodeNameFolder2) {"folders namely '$connectorNodeName', '$folderNameToCheck1'"} elseif ((-not $nodeNameFolder2) -and (-not $connectorFolder) -and $nodeNameFolder1) {"folders namely '$connectorNodeName', '$folderNameToCheck2'"} elseif ((-not $nodeNameFolder1) -and (-not $nodeNameFolder2) -and $connectorFolder) {"folders namely '$folderNameToCheck1', '$folderNameToCheck2'"} else {"folders namely '$connectorNodeName', '$folderNameToCheck1'. '$folderNameToCheck2'"}
+                $folderNameMissing = if ((-not $nodeNameFolder1) -and $connectorFolder -and $nodeNameFolder2) { "folder namely '$folderNameToCheck1'" } elseif ((-not $connectorFolder) -and $nodeNameFolder1 -and $nodeNameFolder2) { "folder namely '$connectorNodeName" } elseif ((-not $nodeNameFolder2) -and $connectorFolder -and $nodeNameFolder2) { "folder namely '$folderNameToCheck2" } elseif ((-not $nodeNameFolder1) -and (-not $connectorFolder) -and $nodeNameFolder2) { "folders namely '$connectorNodeName', '$folderNameToCheck1'" } elseif ((-not $nodeNameFolder2) -and (-not $connectorFolder) -and $nodeNameFolder1) { "folders namely '$connectorNodeName', '$folderNameToCheck2'" } elseif ((-not $nodeNameFolder1) -and (-not $nodeNameFolder2) -and $connectorFolder) { "folders namely '$folderNameToCheck1', '$folderNameToCheck2'" } else { "folders namely '$connectorNodeName', '$folderNameToCheck1'. '$folderNameToCheck2'" }
                 Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain '$folderNameMissing"
                 Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
                 Write-Host "Please add the required folders to the solution zip or export the correct solution again."
@@ -482,7 +475,7 @@ try {
         Write-Host "Validate the flow solution has both 'Connector' and 'Workflows' components. If not so, please recreate the solution and export again."
         $resultOfValidation = $false
     }
-    elseif ($pluginEnabled -and (-not $isPluginSolutionPresent)) {
+    elseif ($isPluginEnabled -and (-not $isPluginSolutionPresent)) {
         Write-Host "Plugin solution in '$originalParentFolderPath' is invalid. Plugin solution should contain 'Connector', 'aiplugins' and 'aipluginoperations' folders."
         Write-Host "Validate the plugin solution has 'Connector', 'aiplugins' and 'aipluginoperations' components. If not so, please recreate the solution and export again."
         $resultOfValidation = $false
@@ -490,7 +483,8 @@ try {
     if ($resultOfValidation) {
         Write-Host "Validation successful: The package structure is correct." -ForegroundColor Green
         Write-Host ""
-    } else {
+    }
+    else {
         DisplayReferDocumentation
         Write-Host ""
         Write-Host "Validation failed: Invalid package structure. Check previous messages for details." -ForegroundColor Red
