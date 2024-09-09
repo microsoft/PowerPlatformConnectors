@@ -809,9 +809,9 @@ public class Script : ScriptBase
                     ["type"] = "string",
                     ["x-ms-summary"] = "Anchor String"
                   },
-                  ["value"] = new JObject
+                  ["numericalValue"] = new JObject
                   {
-                    ["x-ms-summary"] = "Value",
+                    ["x-ms-summary"] = "Numerical Value",
                     ["type"] = "string"
                   },
                   ["locked"] = new JObject
