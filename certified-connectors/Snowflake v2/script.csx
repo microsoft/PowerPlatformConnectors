@@ -82,14 +82,14 @@ public class Script : ScriptBase
             HttpResponseMessage response = await Context.SendAsync(Context.Request, CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             if (response.IsSuccessStatusCode)
             {
-                if(IsFullResponseWithData())
+                if(IsFullResponseWithData(response))
                 {
                     var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var converted = ConvertToObjects_FullReponseWithData(responseContent, Context.OperationId, originalContent);
 
                     return converted.GetAsResponse();
                 }
-                else if(IsAsyncResponse())
+                else if(IsAsyncResponse(response))
                 {
                     var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var converted = ConvertToObjects_AsyncResponse(responseContent, Context.OperationId);
@@ -154,16 +154,16 @@ public class Script : ScriptBase
         return (nullable == "true");
     }
 
-    private bool IsFullResponseWithData()
+    private bool IsFullResponseWithData(HttpResponseMessage response)
     {
-        return (Context.OperationId == OP_EXECUTE_SQL || Context.OperationId == OP_GET_RESULTS)
-            && GetQueryStringParam(QueryString_Async) != "true";
+        return (Context.OperationId == OP_EXECUTE_SQL || Context.OperationId == OP_GET_RESULTS) &&
+            response.StatusCode == HttpStatusCode.OK;
     }
 
-    private bool IsAsyncResponse()
+    private bool IsAsyncResponse(HttpResponseMessage response)
     {
-        return Context.OperationId == OP_EXECUTE_SQL &&
-            GetQueryStringParam(QueryString_Async) == "true";
+        return (Context.OperationId == OP_EXECUTE_SQL || Context.OperationId == OP_GET_RESULTS) &&
+            response.StatusCode == HttpStatusCode.Accepted;
     }
 
     private ConvertObjectResult ConvertToObjects_AsyncResponse(string content, string operationId)
@@ -447,6 +447,17 @@ public class Script : ScriptBase
                 return createErrorResponse(ErrorStatusCode, ErrorMessage);
             }
         }
+    }
+
+    public class PerformanceData
+    {
+        public DateTimeOffset BeginFetch {get;set;}
+        public DateTimeOffset EndFetch {get;set;}
+        public int FetchDurationSeconds {get;set;}
+
+        public DateTimeOffset? BeginConvert {get;set;}
+        public DateTimeOffset? EndConvert {get;set;}
+        public int? ConvertDurationSeconds {get;set;}
     }
 
     public class SnowflakeResponseMetadata
