@@ -22,9 +22,3 @@ Prerequisites
 You must have Premium or Buisness User account in seismic tenant.
 You must have Seismic Sales Copilot application installed in Seismic tenant.
 You must have Copilot for sales licence purchased for microsoft and copilot for sales apps installed and setup in outlook.
-
-Connector Documentation
-For detailed documentation around the connector please refer to https://developer.seismic.com/seismicsoftware/docs/seismic-sales-copilot
-
-Known Issues and Limitations
-For issues with DocuSign please try this link first: https://developer.seismic.com/seismicsoftware/docs/seismic-sales-copilot
