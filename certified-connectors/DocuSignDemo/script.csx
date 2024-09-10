@@ -811,7 +811,7 @@ public class Script : ScriptBase
                   },
                   ["numericalValue"] = new JObject
                   {
-                    ["x-ms-summary"] = "Numerical Value",
+                    ["x-ms-summary"] = "Value",
                     ["type"] = "string"
                   },
                   ["locked"] = new JObject
