@@ -26,10 +26,10 @@ However, sales processes extend beyond CRM. Sales teams often rely on specialize
 Currently, Seismic for Copilot for Sales Connector extends the following capabilities of Copilot for Sales (more capabilities coming soon - [Learn more here](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-copilot-for-sales#copilot-capabilities-that-can-be-extended)):
 
 ### Opportunity Summary
-[Enrich CRM record summaries with insights from your application](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-record-summary)
+[Enrich CRM record summaries with insights](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-record-summary)
 
 ### Record Details
-[Enrich CRM record details with insights from your application](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-record-details)
+[Enrich CRM record details with insights](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-record-details)
 
 ## Obtaining Credentials
 Seismic for Copilot for Sales Connector Uses OAuth 2.0 for authentication. 
