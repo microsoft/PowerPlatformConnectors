@@ -1,0 +1,441 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Insiders Cloud",
+    "description": "Used for analysing documents with the Insiders Cloud",
+    "contact": {
+      "name": "Insiders Technologies",
+      "url": "https://insiders-technologies.com",
+      "email": "info@insiders-technologies.de"
+    }
+  },
+  "host": "api.production.de.insiders.cloud",
+  "basePath": "/1/rest",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/tasks/analyse": {
+      "post": {
+        "summary": "Analyse",
+        "description": "Performs a synchronous analysis of the provided document in the respective subsystem",
+        "operationId": "Analyse",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "task-meta-data",
+            "type": "string",
+            "x-ms-summary": "Task metadata",
+            "description": "Should look like this: \n{ \"category\": \"<CATEGORY>\", \"subsystem\": \"<SUBSYSTEM>\"} \nThe category and subsystem can be found in the WebCoordinator of the Cloud Portal."
+          },
+          {
+            "in": "formData",
+            "x-ms-summary": "File to analyse",
+            "name": "file",
+            "type": "file",
+            "description": "The file containing the images of the pages to be analysed"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "The task metadata has invalid values or the sent file has an invalid filetype."
+          },
+          "403": {
+            "description": "The user is not allowed to start an analysis. You can change the user permission in the User Management of the Cloud Platform."
+          },
+          "500": {
+            "description": "Insiders Cloud has internal issues."
+          },
+          "503": {
+            "description": "Insiders Cloud can not respond at this moment."
+          },
+          "200": {
+            "$ref": "#/responses/AnalyseResponse"
+          }
+        }
+      }
+    }
+  },
+  "responses": {
+    "AnalyseResponse": {
+      "description": "The result of an successful analysis",
+      "schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ResponseData"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ResponseData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subsystem",
+        "category",
+        "processes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "subsystem": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "processes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Process"
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskAttribute"
+          }
+        }
+      }
+    },
+    "Process": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Document"
+          }
+        }
+      }
+    },
+    "Document": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DocumentPage"
+          }
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Field"
+          }
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Table"
+          }
+        },
+        "docClass": {
+          "type": "string"
+        },
+        "docType": {
+          "type": "string"
+        },
+        "userComment": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/definitions/DocumentState"
+        },
+        "documentWasDivided": {
+          "type": "boolean"
+        }
+      }
+    },
+    "DocumentPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "$ref": "#/definitions/Image"
+        },
+        "rotation": {
+          "type": "number",
+          "format": "float"
+        },
+        "attachment": {
+          "type": "boolean"
+        },
+        "backside": {
+          "type": "boolean"
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "mailbody": {
+          "type": "boolean"
+        },
+        "placeholder": {
+          "type": "boolean"
+        },
+        "fragment": {
+          "type": "boolean"
+        },
+        "fileTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FileType"
+          }
+        }
+      }
+    },
+    "Image": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fileId": {
+          "type": "string"
+        },
+        "pageNumber": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "FileType": {
+      "type": "string",
+      "description": "The type with which the file has been saved.",
+      "enum": [
+        "Primary",
+        "Secondary",
+        "Original",
+        "Other"
+      ]
+    },
+    "Field": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {},
+        "type": {
+          "$ref": "#/definitions/FieldType"
+        },
+        "geo": {
+          "$ref": "#/definitions/Geometry"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "alteredBy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verifierAction": {
+          "$ref": "#/definitions/FieldVerifierAction"
+        },
+        "checkState": {
+          "$ref": "#/definitions/FieldCheckState"
+        }
+      }
+    },
+    "FieldType": {
+      "type": "string",
+      "description": "Primitive type of a field.",
+      "enum": [
+        "Bool",
+        "Date",
+        "String",
+        "Number"
+      ]
+    },
+    "Geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "top": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "left": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageIndex": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "FieldVerifierAction": {
+      "x-nullable": true,
+      "type": "string",
+      "description": "The action, the verifier has to take, so that the task can be finished.",
+      "enum": [
+        "NoAction",
+        "Imported",
+        "Confirmed",
+        "Changed",
+        "DBLookup",
+        "AutoFill",
+        "OCR"
+      ]
+    },
+    "FieldCheckState": {
+      "x-nullable": true,
+      "type": "string",
+      "description": "State of the field.",
+      "enum": [
+        "OK",
+        "Overridden",
+        "MandatoryOverridden",
+        "Disabled"
+      ]
+    },
+    "Table": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Row"
+          }
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Row": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pageIndex": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Field"
+          }
+        }
+      }
+    },
+    "DocumentState": {
+      "x-nullable": true,
+      "type": "string",
+      "description": "In which state the document is currently in.",
+      "enum": [
+        "Analyser",
+        "Supervisor",
+        "Verifier",
+        "Exporter",
+        "Rescan",
+        "PdfConversionError"
+      ]
+    },
+    "TaskAttribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "value"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://auth.production.de.insiders.cloud/auth/realms/insiderscloud-production/protocol/openid-connect/auth",
+      "tokenUrl": "https://auth.production.de.insiders.cloud/auth/realms/insiderscloud-production/protocol/openid-connect/token",
+      "scopes": {
+        "openid": "openid"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": [
+        "openid"
+      ]
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://insiders-technologies.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://insiders-technologies.com/en/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;IT Operations"
+    }
+  ]
+}
