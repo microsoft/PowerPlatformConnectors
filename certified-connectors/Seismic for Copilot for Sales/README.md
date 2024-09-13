@@ -23,7 +23,7 @@ However, sales processes extend beyond CRM. Sales teams often rely on specialize
 
 ## Supported Operations
 
-Currently, Seismic for Copilot for Sales Connector extends the following capabilities of Copilot for Sales (more capabilities coming soon - [Learn more here](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-copilot-for-sales#copilot-capabilities-that-can-be-extended)):
+Currently, Seismic for Copilot for Sales Connector extends the following capabilities of Copilot for Sales (more capabilities coming soon - [Learn more here](https://seismic.com/blog/seismic-and-microsoft-copilot-for-sales-integration/)):
 
 ### Opportunity Summary
 [Enrich CRM record summaries with insights](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-record-summary)
