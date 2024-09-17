@@ -5,9 +5,8 @@
 ## Publisher: Seismic
 
 ## Prerequisites
-
 - You must have a **Premium** or **Business** user account in the Seismic tenant.
-- The **Seismic Sales Copilot** application must be installed in the Seismic tenant.
+- The **Seismic Sales Copilot** application must be installed and configured in the Seismic tenant. To install, see https://exchange.seismic.com/apps/seismic/microsoft-copilot-for-sales/  
 - A **Copilot for Sales** license must be purchased from Microsoft, and the Copilot for Sales apps must be installed and set up in Outlook.
 
 ## Background
@@ -32,10 +31,8 @@ Currently, Seismic for Copilot for Sales Connector extends the following capabil
 [Enrich CRM record details with insights](https://learn.microsoft.com/en-us/microsoft-sales-copilot/extend-record-details)
 
 ## Obtaining Credentials
-Seismic for Copilot for Sales Connector Uses OAuth 2.0 for authentication. 
+Seismic for Copilot for Sales Connector uses OAuth 2.0 for authentication. 
 Use your Seismic tenant credentials to create connection.
-
-## Known Issues and Limitations
 
 ## Deployment Instructions
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Automate and Power Apps.
