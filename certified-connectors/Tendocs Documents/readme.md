@@ -8,7 +8,7 @@ You will need the following to proceed:
 * The Power platform CLI tools
 
 ## Deployment Instructions
-The connector can be deployed in one of two ways, described below.
+The connector can be deployed in one of two ways.
 
 ### Using the Power Platform Connector CLI
 Run the following commands and follow the prompts:
@@ -28,8 +28,14 @@ Use the following values for the the connector security page:
 
 ## Supported Operations
 The connector supports the following operations:
-* `Create New Document From Template`: Creates a new document based on a Template (Word, PowerPoint or Excel) that contains any number of Document Replacement Tokens (e.g. {{Name}}, {{Date}}, {{Invoice.Amount}}). The service match any number of text, image, document or tables to these tokens, returning a new document in it's original, PDF or HTML format, that merges it all together.
-* `Convert Document To New File Format`: Provides for the conversion of standard Office documents (docx, pptx, xlsx) to a variety of other document formats, including PDF and HTML.
+* `Convert a document to PDF, HTML or TXT`: Convert a document to a new file format. Includes PDF, TXT and HTML.
+* `Compare documents using AI`: Create an AI (GPT-4) comparison of documents (contracts, reports, quotes, etc). 
+* `Summarise a document using AI`: Create a AI (GPT-4) generated summary of the provided document. 
+* `Securely share a PDF document`: Securely share a PDF document with activity tracking, comments, terms and more.
+* `Create a new document from a template`: Create a new Office document by merging an office template with text, images, documents and tables.
+* `Create a new document from a template and JSON`: Create a new Office document by merging an office template with JSON Obeject.
+* `Create a new document from a description`: Create a new document with a complete Table of Contents, example text and instructions.
+
 
 ## Known Issues and Limitations
 - Number of Text Token limited to a maximum of 128.
