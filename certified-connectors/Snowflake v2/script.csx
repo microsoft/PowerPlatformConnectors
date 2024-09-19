@@ -33,6 +33,8 @@ public class Script : ScriptBase
     private const string Snowflake_Type_Float = "float";
     private const string Snowflake_Type_Boolean = "boolean";
     private const string Snowflake_Type_Time = "time";
+    private const string Snowflake_Type_Object = "object";
+    private const string Snowflake_Type_Array = "array";
 
     private const string QueryString_Partition = "partition";
 
@@ -305,7 +307,12 @@ public class Script : ScriptBase
                                 bool myBool = bool.Parse(row[i].ToString());
                                 newRow.Add(new JProperty(name.ToString(), myBool));
                                 break;
-
+                            case Snowflake_Type_Object:
+                                newRow.Add(new JProperty(name.ToString(), JObject.Parse(row[i].ToString())));
+                                break;
+                            case Snowflake_Type_Array:
+                                newRow.Add(new JProperty(name.ToString(), JArray.Parse(row[i].ToString())));
+                                break;
                             default:
                                 if (type.ToString().IndexOf(Snowflake_Type_Time) >= 0)
                                 {
