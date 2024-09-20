@@ -373,8 +373,7 @@
             if (string.IsNullOrEmpty(endpointUri.AbsolutePath))
                 return "/";
 
-            // encode the path per RFC3986
-            return HttpHelpers.UrlEncode(endpointUri.AbsolutePath, true);
+            return endpointUri.AbsolutePath;
         }
 
         /// <summary>
