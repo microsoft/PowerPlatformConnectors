@@ -3633,7 +3633,7 @@ public class Script : ScriptBase
       {
         foreach(var tab in tabTypes.Value)
         {
-          if((tab["tabLabel"].ToString()).Equals(tabLabel))
+          if(tab["tabLabel"] != null && (tab["tabLabel"].ToString()).Equals(tabLabel))
           {
             newBody["name"] = tab["name"];
             newBody["tabLabel"] = tab["tabLabel"];
