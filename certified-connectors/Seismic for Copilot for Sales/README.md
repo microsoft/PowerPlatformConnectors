@@ -32,4 +32,10 @@ Currently, Seismic for Copilot for Sales Connector extends the following capabil
 
 ## Obtaining Credentials
 Seismic for Copilot for Sales Connector uses OAuth 2.0 for authentication. 
-Use your Seismic tenant credentials to create connection.
+Use your Seismic tenant credentials to create connection.   
+
+## Known Issues and Limitations
+No known issues or limitations.
+
+## Deployment Instructions
+Please follow the instructions in [Create a custom connector from an OpenAPI definition](https://learn.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition).
