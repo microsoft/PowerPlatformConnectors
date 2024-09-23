@@ -89,7 +89,7 @@ public class Script : ScriptBase
         { "signHereTabs", "Signature" }, 
         { "signerAttachmentTabs", "Signer Attachment" },
         { "ssnTabs", "SSN" },
-        { "tabGroups", "Tab Group"},
+        { "tabGroups", "Checkbox Group"},
         { "textTabs", "Text" },
         { "titleTabs", "Title" },
         { "zipTabs", "Zip" }
@@ -809,7 +809,7 @@ public class Script : ScriptBase
                     ["type"] = "string",
                     ["x-ms-summary"] = "Anchor String"
                   },
-                  ["value"] = new JObject
+                  ["numericalValue"] = new JObject
                   {
                     ["x-ms-summary"] = "Value",
                     ["type"] = "string"
@@ -1357,6 +1357,11 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Group Label"
+                  },
+                  ["documentId"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Document ID"
                   },
                   ["validationMessage"] = new JObject
                   {
@@ -2927,7 +2932,6 @@ public class Script : ScriptBase
       JObject tab = tabs[i] as JObject;
       if (tabType.Equals("tabGroups"))
       {
-        tab["documentId"] = "1";
         tab["pageNumber"] = "1";
       }
       res_tabs.Add(tab);
