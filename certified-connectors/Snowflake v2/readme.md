@@ -1,5 +1,5 @@
-# Snowflake
 
+# Snowflake API Reference
 This connector is based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html). Snowflake enables data storage, processing, and analytic solutions that are faster, easier to use, and more flexible than traditional offerings. The connector uses the Snowflake REST API V2 to submit synchronous and asynchronous queries and retrieve corresponding results.
 
 ## Publisher: Snowflake
@@ -72,7 +72,13 @@ CREATE SECURITY INTEGRATION <integration name>
 
 1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
 2. If you get a 401 response and your Host field in Step 1 follows this format "orgname-accountname," replace the Host field with your "locator" URL.
-3. The connector may time out with large query results. 
+3. The connector may time out with large query results. This is due to a general limitation that a custom connector must finish all operations, including fetching the data from snowflake is a total of 5 seconds as documented here.
+    >[Microsoft Custom Code FAQ](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code#custom-code-faq)
+    >
+    >Q: Are there any limits?<br/>
+    >A:Yes. Your script must finish execution within 5 seconds and the size of your script file can’t be more than 1 MB.
+4. Snowflake does not currently support variable binding in multi-statement SQL requests. This behavior passes through to the connector.
+5. Fields with true Null values are omitted from the result set of a query returned via a custom connector. Fields with quoted null strings ("null") are returned as expected. This is due to the serialization settings of the APIM layer that inherently lives underneath the custom connector as part of the power platform. Refer to the [Snowlake API Reference](#snowflake-api-reference) documentation for more details about the Nullable setting.
 
 ## Frequently Asked Questions
 
