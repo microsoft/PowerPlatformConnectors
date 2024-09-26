@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.6",
+    "version": "1.8",
     "title": "OneBlink",
     "description": "Empowers business users to create and deploy digital forms for enterprise and government organisations as web and native apps, while allowing developers to customise, extend, or harness the forms through their own custom apps. Connect your forms with this connector to allow easy submission of your form data into your backend systems or databases without the need to write complex integration code.",
     "contact": {
@@ -203,7 +203,7 @@
         }
       }
     },
-    "/submissions/{formId}/{submissionId}.json": {
+    "/storage/forms/{formId}/submissions/{submissionId}": {
       "get": {
         "description": "Allows for Form Submission data to be retrieved",
         "summary": "Retrieve Form Submission Data",
@@ -261,7 +261,7 @@
         }
       }
     },
-    "/submissions/{formId}/attachments/{attachmentId}": {
+    "/storage/forms/{formId}/attachments/{attachmentId}": {
       "get": {
         "description": "Allows for Form Submission attachments to be retrieved",
         "summary": "Retrieve Form Submission Attachment",
@@ -479,6 +479,59 @@
               "format": "binary",
               "description": "Output file content from the PDF Service",
               "x-ms-summary": "Form Submission PDF Content"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/form-submission-meta/{submissionId}/payments/nsw-gov-pay": {
+      "get": {
+        "description": "Allows for a NSW Gov Pay Payment to be retrieved",
+        "summary": "Get NSW Gov Pay Payment",
+        "operationId": "GetFormSubmissionNswGovPayPayment",
+        "x-ms-visibility": "important",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "submissionId",
+            "in": "path",
+            "description": "ID of the form submission",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FormSubmissionPaymentNswGovPay"
             }
           },
           "401": {
@@ -741,6 +794,129 @@
             "webdriver": {
               "type": "boolean",
               "x-ms-summary": "Device: Was Controlled by Automation"
+            }
+          }
+        }
+      }
+    },
+    "FormSubmissionPaymentNswGovPay": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "paymentTransaction": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Payment details specific to NSW GovPay payments",
+          "properties": {
+            "agencyCompletionPayment": {
+              "type": "object",
+              "x-ms-summary": "Transaction",
+              "additionalProperties": true,
+              "description": "The fields returned in the payment completion notification, will be\n`undefined` until the payment is successfully completed",
+              "properties": {
+                "accountToken": {
+                  "description": "Account token for making recurring payment (if it was requested)",
+                  "type": "string",
+                  "x-ms-summary": ": Account Token"
+                },
+                "agencyTransactionId": {
+                  "description": "Transaction ID given to CPP by the agency when the request is made",
+                  "type": "string",
+                  "x-ms-summary": ": Agency Transaction Id"
+                },
+                "amount": {
+                  "description": "Amount collected",
+                  "type": "number",
+                  "x-ms-summary": ": Amount"
+                },
+                "bPay": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Only for BPAY payments",
+                  "x-ms-summary": ": BPAY",
+                  "properties": {
+                    "billerCode": {
+                      "description": "Biller Code for BPAY",
+                      "type": "string",
+                      "x-ms-summary": ": Biller Code"
+                    },
+                    "crn": {
+                      "description": "CRN which was used to make the payment",
+                      "type": "string",
+                      "x-ms-summary": ": CRN"
+                    },
+                    "processingDate": {
+                      "description": "Date on which the payment was processed",
+                      "type": "string",
+                      "x-ms-summary": ": Processing Date"
+                    }
+                  }
+                },
+                "bankReference": {
+                  "description": "Reference generated by the gateway for this payment",
+                  "type": "string",
+                  "x-ms-summary": ": Bank Reference"
+                },
+                "card": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Only for card payments",
+                  "x-ms-summary": ": Card",
+                  "properties": {
+                    "cardPresent": {
+                      "description": "Determine if a card was present",
+                      "type": "boolean",
+                      "x-ms-summary": ": Present"
+                    },
+                    "cardType": {
+                      "description": "The type of card used",
+                      "type": "string",
+                      "x-ms-summary": ": Type"
+                    },
+                    "last4Digits": {
+                      "description": "The last 4 digits of the card used",
+                      "type": "string",
+                      "x-ms-summary": ": Last 4 Digits"
+                    }
+                  }
+                },
+                "emailAddress": {
+                  "description": "Email of the customer for PayID and BPAY payments",
+                  "type": "string",
+                  "x-ms-summary": ": Email Address"
+                },
+                "paymentCompletionReference": {
+                  "description": "Receipt Number generated by CPP to confirm successful payment",
+                  "type": "string",
+                  "x-ms-summary": ": Payment Completion Reference"
+                },
+                "paymentMethod": {
+                  "description": "Payment Method used (CARD, PAYPAL, PAYID, BPAY)",
+                  "enum": [
+                    "BPAY",
+                    "CARD",
+                    "PAYID",
+                    "PAYPAL"
+                  ],
+                  "type": "string",
+                  "x-ms-summary": ": Payment Method"
+                },
+                "paymentReference": {
+                  "description": "Payment Reference shared with the agency",
+                  "type": "string",
+                  "x-ms-summary": ": Payment Reference"
+                },
+                "surcharge": {
+                  "description": "Surcharge collected",
+                  "type": "number",
+                  "x-ms-summary": ": Surcharge"
+                },
+                "surchargeGst": {
+                  "description": "GST collected for the surcharge",
+                  "type": "number",
+                  "x-ms-summary": ": Surcharge GST"
+                }
+              }
             }
           }
         }

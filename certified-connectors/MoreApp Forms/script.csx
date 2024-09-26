@@ -1,4 +1,4 @@
-﻿public class Script : ScriptBase
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -55,6 +55,36 @@
             var reportResponse = await this.Context.SendAsync(reportRequest, this.CancellationToken).ConfigureAwait(false);
             // Return the response of our request to get the report instead of the original response
             return reportResponse;
+        }
+
+        // Create an OpenAPI schema from a formVersion
+        // Runs only for GetFormVersion
+        if (this.Context.OperationId == "GetFormVersion")
+        {
+            JArray responseBody = JArray.Parse(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            JArray fields = (JArray) responseBody[0]["fields"];
+            JObject properties = new JObject();
+
+            foreach (JObject field in fields)
+            {
+                JObject fieldProperties = (JObject) field["properties"];
+                if(fieldProperties.ContainsKey("data_name")) {
+                    JObject widget = new JObject();
+                    widget["oneOf"] = new JArray();
+                    ((JArray) widget["oneOf"]).Add(new JObject{["type"] = "string"});
+                    ((JArray) widget["oneOf"]).Add(new JObject{["type"] = "object"});
+                    widget["x-ms-summary"] = fieldProperties["label_text"];
+                    widget["description"] = fieldProperties["label_text"];
+                    properties[(string) fieldProperties["data_name"]] = widget;
+                }
+            }
+
+            var schema = new JObject();
+            schema["type"] = "object";
+            schema["properties"] = properties;
+            var root = new JObject();
+            root["schema"] = schema;
+            response.Content = CreateJsonContent(root.ToString());
         }
 
         return response;
