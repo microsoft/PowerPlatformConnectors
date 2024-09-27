@@ -14,49 +14,17 @@ You will need the following to proceed:
 
 ## Supported Operations
 
-### Regex
+### RoundUp
 
-use Regex to extract value from content
+Round up number value
 
-
-
-### ImageInfo
+### Evaluate
   
-get image base information like height, width and size by image base64
+Calculate Text formula value
 
-* PowerApps get image info
-  
-```yaml
-Set(
-    ImageInfo,
-    Meekou.ImageInfo(
-        {
-            imageBase64: Substitute(
-                JSON(
-                    Image1.Image,
-                    JSONFormat.IncludeBinaryData
-                ),
-                """",
-                ""
-            )
-        }
-    )
-);
-```
+### HtmlToPdf
 
-![imageinfo-powerapps](http://qiniu.meekou.cn/Blogs/imageinfo-powerapps.png)
-
-* Roundup
-
-get number round up value
-
-* SharePoint.BatchRequest.Build
-
-build sharepoint request body for batch operation
-
-* Array.Map
-
-create a new array based on existing array and property path
+Convert html string to pdf
 
 ## Obtaining Credentials
 
