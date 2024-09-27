@@ -82,8 +82,8 @@ A dialog to configure the connector opens.
 __Note__: You need to add an empty space between 'Basic' and the API token.
 
 In the Host ID field, enter the identifier for the infrastructure where your Staffbase platform is hosted:
- * German infrastructure: **main-de1**
- * International infrastructure: **main-us1**
+ * German infrastructure: **de1**
+ * International infrastructure: **us1**
  
 For detailed information, visit the [Staffbase Support Portal](https://support.staffbase.com/hc/en-us/articles/360017381759-Automating-Workflows-With-the-Staffbase-Connector-for-Power-Automate).
 

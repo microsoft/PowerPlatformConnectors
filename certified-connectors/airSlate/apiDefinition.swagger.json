@@ -4,7 +4,7 @@
   "definitions": {},
   "host": "as-msflow.infrateam.xyz",
   "info": {
-    "description": "Automate your business workflows in Office 365, SharePoint, Microsoft Dynamics 365, Salesforce, NetSuite, and other services without coding. Configure no-code airSlate Bots to transfer data between systems of record and data sources. Set conditions to route documents between multiple recipients, and automate reminders and notifications.",
+    "description": "Automate your business workflows in Office 365, SharePoint, Microsoft Dynamics 365, Salesforce, NetSuite, and other services without coding. Configure no-code airSlate bots to transfer data between systems of record and data sources. Set conditions to route documents between multiple recipients, and automate reminders and notifications.",
     "title": "airSlate",
     "version": "1.1",
     "contact": {
@@ -29,16 +29,114 @@
   ],
   "parameters": {},
   "paths": {
-    "/addon-proxy/flow/v1/flows/{slateId}/packets/blank": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "description": "Generate a new Slate for editing or signing from the Flow in your airSlate Workspace",
-        "operationId": "StartFlow",
+    "/event/{id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "id",
+                  "x-ms-summary": "id"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary": "status"
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
-            "description": "Select an airSlate Workspace where the Flow is located",
+            "name": "id",
+            "in": "path",
+            "description": "ID of the event subscription being deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "summary": "Delete event subscription",
+        "description": "Remove the user's subscription for a particular event",
+        "operationId": "DeleteSlateTrigger",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/event": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "slate_id": {
+              "type": "string",
+              "description": "Unique ID of target document which caused the event.",
+              "x-ms-summary": "Document ID",
+              "x-ms-visibility": "important"
+            }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "id",
+                  "x-ms-summary": "id"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Start workflow on document event",
+        "description": "Starts the workflow on document event.",
+        "operationId": "CreateSlateTrigger",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "botToken": {
+                  "description": "The webhook bot authorization token",
+                  "type": "string",
+                  "x-ms-summary": "Bot authorization token"
+                },
+                "callback": {
+                  "type": "string",
+                  "description": "callback",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "callback"
+                }
+              },
+              "required": ["callback", "botToken"]
+            }
+          }
+        ]
+      }
+    },
+    "/flows/{slateId}/smartLink/create": {
+      "post": {
+        "consumes": ["application/json"],
+        "description": "Generate the smart link from the workflow in your airSlate workspace",
+        "operationId": "CreateSmartLink",
+        "parameters": [
+          {
+            "description": "Select an airSlate workspace where the workflow is located",
             "in": "header",
             "name": "Organization-Domain",
             "required": true,
@@ -64,7 +162,7 @@
             "x-ms-visibility": "internal"
           },
           {
-            "description": "Select a Flow to generate a Slate from",
+            "description": "Select a workflow to generate a document from",
             "in": "path",
             "name": "slateId",
             "required": true,
@@ -82,7 +180,111 @@
               "value-path": "id",
               "value-title": "attributes/name"
             },
-            "x-ms-summary": "Flow"
+            "x-ms-summary": "Workflow"
+          },
+          {
+            "in": "body",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetAddonsScheme",
+                "parameters": {
+                  "Organization-Domain": {
+                    "parameter": "Organization-Domain"
+                  },
+                  "flowId": {
+                    "parameter": "slateId"
+                  }
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetAddonsScheme",
+                "parameters": {
+                  "Organization-Domain": {
+                    "parameterReference": "Organization-Domain"
+                  },
+                  "flowId": {
+                    "parameterReference": "slateId"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "properties": {
+                "smartLink": {
+                  "description": "The smart link for creating document with specified record context",
+                  "title": "Smart link",
+                  "type": "string",
+                  "x-ms-visibility": "important"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Create smart link"
+      }
+    },
+    "/addon-proxy/flow/v1/flows/{slateId}/packets/blank": {
+      "post": {
+        "consumes": ["application/json"],
+        "description": "Generate a new document for editing or signing from the workflow in your airSlate workspace",
+        "operationId": "StartFlow",
+        "parameters": [
+          {
+            "description": "Select an airSlate workspace where the workflow is located",
+            "in": "header",
+            "name": "Organization-Domain",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "UserMe",
+              "parameters": {
+                "include": "organizations"
+              },
+              "value-collection": "included",
+              "value-path": "attributes/subdomain",
+              "value-title": "attributes/subdomain"
+            },
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "default": "application/json",
+            "description": "Application specific mime-type",
+            "in": "header",
+            "name": "Content-Type",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "description": "Select a workflow to generate a document from",
+            "in": "path",
+            "name": "slateId",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFlow",
+              "parameters": {
+                "Organization-Domain": {
+                  "parameter": "Organization-Domain"
+                },
+                "per_page": 5000
+              },
+              "value-collection": "data",
+              "value-path": "id",
+              "value-title": "attributes/name"
+            },
+            "x-ms-summary": "Workflow"
           },
           {
             "in": "body",
@@ -122,11 +324,11 @@
             "schema": {
               "properties": {
                 "data": {
-                  "description": "Slate",
+                  "description": "Document",
                   "properties": {
                     "id": {
-                      "description": "Identity of the new Slate",
-                      "title": "Slate ID",
+                      "description": "Identity of the new document",
+                      "title": "Document ID",
                       "type": "string",
                       "x-ms-visibility": "important"
                     }
@@ -138,12 +340,12 @@
             }
           }
         },
-        "summary": "Create a new Slate"
+        "summary": "Create a new document"
       }
     },
     "/addon-scheme/{flowId}": {
       "get": {
-        "description": "Retrieve the list of parameters available for your slate based on the bots configured for your airSlate flow",
+        "description": "Retrieve the list of parameters available for your document based on the bots configured for your airSlate workflow",
         "operationId": "GetAddonsScheme",
         "parameters": [
           {
@@ -179,7 +381,7 @@
     },
     "/redirect/v1/slates": {
       "get": {
-        "description": "Retrieve the list of flows by the organization it was created in",
+        "description": "Retrieve the list of workflows by the organization it was created in",
         "operationId": "GetFlow",
         "parameters": [
           {
@@ -195,20 +397,14 @@
             "type": "string"
           },
           {
-            "enum": [
-              "name",
-              "updated_at",
-              "last_activity"
-            ],
+            "enum": ["name", "updated_at", "last_activity"],
             "in": "query",
             "name": "sort",
             "required": false,
             "type": "string"
           },
           {
-            "enum": [
-              5000
-            ],
+            "enum": [5000],
             "in": "query",
             "name": "per_page",
             "required": true,
@@ -447,173 +643,8 @@
             }
           }
         },
-        "summary": "Get Flow",
+        "summary": "Get workflow",
         "x-ms-visibility": "internal"
-      }
-    },
-    "/redirect/v1/slates/{slateId}/packets/{packetId}/send": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "description": "Send a Slate with documents and forms by email",
-        "operationId": "SendFlow",
-        "parameters": [
-          {
-            "description": "Select an airSlate Workspace where the Flow is located",
-            "in": "header",
-            "name": "Organization-Domain",
-            "required": true,
-            "type": "string",
-            "x-ms-dynamic-values": {
-              "operationId": "UserMe",
-              "parameters": {
-                "include": "organizations"
-              },
-              "value-collection": "included",
-              "value-path": "attributes/subdomain",
-              "value-title": "attributes/subdomain"
-            },
-            "x-ms-summary": "Workspace"
-          },
-          {
-            "description": "Select a Flow to send a Slate from",
-            "in": "path",
-            "name": "slateId",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "type": "string",
-            "x-ms-dynamic-values": {
-              "operationId": "GetFlow",
-              "parameters": {
-                "Organization-Domain": {
-                  "parameter": "Organization-Domain"
-                },
-                "per_page": 5000
-              },
-              "value-collection": "data",
-              "value-path": "id",
-              "value-title": "attributes/name"
-            },
-            "x-ms-summary": "Flow"
-          },
-          {
-            "description": "Take the Slate ID from the \"Create a new Slate\" action or airSlate web site",
-            "in": "path",
-            "name": "packetId",
-            "x-ms-url-encoding": "single",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Slate ID"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": false,
-            "schema": {
-              "properties": {
-                "data": {
-                  "description": "data",
-                  "properties": {
-                    "attributes": {
-                      "description": "attributes",
-                      "properties": {
-                        "email": {
-                          "description": "Recipient email",
-                          "title": "Recipient email",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "email"
-                      ],
-                      "type": "object"
-                    },
-                    "type": {
-                      "default": "users",
-                      "description": "type",
-                      "title": "Send flow type",
-                      "type": "string",
-                      "x-ms-visibility": "internal"
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "attributes"
-                  ],
-                  "type": "object"
-                }
-              },
-              "required": [
-                "data"
-              ],
-              "type": "object"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "default",
-            "schema": {
-              "properties": {
-                "data": {
-                  "description": "data",
-                  "x-ms-visibility": "advanced",
-                  "items": {
-                    "properties": {
-                      "attributes": {
-                        "description": "attributes",
-                        "properties": {
-                          "created_at": {
-                            "title": "Created at",
-                            "description": "Date and time the user was created",
-                            "type": "string",
-                            "x-ms-visibility": "advanced"
-                          },
-                          "email": {
-                            "title": "E-Mail",
-                            "description": "E-Mail of the user",
-                            "type": "string",
-                            "x-ms-visibility": "advanced"
-                          },
-                          "updated_at": {
-                            "title": "Updated at",
-                            "description": "Date and time the user was modified",
-                            "type": "string",
-                            "x-ms-visibility": "advanced"
-                          },
-                          "user_id": {
-                            "title": "User ID",
-                            "description": "User's unique ID",
-                            "type": "string",
-                            "x-ms-visibility": "advanced"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "id": {
-                        "title": "ID",
-                        "description": "Unique ID of the invitation",
-                        "type": "string",
-                        "x-ms-visibility": "advanced"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "type": "array"
-                }
-              },
-              "type": "object"
-            }
-          }
-        },
-        "x-ms-api-annotation": {
-          "status": "Preview",
-          "family": "SendSlate",
-          "revision": 1
-        },
-        "x-ms-visibility": "advanced",
-        "summary": "Send Slate"
       }
     },
     "/redirect/v1/users/me": {
@@ -941,14 +972,7 @@
   },
   "produces": [],
   "responses": {},
-  "schemes": [
-    "https"
-  ],
-  "security": [
-    {
-      "oauth2_auth": []
-    }
-  ],
+  "schemes": ["https"],
   "securityDefinitions": {
     "basic_auth": {
       "type": "basic"

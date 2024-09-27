@@ -1,16 +1,16 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "v1",
     "title": "Plumsail Forms",
-    "description": "This API allows you to process Plumsail Forms submissions and their attachments.",
+    "description": "Plumsail Forms allows you to design rich web forms, share them with your users, and automate processing of submissions and attachments: generate documents, create records in Excel or Google Sheets, save data to SharePoint or One Drive. Find more information at https://plumsail.com/forms/public-forms/",
     "contact": {
       "name": "Plumsail Team",
       "url": "https://plumsail.com",
       "email": "support@plumsail.com"
-    }
+    },
+    "version": "v5"
   },
-  "host": "forms.plumsail.com",
+  "host": "forms-api.plumsail.com",
   "basePath": "/",
   "schemes": [
     "https"
@@ -24,16 +24,16 @@
           "Attachments"
         ],
         "operationId": "DownloadAttachment",
-        "consumes": [],
         "produces": [
-          "application/octet-stream"
+          "application/json"
         ],
         "parameters": [
           {
-            "name": "fileUrl",
             "in": "query",
+            "name": "fileUrl",
             "required": true,
             "type": "string",
+            "format": "uri",
             "x-ms-summary": "File URL",
             "description": "File URL"
           }
@@ -64,13 +64,13 @@
           "text/json",
           "application/*+json"
         ],
-        "produces": [],
         "parameters": [
           {
-            "name": "fileUrl",
             "in": "body",
+            "name": "fileUrl",
             "required": true,
             "schema": {
+              "format": "uri",
               "type": "string"
             },
             "x-ms-summary": "File URL",
@@ -93,17 +93,10 @@
           "Designer"
         ],
         "operationId": "GetPublicForms",
-        "consumes": [],
-        "produces": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
         "parameters": [
           {
-            "name": "format",
             "in": "query",
-            "required": false,
+            "name": "format",
             "type": "integer",
             "format": "int32",
             "enum": [
@@ -112,22 +105,15 @@
             ]
           },
           {
-            "name": "version",
             "in": "path",
+            "name": "version",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns an array of public forms.",
-            "schema": {
-              "uniqueItems": false,
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Form"
-              }
-            }
+            "description": "Returns an array of public forms."
           },
           "401": {
             "description": "Authorization information is missing or invalid."
@@ -138,18 +124,69 @@
         "description": "Returns an array of public forms"
       }
     },
-    "/api/flow/schema/form": {
+    "/api/forms/{formId}/submissions/{submissionId}": {
+      "delete": {
+        "tags": [
+          "FormSubmissions"
+        ],
+        "operationId": "DeleteSubmission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "formId",
+            "required": true,
+            "type": "string",
+            "format": "uuid",
+            "x-ms-dynamic-values": {
+              "operationId": "GetPublicForms",
+              "value-path": "id",
+              "value-title": "name",
+              "parameters": {
+                "version": "2"
+              }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetPublicForms",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "parameters": {
+                "version": {
+                  "value": "2"
+                }
+              }
+            },
+            "x-ms-summary": "Form",
+            "description": "The form which submission you want to delete."
+          },
+          {
+            "in": "path",
+            "name": "submissionId",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission ID",
+            "description": "Submission ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        },
+        "x-ms-visibility": "important",
+        "summary": "Delete submission",
+        "description": "Deletes an form submission by its ID"
+      }
+    },
+    "/api/flow/Schema/form": {
       "get": {
         "tags": [
           "Schema"
         ],
         "operationId": "GetFormSchema",
-        "consumes": [],
-        "produces": [],
         "parameters": [
           {
-            "name": "formId",
             "in": "query",
+            "name": "formId",
             "required": true,
             "type": "string",
             "format": "uuid",
@@ -188,11 +225,10 @@
           "text/json",
           "application/*+json"
         ],
-        "produces": [],
         "parameters": [
           {
-            "name": "subscriber",
             "in": "body",
+            "name": "subscriber",
             "required": true,
             "schema": {
               "required": [
@@ -217,6 +253,16 @@
                     "value-title": "name",
                     "parameters": {
                       "version": "2"
+                    }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetPublicForms",
+                    "itemValuePath": "id",
+                    "itemTitlePath": "name",
+                    "parameters": {
+                      "version": {
+                        "value": "2"
+                      }
                     }
                   }
                 }
@@ -247,12 +293,10 @@
           "SubmissionTrigger"
         ],
         "operationId": "Unsubscribe",
-        "consumes": [],
-        "produces": [],
         "parameters": [
           {
-            "name": "subscriberId",
             "in": "path",
+            "name": "subscriberId",
             "required": true,
             "type": "string",
             "format": "uuid"
@@ -270,28 +314,25 @@
     }
   },
   "definitions": {
-    "Form": {
+    "FormSchema": {
       "type": "object",
-      "properties": {
-        "id": {
-          "format": "uuid",
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "format": "int32",
-          "enum": [
-            0,
-            1
-          ],
-          "type": "integer"
-        },
-        "modified": {
-          "format": "date-time",
-          "type": "string"
+      "x-ms-dynamic-schema": {
+        "operationId": "GetFormSchema",
+        "value-path": "response",
+        "parameters": {
+          "formId": {
+            "parameter": "formId"
+          }
         }
+      },
+      "x-ms-dynamic-properties": {
+        "operationId": "GetFormSchema",
+        "parameters": {
+          "formId": {
+            "parameterReference": "subscriber/formId"
+          }
+        },
+        "itemValuePath": "response"
       }
     },
     "Subscriber": {
@@ -318,30 +359,18 @@
             "parameters": {
               "version": "2"
             }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "GetPublicForms",
+            "itemValuePath": "id",
+            "itemTitlePath": "name",
+            "parameters": {
+              "version": {
+                "value": "2"
+              }
+            }
           }
         }
-      }
-    },
-    "FormSchema": {
-      "type": "object",
-      "properties": {},
-      "x-ms-dynamic-schema": {
-        "operationId": "GetFormSchema",
-        "value-path": "response",
-        "parameters": {
-          "formId": {
-            "parameter": "formId"
-          }
-        }
-      },
-      "x-ms-dynamic-properties": {
-        "operationId": "GetFormSchema",
-        "parameters": {
-          "formId": {
-            "parameterReference": "subscriber/formId"
-          }
-        },
-        "itemValuePath": "response"
       }
     }
   },
@@ -349,14 +378,14 @@
   "responses": {},
   "securityDefinitions": {
     "oauth2": {
+      "type": "oauth2",
       "flow": "accessCode",
       "authorizationUrl": "https://auth.plumsail.com/connect/authorize",
       "tokenUrl": "https://auth.plumsail.com/connect/token",
       "scopes": {
         "openid": "openid",
         "offline_access": "offline_access"
-      },
-      "type": "oauth2"
+      }
     }
   },
   "security": [
