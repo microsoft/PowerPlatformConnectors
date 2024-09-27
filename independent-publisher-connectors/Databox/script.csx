@@ -1,4 +1,4 @@
-﻿public class Script : ScriptBase
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -14,6 +14,19 @@
 
             var obj = new JObject();
             obj[metricKeyId] = value;
+
+            if (item["dimension"] != null && item["dimension_value"] != null)
+            {
+                var dimension = (string)item["dimension"];
+                var dimensionValue = (string)item["dimension_value"];
+                obj[dimension] = dimensionValue;
+            }
+            
+            if (item["date"] != null)
+            {
+                var dateValue = (string)item["date"];
+                obj["date"] = dateValue;
+            }
 
             data.Add(obj);
         }
