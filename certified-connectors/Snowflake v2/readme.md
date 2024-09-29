@@ -95,12 +95,17 @@ Currently, Power Apps does not support dynamic schema. You can still use the con
 
 ## Version History
 
+### September 2024
+
+- Fix issue where **Submit SQL Statement for Execution** and **Check the Status and Get Results** actions were not handling fields with an object or array schema type.
+- Resolve issue where multi-statement count parameter was not being handled by the **Submit SQL Statement for Execution** action.
+
 ### August 2024
 
 #### Fixes
 
 - Resolve issue where null values for numeric columns would result in an error when calling **Submit SQL Statement for Execution** action or the **Convert result set rows from array to objects** action.
-- Resolve issue where multi-partition results are not properly converted to JSON objects when calling the **Convert result set rows from array to objects** action. 
+- Resolve issue where multi-partition results are not properly converted to JSON objects when calling the **Convert result set rows from array to objects** action.
 - Resolve issue where the **Convert result set rows from array to objects** action would not properly convert the result set rows to JSON objects.
 
 #### Breaking Changes
