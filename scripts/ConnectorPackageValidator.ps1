@@ -385,7 +385,7 @@ try {
             }
         }
 
-        if ($pluginEnabled) {
+        if ($isPluginEnabled) {
             # aiplugin operation
             $pluginNodeName = "aicopilot_aiplugin"
             # Use XPath to find the node
@@ -482,7 +482,7 @@ try {
         Write-Host "Validate the flow solution has both 'Connector' and 'Workflows' components. If not so, please recreate the solution and export again."
         $resultOfValidation = $false
     }
-    elseif ($pluginEnabled -and (-not $isPluginSolutionPresent)) {
+    elseif ($isPluginEnabled -and (-not $isPluginSolutionPresent)) {
         Write-Host "Plugin solution in '$originalParentFolderPath' is invalid. Plugin solution should contain 'Connector', 'aiplugins' and 'aipluginoperations' folders."
         Write-Host "Validate the plugin solution has 'Connector', 'aiplugins' and 'aipluginoperations' components. If not so, please recreate the solution and export again."
         $resultOfValidation = $false
