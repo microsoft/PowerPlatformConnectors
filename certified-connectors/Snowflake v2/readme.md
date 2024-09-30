@@ -90,7 +90,7 @@ Currently, Power Apps does not support dynamic schema. You can still use the con
 1. Download the connector source code from GitHub repository.
 2. Follow the instructions provided in [Create a New Custom Connector](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#create-a-new-custom-connector) to deploy the connector in your favourite Power Platform Environment.
 3. Once the connector is deployed, follow the instructions in [Update an existing custom connector](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#update-an-existing-custom-connector) to update the connector with the latest changes.
-4. Follow the steps metnioned in [Obtaining Credentials](#obtaining-credentials) section to get credentials.
+4. Follow the steps mentioned in [Obtaining Credentials](#obtaining-credentials) section to get credentials.
 5. Test the connector with the above obtained credentials.
 
 ## Version History
