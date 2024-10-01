@@ -24,6 +24,8 @@ Converts tokens using byte-pair encoding and returns their text representation.
 Detects which language each of the provided texts is written in.
 ### Summarize text
 Generates a summary in English for a given text.
+### Get chat
+Generates a text response to a user message.
 
 ## Known Issues and Limitations
 There are no known issues at this time.
