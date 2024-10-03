@@ -298,7 +298,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1005"
+          ["x-ms-summary"] = "DS1007"
       };
     }
 
@@ -965,6 +965,9 @@ public class Script : ScriptBase
   private JObject AddRemindersBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var expiryAfter = string.IsNullOrEmpty(query.Get("expireAfter")) ?
+          "120" : query.Get("expireAfter");
+
     var newBody = new JObject()
     {
       ["useAccountDefaults"] = "false",
@@ -976,7 +979,7 @@ public class Script : ScriptBase
       },
       ["expirations"] = new JObject()
       {
-        ["expireAfter"] = "120"
+        ["expireAfter"] = expiryAfter
       }
     };
 
@@ -1208,6 +1211,33 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject EnvelopeVoidBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    body["status"] = "Voided";
+    body["voidedReason"] = query.Get("voidedReason");
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/voidEnvelope", "");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+
+  private JObject EnvelopeResendBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/resendEnvelope", "");
+    uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
+    
+    query["resend_envelope"] = "true";
+    uriBuilder.Query = query.ToString();
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    return body;
+  }
+
   private JObject AddRecipientToEnvelopeBodyTransformation(JObject body)
   {
       var signers = body["signers"] as JArray;
@@ -1292,14 +1322,7 @@ public class Script : ScriptBase
 
     if (returnUrl.Equals("DocuSign homepage"))
     {
-      if (url.Equals("demo.docusign.net"))
-      {
-        body["returnUrl"] = "https://appdemo.docusign.com/";
-      }
-      else
-      {
-        body["returnUrl"] = "https://app.docusign.com/";
-      }
+      body["returnUrl"] = GetDocusignApiBaseUri();
     }
     else
     {
@@ -1441,11 +1464,40 @@ public class Script : ScriptBase
   private string GetEnvelopeUrl(JToken envelope)
   {
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    var envelopeUrl = uriBuilder.Uri.ToString().Contains("demo") ?
-      "https://apps-d.docusign.com/send/documents/details/" + envelope["envelopeId"] :
-      "https://app.docusign.com/documents/details/" + envelope["envelopeId"];
+
+    var path = uriBuilder.Uri.ToString().Contains("demo") || uriBuilder.Uri.ToString().Contains("stage") ? 
+    "/send/documents/details/" : "/documents/details/";
+    var envelopeUrl = GetDocusignApiBaseUri() + path + envelope["envelopeId"];
 
     return envelopeUrl;
+  }
+
+  private string GetDocusignApiBaseUri()
+  {
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var docusignApiBaseUri = host.Contains("demo") ?
+        "https://apps-d.docusign.com"
+      : host.Contains("stage") ?
+        "https://apps-s.docusign.com"
+      : host.Contains(".mil") ?
+        "https://app.docusign.mil"
+      : "https://app.docusign.com";
+
+    return docusignApiBaseUri;
+  }
+
+  private string GetAccountServerBaseUri()
+  {
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var accountServerBaseUri = host.Contains("demo") ?
+        "https://account-d.docusign.com"
+      : host.Contains("stage") ?
+        "https://account-s.docusign.com"
+      : host.Contains(".mil") ?
+        "https://account.docusign.mil"
+      : "https://account.docusign.com";
+
+    return accountServerBaseUri;
   }
 
   private void AddCoreRecipientParams(JArray signers, JObject body) 
@@ -1522,6 +1574,40 @@ public class Script : ScriptBase
       additionalNotifications.Add(additionalNotification);
       signers[0]["additionalNotifications"] = additionalNotifications;
     }
+  }
+
+  private JArray GetFilteredEnvelopeDetails(JArray filteredEnvelopes)
+  {
+    TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+    var filteredEnvelopesDetails = new JArray();
+        
+    foreach (var envelope in filteredEnvelopes)
+    {
+      DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+      DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+      System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+
+      JArray recipientNames = new JArray(
+      (envelope["recipients"]["signers"] as JArray)?.Select(recipient => recipient["name"]));
+      JArray documentNames = new JArray(
+      (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
+
+      filteredEnvelopesDetails.Add(new JObject()
+      {
+        ["title"] = envelope["emailSubject"],
+        ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
+        ["envelopeId"] = envelope["envelopeId"],
+        ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+        ["url"] = GetEnvelopeUrl(envelope),
+        ["recipients"] = string.Join(", ", recipientNames),
+        ["documents"] = string.Join(",", documentNames),
+        ["sender"] = envelope["sender"]["userName"],
+        ["status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+        ["dateSent"] = envelope["sentDateTime"]
+      });
+    }
+
+    return filteredEnvelopesDetails;
   }
   
   private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
@@ -1674,7 +1760,7 @@ public class Script : ScriptBase
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
-    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://account.docusign.com/oauth/userinfo");
+    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, GetAccountServerBaseUri() + "/oauth/userinfo");
 
     // Access token is in the authorization header already
     userInfoRequest.Headers.Authorization = this.Context.Request.Headers.Authorization;
@@ -1784,6 +1870,16 @@ public class Script : ScriptBase
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if("VoidEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.EnvelopeVoidBodyTransformation).ConfigureAwait(false);
+    }
+
+    if("ResendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.EnvelopeResendBodyTransformation).ConfigureAwait(false);
     }
 
     if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -1926,6 +2022,33 @@ public class Script : ScriptBase
 
       query["include"] = "custom_fields, recipients, documents";
       query["order"] = "desc";
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
+    if("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      uriBuilder.Path = uriBuilder.Path.Replace("/listEnvelopes", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
+      this.Context.Request.Headers.Add("generative-ai-request-id", Guid.NewGuid().ToString());
+      this.Context.Request.Headers.Add("generative-ai-user-agent", "sales-copilot");
+
+      query["include"] = "custom_fields, recipients, documents, folders";
+      query["order"] = "desc";
+      
+      query["status"] = string.IsNullOrEmpty(query.Get("envelopeStatus")) ? 
+        null : query.Get("envelopeStatus");
+      query["folder_ids"] = string.IsNullOrEmpty(query.Get("folder_ids")) ? 
+        null : query.Get("folder_ids").ToString();
+       query["order_by"] = string.IsNullOrEmpty(query.Get("order_by")) ? 
+        "status_changed" : query.Get("order_by");
+      query["from_date"] = string.IsNullOrEmpty(query.Get("from_date")) ? 
+        "2000-01-02T12:45Z" : query.Get("from_date");
+      query["to_date"] = string.IsNullOrEmpty(query.Get("to_date")) ? 
+        DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") : query.Get("to_date");
+
       uriBuilder.Query = query.ToString();
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
@@ -2451,6 +2574,81 @@ public class Script : ScriptBase
       newBody["value"] = (documentRecords.Count < top) ? documentRecords : new JArray(documentRecords.Skip(skip).Take(top).ToArray());
       newBody["hasMoreResults"] = (skip + top < documentRecords.Count) ? true : false;
 
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JObject newBody = new JObject();
+
+      int top = string.IsNullOrEmpty(query.Get("top")) ? 10: int.Parse(query.Get("top"));
+      int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
+
+      JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
+      JArray filteredEnvelopes = new JArray();
+      var filteredEnvelopesDetails = new JArray();
+      var recipientName = query.Get("recipientName") ?? null;
+      var recipientEmailId = query.Get("recipientEmailId") ?? null;
+      var envelopeTitle = query.Get("envelopeTitle") ?? null;
+      var customFieldName = query.Get("customFieldName") ?? null;
+      var customFieldValue = query.Get("customFieldValue") ?? null;
+
+      var envelopeFilterMap = new Dictionary<string, string>() {
+        {"recipientName", recipientName},
+        {"recipientEmailId", recipientEmailId},
+        {"envelopeTitle", envelopeTitle},
+        {"customFieldName", customFieldName},
+        {"customFieldValue", customFieldValue}
+      };
+
+      foreach (var filter in envelopeFilterMap.Keys) 
+      {
+        if (envelopeFilterMap[filter] != null)
+        {
+          switch (filter)
+          {
+            case "recipientName":
+            case "recipientEmailId":
+              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
+                envelope["recipients"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
+              break;
+            case "envelopeTitle":
+              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
+                envelope["emailSubject"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
+              break;
+            case "customFieldName":
+            case "customFieldValue":
+              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
+              {
+                var customFields = envelope["customFields"] as JToken;
+                return customFields?.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower()) ?? false;
+              }));
+              break;
+            default:
+              break;
+          }
+
+          if (filteredEnvelopes.Count > 0)
+          {
+            envelopes.Clear();
+            envelopes = new JArray(filteredEnvelopes);
+            filteredEnvelopes.Clear();
+          }
+          else
+          {
+            envelopes.Clear();
+            break;
+          }
+        }
+      }
+
+      filteredEnvelopesDetails = GetFilteredEnvelopeDetails(envelopes);
+      newBody["value"] = (filteredEnvelopesDetails.Count < top) ? 
+        filteredEnvelopesDetails : 
+        new JArray(filteredEnvelopesDetails.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < filteredEnvelopesDetails.Count) ? true : false;
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
