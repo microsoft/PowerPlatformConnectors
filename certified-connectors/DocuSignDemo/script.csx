@@ -2135,6 +2135,13 @@ public class Script : ScriptBase
         templateRoles.Add(signer);
         signer = new JObject();
       }
+
+      if (key.Contains(" Signing Group"))
+      {
+        signer["signingGroupId"] = value;
+        templateRoles.Add(signer);
+        signer = new JObject();
+      }
     }
 
     newBody["templateRoles"] = templateRoles;
@@ -2656,6 +2663,11 @@ public class Script : ScriptBase
       signers[0]["note"] = query.Get("note");
     }
 
+    if (!string.IsNullOrEmpty(query.Get("signingGroupId")))
+    {
+      signers[0]["signingGroupId"] = query.Get("signingGroupId");
+    }
+
     if (!string.IsNullOrEmpty(query.Get("roleName")))
     {
       signers[0]["roleName"] = query.Get("roleName");
@@ -2716,8 +2728,6 @@ public class Script : ScriptBase
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var recipientType = query.Get("recipientType");
 
-    var missingInput = false;
-
     if (recipientType.Equals("inPersonSigners"))
     {
       signers[0]["hostName"] = body["hostName"];
@@ -2735,10 +2745,13 @@ public class Script : ScriptBase
       signers[0]["name"] = body["name"];
       if (body["email"] == null) 
       {
-        signers[0]["email"] = "power_automate_dummy_recipient@dsxtr.com";
-        if (string.IsNullOrEmpty(query.Get("phoneNumber")))
+        if (string.IsNullOrEmpty(query.Get("signingGroupId")))
         {
-          missingInput = true;
+          if (string.IsNullOrEmpty(query.Get("phoneNumber")))
+          {
+            return true;
+          }
+          signers[0]["email"] = "power_automate_dummy_recipient@dsxtr.com";
         }
       }
       else 
@@ -2746,7 +2759,7 @@ public class Script : ScriptBase
         signers[0]["email"] = body["email"];
       }
     }
-    return missingInput;
+    return false;
   }
 
   private void AddParamsForSelectedSignatureType(JArray signers, JObject body)
@@ -3925,6 +3938,24 @@ public class Script : ScriptBase
         var roleName = signer["roleName"];
         itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
         itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+        itemProperties[roleName + " Signing Group"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-dynamic-values"] = new JObject
+            {
+              ["operationId"] = "GetSigningGroups",
+              ["value-collection"] = "groups",
+              ["value-path"] = "signingGroupId",
+              ["value-title"] = "groupName",
+              ["parameters"] = new JObject
+              {
+                ["accountId"] = new JObject
+                {
+                  ["parameter"] = "accountId"
+                }
+              }
+            }
+        };
       }
 
       var newBody = new JObject
