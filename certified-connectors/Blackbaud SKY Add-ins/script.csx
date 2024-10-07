@@ -35,14 +35,6 @@ public class Script : ScriptBase
         var headers = json["headers"]?.ToString();
         var body = json["body"]?.ToString();
 
-        if (method.Equals("PATCH", StringComparison.OrdinalIgnoreCase))
-        {
-            // PATCH is not supported
-            var response = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            response.Content = CreateJsonErrorResponse($"Unsupported HTTP method '{method}'");
-            return response;
-        }
-
         var uriBuilder = new UriBuilder("https://api.sky.blackbaud.com");
         uriBuilder.Path = path;
 
@@ -96,7 +88,7 @@ public class Script : ScriptBase
         }
     
         // set the request body
-        if (new [] {"PUT", "POST"}.Contains(method, StringComparer.OrdinalIgnoreCase) && (!string.IsNullOrWhiteSpace(body)))
+        if (new [] {"PUT", "POST", "PATCH"}.Contains(method, StringComparer.OrdinalIgnoreCase) && (!string.IsNullOrWhiteSpace(body)))
         {
             this.Context.Request.Content = CreateJsonContent(body);
         }
