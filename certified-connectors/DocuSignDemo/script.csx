@@ -1598,7 +1598,7 @@ public class Script : ScriptBase
         response["schema"]["properties"]["signerName"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Signer name"
+          ["x-ms-summary"] = "* Signer or Signing Group Name"
         };
       }
       else if (recipientType.Equals("signers", StringComparison.OrdinalIgnoreCase))
@@ -1606,7 +1606,7 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Signer name"
+          ["x-ms-summary"] = "* Signer or Signing Group Name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
@@ -1637,12 +1637,12 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Name"
+          ["x-ms-summary"] = "* Recipient or Signing Group Name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Email"
+          ["x-ms-summary"] = "Recipient Email (Leave empty if there’s a signing group)"
         };
       }
     }
@@ -3936,11 +3936,26 @@ public class Script : ScriptBase
       foreach (var signer in signers)
       {
         var roleName = signer["roleName"];
-        itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
-        itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
+        itemProperties[roleName + " Name"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-keyOrder"] = 0,
+          ["x-ms-keyType"] = "none",
+          ["x-ms-sort"] = "none",
+          ["x-ms-summary"] = roleName + " Recipient Or Signing Group Name"
+        };
+        itemProperties[roleName + " Email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-keyOrder"] = 0,
+          ["x-ms-keyType"] = "none",
+          ["x-ms-sort"] = "none",
+          ["x-ms-summary"] = roleName + " Recipient Email (Leave empty if there’s a signing group)"
+        };
         itemProperties[roleName + " Signing Group"] = new JObject
         {
           ["type"] = "string",
+          ["x-ms-summary"] = roleName + " Signing Group",
           ["x-ms-dynamic-values"] = new JObject
             {
               ["operationId"] = "GetSigningGroups",
