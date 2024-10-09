@@ -1598,7 +1598,7 @@ public class Script : ScriptBase
         response["schema"]["properties"]["signerName"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Signer or Signing Group Name"
+          ["x-ms-summary"] = "* Signer or signing group name"
         };
       }
       else if (recipientType.Equals("signers", StringComparison.OrdinalIgnoreCase))
@@ -1606,7 +1606,7 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Signer or Signing Group Name"
+          ["x-ms-summary"] = "* Signer or signing group name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
@@ -1637,12 +1637,12 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Recipient or Signing Group Name"
+          ["x-ms-summary"] = "* Recipient or signing group name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "Recipient Email (Leave empty if there’s a signing group)"
+          ["x-ms-summary"] = "Recipient email (leave empty if there’s a signing group)"
         };
       }
     }
