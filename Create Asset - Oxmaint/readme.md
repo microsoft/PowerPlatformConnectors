@@ -14,7 +14,7 @@ You will need the following to proceed:
 The connector supports the following operations:
 
 ### Create Asset
-Allows users to create a new Asset within the Oxmaint system. Which will help him to 
+Allows users to create a new Asset within the Oxmaint system. Which will help him to do operations in oxmaint like maintenance, inspection etc.
  
 ## Obtaining Credentials
 * Visit https://oxmaint.com
