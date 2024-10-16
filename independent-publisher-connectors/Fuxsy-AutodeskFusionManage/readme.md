@@ -77,7 +77,7 @@ The connector supports all functions available in the Free PLM Connnector
 
 ## Frequently Asked Questions
 
-## How to structure Body content for create Item 
+### How to structure Body content for create Item 
 * Post - Item Create: gains you the ability to create a new item inside of chosen workspace.
 CUSTOM_LOOKUP_NAME - picklist custom ID
 INTEGER - array number of desired element inside of the picklist
