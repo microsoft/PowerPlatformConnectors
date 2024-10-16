@@ -1,32 +1,29 @@
 ## Create Asset Oxmaint
-
-## Name of connector :- Create Asset Oxmaint
-Oxmaint, is an inspection,Maintenance information capture technology.The Oxmaint Power Automate Connector streamlines asset management by enabling users to easily add new assets to the Oxmaint Maintenance app directly through Power Apps. This integration simplifies workflows for maintenance teams, offering a seamless connection between asset tracking and automated processes. With the connector, users can efficiently manage their assets, ensuring up-to-date records and improved operational efficiency.
+The Create Asset connector (Oxmaint) allows users to add new assets with relevant metadata and properties for efficient tracking and management. Designed for CMMS, it simplifies the creation of assets, supporting maintenance planning and work order management.
 
 
 ## Publisher: Oxmaint Inc.
-
-## Description
-Oxmaint is a cloud-based CMMS designed to streamline maintenance operations for businesses. It offers features like asset management, predictive maintenance, work order tracking, and IoT integration. Oxmaint helps reduce downtime, optimize resource use, and improve operational efficiency across industries like manufacturing, healthcare, and facilities management. It supports both free and paid plans with customizable options for larger enterprises.
 
 ## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature.
 * Oxmaint Subscription Account
 
-## How to get an Oxmaint Account?
--Visit the Oxmaint Official website https://oxmaint.com/
--Sign up free for Oxmaint account. Click on Web portal login button on the top-right corner.
--You can login with Gmail or manually type the credentials.
--You are all set with a new Oxmaint Account.
-
 
 ## Supported Operations
 The connector supports the following operations:
-**Create Asset**
+
+### Create Asset
 Allows users to create a new Asset within the Oxmaint system. Which will help him to 
  
-## Parameters
+## Obtaining Credentials
+* Visit https://oxmaint.com
+* Then Sign up for Oxmaint.
+* Fill the necessary details Like: Name, Business Email, Password (Email and password will be required for useing the connector). 
+
+
+## Getting Started
+These are the parameters that are required for connector:-
 
 * `Master Email`: User's unique Oxmaint email for asset management access.
 * `Password`: Provided by Oxmaint support or user for secure login.
@@ -39,3 +36,7 @@ Allows users to create a new Asset within the Oxmaint system. Which will help hi
 * `Odometer Unit`: Unit of measurement for odometer reading (e.g.: Hours, Miles, KM).
 * `Status`: Current operational condition of the asset (e.g.: "Available", "In Maintenance", "Maintenance Required", "Breakdown", "Discontinue", "Deployed", "Idle").
 * `Asset Operator`: Name of the person or entity responsible for operating the asset.
+
+## Known Issues and Limitations
+* The connector is designed to work with Oxmaint's CMMS system and not compatible with other.
+* User can Add only one asset with same asset number.
