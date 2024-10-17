@@ -30,10 +30,13 @@ The connector supports the following operations:
   - **Profile Parsing File**: Parse a Resume and create a Profile from it.
   - **Profile Scoring**: Score Profiles indexed in Sources for a Job.
   - **Profile Searching**: Score Profiles indexed in Sources for a Job.
+  - **Profiles Matching**: Match Profiles indexed in Sources to a Profile.
+  - **Profile Grading**: Grade a Profile indexed in a Source for a Job.
 - **Job API**
   - **Job Indexing**: Index a Job in a Board.
   - **Jobs Scoring**: Score Jobs indexed in Boards for a Profile.
   - **Jobs Searching**: Search Jobs indexed in Boards.
+  - **Jobs Matching**: Match Jobs indexed in Boards to a Job.
 - **Text API**:
   - **Text Embedding**: Vectorize a Text.
   - **Text Geocoding**: Retrieve geojson data for any textual location input.
