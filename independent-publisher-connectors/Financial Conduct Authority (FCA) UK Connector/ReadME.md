@@ -13,11 +13,13 @@ You will need the following to proceed:
 ## Supported Operations
 
 The connector supports the following operations:
-* `Common Search`: Search the Financial Services Register for a firm or an individual by name or unique reference number
-*  `Find Individuals Details`: Get information about the Individuals associated with its Individual Reference Number
-*  `Individual Disciplinary History`: Get information about Disciplinary History on an Individual using its Individual Reference Number
+* `Common Search`: Search the Financial Services Register for a firm or an individual or a fund (collective investment scheme) by name or unique reference number
+*  `Find Individuals Details`: Get information about an Individual associated with its Individual Reference Number
+*  `Find Firm Details`: Get information about a specific firm using its Firm Reference Number
+*  `Find Product Details`: Get information about a specific product using its Product Reference Number
 *  `Subfund Details`: Get information about subfund of a product by using its Product Reference Number
 *  `Product Other Name Details`: Get information about other names of a product by using its Product Reference Number
+*  `Individual Disciplinary History`: Get information about Disciplinary History on an Individual using its Individual Reference Number
 *  `Firm Other Names`: Get information about the other names used by the firms using its Firm Reference Number
 *  `Firm Address`: Get information about a specific firm using its Firm Reference Number
 *  `Firm Individuals`: Get information about the Individuals associated with a firm using its Firm Reference Number
