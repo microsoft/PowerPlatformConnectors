@@ -1,6 +1,6 @@
 param (
     [Parameter(HelpMessage = "Specify valid zip file path.", Mandatory = $true)][string]$zipFilePath,
-    [Parameter(HelpMessage = "Specify 'y'/'yes' (case-insensitive) if plugin is enabled else specify 'n'/'no' (case-insensitive).", Mandatory = $true)][string]$pluginEnabled
+    [Parameter(HelpMessage = "Specify 'y'/'yes' (case-insensitive) if plugin is enabled else specify 'n'/'no' (case-insensitive).", Mandatory = $true)][string]$isPluginEnabled
 )
 
 function RemoveTempFolder($tempFolderPath)
@@ -40,7 +40,7 @@ function CheckValidFile($expectedFiles, $actualFiles) {
 
 function ValidateFolderAndFilesInPackage {
     param (
-        [bool] $pluginEnabled,
+        [bool] $isPluginEnabled,
         [int] $levelOfHierarchy,
         [string] $parentFolderPath,
         [string] $folderPath,
@@ -130,17 +130,17 @@ function ValidateFolderAndFilesInPackage {
                                 if ($expectedCount -and (-not $actualCount))
                                 {
                                     $validationMessages += "The package folder '$currentFolderName' does not contain solution zip files in '$parentFolderPath'."
-                                    $detailsSolutionZip = if ($pluginEnabled) {"connector, flow and AIplugin "} else {"connector and flow"}
+                                    $detailsSolutionZip = if ($isPluginEnabled) {"connector, flow and AIplugin "} else {"connector and flow"}
                                     $validationMessages += "Please add the required $detailsSolutionZip solution zip files."
                                 }
-                                elseif ((-not $pluginEnabled) -and (($expectedCount -eq 2) -and ($actualCount -gt 2)))
+                                elseif ((-not $isPluginEnabled) -and (($expectedCount -eq 2) -and ($actualCount -gt 2)))
                                 {
-                                    $detailsSolutionZip = if ($pluginEnabled) {"connector, flow and AIplugin "} else {"only connector and flow"}
+                                    $detailsSolutionZip = if ($isPluginEnabled) {"connector, flow and AIplugin "} else {"only connector and flow"}
                                     $validationMessages += "The package folder '$currentFolderName' should contain $detailsSolutionZip solution zip files in '$parentFolderPath'."
                                 }
-                                elseif ($pluginEnabled -and (($expectedCount -eq 3) -and ($actualCount -lt 3)))
+                                elseif ($isPluginEnabled -and (($expectedCount -eq 3) -and ($actualCount -lt 3)))
                                 {
-                                    $detailsSolutionZip = if ($pluginEnabled) {"connector, flow and AIplugin "} else {"connector and flow"}
+                                    $detailsSolutionZip = if ($isPluginEnabled) {"connector, flow and AIplugin "} else {"connector and flow"}
                                     $validationMessages += "The package folder '$currentFolderName' should contain $detailsSolutionZip solution zip files in '$parentFolderPath'."
                                     $validationMessages += "Please have all the three solution zip files as this is a plugin connector."
                                 }
@@ -173,18 +173,18 @@ try {
     # Trim the two input string arguments for "" or '' (double quote or single quote) and white spaces
     $zipFilePath = $zipFilePath -replace '"', ''
     $zipFilePath = $zipFilePath -replace "'", ''
-    $pluginEnabled = $pluginEnabled -replace '"', ''
-    $pluginEnabled = $pluginEnabled -replace "'", ''
+    $isPluginEnabled = $isPluginEnabled -replace '"', ''
+    $isPluginEnabled = $isPluginEnabled -replace "'", ''
     $zipFilePath = $zipFilePath.Trim()
-    $pluginEnabled = $pluginEnabled.Trim()
+    $isPluginEnabled = $isPluginEnabled.Trim()
     # Check if null or empty values are given as inputs
     if ($zipFilePath -eq "") {
         Write-Host "Validation failed: The zip file path is empty or blank." -ForegroundColor Red
         Write-Host ""
         exit
     }
-    if ($pluginEnabled -eq "") {
-        Write-Host "Validation failed: The plugin enabled argument is empty or blank." -ForegroundColor Red
+    if ($isPluginEnabled -eq "") {
+        Write-Host "Validation failed: The isPluginEnabled argument is empty or blank." -ForegroundColor Red
         Write-Host ""
         exit
     }
@@ -214,15 +214,15 @@ try {
         Write-Host ""
         exit
     }
-    # bool isPluginEnabled from string pluginEnabled
-    if (($pluginEnabled -eq 'y') -or ($pluginEnabled -eq 'yes')) {
-        $isPluginEnabled = $true
+    # bool isBoolPluginEnabled from string isPluginEnabled
+    if (($isPluginEnabled -eq 'y') -or ($isPluginEnabled -eq 'yes')) {
+        $isBoolPluginEnabled = $true
     }
-    elseif (($pluginEnabled -eq 'n') -or ($pluginEnabled -eq 'no')) {
-        $isPluginEnabled = $false
+    elseif (($isPluginEnabled -eq 'n') -or ($isPluginEnabled -eq 'no')) {
+        $isBoolPluginEnabled = $false
     }
     else {
-        Write-Host "Validation failed: The second argument '$pluginEnabled' provided for pluginEnabled is not correct." -ForegroundColor Red 
+        Write-Host "Validation failed: The second argument '$isPluginEnabled' provided for isPluginEnabled is not correct." -ForegroundColor Red 
         Write-Host "It should be either 'y'/'n' or 'yes'/'no'" -ForegroundColor Red
         Write-Host ""
         exit
@@ -247,7 +247,7 @@ try {
     }
 
     # Call the validation function
-    $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 1 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
+    $resultOfValidation = ValidateFolderAndFilesInPackage -isPluginEnabled $isBoolPluginEnabled -levelOfHierarchy 1 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
     if (-not $resultOfValidation)
     {
         DisplayReferDocumentation
@@ -274,7 +274,7 @@ try {
     $expectedFileCounts = $null # no need to consider the files present normally as these are dependent on environments xml pdb
 
     # Call the validation function
-    $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 2 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
+    $resultOfValidation = ValidateFolderAndFilesInPackage -isPluginEnabled $isBoolPluginEnabled -levelOfHierarchy 2 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
     if (-not $resultOfValidation)
     {
         DisplayReferDocumentation
@@ -295,7 +295,7 @@ try {
     $parentFolderPath = "$parentFolderPath/$pkgAssetFoldereName"
 
     $expectedFolderCount = 0
-    $expectedFileCounts  = if ($isPluginEnabled) { 
+    $expectedFileCounts  = if ($isBoolPluginEnabled) { 
         @{
             "*.zip" = 3
             # no need to consider the files present normally .xml .json as they are env specific
@@ -307,9 +307,8 @@ try {
         } 
     }
 
-    # Call the function
-    $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 3 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
-       
+    # Call the validation function
+    $resultOfValidation = ValidateFolderAndFilesInPackage -isPluginEnabled $isBoolPluginEnabled -levelOfHierarchy 3 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
     if (-not $resultOfValidation) {
         DisplayReferDocumentation
         Write-Host ""
@@ -344,7 +343,6 @@ try {
         $missingFiles = $null
         $missingFiles = CheckValidFile $expectedFiles $actualFiles
         # Call the validation function
-        # $resultOfValidation = ValidateFolderAndFilesInPackage -pluginEnabled $isPluginEnabled -levelOfHierarchy 4 -parentFolderPath $parentFolderPath -folderPath $folderPath -expectedFolderCount $expectedFolderCount -expectedFileCounts $expectedFileCounts
         if ($missingFiles) {
             Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain three files namely '[Content_Types].xml', 'customizations.xml', 'solution.xml'."
             Write-Host "Please add the missing '$($missingFiles -join ', ')' to the solution zip file."
@@ -385,7 +383,7 @@ try {
             }
         }
 
-        if ($pluginEnabled) {
+        if ($isBoolPluginEnabled) {
             # aiplugin operation
             $pluginNodeName = "aicopilot_aiplugin"
             # Use XPath to find the node
@@ -408,7 +406,6 @@ try {
         }
         if (($isConnectorFound) -and (-not $isWorkflowsFound) -and ($isPluginFound)) {
             $isPluginSolutionPresent = $true
-            $workFlowsFolderCount++  
         }
         # check if the connector folder name is present with the same name
         if ($isConnectorFound) {
@@ -471,7 +468,8 @@ try {
                 exit
             } 
         }
-    }   
+    } 
+    write-Host "****** isPluginEnabled: $isPluginEnabled, isBoolPluginEnabled: $isBoolPluginEnabled ******"  
     if (-not $isConnectorSolutionPresent) {
         Write-Host "Connector solution in '$originalParentFolderPath' is invalid. Connector solution should only contain 'Connector' folder."
         Write-Host "Validate the connector solution has no extra component except 'Connector'. If not so, please remove them from the solution and export again."
@@ -482,7 +480,7 @@ try {
         Write-Host "Validate the flow solution has both 'Connector' and 'Workflows' components. If not so, please recreate the solution and export again."
         $resultOfValidation = $false
     }
-    elseif ($pluginEnabled -and (-not $isPluginSolutionPresent)) {
+    elseif ($isBoolPluginEnabled -and (-not $isPluginSolutionPresent)) {
         Write-Host "Plugin solution in '$originalParentFolderPath' is invalid. Plugin solution should contain 'Connector', 'aiplugins' and 'aipluginoperations' folders."
         Write-Host "Validate the plugin solution has 'Connector', 'aiplugins' and 'aipluginoperations' components. If not so, please recreate the solution and export again."
         $resultOfValidation = $false
