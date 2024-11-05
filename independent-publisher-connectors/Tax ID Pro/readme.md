@@ -18,7 +18,7 @@ The lookup endpoint first validates the tax number, then enriches the response w
 ## Known Issues and Limitations
 There are no known issues at this time.
 
-The connector does not implement the batch endpoint from the udnerlying service, while there might be missing parameters and properties too. If you miss anything, get in touch and let's figure out together how to bring in the missing pie
+The connector does not implement the batch endpoint from the underlying service, while there might be missing parameters and properties too. If you miss anything, get in touch and let's figure out together how to bring in the needed functionality.
 
 Additionally, there might be limits applied by the underlying service based on your subscription plan.
 
