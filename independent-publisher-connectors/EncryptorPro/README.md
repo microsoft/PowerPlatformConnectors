@@ -17,6 +17,6 @@ The connector supports the following operations:
 
 
 
-### For support see [support@turtledovecloudsolutions.com](mailto:support@turtledovecloudsolutions.cmo)
+### For support see [support@turtledovecloudsolutions.com](mailto:support@turtledovecloudsolutions.com)
 
 ### This connector is provided for use by the community to leverage the data encryption within a Microsoft Power Platform ecosystem.
