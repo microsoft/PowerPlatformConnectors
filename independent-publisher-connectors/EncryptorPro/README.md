@@ -11,7 +11,7 @@ On initial use, you will need to initiate a new connection reference. This will 
 ## Supported Operations
 The connector supports the following operations:
 * `Encrypt Data`:  Encrypts provided data into AES-256 encryption. 
-* `Dencrypt Data`: Decrypts encrypted data (encrypted using this connector) back into plain text.
+* `Decrypt Data`: Decrypts encrypted data (encrypted using this connector) back into plain text.
 
 ## Screenshots
 
@@ -19,4 +19,4 @@ The connector supports the following operations:
 
 ### For support see [support@turtledovecloudsolutions.com](mailto:support@turtledovecloudsolutions.cmo)
 
-### This connector is provided for use by the community to leverage the data ecnryption within a Microsoft Power Platform ecosystem.
+### This connector is provided for use by the community to leverage the data encryption within a Microsoft Power Platform ecosystem.
