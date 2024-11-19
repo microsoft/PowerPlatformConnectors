@@ -101,7 +101,7 @@ Ironclad operates in multiple environments:
 - EU Production: eu1.ironcladapp.com (EU customers)
 - Demo: demo.ironcladapp.com
 
-Each environment is suppoered, but requires registration of separate client applications.
+Each environment is supported, but requires registration of separate client applications.
 
 ### Connecting the Custom Connector
 1. Select your Ironclad instance (Demo, EU1, or Global)
