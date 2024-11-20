@@ -1151,11 +1151,11 @@ public class Script : ScriptBase
         {
             var formattedSchema = new JObject();
             var schemaAsArray = new JArray();
-            var documentSchemaAsArray = new JArray();
+            var documentsAsArray = new JArray();
 
             foreach (var property in schema.Properties())
             {
-                rtrWfl_ProcessSchemaProperty(property, formattedSchema, schemaAsArray, documentSchemaAsArray);
+                rtrWfl_ProcessSchemaProperty(property, formattedSchema, schemaAsArray);
             }
 
             body["formattedSchema"] = new JObject
@@ -1164,15 +1164,58 @@ public class Script : ScriptBase
                 ["properties"] = formattedSchema
             };
             body["schemaAsArray"] = schemaAsArray;
-            body["documentSchemaAsArray"] = documentSchemaAsArray;
 
+            // Transform documents from the existing workflow documents
+            if (body["attributes"] is JObject attributes)
+            {
+                // Handle draft documents
+                if (attributes["draft"] is JArray draftDocs && draftDocs.Any())
+                {
+                    var draftDocObject = new JObject
+                    {
+                        ["systemName"] = "draft",
+                        ["displayName"] = "Draft Document",
+                        ["readOnly"] = true,
+                        ["versions"] = draftDocs
+                    };
+                    documentsAsArray.Add(draftDocObject);
+                }
+
+                // Handle signed documents
+                if (attributes["signed"] is JObject signedDoc)
+                {
+                    var signedDocObject = new JObject
+                    {
+                        ["systemName"] = "signed",
+                        ["displayName"] = "Signed Document",
+                        ["readOnly"] = true,
+                        ["versions"] = new JArray(signedDoc)
+                    };
+                    documentsAsArray.Add(signedDocObject);
+                }
+
+                // Handle sentSignaturePacket documents
+                if (attributes["sentSignaturePacket"] is JArray signaturePacketDocs && signaturePacketDocs.Any())
+                {
+                    var signaturePacketObject = new JObject
+                    {
+                        ["systemName"] = "signaturePacket",
+                        ["displayName"] = "Signature Packet",
+                        ["readOnly"] = true,
+                        ["versions"] = signaturePacketDocs
+                    };
+                    documentsAsArray.Add(signaturePacketObject);
+                }
+            }
+
+            body["documentsAsArray"] = documentsAsArray;
             body["formattedAttributes"] = rtrWfl_FormatWorkflowAttributes(body["attributes"] as JObject, formattedSchema);
         }
 
         return body;
     }
 
-    private void rtrWfl_ProcessSchemaProperty(JProperty property, JObject formattedSchema, JArray schemaAsArray, JArray documentSchemaAsArray)
+    private void rtrWfl_ProcessSchemaProperty(JProperty property, JObject formattedSchema, JArray schemaAsArray)
     {
         var propertySchema = property.Value as JObject;
         if (propertySchema != null)
@@ -1190,12 +1233,13 @@ public class Script : ScriptBase
             formattedProperty["readOnly"] = isReadOnly;
             formattedSchema[property.Name] = formattedProperty;
 
-            schemaAsArray.Add(rtrWfl_CreateSchemaArrayItem(property.Name, displayName, propertyType, isReadOnly));
-
-            if (propertyType == "array" && propertySchema["elementType"] is JObject arrayElementType && arrayElementType["type"]?.ToString().ToLower() == "document")
+            schemaAsArray.Add(new JObject
             {
-                documentSchemaAsArray.Add(rtrWfl_CreateDocumentSchemaItem(property.Name, displayName, isReadOnly));
-            }
+                ["systemName"] = property.Name,
+                ["displayName"] = displayName,
+                ["type"] = propertyType,
+                ["readOnly"] = isReadOnly
+            });
         }
     }
 
