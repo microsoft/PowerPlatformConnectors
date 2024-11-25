@@ -22,7 +22,9 @@ public class Script : ScriptBase
         }
 
         await this.UpdateRequest().ConfigureAwait(false);
-        var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
+        var response = await this.Context
+            .SendAsync(this.Context.Request, this.CancellationToken)
+            .ConfigureAwait(false);
         if (response.IsSuccessStatusCode)
         {
             await this.UpdateResponse(response).ConfigureAwait(false);
@@ -68,42 +70,86 @@ public class Script : ScriptBase
         switch (this.Context.OperationId)
         {
             case "ListUsers":
-                await this.TransformResponseJsonBody(this.lstUsr_TransformUsersList, response).ConfigureAwait(false);
+                await this.TransformResponseJsonBody(this.lstUsr_TransformUsersList, response)
+                    .ConfigureAwait(false);
                 break;
             case "RetrieveWorkflowSchema":
-                await this.TransformResponseJsonBody(this.rtrWflSch_TransformRetrieveWorkflowSchema, response).ConfigureAwait(false);
+                await this.TransformResponseJsonBody(
+                        this.rtrWflSch_TransformRetrieveWorkflowSchema,
+                        response
+                    )
+                    .ConfigureAwait(false);
                 break;
             case "RetrieveWorkflow":
-                await this.TransformResponseJsonBody(this.rtrWfl_TransformRetrieveWorkflow, response).ConfigureAwait(false);
+                await this.TransformResponseJsonBody(
+                        this.rtrWfl_TransformRetrieveWorkflow,
+                        response
+                    )
+                    .ConfigureAwait(false);
                 break;
             case "RetrieveRecord":
-                await this.TransformResponseJsonBody(this.rtrRcd_TransformRetrieveRecord, response).ConfigureAwait(false);
+                await this.TransformResponseJsonBody(this.rtrRcd_TransformRetrieveRecord, response)
+                    .ConfigureAwait(false);
                 break;
             case "RetrieveEmailThread":
-                await this.TransformResponseJsonBody(this.rtrEml_TransformRetrieveEmailThread, response).ConfigureAwait(false);
+                await this.TransformResponseJsonBody(
+                        this.rtrEml_TransformRetrieveEmailThread,
+                        response
+                    )
+                    .ConfigureAwait(false);
                 break;
             case "CreateRecord":
             case "ReplaceRecord":
             case "UpdateRecordMetadata":
-                await this.TransformResponseJsonBody(this.crtRcd_TransformCreateRecordResponse, response).ConfigureAwait(false);
+                await this.TransformResponseJsonBody(
+                        this.crtRcd_TransformCreateRecordResponse,
+                        response
+                    )
+                    .ConfigureAwait(false);
                 break;
             case "ListAllRecords":
                 // Get query parameter for properties
-                var listAllRecordsQuery = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query)["recordPorperties"] ?? string.Empty;
-                await this.TransformResponseJsonBody(body => lstAllRcd_TransformListAllRecordsResponse(body, listAllRecordsQuery), response).ConfigureAwait(false);
+                var listAllRecordsQuery =
+                    HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query)[
+                        "recordPorperties"
+                    ] ?? string.Empty;
+                await this.TransformResponseJsonBody(
+                        body =>
+                            lstAllRcd_TransformListAllRecordsResponse(body, listAllRecordsQuery),
+                        response
+                    )
+                    .ConfigureAwait(false);
                 break;
             case "RetrieveRecordSchemas":
                 // Get query parameter for properties
-                var retrieveRecordSchemasQuery = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query)["recordPorperties"] ?? string.Empty;
-                await this.TransformResponseJsonBody(body => rtrRcdSch_TransformRetrieveRecordSchemas(body, retrieveRecordSchemasQuery), response).ConfigureAwait(false);
+                var retrieveRecordSchemasQuery =
+                    HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query)[
+                        "recordPorperties"
+                    ] ?? string.Empty;
+                await this.TransformResponseJsonBody(
+                        body =>
+                            rtrRcdSch_TransformRetrieveRecordSchemas(
+                                body,
+                                retrieveRecordSchemasQuery
+                            ),
+                        response
+                    )
+                    .ConfigureAwait(false);
                 break;
             case "ListAllWorkflows":
-                await this.TransformResponseJsonBody(this.lstAllWfl_TransformListAllWorkflowsResponse, response).ConfigureAwait(false);
-                break;  
+                await this.TransformResponseJsonBody(
+                        this.lstAllWfl_TransformListAllWorkflowsResponse,
+                        response
+                    )
+                    .ConfigureAwait(false);
+                break;
         }
     }
 
-    private async Task TransformResponseJsonBody(Func<JObject, JObject> transformationFunction, HttpResponseMessage response)
+    private async Task TransformResponseJsonBody(
+        Func<JObject, JObject> transformationFunction,
+        HttpResponseMessage response
+    )
     {
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -127,7 +173,10 @@ public class Script : ScriptBase
         var multipartContent = new MultipartFormDataContent();
 
         string filename = "document.pdf";
-        if (jsonBody.TryGetValue("metadata", out var metadataToken) && metadataToken is JObject metadata)
+        if (
+            jsonBody.TryGetValue("metadata", out var metadataToken)
+            && metadataToken is JObject metadata
+        )
         {
             filename = metadata["filename"]?.ToString() ?? filename;
         }
@@ -143,7 +192,11 @@ public class Script : ScriptBase
         if (metadataToken != null)
         {
             var metadataJson = metadataToken.ToString();
-            var metadataContent = new StringContent(metadataJson, Encoding.UTF8, "application/json");
+            var metadataContent = new StringContent(
+                metadataJson,
+                Encoding.UTF8,
+                "application/json"
+            );
             multipartContent.Add(metadataContent, "metadata");
         }
 
@@ -161,13 +214,15 @@ public class Script : ScriptBase
         var metadataUrl = new Uri(new Uri(baseUrl), "/public/api/v1/records/metadata");
 
         var request = new HttpRequestMessage(HttpMethod.Get, metadataUrl);
-        
+
         foreach (var header in this.Context.Request.Headers)
         {
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
 
-        var response = await this.Context.SendAsync(request, this.CancellationToken).ConfigureAwait(false);
+        var response = await this.Context
+            .SendAsync(request, this.CancellationToken)
+            .ConfigureAwait(false);
 
         if (response.IsSuccessStatusCode)
         {
@@ -176,7 +231,9 @@ public class Script : ScriptBase
         }
         else
         {
-            throw new Exception($"Failed to retrieve record metadata. Status code: {response.StatusCode}");
+            throw new Exception(
+                $"Failed to retrieve record metadata. Status code: {response.StatusCode}"
+            );
         }
     }
 
@@ -198,16 +255,15 @@ public class Script : ScriptBase
                 var value = prop["value"];
 
                 string type = "unknown";
-                if (metadataProperties != null && metadataProperties.TryGetValue(systemPropertyName, out var propertyInfo))
+                if (
+                    metadataProperties != null
+                    && metadataProperties.TryGetValue(systemPropertyName, out var propertyInfo)
+                )
                 {
                     type = propertyInfo["type"]?.ToString() ?? "unknown";
                 }
 
-                properties[systemPropertyName] = new JObject
-                {
-                    ["value"] = value,
-                    ["type"] = type
-                };
+                properties[systemPropertyName] = new JObject { ["value"] = value, ["type"] = type };
             }
 
             jsonBody["properties"] = properties;
@@ -217,7 +273,7 @@ public class Script : ScriptBase
         }
     }
 
-        // Add counterpartyName property to the response
+    // Add counterpartyName property to the response
     private JObject crtRcd_TransformCreateRecordResponse(JObject body)
     {
         if (body.ContainsKey("properties") && body["properties"] is JObject properties)
@@ -249,20 +305,26 @@ public class Script : ScriptBase
         var metadataUrl = new Uri(new Uri(baseUrl), "/public/api/v1/records/metadata");
 
         var metadataRequest = new HttpRequestMessage(HttpMethod.Get, metadataUrl);
-        
+
         foreach (var header in this.Context.Request.Headers)
         {
             metadataRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
 
-        var metadataResponse = await this.Context.SendAsync(metadataRequest, this.CancellationToken).ConfigureAwait(false);
+        var metadataResponse = await this.Context
+            .SendAsync(metadataRequest, this.CancellationToken)
+            .ConfigureAwait(false);
 
         if (!metadataResponse.IsSuccessStatusCode)
         {
-            throw new Exception($"Failed to retrieve record metadata. Status code: {metadataResponse.StatusCode}");
+            throw new Exception(
+                $"Failed to retrieve record metadata. Status code: {metadataResponse.StatusCode}"
+            );
         }
 
-        var metadataContent = await metadataResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var metadataContent = await metadataResponse.Content
+            .ReadAsStringAsync()
+            .ConfigureAwait(false);
         return JObject.Parse(metadataContent);
     }
 
@@ -274,21 +336,29 @@ public class Script : ScriptBase
         var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
         var jsonBody = JObject.Parse(content);
 
-        if (jsonBody.TryGetValue("addProperties", out var addPropertiesToken) && addPropertiesToken is JArray addPropertiesArray)
+        if (
+            jsonBody.TryGetValue("addProperties", out var addPropertiesToken)
+            && addPropertiesToken is JArray addPropertiesArray
+        )
         {
             var transformedProperties = new JObject();
 
             foreach (var prop in addPropertiesArray)
             {
-                if (prop is JObject propObject && 
-                    propObject.TryGetValue("propertySystemName", out var propertySystemNameToken) &&
-                    propObject.TryGetValue("value", out var valueToken))
+                if (
+                    prop is JObject propObject
+                    && propObject.TryGetValue("propertySystemName", out var propertySystemNameToken)
+                    && propObject.TryGetValue("value", out var valueToken)
+                )
                 {
                     string propertySystemName = propertySystemNameToken.ToString();
                     JToken value = valueToken;
 
                     string type = "unknown";
-                    if (metadataProperties != null && metadataProperties.TryGetValue(propertySystemName, out var propertyInfo))
+                    if (
+                        metadataProperties != null
+                        && metadataProperties.TryGetValue(propertySystemName, out var propertyInfo)
+                    )
                     {
                         type = propertyInfo["type"]?.ToString() ?? "unknown";
                     }
@@ -336,7 +406,8 @@ public class Script : ScriptBase
                     if (item is JObject objItem)
                     {
                         var unflattenedItem = new JObject();
-                        var groupedProperties = objItem.Properties()
+                        var groupedProperties = objItem
+                            .Properties()
                             .GroupBy(p => p.Name.Split('/')[0])
                             .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -426,7 +497,10 @@ public class Script : ScriptBase
 
         var multipartContent = new MultipartFormDataContent();
 
-        if (jsonBody.TryGetValue("attributes", out var attributesToken) && attributesToken is JObject attributes)
+        if (
+            jsonBody.TryGetValue("attributes", out var attributesToken)
+            && attributesToken is JObject attributes
+        )
         {
             crtWfl_ProcessWorkflowAttributes(attributes, multipartContent, jsonBody);
         }
@@ -451,7 +525,8 @@ public class Script : ScriptBase
                     if (item is JObject objItem)
                     {
                         var unflattenedItem = new JObject();
-                        var groupedProperties = objItem.Properties()
+                        var groupedProperties = objItem
+                            .Properties()
                             .GroupBy(p => p.Name.Split('/')[0])
                             .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -527,26 +602,45 @@ public class Script : ScriptBase
         return result;
     }
 
-    private void crtWfl_ProcessWorkflowAttributes(JObject attributes, MultipartFormDataContent multipartContent, JObject jsonBody)
+    private void crtWfl_ProcessWorkflowAttributes(
+        JObject attributes,
+        MultipartFormDataContent multipartContent,
+        JObject jsonBody
+    )
     {
         foreach (var attribute in attributes.Properties())
         {
-            if (attribute.Value is JArray arrayValue && arrayValue.Any(item => item is JObject obj && obj.ContainsKey("fileContent")))
+            if (
+                attribute.Value is JArray arrayValue
+                && arrayValue.Any(item => item is JObject obj && obj.ContainsKey("fileContent"))
+            )
             {
-                crtWfl_ProcessFileArrayAttribute(attribute.Name, arrayValue, multipartContent, jsonBody);
+                crtWfl_ProcessFileArrayAttribute(
+                    attribute.Name,
+                    arrayValue,
+                    multipartContent,
+                    jsonBody
+                );
             }
         }
     }
 
-    private void crtWfl_ProcessFileArrayAttribute(string attributeName, JArray arrayValue, MultipartFormDataContent multipartContent, JObject jsonBody)
+    private void crtWfl_ProcessFileArrayAttribute(
+        string attributeName,
+        JArray arrayValue,
+        MultipartFormDataContent multipartContent,
+        JObject jsonBody
+    )
     {
         var updatedArray = new JArray();
 
         foreach (var item in arrayValue)
         {
-            if (item is JObject fileObject &&
-                fileObject.TryGetValue("fileName", out var fileNameToken) &&
-                fileObject.TryGetValue("fileContent", out var fileContentToken))
+            if (
+                item is JObject fileObject
+                && fileObject.TryGetValue("fileName", out var fileNameToken)
+                && fileObject.TryGetValue("fileContent", out var fileContentToken)
+            )
             {
                 string fileName = fileNameToken.ToString();
                 string fileContent = fileContentToken.ToString();
@@ -557,7 +651,9 @@ public class Script : ScriptBase
 
                     var fileBytes = Convert.FromBase64String(fileContent);
                     var fileContentPart = new ByteArrayContent(fileBytes);
-                    fileContentPart.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                    fileContentPart.Headers.ContentType = new MediaTypeHeaderValue(
+                        "application/octet-stream"
+                    );
                     multipartContent.Add(fileContentPart, fileKey, fileName);
 
                     updatedArray.Add(new JObject { ["file"] = fileKey });
@@ -580,7 +676,10 @@ public class Script : ScriptBase
         var multipartContent = new MultipartFormDataContent();
 
         string filename = "document.pdf"; // Default filename as fallback
-        if (jsonBody.TryGetValue("metadata", out var metadataToken) && metadataToken is JObject metadata)
+        if (
+            jsonBody.TryGetValue("metadata", out var metadataToken)
+            && metadataToken is JObject metadata
+        )
         {
             filename = metadata["filename"]?.ToString() ?? filename;
         }
@@ -596,7 +695,11 @@ public class Script : ScriptBase
         if (metadataToken != null)
         {
             var metadataJson = metadataToken.ToString();
-            var metadataContent = new StringContent(metadataJson, Encoding.UTF8, "application/json");
+            var metadataContent = new StringContent(
+                metadataJson,
+                Encoding.UTF8,
+                "application/json"
+            );
             multipartContent.Add(metadataContent, "metadata");
         }
 
@@ -613,19 +716,22 @@ public class Script : ScriptBase
         if (resources != null)
         {
             var transformedResources = new JArray(
-                resources.Select(user =>
-                {
-                    var givenName = user["name"]?["givenName"]?.ToString() ?? "";
-                    var familyName = user["name"]?["familyName"]?.ToString() ?? "";
-                    var displayName = $"{givenName} {familyName}".Trim();
+                resources.Select(
+                    user =>
+                    {
+                        var givenName = user["name"]?["givenName"]?.ToString() ?? "";
+                        var familyName = user["name"]?["familyName"]?.ToString() ?? "";
+                        var displayName = $"{givenName} {familyName}".Trim();
 
-                    var email = user["emails"]?.FirstOrDefault()?["value"]?.ToString().ToLower() ?? "";
+                        var email =
+                            user["emails"]?.FirstOrDefault()?["value"]?.ToString().ToLower() ?? "";
 
-                    user["displayName"] = displayName;
-                    user["combinedLabel"] = $"{displayName} ({email})";
+                        user["displayName"] = displayName;
+                        user["combinedLabel"] = $"{displayName} ({email})";
 
-                    return user;
-                })
+                        return user;
+                    }
+                )
             );
 
             body["Resources"] = transformedResources;
@@ -649,7 +755,13 @@ public class Script : ScriptBase
         }
 
         var schemas = (JArray)jsonBody["schemas"];
-        if (!schemas.Any(s => s.Type == JTokenType.String && s.Value<string>() == "urn:ietf:params:scim:api:messages:2.0:PatchOp"))
+        if (
+            !schemas.Any(
+                s =>
+                    s.Type == JTokenType.String
+                    && s.Value<string>() == "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+            )
+        )
         {
             schemas.Clear(); // Remove any existing values
             schemas.Add("urn:ietf:params:scim:api:messages:2.0:PatchOp");
@@ -675,7 +787,13 @@ public class Script : ScriptBase
         }
 
         var schemas = (JArray)jsonBody["schemas"];
-        if (!schemas.Any(s => s.Type == JTokenType.String && s.Value<string>() == "urn:ietf:params:scim:api:messages:2.0:PatchOp"))
+        if (
+            !schemas.Any(
+                s =>
+                    s.Type == JTokenType.String
+                    && s.Value<string>() == "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+            )
+        )
         {
             schemas.Clear(); // Remove any existing values
             schemas.Add("urn:ietf:params:scim:api:messages:2.0:PatchOp");
@@ -684,7 +802,7 @@ public class Script : ScriptBase
         // Update the request content with the modified body
         this.Context.Request.Content = CreateJsonContent(jsonBody.ToString());
     }
- 
+
     // ################################################################################
     // Retrieve Workflow Schema #######################################################
     // ################################################################################
@@ -714,24 +832,49 @@ public class Script : ScriptBase
                     if (propertyType == "object")
                     {
                         var objectType = propertyValue["objectType"]?.ToString().ToLower();
-                        if (objectType == "address" || objectType == "monetaryamount" || objectType == "duration")
+                        if (
+                            objectType == "address"
+                            || objectType == "monetaryamount"
+                            || objectType == "duration"
+                        )
                         {
                             effectivePropertyType = objectType;
                         }
                     }
 
-                    var formattedLaunchProperty = rtrWflSch_FormatLaunchProperty(effectivePropertyType, displayName, propertyName, propertyValue);
+                    var formattedLaunchProperty = rtrWflSch_FormatLaunchProperty(
+                        effectivePropertyType,
+                        displayName,
+                        propertyName,
+                        propertyValue
+                    );
                     launchSchema[propertyName] = formattedLaunchProperty;
 
-                    var formattedProperty = rtrWflSch_FormatProperty(effectivePropertyType, displayName, propertyName, propertyValue);
+                    var formattedProperty = rtrWflSch_FormatProperty(
+                        effectivePropertyType,
+                        displayName,
+                        propertyName,
+                        propertyValue
+                    );
                     formattedSchema[propertyName] = formattedProperty;
 
-                    var schemaArrayItem = rtrWflSch_ParseSchemaArrayItem(propertyName, displayName, effectivePropertyType, isReadOnly);
+                    var schemaArrayItem = rtrWflSch_ParseSchemaArrayItem(
+                        propertyName,
+                        displayName,
+                        effectivePropertyType,
+                        isReadOnly
+                    );
                     schemaAsArray.Add(schemaArrayItem);
 
-                    if (propertyType == "array" && propertyValue["elementType"] is JObject arrayElementType && arrayElementType["type"]?.ToString().ToLower() == "document")
+                    if (
+                        propertyType == "array"
+                        && propertyValue["elementType"] is JObject arrayElementType
+                        && arrayElementType["type"]?.ToString().ToLower() == "document"
+                    )
                     {
-                        documentSchemaAsArray.Add(rtrWflSch_ParseDocumentSchemaItem(propertyName, displayName, isReadOnly));
+                        documentSchemaAsArray.Add(
+                            rtrWflSch_ParseDocumentSchemaItem(propertyName, displayName, isReadOnly)
+                        );
                     }
                 }
             }
@@ -740,7 +883,7 @@ public class Script : ScriptBase
             {
                 ["type"] = "object",
                 ["properties"] = launchSchema,
-                ["required"] = new JArray { "counterpartyName" }  // Add the required property here
+                ["required"] = new JArray { "counterpartyName" } // Add the required property here
             };
             body["formattedSchema"] = new JObject
             {
@@ -754,12 +897,21 @@ public class Script : ScriptBase
         return body;
     }
 
-    private JObject rtrWflSch_FormatLaunchProperty(string propertyType, string displayName, string propertyName, JObject propertyValue)
+    private JObject rtrWflSch_FormatLaunchProperty(
+        string propertyType,
+        string displayName,
+        string propertyName,
+        JObject propertyValue
+    )
     {
         switch (propertyType)
         {
             case "array":
-                return rtrWflSch_FormatArrayLaunchProperty(displayName, propertyName, propertyValue);
+                return rtrWflSch_FormatArrayLaunchProperty(
+                    displayName,
+                    propertyName,
+                    propertyValue
+                );
             case "address":
                 return rtrWflSch_FormatAddressProperty(displayName, propertyName);
             case "monetaryamount":
@@ -771,7 +923,11 @@ public class Script : ScriptBase
         }
     }
 
-    private JObject rtrWflSch_FormatArrayLaunchProperty(string displayName, string propertyName, JObject propertyValue)
+    private JObject rtrWflSch_FormatArrayLaunchProperty(
+        string displayName,
+        string propertyName,
+        JObject propertyValue
+    )
     {
         var elementType = propertyValue["elementType"] as JObject;
         if (elementType != null)
@@ -793,14 +949,21 @@ public class Script : ScriptBase
                     ["title"] = displayName,
                     ["description"] = $"The {displayName}.",
                     ["x-ms-visibility"] = "important",
-                    ["items"] = rtrWflSch_FormatBasicProperty(elementTypeString, $"{displayName} Item", $"{propertyName} Item")
+                    ["items"] = rtrWflSch_FormatBasicProperty(
+                        elementTypeString,
+                        $"{displayName} Item",
+                        $"{propertyName} Item"
+                    )
                 };
             }
         }
         return new JObject();
     }
 
-    private JObject rtrWflSch_FormatDocumentArrayLaunchProperty(string displayName, string propertyName)
+    private JObject rtrWflSch_FormatDocumentArrayLaunchProperty(
+        string displayName,
+        string propertyName
+    )
     {
         return new JObject
         {
@@ -834,7 +997,11 @@ public class Script : ScriptBase
         };
     }
 
-    private JObject rtrWflSch_FormatTableProperty(string displayName, string propertyName, JObject propertyValue)
+    private JObject rtrWflSch_FormatTableProperty(
+        string displayName,
+        string propertyName,
+        JObject propertyValue
+    )
     {
         var elementTypeSchema = propertyValue["elementType"]["schema"] as JObject;
         var itemsObject = new JObject();
@@ -850,19 +1017,32 @@ public class Script : ScriptBase
                 // Handle special types
                 if (columnType == "monetaryamount")
                 {
-                    itemsObject[column.Name] = rtrWflSch_FormatMonetaryAmountProperty(columnDisplayName, column.Name);
+                    itemsObject[column.Name] = rtrWflSch_FormatMonetaryAmountProperty(
+                        columnDisplayName,
+                        column.Name
+                    );
                 }
                 else if (columnType == "duration")
                 {
-                    itemsObject[column.Name] = rtrWflSch_FormatDurationProperty(columnDisplayName, column.Name);
+                    itemsObject[column.Name] = rtrWflSch_FormatDurationProperty(
+                        columnDisplayName,
+                        column.Name
+                    );
                 }
                 else if (columnType == "address")
                 {
-                    itemsObject[column.Name] = rtrWflSch_FormatAddressProperty(columnDisplayName, column.Name);
+                    itemsObject[column.Name] = rtrWflSch_FormatAddressProperty(
+                        columnDisplayName,
+                        column.Name
+                    );
                 }
                 else
                 {
-                    JObject formattedColumn = rtrWflSch_FormatBasicProperty(columnType, columnDisplayName, column.Name);
+                    JObject formattedColumn = rtrWflSch_FormatBasicProperty(
+                        columnType,
+                        columnDisplayName,
+                        column.Name
+                    );
                     itemsObject[column.Name] = formattedColumn;
                 }
             }
@@ -874,17 +1054,13 @@ public class Script : ScriptBase
             ["title"] = displayName,
             ["description"] = $"The {displayName}.",
             ["x-ms-visibility"] = "important",
-            ["items"] = new JObject
-            {
-                ["type"] = "object",
-                ["properties"] = itemsObject
-            }
+            ["items"] = new JObject { ["type"] = "object", ["properties"] = itemsObject }
         };
     }
 
     private JObject rtrWflSch_FormatAddressProperty(string displayName, string propertyName)
     {
-    return new JObject
+        return new JObject
         {
             ["type"] = "object",
             ["title"] = displayName,
@@ -892,39 +1068,45 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["lines"] = new JObject {
-                    ["type"] = "array", 
-                    ["items"] = new JObject { 
+                ["lines"] = new JObject
+                {
+                    ["type"] = "array",
+                    ["items"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = $"{displayName} Line",
                         ["x-ms-visibility"] = "important",
                         ["description"] = $"An address line of {displayName}."
-                        } 
-                    },
-                ["locality"] = new JObject { 
-                    ["type"] = "string",  
-                    ["title"] = "Locality", 
-                    ["x-ms-visibility"] = "important", 
-                    ["description"] = $"The locality of {displayName}." 
-                    },
-                ["region"] = new JObject {
+                    }
+                },
+                ["locality"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Locality",
+                    ["x-ms-visibility"] = "important",
+                    ["description"] = $"The locality of {displayName}."
+                },
+                ["region"] = new JObject
+                {
                     ["type"] = "string",
                     ["title"] = "Region",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The region of {displayName}."
-                    },
-                ["postcode"] = new JObject {
+                },
+                ["postcode"] = new JObject
+                {
                     ["type"] = "string",
                     ["title"] = "Postcode",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The postcode of {displayName}."
-                    },
-                ["country"] = new JObject {
+                },
+                ["country"] = new JObject
+                {
                     ["type"] = "string",
                     ["title"] = "Country",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The country of {displayName}."
-                    }
+                }
             }
         };
     }
@@ -939,8 +1121,20 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["amount"] = new JObject { ["type"] = "number", ["title"] = "Amount", ["x-ms-visibility"] = "important", ["description"] = $"The amount of {displayName}." },
-                ["currency"] = new JObject { ["type"] = "string", ["title"] = "Currency", ["x-ms-visibility"] = "important", ["description"] = $"The currency of {displayName}." }
+                ["amount"] = new JObject
+                {
+                    ["type"] = "number",
+                    ["title"] = "Amount",
+                    ["x-ms-visibility"] = "important",
+                    ["description"] = $"The amount of {displayName}."
+                },
+                ["currency"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Currency",
+                    ["x-ms-visibility"] = "important",
+                    ["description"] = $"The currency of {displayName}."
+                }
             }
         };
     }
@@ -955,35 +1149,43 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["years"] = new JObject { 
+                ["years"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Years",
                     ["x-ms-visibility"] = "important",
-                    ["description"] = $"The years of {displayName}." 
-                    },
-                ["months"] = new JObject { 
+                    ["description"] = $"The years of {displayName}."
+                },
+                ["months"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Months",
                     ["x-ms-visibility"] = "important",
-                    ["description"] = $"The months of {displayName}." 
-                    },
-                ["weeks"] = new JObject { 
+                    ["description"] = $"The months of {displayName}."
+                },
+                ["weeks"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Weeks",
                     ["x-ms-visibility"] = "important",
-                    ["description"] = $"The weeks of {displayName}." 
-                    },
-                ["days"] = new JObject {
+                    ["description"] = $"The weeks of {displayName}."
+                },
+                ["days"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Days",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The days of {displayName}."
-                    }
+                }
             }
         };
     }
 
-    private JObject rtrWflSch_FormatBasicProperty(string propertyType, string displayName, string propertyName)
+    private JObject rtrWflSch_FormatBasicProperty(
+        string propertyType,
+        string displayName,
+        string propertyName
+    )
     {
         var formattedLaunchProperty = new JObject
         {
@@ -1016,7 +1218,12 @@ public class Script : ScriptBase
         return formattedLaunchProperty;
     }
 
-    private JObject rtrWflSch_ParseSchemaArrayItem(string systemName, string displayName, string type, bool isReadOnly)
+    private JObject rtrWflSch_ParseSchemaArrayItem(
+        string systemName,
+        string displayName,
+        string type,
+        bool isReadOnly
+    )
     {
         return new JObject
         {
@@ -1027,7 +1234,11 @@ public class Script : ScriptBase
         };
     }
 
-    private JObject rtrWflSch_ParseDocumentSchemaItem(string systemName, string displayName, bool isReadOnly)
+    private JObject rtrWflSch_ParseDocumentSchemaItem(
+        string systemName,
+        string displayName,
+        bool isReadOnly
+    )
     {
         return new JObject
         {
@@ -1037,7 +1248,12 @@ public class Script : ScriptBase
         };
     }
 
-    private JObject rtrWflSch_FormatProperty(string propertyType, string displayName, string propertyName, JObject propertyValue)
+    private JObject rtrWflSch_FormatProperty(
+        string propertyType,
+        string displayName,
+        string propertyName,
+        JObject propertyValue
+    )
     {
         switch (propertyType)
         {
@@ -1054,7 +1270,11 @@ public class Script : ScriptBase
         }
     }
 
-    private JObject rtrWflSch_FormatArrayProperty(string displayName, string propertyName, JObject propertyValue)
+    private JObject rtrWflSch_FormatArrayProperty(
+        string displayName,
+        string propertyName,
+        JObject propertyValue
+    )
     {
         var elementType = propertyValue["elementType"] as JObject;
         if (elementType != null)
@@ -1076,7 +1296,11 @@ public class Script : ScriptBase
                     ["title"] = displayName,
                     ["description"] = $"The {displayName}.",
                     ["x-ms-visibility"] = "important",
-                    ["items"] = rtrWflSch_FormatBasicProperty(elementTypeString, $"{displayName} Item", $"{propertyName} Item")
+                    ["items"] = rtrWflSch_FormatBasicProperty(
+                        elementTypeString,
+                        $"{displayName} Item",
+                        $"{propertyName} Item"
+                    )
                 };
             }
         }
@@ -1096,19 +1320,22 @@ public class Script : ScriptBase
                 ["type"] = "object",
                 ["properties"] = new JObject
                 {
-                    ["filename"] = new JObject {
+                    ["filename"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = "File Name",
                         ["x-ms-visibility"] = "important",
-                        ["description"] = "The name of the file." 
+                        ["description"] = "The name of the file."
                     },
-                    ["download"] = new JObject {
+                    ["download"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = "Download Link",
                         ["x-ms-visibility"] = "important",
                         ["description"] = "The download link of the file."
                     },
-                    ["key"] = new JObject {
+                    ["key"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = "Key",
                         ["x-ms-visibility"] = "important",
@@ -1195,7 +1422,10 @@ public class Script : ScriptBase
                 }
 
                 // Handle sentSignaturePacket documents
-                if (attributes["sentSignaturePacket"] is JArray signaturePacketDocs && signaturePacketDocs.Any())
+                if (
+                    attributes["sentSignaturePacket"] is JArray signaturePacketDocs
+                    && signaturePacketDocs.Any()
+                )
                 {
                     var signaturePacketObject = new JObject
                     {
@@ -1209,13 +1439,20 @@ public class Script : ScriptBase
             }
 
             body["documentsAsArray"] = documentsAsArray;
-            body["formattedAttributes"] = rtrWfl_FormatWorkflowAttributes(body["attributes"] as JObject, formattedSchema);
+            body["formattedAttributes"] = rtrWfl_FormatWorkflowAttributes(
+                body["attributes"] as JObject,
+                formattedSchema
+            );
         }
 
         return body;
     }
 
-    private void rtrWfl_ProcessSchemaProperty(JProperty property, JObject formattedSchema, JArray schemaAsArray)
+    private void rtrWfl_ProcessSchemaProperty(
+        JProperty property,
+        JObject formattedSchema,
+        JArray schemaAsArray
+    )
     {
         var propertySchema = property.Value as JObject;
         if (propertySchema != null)
@@ -1229,21 +1466,33 @@ public class Script : ScriptBase
                 displayName += " (read only)";
             }
 
-            JObject formattedProperty = rtrWfl_FormatPropertyByType(propertyType, displayName, property.Name, propertySchema);
+            JObject formattedProperty = rtrWfl_FormatPropertyByType(
+                propertyType,
+                displayName,
+                property.Name,
+                propertySchema
+            );
             formattedProperty["readOnly"] = isReadOnly;
             formattedSchema[property.Name] = formattedProperty;
 
-            schemaAsArray.Add(new JObject
-            {
-                ["systemName"] = property.Name,
-                ["displayName"] = displayName,
-                ["type"] = propertyType,
-                ["readOnly"] = isReadOnly
-            });
+            schemaAsArray.Add(
+                new JObject
+                {
+                    ["systemName"] = property.Name,
+                    ["displayName"] = displayName,
+                    ["type"] = propertyType,
+                    ["readOnly"] = isReadOnly
+                }
+            );
         }
     }
 
-    private JObject rtrWfl_FormatPropertyByType(string propertyType, string displayName, string propertyName, JObject propertySchema)
+    private JObject rtrWfl_FormatPropertyByType(
+        string propertyType,
+        string displayName,
+        string propertyName,
+        JObject propertySchema
+    )
     {
         switch (propertyType)
         {
@@ -1260,7 +1509,11 @@ public class Script : ScriptBase
         }
     }
 
-    private JObject rtrWfl_FormatArrayProperty(string displayName, string propertyName, JObject propertySchema)
+    private JObject rtrWfl_FormatArrayProperty(
+        string displayName,
+        string propertyName,
+        JObject propertySchema
+    )
     {
         var elementType = propertySchema["elementType"] as JObject;
         if (elementType != null)
@@ -1282,7 +1535,11 @@ public class Script : ScriptBase
                     ["title"] = displayName,
                     ["description"] = $"The {displayName}.",
                     ["x-ms-visibility"] = "important",
-                    ["items"] = rtrWfl_FormatBasicProperty(elementTypeString, $"{displayName} Item", $"{propertyName} Item")
+                    ["items"] = rtrWfl_FormatBasicProperty(
+                        elementTypeString,
+                        $"{displayName} Item",
+                        $"{propertyName} Item"
+                    )
                 };
             }
         }
@@ -1302,86 +1559,101 @@ public class Script : ScriptBase
                 ["type"] = "object",
                 ["properties"] = new JObject
                 {
-                    ["filename"] = new JObject {
+                    ["filename"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = "File Name",
                         ["x-ms-visibility"] = "important",
-                        ["description"] = "The name of the file." 
+                        ["description"] = "The name of the file."
                     },
-                    ["version"] = new JObject {
+                    ["version"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = "Version",
                         ["x-ms-visibility"] = "important",
                         ["description"] = "The version of the file."
                     },
-                    ["versionNumber"] = new JObject {
+                    ["versionNumber"] = new JObject
+                    {
                         ["type"] = "number",
                         ["title"] = "Version Number",
                         ["x-ms-visibility"] = "important",
                         ["description"] = "The version number of the file."
                     },
-                    ["download"] = new JObject {
+                    ["download"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = "Download Link",
                         ["x-ms-visibility"] = "important",
                         ["description"] = "The download link of the file."
                     },
-                    ["key"] = new JObject {
+                    ["key"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = "Key",
                         ["x-ms-visibility"] = "important",
                         ["description"] = "The key of the file."
                     },
-                    ["lastModified"] = new JObject {
+                    ["lastModified"] = new JObject
+                    {
                         ["type"] = "object",
                         ["title"] = "Last Modified",
                         ["x-ms-visibility"] = "important",
                         ["description"] = "Information on when the file was last modified.",
-                        ["properties"] = new JObject {
-                            ["timestamp"] = new JObject {
+                        ["properties"] = new JObject
+                        {
+                            ["timestamp"] = new JObject
+                            {
                                 ["type"] = "string",
                                 ["format"] = "date-time",
                                 ["title"] = "Timestamp",
                                 ["x-ms-visibility"] = "important",
                                 ["description"] = "The date when the file was last modified."
-                                },
-                            ["author"] = new JObject {
+                            },
+                            ["author"] = new JObject
+                            {
                                 ["type"] = "object",
                                 ["title"] = "Author",
                                 ["x-ms-visibility"] = "important",
                                 ["description"] = "The author of the last modification.",
-                                ["properties"] = new JObject {
-                                    ["displayName"] = new JObject {
+                                ["properties"] = new JObject
+                                {
+                                    ["displayName"] = new JObject
+                                    {
                                         ["type"] = "string",
                                         ["title"] = "Display Name",
                                         ["x-ms-visibility"] = "important",
                                         ["description"] = "The display name of the author."
-                                        },
-                                    ["email"] = new JObject {
+                                    },
+                                    ["email"] = new JObject
+                                    {
                                         ["type"] = "string",
                                         ["title"] = "Email",
                                         ["x-ms-visibility"] = "important",
                                         ["description"] = "The email of the author."
-                                        },
-                                    ["userId"] = new JObject {
-                                        ["type"] = "string",
-                                        ["title"] = "User ID",
-                                        ["x-ms-visibility"] = "important",
-                                        ["description"] = "The user ID of the author."
-                                        }
-                                    ["type"] = new JObject {
-                                        ["type"] = "string",
-                                        ["title"] = "Type",
-                                        ["x-ms-visibility"] = "important",
-                                        ["description"] = "The type of the file."
-                                        }
-                                    ["companyName"] = new JObject {
-                                        ["type"] = "string",
-                                        ["title"] = "Company Name",
-                                        ["x-ms-visibility"] = "important",
-                                        ["description"] = "The company name of the author."
-                                    }
-                                    
+                                    },
+                                    ["userId"] =
+                                        new JObject
+                                        {
+                                            ["type"] = "string",
+                                            ["title"] = "User ID",
+                                            ["x-ms-visibility"] = "important",
+                                            ["description"] = "The user ID of the author."
+                                        }["type"] =
+                                        new JObject
+                                        {
+                                            ["type"] = "string",
+                                            ["title"] = "Type",
+                                            ["x-ms-visibility"] = "important",
+                                            ["description"] = "The type of the file."
+                                        }["companyName"] =
+                                            new JObject
+                                            {
+                                                ["type"] = "string",
+                                                ["title"] = "Company Name",
+                                                ["x-ms-visibility"] = "important",
+                                                ["description"] = "The company name of the author."
+                                            }
                                 }
                             }
                         }
@@ -1391,7 +1663,11 @@ public class Script : ScriptBase
         };
     }
 
-    private JObject rtrWfl_FormatTableProperty(string displayName, string propertyName, JObject propertySchema)
+    private JObject rtrWfl_FormatTableProperty(
+        string displayName,
+        string propertyName,
+        JObject propertySchema
+    )
     {
         var elementTypeSchema = propertySchema["elementType"]["schema"] as JObject;
         var itemsObject = new JObject();
@@ -1404,7 +1680,11 @@ public class Script : ScriptBase
                 string columnDisplayName = columnSchema["displayName"].ToString();
                 string columnType = columnSchema["type"].ToString().ToLower();
 
-                JObject formattedColumn = rtrWfl_FormatBasicProperty(columnType, columnDisplayName, column.Name);
+                JObject formattedColumn = rtrWfl_FormatBasicProperty(
+                    columnType,
+                    columnDisplayName,
+                    column.Name
+                );
                 itemsObject[column.Name] = formattedColumn;
             }
         }
@@ -1415,11 +1695,7 @@ public class Script : ScriptBase
             ["title"] = displayName,
             ["description"] = $"The {displayName}.",
             ["x-ms-visibility"] = "important",
-            ["items"] = new JObject
-            {
-                ["type"] = "object",
-                ["properties"] = itemsObject
-            }
+            ["items"] = new JObject { ["type"] = "object", ["properties"] = itemsObject }
         };
     }
 
@@ -1433,39 +1709,45 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["lines"] = new JObject {
-                    ["type"] = "array", 
-                    ["items"] = new JObject { 
+                ["lines"] = new JObject
+                {
+                    ["type"] = "array",
+                    ["items"] = new JObject
+                    {
                         ["type"] = "string",
                         ["title"] = $"{displayName} Line",
                         ["x-ms-visibility"] = "important",
                         ["description"] = $"An address line of {displayName}."
-                        } 
-                    },
-                ["locality"] = new JObject { 
-                    ["type"] = "string",  
-                    ["title"] = "Locality", 
-                    ["x-ms-visibility"] = "important", 
-                    ["description"] = $"The locality of {displayName}." 
-                    },
-                ["region"] = new JObject {
+                    }
+                },
+                ["locality"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Locality",
+                    ["x-ms-visibility"] = "important",
+                    ["description"] = $"The locality of {displayName}."
+                },
+                ["region"] = new JObject
+                {
                     ["type"] = "string",
                     ["title"] = "Region",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The region of {displayName}."
-                    },
-                ["postcode"] = new JObject {
+                },
+                ["postcode"] = new JObject
+                {
                     ["type"] = "string",
                     ["title"] = "Postcode",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The postcode of {displayName}."
-                    },
-                ["country"] = new JObject {
+                },
+                ["country"] = new JObject
+                {
                     ["type"] = "string",
                     ["title"] = "Country",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The country of {displayName}."
-                    }
+                }
             }
         };
     }
@@ -1480,24 +1762,27 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["amount"] = new JObject { 
-                    ["type"] = "number", 
-                    ["title"] = "Amount", 
-                    ["x-ms-visibility"] = "important", 
-                    ["description"] = $"The amount of {displayName}." 
-                    },
-                ["currency"] = new JObject { 
-                    ["type"] = "string", 
-                    ["title"] = "Currency", 
-                    ["x-ms-visibility"] = "important", 
-                    ["description"] = $"The currency of {displayName}." }
+                ["amount"] = new JObject
+                {
+                    ["type"] = "number",
+                    ["title"] = "Amount",
+                    ["x-ms-visibility"] = "important",
+                    ["description"] = $"The amount of {displayName}."
+                },
+                ["currency"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Currency",
+                    ["x-ms-visibility"] = "important",
+                    ["description"] = $"The currency of {displayName}."
+                }
             }
         };
     }
 
     private JObject rtrWfl_FormatDurationProperty(string displayName, string propertyName)
     {
-    return new JObject
+        return new JObject
         {
             ["type"] = "object",
             ["title"] = displayName,
@@ -1505,35 +1790,43 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["years"] = new JObject { 
+                ["years"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Years",
                     ["x-ms-visibility"] = "important",
-                    ["description"] = $"The years of {displayName}." 
-                    },
-                ["months"] = new JObject { 
+                    ["description"] = $"The years of {displayName}."
+                },
+                ["months"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Months",
                     ["x-ms-visibility"] = "important",
-                    ["description"] = $"The months of {displayName}." 
-                    },
-                ["weeks"] = new JObject { 
+                    ["description"] = $"The months of {displayName}."
+                },
+                ["weeks"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Weeks",
                     ["x-ms-visibility"] = "important",
-                    ["description"] = $"The weeks of {displayName}." 
-                    },
-                ["days"] = new JObject {
+                    ["description"] = $"The weeks of {displayName}."
+                },
+                ["days"] = new JObject
+                {
                     ["type"] = "number",
                     ["title"] = "Days",
                     ["x-ms-visibility"] = "important",
                     ["description"] = $"The days of {displayName}."
-                    }
+                }
             }
         };
     }
 
-    private JObject rtrWfl_FormatBasicProperty(string propertyType, string displayName, string propertyName)
+    private JObject rtrWfl_FormatBasicProperty(
+        string propertyType,
+        string displayName,
+        string propertyName
+    )
     {
         var formattedProperty = new JObject
         {
@@ -1566,7 +1859,12 @@ public class Script : ScriptBase
         return formattedProperty;
     }
 
-    private JObject rtrWfl_CreateSchemaArrayItem(string systemName, string displayName, string type, bool isReadOnly)
+    private JObject rtrWfl_CreateSchemaArrayItem(
+        string systemName,
+        string displayName,
+        string type,
+        bool isReadOnly
+    )
     {
         return new JObject
         {
@@ -1577,7 +1875,11 @@ public class Script : ScriptBase
         };
     }
 
-    private JObject rtrWfl_CreateDocumentSchemaItem(string systemName, string displayName, bool isReadOnly)
+    private JObject rtrWfl_CreateDocumentSchemaItem(
+        string systemName,
+        string displayName,
+        bool isReadOnly
+    )
     {
         return new JObject
         {
@@ -1602,7 +1904,10 @@ public class Script : ScriptBase
             if (propertySchema != null && attributes.ContainsKey(property.Name))
             {
                 var attributeValue = attributes[property.Name];
-                formattedAttributes[property.Name] = rtrWfl_FormatAttributeValue(attributeValue, propertySchema);
+                formattedAttributes[property.Name] = rtrWfl_FormatAttributeValue(
+                    attributeValue,
+                    propertySchema
+                );
             }
         }
 
@@ -1661,7 +1966,10 @@ public class Script : ScriptBase
             {
                 if (objectValue.ContainsKey(property.Name))
                 {
-                    formattedObject[property.Name] = rtrWfl_FormatAttributeValue(objectValue[property.Name], property.Value as JObject);
+                    formattedObject[property.Name] = rtrWfl_FormatAttributeValue(
+                        objectValue[property.Name],
+                        property.Value as JObject
+                    );
                 }
             }
         }
@@ -1669,14 +1977,13 @@ public class Script : ScriptBase
         return formattedObject;
     }
 
-
     // ################################################################################
     // Retrieve Record Schema #########################################################
     // ################################################################################
 
     private async Task<HttpResponseMessage> rtrRcdSch_HandleRequest()
     {
-        try 
+        try
         {
             // Get the query parameter
             var uri = this.Context.Request.RequestUri;
@@ -1684,7 +1991,9 @@ public class Script : ScriptBase
             var propertiesQuery = queryParams["recordPorperties"] ?? string.Empty;
 
             // Get the content
-            var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var content = await this.Context.Request.Content
+                .ReadAsStringAsync()
+                .ConfigureAwait(false);
             var metadata = JObject.Parse(content);
 
             // If we have a query, validate all properties exist
@@ -1697,15 +2006,19 @@ public class Script : ScriptBase
                 foreach (var item in requestedItems)
                 {
                     bool exists = false;
-                    
+
                     // Check in properties (including clauses)
                     if (properties != null && properties.ContainsKey(item))
                     {
                         var propObj = properties[item] as JObject;
                         if (propObj != null)
                         {
-                            exists = propObj["type"] != null && 
-                                    (propObj["resolvesTo"] == null || propObj["resolvesTo"].Type == JTokenType.Null);
+                            exists =
+                                propObj["type"] != null
+                                && (
+                                    propObj["resolvesTo"] == null
+                                    || propObj["resolvesTo"].Type == JTokenType.Null
+                                );
                         }
                     }
                     // Check in attachments
@@ -1719,23 +2032,28 @@ public class Script : ScriptBase
                     {
                         return new HttpResponseMessage(HttpStatusCode.BadRequest)
                         {
-                            Content = CreateJsonContent(new JObject
-                            {
-                                ["error"] = new JObject
+                            Content = CreateJsonContent(
+                                new JObject
                                 {
-                                    ["message"] = $"Property '{item}' not found"
-                                }
-                            }.ToString())
+                                    ["error"] = new JObject
+                                    {
+                                        ["message"] = $"Property '{item}' not found"
+                                    }
+                                }.ToString()
+                            )
                         };
                     }
                 }
             }
-                
+
             // Transform the metadata
-            var transformedData = rtrRcdSch_TransformRetrieveRecordSchemas(metadata, propertiesQuery);
-                
+            var transformedData = rtrRcdSch_TransformRetrieveRecordSchemas(
+                metadata,
+                propertiesQuery
+            );
+
             // Create response
-            return new HttpResponseMessage(HttpStatusCode.OK) 
+            return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = CreateJsonContent(transformedData.ToString())
             };
@@ -1744,13 +2062,9 @@ public class Script : ScriptBase
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest)
             {
-                Content = CreateJsonContent(new JObject
-                {
-                    ["error"] = new JObject
-                    {
-                        ["message"] = ex.Message
-                    }
-                }.ToString())
+                Content = CreateJsonContent(
+                    new JObject { ["error"] = new JObject { ["message"] = ex.Message } }.ToString()
+                )
             };
         }
     }
@@ -1766,23 +2080,29 @@ public class Script : ScriptBase
             body["requestedProperties"] = propertiesQuery;
 
             // Get requested items if filtering is needed
-            var requestedItems = !string.IsNullOrWhiteSpace(propertiesQuery) 
-                ? propertiesQuery.Split(',').Select(p => p.Trim()).ToList() 
+            var requestedItems = !string.IsNullOrWhiteSpace(propertiesQuery)
+                ? propertiesQuery.Split(',').Select(p => p.Trim()).ToList()
                 : new List<string>();
 
             foreach (var prop in properties.Properties())
             {
                 var propObj = prop.Value as JObject;
-                if (propObj != null && (propObj["resolvesTo"] == null || propObj["resolvesTo"].Type == JTokenType.Null))
+                if (
+                    propObj != null
+                    && (
+                        propObj["resolvesTo"] == null
+                        || propObj["resolvesTo"].Type == JTokenType.Null
+                    )
+                )
                 {
                     bool isVisible = propObj["visible"]?.ToObject<bool>() ?? true;
-                    
+
                     if (isVisible)
                     {
                         string originalType = propObj["type"]?.ToString().ToLower() ?? "unknown";
                         string effectiveType = originalType == "address" ? "string" : originalType;
                         string displayName = propObj["displayName"]?.ToString() ?? prop.Name;
-                        
+
                         var newObj = new JObject
                         {
                             ["systemName"] = prop.Name,
@@ -1853,7 +2173,8 @@ public class Script : ScriptBase
                     var attachmentObj = attachment.Value as JObject;
                     if (attachmentObj != null)
                     {
-                        var displayName = attachmentObj["displayName"]?.ToString() ?? attachment.Name;
+                        var displayName =
+                            attachmentObj["displayName"]?.ToString() ?? attachment.Name;
                         var newObj = new JObject
                         {
                             ["systemName"] = attachment.Name,
@@ -1876,14 +2197,15 @@ public class Script : ScriptBase
             if (!string.IsNullOrWhiteSpace(propertiesQuery))
             {
                 var propertiesSchema = new JObject();
-                
+
                 foreach (var prop in formattedProperties)
                 {
                     var propertyObj = prop as JObject;
                     var propertyName = propertyObj["systemName"].ToString();
                     var propertyType = propertyObj["type"].ToString().ToLower();
                     var displayName = propertyObj["displayName"].ToString();
-                    var description = propertyObj["description"]?.ToString() ?? $"The {displayName}.";
+                    var description =
+                        propertyObj["description"]?.ToString() ?? $"The {displayName}.";
 
                     JObject schemaProperty;
 
@@ -1902,7 +2224,8 @@ public class Script : ScriptBase
                                     {
                                         ["type"] = "number",
                                         ["title"] = "Amount",
-                                        ["description"] = $"The monetary amount value for {displayName}."
+                                        ["description"] =
+                                            $"The monetary amount value for {displayName}."
                                     },
                                     ["currency"] = new JObject
                                     {
@@ -1926,7 +2249,8 @@ public class Script : ScriptBase
                                     {
                                         ["type"] = "string",
                                         ["title"] = "ISO Duration",
-                                        ["description"] = $"The ISO 8601 duration representation for {displayName}."
+                                        ["description"] =
+                                            $"The ISO 8601 duration representation for {displayName}."
                                     },
                                     ["years"] = new JObject
                                     {
@@ -2001,7 +2325,8 @@ public class Script : ScriptBase
                 body["formattedSchema"] = new JObject
                 {
                     ["type"] = "object",
-                    ["description"] = "The record schema formatted for compatibility with the OpenAPI standard.",
+                    ["description"] =
+                        "The record schema formatted for compatibility with the OpenAPI standard.",
                     ["x-ms-visibility"] = "important",
                     ["properties"] = new JObject
                     {
@@ -2014,7 +2339,9 @@ public class Script : ScriptBase
                             ["properties"] = propertiesSchema
                         },
                         ["recordClauses"] = rtrRcdSch_FormatRecordClausesSchema(formattedClauses),
-                        ["recordAttachments"] = rtrRcdSch_CreateAttachmentSchema(formattedAttachments)
+                        ["recordAttachments"] = rtrRcdSch_CreateAttachmentSchema(
+                            formattedAttachments
+                        )
                     }
                 };
             }
@@ -2023,7 +2350,8 @@ public class Script : ScriptBase
                 body["formattedSchema"] = new JObject
                 {
                     ["type"] = "object",
-                    ["description"] = "The record schema formatted for compatibility with the OpenAPI standard.",
+                    ["description"] =
+                        "The record schema formatted for compatibility with the OpenAPI standard.",
                     ["x-ms-visibility"] = "important",
                     ["properties"] = new JObject()
                 };
@@ -2041,7 +2369,7 @@ public class Script : ScriptBase
             var clauseObj = clause as JObject;
             var clauseName = clauseObj["systemName"].ToString();
             var displayName = clauseObj["displayName"].ToString();
-            
+
             clausesSchema[clauseName] = new JObject
             {
                 ["type"] = "object",
@@ -2050,28 +2378,33 @@ public class Script : ScriptBase
                 ["x-ms-visibility"] = "important",
                 ["properties"] = new JObject
                 {
-                    ["displayName"] = new JObject { 
-                        ["type"] = "string", 
+                    ["displayName"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Display Name",
                         ["description"] = $"The display name of the {displayName} clause."
                     },
-                    ["description"] = new JObject { 
-                        ["type"] = "string", 
+                    ["description"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Description",
                         ["description"] = $"The description of the {displayName} clause."
                     },
-                    ["clauseText"] = new JObject { 
-                        ["type"] = "string", 
+                    ["clauseText"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Clause Text",
                         ["description"] = $"The text content of the {displayName} clause."
                     },
-                    ["source"] = new JObject { 
-                        ["type"] = "string", 
+                    ["source"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Source",
                         ["description"] = $"The source of the {displayName} clause."
                     },
-                    ["clauseType"] = new JObject { 
-                        ["type"] = "string", 
+                    ["clauseType"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Clause Type",
                         ["description"] = $"The type of the {displayName} clause."
                     },
@@ -2080,10 +2413,12 @@ public class Script : ScriptBase
                         ["type"] = "object",
                         ["properties"] = new JObject
                         {
-                            ["type"] = new JObject { 
-                                ["type"] = "string", 
+                            ["type"] = new JObject
+                            {
+                                ["type"] = "string",
                                 ["title"] = "Type",
-                                ["description"] = $"The language position type of the {displayName} clause."
+                                ["description"] =
+                                    $"The language position type of the {displayName} clause."
                             }
                         }
                     }
@@ -2118,25 +2453,30 @@ public class Script : ScriptBase
                 ["x-ms-visibility"] = "important",
                 ["properties"] = new JObject
                 {
-                    ["filename"] = new JObject { 
-                        ["type"] = "string", 
+                    ["filename"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Filename",
                         ["description"] = $"The filename of the {displayName} attachment."
                     },
-                    ["contentType"] = new JObject { 
-                        ["type"] = "string", 
+                    ["contentType"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Content Type",
                         ["description"] = $"The content type of the {displayName} attachment."
                     },
-                    ["href"] = new JObject { 
-                        ["type"] = "string", 
+                    ["href"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Download URL",
                         ["description"] = $"The download URL for the {displayName} attachment."
                     },
-                    ["key"] = new JObject { 
-                        ["type"] = "string", 
+                    ["key"] = new JObject
+                    {
+                        ["type"] = "string",
                         ["title"] = "Key",
-                        ["description"] = $"The unique key identifier for the {displayName} attachment."
+                        ["description"] =
+                            $"The unique key identifier for the {displayName} attachment."
                     }
                 }
             };
@@ -2155,10 +2495,10 @@ public class Script : ScriptBase
     // ################################################################################
     // Retrieve All Records ###########################################################
     // ################################################################################
-   
-   private async Task<HttpResponseMessage> lstAllRcd_HandleRequest()
+
+    private async Task<HttpResponseMessage> lstAllRcd_HandleRequest()
     {
-        try 
+        try
         {
             // Get the query parameter
             var uri = this.Context.Request.RequestUri;
@@ -2166,7 +2506,9 @@ public class Script : ScriptBase
             var propertiesQuery = queryParams["recordPorperties"] ?? string.Empty;
 
             // Get the content
-            var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var content = await this.Context.Request.Content
+                .ReadAsStringAsync()
+                .ConfigureAwait(false);
             var metadata = JObject.Parse(content);
 
             // If we have a query, validate all properties exist
@@ -2179,15 +2521,19 @@ public class Script : ScriptBase
                 foreach (var item in requestedItems)
                 {
                     bool exists = false;
-                    
+
                     // Check in properties (including clauses)
                     if (properties != null && properties.ContainsKey(item))
                     {
                         var propObj = properties[item] as JObject;
                         if (propObj != null)
                         {
-                            exists = propObj["type"] != null && 
-                                    (propObj["resolvesTo"] == null || propObj["resolvesTo"].Type == JTokenType.Null);
+                            exists =
+                                propObj["type"] != null
+                                && (
+                                    propObj["resolvesTo"] == null
+                                    || propObj["resolvesTo"].Type == JTokenType.Null
+                                );
                         }
                     }
                     // Check in attachments
@@ -2201,20 +2547,25 @@ public class Script : ScriptBase
                     {
                         return new HttpResponseMessage(HttpStatusCode.BadRequest)
                         {
-                            Content = CreateJsonContent(new JObject
-                            {
-                                ["error"] = new JObject
+                            Content = CreateJsonContent(
+                                new JObject
                                 {
-                                    ["message"] = $"Property '{item}' not found"
-                                }
-                            }.ToString())
+                                    ["error"] = new JObject
+                                    {
+                                        ["message"] = $"Property '{item}' not found"
+                                    }
+                                }.ToString()
+                            )
                         };
                     }
                 }
             }
 
             var responseBody = metadata;
-            var transformedBody = lstAllRcd_TransformListAllRecordsResponse(responseBody, propertiesQuery);
+            var transformedBody = lstAllRcd_TransformListAllRecordsResponse(
+                responseBody,
+                propertiesQuery
+            );
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -2225,17 +2576,13 @@ public class Script : ScriptBase
         {
             return new HttpResponseMessage(HttpStatusCode.BadRequest)
             {
-                Content = CreateJsonContent(new JObject
-                {
-                    ["error"] = new JObject
-                    {
-                        ["message"] = ex.Message
-                    }
-                }.ToString())
+                Content = CreateJsonContent(
+                    new JObject { ["error"] = new JObject { ["message"] = ex.Message } }.ToString()
+                )
             };
         }
     }
-   private JObject lstAllRcd_TransformListAllRecordsResponse(JObject body, string propertiesQuery)
+    private JObject lstAllRcd_TransformListAllRecordsResponse(JObject body, string propertiesQuery)
     {
         // Add the properties query to the response
         body["requestedProperties"] = propertiesQuery;
@@ -2252,10 +2599,12 @@ public class Script : ScriptBase
                 var originalProperties = record["properties"] as JObject;
 
                 // Handle counterpartyName at root level if it exists
-                if (originalProperties != null && 
-                    originalProperties.ContainsKey("counterpartyName") && 
-                    originalProperties["counterpartyName"] is JObject counterpartyProp && 
-                    counterpartyProp["value"] != null)
+                if (
+                    originalProperties != null
+                    && originalProperties.ContainsKey("counterpartyName")
+                    && originalProperties["counterpartyName"] is JObject counterpartyProp
+                    && counterpartyProp["value"] != null
+                )
                 {
                     record["counterpartyName"] = counterpartyProp["value"];
                 }
@@ -2272,12 +2621,14 @@ public class Script : ScriptBase
                     var attachmentsArray = new JArray();
                     foreach (var attachment in recordAttachmentsObj)
                     {
-                        attachmentsArray.Add(new JObject
-                        {
-                            ["displayName"] = attachment.Value["displayName"] ?? attachment.Key,
-                            ["name"] = attachment.Key,
-                            ["key"] = attachment.Key    // Add the key property
-                        });
+                        attachmentsArray.Add(
+                            new JObject
+                            {
+                                ["displayName"] = attachment.Value["displayName"] ?? attachment.Key,
+                                ["name"] = attachment.Key,
+                                ["key"] = attachment.Key // Add the key property
+                            }
+                        );
                     }
                     record["formattedAttachments"] = attachmentsArray;
                 }
@@ -2286,7 +2637,7 @@ public class Script : ScriptBase
                 if (requestedProperties.Any())
                 {
                     var formattedProperties = new JObject();
-                    
+
                     // Initialize all containers
                     var recordProperties = new JObject();
                     var recordClauses = new JObject();
@@ -2294,28 +2645,39 @@ public class Script : ScriptBase
 
                     foreach (var propertyName in requestedProperties)
                     {
-                        if (originalProperties != null && originalProperties.ContainsKey(propertyName))
+                        if (
+                            originalProperties != null
+                            && originalProperties.ContainsKey(propertyName)
+                        )
                         {
                             var property = originalProperties[propertyName] as JObject;
                             if (property != null)
                             {
                                 var propertyType = property["type"]?.ToString().ToLower();
-                                
+
                                 if (propertyType == "clause")
                                 {
                                     // Handle clause properties
-                                    recordClauses[propertyName] = lstAllRcd_FormatClauseProperty(propertyName, property);
+                                    recordClauses[propertyName] = lstAllRcd_FormatClauseProperty(
+                                        propertyName,
+                                        property
+                                    );
                                 }
                                 else
                                 {
                                     // Handle regular properties
-                                    recordProperties[propertyName] = lstAllRcd_FormatPropertyValue(property);
+                                    recordProperties[propertyName] = lstAllRcd_FormatPropertyValue(
+                                        property
+                                    );
                                 }
                             }
                         }
 
                         // Handle attachments separately
-                        if (recordAttachmentsObj != null && recordAttachmentsObj.ContainsKey(propertyName))
+                        if (
+                            recordAttachmentsObj != null
+                            && recordAttachmentsObj.ContainsKey(propertyName)
+                        )
                         {
                             var attachment = recordAttachmentsObj[propertyName] as JObject;
                             recordAttachments[propertyName] = new JObject
@@ -2324,7 +2686,7 @@ public class Script : ScriptBase
                                 ["contentType"] = attachment["contentType"],
                                 ["href"] = attachment["href"],
                                 ["displayName"] = attachment["displayName"] ?? propertyName,
-                                ["key"] = propertyName  // Add the key property
+                                ["key"] = propertyName // Add the key property
                             };
                         }
                     }
@@ -2364,10 +2726,7 @@ public class Script : ScriptBase
 
     private JObject lstAllRcd_FormatDurationValue(string isoDuration)
     {
-        var result = new JObject
-        {
-            ["isoDuration"] = isoDuration
-        };
+        var result = new JObject { ["isoDuration"] = isoDuration };
 
         var regex = new Regex(@"P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?");
         var match = regex.Match(isoDuration);
@@ -2441,7 +2800,8 @@ public class Script : ScriptBase
         body["formattedSchema"] = new JObject
         {
             ["type"] = "object",
-            ["description"] = "The record schema formatted for compatibility with the OpenAPI standard.",
+            ["description"] =
+                "The record schema formatted for compatibility with the OpenAPI standard.",
             ["x-ms-visibility"] = "important",
             ["properties"] = formattedSchema
         };
@@ -2481,7 +2841,10 @@ public class Script : ScriptBase
             if (rtrRcd_IsClauseProperty(property))
             {
                 var clauseObject = rtrRcd_FormatClauseProperty(property);
-                recordClausesSchema[property.Name] = rtrRcd_CreateClauseSchema(clauseObject["displayName"].ToString(), clauseObject["description"].ToString());
+                recordClausesSchema[property.Name] = rtrRcd_CreateClauseSchema(
+                    clauseObject["displayName"].ToString(),
+                    clauseObject["description"].ToString()
+                );
             }
         }
 
@@ -2504,7 +2867,10 @@ public class Script : ScriptBase
             if (!rtrRcd_IsClauseProperty(property))
             {
                 var propertySchema = rtrRcd_GetRecordSchemaProperty(property.Name);
-                transformedProperties[property.Name] = rtrRcd_FormatRecordPropertyValue(property.Value as JObject, propertySchema);
+                transformedProperties[property.Name] = rtrRcd_FormatRecordPropertyValue(
+                    property.Value as JObject,
+                    propertySchema
+                );
             }
         }
 
@@ -2542,14 +2908,25 @@ public class Script : ScriptBase
 
             var schemaProperty = rtrRcd_GetRecordSchemaProperty(propertyName);
             string displayName = schemaProperty?["displayName"]?.ToString() ?? propertyName;
-            string description = schemaProperty?["description"]?.ToString() ?? $"The {propertyName}.";
+            string description =
+                schemaProperty?["description"]?.ToString() ?? $"The {propertyName}.";
 
-            JObject formattedProperty = rtrRcd_ParseRecordPropertySchemaByType(propertyType, displayName, propertyName, description);
+            JObject formattedProperty = rtrRcd_ParseRecordPropertySchemaByType(
+                propertyType,
+                displayName,
+                propertyName,
+                description
+            );
             formattedSchema[propertyName] = formattedProperty;
         }
     }
 
-    private JObject rtrRcd_ParseRecordPropertySchemaByType(string propertyType, string displayName, string propertyName, string description)
+    private JObject rtrRcd_ParseRecordPropertySchemaByType(
+        string propertyType,
+        string displayName,
+        string propertyName,
+        string description
+    )
     {
         switch (propertyType)
         {
@@ -2588,7 +2965,10 @@ public class Script : ScriptBase
         };
     }
 
-    private JObject rtrRcd_FormatMonetaryAmountPropertySchema(string displayName, string propertyName)
+    private JObject rtrRcd_FormatMonetaryAmountPropertySchema(
+        string displayName,
+        string propertyName
+    )
     {
         return new JObject
         {
@@ -2598,13 +2978,27 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["amount"] = new JObject { ["type"] = "number", ["title"] = "Amount", ["description"] = $"The amount of the {displayName}." },
-                ["currency"] = new JObject { ["type"] = "string", ["title"] = "Currency", ["description"] = $"The currency of the {displayName}." }
+                ["amount"] = new JObject
+                {
+                    ["type"] = "number",
+                    ["title"] = "Amount",
+                    ["description"] = $"The amount of the {displayName}."
+                },
+                ["currency"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Currency",
+                    ["description"] = $"The currency of the {displayName}."
+                }
             }
         };
     }
 
-    private JObject rtrRcd_FormatDurationPropertySchema(string displayName, string propertyName, string description)
+    private JObject rtrRcd_FormatDurationPropertySchema(
+        string displayName,
+        string propertyName,
+        string description
+    )
     {
         return new JObject
         {
@@ -2614,16 +3008,45 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["isoDuration"] = new JObject { ["type"] = "string", ["title"] = "ISO Duration", ["description"] = $"The ISO 8601 duration representation of the {displayName}." },
-                ["years"] = new JObject { ["type"] = "number", ["title"] = "Years", ["description"] = $"The years of the {displayName}." },
-                ["months"] = new JObject { ["type"] = "number", ["title"] = "Months", ["description"] = $"The months of the {displayName}." },
-                ["weeks"] = new JObject { ["type"] = "number", ["title"] = "Weeks", ["description"] = $"The weeks of the {displayName}." },
-                ["days"] = new JObject { ["type"] = "number", ["title"] = "Days", ["description"] = $"The days of the {displayName}." }
+                ["isoDuration"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "ISO Duration",
+                    ["description"] = $"The ISO 8601 duration representation of the {displayName}."
+                },
+                ["years"] = new JObject
+                {
+                    ["type"] = "number",
+                    ["title"] = "Years",
+                    ["description"] = $"The years of the {displayName}."
+                },
+                ["months"] = new JObject
+                {
+                    ["type"] = "number",
+                    ["title"] = "Months",
+                    ["description"] = $"The months of the {displayName}."
+                },
+                ["weeks"] = new JObject
+                {
+                    ["type"] = "number",
+                    ["title"] = "Weeks",
+                    ["description"] = $"The weeks of the {displayName}."
+                },
+                ["days"] = new JObject
+                {
+                    ["type"] = "number",
+                    ["title"] = "Days",
+                    ["description"] = $"The days of the {displayName}."
+                }
             }
         };
     }
 
-    private JObject rtrRcd_FormatBasicPropertySchema(string propertyType, string displayName, string propertyName)
+    private JObject rtrRcd_FormatBasicPropertySchema(
+        string propertyType,
+        string displayName,
+        string propertyName
+    )
     {
         var formattedProperty = new JObject
         {
@@ -2659,7 +3082,7 @@ public class Script : ScriptBase
 
     private JObject rtrRcd_GetRecordSchemaProperty(string propertyName)
     {
-        if (recordSchemaInfo == null || !recordSchemaInfo.ContainsKey("properties")) 
+        if (recordSchemaInfo == null || !recordSchemaInfo.ContainsKey("properties"))
             return null;
 
         var properties = recordSchemaInfo["properties"] as JObject;
@@ -2679,7 +3102,11 @@ public class Script : ScriptBase
 
     private JToken rtrRcd_FormatRecordPropertyValue(JObject propertyValue, JObject propertySchema)
     {
-        if (propertyValue == null || !propertyValue.ContainsKey("type") || !propertyValue.ContainsKey("value"))
+        if (
+            propertyValue == null
+            || !propertyValue.ContainsKey("type")
+            || !propertyValue.ContainsKey("value")
+        )
         {
             return null;
         }
@@ -2714,10 +3141,7 @@ public class Script : ScriptBase
 
     private JObject rtrRcd_FormatDurationPropertyValue(string isoDuration)
     {
-        var result = new JObject
-        {
-            ["isoDuration"] = isoDuration
-        };
+        var result = new JObject { ["isoDuration"] = isoDuration };
 
         var regex = new Regex(@"P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?");
         var match = regex.Match(isoDuration);
@@ -2748,7 +3172,7 @@ public class Script : ScriptBase
 
         var schemaProperty = rtrRcd_GetRecordSchemaProperty(property.Name);
         var displayName = schemaProperty?["displayName"]?.ToString() ?? property.Name;
-        
+
         if (!displayName.EndsWith(" Clause", StringComparison.OrdinalIgnoreCase))
         {
             displayName += " Clause";
@@ -2757,7 +3181,8 @@ public class Script : ScriptBase
         return new JObject
         {
             ["displayName"] = displayName,
-            ["description"] = schemaProperty?["description"]?.ToString() ?? $"The {property.Name} clause.",
+            ["description"] =
+                schemaProperty?["description"]?.ToString() ?? $"The {property.Name} clause.",
             ["clauseText"] = clauseValue["clauseText"],
             ["source"] = clauseValue["source"],
             ["clauseType"] = clauseValue["clauseType"],
@@ -2775,11 +3200,38 @@ public class Script : ScriptBase
             ["x-ms-visibility"] = "important",
             ["properties"] = new JObject
             {
-                ["displayName"] = new JObject { ["type"] = "string", ["title"] = "Display Name", ["description"] = "The display name of the clause." },
-                ["description"] = new JObject { ["type"] = "string", ["title"] = "Description", ["description"] = "The description of the clause." },
-                ["clauseText"] = new JObject { ["type"] = "string", ["title"] = "Clause Text", ["description"] = "The text content of the clause." },
-                ["source"] = new JObject { ["type"] = "string", ["title"] = "Source", ["description"] = "The source of the clause.", ["x-ms-visibility"] = "internal" },
-                ["clauseType"] = new JObject { ["type"] = "string", ["title"] = "Clause Type", ["description"] = "The type of the clause.", ["x-ms-visibility"] = "internal" },
+                ["displayName"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Display Name",
+                    ["description"] = "The display name of the clause."
+                },
+                ["description"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Description",
+                    ["description"] = "The description of the clause."
+                },
+                ["clauseText"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Clause Text",
+                    ["description"] = "The text content of the clause."
+                },
+                ["source"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Source",
+                    ["description"] = "The source of the clause.",
+                    ["x-ms-visibility"] = "internal"
+                },
+                ["clauseType"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["title"] = "Clause Type",
+                    ["description"] = "The type of the clause.",
+                    ["x-ms-visibility"] = "internal"
+                },
                 ["languagePosition"] = new JObject
                 {
                     ["type"] = "object",
@@ -2788,7 +3240,12 @@ public class Script : ScriptBase
                     ["x-ms-visibility"] = "internal",
                     ["properties"] = new JObject
                     {
-                        ["type"] = new JObject { ["type"] = "string", ["title"] = "Type", ["description"] = "The type of language position." }
+                        ["type"] = new JObject
+                        {
+                            ["type"] = "string",
+                            ["title"] = "Type",
+                            ["description"] = "The type of language position."
+                        }
                     }
                 }
             }
@@ -2799,14 +3256,18 @@ public class Script : ScriptBase
     {
         var attachmentProperties = new JObject();
 
-        if (recordSchemaInfo != null && recordSchemaInfo["attachments"] is JObject attachmentSchemas)
+        if (
+            recordSchemaInfo != null && recordSchemaInfo["attachments"] is JObject attachmentSchemas
+        )
         {
             foreach (var attachment in attachments.Properties())
             {
                 var attachmentName = attachment.Name;
                 var attachmentSchema = attachmentSchemas[attachmentName] as JObject;
                 var displayName = attachmentSchema?["displayName"]?.ToString() ?? attachmentName;
-                var description = attachmentSchema?["description"]?.ToString() ?? $"The {displayName} attachment.";
+                var description =
+                    attachmentSchema?["description"]?.ToString()
+                    ?? $"The {displayName} attachment.";
 
                 attachmentProperties[attachmentName] = new JObject
                 {
@@ -2865,7 +3326,9 @@ public class Script : ScriptBase
     {
         var formattedAttachments = new JObject();
 
-        if (recordSchemaInfo != null && recordSchemaInfo["attachments"] is JObject attachmentSchemas)
+        if (
+            recordSchemaInfo != null && recordSchemaInfo["attachments"] is JObject attachmentSchemas
+        )
         {
             foreach (var attachment in attachments.Properties())
             {
@@ -2892,7 +3355,9 @@ public class Script : ScriptBase
     {
         var attachmentsArray = new JArray();
 
-        if (recordSchemaInfo != null && recordSchemaInfo["attachments"] is JObject attachmentSchemas)
+        if (
+            recordSchemaInfo != null && recordSchemaInfo["attachments"] is JObject attachmentSchemas
+        )
         {
             foreach (var attachment in attachments.Properties())
             {
@@ -2900,12 +3365,14 @@ public class Script : ScriptBase
                 var attachmentSchema = attachmentSchemas[attachmentName] as JObject;
                 var displayName = attachmentSchema?["displayName"]?.ToString() ?? attachmentName;
 
-                attachmentsArray.Add(new JObject
-                {
-                    ["name"] = attachmentName,
-                    ["displayName"] = displayName,
-                    ["key"] = attachmentName
-                });
+                attachmentsArray.Add(
+                    new JObject
+                    {
+                        ["name"] = attachmentName,
+                        ["displayName"] = displayName,
+                        ["key"] = attachmentName
+                    }
+                );
             }
         }
 
@@ -2918,13 +3385,15 @@ public class Script : ScriptBase
         var schemaUrl = new Uri(new Uri(baseUrl), "/public/api/v1/records/metadata");
 
         var request = new HttpRequestMessage(HttpMethod.Get, schemaUrl);
-        
+
         foreach (var header in this.Context.Request.Headers)
         {
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
 
-        var response = await this.Context.SendAsync(request, this.CancellationToken).ConfigureAwait(false);
+        var response = await this.Context
+            .SendAsync(request, this.CancellationToken)
+            .ConfigureAwait(false);
 
         if (response.IsSuccessStatusCode)
         {
@@ -2936,11 +3405,15 @@ public class Script : ScriptBase
                 ["attachments"] = schemaResponse["attachments"]
             };
 
-            this.Context.Logger.LogInformation($"Retrieved schema information: {this.recordSchemaInfo?.ToString()}");
+            this.Context.Logger.LogInformation(
+                $"Retrieved schema information: {this.recordSchemaInfo?.ToString()}"
+            );
         }
         else
         {
-            throw new Exception($"Failed to retrieve schema information. Status code: {response.StatusCode}");
+            throw new Exception(
+                $"Failed to retrieve schema information. Status code: {response.StatusCode}"
+            );
         }
     }
 
@@ -2956,13 +3429,15 @@ public class Script : ScriptBase
                 attachments
                     .OfType<JObject>()
                     .Where(attachment => attachment.ContainsKey("download"))
-                    .Select(attachment =>
-                    {
-                        string downloadUrl = attachment["download"].ToString();
-                        string key = rtrEml_ExtractKeyFromDownloadUrl(downloadUrl);
-                        attachment["key"] = key;
-                        return attachment;
-                    })
+                    .Select(
+                        attachment =>
+                        {
+                            string downloadUrl = attachment["download"].ToString();
+                            string key = rtrEml_ExtractKeyFromDownloadUrl(downloadUrl);
+                            attachment["key"] = key;
+                            return attachment;
+                        }
+                    )
             );
             body["attachments"] = updatedAttachments;
         }
@@ -2979,5 +3454,4 @@ public class Script : ScriptBase
         }
         return string.Empty;
     }
-
 }
