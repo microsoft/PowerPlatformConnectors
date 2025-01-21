@@ -1,6 +1,6 @@
-# Seismic Power Automate Progarms connector
+# Seismic Program connector
 
-The Seismic programs connector provides a set of actions and triggers to interact with programs, tasks and requests.
+The Seismic Program connector provides a set of actions and triggers to interact with programs, tasks and requests.
 
 ## Publisher: Seismic
 
@@ -146,9 +146,14 @@ A trigger that uses the PlannerRequestUpdate webhook to return request data afte
 
 A trigger that uses the PlannerRequestDelete webhook to return request data after it has been deleted
 
+## Obtaining Credentials
+
+You need a Seismic Premium user account for the tenant. Contact your Seismic system administrator if you do not have sufficient permissions.
+
+
 ## Getting Started
 
-The Seismic Power Automate Programs connector includes the following actions. Each action corresponds to an API endpoint. Refer to the article for each corresponding API endpoint for further information on the fields and properties associated with the action.
+The Seismic Programs connector includes the following actions. Each action corresponds to an API endpoint. Refer to the article for each corresponding API endpoint for further information on the fields and properties associated with the action.
 
 - [Get comments](https://developer.seismic.com/seismicsoftware/reference/programs-get-comments)
 - [Get a comment](https://developer.seismic.com/seismicsoftware/reference/programs-get-comment)
@@ -183,10 +188,10 @@ The Seismic Power Automate Programs connector includes the following actions. Ea
 - [Trigger: request update](https://developer.seismic.com/seismicsoftware/docs/plannerrequestupdatev1)
 - [Trigger: request delete](https://developer.seismic.com/seismicsoftware/docs/plannerrequestdeletev1)
 
-## Obtaining Credentials
-
-You need a Seismic Premium user account for the tenant. Contact your Seismic system administrator if you do not have sufficient permissions.
 
 ## Known Issues and Limitations
 
 No issues and limitations are known at this time. All APIs operate in accordance with Seismic API policy, including Rate Limits. Please refer to the [Seismic Developer portal](https://developer.seismic.com/) for API specifications, restrictions, and standards.
+
+## Deployment Instructions
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate and Power Apps.
