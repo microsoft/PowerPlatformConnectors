@@ -100,7 +100,6 @@
     "address": {
       "type": "object",
       "required": [
-        "addressee",
         "address",
         "postal_code",
         "city",
@@ -136,6 +135,54 @@
         "country": {
           "description": "A string representing the country.",
           "type": "string",
+          "x-ms-visibility": "advanced"
+        },
+        "updated_at": {
+          "description": "Timestamp of last update.",
+          "type": "string",
+          "readOnly": true,
+          "x-ms-visibility": "advanced"
+        },
+        "created_at": {
+          "description": "Timestamp of creation.",
+          "type": "string",
+          "readOnly": true,
+          "x-ms-visibility": "advanced"
+        }
+      },
+      "additionalProperties": true
+    },
+    "authentication": {
+      "type": "object",
+      "required": [
+        "user_id",
+        "authentication_provider_id",
+        "uid"
+      ],
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the authentication.",
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "user_id": {
+          "description": "The id of the user that this authentication belongs to.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "authentication_provider_id": {
+          "description": "The id of the authentication provider.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "uid": {
+          "description": "The unique identifier of this authentication that corresponds the a unique id from the IDP.",
+          "type": "string"
+        },
+        "otp_enabled": {
+          "description": "In case auth provider is Eduframe, indicates if one time password is enabled for this login, is false for any other providers.",
+          "x-ms-summary": "If OTP is enabled for this login.",
           "x-ms-visibility": "advanced"
         },
         "updated_at": {
@@ -389,6 +436,36 @@
           "type": "string",
           "description": "Timestamp of creation.",
           "readOnly": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "create_authentication": {
+      "type": "object",
+      "required": [
+        "user_id",
+        "authentication_provider_type",
+        "uid"
+      ],
+      "properties": {
+        "user_id": {
+          "description": "The id of the user that this authentication belongs to.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "authentication_provider_type": {
+          "description": "The type of the authentication provider.",
+          "type": "string",
+          "enum": [
+            "azure_active_directory",
+            "eduframe",
+            "openid_connect",
+            "surf_conext"
+          ]
+        },
+        "uid": {
+          "description": "The unique identifier of this authentication that corresponds the a unique id from the IDP.",
+          "type": "string"
         }
       },
       "additionalProperties": true
@@ -890,7 +967,6 @@
     "webhook": {
       "type": "object",
       "required": [
-        "url",
         "events"
       ],
       "properties": {
@@ -1136,6 +1212,36 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/account"
+            }
+          }
+        }
+      }
+    },
+    "/authentications": {
+      "post": {
+        "operationId": "Post_authentication",
+        "summary": "Add an authentication",
+        "description": "Add an authentication method to an existing user",
+        "tags": [
+          "authentications"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/create_authentication"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/authentication"
             }
           }
         }
@@ -1567,6 +1673,80 @@
         }
       }
     },
+    "/users/{user_id}/authentications": {
+      "get": {
+        "operationId": "Get_authentications_by_user_id",
+        "summary": "Get the authentications of a user",
+        "description": "Get a list of authentications that belong to a specific user.",
+        "tags": [
+          "authentications"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/Page"
+          },
+          {
+            "$ref": "#/parameters/PerPage"
+          },
+          {
+            "$ref": "#/parameters/UserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/authentication"
+              },
+              "type": "array"
+            },
+            "headers": {
+              "total": {
+                "description": "Total number of records.",
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_id}/authentications/{authentication_id}": {
+      "delete": {
+        "operationId": "Delete_authentication_by_user_id",
+        "summary": "Delete an authentication of a user",
+        "description": "Delete one of the authentications of an user. Note that you cannot delete the last authentication!",
+        "tags": [
+          "authentications"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserId"
+          },
+          {
+            "name": "authentication_id",
+            "type": "integer",
+            "format": "int64",
+            "in": "path",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Authentication id",
+            "description": "Identifier of the authentication."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/invoices": {
       "post": {
         "operationId": "Post_invoices",
@@ -1903,94 +2083,95 @@
             "required": true,
             "schema": {
               "type": "object",
-      "required": [
-        "url",
-        "events"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier of the webhook. (a UUID).",
-          "readOnly": true
-        },
-        "url": {
-          "type": "string",
-          "description": "The callback url for Eduframe to send a HTTP POST payload to.",
-          "x-ms-notification-url": true,
-          "x-ms-visibility": "internal"
-        },
-        "active": {
-          "type": "boolean",
-          "description": "State of webhook.",
-          "default": true
-        },
-        "events": {
-          "items": {
-            "type": "string",
-            "enum": [
-              "account.created",
-              "account.deleted",
-              "account.updated",
-              "category.created",
-              "category.deleted",
-              "category.updated",
-              "course.created",
-              "course.deleted",
-              "course.updated",
-              "course_location.created",
-              "course_location.deleted",
-              "course_location.updated",
-              "course_variant.created",
-              "course_variant.deleted",
-              "course_variant.updated",
-              "educator.created",
-              "educator.deleted",
-              "educator.updated",
-              "enrollment.created",
-              "enrollment.deleted",
-              "enrollment.updated",
-              "invoice.created",
-              "invoice.deleted",
-              "invoice.updated",
-              "invoice_vat.created",
-              "invoice_vat.deleted",
-              "invoice_vat.updated",
-              "lead.created",
-              "lead.deleted",
-              "lead.updated",
-              "meeting.created",
-              "meeting.deleted",
-              "meeting.updated",
-              "meeting.teacher_attendees_changed",
-              "meeting_location.created",
-              "meeting_location.deleted",
-              "meeting_location.updated",
-              "order.created",
-              "order.deleted",
-              "order.updated",
-              "payment.created",
-              "payment.deleted",
-              "payment.updated",
-              "planned_course.created",
-              "planned_course.deleted",
-              "planned_course.updated",
-              "planning_event.created",
-              "planning_event.deleted",
-              "planning_event.updated",
-              "planning_event.teacher_attendees_changed",
-              "teacher_role.created",
-              "teacher_role.deleted",
-              "teacher_role.updated",
-              "user.created",
-              "user.deleted",
-              "user.updated"
-            ]
-          },
-          "type": "array",
-          "description": "Array of events that should trigger this webhook."
-        }
-      },
-      "additionalProperties": true
+            "required": [
+              "url",
+              "events"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier of the webhook. (a UUID).",
+                "readOnly": true
+              },
+              "url": {
+                "type": "string",
+                "description": "The callback url for Eduframe to send a HTTP POST payload to.",
+                "x-ms-notification-url": true,
+                "x-ms-visibility": "internal",
+                "default": ""
+              },
+              "active": {
+                "type": "boolean",
+                "description": "State of webhook.",
+                "default": true
+              },
+              "events": {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "account.created",
+                    "account.deleted",
+                    "account.updated",
+                    "category.created",
+                    "category.deleted",
+                    "category.updated",
+                    "course.created",
+                    "course.deleted",
+                    "course.updated",
+                    "course_location.created",
+                    "course_location.deleted",
+                    "course_location.updated",
+                    "course_variant.created",
+                    "course_variant.deleted",
+                    "course_variant.updated",
+                    "educator.created",
+                    "educator.deleted",
+                    "educator.updated",
+                    "enrollment.created",
+                    "enrollment.deleted",
+                    "enrollment.updated",
+                    "invoice.created",
+                    "invoice.deleted",
+                    "invoice.updated",
+                    "invoice_vat.created",
+                    "invoice_vat.deleted",
+                    "invoice_vat.updated",
+                    "lead.created",
+                    "lead.deleted",
+                    "lead.updated",
+                    "meeting.created",
+                    "meeting.deleted",
+                    "meeting.updated",
+                    "meeting.teacher_attendees_changed",
+                    "meeting_location.created",
+                    "meeting_location.deleted",
+                    "meeting_location.updated",
+                    "order.created",
+                    "order.deleted",
+                    "order.updated",
+                    "payment.created",
+                    "payment.deleted",
+                    "payment.updated",
+                    "planned_course.created",
+                    "planned_course.deleted",
+                    "planned_course.updated",
+                    "planning_event.created",
+                    "planning_event.deleted",
+                    "planning_event.updated",
+                    "planning_event.teacher_attendees_changed",
+                    "teacher_role.created",
+                    "teacher_role.deleted",
+                    "teacher_role.updated",
+                    "user.created",
+                    "user.deleted",
+                    "user.updated"
+                  ]
+                },
+                "type": "array",
+                "description": "Array of events that should trigger this webhook."
+              }
+            },
+            "additionalProperties": true
             }
           }
         ],
@@ -2036,6 +2217,16 @@
       "in": "query",
       "type": "integer",
       "default": 25
+    },
+    "UserId": {
+      "name": "user_id",
+      "type": "integer",
+      "format": "int64",
+      "in": "path",
+      "required": true,
+      "x-ms-url-encoding": "single",
+      "x-ms-summary": "User id",
+      "description": "Identifier of the user."
     }
   }
 }

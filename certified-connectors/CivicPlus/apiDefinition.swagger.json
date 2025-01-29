@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.7",
+    "version": "1.9",
     "title": "CivicPlus Transform",
     "description": "Empowers business users to create and deploy digital forms for enterprise and government organizations as web and native apps, while allowing developers to customize, extend, or harness the forms through their own custom apps. Connect your forms with this connector to allow easy submission of your form data into your backend systems or databases without the need to write complex integration code.",
     "contact": {
@@ -203,7 +203,7 @@
         }
       }
     },
-    "/submissions/{formId}/{submissionId}.json": {
+    "/storage/forms/{formId}/submissions/{submissionId}": {
       "get": {
         "description": "Allows for Form Submission data to be retrieved",
         "summary": "Retrieve Form Submission Data",
@@ -261,7 +261,7 @@
         }
       }
     },
-    "/submissions/{formId}/attachments/{attachmentId}": {
+    "/storage/forms/{formId}/attachments/{attachmentId}": {
       "get": {
         "description": "Allows for Form Submission attachments to be retrieved",
         "summary": "Retrieve Form Submission Attachment",
@@ -284,6 +284,16 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Attachment Id"
+          },
+          {
+            "name": "range",
+            "in": "header",
+            "description": "The range of bytes to gather for a chunked file.",
+            "required": true,
+            "type": "string",
+            "default": "bytes=0-10000000",
+            "x-ms-visibility": "internal",
+            "x-ms-summary": "range"
           }
         ],
         "responses": {
@@ -348,6 +358,195 @@
                       "name": {
                         "type": "string"
                       }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/forms/{formId}/approval-steps": {
+      "get": {
+        "description": "Allows for Form approval steps to be retrieved",
+        "summary": "Retrieve Form Approval Steps",
+        "operationId": "GetFormApprovalSteps",
+        "x-ms-visibility": "internal",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "formId",
+            "type": "integer",
+            "required": true,
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-path": "id",
+              "value-collection": "forms",
+              "value-title": "name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "approvalSteps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/form-submission-meta/{submissionId}/approval-steps/{approvalLabel}": {
+      "get": {
+        "description": "Allows for Form Approval data for a single step to be retrieved",
+        "summary": "Retrieve Approval Record",
+        "operationId": "GetFormSubmissionApprovalByStepLabel",
+        "x-ms-visibility": "important",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submissionId",
+            "description": "ID of the form submission",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "in": "query",
+            "name": "formId",
+            "type": "integer",
+            "required": true,
+            "x-ms-summary": "Form",
+            "x-ms-visibility": "important",
+            "description": "Form to select an approval step",
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-path": "id",
+              "value-collection": "forms",
+              "value-title": "name"
+            }
+          },
+          {
+            "in": "path",
+            "name": "approvalLabel",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Approval Step",
+            "x-ms-visibility": "important",
+            "description": "Approval step to retrieve approval record",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFormApprovalSteps",
+              "value-path": "label",
+              "value-collection": "approvalSteps",
+              "value-title": "label",
+              "parameters": {
+                "formId": {
+                  "parameter": "formId"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "formSubmissionApproval": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "updatedBy": {
+                      "type": "string",
+                      "format": "date-time",
+                      "x-ms-summary": "Approved By: Email Address"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "x-ms-summary": "Approved Timestamp"
+                    },
+                    "approvalFormId": {
+                      "type": "number",
+                      "x-ms-summary": "Approval Form Id"
+                    },
+                    "approvalFormSubmissionId": {
+                      "type": "string",
+                      "x-ms-summary": "Approval Form Submission Id"
                     }
                   }
                 }

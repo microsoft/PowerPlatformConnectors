@@ -12,121 +12,38 @@ public class Script : ScriptBase
 
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        string[] clientCredentials = this.Context.Request.Headers.GetValues("ClientCredentials").First().Split(':');
-        string clientId = clientCredentials[0];
-        string clientSecret = clientCredentials[1];
-        
-        var accessToken = await this.GetAccessToken(clientId: clientId, clientSecret: clientSecret);
         var path = this.Context.Request.RequestUri.AbsolutePath.ToString();
         
         switch (path) {
-            case "/v1/runs":
-                return await CreateRun(accessToken);
+            case "/v1/workflows":
+                return await CreateRun();
                 break;
-            case "/v1/predictions": 
-                return await CreatePrediction(accessToken);
+            case "/v1/documents": 
+                return await CreateDocument();
                 break;
             case "/v1/models":
-                return await GetModels(accessToken);
-                break;
-            case "/v1/workflows":
-                return await GetWorkflows(accessToken);
+                return await GetModels();
                 break;
         }
 
         return null;
     }
     
-    private async Task<HttpResponseMessage> CreateRun(string accessToken)
+    private async Task<HttpResponseMessage> CreateRun()
     {
-        string workflowId = this.Context.Request.Headers.GetValues("WorkflowId").First();
-        string executionName = this.Context.Request.Headers.GetValues("Name").First();
-        
-        var fileContent = await this.Context.Request.Content.ReadAsByteArrayAsync();
+        var request = this.Context.Request;
+        string workflowId = request.Headers.GetValues("WorkflowId").First();
+        request.RequestUri = new Uri($"{Script.API_ENDPOINT}/workflows/{workflowId}/executions");
 
-        var (documentResponse, putResponse) = await this.CreateDocument(
-            content: fileContent,
-            name: executionName,
-            accessToken: accessToken
-        );
-
-        var documentId = (string) (await ToJson(documentResponse))["documentId"];
-
-        var request = CreateAuthorizedRequest(
-            method: HttpMethod.Post,
-            path: $"/workflows/{workflowId}/executions",
-            accessToken: accessToken
-        );
-        
-        request.Content = CreateJsonContent(new JObject {
-            ["input"] = new JObject {
-                ["documentId"] = documentId,
-                ["title"] = executionName
-            }
-        }.ToString());
-        
         return await this.Context.SendAsync(request, this.CancellationToken);       
     }
-
-    private async Task<HttpResponseMessage> CreatePrediction(string accessToken)
-    {
-        string modelId = this.Context.Request.Headers.GetValues("ModelId").First();
-        string fileName = this.Context.Request.Headers.GetValues("Name").First();
-        
-        var fileContent = await this.Context.Request.Content.ReadAsByteArrayAsync();
-
-        var (documentResponse, putResponse) = await this.CreateDocument(
-            content: fileContent,
-            name: fileName,
-            accessToken: accessToken
-        );
-        
-        var documentId = (string) (await ToJson(documentResponse))["documentId"];
-        
-        var request = CreateAuthorizedRequest(
-            method: HttpMethod.Post,
-            path: $"/predictions",
-            accessToken: accessToken
-        );
-
-        request.Content = CreateJsonContent(new JObject {
-            ["modelId"] = modelId,
-            ["documentId"] = documentId
-        }.ToString());
-        
-        var response = await this.Context.SendAsync(request, this.CancellationToken);
-
-        var predictions = new Dictionary<string, JToken>();
-        foreach (var pred in (await ToJson(response))["predictions"]) {
-            var label = (string) pred["label"];
-            try {
-                if ((float) predictions[label]["confidence"] < (float) pred["confidence"]) {
-                    predictions[label] = pred;
-                }
-            } catch (KeyNotFoundException) {
-                predictions[label] = pred;
-            }
-        }
-        
-        var formatted = new JObject();
-        foreach (var item in predictions) {
-            formatted.Add(item.Key, item.Value);
-        }
-        
-        var content = await ToJson(response);
-        content["predictions"] = formatted;
-        response.Content = CreateJsonContent(content.ToString());
-
-        return response;
-    }
     
-    private async Task<HttpResponseMessage> GetModels(string accessToken)
+    private async Task<HttpResponseMessage> GetModels()
     {
         var myModelsRes = this.Context.SendAsync(
             CreateAuthorizedRequest(
                 method: HttpMethod.Get,
-                path: $"/models",
-                accessToken: accessToken
+                path: $"/models"
             ),
             this.CancellationToken
         );
@@ -134,8 +51,7 @@ public class Script : ScriptBase
         var publicModelsRes = this.Context.SendAsync(
             CreateAuthorizedRequest(
                 method: HttpMethod.Get,
-                path: $"/models?owner=las:organization:cradl",
-                accessToken: accessToken
+                path: $"/models?owner=las:organization:cradl"
             ),
             this.CancellationToken
         );
@@ -152,56 +68,38 @@ public class Script : ScriptBase
         response.Content = CreateJsonContent(content.ToString());
         return response;
     }
-   
-    private async Task<HttpResponseMessage> GetWorkflows(string accessToken)
-    {
-        var request = CreateAuthorizedRequest(
-            method: HttpMethod.Get,
-            path: $"/workflows",
-            accessToken: accessToken
-        );
-        
-        return await this.Context.SendAsync(request, this.CancellationToken);       
-    }
 
-    private async Task<string> GetAccessToken(string clientId, string clientSecret)
+    private async Task<HttpResponseMessage> CreateDocument()
     {
-        var authString = Convert.ToBase64String(new UTF8Encoding().GetBytes($"{clientId}:{clientSecret}"));
-        
-        var tokenRequest = new HttpRequestMessage(HttpMethod.Post, new Uri($"{Script.TOKEN_ENDPOINT}?grant_type=client_credentials"));
-        tokenRequest.Headers.Add("Authorization", $"Basic {authString}");
-        tokenRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>() {});
-        
-        var tokenResponse = await this.Context.SendAsync(tokenRequest, this.CancellationToken);
-        return (string) (await ToJson(tokenResponse))["access_token"];
-    }
-    
-    private async Task<(HttpResponseMessage, HttpResponseMessage)> CreateDocument(byte[] content, string name, string accessToken)
-    {
+        string fileName = this.Context.Request.Headers.GetValues("Name").First();
+        var fileContent = await this.Context.Request.Content.ReadAsByteArrayAsync();
+
         var request = CreateAuthorizedRequest(
             method: HttpMethod.Post,
-            path: "/documents",
-            accessToken: accessToken
+            path: "/documents"
         );
 
-        request.Content = CreateJsonContent(new JObject { ["name"] = name }.ToString());
+        request.Content = CreateJsonContent(new JObject { ["name"] = fileName }.ToString());
         var response = await this.Context.SendAsync(request, this.CancellationToken);
         
         var fileUrl = (string) (await ToJson(response))["fileUrl"];
         
         var putRequest = new HttpRequestMessage(HttpMethod.Put, new Uri(fileUrl));
-        putRequest.Headers.Add("Authorization", $"Bearer {accessToken}");
-        
-        putRequest.Content = new ByteArrayContent(content);
-        
+        putRequest.Headers.Add("Authorization", this.Context.Request.Headers.GetValues("Authorization").First());
+        putRequest.Content = new ByteArrayContent(fileContent);
         var putResponse = await this.Context.SendAsync(putRequest, this.CancellationToken);
-        return (response, putResponse);
+        
+        if (!putResponse.IsSuccessStatusCode) {
+            return putResponse;
+        }
+        
+        return response;
     }
     
-    private static HttpRequestMessage CreateAuthorizedRequest(HttpMethod method, string path, string accessToken)
+    private HttpRequestMessage CreateAuthorizedRequest(HttpMethod method, string path)
     {
         var request = new HttpRequestMessage(method, new Uri($"{Script.API_ENDPOINT}{path}"));
-        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+        request.Headers.Add("Authorization", this.Context.Request.Headers.GetValues("Authorization").First());
         return request;
     }
     

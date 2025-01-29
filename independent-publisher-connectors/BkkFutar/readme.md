@@ -17,6 +17,9 @@ List all bike rental stations and detailes about them, such as location informat
 ### Get arrivals and departures for a stop
 List planned and actual arrival and departure times for given stop, based on additional time or location filters.
 
+### Get references
+Retrieve ID based references.
+
 ### Get schedule for a stop
 List schedules for a selected stop, including times, details and directions.
 

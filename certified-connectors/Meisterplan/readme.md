@@ -34,6 +34,8 @@ The connector supports reading and/or updating the following Meisterplan entitie
 - Role Capacities
 - Roles
 - Scenarios (read only)
+- Task Management
+- Teams (read only)
 - Users (read only)
 
 The connector supports triggers for project created, project updated and project deleted events.
@@ -47,13 +49,13 @@ You will need an API-token to connect to the REST-API. For details on how to cre
 
 ## Obtaining Credentials
 
-This connector uses oAuth to access your Meisterplan system. Simply log in with your Meisterplan account and grant access to the Power Automate Connector.
-
-If you're building the connector yourself, please use an API token as described [here](https://help.meisterplan.com/hc/en-us/articles/360028700752-REST-API-Manage-API-Tokens).
+This connector uses an API key to access your Meisterplan system. 
+To obtain an API key, please follow the instructions [here](https://help.meisterplan.com/hc/en-us/articles/360028700752-REST-API-Manage-API-Tokens).
 
 ## Known Issues and Limitations
 
 The Meisterplan Connector uses the Meisterplan REST API. A description including status codes can be found in the REST API [documentation](https://api.us.meisterplan.com/docs/api.html). Additional information can be found in the [Help Center](https://help.meisterplan.com/hc/en-us/articles/360011962979-REST-API-Overview).
+When creating a custom connector use "API Key" as authentication mechanism with Header variable name "Authorization".
 
 ## Deployment Instructions
 

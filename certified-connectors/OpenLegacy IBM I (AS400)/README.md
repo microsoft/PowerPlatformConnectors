@@ -24,6 +24,12 @@ During design-time displaying a list of projects filtered for this action only.
 ### AS400DataQueue
 Performs an HTTP request to the user's API. Main logic is controlled by C# script.
 During design-time displaying a list of projects filtered for this action only.
+### AS400Db2Queries
+Performs an HTTP request to the user's API. Main logic is controlled by C# script.
+During design-time displaying a list of projects filtered for this action only.
+### AS400Db2Executables
+Performs an HTTP request to the user's API. Main logic is controlled by C# script.
+During design-time displaying a list of projects filtered for this action only.
 
 ## Obtaining Credentials
 Register to OpenLegacy Hub at https://hub.openlegacy.com.

@@ -11,7 +11,7 @@ You will need the following to proceed:
 Note: Please contact your IT administrator for any issues related to Power automate
 
 # How to get credentials
-Request access by contacting [Elite Support](https://elite.com/en/support)
+Request access by contacting [Elite Support](https://elite.com/support)
 
 When requesting access and to establish connection to the 3E Events Connector, the user will need access to the following 3E information.: :
 

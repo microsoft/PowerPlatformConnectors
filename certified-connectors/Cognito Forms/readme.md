@@ -89,6 +89,26 @@ The output will be an object containing the document's file data, the metadata, 
 - `entry`: The entry Id or entry number of the entry for which the document should be generated
 - `templateNumber`: The number of the template that should be used to generate the entry document
 
+#### GetEntry
+
+This action will get an existing entry for the specified form.
+This action will fail if the entry does not exist.
+The output will be the entry data.
+
+##### Parameters:
+- `form`: The internal form name or Id
+- `entryId`: The entry number or entry Id for the entry to be retrieved
+
+#### DeleteEntry
+
+This action will delete an existing entry for the specified form.
+This action will fail if the entry does not exist.
+There will be no output.
+
+##### Parameters:
+- `form`: The internal form name or Id
+- `entryId`: The entry number or entry Id for the entry to be deleted
+
 ### Private Operations
 
 These operations are enablers for the public triggers and actions.

@@ -1,0 +1,965 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Signhost",
+    "description": "Signhost the workflow signing service by Entrust is a digital signing and identification solution, empowering all types of businesses with seamless and secure online transactions.",
+    "version": "1.0",
+    "contact": {
+      "name": "Signhost Customer Success Team",
+      "url": "https://intercom.help/signhost/en/",
+      "email": "support@signhost.com"
+    }
+  },
+  "host": "api.signhost.com",
+  "schemes": [
+    "https"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "parameters": {
+    "AppkeyParam": {
+      "name": "Application",
+      "x-ms-summary": "APPKey",
+      "description": "The APPKey",
+      "in": "header",
+      "type": "string",
+      "required": true
+    }
+  },
+  "paths": {
+    "/api/transaction/{transactionId}": {
+      "get": {
+        "description": "Returns current transaction details",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "x-ms-summary": "Transaction Id",
+            "description": "ID of the transaction",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the transaction",
+            "schema": {
+              "$ref": "#/definitions/Transaction"
+            }
+          },
+          "401": {
+            "description": "Not authorized to access the specified transaction"
+          },
+          "410": {
+            "description": "The transaction details are no longer available and as a result the returned JSON only contains partial historical data.\nThis happens when we cleaned the transaction for example due to reaching an end status (any status above 30),\nor the expiration dates have expired.\n"
+          }
+        },
+        "summary": "Get transaction details",
+        "operationId": "Getdetails"
+      },
+      "delete": {
+        "description": "Delete a transaction by a transaction id",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "x-ms-summary": "Transaction Id",
+            "type": "string",
+            "description": "ID of the transaction",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "x-ms-summary": "Body",
+            "in": "body",
+            "description": "Cancellation details",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "SendNotifications": {
+                  "type": "boolean",
+                  "description": "Send e-mail notifications to the awaiting signers.",
+                  "default": false
+                },
+                "Reason": {
+                  "type": "string",
+                  "description": "The reason of cancellation."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The transaction is successfully deleted"
+          },
+          "400": {
+            "description": "The transaction could not be deleted.",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "summary": "Delete transaction",
+        "operationId": "Delete"
+      }
+    },
+    "/api/transaction/{transactionId}/file/{fileId}/": {
+      "get": {
+        "description": "Returns the (signed) document(s).",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "x-ms-summary": "Transaction Id",
+            "description": "ID of the description",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fileId",
+            "x-ms-summary": "Name",
+            "description": "A unique identifier provided by you for the file.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The contents of the file is returned in the body.",
+            "schema": {
+              "type": "string",
+              "title": "Content",
+              "format": "binary",
+              "x-ms-summary": "File content",
+              "x-ms-visibility": "important"
+            }
+          }
+        },
+        "summary": "Download pdf",
+        "operationId": "Downloadpdf"
+      }
+    },
+    "/api/file/receipt/{transactionId}": {
+      "get": {
+        "description": "Returns the receipt when the transaction is successfully signed (Status=30)",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transactionId",
+            "x-ms-summary": "Transaction Id",
+            "description": "ID of the description",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(signed) document(s)",
+            "schema": {
+              "title": "Content",
+              "x-ms-summary": "Signed document",
+              "type": "string",
+              "format": "binary",
+              "x-ms-visibility": "important"
+            }
+          }
+        },
+        "summary": "Download receipt",
+        "operationId": "Downloadreceipt"
+      }
+    },
+    "/api/transaction": {
+      "post": {
+        "description": "Creates a new transaction",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "transaction",
+            "x-ms-summary": "Transaction properties",
+            "description": "Transaction to be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TransactionInput"
+            }
+          }
+        ],
+        "produces": [
+          "application/pdf"
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the created transaction.",
+            "schema": {
+              "$ref": "#/definitions/Transaction"
+            }
+          },
+          "401": {
+            "description": "Not authorized to create a transaction."
+          }
+        },
+        "summary": "Create transaction",
+        "operationId": "Create"
+      }
+    },
+    "/api/transaction/{transactionId}/file/{fileId}": {
+      "put": {
+        "description": "Add a file to the transaction or overwrite an existing file with the same {fileId}.",
+        "consumes": [
+          "application/pdf"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transactionId",
+            "x-ms-summary": "Transaction Id",
+            "description": "ID of an existing -- not yet started -- transaction",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fileId",
+            "x-ms-summary": "File Id",
+            "description": "A unique identifier provided by you for the file.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "x-ms-summary": "File binary",
+            "description": "File upload\n",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "File successfully created and added to the transaction"
+          },
+          "202": {
+            "description": "File meta data accepted, waiting for actual file content"
+          },
+          "204": {
+            "description": "Existing file replaced within the specified transaction"
+          },
+          "409": {
+            "description": "Conflict while trying to overwrite the file.\nYou have used the same fileId again which causes us to overwrite the file (which is a valid action).\nHowever the same fileId was provided in a too short time interval making it unclear which version was meant to be the latest version.\n"
+          }
+        },
+        "summary": "Add file",
+        "operationId": "Addfile"
+      }
+    },
+    "/api/transaction/{transactionId}/start": {
+      "put": {
+        "description": "Starts a transaction with the same {transactionId}",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "x-ms-summary": "Transaction Id",
+            "description": "ID of an existing -- not yet started -- transaction",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The transaction is started."
+          },
+          "400": {
+            "description": "The transaction could not be started. Most probably causes are that the created transactions contains errors causing the transaction to be in Failed status.",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "summary": "Start transaction",
+        "operationId": "Start"
+      }
+    }
+  },
+  "definitions": {
+    "TransactionInput": {
+      "type": "object",
+      "properties": {
+        "Files": {
+          "readOnly": true,
+          "type": "object",
+          "description": "A map of files attached to this transaction.",
+          "additionalProperties": {
+            "$ref": "#/definitions/FileEntry"
+          }
+        },
+        "Language": {
+          "description": "Language, only de-DE, en-US, es-ES, fr-FR, it-IT, pl-PL and nl-NL are allowed.",
+          "type": "string",
+          "enum": [
+            "de-DE",
+            "en-US",
+            "es-ES",
+            "fr-FR",
+            "it-IT",
+            "pl-PL",
+            "nl-NL"
+          ]
+        },
+        "Seal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Seal the document before sending to the signers."
+        },
+        "Signers": {
+          "type": "array",
+          "description": "The signer information.",
+          "items": {
+            "type": "object",
+            "required": [
+              "Email"
+            ],
+            "properties": {
+              "Id": {
+                "type": "string",
+                "description": "The id of the signer, must be unique within a transaction."
+              },
+              "Email": {
+                "type": "string",
+                "description": "The e-mail address of the signer",
+                "example": "john.doe@example.com"
+              },
+              "IntroText": {
+                "type": "string",
+                "description": "An intro text to show to the user during the sign process."
+              },
+              "Authentications": {
+                "description": "List of authentications that the signer has to authenticate with.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Authentication"
+                }
+              },
+              "Verifications": {
+                "description": "List of verifications that the signer has to verify with",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Verification"
+                }
+              },
+              "SendSignRequest": {
+                "description": "Send a sign invitation to the signer his e-mail address.",
+                "default": true,
+                "type": "boolean"
+              },
+              "SignUrl": {
+                "description": "A unique URL per signer that provides the signing flow for the signer.",
+                "type": "string",
+                "readOnly": true
+              },
+              "SignRequestSubject": {
+                "type": "string",
+                "description": "The subject of the sign request email in plain text."
+              },
+              "SignRequestMessage": {
+                "description": "The message of the sign request in plain text.",
+                "type": "string"
+              },
+              "SendSignConfirmation": {
+                "description": "Send the sign confirmation to the signer his e-mail address.",
+                "type": "boolean"
+              },
+              "Language": {
+                "description": "Language, only de-DE, en-US, es-ES, fr-FR, it-IT, pl-PL and nl-NL are allowed.",
+                "default": "nl-NL",
+                "type": "string",
+                "enum": [
+                  "de-DE",
+                  "en-US",
+                  "es-ES",
+                  "fr-FR",
+                  "it-IT",
+                  "pl-PL",
+                  "nl-NL"
+                ]
+              },
+              "ScribbleName": {
+                "description": "The name of the signer, this will be pre filled in the scribble form.",
+                "type": "string"
+              },
+              "DaysToRemind": {
+                "description": "Amount of days before reminding the signers. -1 to disable reminders.",
+                "default": 7,
+                "type": "integer"
+              },
+              "Expires": {
+                "description": "When set the signer is no longer allowed to sign the transaction after this date.",
+                "type": "string",
+                "format": "date-time"
+              },
+              "Reference": {
+                "description": "The reference of the signer.",
+                "type": "string"
+              },
+              "RejectReason": {
+                "readOnly": true,
+                "description": "The rejection reason that was given by the signer when the transaction was rejected.",
+                "type": "string"
+              },
+              "ReturnUrl": {
+                "description": "The url to redirect the user to after signing, rejecting or cancelling.",
+                "default": "https://signhost.com",
+                "type": "string"
+              },
+              "Context": {
+                "type": "object",
+                "description": "Any valid json object which we will return back."
+              },
+              "Activities": {
+                "type": "array",
+                "readOnly": true,
+                "description": "List of activities attached to this signer.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "Id": {
+                      "type": "string"
+                    },
+                    "Code": {
+                      "type": "integer",
+                      "enum": [
+                        101,
+                        102,
+                        103,
+                        104,
+                        105,
+                        201,
+                        202,
+                        203,
+                        301,
+                        302,
+                        303,
+                        401,
+                        402,
+                        403
+                      ],
+                      "description": "Consult api documentation"
+                    },
+                    "Info": {
+                      "type": "string",
+                      "description": "May contain additional information belonging to this activity"
+                    },
+                    "CreatedDateTime": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Receivers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "Name",
+              "Email",
+              "Message"
+            ],
+            "properties": {
+              "Name": {
+                "type": "string",
+                "description": "The name of the receiver."
+              },
+              "Email": {
+                "type": "string",
+                "description": "The e-mail address of the receiver."
+              },
+              "Language": {
+                "type": "string",
+                "description": "Language, only de-DE, en-US, es-ES, fr-FR, it-IT and nl-NL allowed.",
+                "default": "nl-NL"
+              },
+              "Subject": {
+                "type": "string",
+                "description": "The subject of the receiver email in plain text."
+              },
+              "Message": {
+                "type": "string",
+                "description": "The email message towards the receiver in plain text."
+              },
+              "Reference": {
+                "type": "string",
+                "description": "The reference of the receiver."
+              },
+              "Context": {
+                "type": "object",
+                "description": "Any valid json object which we will return back."
+              }
+            }
+          }
+        },
+        "Reference": {
+          "type": "string",
+          "description": "The reference of the transaction."
+        },
+        "PostbackUrl": {
+          "type": "string",
+          "description": "The absolute url to postback the status updates."
+        },
+        "SignRequestMode": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Set to 1 for sending at once, to 2 for sequential.",
+          "default": 2
+        },
+        "DaysToExpire": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Amount of days before expiration. Max 90 days.",
+          "default": 60
+        }
+      }
+    },
+    "Transaction": {
+      "type": "object",
+      "properties": {
+        "Id": {
+          "readOnly": true,
+          "type": "string",
+          "description": "The id of the transaction."
+        },
+        "Files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "Rel": {
+                      "type": "string"
+                    },
+                    "Type": {
+                      "type": "string"
+                    },
+                    "Link": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "DisplayName": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "Language": {
+          "description": "The language, only de-DE, en-US, es-ES, fr-FR, it-IT, pl-PL and nl-NL allowed.",
+          "type": "string",
+          "enum": [
+            "de-DE",
+            "en-US",
+            "es-ES",
+            "fr-FR",
+            "it-IT",
+            "pl-PL",
+            "nl-NL"
+          ]
+        },
+        "Seal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Seal the document before sending to the signers."
+        },
+        "Signers": {
+          "type": "array",
+          "description": "The signer information.",
+          "items": {
+            "type": "object",
+            "required": [
+              "Email"
+            ],
+            "properties": {
+              "Id": {
+                "type": "string",
+                "description": "The id of the signer, must be unique within a transaction."
+              },
+              "Email": {
+                "type": "string",
+                "description": "The e-mail address of the signer",
+                "example": "john.doe@example.com"
+              },
+              "IntroText": {
+                "type": "string",
+                "description": "An intro text to show to the user during the sign process."
+              },
+              "Authentications": {
+                "description": "List of authentications that the signer has to authenticate with.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Authentication"
+                }
+              },
+              "Verifications": {
+                "description": "List of verifications that the signer has to verify with.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Verification"
+                }
+              },
+              "SendSignRequest": {
+                "description": "Send a sign invitation to the signer his e-mail address.",
+                "default": true,
+                "type": "boolean"
+              },
+              "SignUrl": {
+                "description": "A unique URL per signer that provides the signing flow for the signer.",
+                "type": "string",
+                "readOnly": true
+              },
+              "SignRequestSubject": {
+                "type": "string",
+                "description": "The subject of the sign request email in plain text."
+              },
+              "SignRequestMessage": {
+                "description": "The message of the sign request in plain text.",
+                "type": "string"
+              },
+              "SendSignConfirmation": {
+                "description": "Send the sign confirmation to the signer his e-mail address.",
+                "type": "boolean"
+              },
+              "Language": {
+                "description": "Only de-DE, en-US, es-ES, fr-FR, it-IT, pl-PL and nl-NL are allowed.",
+                "default": "nl-NL",
+                "type": "string",
+                "enum": [
+                  "de-DE",
+                  "en-US",
+                  "es-ES",
+                  "fr-FR",
+                  "it-IT",
+                  "pl-PL",
+                  "nl-NL"
+                ]
+              },
+              "ScribbleName": {
+                "description": "The name of the signer, this will be pre filled in the scribble form.",
+                "type": "string"
+              },
+              "DaysToRemind": {
+                "description": "Amount of days before reminding the signers.",
+                "default": 7,
+                "type": "integer"
+              },
+              "Expires": {
+                "description": "When set the signer is no longer allowed to sign the transaction after this date.",
+                "type": "string",
+                "format": "date-time"
+              },
+              "Reference": {
+                "description": "The reference of the signer.",
+                "type": "string"
+              },
+              "RejectReason": {
+                "readOnly": true,
+                "description": "The rejection reason that was given by the signer when the transaction was rejected.",
+                "type": "string"
+              },
+              "ReturnUrl": {
+                "description": "The url to redirect the user to after signing, rejecting or cancelling.",
+                "default": "https://signhost.com",
+                "type": "string"
+              },
+              "Context": {
+                "type": "object",
+                "description": "Any valid json object which we will return."
+              },
+              "Activities": {
+                "type": "array",
+                "readOnly": true,
+                "description": "List of activities attached to this signer.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "Id": {
+                      "type": "string"
+                    },
+                    "Code": {
+                      "type": "integer",
+                      "enum": [
+                        101,
+                        102,
+                        103,
+                        104,
+                        105,
+                        201,
+                        202,
+                        203,
+                        301,
+                        302,
+                        303,
+                        401,
+                        402,
+                        403
+                      ],
+                      "description": "* 101 -  Invitation sent\n* 102 -  Received\n* 103 -  Opened\n* 104 -  Reminder sent\n* 105 -  Document opened, Info property contains the file id of the opened document.\n* 201 -  Cancelled\n* 202 -  Rejected\n* 203 -  Signed\n* 301 -  Signed document sent\n* 302 -  Signed document opened\n* 303 -  Signed document downloaded\n* 401 -  Receipt sent\n* 402 -  Receipt opened\n* 403 -  Receipt downloaded\n"
+                    },
+                    "Info": {
+                      "type": "string",
+                      "description": "May contain additional information belonging to this activity"
+                    },
+                    "CreatedDateTime": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Receivers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "Name",
+              "Email",
+              "Message"
+            ],
+            "properties": {
+              "Name": {
+                "type": "string",
+                "description": "The name of the receiver."
+              },
+              "Email": {
+                "type": "string",
+                "description": "The e-mail address of the receiver."
+              },
+              "Language": {
+                "type": "string",
+                "description": "The language of the receiver, only de-DE, en-US, es-ES, fr-FR, it-IT and nl-NL are allowed.",
+                "default": "nl-NL"
+              },
+              "Subject": {
+                "type": "string",
+                "description": "The subject of the receiver email in plain text."
+              },
+              "Message": {
+                "type": "string",
+                "description": "The email message towards the receiver in plain text."
+              },
+              "Reference": {
+                "type": "string",
+                "description": "The reference of the receiver."
+              },
+              "Context": {
+                "type": "object",
+                "description": "Any valid json object which we will return back."
+              }
+            }
+          }
+        },
+        "Reference": {
+          "type": "string",
+          "description": "The reference of the transaction. For example \"1234\""
+        },
+        "PostbackUrl": {
+          "type": "string",
+          "description": "The absolute url to postback the status updates."
+        },
+        "SignRequestMode": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Set to 1 for sending at once, to 2 for sequential.",
+          "default": 2
+        },
+        "DaysToExpire": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Amount of days before expiration. Max 90 days.",
+          "default": 60
+        },
+        "SendEmailNotifications": {
+          "type": "boolean",
+          "description": "Send e-mail notifications to the sender.",
+          "default": true
+        },
+        "Status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Current transaction status.",
+          "enum": [
+            5,
+            10,
+            20,
+            30,
+            40,
+            50,
+            60,
+            70
+          ]
+        },
+        "CancelationReason": {
+          "type": "string",
+          "description": "The original cancellation reason given during a DELETE call."
+        },
+        "Context": {
+          "type": "object",
+          "description": "Any valid json object which we will return back."
+        }
+      }
+    },
+    "Authentication": {
+      "type": "object",
+      "properties": {
+        "Type": {
+          "type": "string",
+          "enum": [
+            "DigiD",
+            "PhoneNumber"
+          ],
+          "description": "Type of the authentication object."
+        },
+        "Number": {
+          "type": "string",
+          "description": "Phone number: This field is mandatory when the authentication method PhoneNumber is chosen\n"
+        },
+        "Bsn": {
+          "type": "number",
+          "description": "This field is mandatory when the authentication method BSN is chosen\n"
+        }
+      },
+      "required": [
+        "Type"
+      ]
+    },
+    "Verification": {
+      "type": "object",
+      "properties": {
+        "Type": {
+          "type": "string",
+          "enum": [
+            "Consent",
+            "DigiD",
+            "eHerkenning",
+            "eIDAS Login",
+            "iDeal",
+            "iDIN",
+            "itsme Identification",
+            "PhoneNumber",
+            "Scribble",
+            "itsme sign",
+            "SigningCertificate",
+            "SURFnet",
+            "ZealiD Qualified"
+          ],
+          "description": "Type of the verification object."
+        }
+      },
+      "required": [
+        "Type"
+      ]
+    },
+    "FileEntry": {
+      "type": "object",
+      "properties": {
+        "Links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          }
+        },
+        "DisplayName": {
+          "type": "string",
+          "description": "The name of the document that was displayed to the user while signing the documents."
+        }
+      }
+    },
+    "Link": {
+      "type": "object",
+      "properties": {
+        "Rel": {
+          "type": "string",
+          "description": "The type of file you can download.",
+          "enum": [
+            "file",
+            "receipt",
+            "signer.sign",
+            "signer.download"
+          ]
+        },
+        "Type": {
+          "type": "string",
+          "description": "The type of the file you can expect to download."
+        },
+        "Link": {
+          "type": "string",
+          "description": "Url containing the link to the file."
+        }
+      }
+    },
+    "File": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        }
+      }
+    },
+    "ErrorModel": {
+      "type": "object",
+      "properties": {
+        "Message": {
+          "type": "string",
+          "description": "Message describing the error in the request."
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Authorization": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "Authorization": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.signhost.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.evidos.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Productivity"
+    }
+  ]
+}

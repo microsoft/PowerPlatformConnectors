@@ -16,6 +16,9 @@ A free Cradl AI account. If you don't already have one, you can sign up for free
 
 This connector supports the following operations:
 
+### Create document
+Create a new document.
+
 ### Parse document with human-in-the-loop
 
 Parse a document with *Flows*. This operation runs asynchronous.
@@ -26,11 +29,7 @@ Parse a document by calling the model directly. This operation runs synchronousl
 
 ## Obtaining Credentials
 
-Log into Cradl AI, then go to [API -> New API key](https://app.cradl.ai/appclients) to create API credentials. Create a new Power Automate connection and copy the `clientId` *and* `clientSecret`to the *Client Credentials* field. The `clientId` and `clientSecret` should be separated by a colon:
-
-*Client Credentials:*
-
-> \<clientId\>:\<clientSecret\>
+Log into Cradl AI, then go to [API -> New API key](https://app.cradl.ai/appclients) to create API credentials. Create a new Power Automate connection and copy `Credentials` to the *Client Credentials* field.
 
 ## Getting Started
 

@@ -26,6 +26,9 @@ Get a specific company linked to a manufacturer.
 ### Update a company
 Update a specific company of a manufacturer.
 
+### Delete a company
+Delete a specific company of a manufacturer.
+
 ### Archive a company
 Archive a company together with all of its contacts.
 
@@ -59,8 +62,14 @@ Get a specific contact of a manufacturer or its companies.
 ### Update a manufacturer contact
 Update a specific contact of a manufacturer or its companies.
 
+### Delete a distributor contact
+Delete a specific contact of a distributor.
+
 ### Archive a contact
 Archive a specific contact and remove its invites.
+
+### Unarchive a contact
+Unarchive a contact.
 
 ### Search distributor accounts
 Search accounts in the address book of a distributor.
@@ -115,6 +124,9 @@ Update a specific component in master data
 
 ### Delete components in bulk
 Delete multiple components in master data
+
+### Upsert components in bulk
+Create or update multiple components in master data.
 
 ### Upsert component prices in bulk
 Create or update multiple component prices in master data.
@@ -173,8 +185,17 @@ Links one or more features to a component in master data. Existing links will be
 ### Unlink a feature from a component
 Unlinks a feature from a specific component in master data.
 
+### Search component quantities
+Search quantities of a component in master data.
+
+### Set component quantities
+Set quantities for a component in master data. Existing quantities are overwritten or deleted.
+
 ### Link a feature to a component
 Links one feature to a component in master data.
+
+### Copy a component to another version
+Copy a component to another version.
 
 ### Search properties
 Search properties in master data.
@@ -187,6 +208,9 @@ Delete a specific property from master data
 
 ### Update a property
 Update a specific property in master data.
+
+### Copy a property to another version
+Copy a property to another version.
 
 ### Search feature groups
 Search feature groups in master data.
@@ -205,6 +229,9 @@ Delete a specific feature group from master data.
 
 ### Update a feature group
 Update a specific feature group in master data.
+
+### Copy a feature group to another version
+Copy a feature group to another version.
 
 ### Search features
 Search features in a specific feature group in master data.
@@ -227,6 +254,9 @@ Update a feature in a specific feature group in master data.
 ### Change the feature group of a feature
 Change the feature group of a specific feature in master data.
 
+### Copy a feature to another version
+Copy a feature to another version.
+
 ### Search units
 Search units in master data.
 
@@ -241,6 +271,9 @@ Delete a specific unit from master data.
 
 ### Update a unit
 Update a specific unit in master data.
+
+### Copy a unit to another version
+Copy a unit to another version.
 
 ### Search custom object types
 Search custom object types of a manufacturer.
@@ -275,6 +308,9 @@ Get a specific project of a manufacturer.
 ### Update a project
 Update a specific project of a manufacturer.
 
+### Delete a project
+Delete a specific project of a manufacturer.
+
 ### Add products to a project
 Add one or more products to a project of a manufacturer.
 
@@ -286,6 +322,9 @@ Start an asynchronous recalculation of the project.
 
 ### Generate a document for a project
 Generate a PDF document for a specific project. The template ID is optional only if the document type is QUOTE and a default template has been configured.
+
+### Generate a word document for a project
+Generate a Microsoft word document for a specific project. The template ID is optional only if the document type is QUOTE and a default template has been configured.
 
 ### Add a configuration to a project
 Add a new V2 configuration to a project.
@@ -326,8 +365,20 @@ Cancel the order process and move a project segment back to step 2.
 ### Change the settings of a project segment
 Change the settings of a project segment. Settings are only available if a segment configurator is configured.
 
-### Add a configuration to a segment
+### Add a configuration to a project segment
 Add a V1 configuration to a specific project segment.
+
+### Continue recalculation of a project segment
+Continues the recalculation of a project segment if it was paused by an external recalculation.
+
+### Search attachments of a project segment
+Search attachments of a specific project segment.
+
+### Add an attachment to a project segment
+Add an attachment to a specific project segment.
+
+### Delete an attachment of a project segment
+Delete an attachment of a specific project segment.
 
 ### Search project segment items
 Search project segment items of a specific manufacturer.
@@ -490,6 +541,9 @@ Search payment conditions of a manufacturer.
 
 ### Search tax conditions
 Search tax conditions of a manufacturer.
+
+### Search supported languages
+Search the supported languages.
 
 
 ## Obtaining Credentials

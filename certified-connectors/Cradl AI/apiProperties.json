@@ -5,21 +5,91 @@
         "type": "securestring",
         "uiDefinition": {
           "displayName": "Client Credentials",
-          "description": "Client credentials specified as clientId:clientSecret",
-          "tooltip": "Login to your Cradl AI account to generate client credentials.",
+          "description": "Your client credentials.",
+          "tooltip": "Provide your client credentials.",
           "constraints": {
-            "tabIndex": 2,
-            "clearText": false,
             "required": "true"
           }
         }
       }
     },
     "iconBrandColor": "#121220",
-    "scriptOperations": [],
+    "scriptOperations": [
+      "CreateDocument",
+      "CreateRun",
+      "GetModels"
+    ],
     "capabilities": [],
-    "policyTemplateInstances": [],
-    "publisher": "Cradl AI",
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set basic auth",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Authorization",
+          "x-ms-apimTemplateParameter.value": "Basic @connectionParameters('api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "dynamichosturl",
+        "title": "Change host to auth",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://auth.lucidtech.ai",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set content type",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Content-Type",
+          "x-ms-apimTemplateParameter.value": "application/x-www-form-urlencoded",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setvaluefromurl",
+        "title": "Authorize",
+        "parameters": {
+          "x-ms-apimTemplateParameter.parameterTemplate": "@headers('Authorization')",
+          "x-ms-apimTemplateParameter.httpMethod": "POST",
+          "x-ms-apimTemplateParameter.parameterValueUrl": "/oauth2/token?grant_type=client_credentials",
+          "x-ms-apimTemplateParameter.parameterValuePathTemplate": "@body().access_token",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set auth header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Authorization",
+          "x-ms-apimTemplateParameter.value": "Bearer @headers('Authorization')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "dynamichosturl",
+        "title": "Change host back",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://api.lucidtech.ai/v1",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set JSON content type",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Content-Type",
+          "x-ms-apimTemplateParameter.value": "application/json",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      }
+    ],
+    "publisher": "Ståle Zerener Haugnæss",
     "stackOwner": "Cradl AI"
   }
 }

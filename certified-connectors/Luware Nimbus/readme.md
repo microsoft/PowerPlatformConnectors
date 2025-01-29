@@ -8,7 +8,7 @@ The Luware Nimbus Connector allows for integration between Nimbus and 3rd party 
 * An Azure tenant
 * The Power platform CLI tools
 * At least one Luware Nimbus Service provisioned
-* A role in Luware Nimbus allowing the usage of the Luware Nimbus connector (https://help.luware.com/nimbus/?contentKey=PARBAC)
+* A role in Luware Nimbus allowing the usage of the Luware Nimbus connector (https://help.luware.com/power-automate-roles)
 
 
 ## Supported Operations
@@ -34,7 +34,7 @@ The Luware Nimbus Connector allows for integration between Nimbus and 3rd party 
 This connector uses OAuth via an Azure AD / Entra ID app for authentication. See below for instructions how to set up an Azure AD / Entra ID application. 
 
 ## Getting Started
-Check out our use cases describing common scenarios for the Luware Nimbus connector: https://help.luware.com/nimbus/?contentKey=pauclist 
+Check out our use cases describing common scenarios for the Luware Nimbus connector: https://help.luware.com/power-automate-use-cases
 
 ## Known Issues and Limitations
 * Losing permissions (RBAC) in Luware Nimbus will disable triggers in power automate without transparent information for the end user. Flows will just not be triggered anymore.

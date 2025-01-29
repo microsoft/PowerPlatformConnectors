@@ -64,6 +64,7 @@ We provide the expertise, software and services required to underpin student suc
 
 ## Known Issues and Limitations
 
+* Newly introduced Version selection may require updating on flows if they are changed. If they are not changed that it will default to the latest stable version.
 
 ## Deployment instructions
 

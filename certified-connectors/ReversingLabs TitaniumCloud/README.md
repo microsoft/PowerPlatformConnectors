@@ -84,7 +84,8 @@ TitaniumCloud account with adequate roles for the desired API-s.
 `Group By RHA1 Single Query`: Returns a list of all SHA1 hashes of functionally similar samples for the requested SHA1 sample hash and RHA1 precision level    
 `Import Hash Similarity`: Provides a list of all available SHA1 hashes for the requested import hash (imphash)  
 `Import Hash Similarity paginated`: Provides a list of all available SHA1 hashes for the requested import hash (imphash)  
-
+`File Reputation Override`: Enables sample classification user overrides
+`File Reputation List User Overrides`: Enables listing of the user overrides
 
 ## Obtaining Credentials
 Visit [reversinglabs.com](https://www.reversinglabs.com/products/file-reputation-service) to get in contact with ReversingLabs sales representatives.​  

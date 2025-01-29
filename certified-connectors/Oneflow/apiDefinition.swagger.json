@@ -35,6 +35,117 @@
   ],
   "tags": [],
   "paths": {
+    "/webhooks": {
+      "x-ms-notification-content": {
+        "description": "Webhook event sent by Oneflow.",
+        "schema": {
+          "$ref": "#/definitions/Webhook_Event"
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "API Key": []
+          }
+        ],
+        "summary": "When a contract is updated",
+        "description": "Register a webhook for a specified contract update event",
+        "operationId": "webhookRegister",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "callback_url": {
+                  "type": "string",
+                  "description": "callback_url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": ""
+                },
+                "filters": {
+                  "x-ms-visibility": "important",
+                  "x-ms-summary": "Update type",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Select event that will trigger this flow.",
+                    "enum": [
+                      "contract:publish",
+                      "contract:sign",
+                      "contract:delete",
+                      "contract:decline",
+                      "participant:first_visit",
+                      "participant:sign",
+                      "participant:create",
+                      "participant:decline",
+                      "participant:delete",
+                      "data_field:update",
+                      "contract:signing_period_expire",
+                      "contract:signing_period_revive",
+                      "contract:signature_reset"
+                    ]
+                  }
+                },
+                "template_group_id": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetTemplateTypes",
+                    "value-collection": "data",
+                    "value-path": "id",
+                    "value-title": "name"
+                  },
+                  "x-ms-summary": "Template Group Id",
+                  "description": "(Optional) Filter contracts by a template group."
+                }
+              },
+              "required": [
+                "callback_url",
+                "filters"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}": {
+      "delete": {
+        "x-ms-visibility": "internal",
+        "summary": "Delete Trigger",
+        "description": "Deletes Webhook",
+        "operationId": "DeleteTrigger",
+        "security": [
+          {
+            "API Key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "description": "ID of the Webhook being deleted",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string"
+          }
+        ]
+      }
+    },
     "/contracts/parties/create": {
       "post": {
         "summary": "Add Participant",
@@ -83,6 +194,14 @@
               "Ownerside"
             ],
             "default": "Company"
+          },
+          {
+            "name": "signing_order",
+            "in": "header",
+            "type": "number",
+            "description": "Sign order of participant",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "Signing order"
           },
           {
             "name": "party",
@@ -414,6 +533,47 @@
       }
     },
     "/contracts/{contract_id}/": {
+      "get": {
+        "summary": "Get contract details",
+        "description": "Retrieve the details of a contract by its ID.",
+        "operationId": "GetContract",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description": "Contract Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Contract"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
       "delete": {
         "summary": "Delete a contract",
         "description": "Delete a specific contract by its ID.",
@@ -464,47 +624,6 @@
           },
           "401": {
             "description": "Unauthorized",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "get": {
-        "summary": "Get contract details",
-        "description": "Retrieve the details of a contract by its ID.",
-        "operationId": "GetContract",
-        "parameters": [
-          {
-            "name": "contract_id",
-            "in": "path",
-            "type": "string",
-            "required": true,
-            "x-ms-summary": "Contract Id",
-            "description": "Contract Id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/Contract"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "object"
-            }
-          },
-          "404": {
-            "description": "Not Found",
             "schema": {
               "type": "object"
             }
@@ -1517,9 +1636,7 @@
             "workspace_id": {
               "type": "integer",
               "format": "int32",
-              "description": "workspace_id",
-              "x-ms-summary": "Workspace Id",
-              "x-ms-visibility": "internal"
+              "x-ms-summary": "Workspace Id"
             }
           },
           "description": "Contract _private attributes"
@@ -1534,9 +1651,7 @@
             "template_id": {
               "type": "integer",
               "format": "int32",
-              "description": "template_id",
-              "x-ms-summary": "Template Id",
-              "x-ms-visibility": "internal"
+              "x-ms-summary": "Template Id"
             },
             "template_type_id": {
               "type": "integer",
@@ -1650,61 +1765,62 @@
           "description": "Contract available_options attributes"
         },
         "data_fields": {
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Data Fields",
+          "x-ms-summary": "Data field",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "_private_ownerside": {
-                "x-ms-summary": "Private Ownerside (Data Fields)",
+                "x-ms-summary": "private ownerside",
                 "type": "object",
                 "properties": {
                   "created_time": {
                     "type": "string",
-                    "description": "created_time",
-                    "x-ms-summary": "Created Time (Data Field)"
+                    "description": "Data field created_time",
+                    "x-ms-summary": "created time"
                   },
                   "custom_id": {
                     "type": "string",
-                    "description": "custom_id",
-                    "x-ms-summary": "Custom Id (Data Field)"
+                    "description": "Data field custom_id",
+                    "x-ms-summary": "custom id"
                   },
                   "updated_time": {
                     "type": "string",
-                    "description": "updated_time",
-                    "x-ms-summary": "Updated Time (Data Field)"
+                    "description": "Data field updated_time",
+                    "x-ms-summary": "Updated time"
                   }
                 },
                 "description": "_private_ownerside"
               },
               "description": {
                 "type": "string",
-                "description": "description",
-                "x-ms-summary": "Data Field Description"
+                "description": "Data field description",
+                "x-ms-summary": "description"
               },
               "id": {
                 "type": "integer",
                 "format": "int32",
-                "description": "id",
-                "x-ms-summary": "Data Field Id"
+                "description": "Data field id",
+                "x-ms-summary": "id"
               },
               "name": {
                 "type": "string",
-                "description": "name",
-                "x-ms-summary": "Data Field Name"
+                "description": "Data field name",
+                "x-ms-summary": "name"
               },
               "placeholder": {
                 "type": "string",
-                "description": "placeholder"
+                "description": "Data field placeholder",
+                "x-ms-summary": "placeholder"
               },
               "value": {
                 "type": "string",
-                "description": "value"
+                "description": "Data field value",
+                "x-ms-summary": "value"
               }
             }
           },
-          "description": "data_fields"
+          "description": "Data fields collection"
         },
         "id": {
           "type": "integer",
@@ -2305,8 +2421,7 @@
           "type": "object",
           "properties": {
             "amount": {
-              "type": "integer",
-              "format": "int32",
+              "type": "number",
               "x-ms-summary": "amount"
             },
             "type": {
@@ -2413,8 +2528,7 @@
           "type": "object",
           "properties": {
             "amount": {
-              "type": "integer",
-              "format": "int32",
+              "type": "number",
               "description": "Any positive number or 1/0 if the type is multiple_choice/single_choice",
               "x-ms-summary": "Amount"
             },
@@ -2546,6 +2660,51 @@
             "updated_time": {
               "type": "string",
               "x-ms-summary": "Datafield updated time"
+            }
+          }
+        }
+      }
+    },
+    "Webhook_Event": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Contract id",
+              "x-ms-summary": "Contract id"
+            }
+          }
+        },
+        "callback_id": {
+          "type": "string",
+          "x-ms-summary": "Callback id",
+          "description": "Callback id"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "created_time": {
+                "type": "string",
+                "format": "date-time",
+                "x-ms-summary": "Event created time"
+              },
+              "id": {
+                "type": "number",
+                "x-ms-summary": "Event id"
+              },
+              "type": {
+                "type": "string",
+                "x-ms-summary": "Event type"
+              },
+              "signature": {
+                "type": "string",
+                "x-ms-summary": "Signature"
+              }
             }
           }
         }

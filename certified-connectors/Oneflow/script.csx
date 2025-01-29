@@ -1,6 +1,6 @@
 ﻿public class Script : ScriptBase
 {
-  #region fields & consctructors
+  #region fields & constructors
   private readonly Dictionary<string, Func<IScriptContext, Task<HttpResponseMessage>>> _operationMappings;
   private readonly Dictionary<string, string> _schemaMappings;
   public Script()
@@ -61,37 +61,48 @@
 
   private async Task<HttpResponseMessage> HandleAddProduct(IScriptContext ctx)
   {
-
-    HttpRequestMessage req = ctx.Request;
-    string contractId = GetHeaderStringValue(req.Headers, Constants.ContractIdHeader);
-    string productGroupIndexStr = GetHeaderStringValue(req.Headers, Constants.ProductGroupIndexHeader);
-
-    var getProductGroupsRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(string.Format(Constants.Requests.ContractProductGroupsEndpoint, contractId)));
-    CopyHeaders(req, getProductGroupsRequest);
-
-    HttpResponseMessage getProductGroupsResponse = await ctx.SendAsync(getProductGroupsRequest, CancellationToken)
-        .ConfigureAwait(false);
-
-    if (!getProductGroupsResponse.IsSuccessStatusCode)
+    StringBuilder log = new StringBuilder();
+    try
     {
-      return getProductGroupsResponse;
+      HttpRequestMessage req = ctx.Request;
+      string contractId = GetHeaderStringValue(req.Headers, Constants.ContractIdHeader);
+      string productGroupIndexStr = GetHeaderStringValue(req.Headers, Constants.ProductGroupIndexHeader);
+      log.AppendLine($"contractId - {contractId}, productGroupIndex - {productGroupIndexStr}");
+      var getProductGroupsRequest = new HttpRequestMessage(
+          HttpMethod.Get,
+          new Uri(string.Format(Constants.Requests.ContractProductGroupsEndpoint, req.RequestUri.Host, contractId)));
+      CopyHeaders(req, getProductGroupsRequest);
+
+      HttpResponseMessage getProductGroupsResponse = await ctx.SendAsync(getProductGroupsRequest, CancellationToken)
+          .ConfigureAwait(false);
+
+      if (!getProductGroupsResponse.IsSuccessStatusCode)
+      {
+        return getProductGroupsResponse;
+      }
+
+      var getProductGroupsResponseJson = await getProductGroupsResponse.Content.ReadAsStringAsync();
+      var productGroups = JObject.Parse(getProductGroupsResponseJson);
+
+      int index = Convert.ToInt32(productGroupIndexStr);
+      int count = productGroups.Value<int>("count");
+
+      if (count < index)
+      {
+        throw new ScriptException(HttpStatusCode.BadRequest,
+        $"The selected contract contains only {count} product tables. Cannot populate table #{index} because it does not exist.");
+      }
+
+      int productGroupId = productGroups.Value<JArray>("data").ElementAt(index - 1).Value<int>("id");
+      log.AppendLine($"product groups count - {count}, product group id - {productGroupId}");
+      req.RequestUri = new Uri(String.Format(Constants.Requests.AddProductEndpoint, req.RequestUri.Host, contractId, productGroupId));
+      log.AppendLine($"composed put products uri - {req.RequestUri}");
+      return await ctx.SendAsync(req, CancellationToken);
     }
-
-    var getProductGroupsResponseJson = await getProductGroupsResponse.Content.ReadAsStringAsync();
-    var productGroups = JObject.Parse(getProductGroupsResponseJson);
-
-    int index = Convert.ToInt32(productGroupIndexStr);
-    int count = productGroups.Value<int>("count");
-    if (count < index)
+    catch (Exception ex)
     {
-      throw new ScriptException(HttpStatusCode.BadRequest,
-      $"The selected contract contains only {count} product tables. Cannot populate table #{index} because it does not exist.");
+      throw new ScriptException(HttpStatusCode.InternalServerError, log.ToString() + ex.Message, ex);
     }
-
-    int productGroupId = productGroups.Value<JArray>("data").ElementAt(index - 1).Value<int>("id");
-    req.RequestUri = new Uri(String.Format(Constants.Requests.AddProductEndpoint, contractId, productGroupId));
-
-    return await ctx.SendAsync(req, CancellationToken);
   }
 
   private async Task<HttpResponseMessage> HandleGetTemplates(IScriptContext ctx)
@@ -169,7 +180,7 @@
     try
     {
       var req = ctx.Request;
-      string contractId = GetHeaderStringValue(req.Headers, "contract_id");
+      string contractId = GetHeaderStringValue(req.Headers, Constants.CreatePartyContractIdHeader);
       debugInfo.AppendLine($"contractId - {contractId}");
 
       var inputPartyJson = await req.Content.ReadAsStringAsync();
@@ -177,71 +188,196 @@
       var inputParty = JsonConvert.DeserializeObject<Models.Party>(inputPartyJson);
       var selectedType = GetHeaderStringValue(req.Headers, Constants.ParticipantTypeHeader);
       debugInfo.AppendLine($"selectedType - {selectedType}");
-
+      int participantId = 0;
+      HttpResponseMessage result = null;
       // for individual parties, just straight up create an individual participant.
       if (selectedType.Equals(Constants.PartyTypes.Individual, StringComparison.OrdinalIgnoreCase))
       {
         debugInfo.AppendLine("identified as individual. creating individual party.");
-        return await CreateParty(req, contractId, inputParty, ctx);
-      }
-
-      // call getParties
-      debugInfo.AppendLine("trying to get existing parties.");
-      var getPartiesRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(string.Format(Constants.Requests.PartyEndpoint, contractId)));
-      CopyHeaders(req, getPartiesRequest);
-
-      var getPartiesResponse = await ctx.SendAsync(getPartiesRequest, CancellationToken)
-          .ConfigureAwait(false);
-
-      if (!getPartiesResponse.IsSuccessStatusCode)
-      {
-        return getPartiesResponse;
-      }
-      debugInfo.AppendLine("converting get party response.");
-      var getPartiesResponseJson = await getPartiesResponse.Content.ReadAsStringAsync();
-
-      var existingParties = JsonConvert.DeserializeObject<Responses.GetPartiesResponse>(getPartiesResponseJson).data;
-      int matchingPartyId = 0;
-
-      // if we need to create an ownserside participant, just find my_party and create a participant for it.
-      if (selectedType.Equals(Constants.PartyTypes.Ownerside, StringComparison.OrdinalIgnoreCase))
-      {
-        matchingPartyId = existingParties.FirstOrDefault(x =>
-        x.my_party.Value).id ??
-        throw new ScriptException(HttpStatusCode.InternalServerError,
-                                  $"Couldn't find ownerside party for contract {contractId}");
-
-        return await CreateParticipant(req, matchingPartyId, contractId, inputParty.participant, ctx);
-      }
-
-      // process Company participants.                
-      debugInfo.AppendLine($"Input party - {Environment.NewLine + inputParty}");
-      foreach (Models.Party existingParty in existingParties)
-      {
-        debugInfo.AppendLine($"Trying to match with party - {Environment.NewLine + existingParty}");
-        if (existingParty.Equals(inputParty))
+        result = await CreateParty(req, contractId, inputParty, ctx);
+        if (!result.IsSuccessStatusCode)
         {
-          debugInfo.AppendLine("match");
-          matchingPartyId = existingParty.id.Value;
-          break;
+          return result;
         }
-        debugInfo.AppendLine("not match");
+        string responseStr = await result.Content.ReadAsStringAsync();
+        JObject partyResponse = JObject.Parse(responseStr);
+        participantId = partyResponse["participant"]["id"].ToObject<int>();
       }
-
-      debugInfo.Append($"matching party id: {Environment.NewLine + matchingPartyId}");
-      if (matchingPartyId != default)
+      else
       {
-        debugInfo.AppendLine("Party found. creating participant.");
-        return await CreateParticipant(req, matchingPartyId, contractId, inputParty.participant, ctx);
+        // call getParties
+        debugInfo.AppendLine("trying to get existing parties.");
+
+        var getPartiesRequest = new HttpRequestMessage(
+            HttpMethod.Get,
+            new Uri(string.Format(Constants.Requests.PartyEndpoint, req.RequestUri.Host, contractId)));
+
+        CopyHeaders(req, getPartiesRequest);
+
+        var getPartiesResponse = await ctx.SendAsync(getPartiesRequest, CancellationToken)
+            .ConfigureAwait(false);
+
+        if (!getPartiesResponse.IsSuccessStatusCode)
+        {
+          return getPartiesResponse;
+        }
+
+        debugInfo.AppendLine("converting get party response.");
+        var getPartiesResponseJson = await getPartiesResponse.Content.ReadAsStringAsync();
+
+        var existingParties = JsonConvert.DeserializeObject<Responses.GetPartiesResponse>(getPartiesResponseJson).data;
+        int matchingPartyId = 0;
+
+        // if we need to create an ownserside participant, just find my_party and create a participant for it.
+        if (selectedType.Equals(Constants.PartyTypes.Ownerside, StringComparison.OrdinalIgnoreCase))
+        {
+          matchingPartyId = existingParties.FirstOrDefault(x =>
+          x.my_party.Value).id ??
+          throw new ScriptException(HttpStatusCode.InternalServerError,
+                                    $"Couldn't find ownerside party for contract {contractId}");
+
+          result = await CreateParticipant(req, matchingPartyId, contractId, inputParty.participant, ctx);
+          if (!result.IsSuccessStatusCode)
+          {
+            return result;
+          }
+          string responseStr = await result.Content.ReadAsStringAsync();
+          JObject partyResponse = JObject.Parse(responseStr);
+          participantId = partyResponse["id"].ToObject<int>();
+        }
+        else
+        {
+          // process Company participants.                
+          debugInfo.AppendLine($"Input party - {Environment.NewLine + inputParty}");
+          foreach (Models.Party existingParty in existingParties)
+          {
+            debugInfo.AppendLine($"Trying to match with party - {Environment.NewLine + existingParty}");
+            if (existingParty.Equals(inputParty))
+            {
+              debugInfo.AppendLine("match");
+              matchingPartyId = existingParty.id.Value;
+              break;
+            }
+            debugInfo.AppendLine("not match");
+          }
+
+          debugInfo.Append($"matching party id: {Environment.NewLine + matchingPartyId}");
+          if (matchingPartyId != default)
+          {
+            debugInfo.AppendLine("Party found. creating participant.");
+            result = await CreateParticipant(req, matchingPartyId, contractId, inputParty.participant, ctx);
+            if (!result.IsSuccessStatusCode)
+            {
+              return result;
+            }
+            string responseStr = await result.Content.ReadAsStringAsync();
+            JObject partyResponse = JObject.Parse(responseStr);
+            participantId = partyResponse["id"].ToObject<int>();
+          }
+          else
+          {
+            debugInfo.AppendLine("Party not found. creating new party.");
+            result = await CreateParty(req, contractId, inputParty, ctx);
+            if (!result.IsSuccessStatusCode)
+            {
+              return result;
+            }
+            string responseStr = await result.Content.ReadAsStringAsync();
+            JObject partyResponse = JObject.Parse(responseStr);
+            participantId = partyResponse["participants"].ElementAt(0)["id"].ToObject<int>();
+          }
+        }
+      }
+      string signOrder = GetHeaderStringValue(req.Headers, Constants.SigningOrderHeader);
+      if (!string.IsNullOrEmpty(signOrder) && Int32.TryParse(signOrder, out int orderInt) && participantId != default)
+      {
+        debugInfo.AppendLine($"setting sign order.");
+        var getContractRequest = new HttpRequestMessage(
+           HttpMethod.Get,
+           new Uri(string.Format(Constants.Requests.ContractsEndpoint, req.RequestUri.Host, contractId)));
+
+        CopyHeaders(req, getContractRequest);
+
+        var getContractResponse = await ctx.SendAsync(getContractRequest, CancellationToken)
+            .ConfigureAwait(false);
+        if (!getContractResponse.IsSuccessStatusCode) return getContractResponse;
+        debugInfo.AppendLine($"retrieved contract");
+        string responseStr = await getContractResponse.Content.ReadAsStringAsync();
+        var contract = JsonConvert.DeserializeObject<Models.Contract>(responseStr);
+        var participants = new List<Models.Participant>();
+
+        foreach (Models.Party party in contract.parties)
+        {
+          if (party.participants != null && party.participants.Any())
+          {
+            participants.AddRange(party.participants);
+          }
+          else if (party.participant != null)
+          {
+            participants.Add(party.participant);
+          }
+        }
+        debugInfo.AppendLine($"extracted participants.");
+        if (contract.sign_order != null && contract.sign_order.Any())
+        {
+          foreach (var participant in participants)
+          {
+            var signorderItem = contract.sign_order.FirstOrDefault(x => x.participant_id == participant.id.Value);
+            if (signorderItem != null) participant.private_ownerside.signOrder = signorderItem.order;
+          }
+          debugInfo.AppendLine($"synced sign orders with participants.");
+        }
+
+        debugInfo.AppendLine($"$Participants: {String.Join($"{Environment.NewLine},", participants.Select(x => JsonConvert.SerializeObject(x)))}");
+
+        participants = participants.OrderBy(x => x.private_ownerside.created_time).ToList();
+        debugInfo.AppendLine($"sorted participants.");
+
+
+        var signOrderResponse = await SetParticipantSignOrder(req, debugInfo, participants, contractId, participantId, orderInt, ctx);
+        if (!signOrderResponse.IsSuccessStatusCode)
+        {
+          return signOrderResponse;
+        }
       }
 
-      debugInfo.AppendLine("Party not found. creating new party.");
-      return await CreateParty(req, contractId, inputParty, ctx);
+      return result;
     }
     catch (Exception e)
     {
       throw new ScriptException(HttpStatusCode.BadRequest, e.Message + $"Trace information: {debugInfo}");
     }
+  }
+
+  private async Task<HttpResponseMessage> SetParticipantSignOrder(HttpRequestMessage initialRequest, StringBuilder debugInfo, List<Models.Participant> existingParticipants, string contractId, int participantId, int order, IScriptContext ctx)
+  {
+    string requestUrl = string.Format(Constants.Requests.ContractsEndpoint, initialRequest.RequestUri.Host, contractId);
+    HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Put, new Uri(requestUrl));
+    CopyHeaders(initialRequest, req);
+
+    var signOrder = new List<Models.SignOrderItem>();
+    int counter = 1;
+    foreach (var participant in existingParticipants)
+    {
+      var signOrderItem = new Models.SignOrderItem() { participant_id = participant.id.Value };
+      debugInfo.AppendLine($"1");
+      if (participant.private_ownerside.signOrder != default)
+      {
+        signOrderItem.order = participant.private_ownerside.signOrder; debugInfo.AppendLine($"2");
+      }
+      else if (participant.id == participantId) { signOrderItem.order = order; debugInfo.AppendLine($"3"); }
+      else { signOrderItem.order = counter++; debugInfo.AppendLine($"4"); }
+      signOrder.Add(signOrderItem);
+    }
+    debugInfo.AppendLine($"assigned sign order to every participant.");
+    var bodyObj = new Models.Contract()
+    {
+      sign_order = signOrder
+    };
+
+    var jsonBody = JsonConvert.SerializeObject(bodyObj);
+    req.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+    return await ctx.SendAsync(req, CancellationToken);
   }
 
   private async Task<HttpResponseMessage> HandleGetTemplateTypeByTemplateId(IScriptContext ctx)
@@ -250,7 +386,7 @@
     var templateId = GetHeaderStringValue(req.Headers, Constants.TemplateIdHeader);
     if (String.IsNullOrEmpty(templateId)) throw new ScriptException(HttpStatusCode.BadRequest, "template id is a required property.");
 
-    string requestUrl = string.Format(Constants.Requests.TemplatesEndpoint, templateId);
+    string requestUrl = string.Format(Constants.Requests.TemplatesEndpoint, req.RequestUri.Host, templateId);
     var getTemplateRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(requestUrl));
     CopyHeaders(req, getTemplateRequest);
 
@@ -281,7 +417,7 @@
     try
     {
       party.AlignParticipants();
-      string requestUrl = string.Format(Constants.Requests.PartyEndpoint, contractId);
+      string requestUrl = string.Format(Constants.Requests.PartyEndpoint, initialRequest.RequestUri.Host, contractId);
       debugInfo.AppendLine($"requestUri - {requestUrl}");
       HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, new Uri(requestUrl));
       CopyHeaders(initialRequest, req);
@@ -301,7 +437,7 @@
     StringBuilder debugInfo = new StringBuilder();
     try
     {
-      string requestUrl = String.Format(Constants.Requests.ParticipantEndpoint, contractId, existingPartyId);
+      string requestUrl = String.Format(Constants.Requests.ParticipantEndpoint, initialRequest.RequestUri.Host, contractId, existingPartyId);
       debugInfo.AppendLine($"requestUri - {requestUrl}");
       if (participant == null)
       {
@@ -409,11 +545,12 @@
   {
     public static class Requests
     {
-      public const string PartyEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties";
-      public const string ParticipantEndpoint = "https://api.oneflow.com/v1/contracts/{0}/parties/{1}/participants";
-      public const string ContractProductGroupsEndpoint = "https://api.oneflow.com/v1/contracts/{0}/product_groups";
-      public const string AddProductEndpoint = "https://api.oneflow.com/v1/contracts/{0}/product_groups/{1}/products";
-      public const string TemplatesEndpoint = "https://api.oneflow.com/v1/templates/{0}";
+      public const string PartyEndpoint = "https://{0}/v1/contracts/{1}/parties";
+      public const string ParticipantEndpoint = "https://{0}/v1/contracts/{1}/parties/{2}/participants";
+      public const string ContractProductGroupsEndpoint = "https://{0}/v1/contracts/{1}/product_groups";
+      public const string AddProductEndpoint = "https://{0}/v1/contracts/{1}/product_groups/{2}/products";
+      public const string TemplatesEndpoint = "https://{0}/v1/templates/{1}";
+      public const string ContractsEndpoint = "https://{0}/v1/contracts/{1}";
     }
     public static class PartyTypes
     {
@@ -424,7 +561,9 @@
     public const string GetTemplatesFilterHeader = "x-oneflow-workspace-id";
     public const string TemplateIdHeader = "x-oneflow-template-id";
     public const string SchemaIdHeader = "schema_id";
+    public const string CreatePartyContractIdHeader = "contract_id";
     public const string ParticipantTypeHeader = "participant_type";
+    public const string SigningOrderHeader = "signing_order";
     public const string UserEmailOverrideHeader = "x-oneflow-user-email-override";
     public const string UserEmailHeader = "x-oneflow-user-email";
     public const string ProductGroupIndexHeader = "x-ms-oneflow-product-group-index";
@@ -700,6 +839,7 @@
                                                      }";
     #endregion
   }
+
   public class Models
   {
     public class Party
@@ -788,6 +928,7 @@
 
         return sb.ToString();
       }
+
       public void AlignParticipants()
       {
         if (Constants.PartyTypes.Individual.Equals(type, StringComparison.OrdinalIgnoreCase)) return;
@@ -799,8 +940,20 @@
       }
     }
 
+    public class ParticipantPrivateOwnerside
+    {
+      //[JsonConverter(typeof(DateFormatConverter), "o")] // 2023-04-27T11:29:36+00:00
+      public DateTime created_time { get; set; }
+
+      [JsonIgnore]
+      public int signOrder { get; set; }
+    }
+
     public class Participant
     {
+      [JsonProperty("_private_ownerside", NullValueHandling = NullValueHandling.Ignore)]
+      public ParticipantPrivateOwnerside private_ownerside { get; set; }
+
       //workaround for Power Automate bug with a nested object in array element.
       [JsonProperty("_permissions/contract:update", NullValueHandling = NullValueHandling.Ignore)]
       bool? updatePermission { get; set; }
@@ -929,6 +1082,22 @@
       public TemplateType template_type { get; set; }
     }
 
+    public class Contract
+    {
+      [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+      public IEnumerable<Party> parties { get; set; }
+
+      [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+      public IEnumerable<SignOrderItem> sign_order { get; set; }
+    }
+
+    public class SignOrderItem
+    {
+      public int participant_id { get; set; }
+
+      public int order { get; set; }
+    }
+
     public class TemplateType
     {
       public string extension_type { get; set; }
@@ -979,6 +1148,14 @@
         return 0;
       else
         return obj.GetHashCode();
+    }
+  }
+
+  public class DateFormatConverter : Newtonsoft.Json.Converters.IsoDateTimeConverter
+  {
+    public DateFormatConverter(string format)
+    {
+      DateTimeFormat = format;
     }
   }
 
