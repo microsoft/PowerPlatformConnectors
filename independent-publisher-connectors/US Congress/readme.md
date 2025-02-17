@@ -370,8 +370,9 @@ Congress.gov updates its data **daily**, but the timing may vary depending on le
 ## Additional Resources
 
 - [Congress.gov API Documentation](https://api.govinfo.gov/docs/)
-
 - [Congress.gov Developer Portal](https://api.congress.gov/)
-
 - [US Congress API Overview](https://www.congress.gov/developers/)
+- [US Congress GitHub Repo](https://github.com/LibraryOfCongress/api.congress.gov/)
+- API keys and user registration follow the [data.gov privacy policy.](https://data.gov/privacy-policy/)
+- API content follows the [Library of Congress privacy policy.](https://www.loc.gov/legal/privacy-policy/)
 
