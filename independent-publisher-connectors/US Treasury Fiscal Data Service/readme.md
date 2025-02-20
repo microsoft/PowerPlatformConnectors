@@ -60,6 +60,9 @@ Update frequencies vary by dataset. Some are updated **daily**, while others are
 ### What should I do if I encounter issues accessing data?
 Ensure that the **API endpoint is correct** and that you are **formatting requests properly**. If issues persist, check the [Treasury Fiscal Data Service API status](https://fiscaldata.treasury.gov/status/) or contact their support team.
 
+### Is there a data model available for the datasets?
+Yes, and there is also a Fiscal Data Registry that provides **metadata** and **data dictionaries** detailing government-wide financial data elements - specifically those data elements commonly used across multiple agencies.. You can access it [here](https://fiscal.treasury.gov/data-registry/).
+
 ## Deployment Instructions
 
 To deploy this connector as a **custom connector** within your **Power Platform** environment: import the connector file, configure the operations, and create a connection. No API key is required.
