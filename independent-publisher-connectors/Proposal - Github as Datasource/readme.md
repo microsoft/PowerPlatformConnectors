@@ -1,6 +1,6 @@
-# Github as a datasource
+# GitHub as a datasource
 
-This connector allows you to grab a raw MD file from your github repo, and pull it in as data to then be manipulated based on your markdown format.
+This connector allows you to grab a raw MD file from your GitHub repo, and pull it in as data to then be manipulated based on your markdown format.
 
 ## Publisher: Nathalie Leenders | Wortell
 
@@ -31,17 +31,17 @@ The connector supports the following operations:
 
 There are 5 parameters built in:
 
-1. Github name
+1. GitHub name
 2. Repo name
 3. Folder name
 4. Folder2 name
 5. Markdownfile name
 
-- Github name is your user account for github, or from the account you're trying to pull data from.
+- GitHub name is your user account for GitHub, or from the account you're trying to pull data from.
 - Repo name is the name of your repo.
 - Foldername is the name of the first folder
 - Foldername2 is the underlying folders. If there are more than use use foldername/foldername2/foldername3 in this parameter if needed.
-- Take note, it is open source so it doesn't need any authentication on github.
+- Take note, it is open source so it doesn't need any authentication on GitHub.
 
 ## Known issues and limitations
 
