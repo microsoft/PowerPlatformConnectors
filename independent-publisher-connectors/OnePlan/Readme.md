@@ -41,7 +41,7 @@ Returns: Success Message
 ### 'Get Mapped Plan Item Id'
 Description: This action will use the flow id and the external item id to return plan id that it belongs to. Useful for when you want to find the plan for an external item.
 
-Parmeters: Flow ID, External Item Id
+Parameters: Flow ID, External Item Id
 
 Returns: Plan Id
 
@@ -72,7 +72,7 @@ Trigger Action for when Plan gets updated
 Required parameters: None
 
 ## Obtaining Credentials
-Navigate to my.oneplan.ai, setup a trial group and follow the onboarding process. For any inquires reach out to to [OnePlan Support](https://support.oneplan.ai/hc/en-us/requests/new)
+Navigate to my.oneplan.ai, setup a trial group and follow the onboarding process. For any inquires reach out to [OnePlan Support](https://support.oneplan.ai/hc/en-us/requests/new)
 
 ## Known Issues and Limitations
 The connector does not support Work Plan actions at the moment.
