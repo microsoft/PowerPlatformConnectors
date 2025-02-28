@@ -137,7 +137,7 @@ public class Script : ScriptBase
                 return BuildErrorResponse(HttpStatusCode.NotFound, "The requested resource was not found.");
 
             case (HttpStatusCode)529:
-                _logger.LogError("529 Too Many Requests: Rate limit exceeded.");
+                _logger.LogError("429 Too Many Requests: Rate limit exceeded.");
                 return BuildErrorResponse((HttpStatusCode)529, "Too many requests. Try again later.");
 
             case HttpStatusCode.Forbidden:
