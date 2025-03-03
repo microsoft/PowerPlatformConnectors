@@ -40,7 +40,7 @@ There are 5 parameters built in:
 - GitHub name is your user account for GitHub, or from the account you're trying to pull data from.
 - Repo name is the name of your repo.
 - Foldername is the name of the first folder
-- Foldername2 is the underlying folders. If there are more than use use foldername/foldername2/foldername3 in this parameter if needed.
+- Foldername2 is the underlying folders. If there are more than 1 use foldername/foldername2/foldername3 in this parameter if needed.
 - Take note, it is open source so it doesn't need any authentication on GitHub.
 
 ## Known issues and limitations
