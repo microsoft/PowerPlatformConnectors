@@ -46,6 +46,8 @@ This connector supports the following operations:
   * The connector now supports filenames with characters such as spaces (`folder 1/my file.csv`).
   * The connector now supports binary content such as PDF files.
     *Note: Large files might run into timeout issues.([Microsoft FAQ: Script must be finished within 5 seconds](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code#custom-code-faq))
+* List Object
+  * The connector now encodes the query parameters correctly for AWS Signature Version 4. This caused an authentication issue when parameter `prefix` was used together with special characters such as `/`.
 
 ## AWS Signature Version 4
 
