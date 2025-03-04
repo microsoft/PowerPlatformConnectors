@@ -27,6 +27,9 @@ Send a completion request to a selected model (text-only format).
 ### Get generation
 Returns metadata about a specific generation request.
 
+## Obtaining credentials
+Once signed up over (https://openrouter.ai)[https://openrouter.ai], you will need to generate an API Key by navigating to your profile and under "Keys" selecting "Create Key".
+
 ## Known issues and limitations
 
 Currently there are no known issues with the connector itself, but be aware, that the underlying service might pose a few limitation based on your usage and available tokens. The connector only implements an "as-is" wrapper around the underlying service. In case you are missing an endpoint, or have a request for additional data, feel free to reach out and connect
