@@ -5297,6 +5297,8 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
             var fieldValues = lines[index].Split(',');
             var roleName = "";
             var fieldName = "";
+            var tabLabelName = "";
+
             for (var index2 = 0; index2 < fieldValues.Length; index2++)
             {
               var columnName = parsedHeaders[index2];
@@ -5310,6 +5312,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
               {
                 roleName = columnName[0];
                 fieldName = columnName[1];
+                tabLabelName = columnName[1];
                 fieldName = fieldName.Replace(" ", "");
                 fieldName = char.ToLower(fieldName[0]) + fieldName.Substring(1);
                 JObject recipientObj;
@@ -5346,7 +5349,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
                   }
                   ((JArray)recipientObj["tabs"]).Add(new JObject()
                   {
-                      ["tabLabel"] = fieldName,
+                      ["tabLabel"] = tabLabelName,
                       ["initialValue"] = value
                   });
                 }
