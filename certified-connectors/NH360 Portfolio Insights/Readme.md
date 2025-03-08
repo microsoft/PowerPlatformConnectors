@@ -18,10 +18,13 @@ You will need the following to proceed:
 The connector supports the following operations:
 * `Create entity`: Create a new entity in the NH360 Portfolio Insights site.
 * `Get entity`: Returns properties of a selected entity.
+* `Get entity -strict`: Returns the properties of a selected entity, provided in the Data property of the response. If an error occurs, it is returned without retry attempts.
 * `List all entities`: Returns a list with all Entities from the NH360 Portfolio Insights site.
+* `List all entities -strict`: Returns a list of all entities from the NH360 Portfolio Insights site. The values are included in the Data property, and in case of an error, no retries are attempted —only the error message is returned.
 * `List entity types`: Returns a list with all Entity Types from the NH360 Portfolio Insights site.
 * `Get entity field value`: Returns a specific Entity Field value from an entity.
 * `Get entity fields values`: Returns a list with all Entity Fields and their values for a certain entity.
+* `Get entity field values odata -strict`: Returns a list with all Entity Fields and their values for a certain entity. The fields are returned within the `Data` property of the response. If the OData query is malformed, an error is returned without any retry attempts.
 * `Get entity fields`: Returns a list with an entity’s field names and their unique identifiers.
 * `Get option set values`: Returns a list with all available values of a selected Option Set
 * `List all options sets`: Returns a list with all options sets from the NH360 Portfolio Insights site.

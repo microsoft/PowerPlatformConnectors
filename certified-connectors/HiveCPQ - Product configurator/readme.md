@@ -26,6 +26,9 @@ Get a specific company linked to a manufacturer.
 ### Update a company
 Update a specific company of a manufacturer.
 
+### Delete a company
+Delete a specific company of a manufacturer.
+
 ### Archive a company
 Archive a company together with all of its contacts.
 
@@ -58,6 +61,9 @@ Get a specific contact of a manufacturer or its companies.
 
 ### Update a manufacturer contact
 Update a specific contact of a manufacturer or its companies.
+
+### Delete a distributor contact
+Delete a specific contact of a distributor.
 
 ### Archive a contact
 Archive a specific contact and remove its invites.
@@ -119,6 +125,9 @@ Update a specific component in master data
 ### Delete components in bulk
 Delete multiple components in master data
 
+### Upsert components in bulk
+Create or update multiple components in master data.
+
 ### Upsert component prices in bulk
 Create or update multiple component prices in master data.
 
@@ -175,6 +184,12 @@ Links one or more features to a component in master data. Existing links will be
 
 ### Unlink a feature from a component
 Unlinks a feature from a specific component in master data.
+
+### Search component quantities
+Search quantities of a component in master data.
+
+### Set component quantities
+Set quantities for a component in master data. Existing quantities are overwritten or deleted.
 
 ### Link a feature to a component
 Links one feature to a component in master data.
@@ -350,8 +365,11 @@ Cancel the order process and move a project segment back to step 2.
 ### Change the settings of a project segment
 Change the settings of a project segment. Settings are only available if a segment configurator is configured.
 
-### Add a configuration to a segment
+### Add a configuration to a project segment
 Add a V1 configuration to a specific project segment.
+
+### Continue recalculation of a project segment
+Continues the recalculation of a project segment if it was paused by an external recalculation.
 
 ### Search attachments of a project segment
 Search attachments of a specific project segment.
@@ -523,6 +541,9 @@ Search payment conditions of a manufacturer.
 
 ### Search tax conditions
 Search tax conditions of a manufacturer.
+
+### Search supported languages
+Search the supported languages.
 
 
 ## Obtaining Credentials

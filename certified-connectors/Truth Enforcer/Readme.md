@@ -1,5 +1,5 @@
-## CB Blockchain Seal Connector
-With CB Blockchain Seal, you can digitally seal documents using blockchain technology. This solution allows users to verify that documents are authentic and unchanged - anywhere and anytime after applying the timestamped seal. It is fast and cost-effective. It is also a thousand times more ecological than other blockchain solutions, and no prior knowledge of blockchain is required.
+## Truth Enforcer Connector
+With Truth Enforcer, you can digitally seal documents using blockchain technology. This solution allows users to verify that documents are authentic and unchanged - anywhere and anytime after applying the timestamped seal. It is fast and cost-effective. It is also a thousand times more ecological than other blockchain solutions, and no prior knowledge of blockchain is required.
  
  
 ## Prerequisites

@@ -326,6 +326,7 @@ try {
     $isConnectorSolutionPresent= $false
     $isFlowSolutionPresent = $false
     $isPluginSolutionPresent = $false
+    $isWorkflowsInPlugin= $false
     foreach ($secondLevelZipFile in $secondLevelZipFiles) {
         $isConnectorFound = $false
         $isWorkflowsFound = $false
@@ -407,6 +408,9 @@ try {
         if (($isConnectorFound) -and (-not $isWorkflowsFound) -and ($isPluginFound)) {
             $isPluginSolutionPresent = $true
         }
+        if (($isConnectorFound) -and ($isWorkflowsFound) -and ($isPluginFound)) {
+            $isWorkflowsInPlugin= $true
+        }
         # check if the connector folder name is present with the same name
         if ($isConnectorFound) {
             $connectorFolder = Get-ChildItem -Path "$tempFolder3" -Directory | Where-Object {$_.Name -eq $connectorNodeName}
@@ -455,7 +459,7 @@ try {
             
             if ((-not $connectorFolder) -or (-not $nodeNameFolder1) -or (-not $nodeNameFolder2)) {
                 $folderNameMissing = if ((-not $nodeNameFolder1) -and $connectorFolder -and $nodeNameFolder2) {"folder namely '$folderNameToCheck1'"} elseif ((-not $connectorFolder) -and $nodeNameFolder1 -and $nodeNameFolder2) {"folder namely '$connectorNodeName"} elseif ((-not $nodeNameFolder2) -and $connectorFolder -and $nodeNameFolder2) {"folder namely '$folderNameToCheck2"} elseif ((-not $nodeNameFolder1) -and (-not $connectorFolder) -and $nodeNameFolder2) {"folders namely '$connectorNodeName', '$folderNameToCheck1'"} elseif ((-not $nodeNameFolder2) -and (-not $connectorFolder) -and $nodeNameFolder1) {"folders namely '$connectorNodeName', '$folderNameToCheck2'"} elseif ((-not $nodeNameFolder1) -and (-not $nodeNameFolder2) -and $connectorFolder) {"folders namely '$folderNameToCheck1', '$folderNameToCheck2'"} else {"folders namely '$connectorNodeName', '$folderNameToCheck1'. '$folderNameToCheck2'"}
-                Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain '$folderNameMissing"
+                Write-Host "The solution zip file '$secondLevelZipFile' in '$originalParentFolderPath' should contain '$folderNameMissing'"
                 Write-Host "The folders should match the customization.xml file. They are present by default in an exported solution and should not be modified/removed manually."
                 Write-Host "Please add the required folders to the solution zip or export the correct solution again."
                 DisplayReferDocumentation
@@ -468,8 +472,7 @@ try {
                 exit
             } 
         }
-    } 
-    write-Host "****** isPluginEnabled: $isPluginEnabled, isBoolPluginEnabled: $isBoolPluginEnabled ******"  
+    }  
     if (-not $isConnectorSolutionPresent) {
         Write-Host "Connector solution in '$originalParentFolderPath' is invalid. Connector solution should only contain 'Connector' folder."
         Write-Host "Validate the connector solution has no extra component except 'Connector'. If not so, please remove them from the solution and export again."
@@ -481,8 +484,14 @@ try {
         $resultOfValidation = $false
     }
     elseif ($isBoolPluginEnabled -and (-not $isPluginSolutionPresent)) {
-        Write-Host "Plugin solution in '$originalParentFolderPath' is invalid. Plugin solution should contain 'Connector', 'aiplugins' and 'aipluginoperations' folders."
-        Write-Host "Validate the plugin solution has 'Connector', 'aiplugins' and 'aipluginoperations' components. If not so, please recreate the solution and export again."
+        if ($isWorkflowsInPlugin) {
+            $errorMessagePlugin = "Plugin solution should not contain 'Workflows' folder."
+        } else {
+            $errorMessagePlugin = "Plugin solution should contain 'Connector', 'aiplugins' and 'aipluginoperations' folders."
+        }
+        Write-Host "Plugin solution in '$originalParentFolderPath' is invalid."
+        Write-Host "$errorMessagePlugin"
+        Write-Host "Validate the plugin solution has only 'Connector', 'aiplugins' and 'aipluginoperations' components. If not so, please recreate the solution and export again."
         $resultOfValidation = $false
     }
     if ($resultOfValidation) {

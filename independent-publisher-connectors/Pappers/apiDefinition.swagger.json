@@ -1,0 +1,1375 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Pappers",
+    "description": "Pappers International allows you to retrieve information and documents on European companies through their registration number in the appropriate commercial register.",
+    "contact": {
+      "name": "Troy Taylor",
+      "url": "https://www.hitachisolutions.com",
+      "email": "ttaylor@hitachisolutions.com"
+    },
+    "x-ms-keywords": [
+      "Pappers",
+      "legal",
+      "company",
+      "Europe",
+      "registration"
+    ]
+  },
+  "host": "api.pappers.in",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/company": {
+      "get": {
+        "description": "Get company information by country code and company number.",
+        "summary": "Get company",
+        "operationId": "CompanyGet",
+        "parameters": [
+          {
+            "name": "country_code",
+            "in": "query",
+            "x-ms-summary": "Country Code",
+            "required": true,
+            "enum": [
+              "UK",
+              "FR",
+              "BE",
+              "CH"
+            ],
+            "type": "string",
+            "description": "The country code of the company."
+          },
+          {
+            "name": "company_number",
+            "in": "query",
+            "x-ms-summary": "Company Number",
+            "required": true,
+            "type": "string",
+            "description": "The company number."
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "x-ms-summary": "Fields",
+            "required": false,
+            "enum": [
+              "officers",
+              "ubos",
+              "financials",
+              "documents",
+              "certificates",
+              "publications",
+              "establishments",
+              "contacts"
+            ],
+            "type": "string",
+            "description": "Additional fields (separated by a comma) to include in the return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Company information returned successfully.",
+            "schema": {
+              "$ref": "#/definitions/CompanyFormat"
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Incorrect API key."
+          },
+          "404": {
+            "description": "Company not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "company",
+              "x-ms-require-user-confirmation": false
+            }
+          ]
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "description": "Search for companies by country code and query string.",
+        "summary": "Search companies",
+        "operationId": "SearchGet",
+        "parameters": [
+          {
+            "name": "country_code",
+            "in": "query",
+            "x-ms-summary": "Country Code",
+            "required": true,
+            "enum": [
+              "UK",
+              "FR",
+              "BE",
+              "CH"
+            ],
+            "type": "string",
+            "description": "The country code of the company."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "x-ms-summary": "Query",
+            "required": true,
+            "type": "string",
+            "description": "The search query string."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "x-ms-summary": "Page",
+            "required": false,
+            "default": 1,
+            "type": "integer",
+            "format": "int32",
+            "description": "The page number of the search result."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "x-ms-summary": "Per Page",
+            "required": false,
+            "default": 10,
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of results returned per page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results returned successfully.",
+            "schema": {
+              "$ref": "#/definitions/SearchResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Incorrect API key."
+          },
+          "404": {
+            "description": "No company matches the specified query."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "search",
+              "x-ms-require-user-confirmation": false
+            }
+          ]
+        }
+      }
+    },
+    "/download-file": {
+      "get": {
+        "description": "Provided the document's token, it will be downloaded to you in PDF format.",
+        "summary": "Get document",
+        "operationId": "DocumentGet",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "x-ms-summary": "Token",
+            "required": true,
+            "type": "string",
+            "description": "The document's token."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document available and will be downloaded.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "$content-type": {
+                  "type": "string",
+                  "description": "The content type.",
+                  "title": "Content Type"
+                },
+                "$content": {
+                  "type": "string",
+                  "description": "The content.",
+                  "title": "Content"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Incorrect API key."
+          },
+          "404": {
+            "description": "Unavailable Document."
+          },
+          "503": {
+            "description": "Service temporarily unavailable."
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true,
+          "operations": [
+            {
+              "operationId": "document",
+              "x-ms-require-user-confirmation": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SearchFormat": {
+      "title": "SearchFormat",
+      "type": "object",
+      "properties": {
+        "company_number": {
+          "description": "The identification number of the company entity in it's appropriate registry of commerce.",
+          "title": "Company Number",
+          "type": "string"
+        },
+        "name": {
+          "description": "Denomination of the company.",
+          "title": "Name",
+          "type": "string"
+        },
+        "local_legal_form_code": {
+          "description": "Local legal form code.",
+          "title": "Local Code",
+          "type": "string"
+        },
+        "local_legal_form_name": {
+          "description": "Local legal form name.",
+          "title": "Local Name",
+          "type": "string"
+        },
+        "activities": {
+          "description": "Array of company's activities, in the NACE classification.",
+          "title": "Activities",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Activity"
+          }
+        },
+        "local_activities": {
+          "description": "Array of company's activities, in the local classifications.",
+          "title": "Local Activities",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LocalActivity"
+          }
+        },
+        "date_of_creation": {
+          "description": "Company's inception date.",
+          "title": "Date of Creation",
+          "type": "string",
+          "format": "date"
+        },
+        "status": {
+          "title": "Status",
+          "description": "Indicates whether or not the company is still active.",
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        },
+        "date_of_cessation": {
+          "description": "Indicates the company's cessation date if company is inactive, otherwise null.",
+          "title": "Date of Cessation",
+          "type": "string",
+          "format": "date"
+        },
+        "head_office": {
+          "title": "HeadOffice",
+          "description": "The company's head office address.",
+          "type": "object",
+          "properties": {
+            "address_line_1": {
+              "description": "The company's primary address line.",
+              "title": "Address Line 1",
+              "type": "string"
+            },
+            "address_line_2": {
+              "description": "The company's additional address line.",
+              "title": "Address Line 2",
+              "type": "string"
+            },
+            "postal_code": {
+              "description": "The company's local postal code.",
+              "title": "Postal Code",
+              "type": "string"
+            },
+            "city": {
+              "description": "The company's city.",
+              "title": "City",
+              "type": "string"
+            },
+            "country": {
+              "description": "The company's country.",
+              "title": "Country",
+              "type": "string"
+            },
+            "country_code": {
+              "description": "The company's country code.",
+              "title": "Country Code",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "CompanyFormat": {
+      "title": "CompanyFormat",
+      "type": "object",
+      "properties": {
+        "company_number": {
+          "description": "The number of the company entity.",
+          "title": "Company Number",
+          "type": "string"
+        },
+        "name": {
+          "description": "Denomination of the company.",
+          "title": "Name",
+          "type": "string"
+        },
+        "trade_name": {
+          "description": "Trade name of the company.",
+          "title": "Trade Number",
+          "type": "string"
+        },
+        "acronym": {
+          "description": "Acronym of the company.",
+          "title": "Acronym",
+          "type": "string"
+        },
+        "vat_number": {
+          "description": "Tax number of the company.",
+          "title": "VAT Number",
+          "type": "string"
+        },
+        "local_legal_form_code": {
+          "description": "Local legal form code.",
+          "title": "Local Code",
+          "type": "string"
+        },
+        "local_legal_form_name": {
+          "description": "Local legal form name.",
+          "title": "Local Name",
+          "type": "string"
+        },
+        "activities": {
+          "description": "Array of company's activities, in the NACE classification.",
+          "title": "Activities",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Activity"
+          }
+        },
+        "fields_of_activity": {
+          "description": "Array of company's fields of activity, in the NACE classification.",
+          "title": "Field of Activities",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "local_activities": {
+          "description": "Array of company's activities, in the local classifications.",
+          "title": "Local Activities",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LocalActivity"
+          }
+        },
+        "date_of_creation": {
+          "description": "Company's creation date.",
+          "title": "Date of Creation",
+          "type": "string",
+          "format": "date"
+        },
+        "status": {
+          "title": "Status",
+          "description": "Indicates whether or not the company is still active.",
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        },
+        "date_of_cessation": {
+          "description": "Indicates the company's cessation date if company is inactive, otherwise null.",
+          "title": "Date of Cessation",
+          "type": "string",
+          "format": "date"
+        },
+        "workforce": {
+          "description": "Indicates the company's exact workforce.",
+          "title": "Workforce",
+          "type": "integer",
+          "format": "int32"
+        },
+        "workforce_range": {
+          "description": "Indicates the company's workforce range.",
+          "title": "Workforce Range",
+          "type": "string"
+        },
+        "head_office": {
+          "title": "Head Office",
+          "description": "The company's head office address.",
+          "type": "object",
+          "properties": {
+            "address_line_1": {
+              "description": "The company's primary address line.",
+              "title": "Address Line 1",
+              "type": "string"
+            },
+            "address_line_2": {
+              "description": "The company's additional address line.",
+              "title": "Address Line 2",
+              "type": "string"
+            },
+            "postal_code": {
+              "description": "The company's local postal code.",
+              "title": "Postal Code ",
+              "type": "string"
+            },
+            "city": {
+              "description": "The company's city.",
+              "title": "City",
+              "type": "string"
+            },
+            "country": {
+              "description": "The company's country.",
+              "title": "Country",
+              "type": "string"
+            },
+            "country_code": {
+              "description": "The company's country code.",
+              "title": "Country Code",
+              "type": "string"
+            }
+          }
+        },
+        "commercial_register_registration_status": {
+          "title": "CommercialRegisterRegistrationStatus",
+          "description": "Indicates the company's registration status on the appropriate commercial register.",
+          "type": "string",
+          "enum": [
+            "registered",
+            "not_registered",
+            "removed",
+            "unknown"
+          ]
+        },
+        "commercial_register_registration_location": {
+          "description": "Indicates the location of the company's commercial register.",
+          "title": "Registration Location",
+          "type": "string"
+        },
+        "commercial_register_registration_date": {
+          "description": "Indicates the company's registration date in the commercial register.",
+          "title": "Registration Date",
+          "type": "string",
+          "format": "date"
+        },
+        "commercial_register_cessation_date": {
+          "description": "Indicates the company's cessation date in the commercial register.",
+          "title": "Cessation Date",
+          "type": "string",
+          "format": "date"
+        },
+        "share_capital": {
+          "description": "Indicates the company's share of capital.",
+          "title": "Capital Share",
+          "type": "integer",
+          "format": "int32"
+        },
+        "share_capital_currency": {
+          "description": "Indicates the company's share of capital's currency.",
+          "title": "Capital Share Currency",
+          "type": "string"
+        },
+        "next_fiscal_year_end": {
+          "description": "Indicates the company's next fiscal year end.",
+          "title": "Next Year End",
+          "type": "string",
+          "format": "date"
+        },
+        "fiscal_year_end": {
+          "description": "Indicates the company's current fiscal year end.",
+          "title": "Fiscal Year End",
+          "type": "string",
+          "format": "date"
+        },
+        "officers": {
+          "description": "Array of company's officers. Present only if \"officers\" has been indicated in the `Fields` query.",
+          "title": "Officers",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Officer"
+          }
+        },
+        "ubos": {
+          "description": "Array of company's owners. Present only if \"ubos\" has been indicated in the `Fields` query.",
+          "title": "Owners",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Ubo"
+          }
+        },
+        "financials": {
+          "description": "Array of company's financials. Present only if \"financials\" has been indicated in the `Fields` query.",
+          "title": "Financials",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Financial"
+          }
+        },
+        "documents": {
+          "description": "Array of company's documents. Present only if \"documents\" has been indicated in the `Fields` query.",
+          "title": "Documents",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Document"
+          }
+        },
+        "certificates": {
+          "description": "Array of company's certificates. Present only if \"certificates\" has been indicated in the `Fields` query.",
+          "title": "Certificates",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Certificate"
+          }
+        },
+        "publications": {
+          "description": "Array of company publications. Present only if \"publications\" has been indicated in the `Fields` query.",
+          "title": "Publications",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Publication"
+          }
+        },
+        "establishments": {
+          "description": "Array of company establishments. Present only if \"establishments\" has been indicated in the `Fields` query.",
+          "title": "Establishments",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Establishment"
+          }
+        },
+        "contacts": {
+          "description": "Array of company contacts. Present only if \"contacts\" has been indicated in the `Fields` query.",
+          "title": "Contacts",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Contact"
+          }
+        }
+      }
+    },
+    "Activity": {
+      "title": "Activity",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Activity code.",
+          "title": "Activity Code",
+          "type": "string"
+        },
+        "name": {
+          "description": "Activity name.",
+          "title": "Activity Name",
+          "type": "string"
+        }
+      }
+    },
+    "Certificate": {
+      "title": "Certificate",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "Type of document.",
+          "title": "Type",
+          "type": "string"
+        },
+        "date": {
+          "description": "Document's publication date.",
+          "title": "Date",
+          "type": "string",
+          "format": "date"
+        },
+        "file_available": {
+          "description": "File download availability.",
+          "title": "File Available",
+          "type": "boolean"
+        },
+        "description": {
+          "description": "File description.",
+          "title": "Description",
+          "type": "string"
+        },
+        "file_token": {
+          "description": "File token that can be used for downloads.",
+          "title": "Token",
+          "type": "string",
+          "format": "binary"
+        },
+        "file_format": {
+          "description": "File format.",
+          "title": "File Format",
+          "type": "string"
+        }
+      }
+    },
+    "Contact": {
+      "title": "Contact",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "description": "Type of contact.",
+          "type": "string",
+          "enum": [
+            "website",
+            "email",
+            "phone"
+          ]
+        },
+        "value": {
+          "description": "The contact value.",
+          "title": "Value",
+          "type": "string"
+        }
+      }
+    },
+    "Document": {
+      "title": "Document",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "Type of document.",
+          "title": "Type",
+          "type": "string"
+        },
+        "date": {
+          "description": "Document's publication date.",
+          "title": "Date",
+          "type": "string",
+          "format": "date"
+        },
+        "file_available": {
+          "description": "File download availability.",
+          "title": "File Available",
+          "type": "boolean"
+        },
+        "description": {
+          "description": "File description.",
+          "title": "Description",
+          "type": "string"
+        },
+        "file_token": {
+          "description": "File token that can be used for downloads.",
+          "title": "Token",
+          "type": "string",
+          "format": "binary"
+        },
+        "file_format": {
+          "description": "File format.",
+          "title": "File Format",
+          "type": "string"
+        }
+      }
+    },
+    "Establishment": {
+      "title": "Establishment",
+      "type": "object",
+      "properties": {
+        "number": {
+          "description": "The number of the establishment.",
+          "title": "Number",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the establishment.",
+          "title": "Name",
+          "type": "string"
+        },
+        "trade_name": {
+          "description": "Trade name of the establishment.",
+          "title": "Trade Name",
+          "type": "string"
+        },
+        "acronym": {
+          "description": "Acronym of the establishment.",
+          "title": "Acronym",
+          "type": "string"
+        },
+        "activities": {
+          "description": "Array of establishment's activities, in the NACE classification.",
+          "title": "Activities",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Activity"
+          }
+        },
+        "fields_of_activity": {
+          "description": "Array of establishment's fields of activity, in the NACE classification.",
+          "title": "Field of Activities",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "local_activities": {
+          "description": "Array of establishment's activities, in the local classifications.",
+          "title": "Local Activities",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LocalActivity"
+          }
+        },
+        "date_of_creation": {
+          "description": "Establishment's creation date.",
+          "title": "Creation Date",
+          "type": "string",
+          "format": "date"
+        },
+        "status": {
+          "title": "Status",
+          "description": "Indicates whether or not the company is still active.",
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        },
+        "date_of_cessation": {
+          "description": "Indicates the establishment's cessation date if establishment is inactive, otherwise null.",
+          "title": "Cessation Date",
+          "type": "string",
+          "format": "date"
+        },
+        "address_line_1": {
+          "description": "The establishment's primary address line.",
+          "title": "Address Line 1",
+          "type": "string"
+        },
+        "address_line_2": {
+          "description": "The establishment's additional address line.",
+          "title": "Address Line 2",
+          "type": "string"
+        },
+        "postal_code": {
+          "description": "The establishment's local postal code.",
+          "title": "Postal Code",
+          "type": "string"
+        },
+        "city": {
+          "description": "The establishment's city.",
+          "title": "City",
+          "type": "string"
+        },
+        "country": {
+          "description": "The establishment's country.",
+          "title": "Country",
+          "type": "string"
+        }
+      }
+    },
+    "Financial": {
+      "title": "Financial",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "description": "The type of financials.",
+          "type": "string",
+          "enum": [
+            "accounts",
+            "consolidated_accounts"
+          ]
+        },
+        "financials_start_date": {
+          "description": "The financials start date.",
+          "title": "Start Date",
+          "type": "string",
+          "format": "date"
+        },
+        "financials_end_date": {
+          "description": "The financials end date.",
+          "title": "End Date",
+          "type": "string",
+          "format": "date"
+        },
+        "deposit_date": {
+          "description": "The financials deposit date.",
+          "title": "Deposit Date",
+          "type": "string",
+          "format": "date"
+        },
+        "currency": {
+          "description": "The financials currency.",
+          "title": "Currency",
+          "type": "string"
+        },
+        "availability": {
+          "title": "Availability",
+          "description": "The financials availability.",
+          "type": "string",
+          "enum": [
+            "available",
+            "unavailable",
+            "confidential",
+            "partially-confidential"
+          ]
+        },
+        "ratios": {
+          "$ref": "#/definitions/Ratios"
+        },
+        "related_documents": {
+          "description": "Array of documents related to the financials.",
+          "title": "Related Document",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelatedDocument"
+          }
+        }
+      }
+    },
+    "LocalActivity": {
+      "title": "Local Activity",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Activity code.",
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "description": "Activity name.",
+          "title": "Name",
+          "type": "string"
+        },
+        "classification": {
+          "description": "Activity classification.",
+          "title": "Classification",
+          "type": "string"
+        }
+      }
+    },
+    "Officer": {
+      "title": "Officer",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "description": "The officer's type.",
+          "type": "string",
+          "enum": [
+            "legal",
+            "physical"
+          ]
+        },
+        "role": {
+          "description": "The officer's role within the company.",
+          "title": "Role",
+          "type": "string"
+        },
+        "date_of_appointment": {
+          "description": "The date of appointment of an officer.",
+          "title": "Appointment Date",
+          "type": "string",
+          "format": "date"
+        },
+        "last_name": {
+          "description": "The officer's last name, if physical officer.",
+          "title": "Last Name",
+          "type": "string"
+        },
+        "first_name": {
+          "description": "The officer's last name, if physical officer.",
+          "title": "First Name",
+          "type": "string"
+        },
+        "gender": {
+          "title": "Gender",
+          "description": "The officer's gender, if physical officer.",
+          "type": "string",
+          "enum": [
+            "M",
+            "F"
+          ]
+        },
+        "date_of_birth": {
+          "description": "The officer's date of birth, if physical officer.",
+          "title": "Birth Date",
+          "type": "string",
+          "format": "date"
+        },
+        "date_of_birth_format": {
+          "description": "The officer's date of birth's format, if physical officer.",
+          "title": "Birth Date Format",
+          "type": "string"
+        },
+        "nationality": {
+          "description": "The officer's nationality, if physical officer.",
+          "title": "Nationality",
+          "type": "string"
+        },
+        "nationality_code": {
+          "description": "The officer's nationality code, if physical officer.",
+          "title": "Nationality Code",
+          "type": "string"
+        },
+        "company_name": {
+          "description": "The officer's company name, if legal officer.",
+          "title": "Company Name",
+          "type": "string"
+        },
+        "company_number": {
+          "description": "The officer's company number, if legal officer.",
+          "title": "Company Number",
+          "type": "string"
+        },
+        "address_line_1": {
+          "description": "The officer's primary address line.",
+          "title": "Address Line 1",
+          "type": "string"
+        },
+        "address_line_2": {
+          "description": "The officer's additional address line.",
+          "title": "Address Line 2",
+          "type": "string"
+        },
+        "postal_code": {
+          "description": "The officer's local postal code.",
+          "title": "Postal Code",
+          "type": "string"
+        },
+        "city": {
+          "description": "The officer's city.",
+          "title": "City",
+          "type": "string"
+        },
+        "country": {
+          "description": "The officer's country.",
+          "title": "Country",
+          "type": "string"
+        },
+        "country_code": {
+          "description": "The officer's country code.",
+          "title": "Country Code",
+          "type": "string"
+        }
+      }
+    },
+    "Publication": {
+      "title": "Publication",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "Type of publication.",
+          "title": "Type",
+          "type": "string"
+        },
+        "date": {
+          "description": "The publication date.",
+          "title": "Date",
+          "type": "string",
+          "format": "date"
+        },
+        "source": {
+          "description": "The publication's source.",
+          "title": "Source",
+          "type": "string"
+        },
+        "content": {
+          "description": "The publication's content.",
+          "title": "Content",
+          "type": "string"
+        }
+      }
+    },
+    "Ratios": {
+      "title": "Ratio",
+      "type": "object",
+      "properties": {
+        "turnover": {
+          "description": "The company's turnover over that fiscal year.",
+          "title": "Turnover",
+          "type": "number",
+          "format": "double"
+        },
+        "gross_profit": {
+          "description": "The company's gross profit over that fiscal year.",
+          "title": "Gross Profit",
+          "type": "number",
+          "format": "double"
+        },
+        "ebitda": {
+          "description": "The company's EBITDA over that fiscal year.",
+          "title": "EBITDA",
+          "type": "number",
+          "format": "double"
+        },
+        "operating_profit": {
+          "description": "The company's operating profit over that fiscal year.",
+          "title": "Operating Profit",
+          "type": "number",
+          "format": "double"
+        },
+        "net_income": {
+          "description": "The company's net income over that fiscal year.",
+          "title": "Net Income",
+          "type": "number",
+          "format": "double"
+        },
+        "revenue_growth_rate": {
+          "description": "The company's revenue growth rate over that fiscal year.",
+          "title": "Revenue Growth Rate",
+          "type": "number",
+          "format": "double"
+        },
+        "gross_margin_rate": {
+          "description": "The company's gross margin rate over that fiscal year.",
+          "title": "Gross Margin Rate",
+          "type": "number",
+          "format": "double"
+        },
+        "ebitda_margin": {
+          "description": "The company's EBITDA margin over that fiscal year.",
+          "title": "EBITDA Margin",
+          "type": "number",
+          "format": "double"
+        },
+        "ebit_margin": {
+          "description": "The company's EBIT margin over that fiscal year.",
+          "title": "EBIT Margin",
+          "type": "number",
+          "format": "double"
+        },
+        "working_capital_requirements": {
+          "description": "The company's working capital requirements over that fiscal year.",
+          "title": "Working Capital Requirements",
+          "type": "number",
+          "format": "double"
+        },
+        "day_sales_outstanding": {
+          "description": "The company's day sales outstanding over that fiscal year.",
+          "title": "Day Sales Outstanding",
+          "type": "number",
+          "format": "double"
+        },
+        "days_payable_outstanding": {
+          "description": "The company's days payable outstanding over that fiscal year.",
+          "title": "Days Payable Outstanding",
+          "type": "number",
+          "format": "double"
+        },
+        "cash_flow_from_operations": {
+          "description": "The company's cash flow from operations over that fiscal year.",
+          "title": "Cash Flow",
+          "type": "number",
+          "format": "double"
+        },
+        "net_working_capital": {
+          "description": "The company's net working capital over that fiscal year.",
+          "title": "Net Working Capital",
+          "type": "number",
+          "format": "double"
+        },
+        "cash": {
+          "description": "The company's cash over that fiscal year.",
+          "title": "Cash",
+          "type": "number",
+          "format": "double"
+        },
+        "financial_debt": {
+          "description": "The company's financial debt over that fiscal year.",
+          "title": "Financial Debt",
+          "type": "number",
+          "format": "double"
+        },
+        "net_financial_debt": {
+          "description": "The company's net financial debt over that fiscal year.",
+          "title": "Net Financial Debt",
+          "type": "number",
+          "format": "double"
+        },
+        "capital_debt_repayment_capacity": {
+          "description": "The company's capital debt repayment capacity over that fiscal year.",
+          "title": "Capital Debt Repayment Capacity",
+          "type": "number",
+          "format": "double"
+        },
+        "gearing_ratio": {
+          "description": "The company's Gearing ratio over that fiscal year.",
+          "title": "Gearing",
+          "type": "number",
+          "format": "double"
+        },
+        "leverage_ratio": {
+          "description": "The company's leverage ratio over that fiscal year.",
+          "title": "Leverage",
+          "type": "number",
+          "format": "double"
+        },
+        "debts_payable_within_one_year": {
+          "description": "The company's debts payable within one year over that fiscal year.",
+          "title": "Debts Payable Within One Year",
+          "type": "number",
+          "format": "double"
+        },
+        "debt_coverage_ratio": {
+          "description": "The company's debt coverage ratio over that fiscal year.",
+          "title": "Debt Coverage",
+          "type": "number",
+          "format": "double"
+        },
+        "equity": {
+          "description": "The company's equity over that fiscal year.",
+          "title": "Equity",
+          "type": "number",
+          "format": "double"
+        },
+        "net_margin": {
+          "description": "The company's net margin over that fiscal year.",
+          "title": "Net Margin",
+          "type": "number",
+          "format": "double"
+        },
+        "return_on_equity": {
+          "description": "The company's return on equity over that fiscal year.",
+          "title": "Return on Equity",
+          "type": "number",
+          "format": "double"
+        },
+        "value_added_ratio": {
+          "description": "The company's value added ratio over that fiscal year.",
+          "title": "Value Added",
+          "type": "number",
+          "format": "double"
+        },
+        "export_turnover": {
+          "description": "The company's export turnover over that fiscal year.",
+          "title": "Export Turnover",
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "RelatedDocument": {
+      "title": "RelatedDocument",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "Type of document.",
+          "title": "Type",
+          "type": "string"
+        },
+        "date": {
+          "description": "Document's publication date.",
+          "title": "Date",
+          "type": "string",
+          "format": "date"
+        },
+        "file_available": {
+          "description": "File download availability.",
+          "title": "File Available",
+          "type": "boolean"
+        },
+        "description": {
+          "description": "File description.",
+          "title": "Description",
+          "type": "string"
+        },
+        "file_token": {
+          "description": "File token that can be used for downloads.",
+          "title": "Token",
+          "type": "string",
+          "format": "binary"
+        },
+        "file_format": {
+          "description": "File format.",
+          "title": "File Format",
+          "type": "string"
+        }
+      }
+    },
+    "SearchResponse": {
+      "title": "Response",
+      "type": "object",
+      "properties": {
+        "results": {
+          "description": "The results of the search is an array of companies that satisfy the specified criterias.",
+          "title": "Results",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchFormat"
+          }
+        },
+        "total": {
+          "description": "Number of companies returned by the response.",
+          "title": "Total",
+          "type": "integer",
+          "format": "int32"
+        },
+        "page": {
+          "description": "Current page index.",
+          "title": "Current Page Index",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "Ubo": {
+      "title": "Owner",
+      "type": "object",
+      "properties": {
+        "last_name": {
+          "description": "The owner's last name.",
+          "title": "Last Name",
+          "type": "string"
+        },
+        "first_name": {
+          "description": "The owner's last name.",
+          "title": "First Name",
+          "type": "string"
+        },
+        "gender": {
+          "title": "Gender",
+          "description": "The owner's gender.",
+          "type": "string",
+          "enum": [
+            "M",
+            "F"
+          ]
+        },
+        "date_of_birth": {
+          "description": "The owner's date of birth.",
+          "title": "Birth Date",
+          "type": "string",
+          "format": "date"
+        },
+        "date_of_birth_format": {
+          "description": "The owner's date of birth's format.",
+          "title": "Birth Date Format",
+          "type": "string"
+        },
+        "nationality": {
+          "description": "The owner's nationality.",
+          "title": "Nationality",
+          "type": "string"
+        },
+        "nationality_code": {
+          "description": "The owner's nationality code.",
+          "title": "Nationality Code",
+          "type": "string"
+        },
+        "address_line_1": {
+          "description": "The owner's primary address line.",
+          "title": "Address Line 1",
+          "type": "string"
+        },
+        "address_line_2": {
+          "description": "The owner's additional address line.",
+          "title": "Address Line 2",
+          "type": "string"
+        },
+        "postal_code": {
+          "description": "The owner's local postal code.",
+          "title": "Postal Code",
+          "type": "string"
+        },
+        "city": {
+          "description": "The owner's city.",
+          "title": "City",
+          "type": "string"
+        },
+        "country": {
+          "description": "The owner's country.",
+          "title": "Country",
+          "type": "string"
+        },
+        "country_code": {
+          "description": "The owner's country code.",
+          "title": "Country Code",
+          "type": "string"
+        },
+        "percentage_of_shares": {
+          "description": "The owner share percentage.",
+          "title": "Share Percentage",
+          "type": "string"
+        },
+        "voting_percentage": {
+          "description": "The owner voting percentage.",
+          "title": "Voting Percentage",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "query",
+      "name": "api_token"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-openai-manifest": {
+    "humanName": "Pappers",
+    "modelDescription": "This is a Copilot connector for the Pappers legal and financial data service.",
+    "contactEmail": "ttaylor@hitachisolutions.com"
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.pappers.in/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.pappers.fr/politique-de-protection-des-donnees-personnelles"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Intelligence;Data"
+    }
+  ]
+}
