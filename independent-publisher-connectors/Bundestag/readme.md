@@ -15,27 +15,27 @@ To use this connector, you will need:
 
 This connector supports the following operations:
 
-### Parliamentary Processes (Vorgänge)
+### Parliamentary Processes
 - **Retrieve all parliamentary processes** – Get a list of all legislative processes in the Bundestag.
 - **Retrieve a specific parliamentary process** – Fetch metadata for a specific legislative process.
 
-### Process Steps (Vorgangspositionen)
+### Process Steps
 - **Retrieve all process steps** – Get a list of all steps within legislative processes.
 - **Retrieve a specific process step** – Fetch details of a specific step within a legislative process.
 
-### Parliamentary Documents (Drucksachen)
+### Parliamentary Documents
 - **Retrieve all parliamentary documents** – Get a list of all documents (Drucksachen) related to legislation.
 - **Retrieve a specific document** – Fetch metadata for a specific parliamentary document.
 
-### Plenary Protocols (Plenarprotokolle)
+### Plenary Protocols
 - **Retrieve all plenary protocols** – Get a list of all Bundestag plenary sessions.
 - **Retrieve a specific plenary protocol** – Fetch details of a specific plenary session.
 
-### Activities (Aktivitäten)
+### Activities
 - **Retrieve all parliamentary activities** – Get a list of all recorded activities in the Bundestag.
 - **Retrieve a specific parliamentary activity** – Fetch metadata for a specific activity.
 
-### Persons (Personenstammdaten)
+### Persons
 - **Retrieve all persons** – Get a list of all politicians and relevant individuals in the Bundestag.
 - **Retrieve a specific person** – Fetch metadata for a specific person.
 
