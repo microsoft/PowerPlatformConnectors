@@ -1,6 +1,6 @@
-# Bundestag
+# German Federal Parliament
 
-Access German Bundestag legislative data, documents, and activities.
+Access German Federal Parliament legislative data, documents, and activities.
 
 ## Publisher: Dan Romano (swolcat)
 
