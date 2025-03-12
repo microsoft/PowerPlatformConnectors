@@ -6291,9 +6291,8 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     if ("GetLoginAccounts".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-      query["include_account_id_guid"] = "true";
-      uriBuilder.Query = query.ToString();
+      uriBuilder.Host =  GetAccountServerBaseUri().Replace("https://", string.Empty);
+      uriBuilder.Path = uriBuilder.Path.Replace("restapi/v2.1", string.Empty);
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -6387,6 +6386,23 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
           body.GetValue("connectId").ToString()));
+    }
+    
+    if ("GetLoginAccounts".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var accounts = body["accounts"] as JArray;
+      var newBody = new JObject();
+      var loginAccounts = new JArray();
+      foreach (var account in accounts)
+      {
+        loginAccounts.Add(new JObject {
+           ["accountIdGuid"] = account["account_id"],
+           ["name"] = account["account_name"]
+        });
+      }
+      newBody["loginAccounts"] = loginAccounts;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
