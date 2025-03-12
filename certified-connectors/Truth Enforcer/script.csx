@@ -12,18 +12,16 @@
         {
             byte[] bytes = Convert.FromBase64String(base64String);
 
-            // Compute SHA256 hash
             byte[] hashBytes;
             using (SHA256 sha256 = SHA256.Create())
             {
                 hashBytes = sha256.ComputeHash(bytes);
             }
 
-            // Convert hash to string
             StringBuilder sb = new StringBuilder();
             foreach (byte b in hashBytes)
             {
-                sb.Append(b.ToString("x2")); // Convert byte to hexadecimal format
+                sb.Append(b.ToString("x2"));
             }
             string hashString = sb.ToString();
 

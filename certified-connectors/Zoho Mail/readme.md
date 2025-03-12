@@ -6,7 +6,7 @@ Zoho Mail connector gives you the power to manage your emails and perform action
 
 ## Prerequisites
 
-A verified Zoho Mail account. Click [here](https://zoho.com/zohomail) to create your first account.
+A verified Zoho Mail account. Click [here](https://zoho.com/mail) to create your first account.
 
 ## Supported Operations
 

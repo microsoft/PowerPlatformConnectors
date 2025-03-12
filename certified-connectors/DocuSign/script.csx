@@ -236,15 +236,13 @@ public class Script : ScriptBase
                           {
                             ["type"] = "string",
                             ["x-ms-summary"] = "Read Only",
-                            ["description"] = "Select",
-                            ["enum"] = new JArray ("true", "false")
+                            ["description"] = "true/false"
                           },
                           ["required"] = new JObject
                           {
                             ["type"] = "string",
                             ["x-ms-summary"] = "Required",
-                            ["description"] = "Select",
-                            ["enum"] = new JArray ("true", "false")
+                            ["description"] = "true/false"
                           },
                           ["anchorXOffset"] = new JObject
                           {
@@ -291,8 +289,7 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Read Only",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["anchorXOffset"] = new JObject
                   {
@@ -341,8 +338,7 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Read Only",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["anchorXOffset"] = new JObject
                   {
@@ -478,8 +474,7 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Optional",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["tabLabel"] = new JObject
                   {
@@ -654,15 +649,13 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Read Only",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["required"] = new JObject
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Required",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["tooltip"] = new JObject
                   {
@@ -761,15 +754,13 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Read Only",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["required"] = new JObject
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Required",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["anchorXOffset"] = new JObject
                   {
@@ -818,15 +809,13 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Read Only",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["required"] = new JObject
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Required",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["validationType"] = new JObject
                   {
@@ -938,8 +927,7 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Read Only",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["selected"] = new JObject
                   {
@@ -1043,8 +1031,7 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Optional",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["anchorXOffset"] = new JObject
                   {
@@ -1189,15 +1176,13 @@ public class Script : ScriptBase
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Required",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["locked"] = new JObject
                   {
                     ["type"] = "string",
                     ["x-ms-summary"] = "Read Only",
-                    ["description"] = "Select",
-                    ["enum"] = new JArray ("true", "false")
+                    ["description"] = "true/false"
                   },
                   ["validationPattern"] = new JObject
                   {
@@ -1305,15 +1290,13 @@ public class Script : ScriptBase
                 {
                   ["type"] = "string",
                   ["x-ms-summary"] = "Required",
-                  ["description"] = "Select",
-                  ["enum"] = new JArray ("true", "false")
+                  ["description"] = "true/false"
                 },
                 ["locked"] = new JObject
                 {
                   ["type"] = "string",
                   ["x-ms-summary"] = "Read Only",
-                  ["description"] = "Select",
-                  ["enum"] = new JArray ("true", "false")
+                  ["description"] = "true/false"
                 },
                 ["tabLabel"] = new JObject
                 {
@@ -2451,14 +2434,7 @@ public class Script : ScriptBase
 
     if (returnUrl.Equals("DocuSign homepage"))
     {
-      if (url.Equals("demo.docusign.net"))
-      {
-        body["returnUrl"] = "https://appdemo.docusign.com/";
-      }
-      else
-      {
-        body["returnUrl"] = "https://app.docusign.com/";
-      }
+      body["returnUrl"] = GetDocusignApiBaseUri();
     }
     else
     {

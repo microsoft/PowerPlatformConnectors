@@ -35,8 +35,8 @@ The connector supports reading and/or updating the following Meisterplan entitie
 - Roles
 - Scenarios (read only)
 - Task Management
+- Teams (read only)
 - Users (read only)
-
 
 The connector supports triggers for project created, project updated and project deleted events.
 
