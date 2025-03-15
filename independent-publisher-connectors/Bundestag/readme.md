@@ -9,7 +9,7 @@ Access German Federal Parliament legislative data, documents, and activities.
 To use this connector, you will need:
 
 - A **Microsoft Power Apps** or **Power Automate** plan that includes custom connector capabilities.
-- No authentication is required. The API is publicly available via API key: I9FKdCn.hbfefNWCY336dL6x62vfwNKpoN2RZ1gp21
+- No authentication is required. The API is publicly available via API key for 2025: I9FKdCn.hbfefNWCY336dL6x62vfwNKpoN2RZ1gp21
 
 ## Supported Operations
 
