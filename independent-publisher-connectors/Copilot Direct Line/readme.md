@@ -12,6 +12,8 @@ In the Security settings of your agent, copy a secret from the two available.
 ## Supported Operations
 ### Start a conversation with activity
 Starts a new conversation, sends the first activity and waits for the agent to respond.
+### Post activity and receive response
+Sends activity to this conversation and waits for the agent to respond.
 ### Start conversation
 Starts a new conversation.
 ### Get conversation
