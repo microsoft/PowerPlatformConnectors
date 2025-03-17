@@ -119,8 +119,8 @@ public class Script : ScriptBase
                 return sendActivityResponse;
             }
             
-            const int maxAttempts = 20;
-            const int pollDelayMs = 1000;
+            const int maxAttempts = 100;
+            const int pollDelayMs = 500;
             int attempts = 0;
             JObject activitiesResponse = null;
             
@@ -172,6 +172,122 @@ public class Script : ScriptBase
                 };
             }
         }
+        else if (this.Context.OperationId == "Conversations_SendActivityResponse") 
+        {
+            string requestContent = await this.Context.Request.Content.ReadAsStringAsync();
+
+            var originalRequestUri = this.Context.Request.RequestUri;
+            var uriBuilder = new UriBuilder(originalRequestUri);
+            uriBuilder.Path = uriBuilder.Path.Replace("activitiesResponse", "activities");
+            var sendActivityRequest = new HttpRequestMessage(HttpMethod.Post, uriBuilder.Uri);
+            sendActivityRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ACCESS_TOKEN);
+            sendActivityRequest.Content = new StringContent(
+                requestContent,
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+            
+            var sendActivityResponse = await this.Context.SendAsync(sendActivityRequest, this.CancellationToken);
+            if (!sendActivityResponse.IsSuccessStatusCode)
+            {
+                return sendActivityResponse;
+            }
+            
+            var activityResponseContent = await sendActivityResponse.Content.ReadAsStringAsync();
+            var activityResponseJson = JObject.Parse(activityResponseContent);
+            string activityId = activityResponseJson["id"].ToString();
+            
+            const int maxAttempts = 100;
+            const int pollDelayMs = 500;
+            int attempts = 0;
+            JObject activitiesResponse = null;
+            
+            do {
+                attempts++;
+                
+                await Task.Delay(pollDelayMs);
+                
+                var getActivitiesRequest = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+                getActivitiesRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ACCESS_TOKEN);
+                
+                var getActivitiesResponse = await this.Context.SendAsync(getActivitiesRequest, this.CancellationToken);
+                if (!getActivitiesResponse.IsSuccessStatusCode)
+                {
+                    return getActivitiesResponse;
+                }
+                
+                var activitiesJson = await getActivitiesResponse.Content.ReadAsStringAsync();
+                activitiesResponse = JObject.Parse(activitiesJson);
+                
+                if (activitiesResponse["activities"] != null && activitiesResponse["activities"].Type == JTokenType.Array)
+                {
+                    var activities = activitiesResponse["activities"] as JArray;
+                    foreach (var a in activities)
+                    {
+                        if (a["replyToId"] != null && a["replyToId"].ToString() == activityId)
+                        {
+                            break;
+                        }
+                    }
+                }
+                
+            } while (attempts < maxAttempts);
+            
+            if (activitiesResponse != null)
+            {
+                activitiesResponse["token"] = ACCESS_TOKEN;
+                activitiesResponse["conversationId"] = conversationId;
+                
+                // Add lastActivity - extract the last item from the activities array
+                if (activitiesResponse["activities"] != null && activitiesResponse["activities"].Type == JTokenType.Array)
+                {
+                    var activities = activitiesResponse["activities"] as JArray;
+                    if (activities.Count > 0)
+                    {
+                        activitiesResponse["lastActivity"] = activities.Last;
+                    }
+                }
+                
+                actionResponse = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        activitiesResponse.ToString(),
+                        System.Text.Encoding.UTF8,
+                        "application/json")
+                };
+            }
+            else
+            {
+                actionResponse = new HttpResponseMessage(HttpStatusCode.RequestTimeout)
+                {
+                    Content = new StringContent("Timed out waiting for bot response")
+                };
+            }
+        }
+        else if (this.Context.OperationId == "Conversations_StartConversation")
+        {
+            var startConversationUrl = "https://directline.botframework.com/v3/directline/conversations";
+            var startConversationRequest = new HttpRequestMessage(HttpMethod.Post, startConversationUrl);
+            startConversationRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ACCESS_TOKEN);
+            
+            HttpResponseMessage startConversationResponse = await this.Context.SendAsync(startConversationRequest, this.CancellationToken);
+            if (!startConversationResponse.IsSuccessStatusCode)
+            {
+                return startConversationResponse;
+            }
+            
+            var conversationResponseString = await startConversationResponse.Content.ReadAsStringAsync();
+            var conversationJson = JObject.Parse(conversationResponseString);
+            
+            // Just preserve the API response directly
+            actionResponse = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    conversationResponseString,
+                    System.Text.Encoding.UTF8,
+                    "application/json")
+            };
+        }
         else if (this.Context.OperationId == "Conversations_Upload")
         {
             actionResponse = await this.Context.SendAsync(this.Context.Request, this.CancellationToken);
@@ -201,6 +317,7 @@ public class Script : ScriptBase
         }
         else
         {
+            // For other operations, just pass through the request with added token
             actionResponse = await this.Context.SendAsync(this.Context.Request, this.CancellationToken);
             
             if (actionResponse.IsSuccessStatusCode && actionResponse.Content != null)
@@ -215,6 +332,17 @@ public class Script : ScriptBase
                         jsonResponse["token"] = ACCESS_TOKEN;
                         jsonResponse["conversationId"] = conversationId;
                         
+                        // If there are activities, add lastActivity
+                        if (jsonResponse["activities"] != null && 
+                            jsonResponse["activities"].Type == JTokenType.Array)
+                        {
+                            var activities = jsonResponse["activities"] as JArray;
+                            if (activities.Count > 0)
+                            {
+                                jsonResponse["lastActivity"] = activities.Last;
+                            }
+                        }
+                        
                         actionResponse.Content = new StringContent(
                             jsonResponse.ToString(),
                             System.Text.Encoding.UTF8,
@@ -222,6 +350,7 @@ public class Script : ScriptBase
                     }
                     catch (Exception) 
                     {
+                        // If we can't parse the response as JSON, leave it as is
                     }
                 }
             }
