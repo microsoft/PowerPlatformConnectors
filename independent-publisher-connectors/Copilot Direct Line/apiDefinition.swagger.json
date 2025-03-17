@@ -107,7 +107,7 @@
             "in": "query",
             "x-ms-summary": "Token",
             "description": "The token.",
-            "required": false,
+            "required": true,
             "type": "string"
           }
         ],
@@ -170,7 +170,7 @@
             "in": "query",
             "x-ms-summary": "Token",
             "description": "The token.",
-            "required": false,
+            "required": true,
             "type": "string"
           }
         ],
@@ -223,7 +223,7 @@
             "in": "query",
             "x-ms-summary": "Token",
             "description": "The token.",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -296,7 +296,7 @@
             "in": "query",
             "x-ms-summary": "Direct Line Token",
             "description": "The Direct Line token for authorization.",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -399,6 +399,64 @@
           }
         ],
         "x-ms-visibility": "important"
+      }
+    },
+    "/v3/directline/conversations/{conversationId}/activitiesResponse": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "A set of activities and a watermark are returned.",
+            "schema": {
+              "$ref": "#/definitions/ActivitySet"
+            }
+          },
+          "400": {
+            "description": "The URL, body, or headers in the request are malformed or invalid."
+          },
+          "401": {
+            "description": "The operation included an invalid or missing Authorization header."
+          },
+          "403": {
+            "description": "You are forbidden from performing this action because your token or secret is invalid."
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "429": {
+            "description": "Too many requests have been submitted to this API. This error may be accompanied by a Retry-After header, which includes the suggested retry interval."
+          },
+          "500": {
+            "description": "An internal server error has occurred."
+          }
+        },
+        "summary": "Post activity and receive response",
+        "operationId": "Conversations_SendActivityResponse",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "x-ms-summary": "Token",
+            "description": "The token.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "activity",
+            "in": "body",
+            "description": "Activity to send.",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Activity"
+            }
+          }
+        ],
+        "description": "Sends activity to this conversation and waits for the agent to respond."
       }
     }
   },
@@ -515,10 +573,17 @@
           "description": "The conversation ID.",
           "title": "Conversation ID",
           "type": "string"
+        },
+        "lastActivity": {
+          "description": "The last activity in the set.",
+          "title": "Last Activity",
+          "type": "object",
+          "$ref": "#/definitions/LastActivity"
         }
       },
       "required": [
-        "activities"
+        "activities",
+        "token"
       ]
     },
     "Activity": {
@@ -1766,6 +1831,194 @@
       "required": [
         "activity"
       ]
+    },
+    "LastActivity": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Activity Type",
+          "description": "The type of activity (message, typing, etc.).",
+          "enum": [
+            "message",
+            "typing",
+            "event",
+            "contactRelation",
+            "endOfConversation",
+            "instruct",
+            "trace"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "title": "Activity ID",
+          "description": "Unique identifier for the activity.",
+          "pattern": "^[a-zA-Z0-9_-]+\\|\\d+$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Timestamp",
+          "description": "ISO 8601 timestamp of when the activity occurred."
+        },
+        "channelId": {
+          "type": "string",
+          "title": "Channel ID",
+          "description": "The channel where the activity occurred (directline, teams, etc.)."
+        },
+        "from": {
+          "type": "object",
+          "title": "Sender",
+          "description": "Information about the sender of the message.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Sender ID",
+              "description": "Unique identifier for the sender."
+            },
+            "name": {
+              "type": "string",
+              "title": "Sender Name",
+              "description": "Display name of the sender."
+            },
+            "role": {
+              "type": "string",
+              "title": "Sender Role",
+              "enum": [
+                "bot",
+                "user",
+                "channel"
+              ],
+              "description": "Role of the sender in the conversation."
+            }
+          },
+          "required": [
+            "id",
+            "role"
+          ]
+        },
+        "conversation": {
+          "type": "object",
+          "title": "Conversation",
+          "description": "Information about the conversation this activity belongs to.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Conversation ID",
+              "description": "Unique identifier for the conversation."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "textFormat": {
+          "type": "string",
+          "title": "Text Format",
+          "enum": [
+            "plain",
+            "markdown",
+            "xml"
+          ],
+          "description": "Format of the text content."
+        },
+        "membersAdded": {
+          "type": "array",
+          "title": "Members Added",
+          "description": "List of members added during this activity.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "membersRemoved": {
+          "type": "array",
+          "title": "Members Removed",
+          "description": "List of members removed during this activity.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "reactionsAdded": {
+          "type": "array",
+          "title": "Reactions Added",
+          "description": "List of reactions added to this activity.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "reactionsRemoved": {
+          "type": "array",
+          "title": "Reactions Removed",
+          "description": "List of reactions removed from this activity.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "locale": {
+          "type": "string",
+          "title": "Locale",
+          "description": "Locale/language code for the message.",
+          "pattern": "^[a-z]{2}-[A-Z]{2}$"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The text content of the message."
+        },
+        "inputHint": {
+          "type": "string",
+          "title": "Input Hint",
+          "enum": [
+            "acceptingInput",
+            "ignoringInput",
+            "expectingInput"
+          ],
+          "description": "Hint about whether the bot is accepting, expecting, or ignoring input."
+        },
+        "attachments": {
+          "type": "array",
+          "title": "Attachments",
+          "description": "Media attachments within the message.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "entities": {
+          "type": "array",
+          "title": "Entities",
+          "description": "Entities mentioned in or related to the activity.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "channelData": {
+          "type": "object",
+          "title": "Channel Data",
+          "description": "Channel-specific data including metadata and feedback information."
+        },
+        "replyToId": {
+          "type": "string",
+          "title": "Reply To ID",
+          "description": "ID of the activity this is replying to.",
+          "pattern": "^[a-zA-Z0-9_-]+\\|\\d+$"
+        },
+        "listenFor": {
+          "type": "array",
+          "title": "Listen For",
+          "description": "Keywords or phrases to listen for.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "textHighlights": {
+          "type": "array",
+          "title": "Text Highlights",
+          "description": "Highlights within the text content.",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
     }
   },
   "parameters": {},
@@ -1777,7 +2030,11 @@
       "name": "secret"
     }
   },
-  "security": [],
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
   "tags": [],
   "x-ms-connector-metadata": [
     {
