@@ -9,7 +9,12 @@ Access German Federal Parliament legislative data, documents, and activities.
 To use this connector, you will need:
 
 - A **Microsoft Power Apps** or **Power Automate** plan that includes custom connector capabilities.
+- Personal or public API key. See "Obtaining Credentials."
+
+## Obtaining Credentials
+
 - No authentication is required. The API is publicly available via API key for 2025: I9FKdCn.hbfefNWCY336dL6x62vfwNKpoN2RZ1gp21
+- To obtain your own license key that is valid for ten years, submit an email request to the service: parlamentsdokumentation@bundestag.de
 
 ## Supported Operations
 
@@ -45,6 +50,11 @@ This connector supports the following operations:
 2. **Set up a flow or app** – Use the available actions to fetch Bundestag data based on legislative processes, documents, activities, or persons. Use this API key for the entire year of 2025: I9FKdCn.hbfefNWCY336dL6x62vfwNKpoN2RZ1gp21
 3. **Use the results** – Connect responses to your Power BI reports, automate notifications, or integrate with your workflows.
 4. **Create your own API key by submitting an email request to the service: parlamentsdokumentation@bundestag.de. They are valid for ten years.
+5. Additional resources:
+	- [Bundestag API Swagger Documentation](https://search.dip.bundestag.de/api/v1/swagger-ui/)
+	- [Microsoft Power Automate Custom Connectors](https://learn.microsoft.com/en-us/connectors/custom-connectors/)
+	- [API General Info](https://dip.bundestag.de/%C3%BCber-dip/hilfe/api)
+	- [Official PDF Documenation via the Bundestag API](https://dip.bundestag.de/api/v1/docs/pdf)
 
 ## Known Issues and Limitations
 
@@ -62,9 +72,3 @@ The data is updated based on parliamentary activities, which means some document
 
 ### Can I use this in Power BI?
 Yes. You can integrate the Bundestag API with Power BI using Power Automate to fetch and structure the data. Power BI can transform the array of objects into a tabular format for visualization.
-
-## Additional Resources
-- [Bundestag API Swagger Documentation](https://search.dip.bundestag.de/api/v1/swagger-ui/)
-- [Microsoft Power Automate Custom Connectors](https://learn.microsoft.com/en-us/connectors/custom-connectors/)
-- [API General Info](https://dip.bundestag.de/%C3%BCber-dip/hilfe/api)
-- [Official PDF Documenation via the Bundestag API](https://dip.bundestag.de/api/v1/docs/pdf)
