@@ -1,6 +1,6 @@
 # WhatsApp
 
-Allows the user to send automated WhatsApp messages through a flow on Power Automate. Custom message templates can be sent and variables within the JSON body can be set.
+Allows the user to send automated WhatsApp messages through a flow on Power Automate. Custom message templates can be sent and variables within the JSON body can be set. These variables can be in the form of an image header and/or a text variable in the body.
 
 ## Publishers: Zakariya Fakira, Satbir Virdi, Oscar Hui, Chaohui Wang
 
@@ -37,11 +37,21 @@ Allows the user to send automated WhatsApp messages through a flow on Power Auto
 
    For that, follow the steps, thoroughly explained by Meta on this website: [Create message templates for your WhatsApp Business account | Meta Business Help Centre (facebook.com)](https://www.facebook.com/business/help/2055875911147364?id=2129163877102343).
 
+More information about the WhatsApp Business Cloud API can be found on https://developers.facebook.com/docs/whatsapp/cloud-api.
+
 ## Supported Operation
 
 The connector supports the following operations:
 
 - Send Message: Sends a message to the recipient provided that the latter is found in the list of phone numbers for the Meta Account.
+
+Important Note on how to consume the connetor in a flow: If the user wishes to send text-only or image+text message templates, a slight variation needs to be made in the Power Automate Flow.
+
+If the user is using text-only, they can simply disregard the 'link' field in the flow.
+
+If the user is using image+text, they can use the 'link' field to specify the image URL.
+
+It may happen that the user uses different templates at once, and this has to be taken into account when using the connector. Should the user need both a text-only and an image+text template simultaneously, they should use the connector in 2 separate flows.
 
 ## Obtaining Credentials
 

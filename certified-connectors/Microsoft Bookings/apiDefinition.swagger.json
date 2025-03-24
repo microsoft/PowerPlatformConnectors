@@ -7,7 +7,10 @@
       "name": "Microsoft 365 Support",
       "url": "https://support.microsoft.com/en-us/contactus#"
     },
-    "version": "1.0"
+    "version": "1.0",
+    "x-ms-api-annotation": {
+      "status": "Preview"
+    }
   },
   "x-ms-connector-metadata": [
     {
@@ -23,7 +26,7 @@
       "propertyValue": "Business Management;Collaboration"
     }
   ],
-  "host": "bookings.office.net",
+  "host": "outlook.office.com",
   "basePath": "/",
   "schemes": [
     "https"
@@ -31,7 +34,7 @@
   "consumes": [],
   "produces": [],
   "paths": {
-    "/api/v1.0/bookingBusinesses/{SMTPAddress}/webhooks/AppointmentCreated": {
+    "/BookingsService/api/V1/bookingBusinesses/{SMTPAddress}/webhook/AppointmentCreated": {
       "x-ms-notification-content": {
         "description": "Appointment details for webhook",
         "schema": {
@@ -40,8 +43,11 @@
       },
       "post": {
         "responses": {
-          "201": {
-            "description": "Created."
+          "200": {
+            "description": "OK.",
+            "schema": {
+              "$ref": "#/definitions/Webhookresponse"
+            }
           },
           "401": {
             "description": "Unauthenticated."
@@ -57,7 +63,7 @@
           }
         },
         "summary": "When a appointment is Created",
-        "description": "This trigger is used for listening to create of bookings appointments. Enter the SMTP address of Bookings Calendar that you are looking forward to listen for create appointment events.",
+        "description": "This trigger is used for listening to create of bookings appointments. Select a booking page or enter the SMTP address of the booking page that you are looking forward to listen for create appointment events",
         "operationId": "CreateAppointment",
         "x-ms-trigger": "single",
         "x-ms-trigger-hint": "To see this trigger work, Create an appointment from bookings page or bookings calendar",
@@ -67,8 +73,14 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "This can be found in your booking page URL: ⁠⁠https://book.ms/b/<SMTPAddress>.",
-            "x-ms-summary": "Bookings Calendar SMTP Address."
+            "description": "Select a booking page",
+            "x-ms-summary": "Booking page.",
+            "x-ms-dynamic-values": {
+              "operationId": "ListBookingsBusinessUserAsAdmin",
+              "value-path": "email",
+              "value-title": "displayName",
+              "value-collection": "mailboxes"
+            }
           },
           {
             "name": "body",
@@ -77,36 +89,44 @@
             "schema": {
               "type": "object",
               "properties": {
-                "notificationURL": {
-                  "type": "string",
-                  "description": "Notification URL where the appointment data will be posted.",
-                  "title": "notificationURL",
-                  "x-ms-visibility": "internal",
-                  "x-ms-notification-url": true
-                },
-                "resource": {
-                  "type": "string",
-                  "description": "resource",
-                  "title": "Resource",
-                  "default": "Appointments",
-                  "x-ms-visibility": "internal"
-                },
-                "changeType": {
-                  "description": "Changes to listen on",
-                  "x-ms-visibility": "internal",
-                  "type": "array",
-                  "default": [
-                    "Created"
-                  ],
-                  "items": {
-                    "type": "string"
-                  }
+                "webhook": {
+                  "type": "object",
+                  "properties": {
+                    "notification_url": {
+                      "type": "string",
+                      "description": "Notification URL where the appointment data will be posted.",
+                      "title": "notification_url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true
+                    },
+                    "resource": {
+                      "type": "string",
+                      "description": "resource",
+                      "title": "Resource",
+                      "default": "Appointments",
+                      "x-ms-visibility": "internal"
+                    },
+                    "change_type": {
+                      "description": "Changes to listen on",
+                      "x-ms-visibility": "internal",
+                      "type": "array",
+                      "default": [
+                        "Created"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "notification_url",
+                    "resource",
+                    "change_type"
+                  ]
                 }
               },
               "required": [
-                "notificationURL",
-                "resource",
-                "changeType"
+                "webhook"
               ]
             }
           }
@@ -114,7 +134,7 @@
         "x-ms-visibility": "important"
       }
     },
-    "/api/v1.0/bookingBusinesses/{SMTPAddress}/webhooks/AppointmentUpdated": {
+    "/BookingsService/api/V1/bookingBusinesses/{SMTPAddress}/webhook/AppointmentUpdated": {
       "x-ms-notification-content": {
         "description": "Appointment details for webhook",
         "schema": {
@@ -140,7 +160,7 @@
           }
         },
         "summary": "When an appointment is Updated",
-        "description": "This trigger is used for listening to Updated of bookings appointments. Enter the SMTP address of Bookings Calendar that you are looking forward to listen for Update appointment events.",
+        "description": "This trigger is used for listening to update of bookings appointments. Select a booking page or enter the SMTP address of the booking page that you are looking forward to listen for update appointment events.",
         "operationId": "UpdateAppointment",
         "x-ms-trigger": "single",
         "x-ms-trigger-hint": "To see this trigger work, Update an existing appointment from bookings page or bookings calendar",
@@ -150,8 +170,14 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "This can be found in your booking page URL: ⁠⁠https://book.ms/b/<SMTPAddress>.",
-            "x-ms-summary": "Bookings Calendar SMTP Address."
+            "description": "Select a booking page",
+            "x-ms-dynamic-values": {
+              "operationId": "ListBookingsBusinessUserAsAdmin",
+              "value-path": "email",
+              "value-title": "displayName",
+              "value-collection": "mailboxes"
+            },
+            "x-ms-summary": "Booking page."
           },
           {
             "name": "body",
@@ -160,36 +186,44 @@
             "schema": {
               "type": "object",
               "properties": {
-                "notificationURL": {
-                  "type": "string",
-                  "description": "Notification URL where the appointment data will be posted.",
-                  "title": "notificationURL",
-                  "x-ms-visibility": "internal",
-                  "x-ms-notification-url": true
-                },
-                "resource": {
-                  "type": "string",
-                  "description": "resource",
-                  "title": "Resource",
-                  "default": "Appointments",
-                  "x-ms-visibility": "internal"
-                },
-                "changeType": {
-                  "description": "Changes to listen on",
-                  "x-ms-visibility": "internal",
-                  "type": "array",
-                  "default": [
-                    "Updated"
-                  ],
-                  "items": {
-                    "type": "string"
-                  }
+                "webhook": {
+                  "type": "object",
+                  "properties": {
+                    "notification_url": {
+                      "type": "string",
+                      "description": "Notification URL where the appointment data will be posted.",
+                      "title": "notification_url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true
+                    },
+                    "resource": {
+                      "type": "string",
+                      "description": "resource",
+                      "title": "Resource",
+                      "default": "Appointments",
+                      "x-ms-visibility": "internal"
+                    },
+                    "change_type": {
+                      "description": "Changes to listen on",
+                      "x-ms-visibility": "internal",
+                      "type": "array",
+                      "default": [
+                        "Updated"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "notification_url",
+                    "resource",
+                    "change_type"
+                  ]
                 }
               },
               "required": [
-                "notificationURL",
-                "resource",
-                "changeType"
+                "webhook"
               ]
             }
           }
@@ -197,7 +231,7 @@
         "x-ms-visibility": "important"
       }
     },
-    "/api/v1.0/bookingBusinesses/{SMTPAddress}/webhooks/AppointmentDeleted": {
+    "/BookingsService/api/V1/bookingBusinesses/{SMTPAddress}/webhook/AppointmentDeleted": {
       "x-ms-notification-content": {
         "description": "Appointment details for webhook",
         "schema": {
@@ -223,7 +257,7 @@
           }
         },
         "summary": "When an appointment is Cancelled",
-        "description": "This trigger is used for listening to cancel of bookings appointments. Enter the SMTP address of Bookings Calendar that you are looking forward to listen for cancel appointment events.",
+        "description": "This trigger is used for listening to cancel of bookings appointments. Select a booking page or enter the SMTP address of the booking page that you are looking forward to listen for cancel appointment events.",
         "operationId": "CancelAppointment",
         "x-ms-trigger": "single",
         "x-ms-trigger-hint": "To see this trigger work, cancel an existing appointment from bookings page or bookings calendar",
@@ -233,8 +267,14 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "This can be found in your booking page URL: ⁠⁠https://book.ms/b/*SMTPAddress*.",
-            "x-ms-summary": "Bookings Calendar SMTP Address."
+            "description": "Select a booking page",
+            "x-ms-dynamic-values": {
+              "operationId": "ListBookingsBusinessUserAsAdmin",
+              "value-path": "email",
+              "value-title": "displayName",
+              "value-collection": "mailboxes"
+            },
+            "x-ms-summary": "Booking page."
           },
           {
             "name": "body",
@@ -243,36 +283,44 @@
             "schema": {
               "type": "object",
               "properties": {
-                "notificationURL": {
-                  "type": "string",
-                  "description": "Notification URL where the appointment data will be posted.",
-                  "title": "notificationURL",
-                  "x-ms-visibility": "internal",
-                  "x-ms-notification-url": true
-                },
-                "resource": {
-                  "type": "string",
-                  "description": "resource",
-                  "title": "Resource",
-                  "default": "Appointments",
-                  "x-ms-visibility": "internal"
-                },
-                "changeType": {
-                  "description": "Changes to listen on",
-                  "x-ms-visibility": "internal",
-                  "type": "array",
-                  "default": [
-                    "Deleted"
-                  ],
-                  "items": {
-                  "type": "string"
-                  }
+                "webhook": {
+                  "type": "object",
+                  "properties": {
+                    "notification_url": {
+                      "type": "string",
+                      "description": "Notification URL where the appointment data will be posted.",
+                      "title": "notification_url",
+                      "x-ms-visibility": "internal",
+                      "x-ms-notification-url": true
+                    },
+                    "resource": {
+                      "type": "string",
+                      "description": "resource",
+                      "title": "Resource",
+                      "default": "Appointments",
+                      "x-ms-visibility": "internal"
+                    },
+                    "change_type": {
+                      "description": "Changes to listen on",
+                      "x-ms-visibility": "internal",
+                      "type": "array",
+                      "default": [
+                        "Deleted"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "notification_url",
+                    "resource",
+                    "change_type"
+                  ]
                 }
               },
               "required": [
-                "notificationURL",
-                "resource",
-                "changeType"
+                "webhook"
               ]
             }
           }
@@ -280,7 +328,33 @@
         "x-ms-visibility": "important"
       }
     },
-    "/api/v1.0/bookingBusinesses('{SMTPAddress}')/webhooks('{WebhookId}')": {
+    "/BookingsService/api/V1/bookingBusinessesUserAsAdmin": {
+      "get": {
+        "summary": "List Booking Businesses where user is an admin",
+        "description": "Operation used to list all mailboxes for which the accessing user is an Administrator.",
+        "operationId": "ListBookingsBusinessUserAsAdmin",
+        "parameters": [
+          {
+            "name": "X-Prefer-OWAUserConfig",
+            "in": "header",
+            "description": "Header to use OWA user config",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "default": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListMailboxResponse"
+            }
+          }
+        }
+      }
+    },
+    "/BookingsService/api/V1/bookingBusinesses/{SMTPAddress}/webhook/{WebhookId}": {
       "delete": {
         "summary": "Unsubscribe a booking webhook",
         "operationId": "DeleteWebhook",
@@ -299,8 +373,11 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "No Content"
+          "200": {
+            "description": "No Content",
+            "schema": {
+              "$ref": "#/definitions/DeleteWebhookResponse"
+            }
           }
         },
         "x-ms-visibility": "internal",
@@ -309,6 +386,47 @@
     }
   },
   "definitions": {
+    "Webhookresponse": {
+      "type": "object",
+      "properties": {
+        "webhookId": {
+          "type": "string",
+          "description": "Webhook ID.",
+          "title": "Webhook ID"
+        }
+      }
+    },
+    "DeleteWebhookResponse": {
+      "type": "string"
+    },
+    "ListMailboxResponse": {
+      "type": "object",
+      "properties": {
+        "mailboxes": {
+          "type": "array",
+          "description": "All mailbox entities.",
+          "title": "mailboxes",
+          "items": {
+            "$ref": "#/definitions/MailboxEntity"
+          }
+        }
+      }
+    },
+    "MailboxEntity": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "Mailbox Display name.",
+          "title": "Display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "SMTP of the Booking mailbox.",
+          "title": "Mailbox SMTP"
+        }
+      }
+    },
     "AppointmentData": {
       "type": "object",
       "properties": {
@@ -330,6 +448,11 @@
         "CustomerLocation": {
           "type": "object",
           "properties": {
+            "DisplayName": {
+              "type": "string",
+              "description": "Customer location display name. Location filled from C2 page for 1:1 Booking.",
+              "title": "Location Display Name"
+            },
             "PhysicalAddress": {
               "type": "object",
               "properties": {
@@ -384,7 +507,7 @@
         },
         "CustomerPhone": {
           "type": "string",
-          "description": "Customer Phone for 1:1 booking.",
+          "description": "Customer phone for 1:1 booking.",
           "title": "CustomerPhone"
         },
         "CustomerTimeZone": {
@@ -404,7 +527,7 @@
           "type": "integer",
           "format": "int32",
           "title": "Duration",
-          "description": "Duration of the meeting"
+          "description": "Duration of the appointment"
         },
         "EndTime": {
           "type": "string",
@@ -420,12 +543,12 @@
         "Id": {
           "type": "string",
           "title": "Id",
-          "description": "Unique identifier for the bookings appointment."
+          "description": "[Deprecated] - use selfServiceAppointmentId as unique identifer for the bookings appointment."
         },
         "IsSMSNotificationsEnabled": {
           "type": "boolean",
           "title": "IsSMSNotificationsEnabled",
-          "description": "Tells if SMS notification is enabled for the appointment."
+          "description": "Field to check if SMS notification is enabled for the appointment."
         },
         "JoinWebURL": {
           "type": "string",
@@ -441,7 +564,7 @@
         "SelfServiceAppointmentId": {
           "type": "string",
           "title": "SelfServiceAppointmentId",
-          "description": "Self service appointment id for the booking appointment."
+          "description": "Appointment id for the booking appointment."
         },
         "ServiceId": {
           "type": "string",
@@ -488,64 +611,69 @@
       "properties": {
         "Email": {
           "type": "string",
-          "description": "Email of the customer in the 1:N appointment.",
+          "description": "Email of the customer in the group booking.",
           "title": "Email"
         },
         "Id": {
           "type": "string",
-          "description": "Unique ID of the customer in the 1:N appointment",
+          "description": "Unique ID of the customer in the group booking.",
           "title": "Id"
         },
         "Location": {
           "type": "object",
           "properties": {
+            "DisplayName": {
+              "type": "string",
+              "description": "Customer location display name. Location filled from C2 page for group booking.",
+              "title": "Location Display Name"
+            },
             "PhysicalAddress": {
               "type": "object",
               "properties": {
                 "City": {
                   "type": "string",
-                  "description": "City the customer belongs to for 1:N booking.",
+                  "description": "City the customer belongs to for group booking.",
                   "title": "City"
                 },
                 "CountryOrRegion": {
                   "type": "string",
-                  "description": "Country Or Region of the customer for 1:N booking.",
+                  "description": "Country Or Region of the customer for group booking.",
                   "title": "Country Or Region"
                 },
                 "PostalCode": {
                   "type": "string",
-                  "description": "Postal Code of the customer for 1:N booking.",
+                  "description": "Postal Code of the customer for group booking.",
                   "title": "Postal Code"
                 },
                 "State": {
                   "type": "string",
-                  "description": "State where the customer belongs to in the 1:N booking.",
+                  "description": "State where the customer belongs to in the group booking.",
                   "title": "State"
                 },
                 "Street": {
                   "type": "string",
-                  "description": "Street where the customer belongs to in the 1:N booking.",
+                  "description": "Street where the customer belongs to in the group booking.",
                   "title": "Street"
                 }
               },
               "description": "PhysicalAddress"
             }
           },
-          "description": "Location of customer in 1:N booking."
+          "description": "Location of customer in a group booking."
         },
         "Name": {
           "type": "string",
-          "description": "Display Name of the customer in the 1:N appointment.",
+          "description": "Display Name of the customer in the group booking.",
           "title": "Display Name"
         },
         "Notes": {
           "type": "string",
-          "description": "Notes of the customer in the 1:N appointment.",
+          "description": "Notes of the customer in the group booking.",
           "title": "Notes"
         },
         "TimeZone": {
           "type": "string",
-          "description": "Timezone of the customer in the 1:N appointment.",
+          "description": "Timezone of the customer in the group booking.",
           "title": "Timezone"
         },
         "Answers": {

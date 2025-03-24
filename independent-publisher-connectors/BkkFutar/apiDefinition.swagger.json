@@ -1,0 +1,1626 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.2.0",
+    "title": "BKK Futar",
+    "description": "Get and search planned and real-time information from the BKK FUTAR system - public transportation of Budapest - regarding journeys, vehicles, stops and many more!",
+    "contact": {
+      "name": "Fördős András",
+      "email": "fordosa90+ipc_bkk@gmail.com"
+    }
+  },
+  "host": "futar.bkk.hu",
+  "basePath": "/api/query/v1/ws/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/{dialect}/api/where/alert-search": {
+      "get": {
+        "summary": "Search Alerts",
+        "description": "List active disturbances corresponding to the search criteria",
+        "operationId": "SearchAlerts",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Query",
+            "description": "A query string matched against disturbance title, description or identification.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Start",
+            "description": "Start of time interval (epoch seconds) for the search.",
+            "x-ms-visibility": "important",
+            "format": "int64"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "End",
+            "description": "End of time interval (epoch seconds) for the search.",
+            "x-ms-visibility": "important",
+            "format": "int64"
+          },
+          {
+            "$ref": "#/parameters/minResultParam"
+          },
+          {
+            "$ref": "#/parameters/appVersionParam"
+          },
+          {
+            "$ref": "#/parameters/versionParam"
+          },
+          {
+            "$ref": "#/parameters/includeReferencesParam"
+          },
+          {
+            "$ref": "#/parameters/dialectParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentTime": {
+                  "$ref": "#/definitions/TimeResponse"
+                },
+                "version": {
+                  "$ref": "#/definitions/VersionResponse"
+                },
+                "status": {
+                  "$ref": "#/definitions/StatusResponse"
+                },
+                "code": {
+                  "$ref": "#/definitions/CodeResponse"
+                },
+                "text": {
+                  "$ref": "#/definitions/TextResponse"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "limitExceeded": {
+                      "$ref": "#/definitions/LimitExceededResponse"
+                    },
+                    "entry": {
+                      "type": "object",
+                      "properties": {
+                        "stopIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Array of found relevant stop IDs.",
+                          "title": "Stop IDs"
+                        },
+                        "routeIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Array of found relevant route IDs.",
+                          "title": "Route IDs"
+                        },
+                        "alertIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Array of found relevant alert IDs.",
+                          "title": "Alert IDs"
+                        }
+                      }
+                    },
+                    "references": {
+                      "$ref": "#/definitions/ReferencesResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{dialect}/api/where/arrivals-and-departures-for-stop": {
+      "get": {
+        "summary": "Get arrivals and departures for stop",
+        "description": "List arrivals and departures for selected stop",
+        "operationId": "GetArrivalsAndDeparturesForStop",
+        "parameters": [
+          {
+            "name": "minutesBefore",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "required": false,
+            "x-ms-summary": "Minutes before",
+            "x-ms-visibility": "advanced",
+            "description": "Start of relevant time interval for query, substracted from 'time' parameter."
+          },
+          {
+            "name": "minutesAfter",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Minutes after",
+            "x-ms-visibility": "advanced",
+            "description": "End of relevant time interval for query, added to the 'time' parameter."
+          },
+          {
+            "name": "stopId",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Stop ID",
+            "description": "Stop ID to query data for, such as 'BKK_F01227'."
+          },
+          {
+            "name": "includeRouteId",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Include Route ID",
+            "description": "List of comma separated route IDs to filter results.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "time",
+            "in": "query",
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "Time",
+            "description": "Timestamp (epoch seconds) used for the query, defaulted to server time."
+          },
+          {
+            "name": "onlyDepartures",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Only departures",
+            "x-ms-visibility": "advanced",
+            "description": "Indicate, whether return results with or without arrivals."
+          },
+          {
+            "name": "limit",
+            "default": 60,
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of returned results, defaulted to 60."
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "type": "number",
+            "format": "float",
+            "x-ms-summary": "Latitude",
+            "description": "Latitude information of the location.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "type": "number",
+            "format": "float",
+            "x-ms-summary": "Longitude",
+            "description": "Longitude information of the location.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Radius",
+            "description": "Radius of location around lat and lon coordinates.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Query",
+            "description": "Query expression used to filter results."
+          },
+          {
+            "$ref": "#/parameters/minResultParam"
+          },
+          {
+            "$ref": "#/parameters/versionParam"
+          },
+          {
+            "$ref": "#/parameters/includeReferencesParam"
+          },
+          {
+            "$ref": "#/parameters/dialectParam"
+          },
+          {
+            "$ref": "#/parameters/appVersionParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentTime": {
+                  "$ref": "#/definitions/TimeResponse"
+                },
+                "version": {
+                  "$ref": "#/definitions/VersionResponse"
+                },
+                "status": {
+                  "$ref": "#/definitions/StatusResponse"
+                },
+                "code": {
+                  "$ref": "#/definitions/CodeResponse"
+                },
+                "text": {
+                  "$ref": "#/definitions/TextResponse"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "limitExceeded": {
+                      "$ref": "#/definitions/LimitExceededResponse"
+                    },
+                    "entry": {
+                      "type": "object",
+                      "properties": {
+                        "stopId": {
+                          "type": "string",
+                          "description": "The identification of the Stop.",
+                          "title": "Stop ID"
+                        },
+                        "routeIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "An array of the route IDs belonging to the stop.",
+                          "title": "Route IDs"
+                        },
+                        "alertIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "An array of the alert IDs belonging to the stop.",
+                          "title": "Alert IDs"
+                        },
+                        "nearbyStopIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "An array of the nearby Stop IDs.",
+                          "title": "Nearby Stop IDs"
+                        },
+                        "stopTimes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "stopId": {
+                                "type": "string",
+                                "description": "Identification of the Stop.",
+                                "title": "Stop ID"
+                              },
+                              "stopHeadsign": {
+                                "type": "string",
+                                "description": "The indicated destination in the stop.",
+                                "title": "Stop Headsign"
+                              },
+                              "arrivalTime": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "The planned arrival time in epoch seconds.",
+                                "title": "Arrival Time"
+                              },
+                              "departureTime": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "The planned departure time in epoch seconds",
+                                "title": "Departure Time"
+                              },
+                              "predictedArrivalTime": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Predicted arrival time in epoch seconds, if the trip has realtime data.",
+                                "title": "Predicted Arrival"
+                              },
+                              "predictedDepartureTime": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Predicted departure time in epoch seconds, if the trip has realtime data.",
+                                "title": "Predicted Departure"
+                              },
+                              "uncertain": {
+                                "type": "boolean",
+                                "description": "Indication, whether the realtime data for the trip is uncertain.",
+                                "title": "Uncertain"
+                              },
+                              "tripId": {
+                                "type": "string",
+                                "description": "The relevant Trip ID for this entry.",
+                                "title": "Trip ID"
+                              },
+                              "serviceDate": {
+                                "type": "string",
+                                "description": "The service date of the Trip, expressed in YYYYMMDD format.",
+                                "title": "Service Date"
+                              },
+                              "wheelchairAccessible": {
+                                "type": "boolean",
+                                "description": "Indication, whether the Trip is wheelchair accessible.",
+                                "title": "Wheelchair Accessible"
+                              },
+                              "mayRequireBooking": {
+                                "type": "boolean",
+                                "description": "Indication, whether at least one of the next stops of the trip requires booking.",
+                                "title": "May Require Booking"
+                              },
+                              "alertIds": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "description": "The relevant alert IDs for the stop.",
+                                "title": "Alert IDs"
+                              }
+                            }
+                          },
+                          "title": "Stop Time",
+                          "description": "The stop schedule relevant for given stop."
+                        }
+                      }
+                    },
+                    "references": {
+                      "$ref": "#/definitions/ReferencesResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{dialect}/api/where/bicycle-rental": {
+      "get": {
+        "summary": "Get Bicycle Rental Stations",
+        "description": "Get information about Bicycle Rental Stations",
+        "operationId": "GetBicycleRentalStations",
+        "parameters": [
+          {
+            "$ref": "#/parameters/appVersionParam"
+          },
+          {
+            "$ref": "#/parameters/versionParam"
+          },
+          {
+            "$ref": "#/parameters/includeReferencesParam"
+          },
+          {
+            "$ref": "#/parameters/dialectParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentTime": {
+                  "$ref": "#/definitions/TimeResponse"
+                },
+                "version": {
+                  "$ref": "#/definitions/VersionResponse"
+                },
+                "status": {
+                  "$ref": "#/definitions/StatusResponse"
+                },
+                "code": {
+                  "$ref": "#/definitions/CodeResponse"
+                },
+                "text": {
+                  "$ref": "#/definitions/TextResponse"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Bike station ID.",
+                            "title": "Bike station ID"
+                          },
+                          "lat": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Latitude information of the station.",
+                            "title": "Latitude"
+                          },
+                          "lon": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Longitude information of the station",
+                            "title": "Longitude"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Name of the bike station.",
+                            "title": "Name"
+                          },
+                          "code": {
+                            "type": "string",
+                            "description": "Code of the bike station.",
+                            "title": "Code"
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the bike station.",
+                            "title": "Type"
+                          },
+                          "bikes": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "Number of available bikes at the station.",
+                            "title": "Bikes"
+                          }
+                        }
+                      }
+                    },
+                    "limitExceeded": {
+                      "$ref": "#/definitions/LimitExceededResponse"
+                    },
+                    "references": {
+                      "$ref": "#/definitions/ReferencesResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{dialect}/api/where/schedule-for-stop": {
+      "get": {
+        "summary": "Get schedule for stop",
+        "description": "List the schedule for a selected stop",
+        "operationId": "GetScheduleForStop",
+        "parameters": [
+          {
+            "name": "stopId",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Stop ID",
+            "description": "Stop ID to query data for, such as 'BKK_F01227'."
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Date",
+            "description": "The requested date in YYYYMMDD format, such as 20230131, defaulted to today."
+          },
+          {
+            "name": "onlyDepartures",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Only departures",
+            "x-ms-visibility": "advanced",
+            "description": "Indicate, whether return results with or without arrivals."
+          },
+          {
+            "$ref": "#/parameters/versionParam"
+          },
+          {
+            "$ref": "#/parameters/includeReferencesParam"
+          },
+          {
+            "$ref": "#/parameters/dialectParam"
+          },
+          {
+            "$ref": "#/parameters/appVersionParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentTime": {
+                  "$ref": "#/definitions/TimeResponse"
+                },
+                "version": {
+                  "$ref": "#/definitions/VersionResponse"
+                },
+                "status": {
+                  "$ref": "#/definitions/StatusResponse"
+                },
+                "code": {
+                  "$ref": "#/definitions/CodeResponse"
+                },
+                "text": {
+                  "$ref": "#/definitions/TextResponse"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "entry": {
+                      "type": "object",
+                      "properties": {
+                        "stopId": {
+                          "type": "string",
+                          "description": "Unique ID of the requested stop.",
+                          "title": "Stop ID"
+                        },
+                        "date": {
+                          "type": "string",
+                          "description": "Date of the requested schedule in YYYYMMDD format, such as 20230130.",
+                          "title": "Date"
+                        },
+                        "routeIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Array of related route IDs for the schedule.",
+                          "title": "Route IDs"
+                        },
+                        "nearbyStopIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Array of nearby stop IDs.",
+                          "title": "Nearby stop IDs"
+                        },
+                        "alertIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Array of related alert IDs for the stop",
+                          "title": "Alert IDs"
+                        },
+                        "schedules": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "routeId": {
+                                "type": "string",
+                                "description": "Relevant route ID for the schedule.",
+                                "title": "Route ID"
+                              },
+                              "alertIds": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "description": "Array of relevant alert IDs",
+                                "title": "Alert IDs"
+                              },
+                              "directions": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "directionId": {
+                                      "type": "string",
+                                      "description": "Identification of the direction.",
+                                      "title": "Direction ID"
+                                    },
+                                    "groups": {
+                                      "type": "object",
+                                      "description": "Combining the target stop and schedule details.",
+                                      "title": "Groups"
+                                    },
+                                    "stopTimes": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "title": "Stop time",
+                                        "description": "Details of a stop time within schedule."
+                                      },
+                                      "description": "Array of stop times and related details within the schedule.",
+                                      "title": "Stop times"
+                                    }
+                                  }
+                                },
+                                "description": "Array of schedule data grouped by direction.",
+                                "title": "Direction"
+                              }
+                            }
+                          },
+                          "description": "Array of schedules related to the stop.",
+                          "title": "Schedule"
+                        }
+                      }
+                    },
+                    "limitExceeded": {
+                      "$ref": "#/definitions/LimitExceededResponse"
+                    },
+                    "references": {
+                      "$ref": "#/definitions/ReferencesResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{dialect}/api/where/stops-for-location": {
+      "get": {
+        "summary": "Get stops for location",
+        "description": "List stops for a selected location, or all stops",
+        "operationId": "GetStopsForLocation",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "type": "number",
+            "format": "float",
+            "required": false,
+            "x-ms-summary": "Latitude",
+            "description": "Latitude of the requested location, for example '47.497313'. If empty, returns all stops."
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "type": "number",
+            "format": "float",
+            "required": false,
+            "x-ms-summary": "Longitude",
+            "description": "Longitude of the requested location, for example '19.064639'. If empty, returns all stops."
+          },
+          {
+            "name": "latSpan",
+            "in": "query",
+            "type": "number",
+            "format": "float",
+            "required": false,
+            "x-ms-summary": "Latitude span",
+            "description": "Latitude span for the requested location (lat +/- latSpan), for example '0.01336'.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lonSpan",
+            "in": "query",
+            "type": "number",
+            "format": "float",
+            "required": false,
+            "x-ms-summary": "Longitude span",
+            "description": "Longitude span for the requested location (lon +/- lonSpan), for example '0.0321'.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "required": false,
+            "x-ms-summary": "Radius",
+            "description": "If latSpan or lonSpan are missing, search area is defined by adding radius (meters) to location.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "$ref": "#/parameters/minResultParam"
+          },
+          {
+            "$ref": "#/parameters/versionParam"
+          },
+          {
+            "$ref": "#/parameters/includeReferencesParam"
+          },
+          {
+            "$ref": "#/parameters/dialectParam"
+          },
+          {
+            "$ref": "#/parameters/appVersionParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentTime": {
+                  "$ref": "#/definitions/TimeResponse"
+                },
+                "version": {
+                  "$ref": "#/definitions/VersionResponse"
+                },
+                "status": {
+                  "$ref": "#/definitions/StatusResponse"
+                },
+                "code": {
+                  "$ref": "#/definitions/CodeResponse"
+                },
+                "text": {
+                  "$ref": "#/definitions/TextResponse"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Unique identification of the stop.",
+                            "title": "ID"
+                          },
+                          "vertex": {
+                            "type": "string",
+                            "description": "The journey planner identification of the stop.",
+                            "title": "Vertex"
+                          },
+                          "lat": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Latitude of the stop.",
+                            "title": "Latitude"
+                          },
+                          "lon": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Longitude of the stop.",
+                            "title": "Longitude"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Name of the stop.",
+                            "title": "Name"
+                          },
+                          "code": {
+                            "type": "string",
+                            "description": "Code of the stop.",
+                            "title": "Code"
+                          },
+                          "direction": {
+                            "type": "string",
+                            "description": "Direction of the stop, for example '-47'.",
+                            "title": "Direction"
+                          },
+                          "platformCode": {
+                            "type": "string",
+                            "description": "Platform code of the stop.",
+                            "title": "Platform code"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "Description of the stop.",
+                            "title": "Description"
+                          },
+                          "locationType": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "The location type of the stop.",
+                            "title": "Location type"
+                          },
+                          "locationSubType": {
+                            "type": "string",
+                            "description": "Location subtype of the stop.",
+                            "title": "Location subtype"
+                          },
+                          "parentStationId": {
+                            "type": "string",
+                            "description": "Unique ID of the parent station.",
+                            "title": "Parent station id"
+                          },
+                          "wheelchairBoarding": {
+                            "type": "boolean",
+                            "description": "Is the stop wheelchair accessible?",
+                            "title": "Wheelchair boarding"
+                          },
+                          "routeIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Array of all routes containing the stop.",
+                            "title": "Route IDs"
+                          },
+                          "alertIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Array of active alert IDs related to the stop.",
+                            "title": "Alert IDs"
+                          }
+                        }
+                      }
+                    },
+                    "limitExceeded": {
+                      "$ref": "#/definitions/LimitExceededResponse"
+                    },
+                    "references": {
+                      "$ref": "#/definitions/ReferencesResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{dialect}/api/where/vehicles-for-stop": {
+      "get": {
+        "summary": "Get vehicles for stop",
+        "description": "List vehicles, which are on a route containing the selected stop",
+        "operationId": "GetVehiclesForStop",
+        "parameters": [
+          {
+            "name": "stopId",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Stop ID",
+            "description": "Stop ID to query data for, such as 'BKK_F01227'."
+          },
+          {
+            "name": "ifModifiedSince",
+            "in": "query",
+            "type": "integer",
+            "format": "int64",
+            "x-ms-summary": "If modified since (unix)",
+            "description": "Return data, that has been modified since the UNIX timestamp.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "$ref": "#/parameters/versionParam"
+          },
+          {
+            "$ref": "#/parameters/includeReferencesParam"
+          },
+          {
+            "$ref": "#/parameters/dialectParam"
+          },
+          {
+            "$ref": "#/parameters/appVersionParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentTime": {
+                  "$ref": "#/definitions/TimeResponse"
+                },
+                "version": {
+                  "$ref": "#/definitions/VersionResponse"
+                },
+                "status": {
+                  "$ref": "#/definitions/StatusResponse"
+                },
+                "code": {
+                  "$ref": "#/definitions/CodeResponse"
+                },
+                "text": {
+                  "$ref": "#/definitions/TextResponse"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "vehicleId": {
+                            "type": "string",
+                            "description": "Identification of the vehicle.",
+                            "title": "Vehicle ID"
+                          },
+                          "stopId": {
+                            "type": "string",
+                            "description": "Identification of the stop.",
+                            "title": "Stop ID"
+                          },
+                          "stopSequence": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "Sequence of the current stop on the route of the vehicle.",
+                            "title": "Stop sequence"
+                          },
+                          "routeId": {
+                            "type": "string",
+                            "description": "Identification of the route.",
+                            "title": "Route ID"
+                          },
+                          "bearing": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "Bearing of the vehicle.",
+                            "title": "Bearing"
+                          },
+                          "location": {
+                            "type": "object",
+                            "properties": {
+                              "lat": {
+                                "type": "number",
+                                "format": "float",
+                                "description": "Latitude information of the vehicle.",
+                                "title": "Latitude"
+                              },
+                              "lon": {
+                                "type": "number",
+                                "format": "float",
+                                "description": "Longitude information of the vehicle",
+                                "title": "Longitude"
+                              }
+                            }
+                          },
+                          "licensePlate": {
+                            "type": "string",
+                            "description": "The license plate  of the vehicle.",
+                            "title": "License plate"
+                          },
+                          "label": {
+                            "type": "string",
+                            "description": "Label information for the vehicle.",
+                            "title": "Label"
+                          },
+                          "deviated": {
+                            "type": "boolean",
+                            "description": "True, if the vehicle has deviated from route.",
+                            "title": "Deviated"
+                          },
+                          "lastUpdateTime": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Timestamp (unix) of the last available real-time data for the vehicle.",
+                            "title": "Last update time"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Status of the vehicle, such as INCOMING_AT.",
+                            "title": "Status"
+                          },
+                          "stopDistancePercent": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "Where is the vehicle between 2 stops, in percentage.",
+                            "title": "Stop distance percent"
+                          },
+                          "wheelchairAccessible": {
+                            "type": "boolean",
+                            "description": "True, if the vehicle is accessible with wheelchair.",
+                            "title": "Wheelchair accessible"
+                          },
+                          "capacity": {
+                            "type": "object",
+                            "description": "Capacity details of the vehicle.",
+                            "title": "Capacity"
+                          },
+                          "occupancy": {
+                            "type": "object",
+                            "description": "Occupancy details of the vehicle.",
+                            "title": "Occupancy"
+                          },
+                          "tripId": {
+                            "type": "string",
+                            "description": "Unique identification of the trip.",
+                            "title": "Trip ID"
+                          },
+                          "vertex": {
+                            "type": "string",
+                            "description": "Unique identification of the trip for journey planner",
+                            "title": "Vertex"
+                          }
+                        }
+                      }
+                    },
+                    "limitExceeded": {
+                      "$ref": "#/definitions/LimitExceededResponse"
+                    },
+                    "references": {
+                      "$ref": "#/definitions/ReferencesResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{dialect}/api/where/references": {
+      "get": {
+        "summary": "Get references",
+        "description": "Retrieve ID based references.",
+        "operationId": "GetReferences",
+        "parameters": [
+          {
+            "name": "agencyId",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Agency ID",
+            "description": "ID of agency, e.g.: 'BKK'."
+          },
+          {
+            "name": "alertId",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Alert ID",
+            "description": "ID of an alert."
+          },
+          {
+            "name": "routeId",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Rpute ID",
+            "description": "ID of a route."
+          },
+          {
+            "name": "stopId",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Stop ID",
+            "description": "ID of a stop, e.g.: 'BKK_F01227'."
+          },
+          {
+            "$ref": "#/parameters/versionParam"
+          },
+          {
+            "$ref": "#/parameters/includeReferencesParam"
+          },
+          {
+            "$ref": "#/parameters/dialectParam"
+          },
+          {
+            "$ref": "#/parameters/appVersionParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentTime": {
+                  "$ref": "#/definitions/TimeResponse"
+                },
+                "version": {
+                  "$ref": "#/definitions/VersionResponse"
+                },
+                "status": {
+                  "$ref": "#/definitions/StatusResponse"
+                },
+                "code": {
+                  "$ref": "#/definitions/CodeResponse"
+                },
+                "text": {
+                  "$ref": "#/definitions/TextResponse"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "entry": {
+                      "type": "object",
+                      "properties": {
+                        "errors": {
+                          "type": "object",
+                          "properties": {
+                            "agencyIds": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Array of agency IDs whose resolution was unsuccessful.",
+                              "title": "Agency IDs."
+                            },
+                            "alertIds": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Array of alerts IDs whose resolution was unsuccessful.",
+                              "title": "Alert IDs"
+                            },
+                            "routeIds": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Array of agency IDs whose resolution was unsuccessful.",
+                              "title": "Route IDs"
+                            },
+                            "stopIds": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Array of stop IDs whose resolution was unsuccessful.",
+                              "title": "Stop IDs"
+                            }
+                          },
+                          "description": "Errors regarding requested references.",
+                          "title": "Errors"
+                        }
+                      },
+                      "description": "The requested data",
+                      "title": "Entry"
+                    },
+                    "limitExceeded": {
+                      "$ref": "#/definitions/LimitExceededResponse"
+                    },
+                    "references": {
+                      "$ref": "#/definitions/ReferencesResponse"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "TimeResponse": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Current server time in milliseconds.",
+      "title": "Current Time"
+    },
+    "VersionResponse": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Version of the API.",
+      "title": "Version"
+    },
+    "StatusResponse": {
+      "type": "string",
+      "description": "Response status.",
+      "title": "Status"
+    },
+    "CodeResponse": {
+      "type": "integer",
+      "format": "int32",
+      "description": "The response status code.",
+      "title": "Code"
+    },
+    "TextResponse": {
+      "type": "string",
+      "description": "The detailed response text related to the status code.",
+      "title": "Text"
+    },
+    "LimitExceededResponse": {
+      "type": "boolean",
+      "description": "Indication, whether response contains more elements than the defined limit.",
+      "title": "Limit Exceeded"
+    },
+    "ReferencesResponse": {
+      "type": "object",
+      "title": "References",
+      "description": "Relevant reference details.",
+      "properties": {
+        "agencies": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/AgencyRef"
+          }
+        },
+        "routes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/RouteRef"
+          }
+        },
+        "stops": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/StopRef"
+          }
+        },
+        "trips": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TripRef"
+          }
+        },
+        "alerts": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/AlertRef"
+          }
+        }
+      }
+    },
+    "AgencyRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Agency identification.",
+          "title": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Agency name.",
+          "title": "Name"
+        },
+        "url": {
+          "type": "string",
+          "description": "Agency URL.",
+          "title": "URL"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "Agency timezone.",
+          "title": "Timezone"
+        },
+        "lang": {
+          "type": "string",
+          "description": "Agency language.",
+          "title": "Language"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Agency telephone.",
+          "title": "Phone"
+        }
+      }
+    },
+    "RouteRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Route ID.",
+          "title": "ID"
+        },
+        "shortName": {
+          "type": "string",
+          "description": "Short name of the route.",
+          "title": "Short name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the route.",
+          "title": "Description"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the route.",
+          "title": "Type"
+        },
+        "agencyId": {
+          "type": "string",
+          "description": "Agency ID relevant for the route.",
+          "title": "Agency ID"
+        },
+        "bikesAllowed": {
+          "type": "boolean",
+          "description": "Indication, whether bikes are allowed.",
+          "title": "Bikes allowed"
+        },
+        "style": {
+          "type": "object",
+          "description": "Styling details for visualization.",
+          "title": "Style"
+        }
+      }
+    },
+    "StopRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stop ID.",
+          "title": "ID"
+        },
+        "vertex": {
+          "type": "string",
+          "description": "Relevant vertex.",
+          "title": "Vertex"
+        },
+        "lat": {
+          "type": "number",
+          "format": "double",
+          "description": "Latitude of the stop.",
+          "title": "Latitude"
+        },
+        "lon": {
+          "type": "number",
+          "format": "double",
+          "description": "Longitude of the stop.",
+          "title": "Longitude"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the stop.",
+          "title": "Name"
+        },
+        "code": {
+          "type": "string",
+          "description": "Unique code of the stop.",
+          "title": "Code"
+        },
+        "direction": {
+          "type": "string",
+          "description": "Direction of the stop.",
+          "title": "Direction"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the stop.",
+          "title": "Description"
+        },
+        "wheelchairBoarding": {
+          "type": "boolean",
+          "description": "Indication, whether wheelchair boarding is possible.",
+          "title": "Wheelchair Boarding"
+        },
+        "routeIds": {
+          "type": "array",
+          "description": "Array of relevant Route IDs for the stop.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Route IDs"
+        },
+        "style": {
+          "type": "object",
+          "description": "Styling guidance for visualization.",
+          "title": "Style"
+        }
+      }
+    },
+    "TripRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Trip ID.",
+          "title": "ID"
+        },
+        "routeId": {
+          "type": "string",
+          "description": "Route ID.",
+          "title": "Route ID"
+        },
+        "shapeId": {
+          "type": "string",
+          "description": "Shape ID.",
+          "title": "Shape ID"
+        },
+        "blockId": {
+          "type": "string",
+          "description": "Block ID.",
+          "title": "Block ID"
+        },
+        "tripHeadsign": {
+          "type": "string",
+          "description": "Headsign for the trip.",
+          "title": "Trip Headsign"
+        },
+        "serviceId": {
+          "type": "string",
+          "description": "Service ID.",
+          "title": "Service ID"
+        },
+        "bikesAllowed": {
+          "type": "boolean",
+          "description": "Indication, whether bikes are allowed.",
+          "title": "Bikes Allowed"
+        },
+        "wheelchairAccessible": {
+          "type": "boolean",
+          "description": "Indication, whether the trip is wheelchair accessible.",
+          "title": "Wheelchair Accessible"
+        }
+      }
+    },
+    "AlertRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Alert ID.",
+          "title": "ID"
+        },
+        "start": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Start timestamp for the alert (seconds).",
+          "title": "Start"
+        },
+        "end": {
+          "type": "integer",
+          "format": "int64",
+          "description": "End timestamp for the alert (seconds).",
+          "title": "End"
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Timestamp for the alert (seconds)",
+          "title": "Timestamp"
+        },
+        "modifiedTime": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Last modification timestamp (seconds) for the alert.",
+          "title": "Modified Time"
+        },
+        "stopIds": {
+          "type": "array",
+          "description": "Array of relevant Stop IDs.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Stop IDs"
+        },
+        "routeIds": {
+          "type": "array",
+          "description": "Array of relevant Route IDs.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Route IDs"
+        },
+        "url": {
+          "type": "object",
+          "description": "URLs containing relevant details with translations.",
+          "title": "URL"
+        },
+        "header": {
+          "type": "object",
+          "description": "Relevant header text for the alert with translations.",
+          "title": "Header"
+        },
+        "description": {
+          "type": "object",
+          "description": "Translated descriptions for the alert.",
+          "title": "Description"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "dialectParam": {
+      "name": "dialect",
+      "default": "otp",
+      "in": "path",
+      "type": "string",
+      "required": true,
+      "x-ms-summary": "Dialect",
+      "description": "The dialect of the API references, defaulted to otp.",
+      "x-ms-visibility": "internal",
+      "x-ms-url-encoding": "single",
+      "enum": [
+        "otp",
+        "mobile"
+      ]
+    },
+    "versionParam": {
+      "name": "version",
+      "default": "2",
+      "in": "query",
+      "type": "string",
+      "required": false,
+      "x-ms-summary": "API version",
+      "description": "The version of the API.",
+      "x-ms-visibility": "internal",
+      "enum": [
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    "appVersionParam": {
+      "name": "appVersion",
+      "default": "1.1.abc",
+      "in": "query",
+      "type": "string",
+      "required": false,
+      "x-ms-summary": "App Version",
+      "description": "The version of the client application.",
+      "x-ms-visibility": "internal"
+    },
+    "includeReferencesParam": {
+      "name": "includeReferences",
+      "default": "true",
+      "in": "query",
+      "type": "string",
+      "required": false,
+      "x-ms-summary": "Include References",
+      "description": "Define the type of references.",
+      "x-ms-visibility": "advanced",
+      "enum": [
+        "true",
+        "false",
+        "compact",
+        "agencies",
+        "routes",
+        "trips",
+        "stops",
+        "alerts",
+        "stations"
+      ]
+    },
+    "minResultParam": {
+      "name": "minResult",
+      "default": 5,
+      "in": "query",
+      "type": "integer",
+      "required": false,
+      "x-ms-summary": "Minimum results",
+      "description": "The minimum number of elements returned.",
+      "x-ms-visibility": "advanced",
+      "format": "int32"
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "query",
+      "name": "key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://opendata.bkk.hu/data-sources"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://bkk.hu/en/about-bkk/data-management-information/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data"
+    }
+  ]
+}

@@ -23,6 +23,18 @@ This operation will retrieve a list of flows in Smart Flows.
 ### GetExecutionStatus
 This operation will retrieve the status of the provided execution.
 
+### Export
+This operation will create an export package that can be imported in another project.
+
+### Import
+This operation will import package that was created by an export.
+
+### Backup
+This operation will create a backup package that can be used to restore the project to the state it was when backed up, or restore in another project.
+
+### Restore
+This operation will use a restore package to restore the project to the state it was when the backup package was created.
+
 ## Obtaining Credentials
 To obtain the API key from your project, you can follow [these instructions](https://experlogixut.mcoutput.com/preview/Resources/2_Operations/Smart%20Flows/Using_the_API.html?tocpath=Resources%7CFor%20developers%7C_____1#UsingtheAPI). Once you have your API key, simply use the project URL (Ex: https://\[project\].smartflows.xpertdoc.com/) and the API key you generated when setting up the connection.
 

@@ -26,7 +26,15 @@
             var dataTypeMapping = new JObject
                 {
                     ["timestamp"] = "string",
-                    ["interval"] = "string"
+                    ["interval"] = "number",
+                    ["float"] ="number",
+                    ["color"] = "object",
+                    ["imageUrl"] = "string",
+                    ["fileUrl"] = "string",
+                    ["user"] = "string",
+                    ["station"] = "string",
+                    ["machine"] = "string",
+                    ["tableLink"] = "string"
                 };
 
             foreach (JObject column in columns){
