@@ -54,7 +54,7 @@ This connector supports the following operations:
 	- [Bundestag API Swagger Documentation](https://search.dip.bundestag.de/api/v1/swagger-ui/)
 	- [Microsoft Power Automate Custom Connectors](https://learn.microsoft.com/en-us/connectors/custom-connectors/)
 	- [API General Info](https://dip.bundestag.de/%C3%BCber-dip/hilfe/api)
-	- [Official PDF Documenation via the Bundestag API](https://dip.bundestag.de/api/v1/docs/pdf)
+	- [Official PDF Documentation via the Bundestag API](https://dip.bundestag.de/api/v1/docs/pdf)
 
 ## Known Issues and Limitations
 
