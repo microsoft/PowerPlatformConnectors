@@ -13,16 +13,19 @@ You need an OpenAI account and available tokens. The account comes with a 3 mont
 
 The connector supports the following operations:
 
-- `List engines`: This action will return all available GPT-3 engines.
-- `Completion`: This action will complete your prompt and is the main action you will use.
+- `Completion_v2`: This action will complete your prompt with the GPT-3 models.
+- `ChatCompletion`: Chat models take a series of messages as input, and return a model-generated message as output.
+- `CreateImage`: The image generations endpoint allows you to create an original image given a text prompt.
+- `Embeddings`: Get a vector representation of a given text input.
+- `Completion`: Deprecated completion action, use the other one.
 
 ## Obtaining Credentials
 
-In your account you can create an API key [here](https://beta.openai.com/account/api-keys)
+In your account you can create an API key [here](https://platform.openai.com/account/api-keys)
 
 ## API Documentation
 
-Visit [the OpenAI documentation page](https://beta.openai.com/docs/api-reference/introduction) for further details.
+Visit [the OpenAI documentation page](https://platform.openai.com/docs/api-reference) for further details.
 
 ## Known issues and limitations
 

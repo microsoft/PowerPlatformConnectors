@@ -31,3 +31,4 @@ in the allGeo system.
 * `Update Time Clock`: The various time clock stages of your field employees are updated in
 real time in the allGeo system.
 * `Delete Job-Site`: Job-Site(s) is deleted on allGeo platform.
+* `Get-Breadcrumbs-Report`: Get Report(s) from your account from allGeo platform.
