@@ -18,23 +18,29 @@ Users in Standard, Professional, and Enterprise editions can execute actions usi
 
 ## Privileges Needed
 
-* __ServiceDesk Plus Cloud__ - SDAdmin can set up all actions via the connector. Users can set up limited actions depending on their permissions.
+- **ServiceDesk Plus Cloud** - SDAdmin can set up all actions via the connector. Users can set up limited actions depending on their permissions.
 
-* __Power Automate__ - User
+- **Power Automate** - User
 
-* __External application__ - Privileges needed depend on the application configured
+- **External application** - Provide privileges depending on the application configured
 
 ## Supported Actions
 
 The connector supports the following actions:
 
-* `Create Request`: Create a new request in ServiceDesk Plus Cloud
+- `Create Request`: Create new request in ServiceDesk Plus Cloud
 
-* `Update Request`: Update an existing request's details in ServiceDesk Plus Cloud
+- `Update Request`: Update an existing request in ServiceDesk Plus Cloud
 
-* `Create Change`: Create a new change request in ServiceDesk Plus Cloud
+- `Create Change`: Create a new change in ServiceDesk Plus Cloud
 
-* `Update Change`: Update an existing change request's details in ServiceDesk Plus Cloud
+- `Update Change`: Update an existing change in ServiceDesk Plus Cloud
+
+- `Invoke API`: Make API calls to perform an action in ServiceDesk Plus Cloud
+
+- `Get Request Detail`: Retrieve request details using the request ID from ServiceDesk Plus Cloud
+
+- `Get Request List`: Get a list of requests from ServiceDesk Plus Cloud that meet the criteria given in input_data parameter
 
 ## Obtaining Credentials
 
