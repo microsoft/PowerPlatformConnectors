@@ -1,7 +1,6 @@
 ## Process Street Connector
-Process Street is a modern process management platform for building, sharing, and automating your core processes. 
-You can perform various actions such as starting, finding, and updating a workflow run in Process Street. 
-Or trigger actions when a workflow starts or task status changes.
+Process Street is a modern process management platform for teams.
+You can use this connector to run workflows, find and update workflow runs, and trigger actions when a workflow is run or changes.
 
 ## Publisher: Process Street
 
@@ -14,23 +13,22 @@ The connector supports the following operations:
 
 ### Triggers
 
-* `Task Checked/Unchecked`: Fires when a task is completed, uncompleted or both
-* `Workflow Run Created`: Fires when a workflow is run
-* `Workflow Run Completed`: Fires when a workflow run is completed
+* `When a task is checked, unchecked or ready`: A trigger that will fire each time a task is completed, uncompleted or both, or becomes ready in Process Street
+* `When a workflow is run`: Triggers when a workflow is run
+* `When a workflow run is completed`: Triggers when a workflow run is completed
 
 ### Actions
 
 #### Workflow Runs
 
-* `Create Workflow Run`: Creates a new run based on a workflow id
-* `Find Workflow Run`: Searches for existing workflow runs by name
-* `Update Workflow Run`: Updates an existing workflow run
+* `Run a workflow`: Starts a workflow run based on a workflow
+* `Find workflow runs`: Retrieves the most recent 200 active workflow runs that match the query
+* `Update a workflow run`: Updates a workflow run
 
 #### Form Fields
 
-* `List Form Field Values`: Returns a batch of form fields (and their values) for a certain workflow run
-* `List Form Field Values by Task`: Returns the form field (and their values) that belong to a certain task of a workflow run
-* `Update Form Field Values`: Allows to set a value for form fields of a workflow run (replacing their values if present)
+* `Get workflow run form fields`: Retrieves all the form fields of workflow run
+* `Update workflow run form fields`: Updates the workflow run form fields
 
 ## Obtaining Credentials
 The connector uses an API Key as its authentication method.

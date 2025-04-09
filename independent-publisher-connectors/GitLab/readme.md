@@ -31,11 +31,23 @@ Create a commit by posting a JSON payload.
 ### Create a Merge Request
 Create a new merge request.
 
-### Marge a Marge Request
+### Merge a Merge Request
 Accept and merge changes submitted with MR.
+
+### Update a Merge Request
+Update a merge request, for example close or reopen an MR.
 
 ### Get a File From a Repository
 Fetch, create, update, and delete files in your repository.
+
+### Create a CI/CD Pipeline Trigger
+Create a pipeline trigger so that you can trigger your CI/CD pipeline with a webservice call.
+
+### Trigger a CI/CD Pipeline
+Use your pipeline trigger to trigger a CI/CD pipeline.
+
+### Enable a Runner
+Pass in the ID of a shared runner with the image and tools you need to execute your pipeline so that your project can build on that runner.
 
 ## API Documentation
 https://docs.gitlab.com/ee/api/ 

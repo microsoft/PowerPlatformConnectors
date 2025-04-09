@@ -1,15 +1,10 @@
-This is the private preview version of the Snowflake connector based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html). It is based on OAUTH with Azure AD, but it should also work with other OAUTH providers when the configuration parameters are adapted manually. The connector provides the rows of the resultset as objects with properties for each column rather than an array of strings. 
+# Snowflake
 
-## Supported Operations
-The connector supports the following operations:
-- Submit SQL Statement for Execution
-- Check the Status and Get Results
-- Cancel the Execution of a Statement
+This connector is based on the [Snowflake SQL REST API](https://docs.snowflake.com/en/developer-guide/sql-api/index.html).
 
-## Getting Help or Providing Feedback
-If you have any issues, requests for functionality, or have general feedback, please fill out this [form](http://aka.ms/snowflakeconnectorfeedback) and we will get back to you. 
+## Publisher: Rene Koch
 
-## Pre-requisites for Using the Connector
+## Obtaining Credentials
 Set up Azure AD authentication for Snowflake by following these steps:
 1. In [Step 1: Configure the OAuth Resource in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-1-configure-the-oauth-resource-in-azure-ad), follow steps 1-10 and define the scope as `SESSION:ROLE-ANY` by following these [instructions](https://docs.snowflake.com/en/user-guide/oauth-azure.html#using-any-role-with-external-oauth).
 2. In [Step 2: Create an OAuth Client in Azure AD](https://docs.snowflake.com/en/user-guide/oauth-azure.html#step-2-create-an-oauth-client-in-azure-ad), follow steps 1-13.
@@ -37,24 +32,20 @@ create security integration connector
        external_oauth_any_role_mode = 'ENABLE';
 ```
 
-## Using the Connector
-1. Make sure you've followed the pre-requisites.
-2. To use this connector, go to Power Automate and click **Data** on the left navigation page. Then, click **Custom connectors**.
-3. Wait for the page to load. Then, click **+New custom connector**. 
-4. From the dropdown, select **Import from GitHub**. For **Connector Type**, choose **Custom**. For **Branch**, choose **dev**. For **Connector**, choose **Snowflake**.
-5. Click **Continue.** You will now be taken the the Custom Connector UI, which will populate the connector files, including the code file, into the UI.
-6. In **Step 1: General**, make sure to replace the "YourInstance" in the **Host URL** field with your own instance. You can learn more about this field [here](https://docs.snowflake.com/en/user-guide/client-redirect.html#introduction-to-client-redirect).
-7. Go to **Step 2: Security** and choose **OAuth 2.0** from the dropdown. Then, in the OAuth 2.0 section, choose **Azure Active Directory** from the **Identity Provider** dropdown. 
-8. Fill in the following fields from the values in Pre-requisities:
--	**Client ID**: `OAUTH_CLIENT_ID`
--	**Client Secret**: `OAUTH_CLIENT_SECRET`
--	**Resource URI**: `Application ID URI`
-The **Redirect UR**L will be blank for now.
-10. Go to **Step 3: Definition** and review the operations. Then, go to **Step 4: Code** to view the code, which should already be enabled. Now, click "Create Connector."
-11. Go back to **Step 2: Security** and copy the value in **Redirect URL**. In the Microsoft Azure portal, go to your app registrations and select the Snowflake OAuth Client app. On the left sidebar, click on **Authentication** > **+Add a platform** > Paste your value into the **Redirect URIs field** >> Click **Configure**.
-12. Now, you can go to test your connector in **Step 5: Test** and create a new connection.
-13. Begin using your custom connector in your environment to build apps and flows! 
+## Supported Operations
 
-## Known Issues
+Submit SQL Statement for Execution
+
+Check the Status and Get Results
+
+Cancel the Execution of a Statement
+
+
+## Known Issues and Limitations
 1. If you get a 500 response when creating a new connection, that is a transient error. Please wait a few minutes and try again.
-2. If you get a 401 response and your **Host** field in Step 1 follows this format "orgname-accountname," replace the **Host** field with your "locator" URL. 
+2. If you get a 401 response and your Host field in Step 1 follows this format "orgname-accountname," replace the Host field with your "locator" URL.
+3. The connector may time out with large query results. 
+
+## Frequently Asked Questions
+1. How can the connector be used within Power Apps?
+Currently, Power Apps does not support dynamic schema. You can still use the connector from Power Apps by calling a flow from the app instead of directly from an  app. 

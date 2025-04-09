@@ -14,6 +14,10 @@ Subscribe to a Power Textor plan `https://powertextor.com/#pricing`.
 
 This operation triggers a flow when a new text message arrives. The flow gets information of sender number, text message body, sender location and address details, recipient number, and recipient location and address details.
 
+### When a text (MMS) message is received (Trigger)
+
+This operation triggers a flow when a new MMS message arrives. The flow gets information of sender number, text message body, sender location and address details, recipient number, and recipient location and address details.
+
 ### Send text (SMS) message to multiple contacts
 
 Send a bulk text (SMS) message to multiple Power Textor Contacts at once.
@@ -62,17 +66,17 @@ Send a review text message to a Power Textor contact to get feedback from a cust
 
 Send a review text message to Power Textor contacts to get feedback from customers. Send the pin location of your business or service area within the text messages.
 
-### Send text (SMS) message event reminder to a contact
+### Schedule text (SMS) message event reminder to a contact
 
-Send an event reminder to a Power Textor contact by specifying event date. Provide the number of days before the event day and the time when the text should be sent.
+Schedule an event reminder to a Power Textor contact by specifying event date. Provide the number of days before the event day and the time when the text should be sent.
 
-### Send text (SMS) message event reminder to multiple contacts
+### Schedule text (SMS) message event reminder to multiple contacts
 
-Send a bulk event reminder to Power Textor contacts by specifying the event date. Provide the number of days before the event day and the time when the texts should be sent.
+Schedule a bulk event reminder to Power Textor contacts by specifying the event date. Provide the number of days before the event day and the time when the texts should be sent.
 
-### Send text (SMS) message event reminder to multiple groups
+### Schedule text (SMS) message event reminder to multiple groups
 
-Send a bulk event reminder to Power Textor group(s) by specifying event date. Provide the number of days before the event day and the time when the text should be sent.
+Schedule a bulk event reminder to Power Textor group(s) by specifying event date. Provide the number of days before the event day and the time when the text should be sent.
 
 ### Send text (SMS) message to a number
 
@@ -86,9 +90,9 @@ Schedule a review message for a Power Textor group by specifying the date and ti
 
 Schedule a bulk text message to group by configuring the date and time when the text message should be sent.
 
-### Send text (SMS) message event reminder to a group
+### Schedule text (SMS) message event reminder to a group
 
-Send a bulk event reminder to a Power Textor group by specifying the event date. Provide the number of days before the event day and the time when the text should be sent.
+Schedule a bulk event reminder to a Power Textor group by specifying the event date. Provide the number of days before the event day and the time when the text should be sent.
 
 ### Send review text (SMS) message to a group
 
@@ -106,9 +110,9 @@ Create a new group to send a text message to using Power Textor. The text messag
 
 Create a new group, and schedule a text message for the group using Power Textor, in the same flow.
 
-### Send text (SMS) message event reminder to a new group
+### Schedule text (SMS) message event reminder to a new group
 
-Create a group to send a text message event reminder using Power Textor while the group is automatically created and saved in Power Textor.
+Create a group to schedule a text message event reminder using Power Textor while the group is automatically created and saved in Power Textor.
 
 ### Send text (SMS) message to a new contact
 
@@ -138,9 +142,9 @@ Create a new contact and schedule a text message for the contact using Power Tex
 
 Create a new contact from a flow to save the contact in Power Textor.
 
-### Send text (SMS) message event reminder to a new contact
+### Schedule text (SMS) message event reminder to a new contact
 
-Create a contact to send a text message event reminder using Power Textor, while the contact is automatically created in Power Textor.
+Create a contact to schedule a text message event reminder using Power Textor, while the contact is automatically created in Power Textor.
 
 ### Update a Power Textor Contact
 
@@ -153,6 +157,19 @@ Send a text to multiple contact numbers directly, while their numbers are saved 
 ### Send a text (SMS) message
 
 Send text message to a number directly, without specifying name of the user, while the contact is automatically created in PowerTextor.
+
+### Send an MMS
+
+Send an MMS to a number directly, without specifying name of the user, while the contact is automatically created in PowerTextor.
+
+### Send an MMS to a group
+
+Send an MMS to a PowerTextor group at once.
+
+### Send an MMS to a contact
+
+Send an MMS to a Power Textor Contact.
+
 
 ## Obtaining Credentials
 

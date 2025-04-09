@@ -85,3 +85,9 @@ substring(outputs('Get_envelope_by_id')?['body/flow/id'],6)
 
 ### Upload Document
 To Upload an actuall document you have to create a file in the Verified API and upload the document hash to the blob URL responded from the Verified API.
+
+### How do I use a different company than defined in the connection?
+Every action where the company is needed do have an addition field, Company Id. When a value is presented it is used otherwise the default from the connection is used. The format should be:
+```
+/companies/<your company Id>
+```

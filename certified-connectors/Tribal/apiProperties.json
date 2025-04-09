@@ -6,7 +6,7 @@
         "oAuthSettings": {
           "identityProvider": "oauth2generic",
           "clientId": "[DUMMY]",
-          "scopes": [ "web_hooks", "openid", "edge_identity", "offline_access", "edge", "EventsConnector.Endpoint", "ReferenceData.Api.Read" ],
+          "scopes": [ "web_hooks", "openid", "edge_identity", "offline_access", "edge", "EventsConnector.Endpoint", "ReferenceData.Api.Read", "Maytas.UI", "SITS.UI", "VisaSponsorshipUk.Api.Read" ],
           "redirectMode": "Global",
           "redirectUrl": "https://global.consent.azure-apim.net/redirect",
           "properties": {
@@ -35,6 +35,10 @@
               {
                 "text": "Live",
                 "value": ".tribaledge.com"
+              },
+              {
+                "text": "Pre-Production",
+                "value": "-preprod.tribaledge.com"
               },
               {
                 "text": "Test",
@@ -84,27 +88,12 @@
           "displayName": "Edge Tenant Id",
           "tooltip": "Tenant Id for Tribal Edge"
         }
-      },
-      "token:service": {
-        "type": "string",
-        "uiDefinition": {
-          "constraints": {
-            "tabIndex": 0,
-            "required": "true",
-            "allowedValues": [
-              {
-                "text": "Admissions",
-                "value": "Admissions"
-              }
-            ]
-          },
-          "description": "Service Name",
-          "displayName": "Service Name",
-          "tooltip": "Service Name"
-        }
       }
     },
-    "iconBrandColor": "#0D4C9C",
+    "iconBrandColor": "#0077C4",
+    "scriptOperations": [
+      "RawRequest"
+    ],
     "capabilities": [],
     "publisher": "Tribal Group",
     "stackOwner": "Tribal Group",
@@ -117,17 +106,35 @@
         }
       },
       {
+        "templateId": "setheader",
+        "title": "Tenant Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "tenantId",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('token:tenantId')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
         "parameters": {
           "x-ms-apimTemplate-operationName": ["CustomEvents"],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/@connectionParameters('token:service')/{eventType}/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/{eventType}/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "CustomEvents Tenant Redirect"
       },
       {
         "parameters": {
+          "x-ms-apimTemplate-operationName": ["Services"],
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/services/dynamicvalues"
+        },
+        "templateId": "routerequesttoendpoint",
+        "title": "Services Tenant Redirect"
+      },
+      {
+        "parameters": {
           "x-ms-apimTemplate-operationName": [ "CreatedEvents" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/@connectionParameters('token:service')/Created/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/Created/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "CreatedEvents Tenant Redirect"
@@ -135,7 +142,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "UpdatedEvents" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/@connectionParameters('token:service')/Updated/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/Updated/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "UpdatedEvents Tenant Redirect"
@@ -143,7 +150,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "DeletedEvents" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/@connectionParameters('token:service')/Deleted/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/{service}/Deleted/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "DeletedEvents Tenant Redirect"
@@ -151,7 +158,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "LongRunningEvents" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/longrunningtrigger/@connectionParameters('token:service')/{eventType}/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/webhook/longrunningtrigger/{service}/{eventType}/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "LongRunningEvents Tenant Redirect"
@@ -159,7 +166,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "GetEntityTypes" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/entityTypes/@connectionParameters('token:service')/{eventType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/entityTypes/{service}/{eventType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "GetEntityTypes Tenant Redirect"
@@ -167,7 +174,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "GetEntityTypesByService" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/entityTypes/@connectionParameters('token:service')"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/entityTypes/{service}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "GetEntityTypesByService Tenant Redirect"
@@ -175,7 +182,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "GetEventTypes" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/eventTypes/@connectionParameters('token:service')/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/eventTypes/{service}/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "GetEventTypes Tenant Redirect"
@@ -183,7 +190,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "GetSchemaFilters" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/events/filters/@connectionParameters('token:service')/{eventType}/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/events/filters/{service}/{eventType}/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "GetSchemaFilters Tenant Redirect"
@@ -191,7 +198,7 @@
       {
         "parameters": {
           "x-ms-apimTemplate-operationName": [ "GetDynamicSchema" ],
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/eventSchema/@connectionParameters('token:service')/{eventType}/{entityType}"
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/Events/eventSchema/{service}/{eventType}/{entityType}"
         },
         "templateId": "routerequesttoendpoint",
         "title": "GetDynamicSchema Tenant Redirect"
@@ -200,7 +207,7 @@
         "templateId": "routerequesttoendpoint",
         "title": "ActionEntities Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/entities/@connectionParameters('token:service')/{actionType}",
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/entities/{service}/{actionType}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [ "ActionEntities" ]
         }
@@ -209,7 +216,7 @@
         "templateId": "routerequesttoendpoint",
         "title": "ActionParentEntities Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/entities/parents/@connectionParameters('token:service')/{actionType}",
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/entities/parents/{service}/{actionType}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [ "ActionParentEntities" ]
         }
@@ -218,16 +225,43 @@
         "templateId": "routerequesttoendpoint",
         "title": "ActionSchema Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/schema/@connectionParameters('token:service')/{actionType}",
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/schema/{service}/{actionType}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [ "ActionSchema" ]
         }
       },
       {
         "templateId": "routerequesttoendpoint",
+        "title": "UploadDocumentEntities Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/uploadDocumentEntities/{service}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "UploadDocumentEntities" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "UploadDocumentParentEntities Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/uploadDocumentEntities/parents/{service}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "UploadDocumentParentEntities" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "GetVersions Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/eventsConnector/@connectionParameters('token:tenantId')/api/actions/versions/{service}",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [ "GetVersions" ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
         "title": "ReadCollectionCreateEntity Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/@connectionParameters('token:service')/@connectionParameters('token:tenantId')/api/{entityType}",
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{entityType}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [
             "CreateEntity",
@@ -239,7 +273,7 @@
         "templateId": "routerequesttoendpoint",
         "title": "ReadDeleteUpdateEntity Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/@connectionParameters('token:service')/@connectionParameters('token:tenantId')/api/{entityType}/{id}",
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{entityType}/{id}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [
             "ReadEntity",
@@ -250,9 +284,31 @@
       },
       {
         "templateId": "routerequesttoendpoint",
+        "title": "UploadDocument Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{entityType}/{id}/uploaddocument",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "UploadDocument"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "UploadChildDocument Tenant Redirect",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}/{childId}/uploaddocument",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "UploadChildDocument"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
         "title": "ReadChildCollectionCreateChildEntity Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/@connectionParameters('token:service')/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}",
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [ "CreateChildEntity", "ReadChildEntities" ]
         }
@@ -261,7 +317,7 @@
         "templateId": "routerequesttoendpoint",
         "title": "ReadUpdateDeleteChildEntity Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/@connectionParameters('token:service')/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}/{childId}",
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/{parentEntity}/{parentId}/{childEntity}/{childId}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [
             "DeleteChildEntity",
@@ -274,7 +330,7 @@
         "templateId": "routerequesttoendpoint",
         "title": "GetTranslations Tenant Redirect",
         "parameters": {
-          "x-ms-apimTemplateParameter.newPath": "/@connectionParameters('token:service')/@connectionParameters('token:tenantId')/api/options/{entityCode}/{fieldCode}",
+          "x-ms-apimTemplateParameter.newPath": "/{service}/@connectionParameters('token:tenantId')/api/options/{entityCode}/{fieldCode}",
           "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
           "x-ms-apimTemplate-operationName": [
             "GetTranslations"

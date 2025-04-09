@@ -30,11 +30,44 @@ Searches all pages and child pages that are shared with the integration. (The re
 #### Update a block
 Updates the content for the specified block_id based on the block type.
 
+#### Query a Database
+Gets a list of Pages contained in the database, filtered and ordered according to the filter conditions and sort criteria provided in the request. 
 
+#### Retrieve a page
+Retrieves a Page object using the ID specified.
+
+#### Create a page
+Creates a new page in the specified database or as a child of an existing page.
+
+#### Delete a block
+Sets a Block object, including page blocks, to archived: true using the ID specified.
+
+#### Append block children
+Creates and appends new children blocks to the parent block_id specified.
+
+#### Create a page
+Creates a new page in the specified database or as a child of an existing page.
+
+#### Retrieve a page property item
+Retrieves a property_item object for a given page_id and property_id.
+
+#### Retrieve your token's bot user
+Retrieves the bot User associated with the API token provided in the authorization header. The bot will have an owner field with information about the person who authorized the integration.
+
+#### Update a block
+Updates the content for the specified block_id based on the block type. Supported fields based on the block object type.
+#### Create comment
+Creates a comment in a page or existing discussion thread.
+
+There are two locations you can add a new comment to:
+
+A page
+An existing discussion thread
+
+#### Retrieve comments
+Retrieves a list of un-resolved Comment objects from a page or block.
 
 ## Upcoming Planned Features
-#### Query a Database (Planned)
-Gets a list of Pages contained in the database, filtered and ordered according to the filter conditions and sort criteria provided in the request. 
  
 #### Create a Database (Planned)
 Creates a database as a subpage in the specified parent page, with the specified properties schema.
@@ -42,21 +75,10 @@ Creates a database as a subpage in the specified parent page, with the specified
 #### Update Database (Planned)
 Updates an existing database as specified by the parameters.
  
-#### Retrieve a page (Planned)
-Retrieves a Page object using the ID specified.
- 
-#### Create a page (Planned)
-Creates a new page in the specified database or as a child of an existing page.
  
 #### Update page (Planned)
 Updates page property values for the specified page. 
  
-#### Append block children (Planned)
-Creates and appends new children blocks to the parent block_id specified.
- 
-#### Delete a block (Planned)
-Sets a Block object, including page blocks, to archived: true using the ID specified. 
-
 
 ## API Documentation
 Visit [Start building with the Notion API ](https://developers.notion.com/) page for further details.

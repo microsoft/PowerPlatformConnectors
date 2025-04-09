@@ -35,4 +35,7 @@ As part of this sample following triggers are supported:
 ## Supported Actions
 As part of this sample following actions are supported:
 * `Store document`: Stores a document in d.velop documents
+* `Update document`: Updates a document or the properties of a document in d.velop documents
+* `Create dossier`: Creates a dossier in d.velop documents
+* `Update dossier`: Updates the properties of a dossier in d.velop documents
 * `Execute an action`: Executes the selected action in the selected d.velop environment

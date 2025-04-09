@@ -33,8 +33,119 @@
       "API Key": []
     }
   ],
-  "tags": [],  
+  "tags": [],
   "paths": {
+    "/webhooks": {
+      "x-ms-notification-content": {
+        "description": "Webhook event sent by Oneflow.",
+        "schema": {
+          "$ref": "#/definitions/Webhook_Event"
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "API Key": []
+          }
+        ],
+        "summary": "When a contract is updated",
+        "description": "Register a webhook for a specified contract update event",
+        "operationId": "webhookRegister",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "callback_url": {
+                  "type": "string",
+                  "description": "callback_url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": ""
+                },
+                "filters": {
+                  "x-ms-visibility": "important",
+                  "x-ms-summary": "Update type",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Select event that will trigger this flow.",
+                    "enum": [
+                      "contract:publish",
+                      "contract:sign",
+                      "contract:delete",
+                      "contract:decline",
+                      "participant:first_visit",
+                      "participant:sign",
+                      "participant:create",
+                      "participant:decline",
+                      "participant:delete",
+                      "data_field:update",
+                      "contract:signing_period_expire",
+                      "contract:signing_period_revive",
+                      "contract:signature_reset"
+                    ]
+                  }
+                },
+                "template_group_id": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetTemplateTypes",
+                    "value-collection": "data",
+                    "value-path": "id",
+                    "value-title": "name"
+                  },
+                  "x-ms-summary": "Template Group Id",
+                  "description": "(Optional) Filter contracts by a template group."
+                }
+              },
+              "required": [
+                "callback_url",
+                "filters"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}": {
+      "delete": {
+        "x-ms-visibility": "internal",
+        "summary": "Delete Trigger",
+        "description": "Deletes Webhook",
+        "operationId": "DeleteTrigger",
+        "security": [
+          {
+            "API Key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "description": "ID of the Webhook being deleted",
+            "required": true,
+            "x-ms-url-encoding": "single",
+            "type": "string"
+          }
+        ]
+      }
+    },
     "/contracts/parties/create": {
       "post": {
         "summary": "Add Participant",
@@ -47,7 +158,28 @@
             "type": "string",
             "required": true,
             "x-ms-summary": "Contract Id",
-            "description":"Contract Id"
+            "description": "Contract Id"
+          },
+          {
+            "name": "x-oneflow-user-email-override",
+            "x-ms-visibility": "advanced",
+            "default": "Contract creator",
+            "type": "string",
+            "in": "header",
+            "x-ms-summary": "Add As",
+            "description": "Select user to execute this action as, or enter a custom email",
+            "x-ms-dynamic-values": {
+              "operationId": "GetExecuteAs",
+              "value-collection": "data",
+              "value-path": "value",
+              "value-title": "key"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetExecuteAs",
+              "itemsPath": "data",
+              "itemValuePath": "value",
+              "itemTitlePath": "name"
+            }
           },
           {
             "name": "participant_type",
@@ -58,9 +190,18 @@
             "x-ms-summary": "Participant Type",
             "enum": [
               "Individual",
-              "Company"
+              "Company",
+              "Ownerside"
             ],
             "default": "Company"
+          },
+          {
+            "name": "signing_order",
+            "in": "header",
+            "type": "number",
+            "description": "Sign order of participant",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "Signing order"
           },
           {
             "name": "party",
@@ -111,7 +252,7 @@
             "type": "string",
             "required": true,
             "x-ms-summary": "Contract Id",
-            "description":"Contract Id"
+            "description": "Contract Id"
           },
           {
             "name": "Content-Type",
@@ -141,6 +282,27 @@
               "expanded_pdf"
             ],
             "description": "select type of attachment to upload"
+          },
+          {
+            "name": "x-oneflow-user-email-override",
+            "x-ms-visibility": "advanced",
+            "default": "Contract creator",
+            "type": "string",
+            "in": "header",
+            "x-ms-summary": "Execute As",
+            "description": "Select user to execute this action as, or enter a custom email",
+            "x-ms-dynamic-values": {
+              "operationId": "GetExecuteAs",
+              "value-collection": "data",
+              "value-path": "value",
+              "value-title": "key"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetExecuteAs",
+              "itemsPath": "data",
+              "itemValuePath": "value",
+              "itemTitlePath": "name"
+            }
           }
         ],
         "responses": {
@@ -186,6 +348,27 @@
             "x-ms-visibility": "internal"
           },
           {
+            "name": "x-oneflow-user-email-override",
+            "x-ms-visibility": "advanced",
+            "default": "Contract creator",
+            "type": "string",
+            "in": "header",
+            "x-ms-summary": "Download As",
+            "description": "Select user to execute this action as, or enter a custom email",
+            "x-ms-dynamic-values": {
+              "operationId": "GetExecuteAs",
+              "value-collection": "data",
+              "value-path": "value",
+              "value-title": "key"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetExecuteAs",
+              "itemsPath": "data",
+              "itemValuePath": "value",
+              "itemTitlePath": "name"
+            }
+          },
+          {
             "name": "Accept",
             "default": "binary/octet-stream",
             "in": "header",
@@ -199,7 +382,7 @@
             "type": "string",
             "required": true,
             "x-ms-summary": "Contract Id",
-            "description":"Contract Id"
+            "description": "Contract Id"
           },
           {
             "name": "file_id",
@@ -211,7 +394,7 @@
               "1",
               "2"
             ],
-            "description": "Type of file: * 1 - Contract PDF * 2 - Verification\n",
+            "description": "Type of file: * 1 - Contract PDF * 2 - Verification",
             "x-ms-enum": {
               "name": "file_id",
               "modelAsString": false,
@@ -264,7 +447,133 @@
         }
       }
     },
+    "/contracts/{contract_id}/data_fields/c::{data_field_id}": {
+      "put": {
+        "summary": "Update a datafield",
+        "description": "Update a datafield in the specific contract by its ID.",
+        "operationId": "UpdateDataField",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description": "Contract Id"
+          },
+          {
+            "name": "data_field_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Custom Id",
+            "description": "Custom id (external key) of the datafield."
+          },
+          {
+            "name": "x-oneflow-user-email-override",
+            "x-ms-visibility": "advanced",
+            "default": "Contract creator",
+            "type": "string",
+            "in": "header",
+            "x-ms-summary": "Update As",
+            "description": "Select user to execute this action as, or enter a custom email",
+            "x-ms-dynamic-values": {
+              "operationId": "GetExecuteAs",
+              "value-collection": "data",
+              "value-path": "value",
+              "value-title": "key"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetExecuteAs",
+              "itemsPath": "data",
+              "itemValuePath": "value",
+              "itemTitlePath": "name"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Datafield_for_update"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Datafield"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
     "/contracts/{contract_id}/": {
+      "get": {
+        "summary": "Get contract details",
+        "description": "Retrieve the details of a contract by its ID.",
+        "operationId": "GetContract",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Contract Id",
+            "description": "Contract Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Contract"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
       "delete": {
         "summary": "Delete a contract",
         "description": "Delete a specific contract by its ID.",
@@ -272,19 +581,39 @@
         "parameters": [
           {
             "name": "contract_id",
-            "default": "10015",
             "in": "path",
             "type": "string",
             "required": true,
             "x-ms-summary": "Contract Id",
-            "description":"Contract Id"
+            "description": "Contract Id"
+          },
+          {
+            "name": "x-oneflow-user-email-override",
+            "x-ms-visibility": "advanced",
+            "default": "Contract creator",
+            "type": "string",
+            "in": "header",
+            "x-ms-summary": "Delete As",
+            "description": "Select user to execute this action as, or enter a custom email",
+            "x-ms-dynamic-values": {
+              "operationId": "GetExecuteAs",
+              "value-collection": "data",
+              "value-path": "value",
+              "value-title": "key"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetExecuteAs",
+              "itemsPath": "data",
+              "itemValuePath": "value",
+              "itemTitlePath": "name"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Success",
             "schema": {
-              "type": "object"
+              "type": "string"
             }
           },
           "400": {
@@ -314,7 +643,7 @@
             "type": "string",
             "required": true,
             "x-ms-summary": "Contract Id",
-            "description":"Contract Id"
+            "description": "Contract Id"
           }
         ],
         "responses": {
@@ -372,7 +701,7 @@
             "type": "string",
             "required": true,
             "x-ms-summary": "Contract Id",
-            "description":"Contract Id"
+            "description": "Contract Id"
           },
           {
             "name": "body",
@@ -393,6 +722,27 @@
               }
             },
             "required": true
+          },
+          {
+            "name": "x-oneflow-user-email-override",
+            "x-ms-visibility": "advanced",
+            "default": "Contract creator",
+            "type": "string",
+            "in": "header",
+            "x-ms-summary": "Publish As",
+            "description": "Select user to execute this action as, or enter a custom email",
+            "x-ms-dynamic-values": {
+              "operationId": "GetExecuteAs",
+              "value-collection": "data",
+              "value-path": "value",
+              "value-title": "key"
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetExecuteAs",
+              "itemsPath": "data",
+              "itemValuePath": "value",
+              "itemTitlePath": "name"
+            }
           }
         ],
         "responses": {
@@ -450,6 +800,15 @@
         "description": "Create a new contract based on the selected template.",
         "operationId": "CreateAContract",
         "parameters": [
+          {
+            "name": "x-oneflow-user-email",
+            "in": "header",
+            "type": "string",
+            "format": "email",
+            "x-ms-visibility": "advanced",
+            "x-ms-summary": "Create as",
+            "description": "Specify Oneflow user email. Action will create contract as this user."
+          },
           {
             "name": "contract",
             "in": "body",
@@ -636,6 +995,83 @@
         }
       }
     },
+    "/template_types/": {
+      "get": {
+        "summary": "Get Template Type By Id",
+        "description": "Retrieve the template type by template id.",
+        "operationId": "GetTemplateByTemplateId",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "x-oneflow-template-id",
+            "type": "number",
+            "format": "int32",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Template_Type"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/template_types": {
+      "get": {
+        "summary": "Get Template Type By Id",
+        "description": "Retrieve the template type by template id.",
+        "operationId": "GetTemplateTypes",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Template_Type_Collection"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "/ping": {
       "get": {
         "summary": "Ping",
@@ -739,6 +1175,110 @@
           },
           "400": {
             "description": "Invalid Schema Id"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/helpers/power_automate/post_products/": {
+      "post": {
+        "summary": "Add product to a contract",
+        "description": "Add a product to an existing product group in a contract.",
+        "operationId": "AddProduct",
+        "parameters": [
+          {
+            "name": "x-ms-oneflow-contract_id",
+            "x-ms-summary": "Contract Id",
+            "description": "Contract Id",
+            "required": true,
+            "in": "header",
+            "type": "integer"
+          },
+          {
+            "name": "x-ms-oneflow-product-group-index",
+            "in": "header",
+            "required": true,
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "x-ms-summary": "Product group",
+            "description": "Select the product table index to add the products to. Ordered from top to bottom in the contract."
+          },
+          {
+            "name": "product",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Product_For_Create"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "description": "draft/pending/overdue/signed/declined",
+                  "x-ms-summary": "Contract state"
+                },
+                "state_updated_time": {
+                  "type": "string",
+                  "x-ms-summary": "Contract state update time"
+                },
+                "updated_time": {
+                  "type": "string",
+                  "x-ms-summary": "Contract update time"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/helper/dynamics/get_execute_as": {
+      "get": {
+        "operationId": "GetExecuteAs",
+        "summary": "Get Execute As Options",
+        "x-ms-visibility": "internal",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object"
+            }
           },
           "500": {
             "description": "Internal Server Error",
@@ -913,6 +1453,66 @@
         }
       }
     },
+    "Template_Type": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "data_fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "custom_id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "placeholder": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Template_Type_Collection": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Template_Type"
+          }
+        }
+      }
+    },
     "Error": {
       "type": "object",
       "properties": {
@@ -983,6 +1583,14 @@
             "itemValuePath": "id",
             "itemTitlePath": "name"
           }
+        },
+        "data_fields": {
+          "type": "array",
+          "x-ms-visibility": "advanced",
+          "x-ms-summary": "Datafield",
+          "items": {
+            "$ref": "#/definitions/Datafield_for_create"
+          }
         }
       },
       "required": [
@@ -1012,18 +1620,15 @@
               "x-ms-summary": "Contract name"
             },
             "value": {
-              "x-ms-visibility": "internal",
               "type": "object",
               "properties": {
                 "amount": {
                   "type": "string",
-                  "description": "amount",
-                  "x-ms-summary": "Contract Amount"
+                  "x-ms-summary": "Contract value"
                 },
                 "currency": {
                   "type": "string",
-                  "description": "currency",
-                  "x-ms-summary": "Contract's Currency"
+                  "x-ms-summary": "Currency"
                 }
               },
               "description": "value"
@@ -1031,9 +1636,7 @@
             "workspace_id": {
               "type": "integer",
               "format": "int32",
-              "description": "workspace_id",
-              "x-ms-summary": "Workspace Id",
-              "x-ms-visibility": "internal"
+              "x-ms-summary": "Workspace Id"
             }
           },
           "description": "Contract _private attributes"
@@ -1048,9 +1651,7 @@
             "template_id": {
               "type": "integer",
               "format": "int32",
-              "description": "template_id",
-              "x-ms-summary": "Template Id",
-              "x-ms-visibility": "internal"
+              "x-ms-summary": "Template Id"
             },
             "template_type_id": {
               "type": "integer",
@@ -1164,176 +1765,161 @@
           "description": "Contract available_options attributes"
         },
         "data_fields": {
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Data Fields",
+          "x-ms-summary": "Data field",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "_private_ownerside": {
-                "x-ms-summary": "Private Ownerside (Data Fields)",
+                "x-ms-summary": "private ownerside",
                 "type": "object",
                 "properties": {
                   "created_time": {
                     "type": "string",
-                    "description": "created_time",
-                    "x-ms-summary": "Created Time (Data Field)"
+                    "description": "Data field created_time",
+                    "x-ms-summary": "created time"
                   },
                   "custom_id": {
                     "type": "string",
-                    "description": "custom_id",
-                    "x-ms-summary": "Custom Id (Data Field)"
+                    "description": "Data field custom_id",
+                    "x-ms-summary": "custom id"
                   },
                   "updated_time": {
                     "type": "string",
-                    "description": "updated_time",
-                    "x-ms-summary": "Updated Time (Data Field)"
+                    "description": "Data field updated_time",
+                    "x-ms-summary": "Updated time"
                   }
                 },
                 "description": "_private_ownerside"
               },
               "description": {
                 "type": "string",
-                "description": "description",
-                "x-ms-summary": "Data Field Description"
+                "description": "Data field description",
+                "x-ms-summary": "description"
               },
               "id": {
                 "type": "integer",
                 "format": "int32",
-                "description": "id",
-                "x-ms-summary": "Data Field Id"
+                "description": "Data field id",
+                "x-ms-summary": "id"
               },
               "name": {
                 "type": "string",
-                "description": "name",
-                "x-ms-summary": "Data Field Name"
+                "description": "Data field name",
+                "x-ms-summary": "name"
               },
               "placeholder": {
                 "type": "string",
-                "description": "placeholder"
+                "description": "Data field placeholder",
+                "x-ms-summary": "placeholder"
               },
               "value": {
                 "type": "string",
-                "description": "value"
+                "description": "Data field value",
+                "x-ms-summary": "value"
               }
             }
           },
-          "description": "data_fields"
+          "description": "Data fields collection"
         },
         "id": {
           "type": "integer",
           "x-ms-summary": "Contract ID",
-          "description":"Contract Id",
+          "description": "Contract Id",
           "format": "int32"
         },
         "lifecycle_settings": {
           "x-ms-visibility": "internal",
-          "x-ms-summary": "Lifecycle Settings",
           "type": "object",
           "properties": {
             "duration": {
               "type": "string",
-              "description": "duration",
-              "x-ms-summary": "Contract Duration"
+              "x-ms-summary": "Contract duration"
             },
             "end_date": {
               "type": "string",
-              "description": "end_date",
-              "x-ms-summary": "Contract End Date"
+              "x-ms-summary": "Contract end date"
             },
             "initial_duration": {
               "type": "string",
-              "description": "initial_duration",
-              "x-ms-summary": "Contract Initial Duration"
+              "x-ms-summary": "Contract initial duration"
             },
             "notice_period": {
               "type": "string",
-              "description": "notice_period",
-              "x-ms-summary": "Contract Notice Period"
+              "x-ms-summary": "Contract notice period"
             },
             "start_date": {
               "type": "string",
-              "description": "start_date",
-              "x-ms-summary": "Contract Start Date"
+              "x-ms-summary": "Contract start date"
             },
             "type": {
               "type": "string",
-              "description": "type",
+              "description": "no_duration/single_period/recurring/recurring_two_periods",
               "x-ms-summary": "Contract Type"
             }
           },
-          "description": "lifecycle_settings"
+          "description": "lifecycle_settings attributes"
         },
         "lifecycle_state": {
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Lifecycle state",
           "type": "object",
           "properties": {
             "contract_end_time": {
               "type": "string",
-              "description": "contract_end_time",
-              "x-ms-summary": "Contract End Time"
+              "x-ms-summary": "Contract end time"
             },
             "contract_start_time": {
               "type": "string",
-              "description": "contract_start_time",
-              "x-ms-summary": "Contract Start Time"
+              "x-ms-summary": "Contract start time"
             },
             "cancel_time": {
               "type": "string",
-              "description": "cancel_time",
-              "x-ms-summary": "Contract Cancel Time"
+              "x-ms-summary": "Contract cancel time"
             },
             "has_ended_by_termination": {
               "type": "boolean",
-              "description": "has_ended_by_termination",
-              "x-ms-summary": "Contract Ended By Termination?"
+              "x-ms-summary": "Contract ended by termination?"
             },
             "has_passed_notice_period_start_time": {
               "type": "boolean",
-              "description": "has_passed_notice_period_start_time",
-              "x-ms-summary": "Has Contract Passed Notice Period Start Time?"
+              "x-ms-summary": "Has notice period start time passed?"
             },
             "is_canceled": {
               "type": "boolean",
-              "description": "is_canceled",
-              "x-ms-summary": "Is Contract Canceled"
+              "x-ms-summary": "Is contract canceled"
             },
             "is_recurring": {
               "type": "boolean",
-              "description": "is_recurring",
-              "x-ms-summary": "Is Contract Recurring"
+              "x-ms-summary": "Is contract recurring"
             },
             "lifecycle_state": {
               "type": "string",
-              "description": "lifecycle_state",
-              "x-ms-summary": "Lifecycle State"
+              "description": "awaiting/active/ended",
+              "x-ms-summary": "Lifecycle state"
             },
             "lifecycle_state_updated_time": {
               "type": "string",
-              "description": "lifecycle_state_updated_time",
-              "x-ms-summary": "Lifecycle state Updated Time"
+              "x-ms-summary": "Lifecycle state updated time"
             },
             "notice_period_start_time": {
               "type": "string",
-              "description": "notice_period_start_time",
-              "x-ms-summary": "Notice Period Start Time"
+              "x-ms-summary": "Notice period start time",
+              "x-ms-visibility": "internal"
             },
             "period": {
               "type": "integer",
               "format": "int32",
-              "description": "period",
-              "x-ms-summary": "Period"
+              "x-ms-summary": "Contract Period",
+              "x-ms-visibility": "internal"
             },
             "period_end_time": {
               "type": "string",
-              "description": "period_end_time",
-              "x-ms-summary": "Period End Time"
+              "x-ms-summary": "Contract period end time",
+              "x-ms-visibility": "internal"
             },
             "period_start_time": {
               "type": "string",
-              "description": "period_start_time",
-              "x-ms-summary": "Period Start Time"
+              "x-ms-summary": "Contract period start time",
+              "x-ms-visibility": "internal"
             }
           },
           "description": "lifecycle_state"
@@ -1346,200 +1932,12 @@
           "description": "Parties collection"
         },
         "product_groups": {
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Product Groups",
+          "x-ms-summary": "Product groups",
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "_private_ownerside": {
-                "x-ms-summary": "Private Ownerside (Product Groups)",
-                "type": "object",
-                "properties": {
-                  "created_time": {
-                    "type": "string",
-                    "description": "created_time",
-                    "x-ms-summary": "Product Group Created Time"
-                  },
-                  "updated_time": {
-                    "type": "string",
-                    "description": "updated_time",
-                    "x-ms-summary": "Product Group Updated Time"
-                  }
-                },
-                "description": "_private_ownerside"
-              },
-              "id": {
-                "type": "integer",
-                "format": "int32",
-                "description": "id",
-                "x-ms-summary": "Product Group Id"
-              },
-              "products": {
-                "x-ms-summary": "Products",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "_private_ownerside": {
-                      "x-ms-summary": "Private Ownerside (Products)",
-                      "type": "object",
-                      "properties": {
-                        "created_time": {
-                          "type": "string",
-                          "description": "created_time",
-                          "x-ms-summary": "Product Created Time"
-                        },
-                        "updated_time": {
-                          "type": "string",
-                          "description": "updated_time",
-                          "x-ms-summary": "Product Updated Time"
-                        }
-                      },
-                      "description": "_private_ownerside"
-                    },
-                    "counterparty_lock": {
-                      "type": "boolean",
-                      "description": "counterparty_lock",
-                      "x-ms-summary": "Product Locked For Counterparties?"
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "description",
-                      "x-ms-summary": "Product Description"
-                    },
-                    "id": {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "id",
-                      "x-ms-summary": "Product Id"
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "name",
-                      "x-ms-summary": "Product Name"
-                    },
-                    "price_1": {
-                      "x-ms-summary": "Product Price 1",
-                      "type": "object",
-                      "properties": {
-                        "amount": {
-                          "x-ms-summary": "Product Price 1 Amount (object)",
-                          "type": "object",
-                          "properties": {
-                            "amount": {
-                              "type": "string",
-                              "description": "amount",
-                              "x-ms-summary": "Price 1 Amount"
-                            }
-                          },
-                          "description": "amount"
-                        },
-                        "base_amount": {
-                          "x-ms-summary": "Product Price 1 Base Amount (object)",
-                          "type": "object",
-                          "properties": {
-                            "amount": {
-                              "type": "string",
-                              "description": "amount",
-                              "x-ms-summary": "Price 1 Base Amount"
-                            }
-                          },
-                          "description": "base_amount"
-                        },
-                        "discount_amount": {
-                          "x-ms-summary": "Product Price 1 Discount Amount (object)",
-                          "type": "object",
-                          "properties": {
-                            "amount": {
-                              "type": "string",
-                              "description": "amount",
-                              "x-ms-summary": "Price 1 Discount Amount"
-                            }
-                          },
-                          "description": "discount_amount"
-                        },
-                        "discount_percent": {
-                          "type": "string",
-                          "description": "discount_percent",
-                          "x-ms-summary": "Price 1 Discount Percent"
-                        }
-                      },
-                      "description": "price_1"
-                    },
-                    "price_2": {
-                      "x-ms-summary": "Product Price 2",
-                      "type": "object",
-                      "properties": {
-                        "amount": {
-                          "x-ms-summary": "Product Price 2 Amount (object)",
-                          "type": "object",
-                          "properties": {
-                            "amount": {
-                              "type": "string",
-                              "description": "amount",
-                              "x-ms-summary": "Price 2 Amount"
-                            }
-                          },
-                          "description": "amount"
-                        },
-                        "base_amount": {
-                          "x-ms-summary": "Product Price 2 Base Amount",
-                          "type": "object",
-                          "properties": {
-                            "amount": {
-                              "type": "string",
-                              "description": "amount",
-                              "x-ms-summary": "Price 2 Base Amount"
-                            }
-                          },
-                          "description": "base_amount"
-                        },
-                        "discount_amount": {
-                          "x-ms-summary": "Product Price 2 Discount Amount (object)",
-                          "type": "object",
-                          "properties": {
-                            "amount": {
-                              "type": "string",
-                              "description": "amount",
-                              "x-ms-summary": "Price 2 Discount Amount"
-                            }
-                          },
-                          "description": "discount_amount"
-                        },
-                        "discount_percent": {
-                          "type": "string",
-                          "description": "discount_percent",
-                          "x-ms-summary": "Price 2 Discount Percent"
-                        }
-                      },
-                      "description": "price_2"
-                    },
-                    "quantity": {
-                      "x-ms-summary": "Product Quantity (object)",
-                      "type": "object",
-                      "properties": {
-                        "amount": {
-                          "type": "integer",
-                          "format": "int32",
-                          "description": "amount",
-                          "x-ms-summary": "Product Quantity"
-                        },
-                        "type": {
-                          "type": "string",
-                          "description": "type",
-                          "x-ms-summary": "Product Type"
-                        }
-                      },
-                      "description": "quantity"
-                    }
-                  }
-                },
-                "description": "products"
-              }
-            }
+            "$ref": "#/definitions/Product_Group"
           },
-          "description": "product_groups"
+          "description": "product_groups collection"
         },
         "published_time": {
           "type": "string",
@@ -1640,37 +2038,35 @@
           "description": "Participant permissions"
         },
         "_private_ownerside": {
-          "x-ms-visibility": "internal",
           "type": "object",
           "properties": {
             "created_time": {
               "type": "string",
+              "x-ms-visibility": "internal",
               "description": "created_time",
               "x-ms-summary": "Participant Created Time"
             },
             "first_visited_time": {
               "type": "string",
-              "description": "first_visited_time",
-              "x-ms-summary": "Participant First Visited Time"
+              "x-ms-summary": "Participant first visit time"
             },
             "last_visited_time": {
               "type": "string",
-              "description": "last_visited_time",
-              "x-ms-summary": "Participant Last Visited Time"
+              "x-ms-summary": "Participant Last visit time"
             },
             "updated_time": {
               "type": "string",
+              "x-ms-visibility": "internal",
               "description": "updated_time",
               "x-ms-summary": "Participant Update Time"
             },
             "visits": {
               "type": "integer",
               "format": "int32",
-              "description": "visits",
-              "x-ms-summary": "Participant Visits Count"
+              "x-ms-summary": "Participant visit count"
             }
           },
-          "description": "_private_ownerside"
+          "description": "participant._private_ownerside attributes"
         },
         "delivery_channel": {
           "type": "string",
@@ -1722,14 +2118,12 @@
         "sign_state": {
           "type": "string",
           "description": "undecided/signed/declined",
-          "x-ms-visibility": "internal",
           "x-ms-summary": "Participant sign state"
         },
         "sign_state_updated_time": {
           "type": "string",
           "description": "sign_state_updated_time",
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Participant's Sign State Updated Time"
+          "x-ms-summary": "Participant sign state updated time"
         },
         "signatory": {
           "type": "boolean",
@@ -1761,42 +2155,37 @@
           "description": "Individual participant permissions"
         },
         "_private_ownerside": {
-          "x-ms-visibility": "internal",
           "type": "object",
           "properties": {
             "created_time": {
               "type": "string",
-              "description": "created_time",
-              "x-ms-summary": "Individual Participant Created Time"
+              "x-ms-visibility": "internal",
+              "x-ms-summary": "Individual participant created time"
             },
             "first_visited_time": {
               "type": "string",
-              "description": "first_visited_time",
-              "x-ms-summary": "Individual Participant's First Visited Time"
+              "x-ms-summary": "Individual participant first visit time"
             },
             "last_visited_time": {
               "type": "string",
-              "description": "last_visited_time",
-              "x-ms-summary": "Individual Participant's Last Visited Time"
+              "x-ms-summary": "Individual participant last visit time"
             },
             "updated_time": {
               "type": "string",
-              "description": "updated_time",
-              "x-ms-summary": "Individual Participant's Updated Time"
+              "x-ms-summary": "Individual participant updated time"
             },
             "visits": {
               "type": "integer",
               "format": "int32",
-              "description": "visits",
-              "x-ms-summary": "Individual Participant's Visits Count"
+              "x-ms-summary": "Individual participant visit count"
             }
           },
-          "description": "_private_ownerside"
+          "description": "individual_participant._private_ownerside attributes"
         },
         "delivery_channel": {
           "type": "string",
           "description": "email/none/same_device/sms",
-          "x-ms-summary": "Individual Participant delivery channel"
+          "x-ms-summary": "Individual participant delivery channel"
         },
         "delivery_status": {
           "type": "string",
@@ -1816,8 +2205,7 @@
         },
         "identification_number": {
           "type": "string",
-          "x-ms-summary": "Individual participant identification number",
-          "description": "Individual participant identification number"
+          "x-ms-summary": "Individual participant identification number"
         },
         "my_participant": {
           "type": "boolean",
@@ -1843,14 +2231,11 @@
         "sign_state": {
           "type": "string",
           "description": "undecided/signed/declined",
-          "x-ms-visibility": "internal",
-          "x-ms-summary": "Individual Participant's Sign State"
+          "x-ms-summary": "Individual participant sign state"
         },
         "sign_state_updated_time": {
           "type": "string",
-          "x-ms-visibility": "internal",
-          "description": "sign_state_updated_time",
-          "x-ms-summary": "Individual Participant's Sign State Updated Time"
+          "x-ms-summary": "Individual participant sign state updated time"
         },
         "signatory": {
           "type": "boolean",
@@ -1867,6 +2252,463 @@
         }
       },
       "description": "Individual participant object"
+    },
+    "Product_Group": {
+      "x-ms-summary": "Product group",
+      "type": "object",
+      "properties": {
+        "_private_ownerside": {
+          "x-ms-summary": "Private Ownerside (Product Groups)",
+          "x-ms-visibility": "internal",
+          "type": "object",
+          "properties": {
+            "created_time": {
+              "type": "string",
+              "description": "created_time",
+              "x-ms-summary": "Product Group Created Time"
+            },
+            "updated_time": {
+              "type": "string",
+              "description": "updated_time",
+              "x-ms-summary": "Product Group Updated Time"
+            }
+          },
+          "description": "_private_ownerside"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Product Group Id"
+        },
+        "products": {
+          "x-ms-summary": "Products",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Product"
+          },
+          "description": "products collection"
+        }
+      },
+      "description": "product_group item in product_groups collection"
+    },
+    "Product": {
+      "x-ms-summary": "product",
+      "type": "object",
+      "properties": {
+        "_private_ownerside": {
+          "x-ms-visibility": "internal",
+          "x-ms-summary": "Private Ownerside (Products)",
+          "type": "object",
+          "properties": {
+            "created_time": {
+              "type": "string",
+              "x-ms-summary": "Product Created Time"
+            },
+            "updated_time": {
+              "type": "string",
+              "x-ms-summary": "Product Updated Time"
+            }
+          },
+          "description": "_private_ownerside"
+        },
+        "counterparty_lock": {
+          "type": "boolean",
+          "description": "counterparty_lock",
+          "x-ms-summary": "locked for counterparties?"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "description"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "id"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "name"
+        },
+        "price_1": {
+          "x-ms-summary": "price 1",
+          "description": "Price 1 object",
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Amount value of price 1",
+                  "x-ms-summary": "amount"
+                }
+              },
+              "description": "amount"
+            },
+            "base_amount": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Amount value of price 1",
+                  "x-ms-summary": "base  amount"
+                }
+              },
+              "description": "Base amount value of price 1"
+            },
+            "discount_amount": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Discount amount of price 1",
+                  "x-ms-summary": "discount  amount"
+                }
+              }
+            },
+            "discount_percent": {
+              "type": "string",
+              "description": "Discount percent of price 1",
+              "x-ms-summary": "discount  percent"
+            }
+          }
+        },
+        "price_2": {
+          "x-ms-summary": "price 2",
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Amount value of price 2",
+                  "x-ms-summary": "amount"
+                }
+              },
+              "description": "amount"
+            },
+            "base_amount": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Base amount value of price 2",
+                  "x-ms-summary": "base amount"
+                }
+              }
+            },
+            "discount_amount": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Discount amount of price 2",
+                  "x-ms-summary": "discount amount"
+                }
+              }
+            },
+            "discount_percent": {
+              "type": "string",
+              "description": "Discount percent of price 2",
+              "x-ms-summary": "discount Percent"
+            }
+          },
+          "description": "price_2"
+        },
+        "quantity": {
+          "x-ms-summary": "quantity",
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "x-ms-summary": "amount"
+            },
+            "type": {
+              "type": "string",
+              "description": "quantity/multiple_choice/single_choice",
+              "x-ms-summary": "type"
+            }
+          }
+        }
+      }
+    },
+    "Product_For_Create": {
+      "type": "object",
+      "properties": {
+        "counterparty_lock": {
+          "type": "boolean",
+          "description": "Select whether you want the product attributes to be editable by counterparties.",
+          "x-ms-summary": "Product Locked For Counterparties?"
+        },
+        "description": {
+          "type": "string",
+          "description": "Add details about the product.",
+          "x-ms-summary": "Product Description"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the product.",
+          "x-ms-summary": "Product Name"
+        },
+        "price_1": {
+          "x-ms-summary": "Price",
+          "type": "object",
+          "properties": {
+            "base_amount": {
+              "x-ms-summary": 1,
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Base amount for the product.",
+                  "x-ms-summary": "Amount"
+                }
+              },
+              "description": "base_amount"
+            },
+            "discount_amount": {
+              "x-ms-summary": 1,
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Discount amount as a number.",
+                  "x-ms-summary": "Discount Amount"
+                }
+              },
+              "description": "discount_amount"
+            },
+            "discount_percent": {
+              "type": "string",
+              "description": "Discount as a percentage of the base amount.",
+              "x-ms-summary": "1 Discount Percent"
+            }
+          },
+          "description": "price_1"
+        },
+        "price_2": {
+          "x-ms-summary": "Price",
+          "type": "object",
+          "properties": {
+            "base_amount": {
+              "x-ms-summary": 2,
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Secondary price value. i.e. if the product has a subscription fee.",
+                  "x-ms-summary": "Amount"
+                }
+              },
+              "description": "base_amount"
+            },
+            "discount_amount": {
+              "x-ms-summary": 2,
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string",
+                  "description": "Secondary discount amount as a number.",
+                  "x-ms-summary": "Discount Amount"
+                }
+              },
+              "description": "discount_amount"
+            },
+            "discount_percent": {
+              "type": "string",
+              "description": "Secondary discount amount as a percentage of Price 2.",
+              "x-ms-summary": "2 Discount Percent"
+            }
+          },
+          "description": "price_2"
+        },
+        "quantity": {
+          "x-ms-summary": "Quantity -",
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "description": "Any positive number or 1/0 if the type is multiple_choice/single_choice",
+              "x-ms-summary": "Amount"
+            },
+            "type": {
+              "type": "string",
+              "description": "Select an input type of quantity (i.e. a checkbox, number, single select).",
+              "x-ms-summary": "Product Type",
+              "enum": [
+                "multiple_choice",
+                "single_choice",
+                "quantity"
+              ],
+              "default": "quantity"
+            }
+          },
+          "description": "quantity"
+        }
+      }
+    },
+    "Datafield_for_update": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "x-ms-summary": "Id",
+          "description": "Datafield Id",
+          "x-ms-visibility": "internal"
+        },
+        "value": {
+          "type": "string",
+          "description": "Value to set for the datafield.",
+          "x-ms-summary": "Value"
+        },
+        "_private_ownerside": {
+          "x-ms-visibility": "internal",
+          "type": "object",
+          "properties": {
+            "custom_id": {
+              "type": "string",
+              "description": "Custom id of the datafield",
+              "x-ms-summary": "Custom Id"
+            }
+          },
+          "required": [
+            "custom_id"
+          ]
+        }
+      }
+    },
+    "Datafield_for_create": {
+      "type": "object",
+      "properties": {
+        "custom_id": {
+          "x-ms-summary": "Datafield",
+          "description": "Select datafield to populate",
+          "type": "string",
+          "x-ms-dynamic-values": {
+            "operationId": "GetTemplateByTemplateId",
+            "parameters": {
+              "x-oneflow-template-id": {
+                "parameter": "template_id"
+              }
+            },
+            "value-path": "custom_id",
+            "value-title": "name",
+            "value-collection": "data_fields"
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "GetTemplateByTemplateId",
+            "parameters": {
+              "x-oneflow-template-id": {
+                "parameterReference": "contract/template_id"
+              }
+            },
+            "itemsPath": "data_fields",
+            "itemValuePath": "custom_id",
+            "itemTitlePath": "name"
+          }
+        },
+        "value": {
+          "type": "string",
+          "description": "Datafield value",
+          "x-ms-summary": "Value"
+        }
+      },
+      "required": [
+        "custom_id"
+      ]
+    },
+    "Datafield": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "x-ms-summary": "Datafield id",
+          "description": "Datafield Id"
+        },
+        "value": {
+          "type": "string",
+          "description": "Datafield value",
+          "x-ms-summary": "Value"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the datafield",
+          "x-ms-summary": "Datafield description"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the datafield",
+          "x-ms-summary": "Datafield name"
+        },
+        "placeholder": {
+          "type": "string",
+          "x-ms-summary": "Datafield placeholder"
+        },
+        "_private_ownerside": {
+          "type": "object",
+          "properties": {
+            "custom_id": {
+              "type": "string",
+              "description": "Custom id of the datafield",
+              "x-ms-summary": "Custom Id"
+            },
+            "created_time": {
+              "type": "string",
+              "x-ms-summary": "Datafield created time"
+            },
+            "updated_time": {
+              "type": "string",
+              "x-ms-summary": "Datafield updated time"
+            }
+          }
+        }
+      }
+    },
+    "Webhook_Event": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Contract id",
+              "x-ms-summary": "Contract id"
+            }
+          }
+        },
+        "callback_id": {
+          "type": "string",
+          "x-ms-summary": "Callback id",
+          "description": "Callback id"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "created_time": {
+                "type": "string",
+                "format": "date-time",
+                "x-ms-summary": "Event created time"
+              },
+              "id": {
+                "type": "number",
+                "x-ms-summary": "Event id"
+              },
+              "type": {
+                "type": "string",
+                "x-ms-summary": "Event type"
+              },
+              "signature": {
+                "type": "string",
+                "x-ms-summary": "Signature"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "x-ms-connector-metadata": [

@@ -23,6 +23,14 @@ public class Script : ScriptBase
                 ["ApplicationName"] = "Power Automate"
             };
         }
+
+        var queryParams = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+        foreach (var queryParam in queryParams.AllKeys)
+        {
+            if (!requestContentAsJson.ContainsKey(queryParam))
+                requestContentAsJson[queryParam] = queryParams[queryParam];
+        }
+
         this.Context.Request.Content = CreateJsonContent(requestContentAsJson.ToString());
 
         // Make the actual API request

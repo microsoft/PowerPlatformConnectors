@@ -1,0 +1,931 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Seismic Content Discovery",
+    "description": "Seismic content discovery connector provides set of actions required for searching contents in various repositories like library, workspace, recents, favorites and predictive contents.",
+    "contact": {
+      "name": "Seismic",
+      "email": "support@seismic.com",
+      "url": "https://seismic.com"
+    },
+    "license": {
+      "name": "Seismic"
+    },
+    "version": "1.0"
+  },
+  "host": "api.seismic.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/integration/v2/predictiveContent/{predictiveContentId}/{contextId}": {
+      "get": {
+        "tags": [
+          "Predictive Content"
+        ],
+        "summary": "Get predictive contents for user",
+        "description": "Gets the list of predictive content for a given predictive content setting for the currently authenticated user.",
+        "operationId": "GetPredictiveContentResultSet",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "predictiveContentId",
+            "description": "This can be either the GUID for the predictive content or the name of the predictive content",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Predictive content setting name"
+          },
+          {
+            "in": "path",
+            "name": "contextId",
+            "description": "ContextId of content like SalesForce, Sugar etc.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Context System Type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.PredictiveContent.PredictiveContentResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/v2/predictiveContent": {
+      "get": {
+        "tags": [
+          "Predictive Content"
+        ],
+        "summary": "Get the available predictive content settings",
+        "description": "Gets the list of predictive content settings the current user has access to.",
+        "operationId": "GetPredictiveSettings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "systemType",
+            "description": "The system type such as Salesforce, MicrosoftDynamicCRM, Oracle etc. Default is empty.",
+            "type": "string",
+            "x-ms-summary": "System Type",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contextType",
+            "description": "The context type such as Opportunity, Contact, Account, etc. Default is empty.",
+            "type": "string",
+            "x-ms-summary": "Context Type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.PredictiveContent.EmbeddedAppTab"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/v2/users/favorites": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user's favorite contents",
+        "description": "Get the current user's favorite contents.",
+        "operationId": "GetUserFavorites",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.DocCenter.ContentItem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/v2/users/recents": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user's recent contents",
+        "description": "Get the current user's recent contents.",
+        "operationId": "GetUserRecentContents",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Seismic.DocCenter.ContentItem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/v1/content/query": {
+      "post": {
+        "description": "Users can query all content that a user has access to using a search term, and further apply a content filter.",
+        "summary": "Search contents",
+        "tags": [
+          "ContentSearch"
+        ],
+        "operationId": "QueryContent",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "continuationToken",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "(Optional) Pass the continuation token you have received from previous search action response to get results from next page.",
+            "x-ms-summary": "Continuation Token"
+          },
+          {
+            "name": "Search request body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Seismic.Search.SearchQueryRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Seismic.Search.SearchResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Seismic.ContentManager.ContentCustomProperties": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Seismic.DocCenter.ContentInfo": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "description": "The content source from(value can be doccenter, newscenter, workspace, library, generatedlivedocs)",
+          "type": "string",
+          "x-ms-summary": "Repository"
+        },
+        "name": {
+          "description": "Content name",
+          "type": "string",
+          "x-ms-summary": "Content name"
+        },
+        "type": {
+          "description": "Content Type(value can be \"file\", \"url\")",
+          "type": "string",
+          "x-ms-summary": "Content Type"
+        },
+        "format": {
+          "description": "Content format",
+          "type": "string",
+          "x-ms-summary": "Content format"
+        },
+        "majorVersion": {
+          "description": "Major Version",
+          "type": "string",
+          "x-ms-summary": "Major Version"
+        },
+        "minorVersion": {
+          "description": "Minor Version",
+          "type": "string",
+          "x-ms-summary": "Minor Version"
+        },
+        "libraryContent": {
+          "$ref": "#/definitions/Seismic.LiveSend.LiveSendLinkContentBasicInfo"
+        },
+        "contentProfileId": {
+          "description": "Content profile Id.",
+          "type": "string",
+          "x-ms-summary": "Content profile Id"
+        },
+        "contentProfileName": {
+          "description": "Content profile name",
+          "type": "string",
+          "x-ms-summary": "Content profile name"
+        },
+        "contentProfilePath": {
+          "description": "Content profile path",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Content profile path"
+          }
+        },
+        "contentProfilePathIds": {
+          "description": "Content profile path ids",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Content profile path id"
+          }
+        },
+        "id": {
+          "description": "Content Id",
+          "type": "string",
+          "x-ms-summary": "Content Id"
+        },
+        "contentTypes": {
+          "description": "Content Types",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Content Types"
+          }
+        },
+        "versionId": {
+          "description": "Content Version Id",
+          "type": "string",
+          "x-ms-summary": "Content Version Id"
+        },
+        "contentType": {
+          "description": "Content Type",
+          "type": "string",
+          "x-ms-summary": "Content Type"
+        },
+        "workspaceVersionType": {
+          "description": "Workspace version type",
+          "type": "string",
+          "x-ms-summary": "Workspace version type"
+        }
+      }
+    },
+    "Seismic.DocCenter.ContentItem": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "$ref": "#/definitions/Seismic.DocCenter.ContentInfo"
+        },
+        "publishedAt": {
+          "description": "Content published date",
+          "type": "string",
+          "x-ms-summary": "Content published date"
+        },
+        "modifiedAt": {
+          "description": "Content Modified Date",
+          "type": "string",
+          "x-ms-summary": "Content Modified Date"
+        },
+        "addedAt": {
+          "description": "Content added date",
+          "type": "string",
+          "x-ms-summary": "Content added date"
+        },
+        "universalLink": {
+          "description": "Content universal link",
+          "type": "string",
+          "x-ms-summary": "Content universal link"
+        },
+        "urlObjectUrl": {
+          "description": "Origin URL",
+          "type": "string",
+          "x-ms-summary": "Content Origin URL"
+        },
+        "thumbnailId": {
+          "description": "Content thumbnail id",
+          "type": "string",
+          "x-ms-summary": "Content thumbnail id"
+        },
+        "thumbnailUrl": {
+          "description": "Content thumbnail Url",
+          "type": "string",
+          "x-ms-summary": "Content thumbnail Url"
+        },
+        "sourceBlobId": {
+          "description": "Source blob id",
+          "type": "string",
+          "x-ms-summary": "Source blob id"
+        },
+        "sourceBlobDownloadUrl": {
+          "description": "Source blob download Url",
+          "type": "string",
+          "x-ms-summary": "Source blob download Url"
+        },
+        "sourceContainerName": {
+          "description": "Source Container Name",
+          "type": "string",
+          "x-ms-summary": "Source Container Name"
+        },
+        "size": {
+          "type": "string",
+          "x-ms-summary": "Size"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description"
+        },
+        "deliveryOptions": {
+          "description": "Content delivery options",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Content delivery options"
+          }
+        },
+        "blockedDeliveryOptions": {
+          "description": "Content blocked delivery options",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Blocked delivery options"
+          }
+        },
+        "allowedDeliveryOptions": {
+          "description": "Content allowed delivery options",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-ms-summary": "Allowed delivery options"
+          }
+        },
+        "profileVersionId": {
+          "description": "Profile Version Id",
+          "type": "string",
+          "x-ms-summary": "Profile Version Id"
+        },
+        "userId": {
+          "description": "For workspace content, user who created or shared content",
+          "type": "string",
+          "x-ms-summary": "User Id"
+        }
+      }
+    },
+    "Seismic.LibraryContentManagement.UrlInfo": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "openInNewWindow": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.LibraryWorkflow.LibraryContent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "versionId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "teamsiteId": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.LiveSend.LiveSendLinkContentBasicInfo": {
+      "description": "LiveSend link content Basic Info.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "returns when repository is doccenter or newscenter.",
+          "type": "string",
+          "x-ms-summary": "Library Content Id"
+        },
+        "versionId": {
+          "description": "returns when repository is doccenter or newscenter.",
+          "type": "string",
+          "x-ms-summary": "Library Content Version Id"
+        },
+        "teamsiteId": {
+          "description": "returns when repository is doccenter or newscenter.",
+          "type": "string",
+          "x-ms-summary": "Library TeamSiteId"
+        }
+      }
+    },
+    "Seismic.PredictiveContent.EmbeddedAppTab": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "systemType": {
+          "type": "string"
+        },
+        "contextType": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.PredictiveContent.PredictiveContentHierarchy": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.PredictiveContent.PredictiveContentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "score": {
+          "$ref": "#/definitions/Seismic.PredictiveContent.PredictiveContentScore"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "contentProfileId": {
+          "type": "string"
+        },
+        "url": {
+          "$ref": "#/definitions/Seismic.LibraryContentManagement.UrlInfo"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.ContentManager.ContentCustomProperties"
+          }
+        },
+        "hierarchy": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.PredictiveContent.PredictiveContentHierarchy"
+          }
+        },
+        "applicationUrls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.WorkSpaceContentManager.ApplicationUrl"
+          }
+        },
+        "libraryContent": {
+          "$ref": "#/definitions/Seismic.LibraryWorkflow.LibraryContent"
+        },
+        "deliveryOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.WorkSpaceContentManager.WsDeliveryOption"
+          }
+        }
+      }
+    },
+    "Seismic.PredictiveContent.PredictiveContentScore": {
+      "type": "object",
+      "properties": {
+        "points": {
+          "format": "double",
+          "type": "number"
+        },
+        "rank": {
+          "format": "double",
+          "type": "number"
+        }
+      }
+    },
+    "Seismic.WorkSpaceContentManager.ApplicationUrl": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.WorkSpaceContentManager.WsDeliveryOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "Seismic.Search.ConditionExpressionInfo": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "title": "Attribute"
+        },
+        "operator": {
+          "type": "string",
+          "title": "Operator"
+        },
+        "value": {
+          "type": "string",
+          "title": "Value"
+        }
+      }
+    },
+    "Seismic.Search.FilterExpressionInfo": {
+      "type": "object",
+      "x-ms-visibility": "advanced",
+      "properties": {
+        "conditions": {
+          "description": "Represent a list of inner conditions",
+          "type": "array",
+          "x-ms-summary": "Condition",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.ConditionExpressionInfo"
+          }
+        },
+        "filters": {
+          "description": "Represent a list of inner filters",
+          "type": "array",
+          "x-ms-summary": "Filter",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.FilterExpressionInfo"
+          }
+        },
+        "operator": {
+          "description": "Represent the operator to apply on the condition list",
+          "type": "string",
+          "title": "Operator"
+        }
+      }
+    },
+    "Seismic.Search.SearchOptions": {
+      "type": "object",
+      "properties": {
+        "pageSize": {
+          "format": "int32",
+          "description": "(Optional)  Any number between 0 and 100. Default value of 40.",
+          "type": "integer",
+          "title": "Page Size"
+        },
+        "searchFields": {
+          "description": "search fields",
+          "x-ms-visibility": "advanced",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "(Optional) This specifies where in the content Seismic search service conducts the search.",
+            "title": "Search Fields",
+            "enum": [
+              "Name",
+              "Description",
+              "Body",
+              "Properties"
+            ]
+          }
+        },
+        "returnFields": {
+          "description": "return fields",
+          "x-ms-visibility": "advanced",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "(Optional) This specifies the content property fields that Seismic search service returns for matching content found.",
+            "title": "Return Fields",
+            "enum": [
+              "Repository",
+              "Name",
+              "TeamsiteId",
+              "Id",
+              "VersionId",
+              "Type",
+              "ApplicationUrls",
+              "Format",
+              "Description",
+              "Properties",
+              "ThumbnailUrl",
+              "DownloadUrl",
+              "CreatedDate",
+              "PublishDate",
+              "ModifiedDate",
+              "MajorVersion",
+              "MinorVersion"
+            ]
+          }
+        }
+      }
+    },
+    "Seismic.Search.SearchQueryRequest": {
+      "type": "object",
+      "properties": {
+        "term": {
+          "description": "Search term",
+          "type": "string",
+          "title": "Search Term"
+        },
+        "options": {
+          "$ref": "#/definitions/Seismic.Search.SearchOptions"
+        },
+        "sort": {
+          "description": "Sort criteria",
+          "type": "array",
+          "x-ms-summary": "Sort",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.SortConstraint"
+          }
+        },
+        "filter": {
+          "$ref": "#/definitions/Seismic.Search.FilterExpressionInfo"
+        }
+      }
+    },
+    "Seismic.Search.SortConstraint": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "(Optional) This will allow search to sort search results on selected fields.",
+          "title": "Field"
+        },
+        "order": {
+          "$ref": "#/definitions/Seismic.Search.SortConstraintDirection",
+          "title": "Order",
+          "type": "string",
+          "x-ms-summary": "Order",
+          "enum": [
+            "Asc",
+            "Desc"
+          ]
+        }
+      }
+    },
+    "Seismic.Search.SortConstraintDirection": {
+      "enum": [
+        "Asc",
+        "Desc"
+      ],
+      "type": "string",
+      "x-ms-summary": "Order"
+    },
+    "Seismic.Search.ApplicationUrls": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Application Url Name"
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "Application Url"
+        }
+      }
+    },
+    "Seismic.Search.CustomPropertyDefinition": {
+      "type": "object",
+      "x-ms-summary": "Custom Property",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Custom Property Name"
+        },
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Custom Property Id"
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Custom Property Type"
+        },
+        "teamSiteId": {
+          "type": "string",
+          "x-ms-summary": "Custom Property Teamsite Id"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.CustomPropertyValueDefinition"
+          }
+        }
+      }
+    },
+    "Seismic.Search.CustomPropertyValueDefinition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Custom Property Value Id"
+        },
+        "value": {
+          "type": "string",
+          "x-ms-summary": "Custom Property Value"
+        }
+      }
+    },
+    "Seismic.Search.Documents": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "x-ms-summary": "Content Repository"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Content Name"
+        },
+        "teamsiteId": {
+          "type": "string",
+          "x-ms-summary": "Content Teamsite Id"
+        },
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Content Id"
+        },
+        "versionId": {
+          "type": "string",
+          "x-ms-summary": "Content Version Id"
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Content Type"
+        },
+        "format": {
+          "type": "string",
+          "x-ms-summary": "Content Format"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Content Description"
+        },
+        "customProperties": {
+          "type": "array",
+          "x-ms-summary": "Content Custom Properties",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.CustomPropertyDefinition"
+          }
+        },
+        "applicationUrls": {
+          "type": "array",
+          "x-ms-summary": "Content Application Urls",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.ApplicationUrls"
+          }
+        },
+        "contentThumbnailUrl": {
+          "type": "string",
+          "x-ms-summary": "Content Thumbnail Url"
+        },
+        "contentDownloadUrl": {
+          "type": "string",
+          "x-ms-summary": "Content Download Url"
+        },
+        "createdDate": {
+          "type": "string",
+          "x-ms-summary": "Content Created Date"
+        },
+        "publishDate": {
+          "type": "string",
+          "x-ms-summary": "Content Publish Date"
+        },
+        "modifiedDate": {
+          "type": "string",
+          "x-ms-summary": "Content Modified Date"
+        },
+        "majorVersion": {
+          "type": "string",
+          "x-ms-summary": "Content Major Version"
+        },
+        "minorVersion": {
+          "type": "string",
+          "x-ms-summary": "Content Minor Version"
+        }
+      }
+    },
+    "Seismic.Search.SearchResponse": {
+      "type": "object",
+      "properties": {
+        "totalCount": {
+          "x-ms-summary": "Total result count",
+          "type": "integer"
+        },
+        "queryTimeInMs": {
+          "x-ms-summary": "Query time in millisecond",
+          "type": "integer"
+        },
+        "serviceTimeInMs": {
+          "x-ms-summary": "Service time in millisecond",
+          "type": "integer"
+        },
+        "continuationToken": {
+          "type": "string",
+          "x-ms-summary": "Continuation Token"
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Seismic.Search.Documents"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://auth.seismic.com/central/connect/authorize",
+      "tokenUrl": "https://auth.seismic.com/central/connect/token",
+      "scopes": {
+        "seismic.self.view seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage seismic.search offline_access": "seismic.self.view seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage seismic.search offline_access"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Predictive Content"
+    }
+  ],
+  "security": [
+    {
+      "oauth2-auth": [
+        "seismic.self.view seismic.library.view seismic.library.manage seismic.configuration.view seismic.configuration.manage seismic.search offline_access"
+      ]
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://seismic.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://seismic.com/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing;Sales and CRM"
+    }
+  ]
+}

@@ -1,0 +1,861 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Azure Communication Chat",
+    "description": "Connector to utilize Azure Communication Services Chat features.",
+    "version": "1.0",
+    "x-ms-api-annotation": {
+      "status": "Production"
+    },
+    "contact": {
+      "name": "Microsoft",
+      "email": "acssolutions@microsoft.com",
+      "url": "https://azure.microsoft.com/services/communication-services"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://azure.microsoft.com/services/communication-services"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://privacy.microsoft.com"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ],
+  "host": "api.contoso.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/chat/threads/{chatThreadId}/messages": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "description": "Collection of chat messages.",
+                  "x-ms-summary": "Message List",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "ID of the chat message. This id is server generated.",
+                        "x-ms-summary": "ID"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Chat message type.",
+                        "x-ms-summary": "Type"
+                      },
+                      "version": {
+                        "type": "string",
+                        "description": "Version of the chat message.",
+                        "x-ms-summary": "Version"
+                      },
+                      "sequenceId": {
+                        "type": "string",
+                        "description": "Sequence of the chat message in the conversation.",
+                        "x-ms-summary": "Sequence ID"
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Chat message content.",
+                            "x-ms-summary": "message"
+                          },
+                          "initiatorCommunicationIdentifier": {
+                            "$ref": "#/definitions/CommunicationIdentifier"
+                          },
+                          "topic": {
+                            "type": "string",
+                            "description": "Chat message content for messages of type topicUpdated.",
+                            "x-ms-summary": "Topic"
+                          },
+                          "participants": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "communicationIdentifier": {
+                                  "$ref": "#/definitions/CommunicationIdentifier"
+                                }
+                              }
+                            },
+                            "description": "Chat message content for messages of types participantAdded or participantRemoved."
+                          }
+                        },
+                        "description": "Content of a chat message."
+                      },
+                      "senderDisplayName": {
+                        "type": "string",
+                        "description": "Display name of the chat message sender. This property is used to populate sender name for push notifications.",
+                        "x-ms-summary": "Sender Display Name"
+                      },
+                      "createdOn": {
+                        "type": "string",
+                        "description": "Timestamp in RFC3339 format (yyyy-MM-ddTHH:mm:ssZ) when the chat message arrived at the server.",
+                        "x-ms-summary": "Created On"
+                      },
+                      "senderCommunicationIdentifier": {
+                        "$ref": "#/definitions/CommunicationIdentifier"
+                      }
+                    }
+                  }
+                },
+                "nextLink": {
+                  "type": "string",
+                  "description": "If there are more chat messages that can be retrieved, the next link will be populated.",
+                  "x-ms-summary": "Next Link"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "List chat thread messages",
+        "description": "List messages From chat thread.",
+        "operationId": "ListMessages",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/chatThreadId"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/listMessagesStartTime"
+          },
+          {
+            "$ref": "#/parameters/listMessagesMaxPageSize"
+          }
+        ]
+    },
+    "post": {
+      "responses": {
+        "201": {
+          "description": "Success",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "id"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized"
+        },
+        "403": {
+          "description": "Forbidden"
+        }
+      },
+      "summary": "Send message to chat thread",
+      "description": "Send message to chat thread.",
+      "operationId": "SendChat",
+      "parameters": [
+        {
+          "$ref": "#/parameters/accessToken"
+        },
+        {
+          "$ref": "#/parameters/chatThreadId"
+        },
+        {
+          "$ref": "#/parameters/apiVersion"
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string",
+                "title": "Content",
+                "description": "Message content."
+              },
+              "senderDisplayName": {
+                "type": "string",
+                "title": "Name",
+                "description": "Display name for the message sender."
+              }
+            },
+            "required": [
+              "content",
+              "senderDisplayName"
+            ]
+          }
+        }
+      ]
+    }
+  },
+    "/chat/threads/{chatThreadId}/participants/:add": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "invalidParticipants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string",
+                        "description": "Target ID.",
+                        "x-ms-summary": "Target"
+                      },
+                      "code": {
+                        "type": "string",
+                        "description": "Error code.",
+                        "x-ms-summary": "Code"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Error message.",
+                        "x-ms-summary": "Message"
+                      }
+                    }
+                  },
+                  "description": "Invalid participants list."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Add chat thread participants",
+        "description": "Add participants to chat thread.",
+        "operationId": "AddParticipants",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/chatThreadId"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "participants": {
+                  "title": "Participants",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "communicationIdentifier": {
+                        "$ref": "#/definitions/CommunicationIdentifier"
+                      },
+                      "displayName": {
+                        "type": "string",
+                        "title": "Display Name",
+                        "description": "Display name for the chat participant."
+                      },
+                      "shareHistoryTime": {
+                        "type": "string",
+                        "title": "Time",
+                        "description": "Time in RFC3339 format (yyyy-MM-ddTHH:mm:ssZ) from which the chat history is shared."
+                      }
+                    }
+                  },
+                  "description": "Participants to add."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/chat/threads/{chatThreadId}/participants/:remove": {
+      "post": {
+        "responses": {
+          "204": {
+            "description": "Request successful"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Remove chat thread participant",
+        "description": "Remove participant from chat thread.",
+        "operationId": "RemoveParticipant",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/chatThreadId"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/CommunicationIdentifier"
+            }
+          }
+        ]
+      }
+    },
+    "/chat/threads": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Chat thread ID.",
+                        "x-ms-summary": "ID"
+                      },
+                      "topic": {
+                        "type": "string",
+                        "description": "Chat thread topic.",
+                        "x-ms-summary": "Topic"
+                      },
+                      "lastMessageReceivedOn": {
+                        "type": "string",
+                        "description": "Timestamp in RFC3339 format (yyyy-MM-ddTHH:mm:ssZ) when the last message arrived at the server.",
+                        "x-ms-summary": "last Message Received On"
+                      },
+                      "deletedOn": {
+                        "type": "string",
+                        "description": "Timestamp in RFC3339 format (yyyy-MM-ddTHH:mm:ssZ) when the chat thread was deleted.",
+                        "x-ms-summary": "Deleted On"
+                      }
+                    }
+                  },
+                  "description": "Collection of chat threads.",
+                  "x-ms-summary": "Chat Threads"
+                },
+                "nextLink": {
+                  "type": "string",
+                  "description": "If there are more chat threads that can be retrieved, the next link will be populated.",
+                  "x-ms-summary": "Next Link"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "List chat threads",
+        "description": "List chat threads.",
+        "operationId": "ListChatThreads",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/listChatThreadsStartTime"
+          },
+          {
+            "$ref": "#/parameters/listChatThreadsMaxPageSize"
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "chatThread": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Chat Thread ID",
+                      "x-ms-summary": "ID"
+                    },
+                    "topic": {
+                      "type": "string",
+                      "description": "Chat Thread Topic",
+                      "x-ms-summary": "Topic"
+                    },
+                    "createdOn": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Chat Creation Time",
+                      "x-ms-summary": "Created On"
+                    },
+                    "createdByCommunicationIdentifier": {
+                      "$ref": "#/definitions/CommunicationIdentifier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "Create chat thread",
+        "description": "Create a chat thread.",
+        "operationId": "CreateChat",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "topic": {
+                  "type": "string",
+                  "description": "Chat thread topic.",
+                  "title": "Chat Thread Topic"
+                },
+                "participants": {
+                  "title": "Participants",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "communicationIdentifier": {
+                        "$ref": "#/definitions/CommunicationIdentifier"
+                      },
+                      "displayName": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Display name for the chat participant."
+                      }
+                    }
+                  },
+                  "description": "Participants."
+                }
+              },
+              "required": [
+                "topic"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/chat/threads/{chatThreadId}/participants": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "communicationIdentifier": {
+                        "$ref": "#/definitions/CommunicationIdentifier"
+                      },
+                      "displayName": {
+                        "x-ms-summary": "Name",
+                        "type": "string",
+                        "description": "Display name for the chat participant."
+                      },
+                      "shareHistoryTime": {
+                        "x-ms-summary": "Time",
+                        "type": "string",
+                        "description": "Time in RFC3339 format (yyyy-MM-ddTHH:mm:ssZ) from which the chat history is shared."
+                      }
+                    }
+                  },
+                  "description": "Chat participants."
+                },
+                "nextLink": {
+                  "type": "string",
+                  "description": "If there are more chat participants that can be retrieved, the next link will be populated.",
+                  "x-ms-summary": "Next Link"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "summary": "List chat thread participants",
+        "description": "List participants in chat thread.",
+        "operationId": "ListParticipants",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/chatThreadId"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/skip"
+          },
+          {
+            "$ref": "#/parameters/listParticipantsMaxPageSize"
+          }
+        ]
+      }
+    },
+    "/chat/threads/{chatThreadId}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Chat thread ID.",
+                  "x-ms-summary": "ID"
+                },
+                "topic": {
+                  "type": "string",
+                  "description": "Chat thread topic.",
+                  "x-ms-summary": "Topic"
+                },
+                "createdOn": {
+                  "type": "string",
+                  "description": "Time when the thread was created.",
+                  "x-ms-summary": "Created On"
+
+                },
+                "deletedOn": {
+                  "type": "string",
+                  "description": "Time when the thread was deleted.",
+                  "x-ms-summary": "Deleted On"
+                },
+                "createdByCommunicationIdentifier": {
+                  "type": "object",
+                  "properties": {
+                    "rawId": {
+                      "type": "string",
+                      "description": "Raw ID of the identifier.",
+                      "x-ms-summary": "Raw ID"
+                    },
+                    "communicationUser": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "ID of the communication user.",
+                          "x-ms-summary": "ID"
+                        }
+                      },
+                      "description": "Communication user."
+                    }
+                  },
+                  "description": "Communication identifier of creator."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "operationId": "GetThreadProperties",
+        "summary": "Get chat thread properties",
+        "description": "Get the properties of the chat thread.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/chatThreadId"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          }
+        ]
+      },
+      "patch": {
+        "responses": {
+          "204": {
+            "description": "Thread was successfully updated."
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too many requests."
+          },
+          "503": {
+            "description": "Service unavailable."
+          }
+        },
+        "operationId": "UpdateChatThreadProperties",
+        "summary": "Update chat thread properties",
+        "description": "Update the properties of the chat thread.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/chatThreadId"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          },
+          {
+            "$ref": "#/parameters/contentType"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Request payload for updating a chat thread.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "description": "Request payload for updating a chat thread.",
+              "properties": {
+                "topic": {
+                  "description": "Chat thread topic.",
+                  "type": "string",
+                  "title": "Chat Thread Topic"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "Request successful."
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too many requests."
+          },
+          "503": {
+            "description": "Service unavailable."
+          }
+        },
+        "operationId": "DeleteChatThread",
+        "summary": "Delete chat thread",
+        "description": "Delete a chat thread.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/accessToken"
+          },
+          {
+            "$ref": "#/parameters/chatThreadId"
+          },
+          {
+            "$ref": "#/parameters/apiVersion"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "CommunicationIdentifier": {
+      "type": "object",
+      "properties": {
+        "communicationUser": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "x-ms-summary": "User ID",
+              "type": "string"
+            }
+          },
+          "description": "Communication user."
+        }
+      },
+      "description": "Communication identifier."
+    }
+  },
+  "parameters": {
+    "chatThreadId":{
+      "name": "chatThreadId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "Chat Thread ID.",
+      "x-ms-summary": "Thread ID",
+      "x-ms-url-encoding":"single"
+    },
+    "apiVersion":{
+      "name": "api-version",
+      "in": "query",
+      "required": true,
+      "type": "string",
+      "default": "2021-09-07",
+      "description": "API version to call.",
+      "x-ms-summary": "API Version",
+      "x-ms-visibility": "internal"
+    },
+    "contentType": {
+      "name": "content-type",
+      "in": "header",
+      "required": true,
+      "type": "string",
+      "default": "application/merge-patch+json",
+      "description": "Content type for patch operation.",
+      "x-ms-summary": "Content type for patch operation",
+      "x-ms-visibility": "internal"
+    },
+    "accessToken":{
+      "name": "Access-Token",
+      "in": "header",
+      "required": true,
+      "type": "string",
+      "description": "User access token.",
+      "x-ms-summary": "Access Token"
+    },
+    "listParticipantsMaxPageSize":{
+      "name": "maxPageSize",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-visibility": "advanced",
+      "description": "Maximum number of participants to be returned per page.",
+      "x-ms-summary": "Max Participants Per Page"
+    },
+    "skip":{
+      "name": "skip",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-visibility": "advanced",
+      "description": "Skips participants up to a specified position in response.",
+      "x-ms-summary": "Number Of Participants To Skip"
+    },
+    "listChatThreadsMaxPageSize":{
+      "name": "maxPageSize",
+      "in": "query",
+      "required": false,
+      "type": "integer",
+      "x-ms-visibility": "advanced",
+      "description": "Maximum number of chat threads returned per page.",
+      "x-ms-summary": "Max Page Size"
+    },
+    "listChatThreadsStartTime":{
+      "name": "startTime",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-visibility": "advanced",
+      "description": "Starting time in RFC3339 format (yyyy-MM-ddTHH:mm:ssZ) to get chat threads.",
+      "x-ms-summary": "Start Time"
+    },
+    "listMessagesMaxPageSize":{
+      "name": "maxPageSize",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-visibility": "advanced",
+      "description": "Maximum number of messages to be returned per page.",
+      "x-ms-summary": "Max Page Size"
+    },
+    "listMessagesStartTime":{
+      "name": "startTime",
+      "in": "query",
+      "required": false,
+      "type": "string",
+      "x-ms-visibility": "advanced",
+      "description": "Starting time in RFC3339 format (yyyy-MM-ddTHH:mm:ssZ) to get messages.",
+      "x-ms-summary": "Start Time"
+    }
+  },
+  "responses": {},
+  "tags": [],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Endpoint-Url"
+    }
+  }
+}

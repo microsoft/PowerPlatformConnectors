@@ -1,0 +1,958 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Rainbird",
+    "description": "Rainbird is a no-code intelligent automation platform that enables you to automate complex decisions. This connector enables you to interact with knowledge maps you have built in Rainbird.",
+    "contact": {
+      "name": "Rainbird Technologies Ltd",
+      "url": "https://rainbird.ai/contact-us/",
+      "email": "support@rainbird.zohodesk.eu"
+    }
+  },
+  "host": "enterprise-api.rainbird.ai",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/start/{kmID}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "environment",
+            "type": "string",
+            "enum": [
+              "enterprise-api.rainbird.ai",
+              "api.rainbird.ai"
+            ],
+            "required": true,
+            "description": "Account environment: Community (api.rainbird.ai) or Enterprise (enterprise-api.rainbird.ai).",
+            "x-ms-summary": "Environment",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "The knowledge map ID to start a session against",
+            "in": "path",
+            "name": "kmID",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Knowledge Map ID (kmId)",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - Session start information",
+            "schema": {
+              "example": {
+                "id": "string",
+                "kmVersion": {
+                  "id": "string"
+                }
+              },
+              "properties": {
+                "id": {
+                  "description": "ID of newly created session",
+                  "type": "string"
+                },
+                "kmVersion": {
+                  "properties": {
+                    "id": {
+                      "description": "ID of the version being queried, which will be different to the knowledge map ID when querying live versions of a knowledge map",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400":{
+            "description": "Bad request, your request might miss a required parameter"
+          },
+          "401":{
+            "description": "Your API key is invalid"
+          },
+          "403":{
+            "description": "Your API key does not permit access to the resource"
+          },
+          "404": {
+            "description": "The resource (session, KM etc.) could not be found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "default": {
+            "description": "Operation Failed"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "operationId": "Start",
+        "summary": "Start - Start a new session",
+        "description": "Create a new session ID on a knowledge map. This first step will allow you to make further actions against your Rainbird model, such as injecting facts or doing a query.",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/{sessionID}/inject": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "environment",
+            "type": "string",
+            "enum": [
+              "enterprise-api.rainbird.ai",
+              "api.rainbird.ai"
+            ],
+            "required": true,
+            "description": "Account environment: Community (api.rainbird.ai) or Enterprise (enterprise-api.rainbird.ai).)",
+            "x-ms-summary": "Environment",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "The session to inject facts into",
+            "in": "path",
+            "name": "sessionID",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "Array of facts to inject",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "example": [
+                {
+                  "certainty": 100,
+                  "object": "England",
+                  "relationship": "lives in",
+                  "subject": "John"
+                },
+                {
+                  "certainty": 100,
+                  "object": "England",
+                  "relationship": "lives in",
+                  "subject": "Will"
+                },
+                {
+                  "certainty": 100,
+                  "object": "England",
+                  "relationship": "lives in",
+                  "subject": "Ellie"
+                },
+                {
+                  "certainty": 100,
+                  "object": "England",
+                  "relationship": "lives in",
+                  "subject": "David"
+                }
+              ],
+              "items": {
+                "properties": {
+                  "subject": {
+                    "$ref": "#/definitions/Subject"
+                  },
+                  "relationship": {
+                    "$ref": "#/definitions/Relationship",
+                    "type": "string"
+                  },
+                  "object": {
+                    "$ref": "#/definitions/Object"
+                  },
+                  "certainty": {
+                    "$ref": "#/definitions/Certainty",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "subject",
+                  "relationship",
+                  "object",
+                  "certainty"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "x-ms-summary": "Fact",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - Facts were injected successfully",
+            "schema": {
+              "example": {
+                "result": "ok"
+              },
+              "properties": {
+                "result": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400":{
+            "description": "Bad request, your request might miss a required parameter"
+          },
+          "404": {
+            "description": "The resource (session, KM etc.) could not be found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "default": {
+            "description": "Operation Failed"
+          }
+        },
+        "operationId": "Inject",
+        "summary": "Inject - Inject facts into a session",
+        "description": "Inject data in a knowledge map against a specific session ID. This is usually performed prior to a query. It's a way to upload data into a Rainbird model.",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/{sessionID}/query": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "environment",
+            "type": "string",
+            "enum": [
+              "enterprise-api.rainbird.ai",
+              "api.rainbird.ai"
+            ],
+            "required": true,
+            "description": "Account environment: Community (api.rainbird.ai) or Enterprise (enterprise-api.rainbird.ai).)",
+            "x-ms-summary": "Environment",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "The session to query against",
+            "in": "path",
+            "name": "sessionID",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "Query for the engine to try to answer",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "example": {
+                "relationship": "speaks",
+                "subject": "John"
+              },
+              "properties": {
+                "subject": {
+                  "description": "The subject-side concept instance (object or subject required)",
+                  "type": "string"
+                },
+                "relationship": {
+                  "description": "The relationship to query for",
+                  "type": "string"
+                },
+                "object": {
+                  "description": "The object-side concept instance (object or subject required)",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "relationship"
+              ],
+              "type": "object"
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - An answer if one is reached, or a question",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400":{
+            "description": "Bad request, your request might miss a required parameter"
+          },
+          "404": {
+            "description": "The resource (session, KM etc.) could not be found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "default": {
+            "description": "Operation Failed"
+          }
+        },
+        "operationId": "Query",
+        "summary": "Query - Query a running session",
+        "description": "Ask a question to a knowledge map. This action triggers Rainbird's decision engine. It performs the automated decisioning and then provides a final answer. If Rainbird needs more information to come to a conclusion, it will ask a question.",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/{sessionID}/response": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "environment",
+            "type": "string",
+            "enum": [
+              "enterprise-api.rainbird.ai",
+              "api.rainbird.ai"
+            ],
+            "required": true,
+            "description": "Account environment: Community (api.rainbird.ai) or Enterprise (enterprise-api.rainbird.ai).)",
+            "x-ms-summary": "Environment",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "The session to send responses to",
+            "in": "path",
+            "name": "sessionID",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "Fact(s) to send as a response",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "example": {
+                "answers": [
+                  {
+                    "certainty": 100,
+                    "object": "England",
+                    "relationship": "lives in",
+                    "subject": "John"
+                  }
+                ]
+              },
+              "properties": {
+                "answers": {
+                  "items": {
+                    "properties": {
+                      "subject": {
+                        "$ref": "#/definitions/Subject"
+                      },
+                      "relationship": {
+                        "$ref": "#/definitions/Relationship",
+                        "type": "string"
+                      },
+                      "object": {
+                        "$ref": "#/definitions/Object"
+                      },
+                      "certainty": {
+                        "$ref": "#/definitions/Certainty",
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "subject",
+                      "relationship",
+                      "object",
+                      "certainty"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "x-ms-summary": "Response Fact(s)",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - An answer if one is reached, or a question",
+            "description": "An answer if one is reached, or a question",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400":{
+            "description": "Bad request, your request might miss a required parameter"
+          },
+          "404": {
+            "description": "The resource (session, KM etc.) could not be found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "default": {
+            "description": "Operation Failed"
+          }
+        },
+        "operationId": "Response",
+        "summary": "Response - Respond to an asked question",
+        "description": "Give an answer back to Rainbird. When Rainbird comes back with a question to a query, it expects a user or a system to input more data. This action provides a response back.",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/{sessionID}/undo": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "environment",
+            "type": "string",
+            "enum": [
+              "enterprise-api.rainbird.ai",
+              "api.rainbird.ai"
+            ],
+            "required": true,
+            "description": "Account environment: Community (api.rainbird.ai) or Enterprise (enterprise-api.rainbird.ai).)",
+            "x-ms-summary": "Environment",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "The session ID to step back with an undo",
+            "in": "path",
+            "name": "sessionID",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "An empty object (leave blank)",
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "example": {},
+              "properties": {},
+              "type": "object"
+            },
+            "x-ms-summary": "Undo Data",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - Session stepped back to a previous question or answer",
+            "description": "Session stepped back to a previous question or answer",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400":{
+            "description": "Bad request, your request might miss a required parameter"
+          },
+          "404": {
+            "description": "The resource (session, KM etc.) could not be found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "default": {
+            "description": "Operation Failed"
+          }
+        },
+        "operationId": "Undo",
+        "summary": "Undo - Undoes previous interaction with the engine",
+        "description": "Undo a previous action. This action removes the last action performed. It removes the last piece of data given to Rainbird.",
+        "x-ms-visibility": "advanced"
+      }
+    },
+    "/analysis/evidence/{factID}/{sessionID}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "environment",
+            "type": "string",
+            "enum": [
+              "enterprise-api.rainbird.ai",
+              "api.rainbird.ai"
+            ],
+            "required": true,
+            "description": "Account environment: Community (api.rainbird.ai) or Enterprise (enterprise-api.rainbird.ai).)",
+            "x-ms-summary": "Environment",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "The factID for which to retrieve evidence",
+            "in": "path",
+            "name": "factID",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Fact ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          },
+          {
+            "description": "The sessionID WITH EVIDENCE SECURITY OFF (see model settings) where the fact was created",
+            "in": "path",
+            "name": "sessionID",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Session ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - Fact detail",
+            "description": "Fact detail",
+            "examples": {
+              "application/json": {
+                "fact": {
+                  "certainty": 75,
+                  "object": {
+                    "dataType": "string",
+                    "type": "language",
+                    "value": "English"
+                  },
+                  "relationship": {
+                    "type": "speaks"
+                  },
+                  "subject": {
+                    "dataType": "string",
+                    "type": "person",
+                    "value": "Bob"
+                  }
+                },
+                "factID": "WA:RF:46270715221c02dca319bd10",
+                "rule": {
+                  "bindings": {
+                    "COUNTRY": "England",
+                    "O": "English",
+                    "S": "Bob",
+                    "conditions": [
+                      {
+                        "certainty": 100,
+                        "factID": "WA:KF:7ccf0415f3af204b5eb3",
+                        "object": "English",
+                        "objectType": "string",
+                        "relationship": "national language",
+                        "salience": 100,
+                        "subject": "England"
+                      },
+                      {
+                        "certainty": 100,
+                        "factID": "WA:AF:8e5b2c204b5eb3b24ba1",
+                        "object": "England",
+                        "objectType": "string",
+                        "relationship": "lives in",
+                        "salience": 100,
+                        "subject": "Bob"
+                      }
+                    ]
+                  }
+                },
+                "source": "rule",
+                "time": 1522060091106
+              }
+            },
+            "schema": {
+              "properties": {
+                "fact": {
+                  "properties": {
+                    "certainty": {
+                      "$ref": "#/definitions/Certainty"
+                    },
+                    "object": {
+                      "properties": {
+                        "dataType": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "$ref": "#/definitions/Object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "relationship": {
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "subject": {
+                      "properties": {
+                        "dataType": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "factID": {
+                  "type": "string"
+                },
+                "rule": {
+                  "properties": {
+                    "bindings": {
+                      "additionalProperties": true,
+                      "properties": {
+                        "conditions": {
+                          "items": {
+                            "properties": {
+                              "certainty": {
+                                "$ref": "#/definitions/Certainty"
+                              },
+                              "factID": {
+                                "$ref": "#/definitions/factID",
+                                "type": "string"
+                              },
+                              "object": {
+                                "$ref": "#/definitions/Object"
+                              },
+                              "objectType": {
+                                "type": "string"
+                              },
+                              "relationship": {
+                                "$ref": "#/definitions/Relationship",
+                                "type": "string"
+                              },
+                              "salience": {
+                                "type": "number"
+                              },
+                              "subject": {
+                                "$ref": "#/definitions/Subject"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "number"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400":{
+            "description": "Bad request, your request might miss a required parameter"
+          },
+          "404": {
+            "description": "The resource (session, KM etc.) could not be found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "default": {
+            "description": "Operation Failed"
+          }
+        },
+        "operationId": "Evidence",
+        "summary": "Evidence - Returns the evidence for a given fact",
+        "description": "Generate an evidence-based on a fact ID. Knowledge inferred by Rainbird always come with data to explain the decision-making process. This data is made accessible through this action. Note: make sure the evidence key is off in Rainbird studio.",
+        "x-ms-visibility": "advanced"
+      }
+    },
+    "/version": {
+      "get": {
+        "produces": [
+          "text/plain"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "environment",
+            "type": "string",
+            "enum": [
+              "enterprise-api.rainbird.ai",
+              "api.rainbird.ai"
+            ],
+            "required": true,
+            "description": "Account environment: Community (api.rainbird.ai) or Enterprise (enterprise-api.rainbird.ai).)",
+            "x-ms-summary": "Environment",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK - Engine version (semver)",
+            "schema": {
+              "example": "2.34.5",
+              "type": "string"
+            }
+          },
+          "400":{
+            "description": "Bad request, your request might miss a required parameter"
+          },
+          "404": {
+            "description": "The resource (session, KM etc.) could not be found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "default": {
+            "description": "Operation Failed"
+          }
+        },
+        "operationId": "Version",
+        "summary": "Version - Reports engine version",
+        "description": "Return the current Rainbird's inference engine version.",
+        "x-ms-visibility": "advanced"
+      }
+    }
+  },
+  "definitions": {
+    "Certainty": {
+      "description": "How certain this fact or answer is",
+      "maximum": 100,
+      "minimum": 1,
+      "type": "number"
+    },
+    "Subject": {
+      "description": "The subject-side concept instance or value"
+    },
+    "Relationship": {
+      "description": "The relationship linking Subject and Object"
+    },
+    "Object": {
+      "description": "The object-side concept instance or value"
+    },
+    "factID": {
+      "description": "ID used to fetch the evidence that lead to this decision"
+    },
+    "QuestionResponse": {
+      "description": "A question the engine wants answered",
+      "properties": {
+        "question": {
+          "properties": {
+            "allowCF": {
+              "type": "boolean"
+            },
+            "allowUnknown": {
+              "type": "boolean"
+            },
+            "concepts": {
+              "items": {
+                "properties": {
+                  "conceptType": {
+                    "type": "string"
+                  },
+                  "dynamic": {
+                    "type": "boolean"
+                  },
+                  "fsid": {
+                    "type": "string"
+                  },
+                  "invalidResponse": {
+                    "type": "boolean"
+                  },
+                  "metadata": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "plural": {
+              "type": "boolean"
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "relationship": {
+              "type": "string"
+            },
+            "subject": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "sid": {
+          "description": "The ID of the session",
+          "type": "string"
+        },
+        "stats": {
+          "additionalProperties": true,
+          "description": "Report of engine performance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "question",
+        "stats",
+        "sid"
+      ],
+      "type": "object"
+    },
+    "ResultResponse": {
+      "description": "The engine is providing results",
+      "properties": {
+        "result": {
+          "description": "An array of results",
+          "items": {
+            "properties": {
+              "certainty": {
+                "$ref": "#/definitions/Certainty"
+              },
+              "factID": {
+                "description": "ID used to fetch the evidence that lead to this decision",
+                "type": "string"
+              },
+              "object": {
+                "$ref": "#/definitions/Object"
+              },
+              "objectMetadata": {
+                "additionalProperties": true,
+                "description": "If it exists the object side meta",
+                "type": "object"
+              },
+              "relationshipType": {
+                "description": "The name of the relationship the query was for",
+                "type": "string"
+              },
+              "subject": {
+                "description": "The subject side concept instance",
+                "type": "string"
+              },
+              "subjectMetadata": {
+                "additionalProperties": true,
+                "description": "If it exists the subject side meta",
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "sid": {
+          "description": "The session ID this result relates to",
+          "type": "string"
+        },
+        "stats": {
+          "additionalProperties": true,
+          "description": "Information about engine performance",
+          "type": "object"
+        }
+      },
+      "required": [
+        "result",
+        "stats",
+        "sid"
+      ],
+      "type": "object"
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "basic_auth": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "basic_auth": []
+    }
+  ],
+  "tags": [],
+  "x-components": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://rainbird.ai/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://rainbird.ai/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Business Intelligence"
+    }
+  ]
+}

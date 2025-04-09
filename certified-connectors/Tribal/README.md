@@ -12,7 +12,6 @@ We provide the expertise, software and services required to underpin student suc
 - Environment such as Live, Test or Development.
 - Region such as APAC or EMEA.
 - Edge Tenant ID as supplied by Tribal.
-- Service Name such as Admissions.
 
 2. On sign in, you must enable the following permissions:
 - Events Connector Endpoint
@@ -53,17 +52,19 @@ We provide the expertise, software and services required to underpin student suc
 
 - `Read child entity collection`:  Reads a collection of entities which are children of another entity within a Tribal Edge module. Additional filtering is available for the records using Open Data Protocol syntax.
 
-- `Update an entity`: Updates an entity within a Tribal Edge module
+- `Replace an entity`: Replaces an entity within a Tribal Edge module. This will remove any properties from the entity that have not been included.
 
-- `Update a child entity`: Updates an entity which is a child of another entity within a Tribal Edge module
+- `Replace a child entity`: Replaces an entity which is a child of another entity within a Tribal Edge module. This will remove any properties from the entity that have not been included.
 
 - `Delete an entity`: Deletes an entity within a Tribal Edge module
 
 - `Delete a child entity`: Deletes an entity which is a child of another entity within a Tribal Edge module
 
+- `HTTP Request`: Performs a custom request on a relative path for a Tribal Edge Edge module.
+
 ## Known Issues and Limitations
 
-- Currently limited for use within the admissions service
+* Newly introduced Version selection may require updating on flows if they are changed. If they are not changed that it will default to the latest stable version.
 
 ## Deployment instructions
 

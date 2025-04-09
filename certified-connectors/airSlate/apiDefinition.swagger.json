@@ -4,7 +4,7 @@
   "definitions": {},
   "host": "as-msflow.infrateam.xyz",
   "info": {
-    "description": "Automate your business workflows in Office 365, SharePoint, Microsoft Dynamics 365, Salesforce, NetSuite, and other services without coding. Configure no-code airSlate Bots to transfer data between systems of record and data sources. Set conditions to route documents between multiple recipients, and automate reminders and notifications.",
+    "description": "Automate your business workflows in Office 365, SharePoint, Microsoft Dynamics 365, Salesforce, NetSuite, and other services without coding. Configure no-code airSlate bots to transfer data between systems of record and data sources. Set conditions to route documents between multiple recipients, and automate reminders and notifications.",
     "title": "airSlate",
     "version": "1.1",
     "contact": {
@@ -29,14 +29,114 @@
   ],
   "parameters": {},
   "paths": {
+    "/event/{id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "id",
+                  "x-ms-summary": "id"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary": "status"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the event subscription being deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "summary": "Delete event subscription",
+        "description": "Remove the user's subscription for a particular event",
+        "operationId": "DeleteSlateTrigger",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/event": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "slate_id": {
+              "type": "string",
+              "description": "Unique ID of target document which caused the event.",
+              "x-ms-summary": "Document ID",
+              "x-ms-visibility": "important"
+            }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "id",
+                  "x-ms-summary": "id"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Start workflow on document event",
+        "description": "Starts the workflow on document event.",
+        "operationId": "CreateSlateTrigger",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "botToken": {
+                  "description": "The webhook bot authorization token",
+                  "type": "string",
+                  "x-ms-summary": "Bot authorization token"
+                },
+                "callback": {
+                  "type": "string",
+                  "description": "callback",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "callback"
+                }
+              },
+              "required": ["callback", "botToken"]
+            }
+          }
+        ]
+      }
+    },
     "/flows/{slateId}/smartLink/create": {
       "post": {
         "consumes": ["application/json"],
-        "description": "Generate the Smart Link from the Flow in your airSlate Workspace",
+        "description": "Generate the smart link from the workflow in your airSlate workspace",
         "operationId": "CreateSmartLink",
         "parameters": [
           {
-            "description": "Select an airSlate Workspace where the Flow is located",
+            "description": "Select an airSlate workspace where the workflow is located",
             "in": "header",
             "name": "Organization-Domain",
             "required": true,
@@ -62,7 +162,7 @@
             "x-ms-visibility": "internal"
           },
           {
-            "description": "Select a Flow to generate a Slate from",
+            "description": "Select a workflow to generate a document from",
             "in": "path",
             "name": "slateId",
             "required": true,
@@ -80,7 +180,7 @@
               "value-path": "id",
               "value-title": "attributes/name"
             },
-            "x-ms-summary": "Flow"
+            "x-ms-summary": "Workflow"
           },
           {
             "in": "body",
@@ -120,8 +220,8 @@
             "schema": {
               "properties": {
                 "smartLink": {
-                  "description": "The Smart Link for creating slate with specified record context",
-                  "title": "Smart Link",
+                  "description": "The smart link for creating document with specified record context",
+                  "title": "Smart link",
                   "type": "string",
                   "x-ms-visibility": "important"
                 }
@@ -130,17 +230,17 @@
             }
           }
         },
-        "summary": "Create Smart Link"
+        "summary": "Create smart link"
       }
     },
     "/addon-proxy/flow/v1/flows/{slateId}/packets/blank": {
       "post": {
         "consumes": ["application/json"],
-        "description": "Generate a new Slate for editing or signing from the Flow in your airSlate Workspace",
+        "description": "Generate a new document for editing or signing from the workflow in your airSlate workspace",
         "operationId": "StartFlow",
         "parameters": [
           {
-            "description": "Select an airSlate Workspace where the Flow is located",
+            "description": "Select an airSlate workspace where the workflow is located",
             "in": "header",
             "name": "Organization-Domain",
             "required": true,
@@ -166,7 +266,7 @@
             "x-ms-visibility": "internal"
           },
           {
-            "description": "Select a Flow to generate a Slate from",
+            "description": "Select a workflow to generate a document from",
             "in": "path",
             "name": "slateId",
             "required": true,
@@ -184,7 +284,7 @@
               "value-path": "id",
               "value-title": "attributes/name"
             },
-            "x-ms-summary": "Flow"
+            "x-ms-summary": "Workflow"
           },
           {
             "in": "body",
@@ -224,11 +324,11 @@
             "schema": {
               "properties": {
                 "data": {
-                  "description": "Slate",
+                  "description": "Document",
                   "properties": {
                     "id": {
-                      "description": "Identity of the new Slate",
-                      "title": "Slate ID",
+                      "description": "Identity of the new document",
+                      "title": "Document ID",
                       "type": "string",
                       "x-ms-visibility": "important"
                     }
@@ -240,12 +340,12 @@
             }
           }
         },
-        "summary": "Create a new Slate"
+        "summary": "Create a new document"
       }
     },
     "/addon-scheme/{flowId}": {
       "get": {
-        "description": "Retrieve the list of parameters available for your slate based on the bots configured for your airSlate flow",
+        "description": "Retrieve the list of parameters available for your document based on the bots configured for your airSlate workflow",
         "operationId": "GetAddonsScheme",
         "parameters": [
           {
@@ -281,7 +381,7 @@
     },
     "/redirect/v1/slates": {
       "get": {
-        "description": "Retrieve the list of flows by the organization it was created in",
+        "description": "Retrieve the list of workflows by the organization it was created in",
         "operationId": "GetFlow",
         "parameters": [
           {
@@ -543,7 +643,7 @@
             }
           }
         },
-        "summary": "Get Flow",
+        "summary": "Get workflow",
         "x-ms-visibility": "internal"
       }
     },
