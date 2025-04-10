@@ -34,6 +34,7 @@ The connector supports reading and/or updating the following Meisterplan entitie
 - Role Capacities
 - Roles
 - Scenarios (read only)
+- Sprint (read only)
 - Task Management
 - Teams (read only)
 - Users (read only)

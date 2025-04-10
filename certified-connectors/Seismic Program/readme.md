@@ -124,32 +124,31 @@ A trigger that uses the ProgramDelete webhook to return program data after it ha
 
 ### Trigger: When a task is created
 
-A trigger that uses the PlannerTaskCreate webhook to return task data after it has been created
+A trigger that uses the ProgramTaskCreate webhook to return task data after it has been created
 
 ### Trigger: When a task is updated
 
-A trigger that uses the PlannerTaskUpdate webhook to return task data after it has been updated
+A trigger that uses the ProgramTaskUpdate webhook to return task data after it has been updated
 
 ### Trigger: When a task is deleted
 
-A trigger that uses the PlannerTaskDelete webhook to return task data after it has been deleted
+A trigger that uses the ProgramTaskDelete webhook to return task data after it has been deleted
 
 ### Trigger: When a request is created
 
-A trigger that uses the PlannerRequestCreate webhook to return request data after it has been created
+A trigger that uses the ProgramRequestCreate webhook to return request data after it has been created
 
 ### Trigger: When a request is updated
 
-A trigger that uses the PlannerRequestUpdate webhook to return request data after it has been updated
+A trigger that uses the ProgramRequestUpdate webhook to return request data after it has been updated
 
 ### Trigger: When a request is deleted
 
-A trigger that uses the PlannerRequestDelete webhook to return request data after it has been deleted
+A trigger that uses the ProgramRequestDelete webhook to return request data after it has been deleted
 
 ## Obtaining Credentials
 
 You need a Seismic Premium user account for the tenant. Contact your Seismic system administrator if you do not have sufficient permissions.
-
 
 ## Getting Started
 
@@ -181,17 +180,17 @@ The Seismic Programs connector includes the following actions. Each action corre
 - [Trigger: program create](https://developer.seismic.com/seismicsoftware/docs/programcreatev1)
 - [Trigger: program update](https://developer.seismic.com/seismicsoftware/docs/programupdatev1)
 - [Trigger: program delete](https://developer.seismic.com/seismicsoftware/docs/programdeletev1)
-- [Trigger: task create](https://developer.seismic.com/seismicsoftware/docs/plannertaskcreatev1)
-- [Trigger: task update](https://developer.seismic.com/seismicsoftware/docs/plannertaskupdatev1)
-- [Trigger: task delete](https://developer.seismic.com/seismicsoftware/docs/plannertaskdeletev1)
-- [Trigger: request create](https://developer.seismic.com/seismicsoftware/docs/plannerrequestcreatev1)
-- [Trigger: request update](https://developer.seismic.com/seismicsoftware/docs/plannerrequestupdatev1)
-- [Trigger: request delete](https://developer.seismic.com/seismicsoftware/docs/plannerrequestdeletev1)
-
+- [Trigger: task create](https://developer.seismic.com/seismicsoftware/docs/programtaskcreatev1)
+- [Trigger: task update](https://developer.seismic.com/seismicsoftware/docs/programtaskupdatev1)
+- [Trigger: task delete](https://developer.seismic.com/seismicsoftware/docs/programtaskdeletev1)
+- [Trigger: request create](https://developer.seismic.com/seismicsoftware/docs/programrequestcreatev1)
+- [Trigger: request update](https://developer.seismic.com/seismicsoftware/docs/programrequestupdatev1)
+- [Trigger: request delete](https://developer.seismic.com/seismicsoftware/docs/programrequestdeletev1)
 
 ## Known Issues and Limitations
 
 No issues and limitations are known at this time. All APIs operate in accordance with Seismic API policy, including Rate Limits. Please refer to the [Seismic Developer portal](https://developer.seismic.com/) for API specifications, restrictions, and standards.
 
 ## Deployment Instructions
+
 Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate and Power Apps.

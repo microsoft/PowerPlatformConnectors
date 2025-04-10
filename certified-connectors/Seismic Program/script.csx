@@ -22,23 +22,23 @@ public class Script : ScriptBase
             case "TriggerProgramDeleteV1":
                 UpdateRequestForCreateWebhooksApi("ProgramDeleteV1");
                 break;
-            case "TriggerPlannerTaskCreateV1":
-                UpdateRequestForCreateWebhooksApi("PlannerTaskCreateV1");
+            case "TriggerProgramTaskCreateV1":
+                UpdateRequestForCreateWebhooksApi("ProgramTaskCreateV1");
                 break;
-            case "TriggerPlannerTaskUpdateV1":
-                UpdateRequestForCreateWebhooksApi("PlannerTaskUpdateV1");
+            case "TriggerProgramTaskUpdateV1":
+                UpdateRequestForCreateWebhooksApi("ProgramTaskUpdateV1");
                 break;
-            case "TriggerPlannerTaskDeleteV1":
-                UpdateRequestForCreateWebhooksApi("PlannerTaskDeleteV1");
+            case "TriggerProgramTaskDeleteV1":
+                UpdateRequestForCreateWebhooksApi("ProgramTaskDeleteV1");
                 break;
-            case "TriggerPlannerRequestCreateV1":
-                UpdateRequestForCreateWebhooksApi("PlannerRequestCreateV1");
+            case "TriggerProgramRequestCreateV1":
+                UpdateRequestForCreateWebhooksApi("ProgramRequestCreateV1");
                 break;
-            case "TriggerPlannerRequestUpdateV1":
-                UpdateRequestForCreateWebhooksApi("PlannerRequestUpdateV1");
+            case "TriggerProgramRequestUpdateV1":
+                UpdateRequestForCreateWebhooksApi("ProgramRequestUpdateV1");
                 break;
-            case "TriggerPlannerRequestDeleteV1":
-                UpdateRequestForCreateWebhooksApi("PlannerRequestDeleteV1");
+            case "TriggerProgramRequestDeleteV1":
+                UpdateRequestForCreateWebhooksApi("ProgramRequestDeleteV1");
                 break;
             default:
                 break;
@@ -50,7 +50,7 @@ public class Script : ScriptBase
 
         return response;
     }
-        
+
     private async Task UpdateRequestForCreateWebhooksApi(string eventType)
     {
         // Update the request URI to point to `/webhooks/v1/subscriptions`
