@@ -17,6 +17,8 @@ The connector supports the following operations:
 * `Get Contact By ID`: Retrieve a specific contact.
 * `Update Contact`: Update the user-given name and exclusion status of a specific contact.
 * `Create Contact List`: Create a new contact list.
+* `Get All Contact Lists`: Get all contact lists.  -**new**-
+* `Get Contact List by ID`: Get a contact list. -**new**-
 * `Delete Contact List`: Delete a contact list.
 * `Update Contact List`: Update a specific contact list by changing its name and / or deletion status.
 * `Get Campaigns Draft`: Get all campaign drafts and their configuration.
@@ -25,6 +27,8 @@ The connector supports the following operations:
 * `Update Campaign Draft`: Update an existing campaign draft.
 * `Get Campaign Overview`: Get general details and stats for all drafts, AB Testing objects and/or sent campaigns.
 * `Get Contacts Statistics`: Retrieve a list of overall aggregated delivery and engagement statistics, grouped by contact.
+* `Get Contacts Data`: Get information on all contacts and the property values associated with them. -**new**-
+* `Get Contact Data by ID`: Get the contact property values relating to a specific contact. -**new**-
 
 ## Obtaining Credentials
 ### Mailjet side

@@ -884,7 +884,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returned when the operation successfully adds the gifts to the batch. The response body contains a list of IDs and any exceptions that occured when adding the gifts.",
+            "description": "Returned when the operation successfully adds the gift to the batch. The response body contains a list of IDs and any exceptions that occured when adding the gifts.",
             "schema": {
               "$ref": "#/definitions/GiftApi.BatchGiftAddResults"
             }
@@ -1047,6 +1047,146 @@
           },
           "403": {
             "description": "Returned when the user does not have permission to view table entries."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/giftaid/constituents/{constituent_id}/taxdeclarations": {
+      "get": {
+        "operationId": "ListConstituentTaxDeclarations",
+        "summary": "List constituent tax declarations",
+        "description": "Lists the Gift Aid tax declarations for a constituent (only applicable for UK versions).",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "constituent_id",
+            "in": "path",
+            "description": "The system record ID of the constituent.",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Constituent ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Represents the number of records to return. The default is 500. There is no maximum TODO:.",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Limit"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Represents the number of records to skip. For use with pagination.",
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation succeeds.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.TaxDeclarationCollection"
+            }
+          },
+          "400": {
+            "description": "Returned when the specified constituent ID in the request URL or the specified request parameter is not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to view the tax declarations."
+          },
+          "404": {
+            "description": "Returned when the specified constituent is not found."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/giftaid/taxdeclarations": {
+      "post": {
+        "operationId": "CreateTaxDeclaration",
+        "summary": "Create a constituent tax declaration",
+        "description": "Creates a new Gift Aid tax declaration for a constituent.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.NewTaxDeclaration"
+            },
+            "description": "An object that represents the tax declaration to create.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation successfully creates a tax declaration. The response body contains the ID of the new tax declaration.",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.CreatedTaxDeclaration"
+            }
+          },
+          "400": {
+            "description": "Returned when the specified request body is not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to create the tax declaration."
+          }
+        }
+      }
+    },
+    "/nxt-data-integration/v1/re/giftaid/taxdeclarations/{tax_declaration_id}": {
+      "patch": {
+        "operationId": "EditTaxDeclaration",
+        "summary": "Update a constituent tax declaration",
+        "description": "Updates a constituent tax declaration.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tax_declaration_id",
+            "in": "path",
+            "description": "The system record ID of the tax declaration to update.",
+            "required": true,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Tax declaration ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/NXTDataIntegrationApi.TaxDeclarationEdit"
+            },
+            "description": "An object that represents the properties of the tax declaration to update.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned when the operation successfully updates the tax declaration."
+          },
+          "400": {
+            "description": "Returned when the specified tax declaration ID in the request URL or the specified request parameters are not in the appropriate format."
+          },
+          "403": {
+            "description": "Returned when the user does not have permission to update the tax declaration."
+          },
+          "404": {
+            "description": "Returned when the specified tax declaration is not found."
           }
         }
       }
@@ -4269,6 +4409,17 @@
         }
       }
     },
+    "NXTDataIntegrationApi.CreatedTaxDeclaration": {
+      "type": "object",
+      "description": "Created tax declaration",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The ID of the newly created tax declaration.",
+          "x-ms-summary": "ID"
+        }
+      }
+    },
     "NXTDataIntegrationApi.GiftIdMap": {
       "type": "object",
       "description": "Gift ID map",
@@ -4772,6 +4923,163 @@
         }
       }
     },
+    "NXTDataIntegrationApi.NewTaxDeclaration": {
+      "type": "object",
+      "required": [
+        "constituent_id",
+        "declaration_starts"
+      ],
+      "properties": {
+        "constituent_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The system record ID of the constituent.",
+          "x-ms-summary": "Constituent ID"
+        },
+        "declaration_starts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration starts (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Declaration starts"
+        },
+        "declaration_ends": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration ends (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Declaration ends"
+        },
+        "declaration_made": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration was made (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Declaration made"
+        },
+        "declaration_indicator": {
+          "type": "string",
+          "description": "The declaration indicator.",
+          "x-ms-summary": "Indicator",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTableEntries",
+            "value-collection": "value",
+            "value-path": "long_description",
+            "value-title": "long_description",
+            "parameters": {
+              "code_table_id": 5099,
+              "include_inactive": false
+            }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "ListTableEntries",
+            "itemsPath": "value",
+            "itemValuePath": "long_description",
+            "itemTitlePath": "long_description",
+            "parameters": {
+              "code_table_id": {
+                "value": 5099
+              },
+              "include_inactive": {
+                "value": false
+              }
+            }
+          }
+        },
+        "declaration_source": {
+          "type": "string",
+          "description": "The declaration source.",
+          "x-ms-summary": "Source",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTableEntries",
+            "value-collection": "value",
+            "value-path": "long_description",
+            "value-title": "long_description",
+            "parameters": {
+              "code_table_id": 5135,
+              "include_inactive": false
+            }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "ListTableEntries",
+            "itemsPath": "value",
+            "itemValuePath": "long_description",
+            "itemTitlePath": "long_description",
+            "parameters": {
+              "code_table_id": {
+                "value": 5135
+              },
+              "include_inactive": {
+                "value": false
+              }
+            }
+          }
+        },
+        "confirmation_sent": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the confirmation was sent (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Confirmation sent"
+        },
+        "confirmation_returned": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the confirmation was returned (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Confirmation returned"
+        },
+        "constituent_pays_tax": {
+          "type": "string",
+          "description": "Indicates whether the constituent pays tax.",
+          "x-ms-summary": "Pays tax",
+          "enum": [
+            "No",
+            "Yes",
+            "Unknown"
+          ]
+        },
+        "tax_payer_status": {
+          "type": "string",
+          "description": "The tax payer status.",
+          "x-ms-summary": "Status",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTableEntries",
+            "value-collection": "value",
+            "value-path": "long_description",
+            "value-title": "long_description",
+            "parameters": {
+              "code_table_id": 5098,
+              "include_inactive": false
+            }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "ListTableEntries",
+            "itemsPath": "value",
+            "itemValuePath": "long_description",
+            "itemTitlePath": "long_description",
+            "parameters": {
+              "code_table_id": {
+                "value": 5098
+              },
+              "include_inactive": {
+                "value": false
+              }
+            }
+          }
+        },
+        "tax_notes": {
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 0,
+          "description": "Comments for the tax declaration.",
+          "x-ms-summary": "Comments"
+        },
+        "sequence": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0.0,
+          "maximum": 2147483647.0,
+          "description": "The numeric sequence associated with the tax declaration.",
+          "x-ms-summary": "Sequence"
+        }
+      }
+    },
     "NXTDataIntegrationApi.TableEntry": {
       "type": "object",
       "properties": {
@@ -4803,6 +5111,270 @@
           "items": {
             "$ref": "#/definitions/NXTDataIntegrationApi.TableEntry"
           }
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TaxDeclaration": {
+      "type": "object",
+      "properties": {
+        "declaration_id": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "ID"
+        },
+        "declaration_starts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration starts.",
+          "x-ms-summary": "Declaration starts"
+        },
+        "declaration_ends": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration ends.",
+          "x-ms-summary": "Declaration ends"
+        },
+        "declaration_made": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration was made.",
+          "x-ms-summary": "Declaration made"
+        },
+        "declaration_indicator_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The declaration indicator ID.",
+          "x-ms-summary": "Indicator ID"
+        },
+        "declaration_indicator": {
+          "type": "string",
+          "description": "The declaration indicator.",
+          "x-ms-summary": "Indicator"
+        },
+        "declaration_source_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The declaration source ID.",
+          "x-ms-summary": "Source ID"
+        },
+        "declaration_source": {
+          "type": "string",
+          "description": "The declaration source.",
+          "x-ms-summary": "Source"
+        },
+        "confirmation_sent": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the confirmation was sent.",
+          "x-ms-summary": "Confirmation sent"
+        },
+        "confirmation_returned": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the confirmation was returned.",
+          "x-ms-summary": "Confirmation returned"
+        },
+        "constituent_pays_tax": {
+          "type": "string",
+          "description": "Indicates whether the constituent pays tax.",
+          "x-ms-summary": "Pays tax",
+          "enum": [
+            "No",
+            "Yes",
+            "Unknown"
+          ]
+        },
+        "tax_payer_status_id": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The tax payer status ID.",
+          "x-ms-summary": "Status ID"
+        },
+        "tax_payer_status": {
+          "type": "string",
+          "description": "The tax payer status.",
+          "x-ms-summary": "Status"
+        },
+        "tax_notes": {
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 0,
+          "description": "Comments for the tax declaration.",
+          "x-ms-summary": "Comments"
+        },
+        "sequence": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0.0,
+          "maximum": 2147483647.0,
+          "description": "The numeric sequence associated with the tax declaration.",
+          "x-ms-summary": "Sequence"
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TaxDeclarationCollection": {
+      "type": "object",
+      "description": "Tax declarations",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of items available for retrieval into the collection after applying any request parameters. The limit and offset parameters do not affect the count, but to facilitate paging, they may affect the number of items in the value result set.",
+          "x-ms-summary": "Count"
+        },
+        "value": {
+          "type": "array",
+          "description": "The set of items included in the response. This may be a subset of the items in the collection.",
+          "items": {
+            "$ref": "#/definitions/NXTDataIntegrationApi.TaxDeclaration"
+          }
+        }
+      }
+    },
+    "NXTDataIntegrationApi.TaxDeclarationEdit": {
+      "type": "object",
+      "properties": {
+        "declaration_starts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration starts (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Declaration starts"
+        },
+        "declaration_ends": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration ends (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Declaration ends"
+        },
+        "declaration_made": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the tax declaration was made (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Declaration made"
+        },
+        "declaration_indicator": {
+          "type": "string",
+          "description": "The declaration indicator.",
+          "x-ms-summary": "Indicator",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTableEntries",
+            "value-collection": "value",
+            "value-path": "long_description",
+            "value-title": "long_description",
+            "parameters": {
+              "code_table_id": 5099,
+              "include_inactive": false
+            }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "ListTableEntries",
+            "itemsPath": "value",
+            "itemValuePath": "long_description",
+            "itemTitlePath": "long_description",
+            "parameters": {
+              "code_table_id": {
+                "value": 5099
+              },
+              "include_inactive": {
+                "value": false
+              }
+            }
+          }
+        },
+        "declaration_source": {
+          "type": "string",
+          "description": "The declaration source.",
+          "x-ms-summary": "Source",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTableEntries",
+            "value-collection": "value",
+            "value-path": "long_description",
+            "value-title": "long_description",
+            "parameters": {
+              "code_table_id": 5135,
+              "include_inactive": false
+            }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "ListTableEntries",
+            "itemsPath": "value",
+            "itemValuePath": "long_description",
+            "itemTitlePath": "long_description",
+            "parameters": {
+              "code_table_id": {
+                "value": 5135
+              },
+              "include_inactive": {
+                "value": false
+              }
+            }
+          }
+        },
+        "confirmation_sent": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the confirmation was sent (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Confirmation sent"
+        },
+        "confirmation_returned": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the confirmation was returned (ex: '2020-09-18T04:13:56Z').",
+          "x-ms-summary": "Confirmation returned"
+        },
+        "constituent_pays_tax": {
+          "type": "string",
+          "description": "Indicates whether the constituent pays tax.",
+          "x-ms-summary": "Pays tax",
+          "enum": [
+            "No",
+            "Yes",
+            "Unknown"
+          ]
+        },
+        "tax_payer_status": {
+          "type": "string",
+          "description": "The tax payer status.",
+          "x-ms-summary": "Status",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTableEntries",
+            "value-collection": "value",
+            "value-path": "long_description",
+            "value-title": "long_description",
+            "parameters": {
+              "code_table_id": 5098,
+              "include_inactive": false
+            }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "ListTableEntries",
+            "itemsPath": "value",
+            "itemValuePath": "long_description",
+            "itemTitlePath": "long_description",
+            "parameters": {
+              "code_table_id": {
+                "value": 5098
+              },
+              "include_inactive": {
+                "value": false
+              }
+            }
+          }
+        },
+        "tax_notes": {
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 0,
+          "description": "Comments for the tax declaration.",
+          "x-ms-summary": "Comments"
+        },
+        "sequence": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0.0,
+          "maximum": 2147483647.0,
+          "description": "The numeric sequence associated with the tax declaration.",
+          "x-ms-summary": "Sequence"
         }
       }
     },
