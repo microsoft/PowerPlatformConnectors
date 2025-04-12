@@ -87,20 +87,26 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> AttachCallbackUrlToStartInstance()
     {
         var content = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-        IEnumerable<string> callbackUrl;
+        var bodyContent = new JObject();
+        JObject requestObject = null;
 
-        if (this.Context.Request.Headers.TryGetValues("x-ntx-callbackUrl", out callbackUrl))
-        {
-            var bodyContent = new JObject();
-            JObject requestObject = null;
+        if (!string.IsNullOrEmpty(content)) {
+            requestObject = JObject.Parse(content);
+            
+            var callbackUrl = requestObject["x-ntx-callbackUrl"];
+            var startData = requestObject["startData"];
 
-            if (!string.IsNullOrEmpty(content)) {
-                requestObject = JObject.Parse(content);
-                bodyContent["startData"] = requestObject;
+            if (startData != null)
+            {
+                bodyContent["startData"] = startData;
             }
 
-            bodyContent["options"] = new JObject();
-            bodyContent["options"]["callbackUrl"] = callbackUrl.First();
+            if (callbackUrl != null)
+            {
+                bodyContent["options"] = new JObject();
+                bodyContent["options"]["callbackUrl"] = callbackUrl.ToString();
+            } 
+                
             this.Context.Request.Content = CreateJsonContent(JsonConvert.SerializeObject(bodyContent));
         }
 
