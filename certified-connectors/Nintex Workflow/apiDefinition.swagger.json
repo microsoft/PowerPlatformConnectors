@@ -1,0 +1,202 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Nintex Workflow",
+    "description": "Nintex Workflow connector provides the ability to start workflows.",
+    "version": "1.0",
+    "contact": {
+      "name": "Nintex Support",
+      "url": "https://www.nintex.com/customer-success/support/",
+      "email": "support@nintex.com"
+    }
+  },
+  "host": "us.nintex.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/workflows/v1/designs/{workflow_id}": {
+      "get": {
+        "operationId": "GetWorkflowDesign",
+        "summary": "Get a workflow design",
+        "description": "Get the published version of a workflow design.",
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/workflows/v1/designs/published": {
+      "get": {
+        "operationId": "ListPublishedWorkflows",
+        "summary": "List published workflows",
+        "description": "Get a list of all the published workflow designs in this tenant. Only workflows that have been published are returned.",
+        "responses": {
+          "200": {
+            "description": "List of workflows",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "workflows": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/workflow"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/workflows/v1/designs/{workflow_id}/instances": {
+      "x-ms-notification-content": {
+        "description": "Workflow instance callback",
+        "schema": {
+          "$ref": "#/definitions/returnData"
+        }
+      },
+      "post": {
+        "operationId": "CreateWorkflowInstance",
+        "summary": "Start a workflow",
+        "description": "Start an instance of a published workflow.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/workflow_id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                  "x-ntx-callbackUrl"
+              ],
+              "properties": {
+                "startData": {
+                  "type": "object",
+                  "x-ms-dynamic-schema": {
+                    "operationId": "GetWorkflowDesign",
+                    "parameters": {
+                      "workflow_id": {
+                        "parameter": "workflow_id"
+                      }
+                    },
+                    "value-path": "items"
+                  },
+                  "x-ms-dynamic-properties": {
+                    "itemValuePath": "items",
+                    "parameters": {
+                      "workflow_id": {
+                        "parameterReference": "workflow_id"
+                      }
+                    },
+                    "operationId": "GetWorkflowDesign"
+                  }
+                },
+                "x-ntx-callbackUrl": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    }
+  },
+  "definitions": {
+    "workflow": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Workflow ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Workflow name"
+        }
+      }
+    },
+    "returnData": {
+      "type": "object",
+      "properties": {
+        "returnData": {
+          "x-ms-summary": "Workflow instance output",
+          "type": "object",
+          "properties": {}
+        }
+      }
+    }
+  },
+  "parameters": {
+    "workflow_id": {
+      "description": "Select a workflow",
+      "x-ms-summary": "Select a workflow",
+      "x-dynamic-schema": {
+        "operationId": "ListPublishedWorkflows",
+        "value-path": "workflows"
+      },
+      "type": "string",
+      "default": "",
+      "required": true,
+      "in": "path",
+      "name": "workflow_id",
+      "x-ms-dynamic-values": {
+        "operationId": "ListPublishedWorkflows",
+        "value-path": "id",
+        "value-collection": "workflows",
+        "value-title": "name"
+      }
+    }
+  },
+  "responses": {},
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.nintex.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.nintex.com/legal/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management;IT Operations"
+    }
+  ]
+}
