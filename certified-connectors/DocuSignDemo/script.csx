@@ -4292,6 +4292,32 @@ public class Script : ScriptBase
     }
   }
   
+  private JObject CreateBlankEnvelopeBodyTransformationV2(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
+    var accountCustomFieldss = body["AccountCustomFields"] as JObject;
+
+    if (accountCustomFieldss is JObject)
+      ParseCustomFields(accountCustomFieldss, textCustomFields, listCustomFields);
+
+    body["customFields"] = new JObject()
+    {
+      ["textCustomFields"] = textCustomFields,
+      ["listCustomFields"] = listCustomFields
+    };
+
+
+    body["emailSubject"] = query.Get("emailSubject");
+ 
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createBlankEnvelopeV2", "/envelopes");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -5957,6 +5983,11 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+     if ("CreateBlankEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformationV2).ConfigureAwait(false);
     }
 
     if ("CompositeTemplates".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
