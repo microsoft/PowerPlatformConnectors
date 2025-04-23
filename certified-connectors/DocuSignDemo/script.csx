@@ -5031,6 +5031,20 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     return filteredEnvelopesDetails;
   }
 
+  private void getRecipientTypes(JArray recipientTypes, JObject recipients)
+  {
+      if (recipients != null)
+      {
+          foreach (var recipientType in recipients.Properties())
+          {
+              if (recipientType.Value is JArray recipientArray && recipientArray.Count > 0)
+              {
+                  recipientTypes.Add(recipientType.Name);
+              }
+          }
+      }
+  }
+
   private JArray GetFilteredEnvelopeDetails(JArray filteredEnvelopes)
   {
     TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
@@ -5048,6 +5062,9 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       JArray documentNames = new JArray(
         (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
 
+      JArray recipientTypes = new JArray();
+      getRecipientTypes(recipientTypes, envelope["recipients"] as JObject);
+
       filteredEnvelopesDetails.Add(new JObject()
       {
         ["title"] = envelope["emailSubject"]?.ToString() ?? "Email subject empty",
@@ -5056,7 +5073,8 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
         ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
         ["url"] = GetEnvelopeUrl(envelope),
         ["recipients"] = string.Join(", ", recipientNames),
-        ["documents"] = string.Join(",", documentNames),
+        ["documents"] = string.Join(", ", documentNames),
+        ["recipientTypes"] = string.Join(", ", recipientTypes),
         ["sender"] = envelope["sender"]?["userName"]?.ToString() ?? "Sender username empty",
         ["status"] = envelope["status"] != null ? textInfo.ToTitleCase(envelope["status"].ToString()) : "Unknown status",
         ["dateSent"] = envelope["sentDateTime"]?.ToString() ?? "No sent date"
