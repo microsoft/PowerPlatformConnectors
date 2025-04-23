@@ -61,6 +61,12 @@ namespace SnowflakeTestApp.Mocks
             // For local testing, pass the token through the Authorization header or set it here.
             string authToken = HttpContext.Current.Request.Headers["Authorization"] ?? string.Empty;
 
+            // Remove the "Bearer " prefix if it exists.
+            if (authToken.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                authToken = authToken.Substring("Bearer ".Length).Trim();
+            }
+
             return new TokenMock(authToken);
         }
 
