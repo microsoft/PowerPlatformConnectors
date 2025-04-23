@@ -5267,6 +5267,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     var tabsMap = new Dictionary<string, string>() { 
       { "Text", "textTabs" }, 
       { "Note", "noteTabs" },
+      { "Number", "numberTabs" }
     };
 
     foreach (var tab in body)
