@@ -1,55 +1,32 @@
+# Finance Agents SAP BTP Connector
 
-### NOTE
-> This is a *sample* connector.  The connector is provided here with the intent to illustrate requirements to the connectors created to link your ERP system with Copilot for Finance application.
-
-# Title
-Copilot for Finance provides the ability for customers to integrate the Microsoft Outlook-addin with any backend systems that supports OAuth by using the integration of Power Platform Custom Connectors. Copilot for Finance connector should provide a REST API of your ERP system.  Using this API, Copilot for Finance Outlook-addin will be able to read and use data from your ERP system.
-
-## Publisher
-Microsoft Corporation ​
+The Finance Agents SAP BTP Connector enables integration between the Microsoft Copilot for Finance Outlook Add-in and any SAP ERP system, using the SAP Business Technology Platform (BTP) as a middleware layer. The connector exposes a REST API on BTP, which in turn communicates with the underlying ERP system via its native APIs. This setup allows the Copilot for Finance add-in to securely access and interact with ERP data through a Power Platform custom connector, using OAuth 2.0 authentication.
 
 ## Prerequisites
 You will need the following to proceed:
 - A Microsoft Power Apps or Power Automate plan with custom connector feature
-- Rest API service implemented with Copilot for finance API endpoints
+- The Finance Agents SAP BTP Connector MTAR package to deploy on SAP BTP
+- An SAP ERP system: S/4HANA (On-premise / Private / Public Cloud) or SAP ECC 6.0
 
 ## Supported Operations
 The connector supports the following operations.
+
 ### Contacts
-Provides list of ERP contacts based on the emails or phone numbers.
-
-### Create contact
-Provides an opportunity to create a new contact in the ERP.
-
-### Update contact
-Provides an opportunity to update the contact in the ERP.
+- List contacts: Retrieves ERP contacts based on email or phone number
+- Create contact: Creates a new contact in the ERP system
+- Update contact: Updates an existing contact in the ERP system
 
 ### Customers
-Provides a list of customers.
+- List customers: Retrieves a list of customers from the ERP system
+- Account statement: Provides a customer's account statement in PDF format
+- Activities: Retrieves a list of customer-related activities
+- Aged balances: Returns aging balance reports for a customer
+- Invoice documents: Downloads invoice documents in PDF or ZIP format
+- Outstanding invoices: Lists outstanding invoices for a customer
 
-### Customer's account statement
-Provides a customer account statement in pdf.
-
-### Customer's activities
-Provides a list of customer activities.
-
-### Customer's aged balances
-Provides an information about customer's aged balance reports.
-
-### Customer's invoice documents
-Provides customer's invoice document/s in pdf/zip format.
-
-### Customer invoices
-Provides list of outstanding invoices for the customer.
-
-### List of invoice statuses
-Provides a list of possible invoice statuses for the backend ERP.
-
-### Update invoice status
-Provides an opportunity to status and promised to pay date for an invoice.
-
-### Supported version
-Returns the latest supported version of the API.
+### Invoices
+- Invoice statuses: Returns possible statuses for customer invoices
+- Update invoice status: Allows updating the status and promise-to-pay date of an invoiceProvides a list of customers.
 
 ## Obtaining Credentials
 Custom connector needs to use OAuth2.0 authentication. More details could be found in the [documentation](https://learn.microsoft.com/en-us/copilot/finance/get-started/custom%20connectors/define-openapi-definition#review-authentication-type)
