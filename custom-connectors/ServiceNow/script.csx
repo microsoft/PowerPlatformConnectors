@@ -94,7 +94,7 @@ public class Script : ScriptBase
         var choices = variable["choices"];
         if (choices != null && choices.Count() > 0)
         {
-            variableSchema["enum"] = new JArray(choices.Select(c => c["value"]));
+            variableSchema["enum"] = new JArray(choices.Select(c => c["value"]?.ToString()));
         }
 
         if (variable["friendly_type"]?.Value<string>()?.Equals("reference") == true && variable["reference"] != null)
