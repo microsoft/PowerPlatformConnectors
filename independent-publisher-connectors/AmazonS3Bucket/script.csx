@@ -1,4 +1,4 @@
-﻿public class Script : ScriptBase
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -31,7 +31,7 @@
             var path = pathAfterAws.Split('/');
             string service    = path.Skip(0).FirstOrDefault(); // Service;
             string region     = path.Skip(1).FirstOrDefault(); // Region;
-            string objectName = path.Skip(2).FirstOrDefault(); // Object Name;
+            string bucketName = path.Skip(2).FirstOrDefault(); // Bucket Name;
             string objectKey  = path.Skip(3).FirstOrDefault(); // Object Key;
             
             // Object key can include / in the name, so we need to decode it
@@ -42,7 +42,7 @@
 
             logger.LogInformation($"Service:     {(service ?? "---")}");
             logger.LogInformation($"Region:      {(region ?? "---")}");
-            logger.LogInformation($"Object Name: {(objectName ?? "---")}");
+            logger.LogInformation($"Bucket Name: {(bucketName ?? "---")}");
             logger.LogInformation($"Object Key:  {(objectKey  ?? "---")}");
             
             var regionUrlPart = string.Empty;
@@ -55,17 +55,23 @@
             var endpointUri = string.Format("https://{2}.{0}{1}.amazonaws.com",
                                                 service,
                                                 regionUrlPart,
-                                                objectName);
+                                                bucketName);
             if (! string.IsNullOrEmpty(objectKey)) {
                 endpointUri = string.Format("{0}/{1}", endpointUri, objectKey);
-            }  
+            }
+            foreach (var character in new[]{"(", ")", "[", "]", "{", "}", "#"}) {
+                if (endpointUri.Contains(character))
+                    endpointUri = endpointUri.Replace(character, Uri.EscapeDataString(character));
+            }
             var uri = new Uri($"{endpointUri}{requestUri.Query}");
-            
+            logger.LogInformation($"Uri AbsolutePath: {uri.AbsolutePath}");
+
             var request = new System.Net.Http.HttpRequestMessage(this.Context.Request.Method, uri)
             {
-                Content = this.Context.Request.Content
+                Content = GetConvertedRequestContent()
             };
-            SignRequest(request, service, region, accessKeyId, accessKeySecret);
+
+            SignRequest(request, service, region, accessKeyId, accessKeySecret, logger);
             logger.LogInformation($"Call: {request.Method} {request.RequestUri!}");
             
             // Use the context to forward/send an HTTP request
@@ -83,6 +89,20 @@
         }
         else 
             throw new Exception("Unexpected Authentication");
+    }
+
+    private System.Net.Http.HttpContent GetConvertedRequestContent()
+    {
+        var logger = this.Context.Logger;
+        try {
+            var binary = Convert.FromBase64String(this.Context.Request.Content.ReadAsStringAsync().Result);
+            logger.LogInformation($"Base64 content converted into binary (Binary content length: {binary.Length})");
+            return new System.Net.Http.ByteArrayContent(binary);
+            
+        } catch {
+            logger.LogInformation("Content can't be converted from Base64 to binary, keep the content as it is.");
+            return this.Context.Request.Content;
+        }
     }
 
     private async Task<HttpResponseMessage> HandleTransformXML2Json(HttpResponseMessage response)
@@ -125,7 +145,8 @@
                                 string service,
                                 string region,
                                 string awsAccessKey,
-                                string awsSecretKey)            
+                                string awsSecretKey,
+                                ILogger logger = null)            
     {
         var signer = new AWS4SignerForAuthorizationHeader
             {
@@ -156,7 +177,7 @@
             headers.Add(AWS4SignerBase.X_Amz_Content_SHA256, bodyHash);                
         }
 
-        string signature = signer.ComputeSignature(headers, queryParameters, bodyHash, awsAccessKey, awsSecretKey);
+        string signature = signer.ComputeSignature(headers, queryParameters, bodyHash, awsAccessKey, awsSecretKey, logger);
         
         foreach (var header in headers.Keys)
         {
@@ -465,7 +486,8 @@
                                        string queryParameters,
                                        string bodyHash,
                                        string awsAccessKey,
-                                       string awsSecretKey)
+                                       string awsSecretKey,
+                                       ILogger logger = null)
         {
             // first get the date and time for the subsequent request, and convert to ISO 8601 format
             // for use in signature generation
@@ -515,6 +537,7 @@
                                                        canonicalizedHeaderNames,
                                                        canonicalizedHeaders,
                                                        bodyHash);
+            logger?.LogInformation($"Canonical Request:\n{canonicalRequest}");
             Console.WriteLine("\nCanonicalRequest:\n{0}", canonicalRequest);
 
             // generate a hash of the canonical request, to go into signature computation
@@ -534,6 +557,7 @@
             stringToSign.AppendFormat("{0}-{1}\n{2}\n{3}\n", SCHEME, ALGORITHM, dateTimeStamp, scope);
             stringToSign.Append(ToHexString(canonicalRequestHashBytes, true));
 
+            logger?.LogInformation($"String to Sign:\n{stringToSign}");
             Console.WriteLine("\nStringToSign:\n{0}", stringToSign);
 
             // compute the signing key
