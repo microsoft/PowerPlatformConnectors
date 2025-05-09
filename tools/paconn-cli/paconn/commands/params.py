@@ -9,7 +9,7 @@ CLI parameter definitions
 """
 
 from knack.arguments import ArgumentsContext
-from paconn import _LOGIN, _LOGOUT, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
+from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
 
 CLIENT_SECRET = 'client_secret'
 CLIENT_SECRET_OPTIONS = ['--secret', '-r']
@@ -46,6 +46,10 @@ API_DEFINITION_HELP = 'Location of the Open API definition JSON document.'
 ICON = 'icon'
 ICON_OPTIONS = ['--icon', '-i']
 ICON_HELP = 'Location for the icon file.'
+
+SCRIPT = 'script'
+SCRIPT_OPTIONS = ['--script', '-x']
+SCRIPT_HELP = 'Location for the script file.'
 
 
 # pylint: disable=unused-argument
@@ -167,6 +171,12 @@ def load_arguments(self, command):
             required=False,
             help=ICON_HELP)
         arg_context.argument(
+            SCRIPT,
+            options_list=SCRIPT_OPTIONS,
+            type=str,
+            required=False,
+            help=SCRIPT_HELP)
+        arg_context.argument(
             POWERAPPS_URL,
             options_list=POWERAPPS_URL_OPTIONS,
             type=str,
@@ -225,6 +235,12 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help=ICON_HELP)
+        arg_context.argument(
+            SCRIPT,
+            options_list=SCRIPT_OPTIONS,
+            type=str,
+            required=False,
+            help=SCRIPT_HELP)
         arg_context.argument(
             CONNECTOR_ID,
             options_list=CONNECTOR_ID_OPTIONS,

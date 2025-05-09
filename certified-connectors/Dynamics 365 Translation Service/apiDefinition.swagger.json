@@ -1,0 +1,906 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Dynamics Translation Service",
+    "version": "1.0.0",
+    "description": "Translation, Alignment, and Regeneration operations powered by Dynamics Translation Service.",
+    "contact": {
+      "name": "Dynamics Translation Service",
+      "url": "https://lcs.dynamics.com",
+      "email": "dtssup@microsoft.com"
+    }
+  },
+  "host": "lcsapi.lcs.dynamics.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "multipart/form-data",
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/dts/align/submit": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Select the product type.",
+            "x-ms-summary": "Product Type",
+            "in": "formData",
+            "name": "productType",
+            "type": "string",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "Products",
+              "value-collection": "products",
+              "value-path": "id",
+              "value-title": "productName"
+            }
+          },
+          {
+            "description": "Select the product version.",
+            "x-ms-summary": "Product Version",
+            "in": "formData",
+            "name": "productVersion",
+            "type": "string",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "ProductVersions",
+              "parameters": {
+                "productType": {
+                  "parameter": "productType"
+                }
+              },
+              "value-collection": "products",
+              "value-path": "id",
+              "value-title": "productName"
+            }
+          },
+          {
+            "in": "formData",
+            "name": "sourceLanguage",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Source Language",
+            "description": "Translation source language.",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLanguages",
+              "value-collection": "languages",
+              "value-path": "code",
+              "value-title": "name",
+              "parameters": {
+                "productType": {
+                  "parameter": "productType"
+                }
+              }
+            }
+          },
+          {
+            "in": "formData",
+            "name": "targetLanguage",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Target Language",
+            "description": "Translation target language.",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLanguages",
+              "value-collection": "languages",
+              "parameters": {
+                "sourceLanguage": {
+                  "parameter": "sourceLanguage"
+                },
+                "productType": {
+                  "parameter": "productType"
+                }
+              },
+              "value-path": "code",
+              "value-title": "name"
+            }
+          },
+          {
+            "description": "Native resource file.",
+            "x-ms-summary": "Source File",
+            "format": "binary",
+            "in": "formData",
+            "name": "sourceFile",
+            "type": "file",
+            "required": true
+          },
+          {
+            "description": "Native Target file.",
+            "x-ms-summary": "Target File",
+            "format": "binary",
+            "in": "formData",
+            "name": "targetFile",
+            "type": "file",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "application/json": {
+                "alignedFile": "https://lcsapi.lcs.dynamics.com/dts/align/download?filename=0_71_BI.fr.label_Aligned.xlf",
+                "alignmentRate": 0.99,
+                "message": "The operation was successful.",
+                "status": "Success"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "alignmentRate": {
+                  "type": "number",
+                  "format": "float",
+                  "title": "Alignment Rate",
+                  "description": "Percentage of matched translation source and target translation units."
+                },
+                "alignedFile": {
+                  "type": "string",
+                  "description": "URL to retrieve the alignment output.",
+                  "title": "Aligned File URL"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "default"
+        ],
+        "summary": "Align",
+        "operationId": "Align",
+        "x-ms-visibility": "important",
+        "description": "Use the Align tool to create a translation memory file from previously translated native files."
+      }
+    },
+    "/dts/languages": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "productType",
+            "type": "string",
+            "x-example": "2",
+            "description": "Select the product type.",
+            "x-ms-summary": "Product Type",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "sourceLanguage",
+            "type": "string",
+            "x-example": "fr"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "application/json": {
+                "languages": [
+                  {
+                    "code": "ar",
+                    "isGaLang": true,
+                    "mTProjectLanguageCode": "ar",
+                    "name": "Arabic"
+                  },
+                  {
+                    "code": "cs",
+                    "isGaLang": true,
+                    "mTProjectLanguageCode": "cs",
+                    "name": "Czech"
+                  }
+                ],
+                "message": "The operation was successful.",
+                "status": "Success"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "String elaborating on the status."
+                },
+                "languages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Friendly language name."
+                      },
+                      "code": {
+                        "type": "string",
+                        "description": "The language code.",
+                        "title": "Language Code"
+                      },
+                      "isGaLang": {
+                        "type": "boolean",
+                        "description": "Boolean indicating if the language is a General Availability langauge."
+                      },
+                      "mTProjectLanguageCode": {
+                        "type": "string",
+                        "description": "An alternative language code for internal use."
+                      }
+                    }
+                  },
+                  "description": "Get the languages for a product type"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "default"
+        ],
+        "summary": "Get Languages",
+        "operationId": "GetLanguages",
+        "x-ms-visibility": "internal",
+        "description": "Get the languages for a product type"
+      }
+    },
+    "/dts/productVersions": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Use Products to get product type",
+            "in": "query",
+            "name": "productType",
+            "type": "string",
+            "x-example": "2",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "application/json": {
+                "message": "The operation was successful.",
+                "products": [
+                  {
+                    "id": 5,
+                    "productName": "Finance and Operations"
+                  }
+                ],
+                "status": "Success"
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "type": "string"
+              },
+              "Content-Length": {
+                "type": "integer"
+              },
+              "Content-Type": {
+                "type": "string"
+              },
+              "Date": {
+                "type": "string"
+              },
+              "Expires": {
+                "type": "string"
+              },
+              "Pragma": {
+                "type": "string"
+              },
+              "Strict-Transport-Security": {
+                "type": "string"
+              },
+              "activity-id": {
+                "type": "string"
+              },
+              "x-ms-lcsstamp": {
+                "type": "string"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The product ID."
+                      },
+                      "productName": {
+                        "type": "string",
+                        "description": "The product name."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2_auth": [
+              "user_impersonation"
+            ]
+          }
+        ],
+        "tags": [
+          "default"
+        ],
+        "summary": "Product Versions",
+        "operationId": "ProductVersions",
+        "x-ms-visibility": "internal",
+        "description": "Get the Product Versions supported by DTS."
+      }
+    },
+    "/dts/products": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "application/json": {
+                "message": "The operation was successful.",
+                "products": [
+                  {
+                    "id": 1,
+                    "productName": "Microsoft Dynamics AX 2012"
+                  },
+                  {
+                    "id": 2,
+                    "productName": "Finance and Operations"
+                  },
+                  {
+                    "id": 3,
+                    "productName": "Microsoft Dynamics CRM / Dynamics 365 Customer Engagement"
+                  },
+                  {
+                    "id": 4,
+                    "productName": "Microsoft Dynamics NAV"
+                  },
+                  {
+                    "id": 5,
+                    "productName": "Dynamics 365 Commerce"
+                  },
+                  {
+                    "id": 6,
+                    "productName": "Microsoft Dynamics AX 2009"
+                  }
+                ],
+                "status": "Success"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "products": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The product ID."
+                      },
+                      "productName": {
+                        "type": "string",
+                        "description": "The product name."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "default"
+        ],
+        "summary": "Products",
+        "operationId": "Products",
+        "x-ms-visibility": "internal",
+        "description": "Get the products supported by DTS."
+      }
+    },
+    "/dts/translate/download": {
+      "get": {
+        "parameters": [
+          {
+            "description": "The download type.",
+            "x-ms-summary": "Download Type",
+            "in": "query",
+            "name": "downloadType",
+            "type": "string",
+            "enum": [
+              "translated"
+            ],
+            "x-example": "translated",
+            "required": true
+          },
+          {
+            "in": "query",
+            "description": "The translation ID. Get this value from the translate operation output.",
+            "x-ms-summary": "Translation ID",
+            "name": "translationId",
+            "type": "integer",
+            "x-example": "50618",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File Output",
+            "schema": {
+              "type": "file",
+              "format": "binary",
+              "x-ms-summary": "Translation output",
+              "description": "Binary file content from translation output.",
+              "title": "File Content",
+              "x-ms-visibility": "important"
+            }
+          }
+        },
+        "tags": [
+          "default"
+        ],
+        "summary": "Download Translation Result",
+        "operationId": "Download",
+        "x-ms-visibility": "important",
+        "description": "Download the output of a translation request."
+      }
+    },
+    "/dts/translate/regenerate": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "ID of translation you are regenerating.",
+            "x-ms-summary": "Translation ID",
+            "in": "query",
+            "name": "translationId",
+            "type": "integer",
+            "x-example": "14007",
+            "required": true
+          },
+          {
+            "x-ms-summary": "Regenerate File",
+            "description": "ZIP file with revised translation memory file(s).",
+            "format": "binary",
+            "in": "formData",
+            "name": "regenerateFile",
+            "type": "file",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "application/json": {
+                "message": "The operation was successful.",
+                "status": "Success"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "String elaborating on the status."
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "default"
+        ],
+        "summary": "Regenerate",
+        "x-ms-visibility": "important",
+        "operationId": "Regenerate",
+        "description": "Regenerate a translation using updated translation memories."
+      }
+    },
+    "/dts/translate/retrieve": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "x-ms-summary": "Translation ID",
+            "description": "ID of translation you are polling.",
+            "in": "query",
+            "name": "translationId",
+            "type": "integer",
+            "x-example": "14007",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "application/json": {
+                "isDeletedRequest": false,
+                "message": "The operation was successful.",
+                "parentTranslationID": 50618,
+                "productType": 2,
+                "productVersion": 5,
+                "requestName": "postman",
+                "sourceFile": "https://lcsapi.lcs.dynamics.com/dts/translate/download?downloadType=source&translationId=50618",
+                "sourceLanguage": "en-US",
+                "status": "Success",
+                "targetLanguage": "fr",
+                "translatedFile": "https://lcsapi.lcs.dynamics.com/dts/translate/download?downloadType=translated&translationId=50618",
+                "translationType": "ui"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "String elaborating on the status."
+                },
+                "parentTranslationID": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The project this translation request belongs to."
+                },
+                "requestName": {
+                  "type": "string",
+                  "description": "The name of the translation request."
+                },
+                "productType": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The product for which the files were translated."
+                },
+                "productVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The version of the product for which the files were translated."
+                },
+                "translationType": {
+                  "type": "string",
+                  "description": "The translation type: either documention or user interface."
+                },
+                "sourceLanguage": {
+                  "type": "string",
+                  "description": "The language files were translated from."
+                },
+                "targetLanguage": {
+                  "type": "string",
+                  "description": "The language files were translated into."
+                },
+                "sourceFile": {
+                  "type": "string",
+                  "description": "sourceFile",
+                  "x-ms-visibility": "internal"
+                },
+                "translatedFile": {
+                  "type": "string",
+                  "description": "translatedFile",
+                  "x-ms-visibility": "internal"
+                },
+                "isDeletedRequest": {
+                  "type": "boolean",
+                  "description": "isDeletedRequest",
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "default"
+        ],
+        "summary": "Retrieve",
+        "operationId": "Retrieve",
+        "x-ms-visibility": "important",
+        "description": "Poll the status of a translation request."
+      }
+    },
+    "/dts/translate/submit": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Select the product type.",
+            "x-ms-summary": "Product Type",
+            "in": "formData",
+            "name": "productType",
+            "type": "string",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "Products",
+              "value-collection": "products",
+              "value-path": "id",
+              "value-title": "productName"
+            }
+          },
+          {
+            "description": "Select the product version.",
+            "x-ms-summary": "Product Version",
+            "required": true,
+            "in": "formData",
+            "name": "productVersion",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "ProductVersions",
+              "parameters": {
+                "productType": {
+                  "parameter": "productType"
+                }
+              },
+              "value-collection": "products",
+              "value-path": "id",
+              "value-title": "productName"
+            }
+          },
+          {
+            "in": "formData",
+            "x-ms-summary": "Source Language",
+            "description": "Language to translate from.",
+            "name": "sourceLanguage",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLanguages",
+              "value-collection": "languages",
+              "value-path": "code",
+              "value-title": "name",
+              "parameters": {
+                "productType": {
+                  "parameter": "productType"
+                }
+              }
+            }
+          },
+          {
+            "in": "formData",
+            "name": "targetLanguage",
+            "x-ms-summary": "Target Language",
+            "description": "Language to translate into.",
+            "type": "string",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetLanguages",
+              "value-collection": "languages",
+              "parameters": {
+                "sourceLanguage": {
+                  "parameter": "sourceLanguage"
+                },
+                "productType": {
+                  "parameter": "productType"
+                }
+              },
+              "value-path": "code",
+              "value-title": "name"
+            }
+          },
+          {
+            "in": "formData",
+            "x-ms-summary": "Request name",
+            "description": "Name for the translation request.",
+            "name": "requestName",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "translationType",
+            "x-ms-summary": "Translation Type",
+            "description": "The translation type. Currently, only UI translations are supported.",
+            "type": "string",
+            "enum": ["ui"],
+            "required": true
+          },
+          {
+            "description": "Zip file containing files to translate.",
+            "x-ms-summary": "Source Files",
+            "format": "binary",
+            "in": "formData",
+            "name": "sourceFile",
+            "type": "file",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "trainMTWithTM",
+            "x-ms-summary": "Custom MT Model",
+            "description": "Create a custom MT system based on uploaded translation memory files.",
+            "type": "boolean",
+            "required": false,
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "description": "Zip file containing translation memory files.",
+            "x-ms-summary": "Translation Memory files",
+            "format": "binary",
+            "in": "formData",
+            "name": "tmFile",
+            "type": "file",
+            "required": false,
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "String describing the status of the request."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "String elaborating on the status."
+                },
+                "translationId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The translation request ID, used retrieve and download operations."
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2_auth": [
+              "user_impersonation"
+            ]
+          }
+        ],
+        "tags": [
+          "default"
+        ],
+        "summary": "Translate",
+        "operationId": "Translate",
+        "description": "Submit a new translation request."
+      }
+    },
+    "/dts/align/download": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "File Output",
+            "schema": {
+              "type": "file",
+              "format": "binary",
+              "x-ms-summary": "Aligned File.",
+              "description": "Binary file content from alignment output.",
+              "title": "File Output",
+              "x-ms-visibility": "important"
+            }
+          }
+        },
+        "summary": "Download Alignment Result",
+        "operationId": "AlignDownload",
+        "parameters": [
+          {
+            "name": "filename",
+            "x-ms-summary": "File name",
+            "description": "Filename returned in alignment output.",
+            "x-example": "0_123456_BI.fr.label_Aligned.xlf",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "x-ms-visibility": "important",
+        "description": "Download the alignment result."
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.windows.net/common/oauth2/authorize",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {
+        "user_impersonation": "user_impersonation"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "tags": [],
+  "x-components": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://lcs.dynamics.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://privacy.microsoft.com/privacystatement"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files"
+    }
+  ]
+}

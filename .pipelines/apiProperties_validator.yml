@@ -1,0 +1,47 @@
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:     
+  - pwsh: |
+      $errorsTotal = 0
+      $warningsTotal = 0
+
+      # Get the list of files for the given PR
+      $files = git diff HEAD~1 --name-only
+      $apiPropertiesFiles = $files | where {$_ -match '.+?apiProperties.json$'}
+
+      $Headers = @{
+        Authorization = $env:token
+      }
+
+      foreach ($file in $apiPropertiesFiles) { 
+        $newFileContent = Get-Content $file -Raw
+
+        # Validate apiProperties json
+        $results = Invoke-RestMethod -Uri "$(apiPropertiesValidatorUrl)" -Headers $Headers -Method Post -ContentType "application/json; charset=utf-8" -Body [$newFileContent]
+
+        $errors = $results | Where-Object { $_.level -EQ "Critical" -OR $_.Level -EQ "Error" }
+        $warnings = $results | Where-Object { $_.level -EQ "Warning" }
+        
+        if ($errors) {
+          $errorsTotal += $errors.Count
+          $errors | foreach { Write-Host "##vso[task.logissue type=error;]$_" }
+        } # If Api Properties Error
+        
+        if ($warnings -AND -NOT $suppressWarnings) {
+          $warningsTotal += $warnings.Count
+          $warnings | foreach { Write-Host "##vso[task.logissue type=warning;sourcepath=$file;]$_" }
+        } # If Api Properties Warnings
+      } # For each file
+
+      if ($errorsTotal -gt 0) {
+          Write-Host "##vso[task.complete result=Failed;]Errors encountered."
+      }
+      elseif ($warningsTotal -gt 0) {
+          Write-Host "##vso[task.complete result=SucceededWithIssues;]Warnings encountered."    
+      }
+      else {
+          Write-Host "##vso[task.complete result=Succeeded;]No error or warnings encountered."    
+      }
+    env:
+      token: $(token)

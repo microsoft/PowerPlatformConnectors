@@ -1,0 +1,739 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Secret Server",
+    "description": "The Secret Server Connector allows users to leverage the power of Delinea Secret Server. This connector allows the user to retrieve a secret from Secret Server via ID.",
+    "version": "1.0",
+    "contact": {
+      "name": "Delinea support",
+      "url": "https://delinea.com/support",
+      "email": "support@delinea.com"
+    }
+  },
+  "host": "test.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/x-www-form-urlencoded"
+  ],
+  "paths": {
+    "/oauth2/token": {
+      "post": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Retrieve or Refresh Access Token",
+        "description": "Retrieve an access token for use with other API requests or refresh an access token.",
+        "operationId": "GetToken",
+        "parameters": [
+          {
+            "name": "grant_type",
+            "type": "string",
+            "enum": [
+              "password",
+              "refresh_token"
+            ],
+            "in": "formData",
+            "default": "password",
+            "required": true,
+            "x-ms-summary": "Authentication grant type.",
+            "description": "Authentication grant type.  Use 'password' when authenticating, and 'refresh_token' when refreshing a token."
+          },
+          {
+            "name": "username",
+            "type": "string",
+            "in": "formData",
+            "required": true,
+            "x-ms-summary": "Username for access to Secret Server",
+            "description": "Secret Server authentication username.  Required when authenticating."
+          },
+          {
+            "name": "password",
+            "type": "string",
+            "in": "formData",
+            "required": true,
+            "x-ms-summary": "Password for access to Secret Server",
+            "description": "Secret Server authentication password.  Required when authenticating"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of an access token",
+              "schema": {
+               "$ref": "#/definitions/TokenResponse"
+            }
+          },
+          "400": {
+            "description": "An error occurred",
+            "schema": {
+              "$ref": "#/definitions/TokenErrorResponse"
+            }
+          }
+        } 
+      }        
+    },
+    "/api/v1/secrets/{id}": {
+      "get": {
+        "description": "Get a single secret by ID",
+        "operationId": "GetSecretById",
+        "summary": "Get secret",
+        "parameters": [
+          {
+            "x-ms-summary": "Secret ID",
+            "description": "Secret ID for get secret object",
+            "x-ms-url-encoding": "single",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "x-ms-summary": "Authorization",
+            "description": "Bearer <Access-Token>",
+            "in": "header",
+            "name": "Access-Token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of secret.",
+            "schema":{
+              "$ref": "#/definitions/SecretModel"
+            }
+          },
+          "400":{
+            "description": "Bad request",
+            "schema":{
+              "$ref": "#/definitions/BadRequestResponse"
+            }
+          },
+          "403": {
+            "description": "Authentication failed",
+            "schema": {
+              "$ref": "#/definitions/AuthenticationFailedResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/InternalServerErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/secret-templates/{id}": {
+      "get": {
+        "description": "Get a single secret template by ID",
+        "operationId": "GetTemplateById",
+        "summary": "Get secret template",
+        "parameters": [
+          {
+            "x-ms-summary": "Template ID",
+            "description": "Get template secret by Id",
+            "x-ms-url-encoding": "single",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "x-ms-summary": "Authorization",
+            "description": "Bearer <Access-Token>",
+            "in": "header",
+            "name": "Access-Token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of secret.",
+            "schema": {
+              "$ref": "#/definitions/SecretTemplateModel"
+            }
+          },
+          "400":{
+            "description": "Bad request",
+            "schema":{
+              "$ref": "#/definitions/BadRequestResponse"
+            }
+          },
+          "403":{
+            "description": "Authentication failed",
+            "schema": {
+              "$ref": "#/definitions/AuthenticationFailedResponse"
+            }
+          },
+          "500":{
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/InternalServerErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.delinea.com"
+    },
+    {
+      "propertyName": "Privacy Policy",
+      "propertyValue": "https://delinea.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Security"
+    }
+  ],
+  "definitions": {
+    "TokenResponse": {
+      "description": "API access token response",
+      "required": [
+        "access_token",
+        "token_type",
+        "expires_in"
+      ],
+      "properties": {
+        "access_token": {
+          "description": "Authentication token",
+          "type": "string"
+        },
+        "token_type": {
+          "description": "Authentication token type",
+          "type": "string",
+          "enum": [
+            "bearer"
+          ]
+        },
+        "expires_in": {
+          "description": "Authentication token expiration time, in seconds",
+          "type": "integer"
+        },
+        "refresh_token": {
+          "description": "Refresh token. This is only provided when the server is set to allow refresh tokens for web services and when the session timeout duration is not set to Unlimited.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "TokenErrorResponse": {
+      "description": "API access token error response",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "description": "Authentication token",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SecretModel": {
+      "description": "Secret",
+      "properties": {
+        "accessRequestWorkflowMapId": {
+          "description": "Id of the assigned access request workflow.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "active": {
+          "description": "Whether the secret is active",
+          "type": "boolean"
+        },
+        "allowOwnersUnrestrictedSshCommands": {
+          "description": "Whether Secret Owners are subject to SSH Command Restrictions, if enabled.",
+          "type": "boolean"
+        },
+        "autoChangeEnabled": {
+          "description": "Whether Automatic Remote Password Changing is enabled.",
+          "type": "boolean"
+        },
+        "autoChangeNextPassword": {
+          "description": "Next Password to be used for Remote Password Changing.",
+          "type": "string"
+        },
+        "checkedOut": {
+          "description": "Whether the secret is currently checked out",
+          "type": "boolean"
+        },
+        "checkOutChangePasswordEnabled": {
+          "description": "Whether to initiate a password change when the secret is checked in.",
+          "type": "boolean"
+        },
+        "checkOutEnabled": {
+          "description": "Whether secret checkout is enabled",
+          "type": "boolean"
+        },
+        "checkOutIntervalMinutes": {
+          "description": "Checkout interval, in minutes",
+          "type": "integer",
+          "format": "int32"
+        },
+        "checkOutMinutesRemaining": {
+          "description": "Minutes remaining in current checkout interval",
+          "type": "integer",
+          "format": "int32"
+        },
+        "checkOutUserDisplayName": {
+          "description": "Name of user who has checked out the secret",
+          "type": "string"
+        },
+        "checkOutUserId": {
+          "description": "ID of user who has checked out the secret",
+          "type": "integer",
+          "format": "int32"
+        },
+        "doubleLockId": {
+          "description": "Id of the DoubleLock configuration for this secret.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "enableInheritPermissions": {
+          "description": "Whether to inherit permissions from the parent folder (true), or use explicit permissions.",
+          "type": "boolean"
+        },
+        "enableInheritSecretPolicy": {
+          "description": "Whether the secret policy is inherited from the containing folder",
+          "type": "boolean"
+        },
+        "failedPasswordChangeAttempts": {
+          "description": "Number of failed password change attempts",
+          "type": "integer",
+          "format": "int32"
+        },
+        "folderId": {
+          "description": "Containing folder ID",
+          "type": "integer",
+          "format": "int32"
+        },
+        "id": {
+          "description": "Secret ID",
+          "type": "integer",
+          "format": "int32"
+        },
+        "isDoubleLock": {
+          "description": "Whether double lock is enabled",
+          "type": "boolean"
+        },
+        "isOutOfSync": {
+          "description": "Out of sync indicates that a Password is setup for autochange and has failed its last password change attempt or has exceeded the maximum RPC attempts",
+          "type": "boolean"
+        },
+        "isRestricted": {
+          "description": "Whether the secret is restricted",
+          "type": "boolean"
+        },
+        "items": {
+          "description": "Secret data fields",
+          "items": {
+            "$ref": "#/definitions/RestSecretItem"
+          },
+          "type": "array"
+        },
+        "lastHeartBeatCheck": {
+          "description": "Time of last heartbeat check",
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastHeartBeatStatus": {
+          "$ref": "#/definitions/HeartbeatStatus"
+        },
+        "lastPasswordChangeAttempt": {
+          "description": "Time of most recent password change attempt",
+          "type": "string",
+          "format": "date-time"
+        },
+        "launcherConnectAsSecretId": {
+          "description": "Id of the secret used for the Connect As Commands feature.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "description": "Secret name",
+          "type": "string"
+        },
+        "outOfSyncReason": {
+          "description": "Reason message if the secret is out of sync",
+          "type": "string"
+        },
+        "passwordTypeWebScriptId": {
+          "description": "Id of the Web Password Changer script to use for Web Password Changing.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "proxyEnabled": {
+          "description": "Whether to use the Proxy service for launchers on this secret, if available.",
+          "type": "boolean"
+        },
+        "requiresApprovalForAccess": {
+          "description": "Whether a workflow approval process is required to access this secret.",
+          "type": "boolean"
+        },
+        "requiresComment": {
+          "description": "Whether a comment is required to access this secret.",
+          "type": "boolean"
+        },
+        "responseCodes": {
+          "description": "Reasons that the user may not be able to retrieve the secret.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "restrictSshCommands": {
+          "description": "Whether proxied launchers are subject to SSH Command Restrictions.",
+          "type": "boolean"
+        },
+        "secretPolicyId": {
+          "description": "Id of the Secret Policy applied to this Secret.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "secretTemplateId": {
+          "description": "Id of the template defining this Secret.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "secretTemplateName": {
+          "description": "Name of secret template",
+          "type": "string"
+        },
+        "sessionRecordingEnabled": {
+          "description": "Whether session recording is enabled",
+          "type": "boolean"
+        },
+        "siteId": {
+          "description": "Id of the Site to which this Secret belongs.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "webLauncherRequiresIncognitoMode": {
+          "description": "Whether web launchers will open an incognito browser session when launching this secret.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "RestSecretItem": {
+      "description": "Secret data field item",
+      "properties": {
+        "fieldDescription": {
+          "description": "Longer description of the secret field.",
+          "type": "string"
+        },
+        "fieldId": {
+          "description": "The id of the field definition from the secret template.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "fieldName": {
+          "description": "The display name of the secret field.",
+          "type": "string"
+        },
+        "fileAttachmentId": {
+          "description": "If the field is a file attachment field, the id of the file attachment.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "filename": {
+          "description": "If the field is a file attachment field, the name of the attached file.",
+          "type": "string"
+        },
+        "isFile": {
+          "description": "Whether the field is a file attachment.",
+          "type": "boolean"
+        },
+        "isList": {
+          "description": "Whether or not the secret field is a list.",
+          "type": "boolean"
+        },
+        "isNotes": {
+          "description": "Whether the field is represented as a multi-line text box. Used for long-form text fields.",
+          "type": "boolean"
+        },
+        "isPassword": {
+          "description": "Whether the field is a password. Password fields are hidden by default in the UI and their value is not returned in GET calls that return secrets. To retrieve a password field value, make a GET call to /api/secrets/{secretId}/fields/{slug}.",
+          "type": "boolean"
+        },
+        "itemId": {
+          "description": "The id of the secret field item. Leave empty when creating a new secret.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "itemValue": {
+          "description": "The value of the secret field item. For list fields, this is a comma-delimited list of the list id guids that are assigned to this field.",
+          "type": "string"
+        },
+        "listType": {
+          "$ref": "#/definitions/SecretFieldListType"
+        },
+        "slug": {
+          "description": "A unique name for the secret field on the template. Slugs cannot contain spaces and are used in many places to easily refer to a secret field without having to know the field id.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "HeartbeatStatus": {
+      "description": "Current status of heartbeat",
+      "properties": {},
+      "type": "string",
+      "enum": [
+        "Failed",
+        "Success",
+        "Pending",
+        "Disabled",
+        "UnableToConnect",
+        "UnknownError",
+        "IncompatibleHost",
+        "AccountLockedOut",
+        "DnsMismatch",
+        "UnableToValidateServerPublicKey",
+        "Processing",
+        "ArgumentError",
+        "AccessDenied"
+      ]
+    },
+    "SecretFieldListType": {
+      "description": "The type of list. Valid values are “None”, “Generic”, and “URL”.",
+      "properties": {},
+      "type": "string",
+      "enum": [
+        "Generic",
+        "URL",
+        "None"
+      ]
+    },
+    "SecretTemplateModel": {
+      "description": "Template to define the secret.",
+      "properties": {
+        "fields": {
+          "description": "Secret template fields",
+          "items": {
+            "$ref": "#/definitions/ISecretTemplateField"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "Secret template ID",
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "description": "Secret template name",
+          "type": "string"
+        },
+        "passwordTypeId": {
+          "description": "Id of the Remote Password Changing configuration used by this Template.",
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "type": "object"
+    },
+    "ISecretTemplateField": {
+      "description": "Secret template fields",
+      "properties": {
+        "description": {
+          "description": "Description",
+          "type": "string"
+        },
+        "displayName": {
+          "description": "Display Name of this field.   ",
+          "type": "string"
+        },
+        "editablePermission": {
+          "description": "Type of permission level required to edit this field.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "editRequires": {
+          "$ref": "#/definitions/EditRequiresOptions"
+        },
+        "fieldSlugName": {
+          "description": "Web-compatible name for this Secret Field. This name will be used for API calls.",
+          "type": "string"
+        },
+        "generatePasswordCharacterSet": {
+          "description": "Id of character set to use when generating a value for this field.",
+          "type": "string"
+        },
+        "generatePasswordLength": {
+          "description": "Length of value to generate for this field.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "hideOnView": {
+          "description": "Whether to display this field in a view context.",
+          "type": "boolean"
+        },
+        "historyLength": {
+          "description": "Length of the history stored for this field.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "isExpirationField": {
+          "description": "Whether Secret Expiration is based on this field.",
+          "type": "boolean"
+        },
+        "isFile": {
+          "description": "Whether this field represents a File Attachment.",
+          "type": "boolean"
+        },
+        "isIndexable": {
+          "description": "Whether this field will be indexed for search.",
+          "type": "boolean"
+        },
+        "isList": {
+          "description": "Whether this field is a List field.",
+          "type": "boolean"
+        },
+        "isNotes": {
+          "description": "Whether this field is a Notes field.",
+          "type": "boolean"
+        },
+        "isPassword": {
+          "description": "Whether this field is a Password field.",
+          "type": "boolean"
+        },
+        "isRequired": {
+          "description": "Whether population of this field is required for the secret to be valid.",
+          "type": "boolean"
+        },
+        "isUrl": {
+          "description": "Whether this is a field is a URL field.",
+          "type": "boolean"
+        },
+        "listType": {
+          "$ref": "#/definitions/ListType"
+        },
+        "mustEncrypt": {
+          "description": "Whether this field is encrypted within the Database.",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Name",
+          "type": "string"
+        },
+        "passwordRequirementId": {
+          "description": "Id of the Password Requirement associated with this field.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "passwordTypeFieldId": {
+          "description": "Id of the Password Type for Web Password Automatic Password Changing.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "secretTemplateFieldId": {
+          "description": "Id of the Field definition on which this Field is based.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "sortOrder": {
+          "description": "Order in which this field is displayed when viewing the Secret.",
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "type": "object"
+    },
+    "EditRequiresOptions": {
+      "description": "Reasons that the user may not be able to retrieve the secret.",
+      "type": "string",
+      "enum": [
+        "Edit",
+        "Owner",
+        "NotEditable"
+      ]
+    },
+    "ListType": {
+      "description": "Type of List to map to this field.",
+      "type": "string",
+      "enum": [
+        "None",
+        "Generic",
+        "URL"
+      ]
+    },
+    "BadRequestResponse": {
+      "description": "Response object for invalid requests",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "description": "Error message",
+          "type": "string"
+        },
+        "messageDetail": {
+          "description": "Error message detail",
+          "type": "string"
+        },
+        "errorCode": {
+          "description": "Error message code",
+          "type": "string"
+        },
+        "modelState": {
+          "description": "An object describing validation errors",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "AuthenticationFailedResponse": {
+      "description": "Response object for authentication failures",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "description": "Error message",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "InternalServerErrorResponse": {
+      "description": "Response object for internal server errors",
+      "required": [
+        "message",
+        "exceptionMessage",
+        "exceptionType",
+        "stackTrace"
+      ],
+      "properties": {
+        "message": {
+          "description": "Error message",
+          "type": "string"
+        },
+        "exceptionMessage": {
+          "description": "Error message from exception",
+          "type": "string"
+        },
+        "exceptionType": {
+          "description": "Exception type",
+          "type": "string"
+        },
+        "stackTrace": {
+          "description": "Exception stack trace",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "securityDefinitions": {}
+}

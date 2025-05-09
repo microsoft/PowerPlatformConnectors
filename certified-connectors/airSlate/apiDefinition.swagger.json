@@ -1,0 +1,983 @@
+{
+  "basePath": "/airslate/",
+  "consumes": [],
+  "definitions": {},
+  "host": "as-msflow.infrateam.xyz",
+  "info": {
+    "description": "Automate your business workflows in Office 365, SharePoint, Microsoft Dynamics 365, Salesforce, NetSuite, and other services without coding. Configure no-code airSlate bots to transfer data between systems of record and data sources. Set conditions to route documents between multiple recipients, and automate reminders and notifications.",
+    "title": "airSlate",
+    "version": "1.1",
+    "contact": {
+      "url": "https://my.airslate.com/help-center",
+      "name": "Help Center",
+      "email": "integrations@pdffiller.com"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.airslate.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.airslate.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Human Resources;IT Operations"
+    }
+  ],
+  "parameters": {},
+  "paths": {
+    "/event/{id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "id",
+                  "x-ms-summary": "id"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "status",
+                  "x-ms-summary": "status"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the event subscription being deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "summary": "Delete event subscription",
+        "description": "Remove the user's subscription for a particular event",
+        "operationId": "DeleteSlateTrigger",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/event": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "slate_id": {
+              "type": "string",
+              "description": "Unique ID of target document which caused the event.",
+              "x-ms-summary": "Document ID",
+              "x-ms-visibility": "important"
+            }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "id",
+                  "x-ms-summary": "id"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Start workflow on document event",
+        "description": "Starts the workflow on document event.",
+        "operationId": "CreateSlateTrigger",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "botToken": {
+                  "description": "The webhook bot authorization token",
+                  "type": "string",
+                  "x-ms-summary": "Bot authorization token"
+                },
+                "callback": {
+                  "type": "string",
+                  "description": "callback",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "callback"
+                }
+              },
+              "required": ["callback", "botToken"]
+            }
+          }
+        ]
+      }
+    },
+    "/flows/{slateId}/smartLink/create": {
+      "post": {
+        "consumes": ["application/json"],
+        "description": "Generate the smart link from the workflow in your airSlate workspace",
+        "operationId": "CreateSmartLink",
+        "parameters": [
+          {
+            "description": "Select an airSlate workspace where the workflow is located",
+            "in": "header",
+            "name": "Organization-Domain",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "UserMe",
+              "parameters": {
+                "include": "organizations"
+              },
+              "value-collection": "included",
+              "value-path": "attributes/subdomain",
+              "value-title": "attributes/subdomain"
+            },
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "default": "application/json",
+            "description": "Application specific mime-type",
+            "in": "header",
+            "name": "Content-Type",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "description": "Select a workflow to generate a document from",
+            "in": "path",
+            "name": "slateId",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFlow",
+              "parameters": {
+                "Organization-Domain": {
+                  "parameter": "Organization-Domain"
+                },
+                "per_page": 5000
+              },
+              "value-collection": "data",
+              "value-path": "id",
+              "value-title": "attributes/name"
+            },
+            "x-ms-summary": "Workflow"
+          },
+          {
+            "in": "body",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetAddonsScheme",
+                "parameters": {
+                  "Organization-Domain": {
+                    "parameter": "Organization-Domain"
+                  },
+                  "flowId": {
+                    "parameter": "slateId"
+                  }
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetAddonsScheme",
+                "parameters": {
+                  "Organization-Domain": {
+                    "parameterReference": "Organization-Domain"
+                  },
+                  "flowId": {
+                    "parameterReference": "slateId"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "properties": {
+                "smartLink": {
+                  "description": "The smart link for creating document with specified record context",
+                  "title": "Smart link",
+                  "type": "string",
+                  "x-ms-visibility": "important"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Create smart link"
+      }
+    },
+    "/addon-proxy/flow/v1/flows/{slateId}/packets/blank": {
+      "post": {
+        "consumes": ["application/json"],
+        "description": "Generate a new document for editing or signing from the workflow in your airSlate workspace",
+        "operationId": "StartFlow",
+        "parameters": [
+          {
+            "description": "Select an airSlate workspace where the workflow is located",
+            "in": "header",
+            "name": "Organization-Domain",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "UserMe",
+              "parameters": {
+                "include": "organizations"
+              },
+              "value-collection": "included",
+              "value-path": "attributes/subdomain",
+              "value-title": "attributes/subdomain"
+            },
+            "x-ms-summary": "Workspace"
+          },
+          {
+            "default": "application/json",
+            "description": "Application specific mime-type",
+            "in": "header",
+            "name": "Content-Type",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "description": "Select a workflow to generate a document from",
+            "in": "path",
+            "name": "slateId",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFlow",
+              "parameters": {
+                "Organization-Domain": {
+                  "parameter": "Organization-Domain"
+                },
+                "per_page": 5000
+              },
+              "value-collection": "data",
+              "value-path": "id",
+              "value-title": "attributes/name"
+            },
+            "x-ms-summary": "Workflow"
+          },
+          {
+            "in": "body",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "x-ms-dynamic-schema": {
+                "operationId": "GetAddonsScheme",
+                "parameters": {
+                  "Organization-Domain": {
+                    "parameter": "Organization-Domain"
+                  },
+                  "flowId": {
+                    "parameter": "slateId"
+                  }
+                },
+                "value-path": "properties"
+              },
+              "x-ms-dynamic-properties": {
+                "operationId": "GetAddonsScheme",
+                "parameters": {
+                  "Organization-Domain": {
+                    "parameterReference": "Organization-Domain"
+                  },
+                  "flowId": {
+                    "parameterReference": "slateId"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "default",
+            "schema": {
+              "properties": {
+                "data": {
+                  "description": "Document",
+                  "properties": {
+                    "id": {
+                      "description": "Identity of the new document",
+                      "title": "Document ID",
+                      "type": "string",
+                      "x-ms-visibility": "important"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Create a new document"
+      }
+    },
+    "/addon-scheme/{flowId}": {
+      "get": {
+        "description": "Retrieve the list of parameters available for your document based on the bots configured for your airSlate workflow",
+        "operationId": "GetAddonsScheme",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "x-ms-url-encoding": "single",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Organization-Domain",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "properties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get bot scheme",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/redirect/v1/slates": {
+      "get": {
+        "description": "Retrieve the list of workflows by the organization it was created in",
+        "operationId": "GetFlow",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "last_activity",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "enum": ["name", "updated_at", "last_activity"],
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "enum": [5000],
+            "in": "query",
+            "name": "per_page",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "header",
+            "name": "Organization-Domain",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "UserMe",
+              "parameters": {
+                "include": "organizations"
+              },
+              "value-collection": "included",
+              "value-path": "attributes/subdomain",
+              "value-title": "attributes/subdomain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "properties": {
+                "data": {
+                  "description": "data",
+                  "items": {
+                    "properties": {
+                      "attributes": {
+                        "description": "attributes",
+                        "properties": {
+                          "created_at": {
+                            "description": "created_at",
+                            "type": "string"
+                          },
+                          "description": {
+                            "description": "description",
+                            "type": "string"
+                          },
+                          "is_editable": {
+                            "description": "is_editable",
+                            "type": "boolean"
+                          },
+                          "last_activity": {
+                            "description": "last_activity",
+                            "type": "string"
+                          },
+                          "name": {
+                            "description": "name",
+                            "type": "string"
+                          },
+                          "source": {
+                            "description": "source",
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "description": "updated_at",
+                            "type": "string"
+                          },
+                          "wizard_status": {
+                            "description": "wizard_status",
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "id": {
+                        "description": "id",
+                        "type": "string"
+                      },
+                      "relationships": {
+                        "description": "relationships",
+                        "properties": {
+                          "admin": {
+                            "description": "admin",
+                            "properties": {
+                              "data": {
+                                "description": "data",
+                                "properties": {
+                                  "id": {
+                                    "description": "id",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "type",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "organization": {
+                            "description": "organization",
+                            "properties": {
+                              "data": {
+                                "description": "data",
+                                "properties": {
+                                  "id": {
+                                    "description": "id",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "type",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "slate": {
+                            "description": "slate",
+                            "properties": {
+                              "data": {
+                                "description": "data",
+                                "properties": {
+                                  "id": {
+                                    "description": "id",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "type",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "template": {
+                            "description": "template",
+                            "properties": {
+                              "data": {
+                                "description": "data",
+                                "properties": {
+                                  "id": {
+                                    "description": "id",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "type",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": {
+                        "description": "type",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "links": {
+                  "description": "links",
+                  "properties": {
+                    "first": {
+                      "description": "first",
+                      "type": "string"
+                    },
+                    "last": {
+                      "description": "last",
+                      "type": "string"
+                    },
+                    "next": {
+                      "description": "next",
+                      "type": "string"
+                    },
+                    "prev": {
+                      "description": "prev",
+                      "type": "string"
+                    },
+                    "self": {
+                      "description": "self",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "meta": {
+                  "description": "meta",
+                  "properties": {
+                    "current_page": {
+                      "description": "current_page",
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "from": {
+                      "description": "from",
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "last_page": {
+                      "description": "last_page",
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "path": {
+                      "description": "path",
+                      "type": "string"
+                    },
+                    "per_page": {
+                      "description": "per_page",
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "to": {
+                      "description": "to",
+                      "format": "int32",
+                      "type": "integer"
+                    },
+                    "total": {
+                      "description": "total",
+                      "format": "int32",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Get workflow",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/redirect/v1/users/me": {
+      "get": {
+        "description": "Retrieve all data about the user: name, email address in the organization, activity status, etc.",
+        "operationId": "UserMe",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "properties": {
+                "data": {
+                  "description": "data",
+                  "properties": {
+                    "attributes": {
+                      "description": "attributes",
+                      "properties": {
+                        "auto_generated": {
+                          "description": "auto_generated",
+                          "format": "int32",
+                          "type": "integer"
+                        },
+                        "created_at": {
+                          "description": "created_at",
+                          "type": "string"
+                        },
+                        "email": {
+                          "description": "email",
+                          "type": "string"
+                        },
+                        "first_name": {
+                          "description": "first_name",
+                          "type": "string"
+                        },
+                        "is_system": {
+                          "description": "is_system",
+                          "format": "int32",
+                          "type": "integer"
+                        },
+                        "last_name": {
+                          "description": "last_name",
+                          "type": "string"
+                        },
+                        "status": {
+                          "description": "status",
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "description": "updated_at",
+                          "type": "string"
+                        },
+                        "username": {
+                          "description": "username",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "id": {
+                      "description": "id",
+                      "type": "string"
+                    },
+                    "meta": {
+                      "description": "meta",
+                      "properties": {
+                        "source": {
+                          "description": "source",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "relationships": {
+                      "description": "relationships",
+                      "properties": {
+                        "organizations": {
+                          "description": "organizations",
+                          "properties": {
+                            "data": {
+                              "description": "data",
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "description": "id",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "type",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "profile": {
+                          "description": "profile",
+                          "properties": {
+                            "data": {
+                              "description": "data",
+                              "properties": {
+                                "id": {
+                                  "description": "id",
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "description": "type",
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "settings": {
+                          "description": "settings",
+                          "properties": {
+                            "data": {
+                              "description": "data",
+                              "properties": {
+                                "id": {
+                                  "description": "id",
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "description": "type",
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": {
+                      "description": "type",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "included": {
+                  "description": "included",
+                  "items": {
+                    "properties": {
+                      "attributes": {
+                        "description": "attributes",
+                        "properties": {
+                          "auto_generated": {
+                            "description": "auto_generated",
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "category": {
+                            "description": "category",
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "description": "created_at",
+                            "type": "string"
+                          },
+                          "email_domains": {
+                            "description": "email_domains",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "invite_domain": {
+                            "description": "invite_domain",
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "logo_profile": {
+                            "description": "logo_profile",
+                            "type": "string"
+                          },
+                          "logo_rectangle": {
+                            "description": "logo_rectangle",
+                            "type": "string"
+                          },
+                          "name": {
+                            "description": "name",
+                            "type": "string"
+                          },
+                          "size": {
+                            "description": "size",
+                            "type": "string"
+                          },
+                          "subdomain": {
+                            "description": "subdomain",
+                            "title": "Organization-Domain",
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "description": "updated_at",
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "id": {
+                        "description": "id",
+                        "title": "Organization ID",
+                        "type": "string"
+                      },
+                      "meta": {
+                        "description": "meta",
+                        "properties": {
+                          "auto_generated": {
+                            "description": "auto_generated",
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "relationships": {
+                        "description": "relationships",
+                        "properties": {
+                          "organization_users": {
+                            "description": "organization_users",
+                            "properties": {
+                              "links": {
+                                "description": "links",
+                                "properties": {
+                                  "related": {
+                                    "description": "related",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "owner": {
+                            "description": "owner",
+                            "properties": {
+                              "data": {
+                                "description": "data",
+                                "properties": {
+                                  "id": {
+                                    "description": "id",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "type",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "settings": {
+                            "description": "settings",
+                            "properties": {
+                              "data": {
+                                "description": "data",
+                                "properties": {
+                                  "id": {
+                                    "description": "id",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "type",
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": {
+                        "description": "type",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "meta": {
+                  "description": "meta",
+                  "properties": {
+                    "permissions": {
+                      "description": "permissions",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "summary": "Get user information",
+        "x-ms-visibility": "internal"
+      }
+    }
+  },
+  "produces": [],
+  "responses": {},
+  "schemes": ["https"],
+  "securityDefinitions": {
+    "basic_auth": {
+      "type": "basic"
+    }
+  },
+  "swagger": "2.0",
+  "tags": []
+}

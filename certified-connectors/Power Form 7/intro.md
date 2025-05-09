@@ -17,3 +17,5 @@ You will need a valid license to use this connector.
 Files are not yet supported.
 
 Free Text values for dropdowns and other option sets are not supported.
+
+From time to time updates are released for the WordPress plugin that accompanies this connector. Please ensure you are using the latest version.

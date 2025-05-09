@@ -12,5 +12,6 @@ The connector supports the following operations:
 * `Update Products`: Update a product in the catalog
 * `GetProductCreatedSchema`: Get the schema to create a product
 * `GetProductUpdatedSchema`: Get the schema to update a product
-* `Product Created`: Trigger when Product is created
-* `Product Updated`: Trigger when Product is updated
+* `Product Created`: Triggered when Product is created
+* `Product Updated`: Triggered when Product is updated
+* `Self Service Cart Created`: Triggered when Self Service Cart is created

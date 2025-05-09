@@ -8,8 +8,8 @@ In order to use Dokobit Portal, a Business or Enterprise plan in Dokobit Portal 
 
 ## How to get credentials?
 
-- [Register](https://app.dokobit.com/register) 
-- [Contact](sales@dokobit.com) our Sales to get the right plan and API access token.
+- [Register](https://app.dokobit.com/register) Dokobit Portal account
+- [Contact](mailto:sales@dokobit.com) our Sales to get the right plan and API access token.
 
 
 

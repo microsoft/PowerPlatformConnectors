@@ -8,6 +8,8 @@ The SAS Decisioning connector enables users to connect to their SAS Viya environ
 *	Determine if an invoice is legitimate
 *	Automatically approve an expense report
 
+The SAS Decisioning connector also enables users to build flows that are triggered by model and decision management activities. For example, uses can use the connector to create an automated process to review and check the performance of a model when it is validated, or to kick off a new build when a new version of a decision flow is published. The events that are supported in the current version include valdiate, publish, and change. 
+
 To learn more about SAS Intelligent Decisioning and to request a free trial, please visit https://www.sas.com/en_us/software/intelligent-decisioning.html.
 
 ## Prerequisites

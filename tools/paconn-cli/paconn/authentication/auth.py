@@ -41,6 +41,7 @@ def get_authentication(settings, force_authenticate):
     if token_expired:
         raise CLIError('Couldn\'t get authentication')
 
+
 def remove_authentication():
     tokenmanager = TokenManager()
     tokenmanager.delete_token_file()
