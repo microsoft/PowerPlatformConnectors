@@ -59,6 +59,6 @@ Evolution triggers are the events and conditions that cause a Pok\u00e9mon to ev
 Evolution triggers are the events and conditions that cause a Pok\u00e9mon to evolve.
 
 ## Known Issues and Limitations
-There are no known issues with the connector, but the latest status can be checked in the repository (issues). As limitations, this specific connector only implements the core endpoints of the underlying API (mainly pokemon related), and other connectors joining endpoints (locations, battles, items).That said, there are also endpoints and data, that arenot foreseen to be implemented. Please reach out and let us collaborate, if you are missing something. 
+There are no known issues with the connector, but the latest status can be checked in the repository (issues). As limitations, this specific connector only implements the core endpoints of the underlying API (mainly pokemon related), and other connectors joining endpoints (locations, battles, items).That said, there are also endpoints and data, that are not foreseen to be implemented. Please reach out and let us collaborate, if you are missing something. 
 
 The underlying service expects a fair use policy, so please don't abuse it with frequent calls, and rather implement resource caching whenever possible.
