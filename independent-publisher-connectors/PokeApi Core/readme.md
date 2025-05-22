@@ -10,7 +10,7 @@ The underlying service is opensource and public, hence there is no need for cred
 
 ## Supported Operations
 
-### List abilitities
+### List abilities
 Abilities provide passive effects for Pokémon in battle or in the overworld. Pokémon have multiple possible abilities but can have only one ability at a time.
 
 ### Get ability
