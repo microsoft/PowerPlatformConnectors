@@ -107,6 +107,7 @@ namespace SnowflakeV2CoreLogic.Providers
             string? orderBy = null;
             var top = "51";
             var skip = "0";
+            var filter = string.Empty;
 
             if (options != null)
             {
@@ -129,6 +130,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 orderBy = options.OrderBy != null ? options.OrderBy.RawValue : null;
                 top = queryOptions.IsTopSet ? queryOptions.Top.ToString() : Constants.DefaultNumberOfRowsToReturn.ToString();
                 skip = queryOptions.Skip.ToString();
+                filter = ConvertODataFilterToSql(options);
             }
 
             using (var latencyLogger = new LatencyLogger(Constants.ListAllItemsAsync, logger))
@@ -136,15 +138,55 @@ namespace SnowflakeV2CoreLogic.Providers
                 // This select statement needs to be transformed using the options
                 var stmt = string.Empty;
 
-                if (orderBy != null)
+                if (!string.IsNullOrEmpty(filter))
                 {
-                    // stmt = QueryConstants.SelectItemsQueryWithoutFilter.FormatInvariant(fieldsToSelect, table, orderBy, top, skip);
-                    stmt = string.Format(CultureInfo.InvariantCulture, QueryConstants.SelectItemsQueryWithoutFilter, fieldsToSelect, table, orderBy, top, skip);
+                    if (orderBy != null)
+                    {
+                        stmt = string.Format(
+                            CultureInfo.InvariantCulture,
+                            QueryConstants.SelectItemsQueryWithFilterAndOrderBy,
+                            fieldsToSelect,
+                            table,
+                            filter,
+                            orderBy,
+                            top,
+                            skip);
+                    }
+                    else
+                    {
+                        stmt = string.Format(
+                            CultureInfo.InvariantCulture,
+                            QueryConstants.SelectItemsQueryWithFilter,
+                            fieldsToSelect,
+                            table,
+                            filter,
+                            top,
+                            skip);
+                    }
                 }
                 else
                 {
-                    // stmt = QueryConstants.SelectItemsQueryWithoutFilterAndOrderBy.FormatInvariant(fieldsToSelect, table, top, skip);
-                    stmt = string.Format(CultureInfo.InvariantCulture, QueryConstants.SelectItemsQueryWithoutFilterAndOrderBy, fieldsToSelect, table, top, skip);
+                    if (orderBy != null)
+                    {
+                        stmt = string.Format(
+                            CultureInfo.InvariantCulture,
+                            QueryConstants.SelectItemsQueryWithoutFilter,
+                            fieldsToSelect,
+                            table,
+                            orderBy,
+                            top,
+                            skip);
+                    }
+                    else
+                    {
+                        stmt = string.Format(
+                            CultureInfo.InvariantCulture,
+                            QueryConstants.SelectItemsQueryWithoutFilterAndOrderBy,
+                            fieldsToSelect,
+                            table,
+                            top,
+                            skip);
+                    }
                 }
 
                 // Add request bindings
@@ -156,6 +198,19 @@ namespace SnowflakeV2CoreLogic.Providers
             }
 
             return snowflakeTableData;
+        }
+
+        public string ConvertODataFilterToSql(ODataQueryOptions options)
+        {
+            if (options?.Filter != null)
+            {
+                var filterClause = options.Filter.FilterClause;
+                var sqlConverter = new ODataToSqlParser();
+                return sqlConverter.ParseFilterToSql(filterClause);
+            }
+
+            // If no filter is provided, return an empty string
+            return string.Empty;
         }
 
         public async Task<SnowflakeTableData?> GetItemFromTableAsync(
@@ -302,11 +357,38 @@ namespace SnowflakeV2CoreLogic.Providers
             return data;
         }
 
-        internal async Task<SnowflakeTableData> GetNumberOfRecordsInTableAsync(
+        internal async Task<SnowflakeTableData> GetNumberOfRecordsAvailableInTableAsync(
             string table,
+            ODataQueryOptions options,
             SnowflakeConnectionParameters connectionParameters)
         {
-            var query = $"Select COUNT(*) FROM {table}";
+            var query = "SELECT COUNT(*) FROM " + table;
+
+            if (options != null)
+            {
+                QueryOptions? queryOptions;
+
+                try
+                {
+                    queryOptions = QueryOptions.Parse(options);
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new HttpResponseException(
+                    SnowflakeHttpException.CreateHttpResponseMessage(
+                        HttpStatusCode.BadRequest,
+                        ex.Message));
+                }
+
+                // Apply OData `$filter` conditions, ignore `$select` and `$orderby`
+                string filterText = string.Empty;
+                if (options.Filter != null)
+                {
+                    filterText = ConvertODataFilterToSql(options);
+                    query = $"SELECT COUNT(*) FROM {table} WHERE {filterText}";
+                }   
+            }
+
             SnowflakeRequestBindings queryBindings = new SnowflakeRequestBindings();
             var data = await snowflakeClient.CallAPIAsync(httpClient, query, queryBindings, connectionParameters).ConfigureAwait(true);
             return data;

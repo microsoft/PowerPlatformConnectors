@@ -69,7 +69,7 @@ namespace SnowflakeV2CoreLogic.Providers
             SnowflakeTableData? queryResponse = null;
 
             queryResponse = await snowflakeDBOperations.ListAllItemsAsync(table, options, connectionParameters).ConfigureAwait(true);
-            var numberOfRecordsResponse = await snowflakeDBOperations.GetNumberOfRecordsInTableAsync(table, connectionParameters).ConfigureAwait(true);
+            var numberOfRecordsResponse = await snowflakeDBOperations.GetNumberOfRecordsAvailableInTableAsync(table, options, connectionParameters).ConfigureAwait(true);
 
             logger.LogDebug(Constants.ClientSuccessMessage);
 
@@ -77,13 +77,21 @@ namespace SnowflakeV2CoreLogic.Providers
             {
                 var response = queryResponse.ToListOfItems();
                 var numberOfRecordsAvailable = int.Parse(numberOfRecordsResponse.Data?[0][0].ToString() ?? "0");
-                int numberOfRowsReturned = queryResponse.ResultSetMetaData?.NumRows ?? 0;
+                int numberOfRowsReturned = queryResponse.Data?.Count ?? 0;
 
                 Uri? nextUrl = SnowflakeToODataHelper.GenerateNextLink(snowflakeConnectionParametersProvider.GetReferralUrl(), options, numberOfRowsReturned, numberOfRecordsAvailable);
 
                 if (nextUrl != null)
                 {
                     request.ODataProperties().NextLink = nextUrl;
+                }
+
+                // Check if `$count` is present
+                bool onlyCountRequested = options?.Count?.RawValue?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true;
+
+                if (onlyCountRequested)
+                {
+                    request.ODataProperties().TotalCount = numberOfRecordsAvailable;
                 }
 
                 return response;

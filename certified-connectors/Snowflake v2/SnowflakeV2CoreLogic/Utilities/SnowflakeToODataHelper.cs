@@ -10,6 +10,8 @@ namespace SnowflakeV2CoreLogic.Utilities
     using System.Web.OData.Query;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Constants;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using SnowflakeV2CoreLogic;
     using SnowflakeV2CoreLogic.Models.SnowflakeAPIModels;
@@ -18,6 +20,25 @@ namespace SnowflakeV2CoreLogic.Utilities
     {
         private const string DateTimeOutputFormat = "yyyy-MM-dd HH:mm:ss.fffffff";
         private const string DateOutputFormat = "yyyy-MM-dd";
+
+        // Supported filter functions
+        // When new functions are added, they need to be added to the capabilityFilterFunction array
+        // so that they are returned in the metadata for delegation to work correctly
+        private static readonly CapabilityFilterFunction[] capabilityFilterFunction =
+        {
+            CapabilityFilterFunction.Equal,
+            CapabilityFilterFunction.NotEqual,
+            CapabilityFilterFunction.GreaterThan,
+            CapabilityFilterFunction.GreaterThanOrEqual,
+            CapabilityFilterFunction.LessThan,
+            CapabilityFilterFunction.LessThanOrEqual,
+            CapabilityFilterFunction.And,
+            CapabilityFilterFunction.Or,
+            CapabilityFilterFunction.Contains,
+            CapabilityFilterFunction.StartsWith,
+            CapabilityFilterFunction.EndsWith,
+            CapabilityFilterFunction.Not,
+        };
 
         /// <summary>
         /// Maps the table metadata response from Snowflake to an OData compatible format
@@ -28,12 +49,14 @@ namespace SnowflakeV2CoreLogic.Utilities
             SnowflakeAPIResponseModel primaryKeyResponse,
             string tableName)
         {
+            var numRows = metadataResponse?.ResultSetMetaData?.NumRows ?? 0;
+
             TableMetadata metadata = new TableMetadata()
             {
                 Name = tableName,
                 Title = tableName,
                 Permission = PermissionType.ReadWrite,
-                Capabilities = CreateTableCapabilities(),
+                Capabilities = CreateTableCapabilities(numRows),
             };
 
             // Get the indicies where the following information can be found
@@ -106,6 +129,16 @@ namespace SnowflakeV2CoreLogic.Utilities
                         var keyType = string.Equals(columnName, primaryKey, StringComparison.OrdinalIgnoreCase) ?
                                                KeyType.Primary : KeyType.None;
 
+                        ColumnCapabilitiesMetadata columnCapabilitiesMetadata = new ColumnCapabilitiesMetadata()
+                        {
+                            FilterFunctions = capabilityFilterFunction,
+                        };
+
+                        JsonSerializer serializer = new JsonSerializer();
+                        serializer.TypeNameHandling = TypeNameHandling.None;
+                        serializer.Converters.Add(new StringEnumConverter());
+                        JToken columnCapabilitiesMetadataJson = JToken.FromObject(columnCapabilitiesMetadata, serializer);
+
                         // Create an entry for the current column
                         var rowEntry = new JObject()
                         {
@@ -116,6 +149,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                             [SchemaPropertyConstants.Permission] = "read-write",
                             [SchemaPropertyConstants.KeyType] = keyType,
                             [SchemaPropertyConstants.Required] = isFieldRequired,
+                            [SchemaPropertyConstants.Capabilities] = columnCapabilitiesMetadataJson,
                         };
 
                         if (!string.IsNullOrEmpty(datatype.ConnectorDataFormat))
@@ -141,9 +175,20 @@ namespace SnowflakeV2CoreLogic.Utilities
             return metadata;
         }
 
-        public static TableCapabilitiesMetadata CreateTableCapabilities()
+        public static TableCapabilitiesMetadata CreateTableCapabilities(int numRows)
         {
-            TableFilterRestrictionsMetadata? tableFilterRestrictionsMetadata = null;
+            // Get all possible values of CapabilityFilterFunction
+            var allCapabilities = Enum.GetValues(typeof(CapabilityFilterFunction)).Cast<CapabilityFilterFunction>();
+
+            // Find capabilities not included in capabilityFilterFunction
+            var nonFilterableProperties = allCapabilities.Except(capabilityFilterFunction).Select(c => c.ToString()).ToArray();
+
+            TableFilterRestrictionsMetadata? tableFilterRestrictionsMetadata = new TableFilterRestrictionsMetadata()
+            {
+                Filterable = true,
+                NonFilterableProperties = nonFilterableProperties,
+                RequiredProperties = null
+            };
 
             // Identify sort restrictions
             var sortRestrictions = new TableSortRestrictionsMetadata();
@@ -153,13 +198,15 @@ namespace SnowflakeV2CoreLogic.Utilities
             TableSelectRestrictionsMetadata selectRestrictions = new TableSelectRestrictionsMetadata();
             selectRestrictions.Selectable = true;
 
-            CapabilityFilterFunction[] capabilityFilterFunction = new CapabilityFilterFunction[0];
-
             TableCapabilitiesMetadata tableCapabilitiesMetadata = new TableCapabilitiesMetadata()
             {
                 FilterRestrictions = tableFilterRestrictionsMetadata,
                 SortRestrictions = sortRestrictions,
                 SelectRestrictions = selectRestrictions,
+                CountRestrictions = new TableCountRestrictionsMetadata()
+                {
+                    Countable = numRows > 0,
+                },
                 FilterFunctionSupport = capabilityFilterFunction,
             };
 
