@@ -14,7 +14,7 @@ This connector lets you easily integrate Flotiq with Microsoft services such as 
 
 Before you begin, make sure you have:
 
-- A [Flotiq account](https://editor.flotiq.com/register?plan=1ef44daa-fdc3-6790-960e-cb20a0848bfa?utm_campaign=flotiq_powerapps_connector&utm_medium=referral&utm_source=microsoft) (free plan available)
+- A [Flotiq account](https://editor.flotiq.com/register?utm_campaign=flotiq_powerapps_connector&utm_medium=referral&utm_source=microsoft) (free plan available)
 - At least one **Content Type Definition (CTD)** created in Flotiq
 - An API key with access to the CTD
 - Access to Microsoft Power Apps or a Microsoft Azure subscription (for Logic Apps)
