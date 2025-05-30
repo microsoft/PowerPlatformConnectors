@@ -1,8 +1,8 @@
-##Impexium Connector
-Impexium is the premier association management software solution for nonprofits and member-based organizations.
+##re:Members AMS Connector
+re:Members AMS (formerly Impexium) is the premier association management software solution for nonprofits and member-based organizations.
 
 ## Prerequisites
-To use this connector, you must have an Impexium account with access to one or more Impexium environments.
+To use this connector, you must have a re:Members AMS account with access to one or more re:Members AMS environments.
 
 ##How to get credentials?
 Contact support@impexium.com to get your API Key
