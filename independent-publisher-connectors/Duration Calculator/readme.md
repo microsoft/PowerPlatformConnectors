@@ -1,7 +1,7 @@
-# Duration Calculator
+# Duration Calculator (Independent Publisher)
 A comprehensive duration and time calculation connector supporting business days, time zones, payroll periods, project timelines, and advanced DST calculations for enterprise applications.
 
-## Publisher: Troy Taylor, Hitachi Solutions
+## Publisher: Troy Taylor
 
 ## Prerequisites
 There are no prerequisites to use this connector. This connector does not use an external REST API, but rather uses custom C# code to handle all operations.
