@@ -206,6 +206,9 @@
             "schema": {
               "type": "object"
             }
+          },
+          "400": {
+            "description": "This Account lacks sufficient permissions. Connect not enabled for account."
           }
         },
         "deprecated": false,
@@ -414,7 +417,7 @@
           {
             "name": "accountId",
             "in": "path",
-            "description": "Account id",
+            "description": "Account ID",
             "required": true,
             "x-ms-summary": "Account",
             "x-ms-test-value": "insert account id",
@@ -429,7 +432,7 @@
           {
             "name": "envelopeId",
             "in": "path",
-            "description": "Envelope id",
+            "description": "Envelope ID",
             "required": true,
             "x-ms-summary": "Envelope",
             "x-ms-test-value": "insert envelope id",
@@ -438,9 +441,9 @@
           {
             "name": "documentGuid",
             "in": "query",
-            "description": "Document Guid",
+            "description": "Document GUID",
             "required": true,
-            "x-ms-summary": "Document Guid",
+            "x-ms-summary": "Document GUID",
             "x-ms-test-value": "insert document guid",
             "type": "string"
           },
@@ -450,22 +453,44 @@
             "required": true,
             "schema": {
               "type": "array",
+              "x-ms-summary": "Field",
               "items": {
                 "type": "object",
                 "properties": {
+                  "fieldType": {
+                    "type": "string",
+                    "x-ms-summary": "Type",
+                    "description": "Choose the type of document generation field to update",
+                    "enum": [
+                      "Text box",
+                      "Date",
+                      "Number",
+                      "Select",
+                      "Table row"
+                    ]
+                  },
                   "name": {
                     "type": "string",
                     "x-ms-summary": "Name",
-                    "description": "Name"
+                    "description": "Enter the field name or table column name"
                   },
                   "value": {
                     "type": "string",
                     "x-ms-summary": "Value",
-                    "description": "Value"
+                    "description": "Enter the field data"
+                  },
+                  "tableName": {
+                    "type": "string",
+                    "x-ms-summary": ": Table Name",
+                    "description": "Required for 'Table Row'. Enter the table name."
+                  },
+                  "rowNumber": {
+                    "type": "string",
+                    "x-ms-summary": ": Table Row",
+                    "description": "Required for 'Table Row'. Enter the row number"
                   }
                 }
-              },
-              "x-ms-summary": "Field"
+              }
             }
           }
         ],
@@ -588,7 +613,7 @@
               "Portfolio : Get envelope documents as a PDF Portfolio"
             ]
           }
-         ],
+        ],
         "responses": {
           "200": {
             "description": "default",
@@ -777,7 +802,7 @@
             "required": false,
             "x-ms-summary": "Expire After",
             "type": "string"
-           }
+          }
         ],
         "responses": {
           "200": {
@@ -843,26 +868,26 @@
         "x-ms-visibility": "advanced"
       },
       "put": {
-        "tags":[
+        "tags": [
           "DocuSign"
         ],
         "summary": "Update envelope prefill tabs",
         "description": "Update values for a list of prefill tabs",
         "operationId": "UpdateEnvelopePrefillTabs",
-        "consumes":[
+        "consumes": [
           "application/json",
           "text/json",
           "application/xml",
           "text/xml",
           "application/x-www-form-urlencoded"
         ],
-        "produces":[
+        "produces": [
           "application/json",
           "text/json",
           "application/xml",
           "text/xml"
         ],
-        "parameters":[
+        "parameters": [
           {
             "name": "accountId",
             "in": "path",
@@ -931,7 +956,7 @@
             "description": "OK"
           }
         },
-        "deprecated":false,
+        "deprecated": false,
         "x-ms-visibility": "important",
         "x-ms-no-generic-test": true
       }
@@ -1187,6 +1212,105 @@
         "x-ms-visibility": "important"
       }
     },
+    "/accounts/{accountId}/envelopes/compositeTemplates": {
+      "post": {
+        "summary": "Create envelope using composite templates",
+        "operationId": "CompositeTemplates",
+        "description": "Create envelope using composite templates",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "emailSubject",
+            "in": "query",
+            "description": "Subject of the email.",
+            "required": true,
+            "x-ms-summary": "Email subject",
+            "x-ms-visibility": "important",
+            "type": "string"
+          },
+          {
+            "name": "emailBody",
+            "in": "query",
+            "description": "Body of the email.",
+            "required": false,
+            "x-ms-summary": "Email body",
+            "x-ms-visibility": "important",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Envelope status",
+            "required": true,
+            "x-ms-summary": "Envelope status",
+            "x-ms-test-value": "Created",
+            "x-ms-visibility": "important",
+            "type": "string",
+            "enum": [
+              "Sent",
+              "Created"
+            ]
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/CompositeTemplateSchema"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "envelopeId": {
+                  "description": "The id of the envelope.",
+                  "type": "string",
+                  "x-ms-summary": "Envelope Id",
+                  "x-ms-visibility": "important"
+                },
+                "status": {
+                  "description": "The status of the envelope.",
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "x-ms-visibility": "important"
+                },
+                "statusDateTime": {
+                  "description": "The datetime the status was set.",
+                  "type": "string",
+                  "x-ms-summary": "Status date time",
+                  "x-ms-visibility": "important"
+                },
+                "uri": {
+                  "description": "The URI for the envelope in DocuSign.",
+                  "type": "string",
+                  "x-ms-summary": "URI",
+                  "x-ms-visibility": "important"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/accounts/salesCopilotAccount/envelopes/getRelatedActivities": {
       "get": {
         "tags": [
@@ -1293,19 +1417,19 @@
           "400": {
             "description": "Bad Request",
             "schema": {
-                "$ref": "#/definitions/ApiError"
+              "$ref": "#/definitions/ApiError"
             }
           },
           "500": {
             "description": "Server Error",
             "schema": {
               "$ref": "#/definitions/ApiError"
-              }
             }
-          },
-          "x-ms-openai-data": {
-            "openai-enabled": true
           }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true
+        }
       }
     },
     "/accounts/salesCopilotAccount/envelopes/getRelatedRecords": {
@@ -1406,25 +1530,25 @@
           "400": {
             "description": "Bad Request",
             "schema": {
-                "$ref": "#/definitions/ApiError"
+              "$ref": "#/definitions/ApiError"
             }
           },
           "401": {
             "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/ApiError"
-              }
-            },
+            }
+          },
           "500": {
             "description": "Server Error",
             "schema": {
               "$ref": "#/definitions/ApiError"
-              }
             }
-          },
-          "x-ms-openai-data": {
-            "openai-enabled": true
           }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true
+        }
       }
     },
     "/accounts/salesCopilotAccount/envelopes/getKeySales": {
@@ -1526,25 +1650,25 @@
           "400": {
             "description": "Bad Request",
             "schema": {
-                "$ref": "#/definitions/ApiError"
+              "$ref": "#/definitions/ApiError"
             }
           },
           "401": {
             "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/ApiError"
-              }
-            },
+            }
+          },
           "500": {
             "description": "Server Error",
             "schema": {
               "$ref": "#/definitions/ApiError"
-              }
             }
-          },
-          "x-ms-openai-data": {
-            "openai-enabled": true
           }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true
+        }
       }
     },
     "/accounts/salesCopilotAccount/envelopes/getEmailSummary": {
@@ -1631,7 +1755,7 @@
             "in": "query",
             "type": "integer",
             "format": "int32"
-          },
+          }
         ],
         "responses": {
           "200": {
@@ -1643,25 +1767,25 @@
           "400": {
             "description": "Bad Request",
             "schema": {
-                "$ref": "#/definitions/ApiError"
+              "$ref": "#/definitions/ApiError"
             }
           },
           "401": {
             "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/ApiError"
-              }
-            },
+            }
+          },
           "500": {
             "description": "Server Error",
             "schema": {
               "$ref": "#/definitions/ApiError"
-              }
             }
-          },
-          "x-ms-openai-data": {
-            "openai-enabled": true
           }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true
+        }
       }
     },
     "/accounts/copilotAccount/envelopes/listEnvelopes": {
@@ -1820,6 +1944,198 @@
             "name": "to_date",
             "x-ms-summary": "End date",
             "description": "Enter '' when no value is provided by user. Enter end date-time in the pattern or format: 2017-05-02T01:44Z.",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/FilteredEnvelopeListResponse"
+            }
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important"
+      }
+    },
+    "/accounts/{accountId}/envelopes/SearchListEnvelopes": {
+      "get": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "List envelopes",
+        "description": "This action brings back relevant Docusign envelopes based on envelope status, date range, recipient name, recipient email address, envelope title, document name, or envelope custom field value. The output is the title, description, Envelope ID, document names, sender names, envelope status, status date, date sent, and a URL of the envelope which can be used as a link to view the envelope in Docusign.",
+        "operationId": "SearchListEnvelopes",
+        "x-ms-no-generic-test": true,
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "recipientName",
+            "x-ms-summary": "Recipient name",
+            "description": "This action lists envelopes based on recipient name",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "recipientEmailId",
+            "x-ms-summary": "Recipient email",
+            "description": "Filters envelopes by recipient email",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "envelopeTitle",
+            "x-ms-summary": "Envelope subject",
+            "description": "Filters envelopes by envelope subject",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "customFieldName",
+            "x-ms-summary": "Custom field name",
+            "description": "This action lists envelopes based on a name of its custom fields",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "customFieldValue",
+            "x-ms-summary": "Custom field value",
+            "description": "Filters by custom field value",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "envelopeStatus",
+            "x-ms-summary": "Envelope status",
+            "description": "This action lists envelopes based on status of the envelope",
+            "enum": [
+              "Any",
+              "Created",
+              "Sent",
+              "Delivered",
+              "Signed",
+              "Completed",
+              "Declined",
+              "Voided",
+              "Deleted"
+            ],
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "default": "Any"
+          },
+          {
+            "name": "folder_ids",
+            "x-ms-summary": "Folder",
+            "description": "Filters envelopes by the selected folder",
+            "enum": [
+              "Awaiting my signature",
+              "Completed",
+              "Draft",
+              "Drafts",
+              "Expiring soon",
+              "Inbox",
+              "Out for signature",
+              "Recycle bin",
+              "Sent items",
+              "Waiting for others"
+            ],
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "order_by",
+            "x-ms-summary": "Order by",
+            "description": "Sorts envelopes in the selected order",
+            "enum": [
+              "Action required",
+              "Created",
+              "Completed",
+              "Envelope name",
+              "Expire",
+              "Last modified",
+              "Sent",
+              "Signer list",
+              "Status",
+              "Subject",
+              "User name",
+              "Status changed"
+            ],
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "default": "Status changed"
+          },
+          {
+            "name": "top",
+            "x-ms-summary": "Return envelopes",
+            "description": "Specify the number of envelopes to return (default is 10; maximum is 1,000)",
+            "in": "query",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "skip",
+            "x-ms-summary": "Skip envelopes",
+            "description": "Specify the number of envelopes to skip from the start",
+            "in": "query",
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "from_date",
+            "x-ms-summary": "Start date",
+            "description": "Enter start date-time in UTC format: 2017-05-02T01:44z",
+            "default": "2024-01-02T12:45Z",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "format": "date-time"
+          },
+          {
+            "name": "to_date",
+            "x-ms-summary": "End date",
+            "description": "Enter end date-time in UTC format: 2017-05-02T01:44z.",
             "in": "query",
             "type": "string",
             "required": false,
@@ -2203,7 +2519,7 @@
         "tags": [
           "DocuSign"
         ],
-        "summary": "Create envelope using template with recipients",
+        "summary": "DEPRECATED: Create envelope using template with recipients",
         "description": "Create a new envelope using a specified template and specify recipients.",
         "operationId": "SendEnvelope",
         "x-ms-no-generic-test": true,
@@ -2225,6 +2541,7 @@
             "name": "accountId",
             "in": "path",
             "description": "Account id",
+            "x-ms-visibility": "important",
             "required": true,
             "x-ms-summary": "Account",
             "x-ms-test-value": "insert account id",
@@ -2235,6 +2552,20 @@
               "value-title": "name"
             },
             "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Envelope status",
+            "required": true,
+            "x-ms-summary": "Envelope status",
+            "x-ms-test-value": "Created",
+            "x-ms-visibility": "important",
+            "type": "string",
+            "enum": [
+              "Sent",
+              "Created"
+            ]
           },
           {
             "name": "templateId",
@@ -2258,20 +2589,6 @@
             "type": "string"
           },
           {
-            "name": "status",
-            "in": "query",
-            "description": "Envelope status",
-            "required": true,
-            "x-ms-summary": "Envelope status",
-            "x-ms-test-value": "Created",
-            "x-ms-visibility": "important",
-            "type": "string",
-            "enum": [
-              "Sent",
-              "Created"
-            ]
-          },
-          {
             "name": "signers",
             "in": "body",
             "description": "The signers of the document.",
@@ -2284,20 +2601,113 @@
           },
           {
             "name": "emailSubject",
-            "in":"query",
+            "in": "query",
             "description": "Email subject",
-            "required":false,
+            "required": false,
             "x-ms-summary": "Email subject",
-            "type":"string",
+            "type": "string",
             "x-ms-visibility": "advanced"
           },
           {
             "name": "emailBody",
-            "in":"query",
+            "in": "query",
             "description": "Email body",
-            "required":false,
+            "required": false,
             "x-ms-summary": "Email body",
-            "type":"string",
+            "type": "string",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreateEnvelopeResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important"
+      }
+    },
+    "/accounts/{accountId}/envelopes/createWithRecipientFields": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Create envelope using template with recipients and tabs",
+        "description": "Create envelope using template with recipients and tabs",
+        "operationId": "SendEnvelopeWithRecipientFields",
+        "x-ms-no-generic-test": true,
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "x-ms-visibility": "important",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "templateId",
+            "in": "query",
+            "description": "Template ID",
+            "required": true,
+            "x-ms-summary": "Template",
+            "x-ms-test-value": "insert template id",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetEnvelopeTemplates",
+              "parameters": {
+                "accountId": {
+                  "parameter": "accountId"
+                }
+              },
+              "value-collection": "envelopeTemplates",
+              "value-path": "templateId",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "recipients",
+            "in": "body",
+            "description": "The signers of the document.",
+            "x-ms-visibility": "important",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/DynamicRecipients"
+            },
+            "x-ms-summary": "Recipients"
+          },
+          {
+            "name": "emailSubject",
+            "in": "query",
+            "description": "Email subject",
+            "required": false,
+            "x-ms-summary": "Email subject",
+            "type": "string",
             "x-ms-visibility": "advanced"
           }
         ],
@@ -2453,196 +2863,12 @@
         "x-ms-visibility": "important"
       },
       "put": {
-        "tags":[
+        "tags": [
           "DocuSign"
         ],
         "summary": "Update envelope custom field",
         "description": "Update value for the specified envelope custom field",
         "operationId": "UpdateEnvelopeCustomField",
-        "consumes":[
-          "application/json",
-          "text/json",
-          "application/xml",
-          "text/xml",
-          "application/x-www-form-urlencoded"
-        ],
-        "produces":[
-          "application/json",
-          "text/json",
-          "application/xml",
-          "text/xml"
-        ],
-        "parameters":[
-          {
-            "name": "accountId",
-            "in": "path",
-            "description": "Account id",
-            "required": true,
-            "x-ms-summary": "Account",
-            "x-ms-test-value": "insert account id",
-            "x-ms-dynamic-values": {
-              "operationId": "GetLoginAccounts",
-              "value-collection": "loginAccounts",
-              "value-path": "accountIdGuid",
-              "value-title": "name"
-            },
-            "type": "string"
-          },
-          {
-            "name": "envelopeId",
-            "in": "path",
-            "description": "Envelope id",
-            "required": true,
-            "x-ms-summary": "Envelope",
-            "x-ms-test-value": "insert envelope id",
-            "type": "string"
-          },
-          {
-            "name": "fieldId",
-            "in": "query",
-            "description": "Custom Field ID",
-            "required": true,
-            "x-ms-summary": "Field ID",
-            "type": "string"
-          },
-          {
-            "name": "fieldType",
-            "in":"query",
-            "description": "Custom Field Type",
-            "required":true,
-            "x-ms-summary": "Field Type",
-            "type":"string"
-          },
-          {
-            "name": "name",
-            "in": "query",
-            "description": "Custom Field Name",
-            "required": true,
-            "x-ms-summary": "Name",
-            "type": "string"
-          },
-          {
-            "name": "value",
-            "in": "query",
-            "description": "Custom Field Value",
-            "required": true,
-            "x-ms-summary": "Value",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/UpdateEnvelopeCustomFieldResponse"
-            }
-          }
-        },
-        "deprecated":false,
-        "x-ms-visibility": "important",
-        "x-ms-no-generic-test": true
-      }
-    },
-    "/accounts/{accountId}/envelopes/{envelopeId}/views/sender": {
-      "post": {
-        "tags":[
-          "DocuSign"
-        ],
-        "summary": "Generate Embedded Sender URL",
-        "description": "Generate Embedded Sender URL",
-        "operationId": "GenerateEmbeddedSenderURL",
-        "consumes":[
-          "application/json",
-          "text/json",
-          "application/xml",
-          "text/xml",
-          "application/x-www-form-urlencoded"
-        ],
-        "produces":[
-          "application/json",
-          "text/json",
-          "application/xml",
-          "text/xml"
-        ],
-        "parameters":[
-          {
-            "name": "accountId",
-            "in": "path",
-            "description": "Account id",
-            "required": true,
-            "x-ms-summary": "Account",
-            "x-ms-test-value": "insert account id",
-            "x-ms-dynamic-values": {
-              "operationId": "GetLoginAccounts",
-              "value-collection": "loginAccounts",
-              "value-path": "accountIdGuid",
-              "value-title": "name"
-            },
-            "type": "string"
-          },
-          {
-            "name": "envelopeId",
-            "in": "path",
-            "description": "Envelope id",
-            "required": true,
-            "x-ms-summary": "Envelope",
-            "x-ms-test-value": "insert envelope id",
-            "type": "string"
-          },
-          {
-            "name": "openIn",
-            "in":"query",
-            "description": "Open in",
-            "required":true,
-            "x-ms-summary": "Open in",
-            "x-ms-visibility":"important",
-            "type":"string",
-            "enum":["Prepare", "Tagging"],
-            "default": "Prepare"
-          },
-          {
-            "name": "returnUrl",
-            "in":"query",
-            "description": "Return URL",
-            "required":true,
-            "x-ms-summary": "Return URL",
-            "x-ms-visibility":"important",
-            "type":"string",
-            "enum":["DocuSign homepage", "Add a different URL"],
-            "default": "DocuSign homepage"
-          },
-          {
-            "name": "additionalURL",
-            "in": "body",
-            "description": "Additional added URL.",
-            "schema": {
-              "$ref": "#/definitions/AdditionalURLForSenderView"
-            },
-            "x-ms-summary": "Additional added URL",
-            "x-ms-visibility": "advanced"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/EmbeddedSenderResponse"
-            }
-          }
-        },
-        "deprecated":false,
-        "x-ms-visibility": "important",
-        "x-ms-no-generic-test": true
-      }
-    },
-    "/accounts/{accountId}/envelopes/{envelopeId}/views/recipient":{
-      "post":{
-        "tags":[
-          "DocuSign"
-        ],
-        "summary": "Generate Embedded Signing URL",
-        "description": "Generate Embedded Signing URL",
-        "operationId": "GenerateEmbeddedSigningURL",
         "consumes": [
           "application/json",
           "text/json",
@@ -2682,10 +2908,202 @@
             "type": "string"
           },
           {
+            "name": "fieldId",
+            "in": "query",
+            "description": "Custom Field ID",
+            "required": true,
+            "x-ms-summary": "Field ID",
+            "type": "string"
+          },
+          {
+            "name": "fieldType",
+            "in": "query",
+            "description": "Custom Field Type",
+            "required": true,
+            "x-ms-summary": "Field Type",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Custom Field Name",
+            "required": true,
+            "x-ms-summary": "Name",
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "description": "Custom Field Value",
+            "required": true,
+            "x-ms-summary": "Value",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UpdateEnvelopeCustomFieldResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important",
+        "x-ms-no-generic-test": true
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/views/sender": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Generate Embedded Sender URL",
+        "description": "Generate Embedded Sender URL",
+        "operationId": "GenerateEmbeddedSenderURL",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "description": "Envelope id",
+            "required": true,
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id",
+            "type": "string"
+          },
+          {
+            "name": "openIn",
+            "in": "query",
+            "description": "Open in",
+            "required": true,
+            "x-ms-summary": "Open in",
+            "x-ms-visibility": "important",
+            "type": "string",
+            "enum": [
+              "Prepare",
+              "Tagging"
+            ],
+            "default": "Prepare"
+          },
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "description": "Return URL",
+            "required": true,
+            "x-ms-summary": "Return URL",
+            "x-ms-visibility": "important",
+            "type": "string",
+            "enum": [
+              "DocuSign homepage",
+              "Add a different URL"
+            ],
+            "default": "DocuSign homepage"
+          },
+          {
+            "name": "additionalURL",
+            "in": "body",
+            "description": "Additional added URL.",
+            "schema": {
+              "$ref": "#/definitions/AdditionalURLForSenderView"
+            },
+            "x-ms-summary": "Additional added URL",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/EmbeddedSenderResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important",
+        "x-ms-no-generic-test": true
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/views/recipient": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Generate Embedded Signing URL",
+        "description": "Generate Embedded Signing URL",
+        "operationId": "GenerateEmbeddedSigningURL",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "description": "Envelope ID",
+            "required": true,
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id",
+            "type": "string",
+            "x-ms-visibility": "important"
+          },
+          {
             "name": "signerName",
             "in": "query",
-            "description": "Name of The Signer",
             "required": true,
+            "description": "Signer Name",
             "x-ms-summary": "Signer Name",
             "x-ms-test-value": "test name",
             "x-ms-visibility": "important",
@@ -2694,8 +3112,8 @@
           {
             "name": "signerEmail",
             "in": "query",
-            "description": "Email of The Signer",
             "required": true,
+            "description": "Signer Email",
             "x-ms-summary": "Signer Email",
             "x-ms-test-value": "test@email.com",
             "x-ms-visibility": "important",
@@ -2704,32 +3122,53 @@
           {
             "name": "clientUserId",
             "in": "query",
-            "description": "Client User ID",
-            "required": true,
+            "description": "Required unless the signer is in-person. Leave blank for in-person signers",
             "x-ms-summary": "Client User ID",
             "x-ms-visibility": "important",
             "type": "string"
           },
           {
             "name": "authenticationMethod",
-            "in":"query",
+            "in": "query",
             "description": "Authentication Method",
-            "required":true,
+            "required": true,
             "x-ms-summary": "Authentication Method",
             "x-ms-visibility": "important",
-            "type":"string",
-            "enum":["Biometric", "Email", "HTTPBasicAuth", "Kerberos", "KnowledgeBasedAuth", "None", "PaperDocuments", "Password", "RSASecureID", "SingleSignOn_CASiteminder", "SingleSignOn_InfoCard", "SingleSignOn_MicrosoftActiveDirectory", "SingleSignOn_Other", "SingleSignOn_Passport", "SingleSignOn_SAML", "Smartcard", "SSLMutualAuth", "X509Certificate"],
+            "type": "string",
+            "enum": [
+              "Biometric",
+              "Email",
+              "HTTPBasicAuth",
+              "Kerberos",
+              "KnowledgeBasedAuth",
+              "None",
+              "PaperDocuments",
+              "Password",
+              "RSASecureID",
+              "SingleSignOn_CASiteminder",
+              "SingleSignOn_InfoCard",
+              "SingleSignOn_MicrosoftActiveDirectory",
+              "SingleSignOn_Other",
+              "SingleSignOn_Passport",
+              "SingleSignOn_SAML",
+              "Smartcard",
+              "SSLMutualAuth",
+              "X509Certificate"
+            ],
             "default": "None"
           },
           {
             "name": "returnUrl",
-            "in":"query",
+            "in": "query",
             "description": "Return URL",
-            "required":true,
+            "required": true,
             "x-ms-summary": "Return URL",
-            "x-ms-visibility":"important",
-            "type":"string",
-            "enum":["Default URL", "Add a different URL"],
+            "x-ms-visibility": "important",
+            "type": "string",
+            "enum": [
+              "Default URL",
+              "Add a different URL"
+            ],
             "default": "Default URL"
           },
           {
@@ -2741,6 +3180,136 @@
             },
             "x-ms-summary": "Additional added URL",
             "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/EmbeddedSigningResponse"
+            }
+          }
+        },
+        "deprecated": true,
+        "x-ms-visibility": "important",
+        "x-ms-no-generic-test": true
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/views/recipientV2": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Generate Embedded Signing URL (V2)",
+        "description": "Generate Embedded Signing URL (V2)",
+        "operationId": "GenerateEmbeddedSigningURLV2",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "description": "Envelope ID",
+            "required": true,
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id",
+            "type": "string",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "isInPersonSigner",
+            "in": "query",
+            "description": "Yes/No",
+            "required": true,
+            "x-ms-summary": "Is this an in-person signer?",
+            "type": "string",
+            "enum": [
+              "Yes",
+              "No"
+            ],
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "authenticationMethod",
+            "in": "query",
+            "description": "Authentication Method",
+            "required": true,
+            "x-ms-summary": "Authentication Method",
+            "x-ms-visibility": "important",
+            "type": "string",
+            "enum": [
+              "Biometric",
+              "Email",
+              "HTTPBasicAuth",
+              "Kerberos",
+              "KnowledgeBasedAuth",
+              "None",
+              "PaperDocuments",
+              "Password",
+              "RSASecureID",
+              "SingleSignOn_CASiteminder",
+              "SingleSignOn_InfoCard",
+              "SingleSignOn_MicrosoftActiveDirectory",
+              "SingleSignOn_Other",
+              "SingleSignOn_Passport",
+              "SingleSignOn_SAML",
+              "Smartcard",
+              "SSLMutualAuth",
+              "X509Certificate"
+            ],
+            "default": "None"
+          },
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "description": "Return URL",
+            "required": true,
+            "x-ms-summary": "Return URL",
+            "x-ms-visibility": "important",
+            "type": "string",
+            "enum": [
+              "Default URL",
+              "Add a different URL"
+            ],
+            "default": "Default URL"
+          },
+          {
+            "name": "additionalURL",
+            "in": "body",
+            "required": true,
+            "description": "Additional added URL.",
+            "schema": {
+              "$ref": "#/definitions/DynamicSigningUrlFields"
+            },
+            "x-ms-summary": "Additional added URL",
+            "x-ms-visibility": "important"
           }
         ],
         "responses": {
@@ -3104,6 +3673,14 @@
             "required": false,
             "x-ms-summary": "Phone Number",
             "type": "string"
+          },
+          {
+            "name": "recipientId",
+            "in": "query",
+            "description": "Recipinet Id",
+            "required": false,
+            "x-ms-summary": "Recipient Id",
+            "type": "string"
           }
         ],
         "responses": {
@@ -3111,6 +3688,60 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/Signer"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-no-generic-test": true,
+        "x-ms-visibility": "advanced"
+      }
+    },
+    "/accounts/{accountId}/envelopes/{envelopeId}/audit_events": {
+      "get": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Get audit event list",
+        "description": "Get audit event list",
+        "operationId": "GetAuditEvents",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "description": "Envelope id",
+            "required": true,
+            "x-ms-summary": "Envelope",
+            "x-ms-test-value": "insert envelope id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AuditResponse"
             }
           }
         },
@@ -3300,10 +3931,29 @@
           {
             "name": "phoneNumber",
             "in": "query",
-            "description": " For SMS notifications, the phone number without the country code.",
+            "description": "Signer email or SMS phone required. Exclude country code for phone number.",
             "x-ms-summary": "SMS Phone Number",
             "x-ms-visibility": "advanced",
             "type": "integer"
+          },
+          {
+            "name": "signingGroupId",
+            "in": "query",
+            "description": "Signing Group",
+            "x-ms-summary": "Signing Group",
+            "x-ms-visibility": "advanced",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetSigningGroups",
+              "parameters": {
+                "accountId": {
+                  "parameter": "accountId"
+                }
+              },
+              "value-collection": "groups",
+              "value-path": "signingGroupId",
+              "value-title": "groupName"
+            }
           },
           {
             "name": "signatureType",
@@ -3315,6 +3965,25 @@
             "x-ms-dynamic-values": {
               "operationId": "StaticResponseForSignatureTypes",
               "value-collection": "signatureTypes",
+              "value-path": "type",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "workflowId",
+            "in": "query",
+            "description": "IDV workflows with pen signature types must be selected here.",
+            "x-ms-summary": "Verification workflow",
+            "x-ms-visibility": "advanced",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAllWorkflowIDs",
+              "parameters": {
+                "accountId": {
+                  "parameter": "accountId"
+                }
+              },
+              "value-collection": "workFlowIds",
               "value-path": "type",
               "value-title": "name"
             }
@@ -3397,7 +4066,13 @@
             "type": "string",
             "description": "Verification Type",
             "x-ms-summary": "Verification Type",
-            "enum":["None", "Access Code", "ID Verification", "Phone Authentication", "Knowledge Based"],
+            "enum": [
+              "None",
+              "Access Code",
+              "ID Verification",
+              "Phone Authentication",
+              "Knowledge Based"
+            ],
             "default": "None"
           },
           {
@@ -3625,10 +4300,29 @@
           {
             "name": "phoneNumber",
             "in": "query",
-            "description": " For SMS notifications, the phone number without the country code.",
+            "description": "Signer email or SMS phone required. Exclude country code for phone number.",
             "x-ms-summary": "SMS Phone Number",
             "x-ms-visibility": "advanced",
             "type": "integer"
+          },
+          {
+            "name": "signingGroupId",
+            "in": "query",
+            "description": "Signing Group",
+            "x-ms-summary": "Signing Group",
+            "x-ms-visibility": "advanced",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetSigningGroups",
+              "parameters": {
+                "accountId": {
+                  "parameter": "accountId"
+                }
+              },
+              "value-collection": "groups",
+              "value-path": "signingGroupId",
+              "value-title": "groupName"
+            }
           },
           {
             "name": "additionalRecipientParams",
@@ -3781,6 +4475,150 @@
         "x-ms-visibility": "important"
       }
     },
+    "/accounts/{accountId}/bulk_send_lists": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Create bulk send list",
+        "description": "Create bulk send list",
+        "operationId": "CreateBulkSendList",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "description": "Bulk send list name",
+            "x-ms-summary": "Bulk send list name",
+            "type": "string"
+          },
+          {
+            "name": "csv",
+            "in": "body",
+            "description": "CSV File",
+            "x-ms-visibility": "important",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "csv": {
+                  "description": "Upload CSV File",
+                  "type": "string",
+                  "x-ms-summary": "CSV File"
+                }
+              }
+            },
+            "x-ms-summary": "CSV File"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BulkSendListGuid"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-no-generic-test": true,
+        "x-ms-visibility": "important"
+      }
+    },
+    "/accounts/{accountId}/bulk_send_lists/{bulkSendListId}/send": {
+      "post": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Bulk send envelope using template",
+        "description": "Bulk send envelope using template",
+        "operationId": "BulkSend",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "bulkSendListId",
+            "in": "path",
+            "required": true,
+            "description": "Bulk send list GUID",
+            "x-ms-summary": "Bulk send list GUID",
+            "type": "string"
+          },
+          {
+            "name": "envelopeOrTemplateId",
+            "in": "query",
+            "description": "Enter the template ID, or choose a template from the dropdown",
+            "required": true,
+            "x-ms-summary": "Template ID",
+            "x-ms-test-value": "Enter the template ID, or choose a template from the dropdown",
+            "x-ms-dynamic-values": {
+              "operationId": "GetEnvelopeTemplates",
+              "parameters": {
+                "accountId": {
+                  "parameter": "accountId"
+                }
+              },
+              "value-collection": "envelopeTemplates",
+              "value-path": "templateId",
+              "value-title": "name"
+            },
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BulkSendListGuid"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-no-generic-test": true,
+        "x-ms-visibility": "important"
+      }
+    },
     "/login_information": {
       "get": {
         "tags": [
@@ -3809,12 +4647,56 @@
     },
     "/accounts/{accountId}/identity_verification": {
       "get": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Workflow Ids",
+        "description": "Get workflow ids",
+        "operationId": "GetWorkflowIDs",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetWorkFlowIdsResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/accounts/{accountId}/all_identity_verification": {
+      "get": {
         "tags":[
           "DocuSign"
         ],
-        "summary":"Workflow Ids",
-        "description":"Get workflow ids",
-        "operationId":"GetWorkflowIDs",
+        "summary":"Get All Workflow Ids",
+        "description":"Get All workflow ids",
+        "operationId":"GetAllWorkflowIDs",
         "consumes": [],
         "produces": [
           "application/json",
@@ -3933,6 +4815,50 @@
         },
         "deprecated": false,
         "x-ms-visibility": "important"
+      }
+    },
+    "/accounts/{accountId}/signing_groups": {
+      "get": {
+        "tags": [
+          "DocuSign"
+        ],
+        "x-ms-summary": "List signing groups",
+        "description": "List signing groups for a specific account.",
+        "operationId": "GetSigningGroups",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account id",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListSigningGroupResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
       }
     },
     "/accounts/{accountId}/account_custom_fields": {
@@ -4491,6 +5417,54 @@
         "x-ms-visibility": "internal"
       }
     },
+    "/signers/accounts/{accountId}/templates/{templateId}": {
+      "get": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Get the signers of a template in dynamic schema format",
+        "description": "Get the signers of a template in dynamic schema format.",
+        "operationId": "GetDynamicRecipients",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account to get the signers for.",
+            "required": true,
+            "x-ms-summary": "Account Id",
+            "x-ms-test-value": "insert account id",
+            "type": "string"
+          },
+          {
+            "name": "templateId",
+            "in": "path",
+            "description": "Template to get the signers for.",
+            "required": true,
+            "x-ms-summary": "Template Id",
+            "x-ms-test-value": "insert template id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-no-generic-test": true,
+        "x-ms-visibility": "internal"
+      }
+    },
     "/accounts/{accountId}/envelopes/{envelopeId}/recipients/{recipientId}/tabs": {
       "post": {
         "tags": [
@@ -4698,7 +5672,7 @@
                     "description": "Tab type",
                     "x-ms-summary": "Type",
                     "x-ms-test-value": "select tab type"
-                    },
+                  },
                   "tabId": {
                     "type": "string",
                     "x-ms-summary": "Id",
@@ -4787,6 +5761,132 @@
         "x-ms-visibility": "advanced"
       }
     },
+    "/accounts/{accountId}/maestro-workflows": {
+      "get": {
+        "summary": "Get Maestro Workflow Definitions",
+        "operationId": "GetMaestroWorkflowDefinitions",
+        "description": "Get Maestro Workflow Definitions",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/WorkflowDefinitionsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/maestro-workflows/{workflowId}": {
+      "get": {
+        "summary": "Get Maestro Workflow Definition",
+        "operationId": "GetMaestroWorkflowDefinition",
+        "description": "Get Maestro Workflow Definition",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/WorkflowDefinitionResponse"
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/maestro-workflows/trigger/{workflowId}": {
+      "post": {
+        "summary": "Start Docusign Maestro workflow",
+        "description": "Start Docusign Maestro workflow",
+        "operationId": "TriggerMaestroFlow",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "workflowId",
+            "in": "path",
+            "description": "Enter the workflow ID or select the workflow name from the dropdown",
+            "x-ms-summary": "workflow",
+            "x-ms-test-value": "insert workflow ID",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetMaestroWorkflowDefinitions",
+              "parameters": {
+                "accountId": {
+                  "parameter": "accountId"
+                }
+              },
+              "value-collection": "workflowDefinitions",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "instanceName",
+            "in": "query",
+            "description": "Name of the Maestro workflow instance",
+            "x-ms-summary": "instance Name",
+            "x-ms-test-value": "insert instance name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "variable",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/MaestroInputVariables"
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TriggerMaestroFlowResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "important"
+      }
+    },
     "/document_types": {
       "get": {
         "tags": [
@@ -4861,8 +5961,8 @@
         },
         "deprecated": false,
         "x-ms-visibility": "internal"
-    }
-  },
+      }
+    },
     "/anchortab_schema": {
       "get": {
         "tags": [
@@ -4879,6 +5979,25 @@
             "x-ms-summary": "tab type"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/composite_templates_schema": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get schema for a composite templates.",
+        "operationId": "StaticResponseForCompositeTemplates",
         "responses": {
           "200": {
             "description": "OK",
@@ -4940,6 +6059,41 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Return URL"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/embeddedSigning_schema_v2": {
+      "get": {
+        "tags": [
+          "StaticResponse"
+        ],
+        "description": "Get schema for return URL (V2).",
+        "operationId": "StaticResponseForEmbeddedSigningSchemaV2",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Return URL"
+          },
+          {
+            "name": "isInPersonSigner",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Is This an Person Signer?"
           }
         ],
         "responses": {
@@ -5068,7 +6222,7 @@
       }
     },
     "/build_number": {
-      "get": {
+      "put": {
         "tags": [
           "StaticResponse"
         ],
@@ -5635,6 +6789,90 @@
         }
       }
     },
+    "WorkflowDefinitionsResponse": {
+      "description": "WorkflowDefinitions Response",
+      "type": "object",
+      "properties": {
+        "WorkflowDefinitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkflowDefinition"
+          },
+          "description": "WorkflowDefinitions",
+          "x-ms-summary": "Workflow Definitions"
+        }
+      }
+    },
+    "WorkflowDefinition": {
+      "description": "WorkflowDefinition",
+      "type": "object",
+      "properties": {
+        "Id": {
+          "type": "string",
+          "description": "Id"
+        },
+        "Name": {
+          "type": "string",
+          "description": "Name"
+        }
+      }
+    },
+    "WorkflowDefinitionResponse": {
+      "description": "WorkflowDefinitionResponse",
+      "type": "object",
+      "properties": {
+        "Id": {
+          "type": "string",
+          "description": "Id"
+        },
+        "Name": {
+          "type": "string",
+          "description": "Name"
+        },
+        "PayloadSchema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkflowDefPayloadSchema"
+          }
+        }
+      }
+    },
+    "WorkflowDefPayloadSchema": {
+      "description": "WorkflowDefPayloadSchema",
+      "type": "object",
+      "properties": {
+        "PropertyName": {
+          "type": "string",
+          "description": "Name"
+        },
+        "Type": {
+          "type": "string",
+          "description": "Type"
+        }
+      }
+    },
+    "TriggerMaestroFlowResponse": {
+      "description": "TriggerMaestroFlowResponse",
+      "type": "object",
+      "properties": {}
+    },
+    "MaestroInputVariables": {
+      "description": "An object that represents input variables based on a workflow.",
+      "type": "object",
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "GetMaestroWorkflowDefinition",
+        "parameters": {
+          "accountId": {
+            "parameter": "accountId"
+          },
+          "workflowId": {
+            "parameter": "workflowId"
+          }
+        },
+        "value-path": "Schema/Items"
+      }
+    },
     "GetDocumentsResponse": {
       "type": "string",
       "format": "binary",
@@ -5642,7 +6880,7 @@
       "x-ms-visibility": "important"
     },
     "AddRemindersResponse": {
-      "type":"object",
+      "type": "object",
       "properties": {
         "reminderEnabled": {
           "description": "Reminder enabled",
@@ -5658,6 +6896,23 @@
       "properties": {},
       "x-ms-dynamic-schema": {
         "operationId": "GetDynamicSigners",
+        "parameters": {
+          "accountId": {
+            "parameter": "accountId"
+          },
+          "templateId": {
+            "parameter": "templateId"
+          }
+        },
+        "value-path": "Schema/Items"
+      }
+    },
+    "DynamicRecipients": {
+      "description": "An object that represents recipients based on a template.",
+      "type": "object",
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "GetDynamicRecipients",
         "parameters": {
           "accountId": {
             "parameter": "accountId"
@@ -5697,7 +6952,7 @@
             "parameter": "verificationType"
           }
         },
-        "value-path":"Schema"
+        "value-path": "Schema"
       }
     },
     "AdditionalURLForSenderView": {
@@ -5711,7 +6966,7 @@
             "parameter": "returnUrl"
           }
         },
-        "value-path":"Schema"
+        "value-path": "Schema"
       }
     },
     "AdditionalURL": {
@@ -5725,7 +6980,24 @@
             "parameter": "returnUrl"
           }
         },
-        "value-path":"Schema"
+        "value-path": "Schema"
+      }
+    },
+    "DynamicSigningUrlFields": {
+      "description": "Addtional Return URL",
+      "type": "object",
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "StaticResponseForEmbeddedSigningSchemaV2",
+        "parameters": {
+          "returnUrl": {
+            "parameter": "returnUrl"
+          },
+          "isInPersonSigner": {
+            "parameter": "isInPersonSigner"
+          }
+        },
+        "value-path": "Schema"
       }
     },
     "BuildNumberSchema": {
@@ -5734,7 +7006,7 @@
       "properties": {},
       "x-ms-dynamic-schema": {
         "operationId": "StaticResponseForBuildNumberSchema",
-        "value-path":"Schema"
+        "value-path": "Schema"
       }
     },
     "AccountCustomFields": {
@@ -5762,6 +7034,15 @@
             "parameter": "tabType"
           }
         },
+        "value-path": "Schema"
+      }
+    },
+    "CompositeTemplateSchema": {
+      "description": "An object that represents the schema for composite templates.",
+      "type": "object",
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "StaticResponseForCompositeTemplates",
         "value-path": "Schema"
       }
     },
@@ -5826,8 +7107,8 @@
         },
         "envelopeId": {
           "minLength": 1,
-          "x-ms-summary": "Envelope Id",
-          "description": "Envelope Id",
+          "x-ms-summary": "Envelope ID",
+          "description": "Envelope ID",
           "type": "string"
         },
         "documents": {
@@ -5838,13 +7119,13 @@
         },
         "recipients": {
           "minLength": 1,
-          "x-ms-summary": "Recipient names",
+          "x-ms-summary": "Recipient Names",
           "description": "List of recipient names",
           "type": "string"
         },
         "sender": {
           "minLength": 1,
-          "x-ms-summary": "Sender name",
+          "x-ms-summary": "Sender Name",
           "description": "Sender name",
           "type": "string"
         },
@@ -5920,7 +7201,7 @@
           "x-ms-summary": "Title",
           "description": "This output indicates the title of the activity in the citation card.",
           "type": "string"
-          },
+        },
         "description": {
           "minLength": 1,
           "x-ms-summary": "Description",
@@ -6090,7 +7371,7 @@
         "envelopeId": {
           "description": "The id of the envelope.",
           "type": "string",
-          "x-ms-summary": "Envelope Id",
+          "x-ms-summary": "Envelope ID",
           "x-ms-visibility": "important"
         },
         "envelopeUri": {
@@ -6125,8 +7406,8 @@
         }
       }
     },
-    "EmbeddedSenderResponse":{
-      "type":"object",
+    "EmbeddedSenderResponse": {
+      "type": "object",
       "properties": {
         "url": {
           "description": "The url of embedded sender view.",
@@ -6137,7 +7418,7 @@
       }
     },
     "EmbeddedSigningResponse": {
-      "type":"object",
+      "type": "object",
       "properties": {
         "url": {
           "description": "The url of embedded signing view.",
@@ -6160,7 +7441,8 @@
         },
         "hasMoreResults": {
           "type": "boolean",
-          "description": "Specifies if there are more envelopes available"
+          "x-ms-summary": "More Envelope Results",
+          "description": "Shows if envelopes exceed the specified number in the Return envelopes field"
         }
       }
     },
@@ -6266,7 +7548,7 @@
         },
         "details": {
           "type": "object",
-          "additionalProperties": { }
+          "additionalProperties": {}
         }
       },
       "additionalProperties": false
@@ -6306,15 +7588,19 @@
         }
       }
     },
-    "EnvelopeVoidResponse":{
+    "EnvelopeVoidResponse": {
       "type": "object",
       "properties": {}
     },
-    "EnvelopeResendResponse":{
+    "EnvelopeResendResponse": {
       "type": "object",
       "properties": {}
     },
     "SendDraftEnvelopeResponse": {
+      "type": "object",
+      "properties": {}
+    },
+    "AuditResponse": {
       "type": "object",
       "properties": {}
     },
@@ -6374,6 +7660,11 @@
           "description": "Indicates whether the tab is of prefill type.",
           "type": "boolean",
           "x-ms-summary": "Is Prefill"
+        },
+        "selected": {
+          "description": "If tabs is checkbox, indicates whether the tab is selected.",
+          "type": "string",
+          "x-ms-summary": "Selected"
         }
       }
     },
@@ -6598,7 +7889,7 @@
         }
       }
     },
-    "SignatureTypesResponse":{
+    "SignatureTypesResponse": {
       "type": "object",
       "properties": {
         "tabTypes": {
@@ -6705,6 +7996,37 @@
         }
       }
     },
+    "ListSigningGroupResponse": {
+      "type": "object",
+      "properties": {
+        "signingGroups": {
+          "description": "List of all signing groups",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SigningGroup"
+          },
+          "x-ms-summary": "Signing Groups"
+        }
+      }
+    },
+    "SigningGroup": {
+      "required": [
+        "signingGroupId"
+      ],
+      "type": "object",
+      "properties": {
+        "signingGroupId": {
+          "description": "The ID of the signing group.",
+          "type": "string",
+          "x-ms-summary": "Signing Group ID"
+        },
+        "groupName": {
+          "description": "The name of the signing group.",
+          "type": "string",
+          "x-ms-summary": "Signing Group Name"
+        }
+      }
+    },
     "ListTemplatesResponse": {
       "type": "object",
       "properties": {
@@ -6733,6 +8055,17 @@
           "description": "The name of the template.",
           "type": "string",
           "x-ms-summary": "Name"
+        }
+      }
+    },
+    "BulkSendListGuid": {
+      "type": "object",
+      "properties": {
+        "listId": {
+          "type": "string",
+          "description": "Bulk send list guid",
+          "x-ms-summary": "Bulk Send List guid",
+          "x-ms-visibility": "important"
         }
       }
     },
