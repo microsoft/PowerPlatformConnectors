@@ -15,6 +15,7 @@ The World Bank API provides access to a catalog of global development datasets, 
 
 - [World Bank documentation](https://datacatalog.worldbank.org/)
 - [World Bank API Help](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation)
+- [How to paginate the response](https://developments.substack.com/p/institutionalized)
 
 ## Supported Operations
 
@@ -126,7 +127,5 @@ The World Bank API provides access to a catalog of global development datasets, 
 
 ## Known Issues and Limitations
 
-- The API response is returned as a raw array. Power Platform expects either a single object or a named object wrapping an array.
-- If Power Automate fails to parse the response, use an expression to access the second item:   body('GetCatalog')?[1]
-- For best results, wrap the array in a proxy service or use a Parse JSON step manually.
+- World Bank endpoints do not offer pagination. Refer to the documentation [here](https://developments.substack.com/p/institutionalized) for guidance on how to paginate the response.
 
