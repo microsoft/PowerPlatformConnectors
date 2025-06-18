@@ -1,0 +1,643 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Edgility",
+    "version": "1.0.0",
+    "description": "Add SMS to your workflows with Edgility. Have an inbound SMS to your Virtual Number initiate a workflow, or trigger an SMS to be sent based on workflow parameters.",
+    "termsOfService": "https://www.edgility.com.au/legal/",
+    "contact": {
+      "name": "Edgility Support",
+      "url": "https://support.edgility.com.au",
+      "email": "support@edgility.com.au"
+    }
+  },
+  "host": "app.messageport.com.au",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/sms": {},
+    "/v2/sms/dry": {},
+    "/v2/account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get Account",
+        "operationId": "GetAccount",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "required": [
+                "data"
+              ],
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/AccountInformation"
+                }
+              }
+            },
+            "examples": {
+              "application/json": {
+                "data": {
+                  "id": 1,
+                  "firstname": "test",
+                  "surname": "test",
+                  "email": "test@test.com",
+                  "mobile": "61412345678",
+                  "credits": 24446,
+                  "settings": {
+                    "timezone": "Australia/Sydney",
+                    "allow_contact_duplicates": false,
+                    "allow_sms_duplicates": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Get account information and balance"
+      }
+    },
+    "/v2/integrations/power-automate/subscribe": {
+      "x-ms-notification-content": {
+        "description": "Inbound Message",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "string",
+              "description": "event",
+              "title": "Event Name",
+              "x-ms-visibility": "internal"
+            },
+            "date": {
+              "type": "string",
+              "description": "date",
+              "title": "Message Received At",
+              "format": "date-time"
+            },
+            "to": {
+              "type": "string",
+              "description": "To Number",
+              "title": "To",
+              "x-ms-visibility": "important"
+            },
+            "from": {
+              "type": "string",
+              "title": "From",
+              "description": "From Number"
+            },
+            "content": {
+              "type": "string",
+              "description": "Message Content",
+              "title": "Content"
+            },
+            "is_opt_out": {
+              "type": "boolean",
+              "description": "Is Opt Out"
+            }
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Success"
+          }
+        },
+        "summary": "Inbound Message",
+        "description": "Inbound SMS Message",
+        "operationId": "InboundMessage",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "application/json",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "Config",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "string",
+                  "description": "event",
+                  "title": "Event Name",
+                  "default": "message_received",
+                  "x-ms-visibility": "internal",
+                  "enum": [
+                    "message_received"
+                  ]
+                },
+                "dedicated_number": {
+                  "type": "string",
+                  "description": "Select a Virtual Number to only trigger workflow for messages to that number",
+                  "title": "Virtual Number",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListVirtualNumbers",
+                    "value-path": "number",
+                    "value-collection": "data",
+                    "value-title": "number"
+                  },
+                  "x-ms-visibility": "important"
+                },
+                "destination_url": {
+                  "type": "string",
+                  "description": "destination_url",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "title": "Webhook URL for workflow"
+                }
+              },
+              "required": [
+                "destination_url",
+                "event"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/v2/integrations/power-automate/unsubscribe/{webhookId}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {}
+          }
+        },
+        "summary": "Delete Inbound Message Subscription",
+        "operationId": "PowerAutomateUnsubscribe",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "webhookId",
+            "type": "integer",
+            "required": true,
+            "description": "Subscription ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "description": "Delete Message Subscription"
+      }
+    },
+    "/v2/numbers": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ulid": {
+                        "type": "string",
+                        "description": "ULID",
+                        "title": "Number ULID",
+                        "x-ms-visibility": "internal"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name",
+                        "title": "Number Name"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "Status",
+                        "title": "Number Status",
+                        "x-ms-visibility": "internal"
+                      },
+                      "number": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number",
+                        "title": "Number"
+                      }
+                    }
+                  },
+                  "description": "data"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List Virtual Numbers",
+        "operationId": "ListVirtualNumbers",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "description": "List VNs"
+      }
+    },
+    "/v2/account/sender-ids": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "sender_id": {
+                        "type": "string",
+                        "description": "Sender ID",
+                        "title": "Sender ID",
+                        "x-ms-visibility": "important"
+                      },
+                      "label": {
+                        "type": "string",
+                        "description": "Label",
+                        "title": "Label",
+                        "x-ms-visibility": "important"
+                      }
+                    }
+                  },
+                  "description": "data"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List Sender IDs",
+        "operationId": "ListSenderIds",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "description": "List Sender IDs"
+      }
+    },
+    "/v2/integrations/power-automate/send": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "default",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success_count": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Count of sent messages",
+                  "title": "Successful Message Count"
+                },
+                "failed_count": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Count of messages that failed to send",
+                  "title": "Failed Message Count"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send SMS Message",
+        "operationId": "SendMessage",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "Message",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "string",
+                  "description": "Destination number, ideally in international format (with country code/leading plus)",
+                  "title": "To",
+                  "x-ms-visibility": "important"
+                },
+                "from": {
+                  "type": "string",
+                  "description": "Sender ID from which your message will be sent",
+                  "title": "From",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "ListSenderIds",
+                    "value-path": "sender_id",
+                    "value-collection": "data",
+                    "value-title": "label"
+                  }
+                },
+                "body": {
+                  "type": "string",
+                  "description": "Message Content",
+                  "title": "Content",
+                  "x-ms-visibility": "important"
+                },
+                "campaign": {
+                  "type": "string",
+                  "description": "Campaign name for reporting purposes",
+                  "title": "Campaign Name",
+                  "x-ms-visibility": "important"
+                },
+                "reference": {
+                  "type": "string",
+                  "description": "Shown in detailed reporting and reporting exports",
+                  "title": "Reporting Reference",
+                  "x-ms-visibility": "advanced"
+                },
+                "date": {
+                  "type": "string",
+                  "description": "Schedule Date/Time",
+                  "title": "Schedule Date",
+                  "format": "date-time",
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "x-ms-visibility": "important"
+            },
+            "x-ms-visibility": "important"
+          }
+        ],
+        "description": "Send an SMS Message"
+      }
+    }
+  },
+  "definitions": {
+    "OutboundMessage": {
+      "required": [
+        "to",
+        "from",
+        "body"
+      ],
+      "type": "object",
+      "properties": {
+        "to": {
+          "description": "Destination phone number. Ideally in international format with the leading +, ie 61412345678. Local formatting will be parsed but is not recommended.",
+          "type": "string",
+          "example": "+61412345678"
+        },
+        "from": {
+          "description": "Sender ID, either a Dedicated Number, Verified Phone Number, Verified Alphanumeric Sender ID. When using numbers, use E164 format.",
+          "type": "string",
+          "example": "SHARED_NUMBER",
+          "title": "From",
+          "x-ms-dynamic-values": {
+            "operationId": "ListSenderIds",
+            "value-path": "sender_id",
+            "value-collection": "data",
+            "value-title": "label"
+          }
+        },
+        "body": {
+          "description": "Message content. Unicode is accepted.",
+          "type": "string",
+          "title": "Message Content"
+        },
+        "campaign": {
+          "description": "Custom campaign name. Shown in reports.",
+          "type": "string"
+        },
+        "metadata": {
+          "description": "Custom metadata to associate with the message. Will be returned with delivery receipts and inbound messages that are replies.",
+          "type": "object"
+        },
+        "reference": {
+          "description": "Custom reporting reference. Available in exported reports and delivery receipts.",
+          "type": "string"
+        },
+        "date": {
+          "description": "Schedule a message at a specific time. Must be in ISO8601 format in UTC timezone. Eg 2021-02-17T22:52:07Z",
+          "type": "string"
+        }
+      }
+    },
+    "OutboundMessageResponse": {
+      "required": [
+        "to",
+        "from",
+        "body",
+        "meta"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "VALID"
+        },
+        "to": {
+          "description": "Destination phone number. Ideally in international format with the leading +, ie 61412345678. Local formatting will be parsed but is not recommended.",
+          "type": "string",
+          "example": "+61412345678"
+        },
+        "from": {
+          "description": "Sender ID, either a Dedicated Number, Verified Phone Number, Verified Alphanumeric Sender ID. When using numbers, use E164 format.",
+          "type": "string",
+          "example": "SHARED_NUMBER"
+        },
+        "body": {
+          "description": "Message content. Unicode is accepted.",
+          "type": "string"
+        },
+        "campaign": {
+          "description": "Custom campaign name. Shown in reports.",
+          "type": "string"
+        },
+        "metadata": {
+          "description": "Custom metadata to associate with the message. Will be returned with delivery receipts and inbound messages that are replies.",
+          "type": "object"
+        },
+        "reference": {
+          "description": "Custom reporting reference. Available in exported reports and delivery receipts.",
+          "type": "string"
+        },
+        "date": {
+          "description": "Schedule a message at a specific time. Must be in ISO8601 format in UTC timezone. Eg 2021-02-17T22:52:07Z",
+          "type": "string"
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "size": {
+              "description": "Length of message in characters in determined encoding",
+              "type": "integer",
+              "example": 55
+            },
+            "parts": {
+              "description": "Length of message in SMS parts",
+              "type": "integer",
+              "example": 1
+            },
+            "is_unicode": {
+              "description": "Is the message unicode or GSM",
+              "type": "boolean",
+              "example": false
+            },
+            "cost": {
+              "description": "Length of message in Billing units",
+              "type": "number",
+              "example": 1
+            },
+            "country": {
+              "description": "ISO country code of the number",
+              "type": "string",
+              "example": "AU"
+            }
+          }
+        }
+      }
+    },
+    "OutboundMessageError": {
+      "required": [
+        "to",
+        "from",
+        "body",
+        "error_code"
+      ],
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "ERROR"
+        },
+        "to": {
+          "description": "Destination phone number. Ideally in international format with the leading +, ie 61412345678. Local formatting will be parsed but is not recommended.",
+          "type": "string",
+          "example": "+61412345678"
+        },
+        "from": {
+          "description": "Sender ID, either a Dedicated Number, Verified Phone Number, Verified Alphanumeric Sender ID. When using numbers, use E164 format.",
+          "type": "string",
+          "example": "SHARED_NUMBER"
+        },
+        "body": {
+          "description": "Message content. Unicode is accepted.",
+          "type": "string"
+        },
+        "campaign": {
+          "description": "Custom campaign name. Shown in reports.",
+          "type": "string"
+        },
+        "metadata": {
+          "description": "Custom metadata to associate with the message. Will be returned with delivery receipts and inbound messages that are replies.",
+          "type": "object"
+        },
+        "reference": {
+          "description": "Custom reporting reference. Available in exported reports and delivery receipts.",
+          "type": "string"
+        },
+        "date": {
+          "description": "Schedule a message at a specific time. Must be in ISO8601 format in UTC timezone. Eg 2021-02-17T22:52:07Z",
+          "type": "string"
+        },
+        "error_code": {
+          "description": "Error code for failure reason",
+          "type": "string"
+        },
+        "error_help": {
+          "description": "Human readable error reason description",
+          "type": "string"
+        }
+      }
+    },
+    "SendMessageBody": {
+      "required": [
+        "messages"
+      ],
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OutboundMessage"
+          }
+        }
+      }
+    },
+    "AccountInformation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "surname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "mobile": {
+          "type": "string"
+        },
+        "credits": {
+          "type": "number"
+        },
+        "settings": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "basic-auth": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "basic-auth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Messages"
+    },
+    {
+      "name": "Account"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.edgility.com.au"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.edgility.com.au/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ]
+}

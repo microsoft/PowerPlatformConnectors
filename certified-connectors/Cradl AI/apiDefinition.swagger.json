@@ -1,0 +1,439 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Cradl AI",
+    "description": "Automate internal document workflows with no-code AI.",
+    "contact": {
+      "name": "Cradl AI Support",
+      "url": "https://www.cradl.ai",
+      "email": "support@cradl.ai"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.cradl.ai"
+    },
+    {
+      "propertyName": "Privacy Policy",
+      "propertyValue": "https://docs.cradl.ai/legal/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Content and Files"
+    }
+  ],
+  "host": "api.lucidtech.ai",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/documents": {
+      "post": {
+        "summary": "Create document",
+        "operationId": "CreateDocument",
+        "description": "Extract data from documents like invoices, receipts, order confirmations, etc.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Name",
+            "x-ms-summary": "Name",
+            "in": "header",
+            "description": "The name of your document, for example Invoice.pdf.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "File content.",
+            "description": "The file content.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "documentId": {
+                  "type": "string",
+                  "description": "The document ID."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predictions": {
+      "post": {
+        "summary": "Parse document",
+        "operationId": "ParseDocument",
+        "description": "Extract data from documents like invoices, receipts, order confirmations, etc.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "modelId": {
+                  "x-ms-summary": "Model",
+                  "description": "Choose your model",
+                  "type": "string",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetModels",
+                    "value-path": "modelId",
+                    "value-title": "name",
+                    "value-collection": "models",
+                    "parameters": {}
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetModels",
+                    "itemsPath": "models",
+                    "itemValuePath": "modelId",
+                    "itemTitlePath": "name",
+                    "parameters": {}
+                  },
+                  "title": "Model",
+                  "x-ms-visibility": "important"
+                },
+                "documentId": {
+                  "x-ms-summary": "Document ID",
+                  "description": "Name of the file, e.g. Document.pdf.",
+                  "type": "string",
+                  "title": "Document ID",
+                  "x-ms-visibility": "important"
+                },
+                "postprocessConfig": {
+                  "$ref": "#/definitions/PostprocessConfig"
+                },
+                "preprocessConfig": {
+                  "$ref": "#/definitions/PreprocessConfig"
+                }
+              },
+              "x-ms-visibility": "important",
+              "required": [
+                "documentId",
+                "modelId"
+              ]
+            },
+            "x-ms-visibility": "important",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "documentId": {
+                  "type": "string",
+                  "description": "The document which was parsed."
+                },
+                "inferenceTime": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The number of seconds used to process this document."
+                },
+                "modelId": {
+                  "type": "string",
+                  "description": "The model which was used."
+                },
+                "postprocessConfig": {
+                  "$ref": "#/definitions/PostprocessConfig"
+                },
+                "preprocessConfig": {
+                  "$ref": "#/definitions/PreprocessConfig"
+                },
+                "predictions": {
+                  "type": "object",
+                  "description": "predictions",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "format": "float"
+                        }
+                      }
+                    }
+                  }
+                },
+                "trainingId": {
+                  "type": "string",
+                  "description": "The model training."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/models": {
+      "get": {
+        "summary": "Get my models",
+        "operationId": "GetModels",
+        "x-ms-visibility": "internal",
+        "description": "Get a list of available models.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK.",
+            "schema": {
+              "$ref": "#/definitions/Models"
+            }
+          },
+          "default": {
+            "description": "Default response."
+          }
+        }
+      }
+    },
+    "/workflows": {
+      "post": {
+        "summary": "Parse document with human-in-the-loop",
+        "operationId": "CreateRun",
+        "description": "Extract data from documents like invoices, receipts, order confirmations, etc.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "WorkflowId",
+            "required": true,
+            "x-ms-skip-url-encoding": true,
+            "x-ms-summary": "Workflow",
+            "description": "Choose your workflow",
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "GetWorkflows",
+              "value-path": "workflowId",
+              "value-title": "name",
+              "value-collection": "workflows",
+              "parameters": {}
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetWorkflows",
+              "itemsPath": "workflows",
+              "itemValuePath": "workflowId",
+              "itemTitlePath": "name",
+              "parameters": {}
+            },
+            "x-ms-visibility": "important"
+          },
+          {
+            "in": "body",
+            "name": "Request",
+            "required": true,
+            "x-ms-visibility": "important",
+            "schema": {
+              "type": "object",
+              "required": [
+                "input"
+              ],
+              "properties": {
+                "input": {
+                  "$ref": "#/definitions/WorkflowInput"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "executionId": {
+                  "type": "string",
+                  "description": "A unique ID for this execution."
+                },
+                "status": {
+                  "type": "string",
+                  "description": "A status indicator for this execution."
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get my workflows",
+        "operationId": "GetWorkflows",
+        "description": "Get a list of available workflows.",
+        "x-ms-visibility": "internal",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "workflows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "workflowId": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "nextToken": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default response."
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "tags": [],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "ClientCredentials"
+    }
+  },
+  "definitions": {
+    "PostprocessConfig": {
+      "type": "object",
+      "x-ms-visibility": "advanced",
+      "x-ms-summary": "Postprocessing.",
+      "properties": {
+        "outputFormat": {
+          "type": "string",
+          "description": "Output format.",
+          "title": "Output format.",
+          "x-ms-summary": "The output format.",
+          "default": "v2",
+          "enum": [
+            "v1",
+            "v2"
+          ]
+        },
+        "strategy": {
+          "type": "string",
+          "description": "Prediction aggregation strategy.",
+          "enum": [
+            "BEST_N_PAGES",
+            "BEST_FIRST"
+          ],
+          "x-ms-summary": "The strategy used for aggregating predictions.",
+          "default": "BEST_FIRST"
+        }
+      }
+    },
+    "PreprocessConfig": {
+      "type": "object",
+      "x-ms-visibility": "advanced",
+      "x-ms-summary": "Preprocessing.",
+      "properties": {
+        "autoRotate": {
+          "type": "boolean",
+          "description": "A flag indicating whether document orientation should be auto detected."
+        },
+        "maxPages": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The maximum number of pages to process in a single request."
+        },
+        "imageQuality": {
+          "type": "string",
+          "description": "The image quality used when processing this document."
+        }
+      }
+    },
+    "Models": {
+      "type": "object",
+      "properties": {
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "modelId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "nextToken": {
+          "type": "string"
+        }
+      }
+    },
+    "WorkflowInput": {
+      "type": "object",
+      "required": [
+        "documentId"
+      ],
+      "properties": {
+        "documentId": {
+          "x-ms-summary": "Document ID",
+          "x-ms-visibility": "important",
+          "title": "Document ID",
+          "type": "string",
+          "description": "The ID of the document which was submitted."
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "x-ms-visibility": "important",
+          "description": "Title, e.g. Invoice.pdf."
+        },
+        "predictions": {
+          "type": "object",
+          "x-ms-summary": "Predictions",
+          "x-ms-visibility": "advanced",
+          "description": "Manually override the predictions used in this workflow execution."
+        }
+      }
+    }
+  }
+}
