@@ -225,6 +225,10 @@ namespace SnowflakeV2CoreLogic.Utilities
             int? precision,
             object data)
         {
+            if (data == null)
+            {
+                return null;
+            }
             snowflakeDataType = snowflakeDataType.ToUpper();
 
             switch (snowflakeDataType)
