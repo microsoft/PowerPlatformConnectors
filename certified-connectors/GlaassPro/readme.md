@@ -8,23 +8,23 @@ Glaass Pro bundles our advanced Glaass Core with construction specific modules a
 
 We work with international building and civil contractors to provide powerful tools that are proven to help teams work smarter with fewer delays and errors.
 
-With a wide range of plans, inbuilt tutorials, and video demonstrations, Glaass Pro enables you to digitise your construction projects quickly and easily. Our plans are designed to suit varying project scopes and budgets. 
+With a wide range of plans, inbuilt tutorials, and video demonstrations, Glaass Pro enables you to digitise your construction projects quickly and easily. Our plans are designed to suit varying project scopes and budgets.
 
 ## Publisher: Glaass Pty Ltd
 
 ## Prerequisites
 
-You will need
+You will need:
 
-* project provisioned in Glaass Pro environment
-* user with admin permissions in that project
-* API key, which you can obtain in your Personal Preferences in Glaass Pro environment (scroll to the bottom of the page to find it)
+* A project provisioned in a Glaass Pro environment
+* A user with an admin user type in that project
+* An API key, which you can obtain at the bottom of your Personal Preferences
 
 ## Using the connector
 
 You can use the connector in Power Apps, Power Automate and Copilot Agents.
 
-To connect to Glaass Pro, you need to provide API key. The API key is specific to a single project and single user.
+To connect to Glaass Pro, you need to provide API key. The API key is specific to a single project and single user. The user must have admin permissions.
 
 ## Supported Operations
 
@@ -34,7 +34,7 @@ To connect to Glaass Pro, you need to provide API key. The API key is specific t
 
 * **`Case_Updated_Trigger`**: It trigger when case is updated. The list of the fields, which has been updated, is provided in the trigger.
 
-* **`Case_Closed_Trigger`**: It triggers when case is closed. Note that closing case is a sort of update, so closing the case can also trigger Case_Updated_Trigger (with field Status as changed).
+* **`Case_Closed_Trigger`**: It triggers when case is closed. Note that API can recognize closing case as an update, so closing the case can also trigger `Case_Updated_Trigger` (with field Status as changed).
 
 ### Actions
 
@@ -60,7 +60,7 @@ To connect to Glaass Pro, you need to provide API key. The API key is specific t
 
 Login to Glaass Pro using the [usual link](https://app.glaass.com) and navigate to project and then to your Personal Preferences. Scroll to the bottom of the page to find your API key.
 
-![API Key in Personal Prefernces](personal-preferences-get-api-key.png)
+![API Key in Personal Preferences](personal-preferences-get-api-key.png)
 
 ## Known Issues
 
