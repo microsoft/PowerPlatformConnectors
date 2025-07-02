@@ -23,15 +23,24 @@
 
     } else if (this.Context.OperationId == "SendTemplateMail") {
       JObject jObject = JObject.Parse(await this.Context.Request.Content.ReadAsStringAsync());
-      JArray merge_key_details = (JArray) jObject["merge_key_detail"];
-      if (merge_key_details != null) {
+
+      String merge_key_value = (String) jObject["merge_key_value"];
+      if (merge_key_value != null) {
         JObject mergekeys = new JObject();
-        for (int i = 0; i < merge_key_details.Count; i++) {
-          JObject merge_key_detail = (JObject) merge_key_details[i];
-          mergekeys.Add((string) merge_key_detail["key"], merge_key_detail["value"]);
+        try
+        {
+            mergekeys = JObject.Parse(merge_key_value);
+
         }
-        jObject.Remove("merge_key_detail");
+        catch (JsonReaderException)
+        {
+            return getErrorMessage(HttpStatusCode.BadRequest, "invalid json for merge info");
+        }
+        jObject.Remove("merge_key_value");
         jObject.Add(new JProperty("merge_info", mergekeys));
+      }
+      else{
+        jObject.Add(new JProperty("merge_info", new JObject()));
       }
       JObject fromDetails = (JObject) jObject["from"];
       JObject fromDetail = (JObject) fromDetails["from-detail"];
@@ -186,6 +195,17 @@ public static JObject getStatDataForEvent(JObject statsObj, string eventKey,int 
     }
     return newDate.ToString(outputDTFormat + "Z");
 
+  }
+    public static HttpResponseMessage getErrorMessage(HttpStatusCode errorCode, string description) {
+      JObject errorObj = new JObject();
+      JArray errArr = new JArray();
+      JObject errDetailObj = new JObject();
+      errDetailObj["description"] = description;
+      errArr.Add(errDetailObj);
+      errorObj["error"] = errArr;
+      HttpResponseMessage errorResponse = new HttpResponseMessage(errorCode);
+      errorResponse.Content = CreateJsonContent(errorObj.ToString());
+      return errorResponse;
   }
 
 }
