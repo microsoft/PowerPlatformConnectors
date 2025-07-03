@@ -53,7 +53,7 @@ namespace SnowflakeTestApp.Mocks
         /// REQUIRED: Update with your Snowflake role name
         /// Common values: "SYSADMIN", "PUBLIC", "ACCOUNTADMIN", "USERADMIN"
         /// </summary>
-        public static string TestRole = "SYSADMIN";
+        public static string TestRole = "ACCOUNTADMIN";
 
         // ====== MOCK IMPLEMENTATION ======
 

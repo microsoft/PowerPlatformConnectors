@@ -16,13 +16,6 @@ namespace SnowflakeTestApp.Tests
     [TestClass]
     public abstract class BaseIntegrationTest
     {
-
-        public const string TenantId = "<TenantId>";
-        public const string ClientId = "<ClientId>";
-        public const string ClientSecret = "<CientSecret>";
-        public const string Scope = "<Scope>";
-
-
         private const int APPLICATION_HEALTH_CHECK_TIMEOUT_SECONDS = 5;
         private const string BEARER_TOKEN_CONFIGURATION_ERROR = 
             "Bearer token not configured. Please update ConnectionParametersProviderMock.TestBearerToken with a valid OAuth bearer token. See README.md for instructions.";
@@ -139,7 +132,7 @@ namespace SnowflakeTestApp.Tests
         }
         private static void InitializeAccessTokenService()
         {
-            AccessTokenService = new AccessTokenService(TenantId, ClientId, ClientSecret, Scope);
+            AccessTokenService = new AccessTokenService(TestData.TenantId, TestData.ClientId, TestData.ClientSecret, TestData.Scope);
         }
         private static void InitializeTestDataSeeder()
         {

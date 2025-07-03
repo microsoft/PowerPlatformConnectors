@@ -15,10 +15,10 @@ namespace SnowflakeTestApp.Tests.Infrastructure
         [TestMethod]
         public void GetToken_ShouldGetAccessToken()
         {
-            string tenantId = BaseIntegrationTest.TenantId;
-            string clientId = BaseIntegrationTest.ClientId;
-            string clientSecret = BaseIntegrationTest.ClientSecret;
-            string scope = BaseIntegrationTest.Scope;
+            string tenantId = TestData.TenantId;
+            string clientId = TestData.ClientId;
+            string clientSecret = TestData.ClientSecret;
+            string scope = TestData.Scope;
 
             AccessTokenService service = new AccessTokenService(tenantId, clientId, clientSecret, scope);
 
