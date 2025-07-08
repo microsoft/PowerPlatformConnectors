@@ -6396,7 +6396,29 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       var newPath = uriBuilder.Path;
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       string[] documentDownloadOptions = { "Combined", "Archive", "Certificate", "Portfolio" };
-
+      var languageMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Chinese Simplified", "zh_CN" },
+        { "Chinese Traditional", "zh_TW" },
+        { "Dutch", "nl" },
+        { "English", "en" },
+        { "French", "fr" },
+        { "German", "de" },
+        { "Italian", "it" },
+        { "Japanese", "ja" },
+        { "Korean", "ko" },
+        { "Portuguese", "pt" },
+        { "Portuguese (Brazil)", "pt_BR" },
+        { "Russian", "ru" },
+        { "Spanish", "es" }
+    };
+    var lang = query.Get("language");
+    if (!string.IsNullOrEmpty(lang) && languageMap.ContainsKey(lang))
+    {
+        query.Set("language", languageMap[lang]);
+        uriBuilder.Query = query.ToString();
+        this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
       acceptHeaderValue = "application/pdf";
       string documentId = null;
 
