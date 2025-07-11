@@ -5,7 +5,7 @@ A high-performance unified interface for LLMs, integrating a vast number of mode
 ## Publisher: Fördős András
 
 ## Prerequisites
-You need an OpenRouter account and API Key, potentially available tokens if using non-free models: (https://openrouter.ai)[https://openrouter.ai].
+You need an OpenRouter account and API Key, potentially available tokens if using non-free models: [https://openrouter.ai](https://openrouter.ai).
 
 ## Operations
 
@@ -28,7 +28,7 @@ Send a completion request to a selected model (text-only format).
 Returns metadata about a specific generation request.
 
 ## Obtaining credentials
-Once signed up over (https://openrouter.ai)[https://openrouter.ai], you will need to generate an API Key by navigating to your profile and under "Keys" selecting "Create Key".
+Once signed up over [https://openrouter.ai](https://openrouter.ai), you will need to generate an API Key by navigating to your profile and under "Keys" selecting "Create Key".
 
 ## Known issues and limitations
 
