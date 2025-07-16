@@ -10,8 +10,10 @@ You will need to request access to Claude on the [Claude product page](https://w
 You can create an API Key on the [Keys page](https://console.anthropic.com/account/keys).
 
 ## Supported Operations
-### Ask Claude
+### Create a text completion
 Send a prompt to Claude for completion.
+### Create a message
+Send a prompt to Claude for message.
 
 ## Known Issues and Limitations
 There are no known issues at this time.
