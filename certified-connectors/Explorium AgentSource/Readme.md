@@ -4,7 +4,7 @@ Explorium empowers businesses to build high-performance GTM agents with speciali
 
 **Full documentation:** [https://developers.explorium.ai/reference/quick-starts](https://developers.explorium.ai/reference/quick-starts)
 
----
+## Publisher: Explorium
 
 ## Prerequisites
 
@@ -13,38 +13,6 @@ To use this connector, you will need:
 - A Microsoft Power Apps or Power Automate plan that supports custom connectors.
 - An active Explorium account.
 - An Explorium API key.
-
-To create an Explorium account and retrieve your API key, see:
-
-- [Account Access](https://developers.explorium.ai/reference/account_access)
-- [Getting Your API Key](https://developers.explorium.ai/reference/getting_your_api_key)
-
----
-
-## Authentication
-
-This connector uses **API Key authentication**. You will be prompted to enter your API Key when creating the connection in Power Automate.
-
----
-
-## Setting Up the Connector
-
-Setting up the connector is simple:
-
-1. Create a connection and enter your Explorium API Key.
-2. Use the available actions to match and enrich businesses or prospects.
-
-**Recommended flow:**
-
-- **Businesses Enrichment**
-  - First, call **Match Businesses** with basic information (e.g., name & website URL or name & domain) to retrieve the `business_id`.
-  - Then, use any enrichment action (e.g., Technographics, Workforce Trends) with that `business_id` to get rich, contextual businesses data.
-- **Prospects Enrichment**
-  - First, call **Match Prospects** to retrieve the `prospect_id`.
-  - Then, use any enrichment action (e.g., Contacts Information, Linkedin Prospects Posts) with that `prospect_id` to get rich, contextual prospects data.
-
----
-
 
 ## Supported Operations
 
@@ -82,14 +50,37 @@ The connector supports the following operations:
 
 > **Note:** Each enrichment operation requires the relevant `business_id` or `prospect_id` obtained from a **Match** call.
 
----
+## Obtaining Credentials
 
-## Additional Resources
+To create an Explorium account and retrieve your API key, see:
 
-- **Quick Start Guides**: [https://developers.explorium.ai/reference/quick-starts](https://developers.explorium.ai/reference/quick-starts)
-- **Authentication & API Key Management**:
-  - [Account Access](https://developers.explorium.ai/reference/account_access)
-  - [Getting Your API Key](https://developers.explorium.ai/reference/getting_your_api_key)
+- [Account Access](https://developers.explorium.ai/reference/account_access)
+- [Getting Your API Key](https://developers.explorium.ai/reference/getting_your_api_key)
+
+## Getting Started
+
+Setting up the connector is simple:
+
+1. Create a connection and enter your Explorium API Key.
+2. Use the available actions to match and enrich businesses or prospects.
+
+This connector uses **API Key authentication**. You will be prompted to enter your API Key when creating the connection in Power Automate.
+
+**Recommended flow:**
+
+- **Businesses Enrichment**
+  - First, call **Match Businesses** with basic information (e.g., name & website URL or name & domain) to retrieve the `business_id`.
+  - Then, use any enrichment action (e.g., Technographics, Workforce Trends) with that `business_id` to get rich, contextual businesses data.
+- **Prospects Enrichment**
+  - First, call **Match Prospects** to retrieve the `prospect_id`.
+  - Then, use any enrichment action (e.g., Contacts Information, Linkedin Prospects Posts) with that `prospect_id` to get rich, contextual prospects data.
+
+**Quick Start Guides**: [https://developers.explorium.ai/reference/quick-starts](https://developers.explorium.ai/reference/quick-starts)
 
 For questions or support, contact [support@explorium.ai](mailto\:support@explorium.ai).
 
+## Known Issues and Limitations
+As long as you have an active Explorium account with sufficient credits, there should be no issues or limitations.
+
+## Deployment Instructions
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector within Microsoft Power Automate and Power Apps
