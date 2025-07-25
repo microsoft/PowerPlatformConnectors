@@ -1,78 +1,104 @@
-# PagePixels Screenshots connector
+# PagePixels Screenshots Connector
 
-With PagePixels Screenshots you can:
+The **PagePixels Screenshots** connector allows you to programmatically capture website screenshots with advanced control over rendering, geolocation, device emulation, and AI-based image analysis. Simulate user interactions like filling out forms, logging in, or clicking buttons before taking a screenshot. You can also render custom HTML to capture your emails and analyze screenshots using AI prompts, all from real geographic locations using a global residential IP proxy network.
 
-* Easily capture full-page, viewport-only, or selector based screenshots
-* Simulate user interactions before taking your screenshot (click buttons and links, fill out forms, and login to websites before taking your screenshot)
-* Render custom HTML as an image / screenshot (perfect for screenshotting emails and generating custom reports from API data)
-* Take screenshots from real geographic locations around the world via our residential IP proxy network (great for testing localization and SERP)
-* Perform an automatic AI-powered analysis on your screenshot.
+## Publisher: PagePixels LLC
 
-Check out the full suite of PagePixels features here: [https://pagepixels.com/app/screenshots-api-documentation](Documentation)
+## Prerequisites
 
-## Pre-requisites
-
-You will need a PagePixels account to use this connector. PagePixels is free to start. No credit card or phone number required.
-
-To get started, sign up at:
-[https://pagepixels.com](https://pagepixels.com)
+To use this connector, you must have a [PagePixels account](https://pagepixels.com). Registration is free, and no credit card or phone number is required.
 
 ## Supported Operations
 
-The connector provides several actions for quickly capturing screenshots and analyzing web content.
+This connector provides the following operations:
 
-### Take a Screenshot of a web page – `QuickSnap`
+### 1. **QuickSnap** – Take a Screenshot of a Web Page
 
-Captures an instant screenshot of any URL with
+Captures an instant screenshot of any public web page. Offers advanced customization options, including:
 
-* Full page, view-port, or selected element captures
-* Multi-Step functionality (click buttons and links, fill out forms, login to websites before taking your screenshot)
-* Blocking of ads, trackers, or cookie banners, and
-* Device emulation and localization
+* Full-page, viewport-only, or selector-based captures
+* Multi-step actions (form submissions, navigation, etc.)
+* Blocking of ads, trackers, and cookie banners
+* Geolocation and device emulation
+* Header and cookie injection
+* Output in JPEG, PNG, or WebP formats
 
-See all available features in the [https://pagepixels.com/app/screenshots-api-documentation](API Documentation).
-
----
-
-### Take a Screenshot of a web page from a real location – `RealLocationScreenshot`
-
-Captures a screenshot from a real location within a selected country, state, or city. Perfect for localization and SERP testing.
-
-Common use cases:
-
-* Search engine result testing from various locations
-* Geotargeted ad validation
-* Regulatory compliance or localization QA
-
-Specify the `proxy_server` value from over 200 available locations, including "USA", "Germany", "Tokyo", "California", and more.
+📘 [API Documentation](https://pagepixels.com/app/screenshots-api-documentation)
 
 ---
 
-### Take a Screenshot of custom HTML – `SnapHtml`
+### 2. **RealLocationScreenshot** – Take a Screenshot from a Real Geographic Location
 
-Screenshot raw HTML content that you provide. This is great for capturing emails and custom reports from API data.
+Capture screenshots from real IPs in over 200 locations worldwide (countries, states, and major cities). Ideal for:
 
-Includes:
+* Localization and SERP testing
+* Region-specific content verification
+* Compliance audits
 
-* Full rendering engine with javascript capabilities.
-* Full support for all screenshot options found in the [https://pagepixels.com/app/screenshots-api-documentation](PagePixels Documentation).
+Specify the `proxy_server` to select the desired location (e.g., `USA`, `Germany`, `Tokyo`, `California`, etc.).
 
 ---
 
-### Take a Screenshot and analyze the image with AI – `AiAnalysisScreenshot`
+### 3. **SnapHtml** – Take a Screenshot of Custom HTML
 
-This action captures a webpage and then analyzes it using AI. The analysis is based on the user's provided prompt to direct the AI. No external API AI keys are required. 
+Render and capture screenshots from raw HTML you provide. Great for:
 
-Use it to:
+* Email rendering
+* Custom reports based on API data
+* Marketing previews
 
-* Extract specific data from the webpage.
-* Generate page summaries
-* Identify UI elements
-* Perform accessibility or marketing checks
+Full support for JavaScript, CSS injection, and multi-step logic.
 
-Just pass your desired `ai_prompt` (up to 2000 characters), and PagePixels handles the capture + interpretation pipeline.
+---
 
-## Support and Documentation
+### 4. **AiAnalysisScreenshot** – Take a Screenshot and Analyze It with AI
 
-For all support requests and documentation:
-Visit [https://pagepixels.com/support](https://pagepixels.com/support)
+Capture a screenshot and have it automatically analyzed by AI using a custom prompt. Useful for:
+
+* Summarizing content
+* Extracting data
+* Running accessibility or design audits
+* Validating UI/UX heuristics
+
+No external AI key required, just include a prompt of up to 2000 characters in length.
+
+---
+
+## Obtaining Credentials
+
+This connector uses OAuth2 for authentication. You can register at [pagepixels.com](https://pagepixels.com) and use your credentials during the first connection setup in Power Platform.
+
+## Getting Started
+
+1. Navigate to [pagepixels.com](https://pagepixels.com) and sign up for an account.
+2. In Power Automate or Logic Apps, search for **PagePixels Screenshots** and add the connector to your flow.
+3. During setup, authenticate via the OAuth2 login window.
+4. Choose the operation you wish to perform and configure it with URL, HTML content, or AI prompt.
+
+📘 For feature-specific options like multi-step actions, localization settings, and rendering options, refer to the [PagePixels API documentation](https://pagepixels.com/app/screenshots-api-documentation).
+
+## Known Issues and Limitations
+
+* **Screenshots of authenticated pages** may require multi-step flows with login forms, which can be complex. If you run into any trouble, we can help, please contact support. 
+
+## Frequently Asked Questions
+
+**Q: Can I take screenshots from a specific city or state?**
+A: Yes! Use the `proxy_server` parameter in `RealLocationScreenshot`. Over 200 locations are supported.
+
+**Q: Is JavaScript rendered in the screenshot?**
+A: Yes. Pages are rendered in a headless browser with full JS support.
+
+**Q: Can I capture just a part of the page?**
+A: Yes. Use the `selectors` parameter to specify a CSS selector.
+
+**Q: Does the AI analysis require any OpenAI API keys?**
+A: No. Everything is handled internally by PagePixels. Just pass your `ai_prompt`.
+
+**Q: How do I block ads or trackers?**
+A: Use the `no_ads`, `no_tracking`, and `no_cookie_banners` parameters.
+
+## Support
+
+For help, bug reports, or feature requests, visit:
+👉 [https://pagepixels.com/support](https://pagepixels.com/support)
