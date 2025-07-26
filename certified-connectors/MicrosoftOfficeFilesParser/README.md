@@ -1,75 +1,43 @@
 # MicrosoftOffice Files Parser Connector
 
-## Overview  
-This custom connector enables easy parsing of Microsoft Word and Excel documents by submitting base64-encoded file content. It is designed for use in Power Automate, Power Apps, and Azure Logic Apps.
+Custom connector for parsing Microsoft Word and Excel documents by submitting base64-encoded file content. Designed for use with Power Automate, Power Apps, and Azure Logic Apps to enable easy document content extraction.
 
-## Features  
-- Parse Word documents to extract text content.  
-- Parse Excel spreadsheets and return worksheet names along with parsed data arrays.
+## Publisher: Steven Soe  
+Certified Connector Owner
 
-## Authentication  
-This connector does **not** require authentication.
+## Prerequisites  
+No special licenses or plans are required. The connector does **not** require authentication. Suitable for users with access to Power Automate, Power Apps, or Azure Logic Apps.
 
-## Usage  
+## Supported Operations  
 
-### Parse Word Document
+### Parse Word Document  
+Accepts base64-encoded Word document content and returns the extracted text content.
 
-**Request**  
-POST JSON payload to `/apps/parser/word.php` with:
+### Parse Excel Spreadsheet  
+Accepts base64-encoded Excel file content and returns worksheet names along with the parsed worksheet data as 2D arrays.
 
-```json
-{
-  "$content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "base64$content": "BASE64_ENCODED_WORD_DOCUMENT_HERE"
-}
-```
+## Obtaining Credentials  
+This connector does **not** require authentication or credentials.
 
-**Respond**
-```json
-{
-  "message": "Text extracted successfully",
-  "text": "Extracted text content from the Word document."
-}
-```
+## Getting Started  
+To use the connector, POST a JSON payload containing the base64-encoded file content to the respective endpoint for Word or Excel parsing. Ensure the content type and filename (for Excel) are provided.
 
-### Parse Excel Spreadsheet
+## Known Issues and Limitations  
+- The connector expects base64 encoding for the file content.  
+- The `$filename` parameter is required for Excel files and must include the file extension.  
+- The connector does **not** store, retain, or use any submitted data.  
+- No authentication is required; users should exercise caution when sharing sensitive data through flows using this connector.
 
-**Request**
-POST JSON payload to /apps/parser/excel.php with:
+## Frequently Asked Questions  
 
-```json
-{
-  "$content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "$filename": "Workbook.xlsx",
-  "base64$content": "BASE64_ENCODED_EXCEL_FILE_HERE"
-}
-```
+### Does this connector store my data?  
+No, the connector does not store, retain, or use any submitted file content.
 
-**Respond**
-```json
-{
-  "Worksheets": ["Sheet1", "Sheet2"],
-  "Sheet1": [
-    ["Header1", "Header2"],
-    ["Row1Value1", "Row1Value2"]
-  ],
-  "Sheet2": [
-    ["HeaderA", "HeaderB"],
-    ["Row1ValueA", "Row1ValueB"]
-  ]
-}
-```
+### Is authentication required?  
+No, this connector does not require any authentication.
 
-
-## Response  
-- **Word endpoint:** Returns extracted text and a status message.  
-- **Excel endpoint:** Returns an array of worksheet names and their respective parsed data as 2D arrays.
-
-## Notes  
-- The `$filename` parameter must include the file extension (e.g., `Workbook.xlsx`).  
-- The `base64$content` parameter must contain the base64-encoded file content.  
-- The connector does not store or retain any submitted data.
+## Deployment Instructions  
+Place the connector files (`swagger.yaml`, `manifest.json`, `README.md`, `icon.png`) in your folder structure and import the custom connector into your Power Platform environment via the Power Automate or Power Apps portal.
 
 ## Support  
-For questions or support, please contact me at [stevens@ssdevkit.onmicrosoft.com](mailto:stevens@ssdevkit.onmicrosoft.com).
-
+For questions or support, contact [stevens@ssdevkit.onmicrosoft.com](mailto:stevens@ssdevkit.onmicrosoft.com).
