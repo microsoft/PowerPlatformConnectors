@@ -4502,6 +4502,16 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
   }
+  
+  private JObject listEnvelopeIdsBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopeId", "");
+    uriBuilder.Query = query.ToString();
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    return body;
+  }
 
   private JObject SearchListEnvelopesTransformation(JObject body)
   { 
@@ -4553,6 +4563,8 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
 
       query["status"] = string.IsNullOrEmpty(query.Get("envelopeStatus")) ? 
         null : envelopeStatusMapping[query.Get("envelopeStatus")];
+      query["folder_ids"] = string.IsNullOrEmpty(query.Get("folder_ids")) ? 
+        null : folderIDMapping[query.Get("folder_ids").ToString()];
        query["order_by"] = string.IsNullOrEmpty(query.Get("order_by")) ? 
         "status_changed" : orderByMapping[query.Get("order_by")];
       query["from_date"] = string.IsNullOrEmpty(query.Get("from_date")) ? 
@@ -6037,7 +6049,12 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       await this.TransformRequestJsonBody(this.EnvelopeResendBodyTransformation).ConfigureAwait(false);
     }
     
-    if(("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
+    if ("listEnvelopeIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.listEnvelopeIdsBodyTransformation).ConfigureAwait(false);
+    }
+    
+    if (("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
     {
       await this.TransformRequestJsonBody(this.SearchListEnvelopesTransformation).ConfigureAwait(false);
     }

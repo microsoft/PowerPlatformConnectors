@@ -2202,8 +2202,7 @@
             ],
             "in": "query",
             "type": "string",
-            "required": false,
-            "x-ms-visibility": "internal"
+            "required": false
           },
           {
             "name": "order_by",
@@ -2277,6 +2276,70 @@
         },
         "deprecated": false,
         "x-ms-visibility": "important"
+      }
+    },
+    "/accounts/{accountId}/envelopes/envelopeId": {
+      "get": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "List envelope IDs",
+        "description": "This is an internal action that grabs all list of envelope IDs for a given account.",
+        "operationId": "listEnvelopeIds",
+        "x-ms-no-generic-test": true,
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Account ID",
+            "required": true,
+            "x-ms-summary": "Account",
+            "x-ms-test-value": "insert account id",
+            "x-ms-dynamic-values": {
+              "operationId": "GetLoginAccounts",
+              "value-collection": "loginAccounts",
+              "value-path": "accountIdGuid",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "Enter start date-time in UTC format: 2017-05-02T01:44Z",
+            "type": "string",
+            "required": false,
+            "format": "date-time",
+            "x-ms-summary": "From date",
+            "default": "2000-01-02T12:45Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/EnvelopeIDsResponse"
+            }
+          }
+        },
+        "x-ms-openai-data": {
+          "openai-enabled": true
+        },
+        "deprecated": false,
+        "x-ms-visibility": "internal"
       }
     },
     "/accounts/copilotAccount/envelopes/listEnvelopesForSalesCopilot": {
@@ -2925,8 +2988,8 @@
         "tags": [
           "DocuSign"
         ],
-        "summary": "Get envelope custom field info",
-        "description": "Get envelope custom field info.",
+        "summary": "Get custom field info from envelope",
+        "description": "Get custom field info from envelope",
         "operationId": "GetEnvelopeCustomField",
         "consumes": [
           "application/json",
@@ -3469,8 +3532,8 @@
         "tags": [
           "DocuSign"
         ],
-        "summary": "List recipients from envelope",
-        "description": "List recipients from envelope",
+        "summary": "List recipients from an envelope",
+        "description": "List recipients from an envelope",
         "operationId": "GetRecipientStatus",
         "consumes": [],
         "produces": [
@@ -3483,9 +3546,9 @@
           {
             "name": "accountId",
             "in": "path",
-            "description": "Account id",
+            "description": "Account ID",
             "required": true,
-            "x-ms-summary": "Account",
+            "x-ms-summary": "Account ID",
             "x-ms-test-value": "insert account id",
             "x-ms-dynamic-values": {
               "operationId": "GetLoginAccounts",
@@ -3496,45 +3559,24 @@
             "type": "string"
           },
           {
-            "name": "folderId",
-            "in": "query",
-            "description": "Folder id",
-            "required": true,
-            "x-ms-summary": "Folder",
-            "x-ms-test-value": "insert folder id",
-            "x-ms-dynamic-values": {
-              "operationId": "GetFolderList",
-              "parameters": {
-                "accountId": {
-                  "parameter": "accountId"
-                }
-              },
-              "value-collection": "folders",
-              "value-path": "folderId",
-              "value-title": "name"
-            },
-            "type": "string"
-          },
-          {
             "name": "envelopeId",
             "in": "path",
-            "description": "Envelope id",
+            "description": "Envelope ID",
             "required": true,
-            "x-ms-summary": "Envelope",
+            "x-ms-summary": "Envelope ID",
             "x-ms-test-value": "insert envelope id",
             "x-ms-dynamic-values": {
-              "operationId": "GetFolderEnvelopeList",
+              "operationId": "listEnvelopeIds",
               "parameters": {
                 "accountId": {
                   "parameter": "accountId"
                 },
-                "folderId": {
-                  "parameter": "folderId"
-                }
+                "from_date":  "2000-01-02T12:45Z"
+
               },
-              "value-collection": "folderItems",
+              "value-collection": "envelopes",
               "value-path": "envelopeId",
-              "value-title": "subject"
+              "value-title": "emailSubject"
             },
             "type": "string"
           }
@@ -3721,9 +3763,6 @@
               "parameters": {
                 "accountId": {
                   "parameter": "accountId"
-                },
-                "folderId": {
-                  "parameter": "folderId"
                 },
                 "envelopeId": {
                   "parameter": "envelopeId"
@@ -7266,6 +7305,23 @@
         }
       }
     },
+    "EnvelopeIds": {
+      "type": "object",
+      "properties": {
+        "emailSubject": {
+          "minLength": 1,
+          "x-ms-summary": "subject",
+          "description": "Title of the envelope",
+          "type": "string"
+        },
+        "envelopeId": {
+          "minLength": 1,
+          "x-ms-summary": "Envelope ID",
+          "description": "Envelope ID",
+          "type": "string"
+        }
+      }
+    },
     "FilteredEnvelopes": {
       "type": "object",
       "properties": {
@@ -7618,11 +7674,24 @@
         "description": "Body of the email.",
         "x-ms-summary": "Email body"
     },
-    "AccountCustomFields": {
-      "$ref": "#/definitions/AccountCustomFields"
+      "AccountCustomFields": {
+        "$ref": "#/definitions/AccountCustomFields"
+      }
     }
-  }
-},
+  },
+  "EnvelopeIDsResponse": {
+      "type": "object",
+      "properties": {
+        "envelopes": {
+          "description": "list of envelope ids",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnvelopeIds"
+          },
+          "x-ms-summary": "Filtered Envelopes"
+        }
+      }
+    },
     "FilteredEnvelopeListResponse": {
       "type": "object",
       "properties": {
