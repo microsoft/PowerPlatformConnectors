@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -267,16 +267,16 @@ namespace SnowflakeV2CoreLogic.Utilities
         /// <param name="sqlStatement">The original SQL statement</param>
         /// <param name="operation">Optional operation name for additional context</param>
         /// <returns>SQL statement with version comment at the end before semicolon</returns>
-        public static string AddVersionComment(string sqlStatement, string? operation = null)
+        public static string AddVersionComment(string? sqlStatement = null, string? operation = null)
         {
             if (string.IsNullOrWhiteSpace(sqlStatement))
-                return sqlStatement;
+                return sqlStatement ?? string.Empty;
 
             var operationInfo = !string.IsNullOrEmpty(operation) ? $" - {operation}" : "";
             var versionComment = $"\n-- {Constants.ConnectorName} v{Constants.ConnectorVersion}{operationInfo}\n";
 
             // Trim the SQL statement
-            var trimmedSql = sqlStatement.Trim();
+            var trimmedSql = sqlStatement!.Trim();
 
             // Check if the query ends with a semicolon
             if (trimmedSql.EndsWith(";"))
