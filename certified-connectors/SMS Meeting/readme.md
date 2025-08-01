@@ -1,72 +1,71 @@
 # SMS Meeting - Power Automate Connector
 
-**SMS Meeting** vous permet d'automatiser l'envoi de SMS, notifications, rappels, et la gestion de vos contacts directement depuis Microsoft Power Automate, Power Apps et Logic Apps.
+**SMS Meeting** allows you to automate SMS sending, notifications, reminders, and contact management directly from Microsoft Power Automate, Power Apps, and Logic Apps.
 
 ## Publisher: Ventus
 
-## Prérequis
+## Prerequisites
 
-- Un compte SMS Meeting actif.
-- Un abonnement API SMS Meeting (offre payante) souscrit depuis l’espace client : [my.sms-meeting.com](https://my.sms-meeting.com).
-- Une clé API (Secret Key) générée dans votre espace client.
+- An active SMS Meeting account.
+- An active SMS Meeting API subscription (paid plan) from the client portal: [my.sms-meeting.com](https://my.sms-meeting.com).
+- An API key (Secret Key) generated in your client portal.
 
-## Opérations supportées
+## Supported Operations
 
-### Envoyer un SMS (`CreateSms`)
-Envoie un SMS à un ou plusieurs destinataires. Permet de spécifier le contenu, l’expéditeur, la date d’envoi différé, etc.
+### Send an SMS (`CreateSms`)
+Send an SMS to one or more recipients. You can specify the content, sender, scheduled date, etc.
 
-### Lister tous les SMS (`GetAllSms`)
-Récupère la liste de tous les SMS envoyés ou programmés.
+### List all SMS (`GetAllSms`)
+Retrieve the list of all sent or scheduled SMS messages.
 
-### Lister tous les contacts (`GetContacts`)
-Affiche les contacts disponibles dans votre compte SMS Meeting.
+### List all contacts (`GetContacts`)
+Display the contacts available in your SMS Meeting account.
 
-### Créer un contact (`CreateContact`)
-Ajoute un nouveau contact dans votre carnet d’adresses SMS Meeting.
+### Create a contact (`CreateContact`)
+Add a new contact to your SMS Meeting address book.
 
-### Lister les templates (`GetTemplates`)
-Affiche la liste des modèles de messages disponibles.
+### List templates (`GetTemplates`)
+Show the list of available message templates.
 
-### Utiliser les listes de contacts
-Créer, modifier, supprimer et gérer vos listes de contacts pour des envois groupés.
+### Use contact lists
+Create, update, delete, and manage your contact lists for bulk sending.
 
-## Obtention des identifiants (Clé API)
+## How to Get Your Credentials (API Key)
 
-1. Connectez-vous à votre espace client [my.sms-meeting.com](https://my.sms-meeting.com).
-2. Souscrivez à l’offre “API SMS Meeting” si ce n’est pas déjà fait.
-3. Accédez à la rubrique **Clés API / Secret Key**.
-4. Générez une clé secrète pour votre licence.
-5. Saisissez cette clé lors de la création de la connexion dans Power Automate.
+1. Log in to your client portal: [my.sms-meeting.com](https://my.sms-meeting.com).
+2. Subscribe to the "SMS Meeting API" plan if you have not already done so.
+3. Go to the **API Keys / Secret Key** section.
+4. Generate a secret key for your license.
+5. Enter this key when creating the connection in Power Automate.
 
-## Mise en route
+## Getting Started
 
-- Ajoutez le connecteur personnalisé à votre environnement Power Platform.
-- Lors de la première utilisation, renseignez votre clé API (“Secret Key”).
-- Utilisez les actions fournies dans vos flux pour automatiser l’envoi et la gestion de vos SMS.
+- Add the custom connector to your Power Platform environment.
+- When first using, enter your API key ("Secret Key").
+- Use the provided actions in your flows to automate SMS sending and management.
 
-## Problèmes connus et limitations
+## Known Issues and Limitations
 
-- Ce connecteur requiert un abonnement API actif.
-- Le quota d’envoi de SMS dépend de votre offre.
-- Les champs obligatoires doivent être respectés (notamment le type de SMS : `confirmation` ou `reminder`).
-- La gestion avancée (templates, contacts) nécessite des droits associés à votre licence.
+- This connector requires an active API subscription.
+- The SMS sending quota depends on your plan.
+- All required fields must be provided (especially the SMS type: `confirmation` or `reminder`).
+- Advanced management (templates, contacts) requires the appropriate license permissions.
 
-## Questions fréquentes
+## Frequently Asked Questions
 
-### Puis-je envoyer un SMS à plusieurs numéros en une seule action ?
-Oui, il suffit d’utiliser la fonctionnalité boucle de Power Automate et d’appeler l’action “Envoyer un SMS” pour chaque numéro.
+### Can I send an SMS to multiple numbers in a single action?
+Yes, simply use the Power Automate loop feature and call the "Send SMS" action for each number.
 
-### Que faire si ma clé API ne fonctionne pas ?
-Vérifiez que votre offre API est active et que la clé n’a pas été révoquée. Générez une nouvelle clé depuis votre espace client si besoin.
+### What should I do if my API key does not work?
+Check that your API plan is active and that the key has not been revoked. Generate a new key from your client portal if necessary.
 
-## Instructions de déploiement
+## Deployment Instructions
 
-1. Ajoutez les fichiers `apiDefinition.swagger.json` et `apiProperties.json` dans le dossier requis.
-2. Suivez la procédure Microsoft pour [soumettre un connecteur certifié ou personnalisé](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-certification).
-3. Une fois approuvé, le connecteur sera disponible sur Power Automate pour tous vos utilisateurs.
+1. Add the `apiDefinition.swagger.json` and `apiProperties.json` files to the required folder.
+2. Follow the Microsoft procedure to [submit a certified or custom connector](https://learn.microsoft.com/en-us/connectors/custom-connectors/submit-certification).
+3. Once approved, the connector will be available in Power Automate for all your users.
 
 ---
 
-Support & contact : [hello@sms-meeting.com](mailto:hello@sms-meeting.com)  
-Site web : [www.sms-meeting.com](https://www.sms-meeting.com)
-
+Support & contact: [hello@sms-meeting.com](mailto:hello@sms-meeting.com)  
+Website: [www.sms-meeting.com](https://www.sms-meeting.com)
