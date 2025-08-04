@@ -9,7 +9,7 @@ CLI parameter definitions
 """
 
 from knack.arguments import ArgumentsContext
-from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
+from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE, _PACKAGE
 
 CLIENT_SECRET = 'client_secret'
 CLIENT_SECRET_OPTIONS = ['--secret', '-r']
@@ -272,28 +272,51 @@ def load_arguments(self, command):
             required=False,
             help=SETTINGS_HELP)
 
-    with ArgumentsContext(self, _VALIDATE) as arg_context:
-        arg_context.argument(
-            API_DEFINITION,
-            options_list=API_DEFINITION_OPTIONS,
-            type=str,
-            required=False,
-            help=API_DEFINITION_HELP)
-        arg_context.argument(
-            POWERAPPS_URL,
-            options_list=POWERAPPS_URL_OPTIONS,
-            type=str,
-            required=False,
-            help=POWERAPPS_URL_HELP)
-        arg_context.argument(
-            POWERAPPS_VERSION,
-            options_list=POWERAPPS_VERSION_OPTIONS,
-            type=str,
-            required=False,
-            help=POWERAPPS_VERSION_HELP)
         arg_context.argument(
             SETTINGS,
             options_list=SETTINGS_OPTIONS,
             type=str,
             required=False,
             help=SETTINGS_HELP)
+
+    with ArgumentsContext(self, _PACKAGE) as arg_context:
+        arg_context.argument(
+            'source',
+            options_list=['--source', '-src'],
+            type=str,
+            required=False,
+            help='Source directory containing the Power Platform solution ZIP files to package. Defaults to current directory.')
+        arg_context.argument(
+            'destination',
+            options_list=['--dest', '-d'],
+            type=str,
+            required=False,
+            help='Destination path for the final ConnectorPackage.zip file. Defaults to current directory.')
+        arg_context.argument(
+            'package_format',
+            options_list=['--format', '-f'],
+            type=str,
+            required=False,
+            choices=['standard'],
+            help='Package format. Currently only "standard" format is supported (ConnectorPackage.zip with intro.md and package.zip).')
+        arg_context.argument(
+            SETTINGS,
+            options_list=SETTINGS_OPTIONS,
+            type=str,
+            required=False,
+            help=SETTINGS_HELP)
+        arg_context.argument(
+            'overwrite',
+            options_list=['--overwrite', '-w'],
+            type=bool,
+            required=False,
+            nargs='?',
+            default=False,
+            const=True,
+            help='Overwrite existing package files if they exist.')
+        arg_context.argument(
+            'custom_mappings',
+            options_list=['--custom-mappings', '-cm'],
+            type=str,
+            required=False,
+            help='JSON string containing custom file renaming mappings. Example: \'{"*MyConnector*": "Connector.zip", "*MyFlow*": "Flow.zip"}\'.')
