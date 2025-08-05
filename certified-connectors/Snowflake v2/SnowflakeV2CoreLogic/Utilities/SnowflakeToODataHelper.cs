@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -220,11 +220,15 @@ namespace SnowflakeV2CoreLogic.Utilities
         /// <param name="precision">The amount of digits to the right of the decimal (if relevant), null otherwise.</param>
         /// <param name="data">The value of the data</param>
         /// <returns>Data converted to appropriate .NET data type</returns>
-        public static object CastSnowflakeDataToCorrectType(
+        public static object? CastSnowflakeDataToCorrectType(
             string snowflakeDataType,
             int? precision,
             object data)
         {
+            if (data == null)
+            {
+                return null;
+            }
             snowflakeDataType = snowflakeDataType.ToUpper();
 
             switch (snowflakeDataType)

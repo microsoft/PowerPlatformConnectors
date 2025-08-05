@@ -11,40 +11,77 @@ namespace SnowflakeTestApp.Mocks
 
     /// <summary>
     /// Mock implementation of the connection parameters provider.
-    /// Provides test values for connection parameters.Update these to your test values before deployment or debugging.
+    /// Provides test values for connection parameters.
+    /// Update these values below for your test environment before deployment or debugging.
     /// </summary>
     public class ConnectionParametersProviderMock : IConnectionParametersProvider
     {
+        // ====== CONFIGURATION VALUES ======
+        // Update these values for your test environment:
+
+        /// <summary>
+        /// Snowflake instance hostname (without https://)
+        /// REQUIRED: Update with your Snowflake account URL
+        /// Format: account.region.cloud_provider.snowflakecomputing.com
+        /// Example: "mycompany.us-west-2.aws.snowflakecomputing.com"
+        /// </summary>
+        public static string TestSnowflakeInstance = "your-account.region.cloud-provider.snowflakecomputing.com";
+
+        /// <summary>
+        /// Database name for testing
+        /// REQUIRED: Update with your test database name
+        /// Common values: "TESTDB", "PUBLIC", "SAMPLE_DATA"
+        /// </summary>
+        public static string TestDatabase = "DATAVERSE";
+
+        /// <summary>
+        /// Schema name for testing
+        /// REQUIRED: Update with your test schema name
+        /// Common values: "PUBLIC", "INFORMATION_SCHEMA", "TEST_SCHEMA"
+        /// </summary>
+        public static string TestSchema = "PUBLIC";
+
+        /// <summary>
+        /// Warehouse name for testing
+        /// REQUIRED: Update with your Snowflake warehouse name
+        /// Common values: "COMPUTE_WH", "XSMALL_WH", "TEST_WAREHOUSE"
+        /// </summary>
+        public static string TestWarehouse = "XSMALL";
+
+        /// <summary>
+        /// Role for testing
+        /// REQUIRED: Update with your Snowflake role name
+        /// Common values: "SYSADMIN", "PUBLIC", "ACCOUNTADMIN", "USERADMIN"
+        /// </summary>
+        public static string TestRole = "ACCOUNTADMIN";
+
+        // ====== MOCK IMPLEMENTATION ======
+
         public T GetProperty<T>(string key)
         {
             if (key.Equals(Constants.Server, StringComparison.OrdinalIgnoreCase))
             {
-                string testServer = "tlpycol-taa70859.snowflakecomputing.com";
-                return (T)Convert.ChangeType(testServer, typeof(T)); ;
+                return (T)Convert.ChangeType(TestSnowflakeInstance, typeof(T));
             }
 
             if (key.Equals(Constants.Database, StringComparison.OrdinalIgnoreCase))
             {
-                string testDatabase = "SNOWFLAKE_TEST_DATA";
-                return (T)Convert.ChangeType(testDatabase, typeof(T)); ;
+                return (T)Convert.ChangeType(TestDatabase, typeof(T));
             }
 
             if (key.Equals(Constants.Role, StringComparison.OrdinalIgnoreCase))
             {
-                string testRole = "ACCOUNTADMIN";
-                return (T)Convert.ChangeType(testRole, typeof(T)); ;
+                return (T)Convert.ChangeType(TestRole, typeof(T));
             }
 
             if (key.Equals(Constants.Warehouse, StringComparison.OrdinalIgnoreCase))
             {
-                string testWarehouse = "COMPUTE_WH";
-                return (T)Convert.ChangeType(testWarehouse, typeof(T)); ;
+                return (T)Convert.ChangeType(TestWarehouse, typeof(T));
             }
 
             if (key.Equals(Constants.Schema, StringComparison.OrdinalIgnoreCase))
             {
-                string testSchema = "PUBLIC";
-                return (T)Convert.ChangeType(testSchema, typeof(T)); ;
+                return (T)Convert.ChangeType(TestSchema, typeof(T));
             }
 
             throw new ArgumentException();

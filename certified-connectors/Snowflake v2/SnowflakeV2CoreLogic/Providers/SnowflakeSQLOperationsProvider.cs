@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+// Copyright (c) Snowflake Inc.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -47,9 +47,8 @@ namespace SnowflakeV2CoreLogic.Providers
             // Execute the SQL statement
             // We would normally execute this through the db operations, but that's intended to build usable sql statements from data in the request.
             // In this case, we have the entire request paylaod provided by the user, so we can bypass it and go straight to the client.
-            SnowflakeAPIResponseModel apiResponse = await snowflakeClient.ExecuteSqlStatementAsync(httpClient, payload, headerParameters, queryParams).ConfigureAwait(true);
+            SnowflakeAPIResponseModel apiResponse = await snowflakeClient.ExecuteSqlStatementAsync(httpClient, payload, headerParameters, queryParams, "POST /sql").ConfigureAwait(true);
 
-            // Need to map the response to the SQLOperationsResponseModel
             var response = MapAPIResponseToOperationResponse(apiResponse);
 
             return response;
