@@ -3065,6 +3065,11 @@ public class Script : ScriptBase
                               ["type"] = "string",
                               ["x-ms-summary"] = "- Recipient ID"
                             },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
                             ["email"] = new JObject
                             {
                               ["type"] = "string",
@@ -3124,6 +3129,11 @@ public class Script : ScriptBase
                             {
                               ["type"] = "string",
                               ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
                             },
                             ["email"] = new JObject
                             {
@@ -3185,6 +3195,11 @@ public class Script : ScriptBase
                               ["type"] = "string",
                               ["x-ms-summary"] = "- Recipient ID"
                             },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
                             ["email"] = new JObject
                             {
                               ["type"] = "string",
@@ -3226,6 +3241,11 @@ public class Script : ScriptBase
                             {
                               ["type"] = "string",
                               ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
                             },
                             ["hostEmail"] = new JObject
                             {
@@ -3280,6 +3300,11 @@ public class Script : ScriptBase
                               ["type"] = "string",
                               ["x-ms-summary"] = "- Recipient ID"
                             },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
                             ["email"] = new JObject
                             {
                               ["type"] = "string",
@@ -3321,6 +3346,11 @@ public class Script : ScriptBase
                             {
                               ["type"] = "string",
                               ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
                             },
                             ["email"] = new JObject
                             {
@@ -4710,18 +4740,9 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var verificationType = query.Get("verificationType");
-    var recipientTypeMap = new Dictionary<string, string>() {
-      {"agent", "agents"},
-      {"editor", "editors"},
-      {"inpersonsigner", "inPersonSigners"},
-      {"certifieddelivery", "certifiedDeliveries"},
-      {"signer", "signers"},
-      {"carboncopy", "carbonCopies"},
-      {"intermediary", "intermediaries"},
-      {"witness", "witnesses"}
-    };
 
-    var recipientType = recipientTypeMap[query.Get("recipientType")];
+
+    var recipientType = query.Get("recipientType");
     var recipientId = query.Get("recipientId");
 
     var recipient = new JObject();
@@ -6716,39 +6737,53 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-      var tabLabel = query.Get("tabLabel");
+      // if tablabels contain a "+" instead of a space from the UI
+      var tabLabel = Uri.UnescapeDataString(query.Get("tabLabel")).Replace("+", " "); 
       var newBody = new JObject();
 
-      foreach(JProperty tabTypes in body.Properties())
+      bool found = false;
+
+      foreach (JProperty tabTypes in body.Properties())
       {
-        foreach(var tab in tabTypes.Value)
+        foreach (var tab in tabTypes.Value)
         {
-          if(tab["tabType"].ToString().Equals("radiogroup"))
+
+          if (tab["tabLabel"] != null && (tab["tabLabel"].ToString()).Equals(tabLabel.ToString()))
           {
-            newBody["value"] = tab["value"] ?? tab["value"];
-            newBody["documentId"] = tab["documentId"] ?? tab["documentId"];
-            newBody["tabType"] = tab["tabType"];
-            newBody["recipientId"] = tab["recipientId"];
+            newBody["name"] = tab["name"] ?? null;
+            newBody["tabLabel"] = tab["tabLabel"];
+            newBody["value"] = tab["value"] ?? null;
+            newBody["documentId"] = tab["documentId"] ?? null;
+            newBody["tabId"] = tab["tabId"] ?? null;
+            newBody["tabType"] = tabTypes.Name;
+            newBody["recipientId"] = tab["recipientId"] ?? null;
+            newBody["selected"] = tab["selected"] ?? null;
+            found = true;
+            break;
           }
 
-          if(tab["tabLabel"] != null && (tab["tabLabel"].ToString()).Equals(tabLabel.ToString()))
+          // Handle radioGroupTabs with groupName
+          if (tabTypes.Name.Equals("radioGroupTabs") && tab["groupName"] != null && (tab["groupName"].ToString()).Equals(tabLabel.ToString()))
           {
-            newBody["name"] = tab["name"] ?? tab["name"];
-            newBody["tabLabel"] = tab["tabLabel"];
-            newBody["value"] = tab["value"] ?? tab["value"];
-            newBody["documentId"] = tab["documentId"] ?? tab["documentId"];
-            newBody["tabId"] = tab["tabId"];
-            newBody["tabType"] = tab["tabType"];
-            newBody["recipientId"] = tab["recipientId"];
+            newBody["name"] = tab["groupName"];
+            newBody["tabLabel"] = tab["tabLabel"] ?? null;
+            newBody["value"] = tab["value"] ?? null;
+            newBody["documentId"] = tab["documentId"] ?? null;
+            newBody["tabId"] = tab["tabId"] ?? null;
+            newBody["tabType"] = tabTypes.Name;
+            newBody["recipientId"] = tab["recipientId"] ?? null;
+            
+            found = true;
             break;
           }
         }
+        if (found) break;
       }
 
-      if (newBody["tabType"] == null)
-      {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Could not find the Tab Type for the specified recipient");
-      }
+        if (!found) 
+        {
+          throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Could not find the Tab Type specified recipient");
+        }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
@@ -7635,7 +7670,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
         error.AppendLine($"Inner exception {level}: {inner.Message}");
         inner = inner.InnerException;
       }
-         
+
       error.AppendLine($"Stack trace: {this.StackTrace}");
       return error.ToString();
     }
