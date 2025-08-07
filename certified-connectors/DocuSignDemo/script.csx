@@ -5158,21 +5158,28 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
   {
     foreach (var doc in docGenFormfields)
     {
-      foreach(var field in (doc["docGenFormFieldList"] as JArray) ?? new JArray())
+      var docGenFormFieldList = doc["docGenFormFieldList"] as JArray;
+      if (docGenFormFieldList == null)
+          continue;
+
+      foreach( var field in docGenFormFieldList)
       {
         formFields.Add(new JObject()
         {
-          ["name"] =  field["name"],
-          ["type"] =  field["type"],
+          ["name"] = field["name"],
+          ["type"] = field["type"],
           ["value"] = field["value"],
-          ["label"] =  field["label"],
-          ["documentId"] =  doc["documentId"]
+          ["label"] = field["label"],
+          ["documentId"] = doc["documentId"]
         });
 
-        if (field["type"].ToString().Equals("TableRow"))
+        if (field["type"] != null && field["type"].ToString().Equals("TableRow", StringComparison.OrdinalIgnoreCase))
         {
-          JArray rowValues = (field["rowValues"] as JArray) ?? new JArray();
-          formFields = GetFormFields(rowValues, formFields);
+          var rowValues = field["rowValues"] as JArray;
+          if (rowValues != null)
+          {
+            formFields = GetFormFields(rowValues, formFields);
+          }
         }
       }
     }
@@ -5382,131 +5389,210 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     return body;
   }
 
+
   private JObject BulkSendBodyTransformation(JObject body)
   {
-    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);      
     var name = query.Get("name");
     JObject newBody = ParseCSV(body);
     newBody["name"] = name;
     return newBody;
   }
 
-  private JObject ParseCSV(JObject inputBody)
+  public static JObject ParseCSV(JObject inputBody)
   {
-    var input = inputBody.GetValue("csv").ToString();
-    var body = new JObject();
-    var result = new JObject();
-    try
-    {
-        var lines = input.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-        var headerLine = lines[0];
-        var headerItems = headerLine.Split(',');
-        var parsedHeaders = new string[headerItems.Length][];
-        string[] recipientFields = { "accessCode", "clientUserId", "deliveryMethod", "email", "embeddedRecipientStartURL", "hostEmail", "hostName", "idCheckConfigurationName", "name", "note", "recipientId", "roleName", "signerName", "signingGroupId" };
-        // This map contains each copy of recipients. The key here would be the role name and the value is the recipient request object that gets added as request body
-        Dictionary<string, JObject> recipientDataMap = new Dictionary<string, JObject>();
-        body["recipients"] = new JArray();
-        result["bulkCopies"] = new JArray();
-        var recipientObject = new JObject();
-        for (int i = 0; i < headerItems.Length; i++)
-        {
-            parsedHeaders[i] = headerItems[i].Split(new string[] { "::" }, StringSplitOptions.None);
-        }
-        // Iterate over the other lines (index at 1 to skip header line)
-        for (var index = 1; index < lines.Length; index++)
-        {
-            var fieldValues = lines[index].Split(',');
-            var roleName = "";
-            var fieldName = "";
-            var tabLabelName = "";
+      var input = inputBody["csv"]?.ToString();
+      var body = new JObject();
+      var result = new JObject();
 
-            for (var index2 = 0; index2 < fieldValues.Length; index2++)
-            {
-              var columnName = parsedHeaders[index2];
-              var value = fieldValues[index2];
-              if (string.IsNullOrEmpty(value))
+      // Hashmap for mapping docgen fields to their internal names
+      var fieldNameToLabelMap = new Dictionary<string, string>();
+      var labelToFieldNameMap = new Dictionary<string, string>(); // Add this reverse lookup
+
+      // Hashmap for mapping table names to their child fields
+      var tableToChildFieldsMap = new Dictionary<string, List<string>>();
+
+      try
+      {
+        processDocGenFields(inputBody, fieldNameToLabelMap, labelToFieldNameMap, tableToChildFieldsMap);
+      }
+      catch (Exception ex)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Error processing DocGen fields: " + ex.Message);
+      }
+
+      // Hashmap for storing child field names to their parent table names
+      var childFieldToTableMap = new Dictionary<string, string>();
+
+      foreach (var kvp in tableToChildFieldsMap)
+      {
+          var tableName = kvp.Key;
+          var childFields = kvp.Value;
+
+          foreach (var childField in childFields)
+          {
+              if (!childFieldToTableMap.ContainsKey(childField))
               {
-                  continue;
+                  childFieldToTableMap[childField] = tableName;
               }
-              // recipient info
-              if (columnName.Length > 1)
-              {
-                roleName = columnName[0];
-                fieldName = columnName[1];
-                tabLabelName = columnName[1];
-                fieldName = fieldName.Replace(" ", "");
-                fieldName = char.ToLower(fieldName[0]) + fieldName.Substring(1);
-                JObject recipientObj;
-                if (recipientDataMap.ContainsKey(roleName))
-                {
-                  recipientObj = recipientDataMap[roleName];
-                }
-                else
-                {
-                  recipientDataMap[roleName] = new JObject();
-                  recipientObj = recipientDataMap[roleName];
-                  recipientObj["roleName"] = roleName;
-                }
-                if (recipientFields.Contains(fieldName))
-                {
-                    recipientObj[fieldName] = value;
-                    continue;
-                }
-                if (fieldName.Equals("emailSubject", StringComparison.OrdinalIgnoreCase) ||
-                fieldName.Equals("emailBody", StringComparison.OrdinalIgnoreCase) ||
-                fieldName.Equals("language", StringComparison.OrdinalIgnoreCase))
-                {
-                  if (!recipientObj.ContainsKey("emailNotification"))
-                  {
-                    recipientObj["emailNotification"] = new JObject();
-                  }
-                  recipientObj["emailNotification"][fieldName] = value;
-                }
-                else
-                {
-                  if (!recipientObj.ContainsKey("tabs"))
-                  {
-                      recipientObj["tabs"] = new JArray();
-                  }
-                  ((JArray)recipientObj["tabs"]).Add(new JObject()
-                  {
-                      ["tabLabel"] = tabLabelName,
-                      ["initialValue"] = value
-                  });
-                }
-              }
-              else
-              {
-                  // custom fields info
-                  if (!body.ContainsKey("customFields"))
-                  {
-                    body["customFields"] = new JArray();
-                  }
-                  ((JArray) body["customFields"]).Add(new JObject()
-                  {
-                    ["name"] = columnName[0],
-                    ["value"] = value
-                  });
-              }
-            }
-            foreach (KeyValuePair<string, JObject> pair in recipientDataMap)
-            {
-              var recipientObj = pair.Value;
-              ((JArray)body["recipients"]).Add(recipientObj.DeepClone());
-            }
-            recipientDataMap = new Dictionary<string, JObject>();
-            ((JArray)result["bulkCopies"]).Add(body.DeepClone());
-            body["recipients"] = new JArray();
-            body["customFields"] = new JArray();
-            recipientDataMap = new Dictionary<string, JObject>(); 
+          }
+      }
+
+      if (string.IsNullOrEmpty(input))
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: CSV input is empty");
+      }
+
+      try
+      {
+      // Split lines from the csv 
+      var lines = input.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+      // first line with the headers 
+      var headerLine = lines[0];
+      var headerItems = headerLine.Split(',');
+      var parsedHeaders = new string[headerItems.Length][];
+      string[] recipientFields = { "accessCode", "clientUserId", "deliveryMethod", "email", "embeddedRecipientStartURL", "hostEmail", "hostName", "idCheckConfigurationName", "name", "note", "recipientId", "roleName", "signerName", "signingGroupId" };
+
+      Dictionary<string, JObject> recipientDataMap = new Dictionary<string, JObject>();
+      body["recipients"] = new JArray();
+      result["bulkCopies"] = new JArray();
+      body["docGenFormFields"] = new JArray(); 
+      var recipientObject = new JObject();
+
+      for (int i = 0; i < headerItems.Length; i++)
+      {
+        parsedHeaders[i] = headerItems[i].Split(new string[] { "::" }, StringSplitOptions.None);
+      }
+    
+      // Iterate over the other lines (index at 1 to skip header line)
+      for (var index = 1; index < lines.Length; index++)
+      {
+        if (string.IsNullOrWhiteSpace(lines[index])) continue;
+
+        var fieldValues = lines[index].Split(',');
+        if (fieldValues.Length != parsedHeaders.Length)
+        {
+          continue;
         }
+        var roleName = "";
+        var fieldName = "";
+        var tabLabelName = "";
+
+        for (var index2 = 0; index2 < Math.Min(fieldValues.Length, parsedHeaders.Length); index2++)
+        {
+          var columnName = parsedHeaders[index2];
+          var value = fieldValues[index2];
+          if (string.IsNullOrEmpty(value))
+          {
+            continue;
+          }
+          
+          // Dynamic Table fields
+          if (columnName.Length > 1 && columnName[0].Equals("Dynamic Table", StringComparison.OrdinalIgnoreCase))
+          {
+            ProcessDynamicTableField(columnName, value, body, labelToFieldNameMap, tableToChildFieldsMap);
+            continue;
+          }
+          
+          // DocGen form fields (Not Dynamic Tables)
+          if (columnName.Length > 1 && columnName[0].Equals("Document Generation", StringComparison.OrdinalIgnoreCase))
+          {
+            var docGenFieldLabel = columnName[1];
+
+            if (labelToFieldNameMap.TryGetValue(docGenFieldLabel, out string matchingFieldName))
+            {
+              var docGenField = new JObject
+              {
+                ["name"] = matchingFieldName,
+                ["value"] = value
+              };
+              
+              ((JArray)body["docGenFormFields"]).Add(docGenField);
+          }
+            continue;
+          }
+
+
+        // recipient info
+        if (columnName.Length > 1)
+        {
+          roleName = columnName[0];
+          fieldName = columnName[1];
+          tabLabelName = columnName[1];
+          fieldName = fieldName.Replace(" ", "");
+          fieldName = char.ToLower(fieldName[0]) + fieldName.Substring(1);
+          JObject recipientObj;
+          if (recipientDataMap.ContainsKey(roleName))
+          {
+            recipientObj = recipientDataMap[roleName];
+          }
+          else
+          {
+            recipientDataMap[roleName] = new JObject();
+            recipientObj = recipientDataMap[roleName];
+            recipientObj["roleName"] = roleName;
+          }
+          if (recipientFields.Contains(fieldName))
+          {
+            recipientObj[fieldName] = value;
+            continue;
+          }
+          if (fieldName.Equals("emailSubject", StringComparison.OrdinalIgnoreCase) ||
+          fieldName.Equals("emailBody", StringComparison.OrdinalIgnoreCase) ||
+          fieldName.Equals("language", StringComparison.OrdinalIgnoreCase))
+          {
+            if (!recipientObj.ContainsKey("emailNotification"))
+            {
+              recipientObj["emailNotification"] = new JObject();
+            }
+            recipientObj["emailNotification"][fieldName] = value;
+          }
+          else
+          {
+            if (!recipientObj.ContainsKey("tabs"))
+            {
+              recipientObj["tabs"] = new JArray();
+            }
+            ((JArray)recipientObj["tabs"]).Add(new JObject()
+            {
+              ["tabLabel"] = tabLabelName,
+              ["initialValue"] = value
+            });
+          }
+        }
+        else
+        {
+          // custom fields info
+          if (!body.ContainsKey("customFields"))
+          {
+            body["customFields"] = new JArray();
+          }
+            ((JArray)body["customFields"]).Add(new JObject()
+            {
+              ["name"] = columnName[0],
+              ["value"] = value
+            });
+        }
+      }
+      foreach (KeyValuePair<string, JObject> pair in recipientDataMap)
+      {
+        var recipientObj = pair.Value;
+        ((JArray)body["recipients"]).Add(recipientObj.DeepClone());
+      }
+      recipientDataMap = new Dictionary<string, JObject>();
+      ((JArray)result["bulkCopies"]).Add(body.DeepClone());
+      body["recipients"] = new JArray();
+      body["docGenFormFields"] = new JArray();
+      body["customFields"] = new JArray();
+      recipientDataMap = new Dictionary<string, JObject>();
     }
-    catch (JsonReaderException ex)
-    {
+    }
+      catch (Exception ex)
+      {
         throw new ConnectorException(HttpStatusCode.BadRequest, "Please refer to Docusign documentations and follow CSV file guidelines. Unable to parse the request body", ex);
+      }
+      return result;
     }
-    return result;
-  }
 
   private JObject BulkSendRequestBodyTransformation(JObject body)
   {
@@ -7054,7 +7140,53 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if (("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
+    if ("GetDocGenTemplateTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var newBody = new JObject();
+      var docGenFormFields = new JArray();
+
+      if (body["documents"] != null)
+      {
+        foreach (var document in body["documents"])
+        {
+          if (document["docGenFormFields"] != null)
+          {
+            foreach (var field in document["docGenFormFields"])
+            {
+              var newField = new JObject();
+              newField["documentId"] = document["documentId"];
+              newField["documentName"] = document["name"];
+              newField["label"] = field["label"];
+              newField["type"] = field["type"];
+              newField["required"] = field["required"];
+              newField["name"] = field["name"];
+
+              // Add optional fields if they exist
+              if (field["description"] != null)
+                newField["description"] = field["description"];
+              if (field["options"] != null)
+                newField["options"] = field["options"];
+              if (field["rowValues"] != null)
+                newField["rowValues"] = field["rowValues"];
+
+              docGenFormFields.Add(newField);
+            }
+          }
+        }
+      }
+
+      newBody = new JObject
+      {
+        ["fields"] = docGenFormFields,
+        ["totalCount"] = docGenFormFields.Count,
+        ["docGenFormFields"] = docGenFormFields
+      };
+
+     response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if (("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) || 
     ("SalesCopilotListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
     ("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
     {
@@ -7637,6 +7769,209 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       }
     }
   }
+
+  public static void processDocGenFields(JObject inputBody, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap, Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+  // Grab docgen fields from template
+    if (inputBody["rawOutput"]?["fields"] == null) return;
+
+    foreach (var field in inputBody["rawOutput"]["fields"])
+    {
+      // Save all labels to their names in a table to grab later
+        ProcessFieldMapping(field, fieldNameToLabelMap, labelToFieldNameMap);
+        
+        if (field["rowValues"] != null)
+        {
+          // Map docgen table fields -> table name
+            ProcessTableRowValues(field, fieldNameToLabelMap, labelToFieldNameMap, tableToChildFieldsMap);
+        }
+    }
+}
+
+public static void ProcessFieldMapping(JToken field, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap)
+{
+    if (field["name"] == null || field["label"] == null) return;
+
+    var fieldName = field["name"].ToString();
+    var fieldLabel = field["label"].ToString();
+
+    if (!fieldNameToLabelMap.ContainsKey(fieldName))
+    {
+        fieldNameToLabelMap[fieldName] = fieldLabel;
+        labelToFieldNameMap[fieldLabel] = fieldName;
+    }
+}
+
+public static void ProcessTableRowValues(JToken field, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap, Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+    var parentTableName = field["name"]?.ToString();
+    var parentTableLabel = field["label"]?.ToString();
+
+    if (string.IsNullOrEmpty(parentTableName)) return;
+
+    if (!tableToChildFieldsMap.ContainsKey(parentTableName))
+    {
+        tableToChildFieldsMap[parentTableName] = new List<string>();
+    }
+
+    foreach (var rowValue in field["rowValues"])
+    {
+        if (rowValue["docGenFormFieldList"] != null)
+        {
+            foreach (var nestedField in rowValue["docGenFormFieldList"])
+            {
+                ProcessNestedFieldMapping(nestedField, parentTableName, parentTableLabel, fieldNameToLabelMap, labelToFieldNameMap, tableToChildFieldsMap);
+            }
+        }
+    }
+}
+
+  public static void ProcessNestedFieldMapping(JToken nestedField, string parentTableName, string parentTableLabel, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap, Dictionary<string, List<string>> tableToChildFieldsMap)
+  {
+    if (nestedField["name"] == null || nestedField["label"] == null) return;
+
+    var nestedFieldName = nestedField["name"].ToString();
+    var nestedFieldLabel = nestedField["label"].ToString();
+
+    // map tablename and fieldnames just like the csv will process
+    var compositeFieldKey = $"{parentTableName}|{nestedFieldName}";
+    var compositeLabelKey = $"{parentTableLabel}|{nestedFieldLabel}";
+
+    //map docgen fields with backwards compatibility
+    fieldNameToLabelMap[compositeFieldKey] = compositeLabelKey;
+    labelToFieldNameMap[compositeLabelKey] = compositeFieldKey;
+
+    // also save child rows to tthe fieldNameLabelMap to find the "name" value
+    if (!fieldNameToLabelMap.ContainsKey(nestedFieldName))
+    {
+      fieldNameToLabelMap[nestedFieldName] = nestedFieldLabel;
+      labelToFieldNameMap[nestedFieldLabel] = nestedFieldName;
+    }
+
+    // add child table fields to their parent table
+    if (!tableToChildFieldsMap[parentTableName].Contains(nestedFieldName))
+    {
+      tableToChildFieldsMap[parentTableName].Add(nestedFieldName);
+    }
+  }
+
+public static void ProcessDynamicTableField(string[] columnName, string value, JObject body, 
+    Dictionary<string, string> labelToFieldNameMap, 
+    Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+  // example of this variable = "table1|first name"
+    var dynamicTablePart = columnName[1]; 
+    var tableParts = dynamicTablePart.Split('|');
+
+    if (tableParts.Length != 2) return;
+
+    var tableName = tableParts[0].Trim();
+    var fieldLabel = tableParts[1].Trim();
+
+
+    // Make sure field name exists
+    if (!TryGetFieldNames(tableName, fieldLabel, labelToFieldNameMap, out string tableFieldName, out string childFieldName))
+      return;
+    // Make sure table and field name are mapped together
+    if (!IsValidTableField(tableFieldName, childFieldName, tableToChildFieldsMap))
+        return;
+
+    var tableObject = GetOrCreateTableObject(body, tableFieldName);
+    ProcessTableRowValues(tableObject, childFieldName, value);
+}
+
+public static bool TryGetFieldNames(string tableName, string fieldLabel, 
+    Dictionary<string, string> labelToFieldNameMap, 
+    out string tableFieldName, out string childFieldName)
+{
+    tableFieldName = null;
+    childFieldName = null;
+
+    if (!labelToFieldNameMap.TryGetValue(tableName, out tableFieldName))
+        return false;
+
+    if (!labelToFieldNameMap.TryGetValue(fieldLabel, out childFieldName))
+        return false;
+
+    return true;
+}
+
+public static bool IsValidTableField(string tableFieldName, string childFieldName, 
+    Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+    return tableToChildFieldsMap.ContainsKey(tableFieldName) &&
+           tableToChildFieldsMap[tableFieldName].Contains(childFieldName);
+}
+
+public static JObject GetOrCreateTableObject(JObject body, string tableFieldName)
+{
+    var docGenFormFields = (JArray)body["docGenFormFields"];
+    
+    foreach (var existingField in docGenFormFields)
+    {
+        if (existingField["name"]?.ToString() == tableFieldName)
+            return (JObject)existingField;
+    }
+
+    var tableObject = new JObject
+    {
+        ["name"] = tableFieldName,
+        ["value"] = null,
+        ["rowValues"] = new JArray()
+    };
+    
+    docGenFormFields.Add(tableObject);
+    return tableObject;
+}
+
+public static void ProcessTableRowValues(JObject tableObject, string childFieldName, string value)
+{
+    var rowValues = value.Split('|');
+    var rowValuesArray = (JArray)tableObject["rowValues"];
+
+    for (int rowIndex = 0; rowIndex < rowValues.Length; rowIndex++)
+    {
+        var rowValue = rowValues[rowIndex].Trim();
+        var rowObject = EnsureRowExists(rowValuesArray, rowIndex);
+        var fieldObject = GetOrCreateFieldInRow(rowObject, childFieldName, rowValue);
+    }
+}
+
+public static JObject EnsureRowExists(JArray rowValuesArray, int rowIndex)
+{
+    while (rowIndex >= rowValuesArray.Count)
+    {
+        rowValuesArray.Add(new JObject
+        {
+            ["docGenFormFieldList"] = new JArray()
+        });
+    }
+    
+    return (JObject)rowValuesArray[rowIndex];
+}
+
+public static JObject GetOrCreateFieldInRow(JObject rowObject, string childFieldName, string rowValue)
+{
+    var docGenFormFieldList = (JArray)rowObject["docGenFormFieldList"];
+    
+    foreach (var existingFieldInRow in docGenFormFieldList)
+    {
+        if (existingFieldInRow["name"]?.ToString() == childFieldName)
+        {
+            existingFieldInRow["value"] = rowValue;
+            return (JObject)existingFieldInRow;
+        }
+    }
+
+    var fieldObject = new JObject
+    {
+        ["name"] = childFieldName,
+        ["value"] = rowValue
+    };
+    
+    docGenFormFieldList.Add(fieldObject);
+    return fieldObject;
+}
 
   public class ConnectorException : Exception
   {
