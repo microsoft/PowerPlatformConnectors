@@ -98,6 +98,10 @@ A: No. Everything is handled internally by PagePixels. Just pass your `ai_prompt
 **Q: How do I block ads or trackers?**
 A: Use the `no_ads`, `no_tracking`, and `no_cookie_banners` parameters.
 
+## Deployment Instructions
+
+Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate and Power Apps.
+
 ## Support
 
 For help, bug reports, or feature requests, visit:
