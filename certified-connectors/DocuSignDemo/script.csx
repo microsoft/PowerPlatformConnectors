@@ -3956,11 +3956,55 @@ public class Script : ScriptBase
     return body;
   }
   
+    private JObject CreateHookEnvelopeV4BodyTransformation(JObject original)
+  {
+    var body = new JObject();
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+    body["events"] = original["events"] ?? new JArray();
+    body["configurationType"] = "custom";
+    body["deliveryMode"] = "sim";
+
+    if (!uriBuilder.Path.Contains(this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault()))
+    {
+      throw new ConnectorException(HttpStatusCode.BadRequest, "User is not an account administrator. Please contact DocuSign account admin");
+    }
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients',
+      'document_fields'
+    ]";
+
+    JArray includeData = JArray.Parse(eventData);
+    body["eventData"] = new JObject
+    {
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
+    };
+
+    uriBuilder.Path = uriBuilder.Path.Replace("connectV4", "connect");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    return body;
+  }
+  
   private JObject CreateHookEnvelopeV3BodyTransformation(JObject original)
   {
     var body = new JObject();
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    
+
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
@@ -3998,7 +4042,7 @@ public class Script : ScriptBase
       ["format"] = "json",
       ["includeData"] = includeData
     };
-    
+
     uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
@@ -6129,6 +6173,11 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     if ("CreateHookEnvelopeV3".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeV3BodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("CreateHookEnvelopeV4".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateHookEnvelopeV4BodyTransformation).ConfigureAwait(false);
     }
 
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
