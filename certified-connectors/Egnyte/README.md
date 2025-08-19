@@ -84,6 +84,24 @@ The connector supports the following actions:
 
 The connector supports the following triggers:
 
+* `When a file is locked`: This operation triggers a flow when a file is locked
+* `When a file is unlocked`: This operation triggers a flow when a file is unlocked
+* `When a file is updated`: This operation triggers a flow when a file is updated in specific Folder
+* `When a file is created v2`: This operation triggers a flow when a file creates in specific Folder
+* `When a share link is created`: This operation triggers a flow when a share link is created
+* `When a share link is deleted`: This operation triggers a flow when a share link is deleted
+* `When the file or folder permission changes`: This operation triggers a flow when a file or a folder permissions changes
+* `When the file or folder metadata changes`: This operation triggers a flow when a file or a folder metadata changes
+* `When a project folder is created`: This operation triggers a flow when a project folder is created or when an existing folder is marked as a project folder
+* `When a folder is unmarked as a project`: This operation triggers a flow when a folder is unmarked as a project
+* `When a project is updated`: This operation triggers a flow when a project is updated
+* `When a workflow is created`: This operation triggers a flow when a workflow is created
+* `When a workflow is completed`: This operation triggers a flow when a workflow is completed
+* `When an approval type workflow is approved`: This operation triggers a flow when an approval type workflow is approved
+* `When an approval type workflow is rejected`: This operation triggers a flow when an approval type workflow is rejected
+* `When a group is created`: This operation triggers a flow when a group is created
+* `When a group is updated`: This operation triggers a flow when a group is updated
+* `When a group is deleted`: This operation triggers a flow when a group is deleted
 * `When a file is created (properties)`: This operation triggers a flow when a new file is created in a folder.
 * `When a folder is created (properties)`: This operation triggers a flow when a sub-folder is created in a folder.
 * `When a file is deleted (properties)`: This operation triggers a flow when a file is deleted in a folder.

@@ -11,7 +11,7 @@ You will find your token in the [Data Manager section](https://app.databox.com/d
 
 ## Supported Operations
 ### Send data
-Send a metric and value to your Datablock.
+Send a metric and value to your Datablock. An optional dimesion can also be sent.
 
 ## Known Issues and Limitations
 The use of custom metrics requires the use of a paid plan or trial.

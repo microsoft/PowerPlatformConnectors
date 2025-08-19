@@ -1,42 +1,77 @@
-# SignatureAPI
-SignatureAPI streamlines your document signing process with a customizable, secure, and cost-effective electronic signature platform, ensuring compliance and efficiency.
+# SignatureAPI Connector
 
-# Publisher
+SignatureAPI streamlines your document signing process with a customizable, secure, and cost-effective electronic signature platform, ensuring compliance and efficiency. Version 1.3 introduces enhanced capabilities to further empower your automation workflows.
+
+## Publisher
 This connector is published by Signature API, Inc.
 
 ## Prerequisites
-To use this connector you need either a test or live API key.
+To use this connector you need either an [API key](https://signatureapi.com/docs/authentication).
 
 ## Supported Operations
 
-### Create an envelope
-Creates a new envelope to which you can add recipients and documents. When ready, use the 'Start an envelope' action to initiate the signing process.
+### Envelope Operations
+- **Create an Envelope**  
+  Creates a new Envelope to which you can add Recipients and Documents. When ready, use the **Start an Envelope** action to initiate the signing process.
+- **Get an Envelope**  
+  Retrieves the details of an Envelope using its ID.
+- **Start an Envelope**  
+  Initiates the signing process for an Envelope.
+- **Wait for Envelope**  
+  Waits for an Envelope to reach a completed state or another final status.
+- **Get a Captured Value**  
+  Retrieves a value entered by a Recipient in an input Place during signing.
 
-### Get an envelope
-Retrieves the details of an envelope using its ID.
+### Document & Template Operations
+- **Add a Document (PDF)**  
+  Adds a PDF Document to an Envelope.
+- **Add a Document (DOCX)**  
+  Adds a DOCX Document to an Envelope.
+- **Add a Template (DOCX)**  
+  Adds a DOCX Template to an Envelope.
+- **Add Data to Template**  
+  Inserts data into a Template.
 
-### Start an envelope
-Initiates the signing proce
-ss for an envelope.
+### Place Operations
+- **Add a Place — Signature**  
+  Adds a signature Place to a Document.
+- **Add a Place — Initials**  
+  Adds an initials Place to a Document.
+- **Add a Place — Text Input**  
+  Adds a text input Place to a Document.
+- **Add a Place — Text**  
+  Adds a text Place to a Document.
+- **Add a Place — Recipient Completed Date**  
+  Adds a Place for recording the Recipient completed date.
+- **Add a Place — Envelope Completed Date**  
+  Adds a Place for recording the Envelope completed date.
 
-### Add a document
-Adds a document to an envelope.
+### Recipient Operations
+- **Add a Recipient**  
+  Adds a Recipient to an Envelope.
+- **Get a Recipient**  
+  Retrieves details of a Recipient using their ID.
+- **Create a Ceremony — Email Link Authentication**  
+  Creates a ceremony where the Recipient is authenticated via an email link.
+- **Create a Ceremony — Custom Authentication**  
+  Creates a ceremony where the Recipient is authenticated externally.
 
-### Add a recipient
-Adds a recipient to an envelope.
+### Deliverable Operations
+- **Get a Deliverable**  
+  Retrieves a Deliverable using its ID. Use it to download a signed copy of the Envelope.
 
-### Wait for envelope
-Waits for an envelope to reach a completed state or another final status.
-
-### Get a deliverable
-Retrieves a deliverable using its ID. Use it to download a signed copy of the envelope.
+### Webhook Notifications
+Version 1.3 also supports webhook notifications for real-time event tracking, including:
+- **Envelope Events**: created, started, completed, failed, and canceled.
+- **Recipient Events**: released, sent, completed, rejected, bounced, failed, replaced, and resent.
+- **Deliverable Events**: generated and failed.
 
 ## Obtaining Credentials
-To obtain an API Key to use this connector, please write to contact@signatureapi.com.
+To obtain an API Key for this connector, please sign up in https://signatureapi.com
 
 ## Known Issues and Limitations
-- Max 10 documents per envelope
-- Max 10 recipients per envelope
+- Maximum of 10 Documents per Envelope.
+- Maximum of 10 Recipients per Envelope.
 
 ## Deployment Instructions
 Please follow the instructions in [Create a custom connector from an OpenAPI definition](https://learn.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition).
