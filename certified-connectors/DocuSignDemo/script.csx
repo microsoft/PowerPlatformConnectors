@@ -1415,7 +1415,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1008"
+          ["x-ms-summary"] = "DS1009.0.0"
       };
     }
 
