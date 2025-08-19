@@ -171,6 +171,62 @@
         }
       }
     },
+    "/Management/v2/organizations/{organizationId}/connect": {
+      "post": {
+        "summary": "When a Docusign Connect event occurs (Organization-level)",
+        "description": "Triggers a new flow when an envelope status changes.",
+        "operationId": "CreateOrgHookEnvelope",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "description": "Organization ID",
+            "required": true,
+            "x-ms-summary": "Organization ID",
+            "x-ms-test-value": "insert organization id",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetOrganizations",
+              "value-collection": "organizations",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WebhookRequestV4"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "default",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "This Account lacks sufficient permissions. Connect not enabled for account."
+          }
+        },
+        "deprecated": false,
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work now, send an envelope.",
+        "x-ms-visibility": "important",
+        "x-ms-no-generic-test": true
+      },
+      "x-ms-notification-content": {
+        "description": "Details for Webhook",
+        "schema": {
+          "$ref": "#/definitions/WebhookEnvelopeResponseV2"
+        }
+      }
+    },
+
     "/accounts/{accountId}/connectV4": {
       "post": {
         "summary": "When a Docusign Connect event occurs (Account-level)",
@@ -4933,6 +4989,46 @@
         "x-ms-visibility": "important"
       }
     },
+    "/Management/v2/organizations": {
+      "get": {
+        "tags": [
+          "DocuSign"
+        ],
+        "summary": "Get organizations",
+        "description": "Get organizations",
+        "operationId": "GetOrganizations",
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "description": "Organization Admin",
+            "x-ms-summary": "Organization Admin",
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "default": "org_admin"
+          }
+        ],
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetOrganizationsResponse"
+            }
+          }
+        },
+        "deprecated": false,
+        "x-ms-no-generic-test": true,
+        "x-ms-visibility": "internal"
+      }
+    },
     "/oauth/userinfo": {
       "get": {
         "tags": [
@@ -6834,6 +6930,180 @@
         }
       }
     },
+    "WebhookOrganizationResponse": {
+      "type": "object",
+      "properties": {
+        "organizationId": {
+          "type": "string",
+          "description": "The organization ID.",
+          "x-ms-summary": "Organization ID"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "envelopeSummary": {
+              "type": "object",
+              "properties": {
+                "customFields": {
+                  "description": "Key-value pairs representing the custom fields for this envelope (where key is the field name, and value is the field value).",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "x-ms-visibility": "important",
+                  "x-ms-summary": "Envelope Custom Fields"
+                },
+                "createdDateTime": {
+                  "format": "date-time",
+                  "description": "yyyy-MM-ddTHH:mm:ss.fffZ",
+                  "type": "string",
+                  "x-ms-summary": "Envelope Created Date-Time",
+                  "x-ms-visibility": "advanced"
+                },
+                "envelopeId": {
+                  "type": "string",
+                  "x-ms-summary": "Envelope ID",
+                  "x-ms-visibility": "important"
+                },
+                "sentDateTime": {
+                  "format": "date-time",
+                  "description": "yyyy-MM-ddTHH:mm:ss.fffZ",
+                  "type": "string",
+                  "x-ms-summary": "Envelope Sent Date-Time",
+                  "x-ms-visibility": "important"
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Envelope Status",
+                  "x-ms-visibility": "important"
+                },
+                "emailSubject": {
+                  "type": "string",
+                  "x-ms-summary": "Email Subject",
+                  "x-ms-visibility": "important"
+                },
+                "envelopeDocuments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "documentId": {
+                        "type": "string",
+                        "x-ms-summary": "Document ID",
+                        "x-ms-visibility": "important"
+                      },
+                      "documentGuid": {
+                        "type": "string",
+                        "x-ms-summary": "Document Guid",
+                        "x-ms-visibility": "important"
+                      },
+                      "documentName": {
+                        "type": "string",
+                        "x-ms-summary": "Document Name",
+                        "x-ms-visibility": "important"
+                      }
+                    }
+                  }
+                },
+                "sender": {
+                  "type": "object",
+                  "properties": {
+                    "userName": {
+                      "type": "string",
+                      "x-ms-summary": "Sender's Name",
+                      "x-ms-visibility": "important"
+                    },
+                    "userId": {
+                      "type": "string",
+                      "x-ms-summary": "Sender's User ID",
+                      "x-ms-visibility": "important"
+                    },
+                    "accountId": {
+                      "type": "string",
+                      "x-ms-summary": "Sender's Account ID",
+                      "x-ms-visibility": "important"
+                    },
+                    "email": {
+                      "type": "string",
+                      "x-ms-summary": "Sender's Email Address",
+                      "x-ms-visibility": "important"
+                    }
+                  }
+                },
+                "recipients": {
+                  "type": "object",
+                  "properties": {
+                    "signers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tabs": {
+                            "description": "Key-value pairs representing the tabs for this recipient (where key is the field name, and value is the field value).",
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            },
+                            "x-ms-visibility": "important",
+                            "x-ms-summary": "Tabs"
+                          },
+                          "email": {
+                            "type": "string",
+                            "x-ms-summary": "Recipient Email",
+                            "x-ms-visibility": "important"
+                          },
+                          "recipientId": {
+                            "type": "string",
+                            "x-ms-summary": "Recipient ID",
+                            "x-ms-visibility": "advanced"
+                          },
+                          "routingOrder": {
+                            "type": "string",
+                            "x-ms-summary": "Routing Order",
+                            "x-ms-visibility": "important"
+                          },
+                          "sentDateTime": {
+                            "format": "date-time",
+                            "description": "yyyy-MM-ddTHH:mm:ss.fffZ",
+                            "type": "string",
+                            "x-ms-summary": "Recipient Sent Date-Time",
+                            "x-ms-visibility": "advanced"
+                          },
+                          "status": {
+                            "description": "The status of the recipient.",
+                            "type": "string",
+                            "x-ms-summary": "Recipient Status",
+                            "x-ms-visibility": "advanced"
+                          },
+                          "recipientType": {
+                            "description": "The type of recipient.",
+                            "type": "string",
+                            "x-ms-summary": "Recipient Type",
+                            "x-ms-visibility": "advanced"
+                          },
+                          "verificationType": {
+                            "description": "The type of the verification.",
+                            "type": "string",
+                            "x-ms-summary": "Verification Type",
+                            "x-ms-visibility": "important"
+                          },
+                          "name": {
+                            "description": "The name of the recipient.",
+                            "type": "string",
+                            "x-ms-summary": "Recipient Name",
+                            "x-ms-visibility": "important"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "WebhookRequestV4": {
       "required": [
         "allUsers",
@@ -8231,6 +8501,20 @@
         }
       }
     },
+    "GetOrganizationsResponse": {
+      "type": "object",
+      "properties": {
+        "organizations": {
+          "description": "list of organizations",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/organization"
+          },
+          "x-ms-summary": "organizations",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
     "GetLoginAccountsResponse": {
       "type": "object",
       "properties": {
@@ -8255,6 +8539,23 @@
             "$ref": "#/definitions/WorkflowID"
           },
           "x-ms-summary": "Workflow IDs",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "organization": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The id of the organization.",
+          "type": "string",
+          "x-ms-summary": "Organization Id",
+          "x-ms-visibility": "advanced"
+        },
+        "name": {
+          "description": "The name of the organization.",
+          "type": "string",
+          "x-ms-summary": "Name",
           "x-ms-visibility": "advanced"
         }
       }
@@ -8839,14 +9140,14 @@
       "authorizationUrl": "https://account-d.docusign.com/oauth/auth",
       "tokenUrl": "https://account-d.docusign.com/oauth/token",
       "scopes": {
-        "signature extended aow_manage account_product_read": "signature extended aow_manage account_product_read"
+        "signature extended aow_manage account_product_read connect_org_config_write_api organization_read": "signature extended aow_manage account_product_read connect_org_config_write_api organization_read"
       }
     }
   },
   "security": [
     {
       "oauth2": [
-        "signature extended aow_manage account_product_read"
+        "signature extended aow_manage account_product_read connect_org_config_write_api organization_read"
       ]
     }
   ],

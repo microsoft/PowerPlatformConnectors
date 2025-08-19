@@ -3999,6 +3999,82 @@ public class Script : ScriptBase
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
   }
+
+  private JObject  GetOrganizationsBodyTransformation(JObject original)
+  {
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+    var url = UpdateRequestUriToDocusignApi() + uriBuilder.Path.Replace("/restapi/v2.1", "");
+
+    var newURL = new UriBuilder(url);
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    newURL.Query = query.ToString();
+    this.Context.Request.RequestUri = newURL.Uri;
+
+    return original;
+  }
+
+  private JObject CreateOrgHookEnvelopeBodyTransformation(JObject original)
+  {
+    var body = new JObject();
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+    body["events"] = original["events"] ?? new JArray();
+    body["configurationType"] = "custom";
+    body["deliveryMode"] = "sim";
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients',
+      'document_fields'
+    ]";
+
+    JArray includeData = JArray.Parse(eventData);
+    body["eventData"] = new JObject
+    {
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
+    };
+
+    var url = UpdateRequestUriToDocusignApi() + uriBuilder.Path.Replace("/restapi/v2.1", "");
+
+    var newURL = new UriBuilder(url);
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    newURL.Query = query.ToString();
+    this.Context.Request.RequestUri = newURL.Uri;
+
+    return body;
+  }
+  
+  
+
+  private String UpdateRequestUriToDocusignApi()
+  {
+
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var apiBaseUri = host.Contains("demo") ?
+        "https://api-d.docusign.net"
+      : host.Contains("stage") ?
+        "https://api-s.docusign.net"
+      : host.Contains(".mil") ?
+        "https://api.docusign.mil"
+      : "https://api.docusign.net";
+
+    return apiBaseUri;
+  }
   
   private JObject CreateHookEnvelopeV3BodyTransformation(JObject original)
   {
@@ -6179,6 +6255,17 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     {
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeV4BodyTransformation).ConfigureAwait(false);
     }
+
+    if ("CreateOrgHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateOrgHookEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("GetOrganizations".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GetOrganizationsBodyTransformation).ConfigureAwait(false);
+    }
+
 
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
