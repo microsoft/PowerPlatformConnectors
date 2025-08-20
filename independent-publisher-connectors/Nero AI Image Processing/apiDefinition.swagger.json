@@ -1,0 +1,348 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Nero AI Image Upscaler",
+    "description": "Power Automate/Power Apps connector for Nero AI Image Upscaler API. Upscale images with AI-powered enhancement (2x or 4x scaling).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Nero AI",
+      "email": "support@nero.com"
+    }
+  },
+  "host": "api.nero.com",
+  "basePath": "/biz/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/task": {
+      "post": {
+        "summary": "Upscale an image",
+        "description": "Submit an image for AI-powered upscaling. Supports 2x and 4x scaling with quality optimization. Returns a task_id for status monitoring.",
+        "operationId": "UpscaleImage",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Upscale request parameters including image URL, quality settings, and scaling options",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpscaleImageRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response from the API. Check the 'code' field in the response body to determine success or failure. Business errors (11002, 11003, 11004) return HTTP 200 with error details in the response body.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/UpscaleImageResponse"
+                },
+                {
+                  "$ref": "#/definitions/ErrorResponse"
+                }
+              ]
+            },
+            "examples": {
+              "success": {
+                "summary": "Success Response",
+                "value": {
+                  "code": 0,
+                  "data": {
+                    "task_id": "bmtrfykh"
+                  }
+                }
+              },
+              "error": {
+                "summary": "Business Error Response",
+                "value": {
+                  "code": 11002,
+                  "msg": "The API key is invalid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters (HTTP 400 status)"
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded (10 requests per second)"
+          },
+          "500": {
+            "description": "Internal server error (HTTP 5xx status)"
+          }
+        }
+      },
+      "get": {
+        "summary": "Check task status",
+        "description": "Monitor the progress and retrieve results of an upscaling task. Check status, progress percentage, and get the final upscaled image URL.",
+        "operationId": "CheckTaskStatus",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Unique task identifier returned from the UpscaleImage operation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response from the API. Check the 'code' field in the response body to determine success or failure. Business errors (11002, 11003, 11004) return HTTP 200 with error details in the response body.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/CheckTaskStatusResponse"
+                },
+                {
+                  "$ref": "#/definitions/ErrorResponse"
+                }
+              ]
+            },
+            "examples": {
+              "success": {
+                "summary": "Success Response",
+                "value": {
+                  "code": 0,
+                  "data": {
+                    "status": "done",
+                    "result": {
+                      "output": "https://api.nero.com/biz/api/download/upscaled_image_12345.jpg"
+                    }
+                  }
+                }
+              },
+              "error": {
+                "summary": "Business Error Response",
+                "value": {
+                  "code": 11002,
+                  "msg": "The API key is invalid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request "
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded (10 requests per second)"
+          },
+          "500": {
+            "description": "Internal server error (HTTP 5xx status)"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "UpscaleImageRequestBody": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Public URL of the image to upscale. Must be accessible via HTTPS. Supported formats: JPG, JPEG, PNG, BMP, WEBP, JFIF, JFI, JPE, JIF, ICO",
+          "example": "https://example.com/image.jpg"
+        },
+        "quality_factor": {
+          "type": "integer",
+          "description": "Quality factor for the upscaled result. Higher values produce better quality but may take longer to process. Range: [80, 100], default: 95. Only effective for JPG, JPEG, or WEBP formats.",
+          "minimum": 80,
+          "maximum": 100,
+          "default": 95,
+          "example": 95
+        },
+        "upscaling_rate": {
+          "type": "number",
+          "description": "Upscaling multiplier. 2x for moderate enhancement, 4x for maximum detail enhancement. Face enhancement does not support upscaling rate.",
+          "enum": [
+            2,
+            4
+          ],
+          "default": 4,
+          "example": 4
+        }
+      },
+      "required": [
+        "image"
+      ]
+    },
+    "UpscaleImageRequest": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "AI model type for image processing. Choose based on your image content for optimal results.",
+          "enum": [
+            "ImageUpscaler:Standard",
+            "ImageUpscaler:Photograph",
+            "ImageUpscaler:Anime",
+            "ImageUpscaler:FaceEnhancement"
+          ],
+          "example": "ImageUpscaler:Standard"
+        },
+        "body": {
+          "$ref": "#/definitions/UpscaleImageRequestBody",
+          "description": "Core upscaling parameters including image URL and quality settings"
+        },
+        "info": {
+          "type": "object",
+          "description": "Additional request metadata for tracking and debugging",
+          "properties": {
+            "trace_id": {
+              "type": "string",
+              "description": "Unique identifier for request tracing and support",
+              "default": "power_automate",
+              "example": "power_automate"
+            },
+            "webhook": {
+              "type": "string",
+              "description": "Optional webhook URL to receive task completion notifications. If webhook invoke fails, it will be retried three times.",
+              "format": "uri",
+              "example": "https://your-webhook-url.com/notify"
+            }
+          },
+          "default": {
+            "trace_id": "power_automate"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "body"
+      ]
+    },
+    "UpscaleImageResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "number",
+          "description": "Response status code. 0 indicates success, other values indicate errors.",
+          "example": 0
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "description": "Unique identifier for the upscaling task. Use this ID to check processing status.",
+              "example": "bmtrfykh"
+            }
+          }
+        }
+      }
+    },
+    "CheckTaskStatusResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "number",
+          "description": "Response status code. 0 indicates success, other values indicate errors.",
+          "example": 0
+        },
+        "data": {
+          "type": "object",
+          "description": "Detailed task information including current status and results",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Current processing status of the task",
+              "enum": [
+                "pending",
+                "running",
+                "done",
+                "failed"
+              ],
+              "example": "running"
+            },
+            "pending_count": {
+              "type": "integer",
+              "description": "Number of tasks ahead in the processing queue (only when status is 'pending')",
+              "example": 5
+            },
+            "progress": {
+              "type": "integer",
+              "description": "Processing progress as a percentage (only when status is 'running')",
+              "minimum": 0,
+              "maximum": 100,
+              "example": 75
+            },
+            "result": {
+              "type": "object",
+              "description": "Final result containing the upscaled image URL (only when status is 'done')",
+              "properties": {
+                "output": {
+                  "type": "string",
+                  "description": "Direct download URL for the upscaled image",
+                  "example": "https://api.nero.com/biz/api/download/upscaled_image_12345.jpg"
+                }
+              }
+            },
+            "msg": {
+              "type": "string",
+              "description": "Error message explaining why the task failed (only when status is 'failed')",
+              "example": "Image processing failed due to unsupported format"
+            }
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "description": "Error response format. Business errors (11002, 11003, 11004)   11002 - The API key is invalid, 11003 - The API key is expired,  11004 - The remaining credits of API key are insufficient.",
+      "properties": {
+        "code": {
+          "type": "number",
+          "description": "Error code indicating the type of error.",
+          "enum": [
+            11002,
+            11003,
+            11004
+          ],
+          "example": 11002
+        },
+        "msg": {
+          "type": "string",
+          "description": "Human-readable error description",
+          "example": "The API key is invalid"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-neroai-api-key",
+      "description": "Your Nero AI API key for authentication. Do not expose this key publicly as it allows access to all authenticated APIs and will cost your credits."
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Image Processing",
+      "description": "AI-powered image upscaling operations"
+    }
+  ],
+  "x-ms-connector-metadata": {
+    "uiDefinition": {
+      "displayName": "Nero AI Image Upscaler",
+      "description": "Connect to Nero AI Image Upscaler to enhance your images with AI-powered upscaling",
+      "iconUri": "https://connectoricons-prod.azureedge.net/releases/v1.0.1638/1.0.1638.3274/nero-ai-image-upscaler/icon.png",
+      "brandColor": "#2AAC6F",
+      "capabilities": [
+        "actions"
+      ]
+    }
+  }
+}
