@@ -8,6 +8,15 @@ public class Script : ScriptBase
             case "CreateInvoice": 
                 return await this.HandleCreateInvoiceOperation().ConfigureAwait(false);
 
+            case "EditInvoice": 
+                return await this.HandleEditInvoiceOperation().ConfigureAwait(false);
+
+            case "CreateVendor": 
+                return await this.HandleCreateVendorOperation().ConfigureAwait(false);
+
+            case "EditVendorAddress":
+                return await this.HandleEditVendorAddressOperation().ConfigureAwait(false);
+
             case "CreateInvoiceAttachment": 
             case "CreateVendorAttachment":
                 return await this.HandleCreateAttachmentOperation().ConfigureAwait(false);
@@ -168,19 +177,21 @@ public class Script : ScriptBase
         // get the default distributions for the vendor
         var defaultDistributionsJson = await this.GetVendorDefaultDistributions(vendorId).ConfigureAwait(false);
 
-        // if there are no vendor default distributions, we must fail because line item distributions are required
-        if (defaultDistributionsJson?.Count == 0) 
-        {
-            return CreateErrorResponse(HttpStatusCode.BadRequest, "No default distributions were found for the specified vendor.");
-        }
+        // The SKY API actually allows an empty distribution list for purchase order line items.  So for now, given the challenges with 
+        // computing the distributions (and prompting for the credit account to use), just leave the distributions off.  In the future, 
+        // we can implement logic for computing the line item distributions based on the vendor default distributions.
+        // // if there are no vendor default distributions, we must fail because line item distributions are required
+        // if (defaultDistributionsJson?.Count == 0)
+        // {
+        //     return CreateErrorResponse(HttpStatusCode.BadRequest, "No default distributions were found for the specified vendor.");
+        // }
 
-        // todo: default distribution logic
         var distributions = new JArray();
         
         // update the line item request with the distributions
         lineItemJson["distributions"] = distributions;
 
-        // stuff the line item into an array as expected by the backend
+        // stuff the single line item into an array as expected by the backend
         var newBody = new JArray(lineItemJson);
 
         // send the request to SKY API
@@ -293,7 +304,75 @@ public class Script : ScriptBase
         return await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
     }
 
-    private async Task<HttpResponseMessage> HandleCreateAttachmentOperation() 
+    private async Task<HttpResponseMessage> HandleEditInvoiceOperation()
+    {
+        // The initial connector definition used the wrong field name "payment_details" - this script replaces that with the expected field "invoice_payment_detail".
+
+        // first, get the invoice object from the request
+        var invoiceContentString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var invoiceJson = JObject.Parse(invoiceContentString);
+
+        // replace "payment_details" with "invoice_payment_detail" if present
+        if (invoiceJson.ContainsKey("payment_details"))
+        {
+            invoiceJson.Add("invoice_payment_detail", invoiceJson["payment_details"]);
+            invoiceJson.Remove("payment_details");
+        }
+
+        var newBody = invoiceJson;
+
+        // send the request to SKY API
+        this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+
+        return await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+    }
+
+    private async Task<HttpResponseMessage> HandleCreateVendorOperation()
+    {
+        // Conver the single address object on the request to an array as expected by the backend
+
+        // first, get the vendor object from the request
+        var vendorContentString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var vendorJson = JObject.Parse(vendorContentString);
+
+        // if the address object is present, convert it to an array
+        if (vendorJson.ContainsKey("address"))
+        {
+            vendorJson["address"] = new JArray(vendorJson["address"]);
+        }
+
+        var newBody = vendorJson;
+
+        // send the request to SKY API
+        this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+
+        return await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+    }
+
+    private async Task<HttpResponseMessage> HandleEditVendorAddressOperation()
+    {
+        // The initial connector definition used the wrong field name "issue_1099s" - this script replaces that with the expected field "is_1099".
+
+        // first, get the vendor address object from the request
+        var vendorAddressContentString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var vendorAddressJson = JObject.Parse(vendorAddressContentString);
+
+        // replace "issue_1099s" with "is_1099" if present
+        if (vendorAddressJson.ContainsKey("issue_1099s"))
+        {
+            vendorAddressJson.Add("is_1099", vendorAddressJson["issue_1099s"]);
+            vendorAddressJson.Remove("issue_1099s");
+        }
+
+        var newBody = vendorAddressJson;
+
+        // send the request to SKY API
+        this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+
+        return await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+    }
+
+    private async Task<HttpResponseMessage> HandleCreateAttachmentOperation()
     {
         // This logic is based on the docs here:
         // https://developer.blackbaud.com/skyapi/support/changelog/fenxt/2018#october
@@ -305,11 +384,11 @@ public class Script : ScriptBase
         var requestJson = JObject.Parse(requestContent);
 
         // determine the attachment type
-        var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
         var type = requestJson["type"].ToString();
 
         // for physical attachments, transform to a multipart request
-        if (type.Equals("Physical")) {
+        if (type.Equals("Physical"))
+        {
 
             var multipartContent = new MultipartFormDataContent();
             multipartContent.Add(new StringContent(requestJson["parent_id"].ToString()), "ParentId");
@@ -323,7 +402,8 @@ public class Script : ScriptBase
 
             var filename = requestJson["file_name"]?.ToString() ?? "attachment";
             streamContent.Headers.ContentType = new MediaTypeHeaderValue(fileJson["$content-type"].ToString());
-            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
+            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
                 Name = "File",
                 FileName = filename
             };
