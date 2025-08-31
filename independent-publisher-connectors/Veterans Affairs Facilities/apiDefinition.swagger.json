@@ -1,0 +1,2038 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "contact": {
+      "name": "Richard Wilson",
+      "email": "richard.a.wilson@microsoft.com",
+      "url": "https://www.richardawilson.com/"
+    },
+    "description": "The United States Department of Veterans Affairs (VA) Facilities service offers comprehensive details on VA health, benefits, cemeteries, and Vet Centers, including location, contact information, and services available. Data is sourced from both real-time and historical records, ensuring users have access to the latest facility updates. Authentication is managed via symmetric tokens, and the service provides a robust framework for accessing VA facility information efficiently.",
+    "title": "Veterans Affairs Facilities",
+    "version": "1.0.0"
+  },
+  "host": "api.va.gov",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/facilities": {
+      "get": {
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "description": "Comma separated list of facility IDs for the search.",
+            "x-ms-summary": "Facility IDs",
+            "x-examples": {
+              "facilityIds": {
+                "description": "Example facility IDs",
+                "value": ["vha_688", "vha_644"]
+              }
+            },
+            "in": "query",
+            "name": "facilityIds",
+            "type": "string"
+          },
+          {
+            "description": "Zip code for searching facilities, considering only the first five digits.",
+            "x-ms-summary": "Zip Code",
+            "x-examples": {
+              "zip": {
+                "description": "Example zip code",
+                "value": "80301-1000"
+              }
+            },
+            "in": "query",
+            "name": "zip",
+            "type": "string"
+          },
+          {
+            "description": "State for facility search, typically a two-character code.",
+            "x-ms-summary": "State",
+            "x-examples": {
+              "state": {
+                "description": "Example state code",
+                "value": "CO"
+              }
+            },
+            "in": "query",
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "description": "Latitude for facility search in WGS84 coordinates.",
+            "x-ms-summary": "Latitude",
+            "x-examples": {
+              "coordinates": {
+                "description": "Example latitude",
+                "value": 56.7
+              }
+            },
+            "format": "float",
+            "in": "query",
+            "name": "lat",
+            "type": "number"
+          },
+          {
+            "description": "Longitude for facility search in WGS84 coordinates.",
+            "x-ms-summary": "Longitude",
+            "x-examples": {
+              "coordinates": {
+                "description": "Example longitude",
+                "value": -123.4
+              }
+            },
+            "format": "float",
+            "in": "query",
+            "name": "long",
+            "type": "number"
+          },
+          {
+            "description": "Radial distance from specified point to filter facility search, in miles.",
+            "x-ms-summary": "Radius",
+            "x-examples": {
+              "distance": {
+                "description": "Example radius in miles",
+                "value": 75
+              }
+            },
+            "format": "float",
+            "in": "query",
+            "name": "radius",
+            "type": "number"
+          },
+          {
+            "description": "Bounding box coordinates for facility search within a geographic area.",
+            "x-ms-summary": "Bounding Box",
+            "x-examples": {
+              "bbox": {
+                "description": "Example bounding box coordinates",
+                "value": [-105.4, 39.4, -104.5, 40.1]
+              }
+            },
+            "in": "query",
+            "name": "bbox[]",
+            "type": "string"
+          },
+          {
+            "description": "VISN (Veterans Integrated Service Networks) code for facility search.",
+            "x-ms-summary": "VISN",
+            "in": "query",
+            "name": "visn",
+            "type": "number"
+          },
+          {
+            "description": "Type of facility location to filter search results.",
+            "x-ms-summary": "Facility Type",
+            "enum": ["health", "cemetery", "benefits", "vet_center"],
+            "in": "query",
+            "name": "type",
+            "type": "string"
+          },
+          {
+            "description": "A comma separated list of services to filter facilities by the services they offer.",
+            "x-ms-summary": "Services Offered",
+            "in": "query",
+            "name": "services[]",
+            "type": "string"
+          },
+          {
+            "description": "Flag to include or exclude mobile facilities in the search results.",
+            "x-ms-summary": "Include Mobile Facilities",
+            "x-examples": {
+              "mobile": {
+                "description": "Flag for including mobile facilities",
+                "value": "True"
+              }
+            },
+            "in": "query",
+            "name": "mobile",
+            "type": "boolean"
+          },
+          {
+            "description": "Page number of results to return in a paginated response.",
+            "x-ms-summary": "Page Number",
+            "format": "int64",
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Number of results per page in a paginated response.",
+            "x-ms-summary": "Results Per Page",
+            "format": "int64",
+            "in": "query",
+            "name": "per_page",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with facilities data.",
+            "schema": {
+              "$ref": "#/definitions/FacilitiesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized request due to missing API key."
+          },
+          "403": {
+            "description": "Request forbidden due to invalid authorization."
+          },
+          "406": {
+            "description": "Describes an error encountered during the processing of a request."
+          },
+          "413": {
+            "description": "Request payload too large."
+          },
+          "429": {
+            "description": "Too many requests sent in a given amount of time."
+          }
+        },
+        "tags": ["facilities"],
+        "description": "Query facilities with a combination of optional search parameters.",
+        "operationId": "GetFacilities",
+        "summary": "List facilities"
+      }
+    },
+    "/facilities/{facilityId}": {
+      "get": {
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "description": "The unique identifier of the facility, following the format `<prefix>_<station>`, with prefixes like 'vha' (health facility), 'vba' (benefits), 'nca' (cemetery), or 'vc' (vet center).",
+            "x-ms-summary": "Facility ID",
+            "in": "path",
+            "name": "facilityId",
+            "required": true,
+            "type": "string",
+            "x-example": "vha_688",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFacilityIds",
+              "value-collection": "data",
+              "parameters": {}
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetFacilityIds",
+              "itemsPath": "data",
+              "parameters": {}
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of facility details.",
+            "schema": {
+              "$ref": "#/definitions/FacilityReadResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request due to incorrect or missing parameters."
+          },
+          "401": {
+            "description": "Unauthorized request due to missing API key."
+          },
+          "403": {
+            "description": "Forbidden request due to invalid authorization."
+          },
+          "404": {
+            "description": "Facility not found."
+          },
+          "406": {
+            "description": "Unacceptable format requested."
+          },
+          "413": {
+            "description": "Request payload exceeds the size limit."
+          },
+          "429": {
+            "description": "Too many requests made in a short amount of time."
+          }
+        },
+        "tags": ["facilities"],
+        "operationId": "GetFacilityById",
+        "summary": "Get a facility by ID",
+        "description": "Returns detailed information about a specific facility, identified by its unique ID."
+      }
+    },
+    "/facilities/{facilityId}/services": {
+      "get": {
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "description": "Unique identifier of the facility, adhering to the format `<prefix>_<station>`, with prefixes indicating the facility type (e.g., 'vha' for health facility, 'vba' for benefits, etc.).",
+            "x-ms-summary": "Facility ID",
+            "in": "path",
+            "name": "facilityId",
+            "required": true,
+            "type": "string",
+            "x-example": "vha_688",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFacilityIds",
+              "value-collection": "data",
+              "parameters": {}
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetFacilityIds",
+              "itemsPath": "data",
+              "parameters": {}
+            }
+          },
+          {
+            "description": "A comma separated list of service IDs to filter the search, usable with or without the `serviceType` parameter.",
+            "x-ms-summary": "Service IDs",
+            "in": "query",
+            "name": "serviceIds",
+            "type": "string",
+            "x-example": "covid19Vaccine"
+          },
+          {
+            "description": "Service type to filter the search, usable with or without the `serviceIds` parameter.",
+            "x-ms-summary": "Service Type",
+            "in": "query",
+            "name": "serviceType",
+            "type": "string",
+            "x-example": "health"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of facility services.",
+            "schema": {
+              "$ref": "#/definitions/DetailedServicesResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request due to invalid or missing parameters."
+          },
+          "401": {
+            "description": "Unauthorized request due to missing API key."
+          },
+          "403": {
+            "description": "Forbidden request due to invalid authorization."
+          },
+          "404": {
+            "description": "Facility not found."
+          },
+          "406": {
+            "description": "Request in unacceptable format."
+          },
+          "413": {
+            "description": "Request payload exceeds the size limit."
+          },
+          "429": {
+            "description": "Too many requests in a short period."
+          }
+        },
+        "tags": ["facilities"],
+        "description": "Queries services offered by a facility, with optional parameters to refine results. Supports independent or combined use of `serviceIds` and `serviceType` for filtering.",
+        "operationId": "GetFacilityServicesById",
+        "summary": "List services for a specific facility"
+      }
+    },
+    "/facilities/{facilityId}/services/{serviceId}": {
+      "get": {
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "description": "The facility's unique identifier, structured as `<prefix>_<station>`, where the prefix indicates the type of facility (e.g., 'vha' for health facilities, 'vba' for benefits, etc.).",
+            "x-ms-summary": "Facility ID",
+            "in": "path",
+            "name": "facilityId",
+            "required": true,
+            "type": "string",
+            "x-example": "vha_688",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFacilityIds",
+              "value-collection": "data",
+              "parameters": {}
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetFacilityIds",
+              "itemsPath": "data",
+              "parameters": {}
+            }
+          },
+          {
+            "description": "The unique identifier for the specific service within the facility.",
+            "x-ms-summary": "Service ID",
+            "in": "path",
+            "name": "serviceId",
+            "required": true,
+            "type": "string",
+            "x-example": "covid19Vaccine",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of detailed information about the specified service at the given facility.",
+            "schema": {
+              "$ref": "#/definitions/DetailedServiceResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request due to incorrect or missing parameters."
+          },
+          "401": {
+            "description": "Unauthorized request due to absence of API key."
+          },
+          "403": {
+            "description": "Forbidden request due to invalid authorization."
+          },
+          "404": {
+            "description": "The specified facility or service was not found."
+          },
+          "406": {
+            "description": "Unacceptable request format."
+          },
+          "413": {
+            "description": "Request exceeds the allowable payload size."
+          },
+          "429": {
+            "description": "Excessive requests made in a short timeframe."
+          }
+        },
+        "tags": ["facilities"],
+        "description": "Retrieves detailed information about a specific service offered by a facility, identified by both facility ID and service ID.",
+        "operationId": "GetFacilityServiceById",
+        "summary": "Get details for a specific service at a facility"
+      }
+    },
+    "/ids": {
+      "get": {
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "description": "Filter for searching by facility type, such as health, cemetery, benefits, or vet center.",
+            "x-ms-summary": "Facility Type",
+            "enum": ["health", "cemetery", "benefits", "vet_center"],
+            "in": "query",
+            "name": "type",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing a list of all facility IDs, optionally filtered by facility type.",
+            "schema": {
+              "$ref": "#/definitions/FacilitiesIdsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized request due to missing API key."
+          },
+          "403": {
+            "description": "Forbidden request due to invalid authorization."
+          },
+          "406": {
+            "description": "Unacceptable format requested."
+          },
+          "413": {
+            "description": "Request payload exceeds the size limit."
+          },
+          "429": {
+            "description": "Too many requests made in a short period."
+          }
+        },
+        "tags": ["facilities"],
+        "description": "Provides a bulk download option for all facility IDs, with the capability to filter by facility type for more targeted results.",
+        "operationId": "GetFacilityIds",
+        "summary": "List all facility IDs"
+      }
+    },
+    "/nearby": {
+      "get": {
+        "summary": "List all nearby facilities",
+        "description": "Retrieves all facilities within a specified drive time from a given location, with optional filtering by services.",
+        "operationId": "GetNearbyFacilities",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Latitude from which drive time is calculated.",
+            "x-ms-summary": "Latitude",
+            "type": "number",
+            "format": "float",
+            "required": true
+          },
+          {
+            "name": "long",
+            "in": "query",
+            "description": "Longitude from which drive time is calculated.",
+            "x-ms-summary": "Longitude",
+            "type": "number",
+            "format": "float",
+            "required": true
+          },
+          {
+            "name": "drive_time",
+            "in": "query",
+            "description": "Maximum drive time in minutes from the location to include facilities.",
+            "x-ms-summary": "Drive Time",
+            "type": "integer",
+            "format": "int32",
+            "required": false
+          },
+          {
+            "name": "services[]",
+            "in": "query",
+            "description": "An optional comma separated list of service to filter by.",
+            "x-ms-summary": "Services Filter",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number of results to return.",
+            "x-ms-summary": "Page Number",
+            "type": "integer",
+            "format": "int32",
+            "required": false
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "The number of results to return per page.",
+            "x-ms-summary": "Results Per Page",
+            "type": "integer",
+            "format": "int32",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response providing nearby VA health facilities.",
+            "schema": {
+              "$ref": "#/definitions/NearbyResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing required or ambiguous parameters."
+          },
+          "401": {
+            "description": "Unauthorized request due to missing API key."
+          },
+          "403": {
+            "description": "Forbidden request due to invalid authorization."
+          },
+          "406": {
+            "description": "Not Acceptable - the requested format is not available."
+          },
+          "413": {
+            "description": "Payload Too Large - the request is too large for the server to process."
+          },
+          "429": {
+            "description": "Too Many Requests - the client has sent too many requests in a given amount of time."
+          }
+        },
+        "tags": ["facilities"]
+      }
+    }
+  },
+  "definitions": {
+    "Address": {
+      "description": "Represents a physical address.",
+      "properties": {
+        "address1": {
+          "title": "Address Line 1",
+          "description": "First line of the address, typically including street name and number.",
+          "x-ms-summary": "Address Line 1",
+          "x-example": "50 Irving Street, Northwest",
+          "type": "string",
+          "x-nullable": true
+        },
+        "address2": {
+          "title": "Address Line 2",
+          "description": "Second line of the address, if applicable, such as a building number or complex name.",
+          "x-ms-summary": "Address Line 2",
+          "x-example": "Bldg 2",
+          "type": "string",
+          "x-nullable": true
+        },
+        "address3": {
+          "title": "Address Line 3",
+          "description": "Third line of the address, if applicable, such as a unit or suite number.",
+          "x-ms-summary": "Address Line 3",
+          "x-example": "Suite 7",
+          "type": "string",
+          "x-nullable": true
+        },
+        "city": {
+          "title": "City",
+          "description": "City component of the address.",
+          "x-ms-summary": "City",
+          "x-example": "Washington",
+          "type": "string",
+          "x-nullable": true
+        },
+        "state": {
+          "title": "State",
+          "description": "State code component of the address.",
+          "x-ms-summary": "State",
+          "x-example": "DC",
+          "type": "string",
+          "x-nullable": true
+        },
+        "zip": {
+          "title": "ZIP Code",
+          "description": "Postal (ZIP) code component of the address.",
+          "x-ms-summary": "ZIP Code",
+          "x-example": "20422-0001",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "Addresses": {
+      "description": "Holds both mailing and physical addresses for a facility.",
+      "properties": {
+        "mailing": {
+          "$ref": "#/definitions/Address"
+        },
+        "physical": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "ApiError": {
+      "description": "Describes an error encountered during the processing of a request.",
+      "properties": {
+        "errors": {
+          "title": "Errors",
+          "description": "A collection of error messages related to the request.",
+          "x-ms-summary": "Errors",
+          "items": {
+            "$ref": "#/definitions/ErrorMessage"
+          },
+          "type": "array"
+        }
+      },
+      "required": ["errors"],
+      "type": "object"
+    },
+    "AppointmentPhoneNumber": {
+      "title": "Appointment Phone Number",
+      "description": "Contains phone number information for scheduling an appointment, including extensions and labels.",
+      "x-ms-summary": "Appointment Phone Number",
+      "properties": {
+        "extension": {
+          "title": "Extension",
+          "description": "The extension number for the appointment phone.",
+          "x-ms-summary": "Extension",
+          "x-example": "71234",
+          "type": "string",
+          "x-nullable": true
+        },
+        "label": {
+          "title": "Label",
+          "description": "A label describing the appointment phone number (e.g., 'Main phone').",
+          "x-ms-summary": "Label",
+          "x-example": "Main phone",
+          "type": "string",
+          "x-nullable": true
+        },
+        "number": {
+          "title": "Number",
+          "description": "The primary phone number for appointments.",
+          "x-ms-summary": "Number",
+          "x-example": "937-268-6511",
+          "type": "string",
+          "x-nullable": true
+        },
+        "type": {
+          "title": "Type",
+          "description": "The type of contact number, such as 'tel' or 'fax'.",
+          "x-ms-summary": "Type",
+          "x-example": "tel",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "DetailedService": {
+      "title": "Detailed Service",
+      "description": "Provides detailed information about a specific service offered by a facility, including appointment information, service availability, and contact details.",
+      "x-ms-summary": "Detailed Service",
+      "properties": {
+        "appointmentLeadIn": {
+          "title": "Appointment Lead-In",
+          "description": "Provides additional appointment information, which may include HTML or string formatting characters.",
+          "x-ms-summary": "Appointment Lead-In",
+          "x-example": "Your VA health care team will contact you if you're eligible to get a vaccine during this time.",
+          "type": "string",
+          "x-nullable": true
+        },
+        "appointmentPhones": {
+          "title": "Appointment Phones",
+          "description": "A list of phone numbers for scheduling appointments related to this service.",
+          "x-ms-summary": "Appointment Phones",
+          "items": {
+            "$ref": "#/definitions/AppointmentPhoneNumber"
+          },
+          "type": "array",
+          "x-nullable": true
+        },
+        "lastUpdated": {
+          "title": "Last Updated",
+          "description": "The date and time when the detailed service information was most recently updated.",
+          "x-ms-summary": "Last Updated",
+          "format": "date-time",
+          "type": "string",
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Service Name",
+          "x-ms-summary": "Service Name",
+          "description": "The name of the service.",
+          "type": "string",
+          "x-nullable": true
+        },
+        "serviceId": {
+          "title": "Service ID",
+          "x-ms-summary": "Service ID",
+          "description": "A unique identifier for the service.",
+          "type": "string",
+          "x-nullable": true
+        },
+        "path": {
+          "title": "Service Details Path",
+          "description": "The URL to a page with more details about this service within the facility's health care system.",
+          "x-ms-summary": "Service Details Path",
+          "x-example": "https://www.boston.va.gov/services/covid-19-vaccines.asp",
+          "type": "string",
+          "x-nullable": true
+        },
+        "serviceInfo": {
+          "$ref": "#/definitions/ServiceInfo"
+        },
+        "serviceLocations": {
+          "title": "Service Locations",
+          "description": "A list of locations where the service is available.",
+          "x-ms-summary": "Service Locations",
+          "items": {
+            "$ref": "#/definitions/DetailedServiceLocation"
+          },
+          "type": "array",
+          "x-nullable": true
+        },
+        "waitTime": {
+          "$ref": "#/definitions/PatientWaitTime"
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "DetailedServiceAddress": {
+      "title": "Detailed Service Address",
+      "description": "Address information for a specific service location, including street, building, and room details.",
+      "x-ms-summary": "Detailed Service Address",
+      "properties": {
+        "addressLine1": {
+          "title": "Address Line 1",
+          "description": "The primary street address line.",
+          "x-ms-summary": "Address Line 1",
+          "x-example": "50 Irving Street, Northwest",
+          "type": "string",
+          "x-nullable": true
+        },
+        "addressLine2": {
+          "title": "Address Line 2",
+          "description": "Additional address information, such as building number.",
+          "x-ms-summary": "Address Line 2",
+          "x-example": "Bldg 2",
+          "type": "string",
+          "x-nullable": true
+        },
+        "buildingNameNumber": {
+          "title": "Building Name/Number",
+          "description": "Name or number of the building for the service location.",
+          "x-ms-summary": "Building Name/Number",
+          "x-example": "Baxter Building",
+          "type": "string",
+          "x-nullable": true
+        },
+        "city": {
+          "title": "City",
+          "description": "The city of the service location.",
+          "x-ms-summary": "City",
+          "x-example": "Washington",
+          "type": "string",
+          "x-nullable": true
+        },
+        "countryCode": {
+          "title": "Country Code",
+          "description": "The country code of the service location.",
+          "x-ms-summary": "Country Code",
+          "x-example": "US",
+          "type": "string",
+          "x-nullable": true
+        },
+        "state": {
+          "title": "State",
+          "description": "The state code of the service location.",
+          "x-ms-summary": "State",
+          "x-example": "DC",
+          "type": "string",
+          "x-nullable": true
+        },
+        "wingFloorOrRoomNumber": {
+          "title": "Wing/Floor/Room Number",
+          "description": "The specific wing, floor, or room number of the service location.",
+          "x-ms-summary": "Wing/Floor/Room Number",
+          "x-example": "Wing East",
+          "type": "string",
+          "x-nullable": true
+        },
+        "zipCode": {
+          "title": "ZIP Code",
+          "description": "The postal code of the service location.",
+          "x-ms-summary": "ZIP Code",
+          "x-example": "20422-0001",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "DetailedServiceEmailContact": {
+      "title": "Detailed Service Email Contact",
+      "description": "Email contact information related to a specific facility service, including the email address and label.",
+      "x-ms-summary": "Detailed Service Email Contact",
+      "properties": {
+        "emailAddress": {
+          "title": "Email Address",
+          "description": "The email address for contacting the facility service.",
+          "x-ms-summary": "Email Address",
+          "x-example": "georgea@va.gov",
+          "type": "string",
+          "x-nullable": true
+        },
+        "emailLabel": {
+          "title": "Email Label",
+          "description": "A label or name associated with the email address.",
+          "x-ms-summary": "Email Label",
+          "x-example": "George Anderson",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "DetailedServiceHours": {
+      "title": "Detailed Service Hours",
+      "description": "Represents the hours of operation for a service, formatted as descriptive text. Hours may vary by holidays or events.",
+      "x-ms-summary": "Detailed Service Hours",
+      "properties": {
+        "friday": {
+          "title": "Friday",
+          "description": "Hours of operation for Fridays.",
+          "x-ms-summary": "Friday",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "monday": {
+          "title": "Monday",
+          "description": "Hours of operation for Mondays.",
+          "x-ms-summary": "Monday",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "saturday": {
+          "title": "Saturday",
+          "description": "Hours of operation for Saturdays.",
+          "x-ms-summary": "Saturday",
+          "x-example": "Closed",
+          "type": "string",
+          "x-nullable": true
+        },
+        "sunday": {
+          "title": "Sunday",
+          "description": "Hours of operation for Sundays.",
+          "x-ms-summary": "Sunday",
+          "x-example": "Closed",
+          "type": "string",
+          "x-nullable": true
+        },
+        "thursday": {
+          "title": "Thursday",
+          "description": "Hours of operation for Thursdays.",
+          "x-ms-summary": "Thursday",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "tuesday": {
+          "title": "Tuesday",
+          "description": "Hours of operation for Tuesdays.",
+          "x-ms-summary": "Tuesday",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "wednesday": {
+          "title": "Wednesday",
+          "description": "Hours of operation for Wednesdays.",
+          "x-ms-summary": "Wednesday",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "DetailedServiceLocation": {
+      "title": "Service Location Details",
+      "description": "Provides specific details about a location where a service is offered, including hours, contact info, and scheduling options.",
+      "x-ms-summary": "Service Location Details",
+      "properties": {
+        "additionalHoursInfo": {
+          "title": "Additional Hours Information",
+          "description": "Details about service location hours that may vary depending on staff availability.",
+          "x-ms-summary": "Additional Hours Information",
+          "x-example": "Location hours times may vary depending on staff availability",
+          "type": "string",
+          "x-nullable": true
+        },
+        "emailContacts": {
+          "title": "Email Contacts",
+          "description": "A list of email contacts for facility services.",
+          "x-ms-summary": "Email Contacts",
+          "items": {
+            "$ref": "#/definitions/DetailedServiceEmailContact"
+          },
+          "type": "array",
+          "x-nullable": true
+        },
+        "officeName": {
+          "title": "Office Name",
+          "description": "The name of the specific office location providing the service.",
+          "x-ms-summary": "Office Name",
+          "x-example": "ENT Clinic",
+          "type": "string",
+          "x-nullable": true
+        },
+        "onlineSchedulingAvailable": {
+          "title": "Online Scheduling Availability",
+          "description": "Indicates if online scheduling is available for the service.",
+          "x-ms-summary": "Online Scheduling Availability",
+          "x-example": "True",
+          "type": "string",
+          "x-nullable": true
+        },
+        "phones": {
+          "title": "Phone Contacts",
+          "description": "A list of phone numbers for scheduling appointments or making inquiries.",
+          "x-ms-summary": "Phone Contacts",
+          "items": {
+            "$ref": "#/definitions/AppointmentPhoneNumber"
+          },
+          "type": "array",
+          "x-nullable": true
+        },
+        "referralRequired": {
+          "title": "Referral Requirement",
+          "description": "Indicates if a referral is required to access the service.",
+          "x-ms-summary": "Referral Requirement",
+          "x-example": "False",
+          "type": "string",
+          "x-nullable": true
+        },
+        "serviceAddress": {
+          "$ref": "#/definitions/DetailedServiceAddress"
+        },
+        "serviceHours": {
+          "$ref": "#/definitions/DetailedServiceHours"
+        },
+        "walkInsAccepted": {
+          "title": "Walk-Ins Accepted",
+          "description": "Indicates if walk-ins are accepted for accessing the service.",
+          "x-ms-summary": "Walk-Ins Accepted",
+          "x-example": "True",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "DetailedServiceResponse": {
+      "title": "Detailed Service Response",
+      "description": "Contains expanded details for a specific service offered by a facility.",
+      "x-ms-summary": "Detailed Service Response",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/DetailedService"
+        }
+      },
+      "type": "object"
+    },
+    "DetailedServicesMetadata": {
+      "title": "Detailed Services Metadata",
+      "description": "Holds metadata about the response for detailed services, including pagination details.",
+      "x-ms-summary": "Detailed Services Metadata",
+      "properties": {
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      },
+      "type": "object"
+    },
+    "DetailedServicesResponse": {
+      "title": "Detailed Services Response",
+      "description": "An object containing a list of detailed services provided by a facility.",
+      "x-ms-summary": "Detailed Services Response",
+      "properties": {
+        "data": {
+          "title": "Services List",
+          "description": "A list detailing each service provided.",
+          "x-ms-summary": "Services List",
+          "items": {
+            "$ref": "#/definitions/DetailedService"
+          },
+          "type": "array"
+        },
+        "links": {
+          "$ref": "#/definitions/PageLinks"
+        },
+        "meta": {
+          "$ref": "#/definitions/DetailedServicesMetadata"
+        }
+      },
+      "type": "object"
+    },
+    "Distance": {
+      "title": "Distance to Facility",
+      "description": "Represents the distance to a facility in miles, using a decimal format.",
+      "x-ms-summary": "Distance to Facility",
+      "x-example": 54.13,
+      "properties": {
+        "distance": {
+          "title": "Distance in Miles",
+          "description": "The distance to the facility, represented in decimal format.",
+          "x-ms-summary": "Distance in Miles",
+          "x-example": 54.13,
+          "type": "number"
+        },
+        "id": {
+          "title": "Facility ID",
+          "description": "The identifier of the facility.",
+          "x-ms-summary": "Facility ID",
+          "x-example": "vc_0101V",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ErrorMessage": {
+      "title": "Error Message",
+      "description": "Provides details about an error that occurred while processing the request.",
+      "x-ms-summary": "Error Message",
+      "properties": {
+        "code": {
+          "title": "Error Code",
+          "description": "A code identifying the error.",
+          "x-ms-summary": "Error Code",
+          "x-example": "103",
+          "type": "string"
+        },
+        "detail": {
+          "title": "Error Detail",
+          "description": "A detailed description of the error.",
+          "x-ms-summary": "Error Detail",
+          "x-example": "Detailed error message",
+          "type": "string"
+        },
+        "status": {
+          "title": "Error Status",
+          "description": "The HTTP status code associated with this error.",
+          "x-ms-summary": "Error Status",
+          "x-example": "400",
+          "type": "string"
+        },
+        "title": {
+          "title": "Error Title",
+          "description": "A brief title summarizing the error.",
+          "x-ms-summary": "Error Title",
+          "x-example": "Error title",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "FacilitiesIdsResponse": {
+      "title": "Facility IDs Response",
+      "description": "Provides a list of unique identifiers for VA facilities.",
+      "x-ms-summary": "Facility IDs Response",
+      "properties": {
+        "data": {
+          "title": "Facility IDs",
+          "description": "An array of VA facility identifiers.",
+          "x-ms-summary": "Facility IDs",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "FacilitiesMetadata": {
+      "title": "Facilities Metadata",
+      "description": "Contains metadata for a response, including pagination and distances to facilities.",
+      "x-ms-summary": "Facilities Metadata",
+      "properties": {
+        "distances": {
+          "title": "Distances to Facilities",
+          "description": "An array of distances from a given location to each facility listed in the response.",
+          "x-ms-summary": "Distances to Facilities",
+          "items": {
+            "$ref": "#/definitions/Distance"
+          },
+          "type": "array"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      },
+      "type": "object"
+    },
+    "FacilitiesResponse": {
+      "title": "Facilities Response",
+      "description": "Describes the response object for one or more VA facilities, including data, pagination links, and metadata.",
+      "x-ms-summary": "Facilities Response",
+      "properties": {
+        "data": {
+          "title": "Facilities Data",
+          "description": "An array of facility objects providing details about each facility.",
+          "x-ms-summary": "Facilities Data",
+          "items": {
+            "$ref": "#/definitions/Facility"
+          },
+          "type": "array"
+        },
+        "links": {
+          "$ref": "#/definitions/PageLinks"
+        },
+        "meta": {
+          "$ref": "#/definitions/FacilitiesMetadata"
+        }
+      },
+      "type": "object"
+    },
+    "Facility": {
+      "title": "Facility",
+      "description": "Details a single VA facility's attributes, location, and services.",
+      "x-ms-summary": "Facility",
+      "properties": {
+        "attributes": {
+          "$ref": "#/definitions/FacilityAttributes"
+        },
+        "id": {
+          "title": "Facility ID",
+          "description": "A unique identifier for the facility.",
+          "x-ms-summary": "Facility ID",
+          "x-example": "vha_688",
+          "type": "string"
+        },
+        "type": {
+          "title": "Facility Type",
+          "description": "Indicates the top-level type of the facility (e.g., VA health facility).",
+          "x-ms-summary": "Facility Type",
+          "enum": ["va_facilities"],
+          "x-example": "va_facilities",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "FacilityAttributes": {
+      "title": "Facility Attributes",
+      "description": "Comprehensive details describing a facility, including its type, services offered, and location details.",
+      "x-ms-summary": "Facility Attributes",
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/Addresses"
+        },
+        "classification": {
+          "title": "Classification",
+          "description": "The subtype of the facility, further describing the facility type.",
+          "x-ms-summary": "Classification",
+          "x-example": "VA Medical Center (VAMC)",
+          "type": "string",
+          "x-nullable": true
+        },
+        "facilityType": {
+          "title": "Facility Type",
+          "description": "The category of the facility, such as health, benefits, cemetery, or vet center.",
+          "x-ms-summary": "Facility Type",
+          "enum": [
+            "va_benefits_facility",
+            "va_cemetery",
+            "va_health_facility",
+            "vet_center"
+          ],
+          "x-example": "va_health_facility",
+          "type": "string"
+        },
+        "hours": {
+          "$ref": "#/definitions/Hours"
+        },
+        "lat": {
+          "title": "Latitude",
+          "description": "Geographical latitude of the facility.",
+          "x-ms-summary": "Latitude",
+          "x-example": 38.9311137,
+          "format": "float",
+          "type": "number"
+        },
+        "long": {
+          "title": "Longitude",
+          "description": "Geographical longitude of the facility.",
+          "x-ms-summary": "Longitude",
+          "x-example": -77.0109110499999,
+          "format": "float",
+          "type": "number"
+        },
+        "mobile": {
+          "title": "Mobile Facility",
+          "description": "Indicates if the facility is mobile (true) or stationary (false).",
+          "x-ms-summary": "Mobile Facility",
+          "x-example": false,
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Facility Name",
+          "description": "The official name of the facility.",
+          "x-ms-summary": "Facility Name",
+          "x-example": "Washington VA Medical Center",
+          "type": "string"
+        },
+        "operatingStatus": {
+          "$ref": "#/definitions/OperatingStatus"
+        },
+        "operationalHoursSpecialInstructions": {
+          "title": "Special Operating Hours",
+          "description": "Special instructions regarding the operating hours, including exceptions.",
+          "x-ms-summary": "Special Operating Hours",
+          "x-example": "More hours are available for some services. If you need to talk to someone, call the Vet Center at 1-877-927-8387. Vet Center hours are dependent upon outreach assignments.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-nullable": true
+          },
+          "x-nullable": true
+        },
+        "parent": {
+          "$ref": "#/definitions/Parent"
+        },
+        "phone": {
+          "$ref": "#/definitions/Phone"
+        },
+        "satisfaction": {
+          "$ref": "#/definitions/Satisfaction"
+        },
+        "services": {
+          "$ref": "#/definitions/Services"
+        },
+        "timeZone": {
+          "title": "Time Zone",
+          "description": "The time zone in which the facility is located.",
+          "x-ms-summary": "Time Zone",
+          "x-example": "America/New_York",
+          "type": "string"
+        },
+        "visn": {
+          "title": "Veterans Integrated Service Network (VISN)",
+          "description": "The VISN to which the facility belongs.",
+          "x-ms-summary": "VISN",
+          "x-example": "20",
+          "type": "string",
+          "x-nullable": true
+        },
+        "website": {
+          "title": "Website",
+          "description": "The official website of the facility.",
+          "x-ms-summary": "Website",
+          "x-example": "http://www.washingtondc.va.gov",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "FacilityReadResponse": {
+      "title": "Facility Read Response",
+      "description": "Contains detailed data for a single facility.",
+      "x-ms-summary": "Facility Read Response",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Facility"
+        }
+      },
+      "type": "object"
+    },
+    "GenericError": {
+      "title": "Generic Error",
+      "description": "Defines a general error response structure for various types of errors, such as authorization issues or invalid requests.",
+      "x-ms-summary": "Generic Error",
+      "properties": {
+        "message": {
+          "title": "Error Message",
+          "description": "A detailed error message explaining the reason for the error.",
+          "x-ms-summary": "Error Message",
+          "x-example": "Detailed Error Message",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Hours": {
+      "title": "Operating Hours",
+      "description": "Details the standard operating hours for each day of the week. Note that hours may vary due to holidays or events.",
+      "x-ms-summary": "Operating Hours",
+      "properties": {
+        "friday": {
+          "title": "Friday Hours",
+          "description": "Operating hours for Friday.",
+          "x-ms-summary": "Friday Hours",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "monday": {
+          "title": "Monday Hours",
+          "description": "Operating hours for Monday.",
+          "x-ms-summary": "Monday Hours",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "saturday": {
+          "title": "Saturday Hours",
+          "description": "Operating hours for Saturday.",
+          "x-ms-summary": "Saturday Hours",
+          "x-example": "Closed",
+          "type": "string",
+          "x-nullable": true
+        },
+        "sunday": {
+          "title": "Sunday Hours",
+          "description": "Operating hours for Sunday.",
+          "x-ms-summary": "Sunday Hours",
+          "x-example": "Closed",
+          "type": "string",
+          "x-nullable": true
+        },
+        "thursday": {
+          "title": "Thursday Hours",
+          "description": "Operating hours for Thursday.",
+          "x-ms-summary": "Thursday Hours",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "tuesday": {
+          "title": "Tuesday Hours",
+          "description": "Operating hours for Tuesday.",
+          "x-ms-summary": "Tuesday Hours",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        },
+        "wednesday": {
+          "title": "Wednesday Hours",
+          "description": "Operating hours for Wednesday.",
+          "x-ms-summary": "Wednesday Hours",
+          "x-example": "9AM-5PM",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "Meta": {
+      "title": "Response Metadata",
+      "description": "Contains metadata about the response, including the version of data sets used.",
+      "x-ms-summary": "Response Metadata",
+      "properties": {
+        "bandVersion": {
+          "title": "Band Version",
+          "description": "Indicates the version of the drive time band data set.",
+          "x-ms-summary": "Band Version",
+          "x-example": "APR2021",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "Nearby": {
+      "title": "Nearby Facility",
+      "description": "Describes a VA facility located near a specified location, including facility attributes and identifier.",
+      "x-ms-summary": "Nearby Facility",
+      "properties": {
+        "attributes": {
+          "$ref": "#/definitions/NearbyAttributes"
+        },
+        "id": {
+          "title": "Facility ID",
+          "description": "Unique identifier for the nearby facility.",
+          "x-ms-summary": "Facility ID",
+          "x-example": "vha_688",
+          "type": "string"
+        },
+        "type": {
+          "title": "Facility Type",
+          "description": "Specifies the type of the nearby facility.",
+          "x-ms-summary": "Facility Type",
+          "enum": ["nearby_facility"],
+          "x-example": "va_health_facility",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "NearbyAttributes": {
+      "title": "Nearby Facility Time Attributes",
+      "description": "Provides the minimum and maximum time required to reach the nearby facility.",
+      "x-ms-summary": "Nearby Facility Time Attributes",
+      "properties": {
+        "maxTime": {
+          "title": "Maximum Time",
+          "description": "The maximum time, in minutes, to reach the facility.",
+          "x-ms-summary": "Maximum Time",
+          "x-example": 20,
+          "format": "int32",
+          "type": "integer"
+        },
+        "minTime": {
+          "title": "Minimum Time",
+          "description": "The minimum time, in minutes, to reach the facility.",
+          "x-ms-summary": "Minimum Time",
+          "x-example": 10,
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "NearbyResponse": {
+      "title": "Nearby Facilities Response",
+      "description": "Response object containing minimum and maximum times to reach nearby VA facilities.",
+      "x-ms-summary": "Nearby Facilities Response",
+      "properties": {
+        "data": {
+          "title": "Nearby Facilities Data",
+          "description": "An array of nearby VA facilities.",
+          "x-ms-summary": "Nearby Facilities Data",
+          "items": {
+            "$ref": "#/definitions/Nearby"
+          },
+          "type": "array"
+        },
+        "meta": {
+          "$ref": "#/definitions/Meta"
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "OperatingStatus": {
+      "title": "Operating Status",
+      "description": "Describes the current operational status of the facility, indicating normal operations, limited services, closures, or special notices.",
+      "x-ms-summary": "Operating Status",
+      "properties": {
+        "additionalInfo": {
+          "title": "Additional Information",
+          "description": "Provides further details on the facility's operational status, such as specific visitor notices.",
+          "x-ms-summary": "Additional Information",
+          "type": "string",
+          "x-nullable": true
+        },
+        "code": {
+          "title": "Status Code",
+          "description": "A code representing the facility's overall operational status.",
+          "x-ms-summary": "Status Code",
+          "enum": ["NORMAL", "NOTICE", "LIMITED", "CLOSED"],
+          "x-example": "NORMAL",
+          "type": "string",
+          "x-nullable": true
+        },
+        "supplementalStatus": {
+          "title": "Supplemental Status",
+          "description": "A list of additional statuses providing more detail about the facility's operations.",
+          "x-ms-summary": "Supplemental Status",
+          "items": {
+            "$ref": "#/definitions/SupplementalStatus"
+          },
+          "type": "array",
+          "x-nullable": true
+        }
+      },
+      "required": ["code"],
+      "type": "object",
+      "x-nullable": true
+    },
+    "PageLinks": {
+      "title": "Page Links",
+      "description": "Provides hyperlinks to the first, last, next, and previous pages of the paginated response, including a link to related information and the current page.",
+      "x-ms-summary": "Page Links",
+      "properties": {
+        "first": {
+          "title": "First Page Link",
+          "description": "URL to the first page of the response.",
+          "x-ms-summary": "First Page Link",
+          "x-example": "https://api.va.gov/services/va_facilities/v1/facilities?type=health&page=1&per_page=1000",
+          "type": "string",
+          "x-nullable": true
+        },
+        "last": {
+          "title": "Last Page Link",
+          "description": "URL to the last page of the response.",
+          "x-ms-summary": "Last Page Link",
+          "x-example": "https://api.va.gov/services/va_facilities/v1/facilities?type=health&page=4&per_page=1000",
+          "type": "string",
+          "x-nullable": true
+        },
+        "next": {
+          "title": "Next Page Link",
+          "description": "URL to the next page of the response.",
+          "x-ms-summary": "Next Page Link",
+          "x-example": "https://api.va.gov/services/va_facilities/v1/facilities?type=health&page=2&per_page=1000",
+          "type": "string",
+          "x-nullable": true
+        },
+        "prev": {
+          "title": "Previous Page Link",
+          "description": "URL to the previous page of the response.",
+          "x-ms-summary": "Previous Page Link",
+          "x-example": "https://api.va.gov/services/va_facilities/v1/facilities?type=health&page=1&per_page=1000",
+          "type": "string",
+          "x-nullable": true
+        },
+        "related": {
+          "title": "Related Link",
+          "description": "URL to related pages or information for the response.",
+          "x-ms-summary": "Related Link",
+          "x-example": "https://api.va.gov/services/va_facilities/v1/facilities?id=vha_688",
+          "type": "string",
+          "x-nullable": true
+        },
+        "self": {
+          "title": "Current Page Link",
+          "description": "URL to the current page of the response.",
+          "x-ms-summary": "Current Page Link",
+          "x-example": "https://api.va.gov/services/va_facilities/v1/facilities?type=health&page=1&per_page=1000",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": ["self"],
+      "type": "object"
+    },
+    "Pagination": {
+      "title": "Pagination Data",
+      "description": "Details the pagination structure of the response, including the current page, total pages, entries per page, and total number of entries.",
+      "x-ms-summary": "Pagination Data",
+      "properties": {
+        "currentPage": {
+          "title": "Current Page",
+          "description": "The number of the current page in the response.",
+          "x-ms-summary": "Current Page",
+          "x-example": 1,
+          "format": "int32",
+          "type": "integer"
+        },
+        "perPage": {
+          "title": "Results Per Page",
+          "description": "The number of results displayed per page.",
+          "x-ms-summary": "Results Per Page",
+          "x-example": 20,
+          "format": "int32",
+          "type": "integer"
+        },
+        "totalEntries": {
+          "title": "Total Entries",
+          "description": "The total number of entries matching the query.",
+          "x-ms-summary": "Total Entries",
+          "x-example": 2162,
+          "format": "int32",
+          "type": "integer"
+        },
+        "totalPages": {
+          "title": "Total Pages",
+          "description": "The total number of pages resulting from the query.",
+          "x-ms-summary": "Total Pages",
+          "x-example": 250,
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "required": ["currentPage", "perPage", "totalEntries", "totalPages"],
+      "type": "object"
+    },
+    "Parent": {
+      "title": "Parent Facility",
+      "description": "Reference data for a facility's parent organization, including ID and API link.",
+      "x-ms-summary": "Parent Facility",
+      "properties": {
+        "id": {
+          "title": "Parent Facility ID",
+          "description": "The identifier of the parent facility.",
+          "x-ms-summary": "Parent Facility ID",
+          "x-example": "vha_402",
+          "type": "string",
+          "x-nullable": true
+        },
+        "link": {
+          "title": "Parent Facility API Link",
+          "description": "The URL for API requests regarding the parent facility.",
+          "x-ms-summary": "Parent Facility API Link",
+          "x-example": "https://api.va.gov/services/va_facilities/v0/facilities/vha_402",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "PatientSatisfaction": {
+      "title": "Patient Satisfaction",
+      "description": "Veteran-reported satisfaction scores for health care services at VA health facilities.",
+      "x-ms-summary": "Patient Satisfaction",
+      "properties": {
+        "primaryCareRoutine": {
+          "title": "Primary Care Routine",
+          "description": "Satisfaction score for routine primary care.",
+          "x-ms-summary": "Primary Care Routine",
+          "x-example": 0.85,
+          "format": "float",
+          "type": "number",
+          "x-nullable": true
+        },
+        "primaryCareUrgent": {
+          "title": "Primary Care Urgent",
+          "description": "Satisfaction score for urgent primary care.",
+          "x-ms-summary": "Primary Care Urgent",
+          "x-example": 0.85,
+          "format": "float",
+          "type": "number",
+          "x-nullable": true
+        },
+        "specialtyCareRoutine": {
+          "title": "Specialty Care Routine",
+          "description": "Satisfaction score for routine specialty care.",
+          "x-ms-summary": "Specialty Care Routine",
+          "x-example": 0.85,
+          "format": "float",
+          "type": "number",
+          "x-nullable": true
+        },
+        "specialtyCareUrgent": {
+          "title": "Specialty Care Urgent",
+          "description": "Satisfaction score for urgent specialty care.",
+          "x-ms-summary": "Specialty Care Urgent",
+          "x-example": 0.85,
+          "format": "float",
+          "type": "number",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "PatientWaitTime": {
+      "title": "Patient Wait Time",
+      "description": "Indicates the expected wait times for new and established patients for specific health care services at VA facilities.",
+      "x-ms-summary": "Patient Wait Time",
+      "properties": {
+        "effectiveDate": {
+          "title": "Effective Date",
+          "description": "The date from which these wait times are effective.",
+          "x-ms-summary": "Effective Date",
+          "x-example": "2018-01-01",
+          "type": "string",
+          "x-nullable": true
+        },
+        "established": {
+          "title": "Established Patient Wait Time",
+          "description": "Average wait time for established patients seeking non-urgent appointments.",
+          "x-ms-summary": "Established Patient Wait Time",
+          "x-example": 4.359409,
+          "type": "number",
+          "x-nullable": true
+        },
+        "new": {
+          "title": "New Patient Wait Time",
+          "description": "Average wait time for new patients seeking non-urgent appointments.",
+          "x-ms-summary": "New Patient Wait Time",
+          "x-example": 28.175438,
+          "type": "number",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "Phone": {
+      "title": "Facility Contact Numbers",
+      "description": "A collection of telephone contact numbers for the facility, covering various services and departments.",
+      "x-ms-summary": "Facility Contact Numbers",
+      "properties": {
+        "afterHours": {
+          "title": "After Hours",
+          "description": "Contact number available outside of normal operating hours.",
+          "x-ms-summary": "After Hours",
+          "x-example": "202-555-1212",
+          "type": "string",
+          "x-nullable": true
+        },
+        "enrollmentCoordinator": {
+          "title": "Enrollment Coordinator",
+          "description": "Direct line to the facility's enrollment coordinator.",
+          "x-ms-summary": "Enrollment Coordinator",
+          "x-example": "202-555-1212",
+          "type": "string",
+          "x-nullable": true
+        },
+        "fax": {
+          "title": "Fax",
+          "description": "Fax number for the facility.",
+          "x-ms-summary": "Fax",
+          "x-example": "202-555-1212",
+          "type": "string",
+          "x-nullable": true
+        },
+        "healthConnect": {
+          "title": "VA Health Connect",
+          "description": "Contact number for VA Health Connect services.",
+          "x-ms-summary": "VA Health Connect",
+          "x-example": "312-122-4516",
+          "type": "string",
+          "x-nullable": true
+        },
+        "main": {
+          "title": "Main Contact",
+          "description": "Primary phone number for the facility.",
+          "x-ms-summary": "Main Contact",
+          "x-example": "512-325-1255",
+          "type": "string",
+          "x-nullable": true
+        },
+        "mentalHealthClinic": {
+          "title": "Mental Health Clinic",
+          "description": "Contact number for the mental health clinic services.",
+          "x-ms-summary": "Mental Health Clinic",
+          "x-example": "202-555-1212",
+          "type": "string",
+          "x-nullable": true
+        },
+        "patientAdvocate": {
+          "title": "Patient Advocate",
+          "description": "Direct line to the facility's patient advocate.",
+          "x-ms-summary": "Patient Advocate",
+          "x-example": "202-555-1212",
+          "type": "string",
+          "x-nullable": true
+        },
+        "pharmacy": {
+          "title": "Pharmacy",
+          "description": "Contact number for pharmacy services.",
+          "x-ms-summary": "Pharmacy",
+          "x-example": "202-555-1212",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "Satisfaction": {
+      "title": "Patient Satisfaction Scores",
+      "description": "Contains the patient satisfaction scores for services at the facility, including specific health care service areas.",
+      "x-ms-summary": "Patient Satisfaction Scores",
+      "properties": {
+        "effectiveDate": {
+          "title": "Effective Date",
+          "description": "The date when the satisfaction scores were last updated.",
+          "x-ms-summary": "Effective Date",
+          "x-example": "2018-01-01",
+          "type": "string",
+          "x-nullable": true
+        },
+        "health": {
+          "$ref": "#/definitions/PatientSatisfaction"
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "ServiceBenefitsService": {
+      "title": "Benefits Service Information",
+      "description": "Provides information about a specific benefits service offered by the facility.",
+      "x-ms-summary": "Benefits Service Information",
+      "properties": {
+        "link": {
+          "title": "Service Link",
+          "description": "URL to detailed information about the benefits service.",
+          "x-ms-summary": "Service Link",
+          "x-example": "http://api.va.gov/services/va_facilities/v1/facilities/vha_558GA/services/covid19Vaccine",
+          "type": "string",
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Service Name",
+          "description": "The name of the benefits service provided.",
+          "x-ms-summary": "Service Name",
+          "x-example": "Example Service Name",
+          "type": "string",
+          "x-nullable": true
+        },
+        "serviceId": {
+          "title": "Service ID",
+          "description": "A unique identifier for the benefits service.",
+          "x-ms-summary": "Service ID",
+          "x-example": "exampleServiceId",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": ["link"],
+      "type": "object"
+    },
+    "ServiceHealthService": {
+      "title": "Health Service Information",
+      "description": "Details a specific health service offered at the facility, including the service name, a unique identifier, and a link to more information.",
+      "x-ms-summary": "Health Service Information",
+      "properties": {
+        "link": {
+          "title": "Service Link",
+          "description": "A fully qualified link to more information about the health service.",
+          "x-ms-summary": "Service Link",
+          "x-example": "http://api.va.gov/services/va_facilities/v1/facilities/vha_558GA/services/covid19Vaccine",
+          "type": "string",
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Service Name",
+          "description": "The name of the health service provided by the facility.",
+          "x-ms-summary": "Service Name",
+          "x-example": "COVID-19 Vaccine",
+          "type": "string",
+          "x-nullable": true
+        },
+        "serviceId": {
+          "title": "Service ID",
+          "description": "A unique identifier for the health service, which can be used to reference the service programmatically.",
+          "x-ms-summary": "Service ID",
+          "x-example": "covid19Vaccine",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": ["link"],
+      "type": "object"
+    },
+    "ServiceInfo": {
+      "title": "General Service Information",
+      "description": "Basic information about a service provided by the facility, including service type and identifier.",
+      "x-ms-summary": "General Service Information",
+      "properties": {
+        "name": {
+          "title": "Service Name",
+          "description": "Name of the service provided.",
+          "x-ms-summary": "Service Name",
+          "x-example": "COVID-19 vaccines",
+          "type": "string",
+          "x-nullable": true
+        },
+        "serviceId": {
+          "title": "Service ID",
+          "description": "Unique identifier for the service.",
+          "x-ms-summary": "Service ID",
+          "x-example": "covid19Vaccine",
+          "type": "string"
+        },
+        "serviceType": {
+          "title": "Service Type",
+          "description": "Category of the service provided (e.g., health, benefits).",
+          "x-ms-summary": "Service Type",
+          "enum": ["benefits", "health", "other"],
+          "x-example": "Health",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "type": "object"
+    },
+    "ServiceOtherService": {
+      "title": "Other Services Information",
+      "description": "Provides information about other types of services offered by the facility that do not fall under the standard health or benefits categories.",
+      "x-ms-summary": "Other Services Information",
+      "properties": {
+        "link": {
+          "title": "Service Link",
+          "description": "A URL linking to detailed information about the service.",
+          "x-ms-summary": "Service Link",
+          "x-example": "http://api.va.gov/services/va_facilities/v1/facilities/vha_558GA/services/covid19Vaccine",
+          "type": "string",
+          "x-nullable": true
+        },
+        "name": {
+          "title": "Service Name",
+          "description": "The name of the service provided.",
+          "x-ms-summary": "Service Name",
+          "x-example": "Example Service Name",
+          "type": "string",
+          "x-nullable": true
+        },
+        "serviceId": {
+          "title": "Service ID",
+          "description": "A unique identifier for the service.",
+          "x-ms-summary": "Service ID",
+          "x-example": "exampleServiceId",
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": ["link"],
+      "type": "object"
+    },
+    "Services": {
+      "title": "VA Facility Services",
+      "description": "A comprehensive list of all services provided by the VA facility, categorized by type such as benefits, health, and other services.",
+      "x-ms-summary": "VA Facility Services",
+      "properties": {
+        "benefits": {
+          "title": "Benefits Services",
+          "description": "A collection of services related to benefits offered by the facility.",
+          "x-ms-summary": "Benefits Services",
+          "items": {
+            "$ref": "#/definitions/ServiceBenefitsService"
+          },
+          "type": "array",
+          "x-nullable": true
+        },
+        "health": {
+          "title": "Health Services",
+          "description": "A collection of health-related services provided by the facility.",
+          "x-ms-summary": "Health Services",
+          "items": {
+            "$ref": "#/definitions/ServiceHealthService"
+          },
+          "type": "array",
+          "x-nullable": true
+        },
+        "lastUpdated": {
+          "title": "Last Updated",
+          "description": "The date when the services information was most recently updated.",
+          "x-ms-summary": "Last Updated",
+          "x-example": "2018-01-01",
+          "type": "string",
+          "x-nullable": true
+        },
+        "link": {
+          "title": "Services Link",
+          "description": "A base URL for accessing detailed information about services at the facility.",
+          "x-ms-summary": "Services Link",
+          "x-example": "http://api.va.gov/services/va_facilities/v1/facilities/vha_558GA/services/",
+          "type": "string",
+          "x-nullable": true
+        },
+        "other": {
+          "title": "Other Services",
+          "description": "A list of other services offered by the facility that do not fall under health or benefits.",
+          "x-ms-summary": "Other Services",
+          "items": {
+            "$ref": "#/definitions/ServiceOtherService"
+          },
+          "type": "array",
+          "x-nullable": true
+        }
+      },
+      "type": "object",
+      "x-nullable": true
+    },
+    "SupplementalStatus": {
+      "title": "Supplemental Status",
+      "description": "Additional status information for the VA facility, providing more specific details beyond the basic operational status.",
+      "x-ms-summary": "Supplemental Status",
+      "properties": {
+        "id": {
+          "title": "Status ID",
+          "description": "A unique identifier for the supplemental status.",
+          "x-ms-summary": "Status ID",
+          "x-example": "COVID_LOW",
+          "type": "string"
+        },
+        "label": {
+          "title": "Status Label",
+          "description": "A descriptive label for the supplemental status, explaining its meaning in human-readable terms.",
+          "x-ms-summary": "Status Label",
+          "x-example": "COVID-19 health protection guidelines: Levels low",
+          "type": "string"
+        }
+      },
+      "required": ["id", "label"],
+      "type": "object",
+      "x-nullable": true
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "apikey"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "VA Facilities API",
+      "name": "facilities"
+    }
+  ],
+  "x-components": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://developer.va.gov/explore/api/va-facilities"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://department.va.gov/privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Human Resources"
+    }
+  ]
+}

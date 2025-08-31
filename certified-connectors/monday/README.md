@@ -1,5 +1,5 @@
 # monday
-monday is a work OS where teams create and shape their own workflows in minutes, code-free. 
+monday is a work OS where teams create and shape their own workflows in minutes, code-free.
 
 ## Publisher: Plugin Genie
 Plugin Genie LLC is committed to providing the best possible experience using Monday with Power Automate.
@@ -28,33 +28,39 @@ In order to use this connector, you will need the following:
 - `Create a board` - Creates a monday.com board in the specified workspace. It returns the ID of the created board.
 - `Create a column` - Creates a monday.com column in the specified workspace and board. It returns the ID of the created column, along with the title and description.
 - `Create a group` - Creates a monday.com group in the specified workspace and board. It returns the ID of the created group.
-- `Create a notification` - Creates a notification in monday.com for a specific user. The notification can be added to either a board or an item. 
+- `Create a notification` - Creates a notification in monday.com for a specific user. The notification can be added to either a board or an item.
 - `Create a subitem` - Creates a subitem in monday.com for a specific parent item in the specified workspace and board. It allows the user to specify all the supported column values for the subitem. Returns the ID of the subitem and the ID of the subitem board.
 - `Create a workspace` - Creates an open workspace in monday.com. Returns the ID of the workspace.
 - `Create an update` - Creates an update for a specified item in monday.com. Returns the ID of the update.
+- `Duplicate a board` - Duplicates a board in monday.com. Returns the ID of the duplicated board.
+
+#### Updates
+- `Update an item's column value` - Updates a single column value for an item given the item ID. Can also be used to update the item name. If the value is blank, the column value is cleared. Returns the ID of the updated item.
+- `Update multiple item column values` - Updates multiple item column values. If the column value is blank, that column is not updated. Returns the updated item ID.
+- `Move an item to a group` - Moves an item to another group within the same board. Returns the ID of the moved item.
 
 #### Data Retrieval
+- `Get items` - Gets all the items for a specified workspace, board, and group.
 - `Get tags` - Gets all the tags in your monday.com account. Returns the name of each tag.
 - `Get users` - Gets all the users in your monday.com account. Returns the name and email of each user.
-- `Get items` - Gets all the items for a specified workspace, board, and group. Returns the name and ID of each item.
 - `Get an item by ID` - Gets an item for a specified item ID. Returns the item ID, name, and column values.
 
 ### Obtaining Credentials
-You need an active monday.com account. You also need to have installed the Microsoft Power Automate app in monday.com and signed up for a subscription to it. 
+You need an active monday.com account. You also need to have installed the Microsoft Power Automate app in monday.com and signed up for a subscription to it.
 
 Once this has been done, sign in to the monday connector in Power Automate. This will authenticate your connection between monday.com and Power Automate to allow you to start using the connector.
 
 ### Getting Started
-1. In monday.com, search the marketplace for the Microsoft Power Automate app.
-2. Subscribe to one of the app's plans and install the app. 
-3. If desired, add the board views: Power Automate Help or Power Automate App Usage. The Power Automate Help view links to the documentation for the connector. The Power Automate App Usage view can be used to track the number of executions for each trigger/action for this connector to help avoid reaching your subscription limit.
-4. In Power Automate, search for the "monday" connector for an action or a trigger. 
-5. After adding the monday action/trigger, sign in to start using it.
+1. In monday.com, search the marketplace for the Microsoft Power Automate app and add the app to your account.
+2. If desired, add the Power Automate App Usage board view. The Power Automate App Usage view can be used to track the number of executions for each trigger/action for this connector to help avoid reaching your subscription limit.
+3. In Power Automate, search for the "monday" connector for an action or a trigger.
+4. After adding the monday action/trigger, sign in and authorize the app to start using it.
 
 ## Known Issues and Limitations
 ### Supported Column Types
 Currently, only the following column types can be read or created in actions and triggers:
 - Boolean
+- Connect Boards (read only)
 - Date
 - Dropdown
 - Email
@@ -63,6 +69,7 @@ Currently, only the following column types can be read or created in actions and
 - Link
 - Location
 - Long Text
+- Mirror (read only)
 - Numeric
 - People
 - Phone
@@ -80,14 +87,12 @@ The following column types are not supported:
 - Auto number
 - Button
 - Color Picker
-- Connect Boards
 - Country
 - Creation Log
 - Dependency
 - Files (assets)
 - Formula
 - Last Updated At
-- Mirror
 - Person (deprecated)
 - Progress Tracking
 - Team (deprecated)
@@ -99,7 +104,7 @@ The Microsoft Power Automate app installed from the monday.com marketplace conta
 
 ## Frequently Asked Questions
 ### I uninstalled the Microsoft Power Automate app in monday.com and reinstalled it again. Now it is no longer working and I'm unable to successfully execute actions/triggers in the monday connector. How do I fix the connector?
-When the Microsoft Power Automate app is uninstalled and reinstalled, the credentials are reset. To fix the connector, you need to re-authenticate your monday connector in Power Automate. 
+When the Microsoft Power Automate app is uninstalled and reinstalled, the credentials are reset. To fix the connector, you need to re-authenticate your monday connector in Power Automate.
 
 This can be done by going to Data -> Connections in the Power Automate sidebar. Then find the "monday" connection and click on it. At the top, click the "Switch account" button. This brings up a popup to re-authenticate your connection between monday.com and Power Automate. Click the Authorize button at the bottom of the popup. Your connection should now be restored and your actions/triggers should work again.
 
@@ -109,7 +114,7 @@ This can occur when your connection between monday.com and Power Automate has be
 To fix this issue, go to Data -> Connections in the Power Automate sidebar. Then find the "monday" connection and click on it. At the top, click the "Switch account" button. This brings up a popup to re-authenticate your connection between monday.com and Power Automate. Click the Authorize button at the bottom of the popup. Your connection should now be restored and your actions/triggers should now work again.
 
 ### When executing a monday action/trigger in Power Automate, it does not work. I see the error "Your monday.com Power Automate app is over the execution limit. If you need more executions, please purchase a higher plan for the Microsoft Power Automate app in monday.com". How do I fix this?
-This occurs when you've used all the executions your Microsoft Power Automate subscription plan in monday.com currently supports. When this happens, actions/triggers will fail to execute until the next month, unless a higher level subscription is purchased. 
+This occurs when you've used all the executions your Microsoft Power Automate subscription plan in monday.com currently supports. When this happens, actions/triggers will fail to execute until the next month, unless a higher level subscription is purchased.
 
 If you need more executions, you can purchase a higher level subscription to the Microsoft Power Automate app in monday.com. Once you've done so, your actions/triggers should start working again within 5 minutes.
 

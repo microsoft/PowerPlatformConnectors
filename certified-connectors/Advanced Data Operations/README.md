@@ -5,7 +5,7 @@ A suite of advanced operations designed to assist in the transformation of bulk 
 State Solutions
 
 ## Prerequisites
-You'll need to sign up for a subscription.  
+You'll need to sign up for a subscription.
 
 One can be obtained by signing up to a paid plan or by activating a trial subscription.  Details can be found on our website under the pricing page ... http://www.statesolutions.com.au/pricing/
 
@@ -20,6 +20,7 @@ One can be obtained by signing up to a paid plan or by activating a trial subscr
 - `Distinct` - Select a set of distinct property values from an array of objects.  
 - `Distinct (Simple)` - Provide a distinct set of values from an array.  
 - `Expert` - Execute a SQL statement over one or more supplied datasets.  
+- `Filter Object Array` - Filter an array of complex, multi-level objects by one or more properties contained within each item in the array.
 - `Flatten Object Array` - Flatten an array of complex, multi-level objects into an array of single level JSON objects.  
 - `Get Data Schema` - Get the schema (i.e. properties and their associated types) from an array of objects.
 - `GZip Compress` - Compress a stream of text into a GZip archive.

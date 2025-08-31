@@ -1,0 +1,288 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "aad",
+          "scopes": [
+            "{Scope}"
+          ],
+          "redirectMode": "GlobalPerConnector",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False",
+            "AzureActiveDirectoryResourceId": "{ResourceUri}",
+            "IsOnbehalfofLoginSupported": true
+          },
+          "customParameters": {
+            "loginUri": {
+              "value": "https://login.microsoftonline.com"
+            },
+            "tenantId": {
+              "value": "common"
+            },
+            "enableOnbehalfOfLogin": {
+              "value": "false"
+            }
+          }
+        }
+      },
+      "token:TenantId": {
+        "type": "string",
+        "metadata": {
+          "sourceType": "AzureActiveDirectoryTenant"
+        },
+        "uiDefinition": {
+          "constraints": {
+            "required": "false",
+            "hidden": "true"
+          }
+        }
+      },
+      "token:ClientId": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "hidden": false
+          },
+	        "description": "Client Id",
+	        "displayName": "Client Id",
+          "tooltip": "Provide Your Client Id"
+        }
+      },
+      "token:ClientSecret": {
+        "type": "securestring",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "hidden": false
+          },
+	  "description": "Client Secret",
+	  "displayName": "Client Secret",
+          "tooltip": "Provide Your Client Secret"
+        }
+      },
+      "token:Scope": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "hidden": false
+          },
+	  "description": "Scope (Example: api://OdataServerClientId/.default).",
+	  "displayName": "Scope",
+          "tooltip": "Provide Your Client Id"
+        }
+      },
+      "token:ResourceUri": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true",
+            "hidden": false
+          },
+	  "description": "Resource URI (Example: api://OdataServerClientId).",
+	  "displayName": "Resource URI",
+          "tooltip": "Provide Your Client Id"
+        }
+      },
+      "zipDomain": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "URL without http/https (Example: abc.com).",
+          "displayName": "ZIP Domain",
+          "tooltip": "Provide Your ZIP Domain url without http/https"
+        }
+      },
+      "zipReadContext": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "ZIP Read Context (Example: zip/odata).",
+          "displayName": "ZIP Read Context",
+          "tooltip": "Provide Your ZIP Read Context"
+        }
+      },
+      "zipWriteContext": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "ZIP Write Context (Example: zip/api).",
+          "displayName": "ZIP Write Context",
+          "tooltip": "Provide Your ZIP Write Context"
+        }
+      },
+      "notificationHubDomain": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "URL without http/https (Example: abc.com).",
+          "displayName": "Notification Hub Domain",
+          "tooltip": "Provide Your Notification Hub Domain url without http/https"
+        }
+      },
+      "notificationHubContext": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "true"
+          },
+          "description": "Notification Hub Context (Example: notificationhub).",
+          "displayName": "Notification Hub Context",
+          "tooltip": "Provide Your Notification Hub Context"
+        }
+      },
+      "apimSubscriptionKey": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "false"
+          },
+          "description": "APIM Subscription Key to access ZIP via APIM url.",
+          "displayName": "APIM Subscription Key",
+          "tooltip": "Provide Your APIM Subscription Key"
+        }
+      },
+      "hmacSignatureKey": {
+        "type": "string",
+        "uiDefinition": {
+          "constraints": {
+            "required": "false"
+          },
+          "description": "HMAC Signature Key to generate HMAC Access Token.",
+          "displayName": "HMAC Signature Key",
+          "tooltip": "Provide Your HMAC Signature Key"
+        }
+      }
+    },
+    "iconBrandColor": "#007ee5",
+    "scriptOperations": [
+      "GetEntities",
+      "GetSchema",
+      "ValidateNotification",
+      "WebhookNotification",
+      "CRUDEntitiy",
+      "GetWriteSchema",
+      "GetZellisObjects"
+    ],
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "dynamichosturl",
+        "title": "READ (GET) actions ZIP URL",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('zipDomain')/@connectionParameters('zipReadContext')",
+          "x-ms-apimTemplate-operationName": [
+            "GetEntities",
+            "GetZellisObjects",
+            "GetSchema"
+          ]
+        }
+      },
+      {
+        "templateId": "dynamichosturl",
+        "title": "TRIGGER Notification Hub URL",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('notificationHubDomain')/@connectionParameters('notificationHubContext')",
+          "x-ms-apimTemplate-operationName": [
+            "GetEvents",
+            "CRUDEntitiy",
+            "WebhookNotification",
+	          "WebhookUnsubscribe"
+          ]
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set APIM Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Ocp-Apim-Subscription-Key",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('apimSubscriptionKey', '')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "GetZellisObjects",
+            "GetSchema",
+            "GetEntities",
+	          "AmendObject",
+            "CreateObject",
+            "UpdateObject"
+          ]
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Content Type Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Content-Type",
+          "x-ms-apimTemplateParameter.value": "application/json",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "WebhookNotification",
+            "GetEvents",
+            "GetZellisObjects",
+	          "AmendObject",
+            "CreateObject",
+            "UpdateObject",
+	          "WebhookUnsubscribe"
+          ]
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Response Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Content-Type",
+          "x-ms-apimTemplateParameter.value": "application/json",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Response",
+          "x-ms-apimTemplate-operationName": [
+            "GetZellisObjects",
+	          "AmendObject",
+            "CreateObject",
+            "UpdateObject"
+          ]
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set HMAC Sign Key Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-access-key",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('hmacSignatureKey', '')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationName": [
+            "ValidateNotification"
+          ]
+        }
+      },
+      {
+        "templateId": "dynamichosturl",
+        "title": "WRITE (POST/PUT/PATCH) actions ZIP URL",
+        "parameters": {
+          "x-ms-apimTemplateParameter.urlTemplate": "https://@connectionParameters('zipDomain')/@connectionParameters('zipWriteContext')",
+          "x-ms-apimTemplate-operationName": [
+            "AmendObject",
+            "CreateObject",
+            "UpdateObject"
+          ]
+        }
+      }
+    ],
+    "publisher": "Zellis",
+    "stackOwner": "Zellis"
+  }
+}

@@ -85,6 +85,7 @@
               "properties": {
                 "data": {
                   "type": "array",
+                  "description": "Indicates the list of user roles for a library.",
                   "items": {
                     "type": "object",
                     "title": "Each Role",
@@ -412,6 +413,7 @@
               "properties": {
                 "data": {
                   "type": "array",
+                  "description": "indicates the list of lookup aliases for the specified lookup field ID.",
                   "items": {
                     "type": "object",
                     "title": "Each Alias",
@@ -1310,6 +1312,350 @@
           }
         }
       }
+    },
+    "/getMyMattersCategories": {
+      "get": {
+        "summary": "Get My Matters categories",
+        "description": "Gets categories created in 'My Matters'. Administrators can specify a user ID to get 'My Matters' categories for that user.",
+        "tags": [
+          "Users"
+        ],
+        "x-im-controller": "user.controllers",
+        "operationId": "GetMyMattersCategories",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "$ref": "#/parameters/connectorId_header"
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "User ID",
+            "description": "Specifies the user ID of the 'My Matters' owner.",
+            "minLength": 1,
+            "x-ms-visibility": "important",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of categories under My Matters.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "title": "Each Category",
+                    "properties": {
+                      "category_type": {
+                        "type": "string",
+                        "title": "Type",
+                        "enum": [
+                          "my_matters",
+                          "my_favorites"
+                        ],
+                        "description": "Indicates the category type. Possible values are 'my_matters', 'my_favorites'."
+                      },
+                      "default_security": {
+                        "type": "string",
+                        "enum": [
+                          "inherit",
+                          "private",
+                          "view",
+                          "public"
+                        ],
+                        "title": "Default Security",
+                        "description": "Indicates the default security access level for the category. Possible values are 'inherit', 'public', 'view', 'private'."
+                      },
+                      "has_subfolders": {
+                        "type": "boolean",
+                        "title": "Has Sub-folders",
+                        "description": "Indicates if the category has subfolders. A subfolder can be a workspace, folder, or category."
+                      },
+                      "id": {
+                        "type": "string",
+                        "title": "ID",
+                        "description": "Indicates the ID of the category. For example, 'ACTIVE_US!987'."
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Indicates the name of the category."
+                      },
+                      "owner": {
+                        "type": "string",
+                        "title": "Owner",
+                        "description": "Indicates the user ID of the category owner."
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "data"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "/addShortcutsToMyMattersAdmin": {
+      "post": {
+        "summary": "Add shortcuts to user's My Matters",
+        "description": "Adds workspace shortcuts to a user's 'My Matters'. If a Category ID is specified, shortcuts are placed under that category.",
+        "tags": [
+          "Users"
+        ],
+        "x-im-controller": "user.controllers",
+        "operationId": "AddShortcutsToMyMattersAdmin",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/connectorId_header"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user_id": {
+                  "type": "string",
+                  "title": "User ID",
+                  "description": "Specifies the ID of the 'My Matters' owner.",
+                  "minLength": 1,
+                  "x-ms-visibility": "important"
+                },
+                "workspace_id": {
+                  "type": "string",
+                  "title": "Workspace ID",
+                  "description": "Specifies one or more workspace IDs, separated by a semicolon. An example of a workspace ID is 'ACTIVE_US!123'.",
+                  "minLength": 1,
+                  "x-ms-visibility": "important"
+                },
+                "category_id": {
+                  "type": "string",
+                  "title": "Category ID",
+                  "description": "Specifies the ID of the category under 'My Matters'. An example of a category ID is 'ACTIVE_US!123'.",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetMyMattersCategories",
+                    "value-collection": "data",
+                    "value-title": "name",
+                    "value-path": "id",
+                    "parameters": {
+                      "user_id": {
+                        "parameter": "user_id"
+                      }
+                    }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetMyMattersCategories",
+                    "itemsPath": "data",
+                    "itemTitlePath": "name",
+                    "itemValuePath": "id",
+                    "parameters": {
+                      "user_id": {
+                        "parameterReference": "body/user_id"
+                      }
+                    }
+                  }
+                }
+              },
+              "required": [
+                "user_id",
+                "workspace_id"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of shortcuts added.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "shortcuts": {
+                      "type": "array",
+                      "title": "Workspace Shortcuts",
+                      "description": "Indicates a collection of workspace shortcuts added to 'My Matters'.",
+                      "items": {
+                        "$ref": "#/definitions/MyMattersShortcutsInArray"
+                      }
+                    },
+                    "all_workspace_shortcut_ids": {
+                      "type": "string",
+                      "title": "All Workspace Shortcut IDs",
+                      "description": "Indicates a list of all workspace shortcut IDs, concatenated as a string and separated by semicolons.",
+                      "x-ms-visibility": "important"
+                    }
+                  },
+                  "required": [
+                    "shortcuts",
+                    "all_workspace_shortcut_ids"
+                  ]
+                }
+              },
+              "required": [
+                "data"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "/getUpdateCustomFieldSchema": {
+      "get": {
+        "summary": "Get update custom field schema",
+        "description": "Gets a schema for updating custom fields.",
+        "tags": [
+          "Library"
+        ],
+        "x-im-controller": "schema.controllers",
+        "operationId": "GetUpdateCustomFieldSchema",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "$ref": "#/parameters/connectorId_header"
+          },
+          {
+            "name": "lookupFieldId",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Lookup Field ID",
+            "description": "Specifies the ID of the lookup field.",
+            "x-ms-visibility": "important",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request succeeded.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "data"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "/updateCustomField": {
+      "post": {
+        "summary": "Update custom field",
+        "description": "Updates a custom field description or enabled state for custom1 through custom12, custom29, and custom30.",
+        "tags": [
+          "Library"
+        ],
+        "x-im-controller": "library.controllers",
+        "operationId": "UpdateCustomField",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "$ref": "#/parameters/connectorId_header"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "libraryId": {
+                  "type": "string",
+                  "title": "Library ID",
+                  "description": "Specifies the ID of the target library.",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetLibraries",
+                    "value-collection": "data",
+                    "value-title": "display_name",
+                    "value-path": "id"
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetLibraries",
+                    "itemsPath": "data",
+                    "itemTitlePath": "display_name",
+                    "itemValuePath": "id"
+                  }
+                },
+                "lookupFieldId": {
+                  "type": "string",
+                  "title": "Lookup Field ID",
+                  "description": "Specifies the lookup field ID.",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetLookupFieldNames",
+                    "value-collection": "data",
+                    "value-title": "display_name",
+                    "value-path": "id"
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetLookupFieldNames",
+                    "itemsPath": "data",
+                    "itemTitlePath": "display_name",
+                    "itemValuePath": "id"
+                  }
+                },
+                "aliasInfo": {
+                  "x-ms-dynamic-schema": {
+                    "operationId": "GetUpdateCustomFieldSchema",
+                    "parameters": {
+                      "lookupFieldId": {
+                        "parameter": "lookupFieldId"
+                      }
+                    },
+                    "value-path": "data"
+                  },
+                  "x-ms-dynamic-properties": {
+                    "operationId": "GetUpdateCustomFieldSchema",
+                    "parameters": {
+                      "lookupFieldId": {
+                        "parameterReference": "body/lookupFieldId"
+                      }
+                    },
+                    "itemValuePath": "data"
+                  }
+                }
+              },
+              "required": [
+                "libraryId",
+                "lookupFieldId",
+                "aliasInfo"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request succeeded.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1755,6 +2101,45 @@
         "tab_url",
         "workspace_id",
         "workspace_name"
+      ]
+    },
+    "MyMattersShortcutsInArray": {
+      "type": "object",
+      "title": "Each Shortcut",
+      "description": "Indicates details of each shortcut.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "ID",
+          "description": "Indicates the ID of the shortcut. For example, 'ACTIVE_US!987'."
+        },
+        "wstype": {
+          "type": "string",
+          "enum": [
+            "workspace_shortcut"
+          ],
+          "title": "Wstype",
+          "description": "Indicates the iManage Work type of the object. Possible value is 'workspace_shortcut'."
+        },
+        "target": {
+          "type": "object",
+          "title": "Target",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "ID",
+              "description": "Indicates the target workspace ID for the shortcut. For example, 'ACTIVE_US!987'."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "wstype",
+        "target"
       ]
     }
   },

@@ -18,6 +18,18 @@ The connector supports the following operations:
 - `Edit prompt`: Creates a new edit for the provided input, instruction, and parameters.
 - `Create an image`: Dall-E creates an image from your prompt.
 - `List models`: Lists the currently available models, and provides basic information about each one such as the owner and availability.
+- `Create fine-tuning job`: Creates a job that fine-tunes a specified model from a given dataset.
+- `Retrieve fine-tuning job`: Retrieve info about a fine-tuning job.
+- `Cancel fine-tuning`: Immediately cancel a fine-tune job.
+- `List fine-tuning events`: Retrieve status updates for a fine-tuning job.
+- `Create moderation`: Classifies if text violates OpenAI's Content Policy.
+- `Create embedding`: Creates an embedding vector representing the input text.
+- `Create speech`: Generates audio from the input text.
+- `Create transcription`: Transcribes audio into the input language.
+- `Create translation`: Translates audio into English.
+- `Create image`: Creates an image given a prompt.
+- `Create image edit`: Creates an edited or extended image given an original image and a prompt.
+- `Create image variation`: Creates a variation of a given image.
 
 ## Obtaining Credentials
 
