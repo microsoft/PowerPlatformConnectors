@@ -9,7 +9,7 @@ Help strings for the CLI
 """
 
 from knack.help_files import helps  # pylint: disable=unused-import
-from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
+from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE, _CONVERT
 
 helps[_COMMAND_GROUP] = """
     short-summary: Microsoft Power Platform Connectors CLI
@@ -54,4 +54,14 @@ helps[_VALIDATE] = """
     examples:
         - name: Validate swagger
           text: paconn validate
+"""
+
+helps[_CONVERT] = """
+    type: command
+    short-summary: Convert an OpenAPI 3.0 definition to Power Platform connector files.
+    examples:
+        - name: Convert OpenAPI file to connector
+          text: paconn convert --openapi myapi.json
+        - name: Convert OpenAPI file to specific destination
+          text: paconn convert --openapi myapi.json --dest ./connectors
 """

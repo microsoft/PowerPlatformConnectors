@@ -37,6 +37,8 @@ For all functionality of the RecFind 6 Search Power App to be available, you wil
 
 `QueryTable` Provides a table of results corresponding to the requested query and search parameters.
 
+`SavedSearch` Provides a table of results corresponding to the requested saved search and search parameters.
+
 `SendFile` Submit file contents and metadata for storage in the RecFind 6 database. Returns a URL to the stored file.
 
 ### Obtaining Credentials

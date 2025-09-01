@@ -1,3 +1,5 @@
+## Blackbaud Church Management Connector [DEPRECATED]
+
 [Blackbaud Church Management](https://www.blackbaud.com/solutions/organizational-and-program-management/church-management) Blackbaud Church Management is designed to effectively manage your people, gifts, communications, events, small groups, ministries, and payments, all in one place.  
 
 This connector is built on top of Blackbaud's [SKY API](https://developer.blackbaud.com/skyapi), and provides operations to help manage entities found within Blackbaud Church Management, including:

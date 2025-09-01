@@ -23,7 +23,7 @@ This connector supports the following operations
 * `BookBuilder - Get Template List` : A template is a predefined list of content to be compiled in a PDF. Templates need to defined/created in FactSet workstation.
 * `BookBuilder - Create Book from Template` : This endpoint retrieves book status, book name, and book ID for ticker requested in JSON format.
 * `BookBuilder - Get PDF` : This endpoint will return the PDF output given a book_id.
-* `Symbology - Get Symbology : Translate Entity ID and market security symbols into FactSet Permanent Security Identifiers.
+* `Symbology - Get Symbology` : Translate Entity ID and market security symbols into FactSet Permanent Security Identifiers.
 
 ## Obtaining Credentials
 
