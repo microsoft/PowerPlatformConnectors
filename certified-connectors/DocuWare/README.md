@@ -9,93 +9,97 @@ DocuWare provides a powerful and extensive REST API. With DocuWare's Power Autom
 You will need the following to proceed:
 * A DocuWare Cloud subscription
 * A Microsoft Power Apps or Power Automate account
+* A Microsoft Power Automate Premium license
 
 ## Supported Operations
 
 The DocuWare Power Automate connector supports the following actions:
 
 * Store to DocuWare
-  * Import to Document Tray - Import a new document into a document tray.
-  * Store to File Cabinet - Stores a new document to a file cabinet.
+  * Import to document tray - Import a new document into a document tray.
+  * Store to file cabinet - Stores a new document to a file cabinet.
 * Get from DocuWare
-  * Download a Document - Downloads a document from a file cabinet or document tray.
-  * Download a File - Downloads a file/section of a document stored in a file cabinet or document tray.
-  * Get Document Information - Gets information about a document.
-  * Get Dialog Fields - Gets a list of fields for a dialog.
-  * Get Dialogs - Gets a list of dialogs for a file cabinet or document tray.
-  * Get File Cabinet Fields - Gets a list of fields for a file cabinet.
-  * Get File Cabinets and Document Trays - Gets a list of file cabinets and/or document trays.
-  * Get Organization - Get the organization name.
-  * Get Stamp Fields - Gets a list of fields for a stamp.
-  * Get Stamps - Gets a list of stamps for a file cabinet or document tray.
-  * Search for Documents - Search a file cabinet for documents matching the specified criteria.
+  * Download a document - Downloads a document from a file cabinet or document tray.
+  * Download a file - Downloads a file/section of a document stored in a file cabinet or document tray.
+  * Get document information - Gets information about a document.
+  * Get dialog fields - Gets a list of fields for a dialog.
+  * Get dialogs - Gets a list of dialogs for a file cabinet or document tray.
+  * Get file cabinet fields - Gets a list of fields for a file cabinet.
+  * Get file cabinets and document trays - Gets a list of file cabinets and/or document trays.
+  * Get organization - Get the organization name.
+  * Get stamp fields - Gets a list of fields for a stamp.
+  * Get stamps - Gets a list of stamps for a file cabinet or document tray.
+  * Search for documents - Search a file cabinet for documents matching the specified criteria.
 * Altering Documents
-  * Append a File to a Document - Appends a file/section to an existing document.
-  * Delete a Document - Deletes a document from a file cabinet or document tray.
-  * Delete a File - Deletes a file/section from an existing document.
-  * Place a Stamp - Places a stamp on a document.
-  * Replace a File - Replaces a file/section in an existing document.
-  * Transfer Documents - Moves one or more documents from one file cabinet/document tray to another.
-  * Update Index Fields - Updates the index fields of a document.
+  * Append a file to a document - Appends a file/section to an existing document.
+  * Delete a document - Deletes a document from a file cabinet or document tray.
+  * Delete a file - Deletes a file/section from an existing document.
+  * Place a stamp - Places a stamp on a document.
+  * Replace a file - Replaces a file/section in an existing document.
+  * Transfer documents - Moves one or more documents from one file cabinet/document tray to another.
+  * Update index fields - Updates the index fields of a document.
 
-### Import to Document Tray
+### Import to document tray
 * Import a new document into a document tray.
 
-### Store to File Cabinet
+### Store to file cabinet
 * Stores a new document to a file cabinet.
 
-### Download a Document
+### Download a document
 * Downloads a document from a file cabinet or document tray.
 
-### Download a File
+### Download a file
 * Downloads a file/section of a document stored in a file cabinet or document tray.
 
-### Get Document Information
+### Get document information
 * Gets information about a document.
 
-### Get Dialog Fields
+### Get dialog fields
 * Gets a list of fields for a dialog.
 
-### Get Dialogs
+### Get dialogs
 * Gets a list of dialogs for a file cabinet or document tray.
 
-### Get File Cabinet Fields
+### Get file cabinet fields
 * Gets a list of fields for a file cabinet.
 
-### Get File Cabinets and Document Trays
+### Get file cabinets and document trays
 * Gets a list of file cabinets and/or document trays.
 
-### Get Organization
+### Get organization
 * Get the organization name.
 
-### Get Stamp Fields
+### Get stamp fields
 * Gets a list of fields for a stamp.
 
-### Get Stamps
+### Get stamps
 * Gets a list of stamps for a file cabinet or document tray.
 
-### Search for Documents
+### Search for documents
 * Search a file cabinet for documents matching the specified criteria.
 
-### Append a File to a Document
+### List documents in document tray
+* Lists all documents in the specified document tray.
+
+### Append a file to a document
 * Appends a file/section to an existing document.
 
-### Delete a Document
+### Delete a document
 * Deletes a document from a file cabinet or document tray.
 
-### Delete a File
+### Delete a file
 * Deletes a file/section from an existing document.
 
-### Place a Stamp
+### Place a stamp
 * Places a stamp on a document.
 
-### Replace a File
+### Replace a file
 * Replaces a file/section in an existing document.
 
-### Transfer Documents
+### Transfer documents
 * Moves one or more documents from one file cabinet/document tray to another.
 
-### Update Index Fields
+### Update index fields
 * Updates the index fields of a document.
 
 ## Obtaining Credentials
