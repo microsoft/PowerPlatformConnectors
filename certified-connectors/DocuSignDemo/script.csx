@@ -6710,6 +6710,10 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       {
         query["certificate"] = "true";
         uriBuilder.Query = query.ToString();
+      } else if (HttpUtility.UrlDecode(uriBuilder.Path).Trim().Contains("Combined without COC"))
+      {
+        query["certificate"] = "false";
+        uriBuilder.Query = query.ToString();
       }
       
       uriBuilder.Path = documentId == null ? newPath.Replace("/documentsDownload", "") : newPath.Substring(0, newPath.IndexOf(documentId) + documentId.Length);
