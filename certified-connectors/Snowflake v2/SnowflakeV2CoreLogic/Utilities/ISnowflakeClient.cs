@@ -18,16 +18,18 @@ namespace SnowflakeV2CoreLogic.Utilities
         Task<SnowflakeTableData> CallAPIAsync(
             HttpClient? client,
             string sqlStatement,
+            string endpoint,
             SnowflakeRequestBindings? requestBindings = null,
             SnowflakeConnectionParameters? perRequestConnectionParameters = null,
             RequestParameters? requestParameters = null,
-            bool isSerilalizerSettings = false);
+            bool isSerializerSettings = false);
 
         Task<SnowflakeAPIResponseModel> ExecuteSqlStatementAsync(
             HttpClient? client,
             ExecuteSqlStatementModel fullAPIRequestPayload,
             HeaderParameters headerParameters,
-            QueryParameters queryParams);
+            QueryParameters queryParams,
+            string endpoint);
 
         Task<SnowflakeAPIResponseModel> GetResultsAsync(
             HttpClient? client,

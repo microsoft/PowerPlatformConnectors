@@ -32,6 +32,12 @@ namespace Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models
         public TableSelectRestrictionsMetadata SelectRestrictions { get; set; }
 
         /// <summary>
+        /// Count restrictions
+        /// </summary>
+        [DataMember(Name = "countRestrictions", EmitDefaultValue = false)]
+        public TableCountRestrictionsMetadata CountRestrictions { get; set; }
+
+        /// <summary>
         /// Server paging restrictions
         /// </summary>
         [DataMember(Name = "isOnlyServerPagable", EmitDefaultValue = false)]
