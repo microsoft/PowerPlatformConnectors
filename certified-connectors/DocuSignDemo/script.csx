@@ -6638,6 +6638,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
         if("GetMaestroWorkflowDefinitions".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
         {
           query["triggerType"] = "1" ;
+		  query["httpType"] = "POST" ;
         }
         var maestroAPIUrl = GetPartnerIntegrationsBaseUri() + uriBuilder.Path.Replace("/restapi/v2.1", "");
         var newUriBilder = new UriBuilder(maestroAPIUrl);
