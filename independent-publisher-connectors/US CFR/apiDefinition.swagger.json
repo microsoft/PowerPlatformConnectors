@@ -1,0 +1,681 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "eCFR (Independent Publisher)",
+    "description": "The US Code of federal regulations, regulation metadata and point-in-time regulation versions. Made available via the Government Publishing Office (GPO).",
+    "version": "1.0",
+    "contact": {
+      "name": "Dan Romano",
+      "email": "dan.romano@swolcat.com",
+      "url": "https://developments.substack.com"
+    }
+  },
+  "host": "www.ecfr.gov",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/versioner/v1/titles.json": {
+      "get": {
+        "tags": [
+          "Versioner"
+        ],
+        "operationId": "GetCfrTitles",
+        "summary": "Get all CFR titles",
+        "description": "Returns a list of all current CFR titles, including their names, amendment history, and up-to-date status.",
+        "x-ms-summary": "Get list of CFR titles",
+        "responses": {
+          "200": {
+            "description": "List of CFR titles with metadata",
+            "schema": {
+              "$ref": "#/definitions/CfrTitlesResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/admin/v1/agencies.json": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAgencies",
+        "summary": "Get List of CFR Agencies",
+        "description": "Returns all agencies that appear in the CFR, including children and title/chapter references.",
+        "x-ms-summary": "Get list of CFR agencies",
+        "responses": {
+          "200": {
+            "description": "Successful response with list of agencies",
+            "schema": {
+              "$ref": "#/definitions/AgencyResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/admin/v1/corrections.json": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetCfrCorrections",
+        "summary": "Get CFR Corrections",
+        "description": "Returns a list of historical corrections to the CFR, including Federal Register citations, titles, and hierarchy metadata.",
+        "x-ms-summary": "Get list of CFR corrections",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Snapshot date",
+            "description": "Return corrections published as of a given date (yyyy-mm-dd)",
+            "required": false
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "type": "integer",
+            "x-ms-summary": "CFR Title Number",
+            "description": "Limit results to a specific CFR title number",
+            "required": false
+          },
+          {
+            "name": "error_corrected_date",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Correction Effective Date",
+            "description": "Limit results to corrections with a given correction effective date (yyyy-mm-dd)",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with CFR corrections",
+            "schema": {
+              "$ref": "#/definitions/CorrectionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/admin/v1/corrections/title/{title}.json": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetTitleCorrections",
+        "summary": "Get CFR Corrections for a Specific Title",
+        "description": "Returns corrections for a specific CFR title, including Federal Register references and structural hierarchy metadata.",
+        "x-ms-summary": "Get CFR corrections by title",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The CFR title number (e.g., 6, 7, 22)",
+            "x-ms-summary": "CFR Title Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with corrections for the title",
+            "schema": {
+              "$ref": "#/definitions/CorrectionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/versioner/v1/versions/title-{title}.json": {
+      "get": {
+        "tags": [
+          "Versioner"
+        ],
+        "summary": "Get Content Versions for a Title",
+        "description": "Returns a list of historical content versions for a specific CFR title.",
+        "operationId": "GetContentVersionsByTitle",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "CFR Title",
+            "description": "The CFR Title number (e.g., 2, 22, 50)"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Snapshot Date",
+            "description": "Filter versions by publication snapshot date (YYYY-MM-DD)"
+          },
+          {
+            "name": "identifier",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Section Identifier",
+            "description": "Filter by CFR section identifier (e.g., 3474.20)"
+          },
+          {
+            "name": "amendment_date",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Amendment Date",
+            "description": "Filter by amendment date"
+          },
+          {
+            "name": "issue_date",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Issue Date",
+            "description": "Filter by issue date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ContentVersionsResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/versioner/v1/ancestry/{date}/title-{title}.json": {
+      "get": {
+        "tags": [
+          "Versioner"
+        ],
+        "summary": "Get CFR Title Ancestry for a Given Date",
+        "description": "Returns the full regulatory hierarchy (title to section) for a specific title on a given date.\n",
+        "operationId": "GetTitleAncestry",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Date",
+            "description": "The snapshot date to retrieve ancestry for (YYYY-MM-DD)"
+          },
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "CFR Title",
+            "description": "The CFR Title number (e.g., 2, 22, 50)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ancestry": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/AncestryItem"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AncestryItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "label_level": {
+          "type": "string"
+        },
+        "label_description": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "boolean"
+        },
+        "section_range": {
+          "type": "string"
+        }
+      }
+    },
+    "ContentVersionsResponse": {
+      "type": "object",
+      "properties": {
+        "content_versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "amendment_date": {
+                "type": "string"
+              },
+              "issue_date": {
+                "type": "string"
+              },
+              "identifier": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "part": {
+                "type": "string"
+              },
+              "subpart": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "substantive": {
+                "type": "boolean"
+              },
+              "removed": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "result_count": {
+              "type": "string"
+            },
+            "issue_date": {
+              "type": "object",
+              "properties": {
+                "lte": {
+                  "type": "string"
+                },
+                "gte": {
+                  "type": "string"
+                }
+              }
+            },
+            "latest_amendment_date": {
+              "type": "string"
+            },
+            "latest_issue_date": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "CfrTitle": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "latest_amended_on": {
+          "type": "string"
+        },
+        "latest_issue_date": {
+          "type": "string"
+        },
+        "up_to_date_as_of": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "boolean"
+        }
+      }
+    },
+    "CfrTitlesMeta": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "import_in_progress": {
+          "type": "boolean"
+        }
+      }
+    },
+    "CfrTitlesResponse": {
+      "type": "object",
+      "properties": {
+        "titles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CfrTitle"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/CfrTitlesMeta"
+        }
+      }
+    },
+    "AgencyResponse": {
+      "type": "object",
+      "properties": {
+        "agencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Agency"
+          }
+        }
+      }
+    },
+    "AgencyReference": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "integer",
+          "description": "CFR title number"
+        },
+        "chapter": {
+          "type": "string",
+          "description": "CFR chapter designation"
+        }
+      }
+    },
+    "Agency": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "short_name": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "sortable_name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "cfr_references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AgencyReference"
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Agency"
+          }
+        }
+      }
+    },
+    "CorrectionReferenceHierarchy": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "chapter": {
+          "type": "string"
+        },
+        "part": {
+          "type": "string"
+        },
+        "subpart": {
+          "type": "string"
+        },
+        "section": {
+          "type": "string"
+        }
+      }
+    },
+    "CorrectionReference": {
+      "type": "object",
+      "properties": {
+        "cfr_reference": {
+          "type": "string"
+        },
+        "hierarchy": {
+          "$ref": "#/definitions/CorrectionReferenceHierarchy"
+        }
+      }
+    },
+    "Correction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "cfr_references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CorrectionReference"
+          }
+        },
+        "corrective_action": {
+          "type": "string"
+        },
+        "error_corrected": {
+          "type": "string"
+        },
+        "error_occurred": {
+          "type": "string"
+        },
+        "fr_citation": {
+          "type": "string"
+        },
+        "position": {
+          "type": "number"
+        },
+        "display_in_toc": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "number"
+        },
+        "year": {
+          "type": "number"
+        },
+        "last_modified": {
+          "type": "string"
+        }
+      }
+    },
+    "CorrectionResponse": {
+      "type": "object",
+      "properties": {
+        "ecfr_corrections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Correction"
+          }
+        }
+      }
+    },
+    "StructureNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "label_level": {
+          "type": "string"
+        },
+        "label_description": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "boolean"
+        },
+        "section_range": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StructureNode"
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "statusCode": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.ecfr.gov/reader-aids/ecfr-developer-resources"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.ecfr.gov/reader-aids/government-policy-and-ofr-procedures/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management"
+    }
+  ]
+}
