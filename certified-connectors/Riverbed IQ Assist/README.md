@@ -29,6 +29,9 @@ This operation runs endpoint analysis to diagnose a device issue.
 ### SuggestUserEndpointRemediation
 This operation suggests a remediation for a device based on diagnosis or symptoms.
 
+### GetOperationId
+This operation retrieves the status of a long-running operation initiated by one of the other operations.
+
 ## Known Issues and Limitations
 The current version is limited to executing pre-mapped, built-in runbooks. Customization support for user-generated runbooks will be added in a future release.
 
