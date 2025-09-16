@@ -89,7 +89,7 @@ For further details, see the [apiProperties.json](schemas/paconn-apiProperties.s
 ### README.md
 
 README.md file for your connector includes a description for your connector, any prerequisite a developer or contributor may need to build your connector. It includes instructions on how to use your connector and api, how to get credentials, supported operations, known issues and limitations, etc. This file is meant to be a standalone guide for deploying and using your connector by other users and developers. A good example is the [Azure Key Vault](custom-connectors/AzureKeyVault/Readme.md) custom connector.
-A readme.md template for [Certified Connectors](templates/certified-connectors/readme.md) and [Independent Publisher Connectors](templates/Independent%20Publisher/readme.md) is also included for your reference. If you are submitting an Independent Publisher connector that requires OAuth, please make sure to explain how to create the OAuth app. The Microsoft Certification Team will use those instructions to create the app, so please make sure they are detailed and accurate.
+A readme.md template for [Certified Connectors](templates/certified-connectors/readme.md) and [Independent Publisher Connectors](templates/Independent%20Publisher/readme.md) is also included for your reference. If you are submitting an Independent Publisher connector that requires OAuth, please make sure to explain how to create the OAuth app. The Microsoft Certification Team will use those instructions to create the app, so please make sure they are detailed and accurate. 
 
 ### Creating a Fork
 

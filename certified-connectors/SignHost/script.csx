@@ -4,69 +4,59 @@
     {
         try
         {
-            if (this.Context.OperationId.StartsWith("Getdetails", StringComparison.OrdinalIgnoreCase))
+            // Use the context to forward/send an HTTP request
+            HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+            
+            // Do the transformation if the response was successful, otherwise return error responses as-is
+            if (response.IsSuccessStatusCode)
             {
+                // Deserialize the JSON to a JObject
+                var jObject = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-                // Use the context to forward/send an HTTP request
-                HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-                // Do the transformation if the response was successful, otherwise return error responses as-is
-                if (response.IsSuccessStatusCode)
+                // Get the "Files" object
+                var filesObject = (JObject?)jObject["Files"];
+
+                // Prepare a list to hold the transformed files
+                var filesList = new List<JObject>();
+
+                if (filesObject is not null)
                 {
-                    // Deserialize the JSON to a JObject
-                    var jObject = JObject.Parse(await response.Content.ReadAsStringAsync());
-
-                    // Get the "Files" object
-                    var filesObject = (JObject?)jObject["Files"];
-
-                    // Prepare a list to hold the transformed files
-                    var filesList = new List<JObject>();
-
-                    if (filesObject is not null)
+                    // Iterate over each property (file) in the "Files" object
+                    foreach (var file in filesObject.Properties())
                     {
-                        // Iterate over each property (file) in the "Files" object
-                        foreach (var file in filesObject.Properties())
+                        // Create a JObject for each file and add it to the list
+                        var fileEntry = new JObject
                         {
-                            // Create a JObject for each file and add it to the list
-                            var fileEntry = new JObject
-                            {
-                                ["Links"] = file.Value["Links"],
-                                ["DisplayName"] = file.Name
-                            };
-                            filesList.Add(fileEntry);
-                        }
-
-                        // Create the new JObject to hold the list of files
-                        jObject.Remove("Files");
-                        var newFilesObject = new JObject
-                        {
-                            ["Files"] = JArray.FromObject(filesList)
+                            ["Links"] = file.Value["Links"],
+                            ["DisplayName"] = file.Name
                         };
-                        jObject.Add("Files", JArray.FromObject(filesList));
-
+                        filesList.Add(fileEntry);
                     }
 
-                    response.Content = CreateJsonContent(jObject.ToString());
-                    return response;
+                    // Create the new JObject to hold the list of files
+                    jObject.Remove("Files");
+                    var newFilesObject = new JObject
+                    {
+                        ["Files"] = JArray.FromObject(filesList)
+                    };
+                    jObject.Add("Files", JArray.FromObject(filesList));
 
                 }
-            }
-        }
-        catch (ConnectorException ex)
-        {
-            var response = new HttpResponseMessage(ex.StatusCode);
 
-            if (ex.Message.Contains("ValidationFailure:"))
-            {
-                response.Content = CreateJsonContent(ex.JsonMessage());
-            }
-            else
-            {
-                response.Content = CreateJsonContent(ex.Message);
-            }
+                response.Content = CreateJsonContent(jObject.ToString());
 
+            }
+            
             return response;
         }
-        return response;
+        catch (Exception ex)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = CreateJsonContent("error: "+ ex.Message)
+            };
+            return response;
+        }
 
     }
 }

@@ -77,6 +77,12 @@
         for (int i = 0; i < events.Length; i++) {
             query.Add("events",events[i]);
         }
+        if(!String.IsNullOrEmpty(query["from_time"])){
+          query["from_time"] = getConvertedTime(query["from_time"]);
+        }
+        if(!String.IsNullOrEmpty(query["to_time"])){
+          query["to_time"] = getConvertedTime(query["to_time"]);
+        }
         uriBuilder.Query = query.ToString();
         this.Context.Request.RequestUri = uriBuilder.Uri;
         HttpResponseMessage response = await this.Context.SendAsync(request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
@@ -99,7 +105,22 @@
         }
         return response;
 
-    }
+    } else if (this.Context.OperationId == "Get_Processed_Emails") {
+      HttpRequestMessage request = this.Context.Request;
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var query = System.Web.HttpUtility.ParseQueryString(request.RequestUri.Query);
+      if(!String.IsNullOrEmpty(query["date_from"])){
+        query["date_from"] =getConvertedTime(query["date_from"]);
+      }
+      if(!String.IsNullOrEmpty(query["date_to"])){
+        query["date_to"] =getConvertedTime(query["date_to"]);
+      }
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+
+      HttpResponseMessage response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+      return response;
+     }
     HttpResponseMessage errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
     errorResponse.Content = CreateJsonContent("{\"message\": \"Unsupported Operation\"}");
     return errorResponse;
@@ -124,6 +145,47 @@ public static JObject getStatDataForEvent(JObject statsObj, string eventKey,int 
     eventStatObj["stats"] = dataArray;
     eventStatObj["count"] = count;
     return eventStatObj;
+  }
+  public static string getConvertedTime(string value) {
+
+    string outputDTFormat = "yyyy-MM-ddTHH:mm:ss";
+    string outputDFormat = "yyyyMMdd";
+    String[] datetimeformatWZ = {
+      "yyyy/MM/dd'T'HH:mm:sszzz",
+      "yyyy-MM-dd'T'HH:mm:sszzz",
+      "yyyyMMdd'T'HHmmsszzz",
+      "yyyy/MM/dd'T'HH:mm:ssZ",
+      "yyyy-MM-dd'T'HH:mm:ssZ"
+    };
+    String[] datetimeformat = {
+      "yyyy/MM/dd'T'HH:mm:ss",
+      "yyyy-MM-dd'T'HH:mm:ss",
+      "yyyyMMdd'T'HHmmss"
+    };
+    String[] dateformat = {
+      "yyyy/MM/dd",
+      "yyyy-MM-dd",
+      "yyyyMMdd"
+    };
+    DateTime newDate;
+    DateTime convertedDate;
+
+    if (DateTime.TryParseExact(value, datetimeformat, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
+      newDate = convertedDate.ToUniversalTime();
+    }
+    else if (DateTimeOffset.TryParseExact(value, datetimeformatWZ, null, System.Globalization.DateTimeStyles.None, out DateTimeOffset convertedDateOffset)) {
+      return convertedDateOffset.ToString(outputDTFormat+"zzz");
+    }  else if (DateTime.TryParseExact(value, dateformat, null, System.Globalization.DateTimeStyles.None, out convertedDate)) {
+      newDate = convertedDate;
+
+    } else if (DateTime.TryParse(value, out convertedDate)) {
+      newDate = convertedDate;
+
+    } else {
+      throw new Exception("Invalid_Date");
+    }
+    return newDate.ToString(outputDTFormat + "Z");
+
   }
 
 }
