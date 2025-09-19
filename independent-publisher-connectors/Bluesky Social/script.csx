@@ -44,7 +44,7 @@ public class Script : ScriptBase
         var sessionResponse = await this.Context.SendAsync(sessionRequest, this.CancellationToken).ConfigureAwait(false);
         _logger.LogInformation("Received session response: {StatusCode}", sessionResponse.StatusCode);
 
-        if (string.Equals(operationId, "Com-atproto-server-createSession", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(operationId, "CreateSession", StringComparison.OrdinalIgnoreCase))
         {
             return sessionResponse;
         }
