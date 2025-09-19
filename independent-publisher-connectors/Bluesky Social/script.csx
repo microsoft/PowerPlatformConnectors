@@ -1,3 +1,4 @@
+//Script provided by Troy Taylor MVP, troystaylor: https://github.com/troystaylor/Bluesky-Connector/blob/main/script.csx
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
