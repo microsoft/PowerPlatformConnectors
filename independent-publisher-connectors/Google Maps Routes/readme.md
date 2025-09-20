@@ -1,10 +1,30 @@
+<<<<<<< HEAD
 # Google Maps Routes
 
 The Google Maps Routes connector allows you to calculate travel information between two locations. It uses the Google Maps Routes API to return the total travel distance and estimated travel duration for a specified mode of transport. This connector is designed for one-to-one route calculations, supporting a single origin and a single destination per request.
+=======
+# Google Maps Routes Connector
+The Google Maps Routes Connector allows you to calculate travel information between two locations.  
+It uses the **Google Maps Routes API to return:  
+
+- Total travel distance (in meters)  
+- Estimated travel duration (in seconds)  
+
+This connector supports a **single origin–destination pair** per request, making it easy to integrate route calculations into your apps and workflows
+
+This connector is designed for **one-to-one route calculations**.  
+Each request supports a **single origin address** and a **single destination address**, and returns the total travel distance and duration for that route.  
+
+Typical use cases include:  
+- Estimating travel distance and duration in workflows  
+- Enriching business data with route information  
+- Integrating location-based logic into apps and automations  
+>>>>>>> 1594a9d16961f80568b76c5962cb68cf11b6b664
 
 ## Publisher: Remsey Mailjard (Skills4-IT)
 
 ## Prerequisites
+<<<<<<< HEAD
 
 To use this connector, you will need a Google Cloud project with the Routes API enabled and a valid API key.
 
@@ -61,3 +81,25 @@ Calculates a route between one origin and one destination and returns the total 
 | Travel duration (seconds) | `string` | The total travel duration in seconds, formatted as a string (e.g., "3461s"). |
 | Display Distance | `string` | The human-readable distance value (e.g., "75.4 km"). |
 | Duration travel time | `string` | The human-readable time needed to travel (e.g., "58 mins"). |
+=======
+To use this connector, you will need:
+
+- A **Google Cloud project** with the [Routes API enabled](https://console.cloud.google.com/marketplace/product/google/routes.googleapis.com).  
+  You can enable the API in the **Google Cloud Console** under *APIs & Services* > *Library*.  
+- A valid **API key**, created in the [Google Cloud Console Credentials page](https://console.cloud.google.com/apis/credentials).  
+
+
+## Obtaining Credentials
+This connector authenticates with an API key passed via the `X-Goog-Api-Key` header.  
+Store the key securely in the connector connection settings.
+
+## Supported Operations
+The connector supports the following operations:
+* `Calculate Distance and Travel Time`: Calculates a route between one origin and one destination and returns the total travel distance (in meters) and the estimated travel time (in seconds).
+
+
+## Known Issues and Limitations
+- There are currently no known issues with this connector.  
+- Each request supports only a **single origin–destination pair**. Calculating multiple routes or distance matrices is not supported.
+
+>>>>>>> 1594a9d16961f80568b76c5962cb68cf11b6b664
