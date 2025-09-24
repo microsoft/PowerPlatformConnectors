@@ -4,7 +4,7 @@ Meet your brainstorming buddy, blank page remover, research assistant, and exper
 ## Publisher: Troy Taylor, Hitachi Solutions
 
 ## Prerequisites
-You will need to sign up for an account with (Copy.ai)[https://app.copy.ai/].
+You will need to sign up for an account with [Copy.ai](https://app.copy.ai/).
 
 ## Obtaining Credentials
 Once you have logged in to your account and created a workflow, open a workflow and click on the API tab to retrieve your Workspace API Key.
