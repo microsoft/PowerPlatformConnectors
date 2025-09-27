@@ -1,4 +1,4 @@
-# Bureau of Labor Statistics (BLS) API Connector
+# US Bureau of Labor Statistics (BLS)
 
 The **Bureau of Labor Statistics (BLS) API** provides public access to U.S. labor market and economic data. With this connector, you can query survey metadata and retrieve time series data from BLS datasets directly in Power Platform.
 
