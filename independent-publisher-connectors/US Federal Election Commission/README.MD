@@ -1,4 +1,4 @@
-﻿# OpenFEC
+﻿# OpenFEC (Independent Publisher)
 
 ## Publisher: Dan Romano
 
