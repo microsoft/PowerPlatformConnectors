@@ -1,5 +1,5 @@
 # ISOPlanner
-ISOPlanner is an easy to use and powerfull Compliance Management solution, integrated with Microsoft 365.
+ISOPlanner is an easy to use and powerful Compliance Management solution, integrated with Microsoft 365.
 This integration allows you to build workflows that respond to events or execute various actions in ISOPlanner.
 
 ## Publisher: REDLAB
@@ -79,7 +79,7 @@ Creates a new task.
 Creates a new webhook for an event which a new workflow can respond to.
 
 ### Create an asset
-Creates a new asset
+Creates a new asset.
 
 ### Create an event
 Creates a new event.
