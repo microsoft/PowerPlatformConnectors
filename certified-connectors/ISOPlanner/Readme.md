@@ -46,6 +46,15 @@ When a risk is updated.
 ### When a risk is deleted
 When a risk is deleted.
 
+### When an asset is created
+When an asset is created.
+
+### When an asset is updated
+When an asset is updated.
+
+### When an asset is deleted
+When an asset is deleted.
+
 ## Supported Operations
 
 ### Add a library item to a task
@@ -69,6 +78,9 @@ Creates a new task.
 ### Create a webhook
 Creates a new webhook for an event which a new workflow can respond to.
 
+### Create an asset
+Creates a new asset
+
 ### Create an event
 Creates a new event.
 
@@ -87,8 +99,14 @@ Deletes a subtask from an event.
 ### Delete a task
 Deletes a task.
 
+### Delete an asset
+Deletes an asset for an asset Id.
+
+### Delete an asset for an external Id
+Deletes an asset for an external Id.
+
 ### Delete an event
-Deletes an Event.
+Deletes an event.
 
 ### Get a KPI
 Gets the details of a KPI.
@@ -107,6 +125,15 @@ Gets a subtask from an event by specifying the subtask Id.
 
 ### Get a subtask of an event based on Name
 Gets a subtask from an event by specifying the subtask Name.
+
+### Get an asset
+Gets an asset.
+
+### Get an asset for an external Id
+Get an asset for an external Id.
+
+### Get assets
+Gets all assets.
 
 ### Get events
 Gets events based on a filter.
