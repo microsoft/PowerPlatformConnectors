@@ -5046,7 +5046,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
 
   private string GetShard(string host)
   {
-    var site = host.Split(".")[0];
+    var site = host.Split('.')[0];
     switch (site)
     {
       case "stage":
