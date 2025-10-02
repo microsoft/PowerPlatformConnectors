@@ -5046,6 +5046,10 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
 
   private string GetShard(string host)
   {
+	if(host.EndsWith(".mil"))
+	{
+		return "";
+	}
     var site = host.Split('.')[0];
     switch (site)
     {
