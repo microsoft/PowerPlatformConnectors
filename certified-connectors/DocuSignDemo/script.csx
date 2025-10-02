@@ -5034,13 +5034,54 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
   private string GetPartnerIntegrationsBaseUri()
   {
     var host = this.Context.Request.RequestUri.Host.ToLower();
+    var shard = GetShard(host);
     var pIBaseUri = host.Contains("demo") ?
-        "https://demo.services.docusign.net/partner-integrations/v1.0"
+        $"https://{shard}services.demo.docusign.net/partner-integrations/v1.0"
       : host.Contains("stage") ?
-        "https://services.stage.docusign.net/partner-integrations/v1.0"
-      : "https://services.docusign.net/partner-integrations/v1.0";
+        $"https://{shard}services.stage.docusign.net/partner-integrations/v1.0"
+      : $"https://{shard}services.docusign.net/partner-integrations/v1.0";
 
     return pIBaseUri;
+  }
+
+  private string GetShard(string host)
+  {
+	if(host.EndsWith(".mil"))
+	{
+		return "";
+	}
+    var site = host.Split('.')[0];
+    switch (site)
+    {
+      case "stage":
+      case "demo":
+      case "na2":
+      case "na4":
+        return "s1.us.";
+
+      case "na1":
+      case "na3":
+	  case "www":
+        return "s2.us.";
+
+      case "caprod":
+      case "ca":
+        return "s1.ca.";
+
+      case "euprod":
+      case "eu":
+        return "s1.eu.";
+
+      case "auprod":
+      case "au":
+        return "s1.au.";
+
+      case "jp1":
+        return "s1.jp.";
+        
+      default:
+        return "";
+    }
   }
 
   private JObject TriggerMaestroWorkflowTransformation(JObject body)
