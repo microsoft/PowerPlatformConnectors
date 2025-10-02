@@ -5057,6 +5057,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
 
       case "na1":
       case "na3":
+	  case "www":
         return "s2.us.";
 
       case "caprod":
