@@ -9,7 +9,7 @@ Help strings for the CLI
 """
 
 from knack.help_files import helps  # pylint: disable=unused-import
-from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE, _PACKAGE
+from paconn import _COMMAND_GROUP, _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE, _CONVERT, _PACKAGE
 
 helps[_COMMAND_GROUP] = """
     short-summary: Microsoft Power Platform Connectors CLI
@@ -56,23 +56,33 @@ helps[_VALIDATE] = """
           text: paconn validate
 """
 
+helps[_CONVERT] = """
+    type: command
+    short-summary: Convert an OpenAPI 3.0 definition to Power Platform connector files.
+    examples:
+        - name: Convert OpenAPI file to connector
+          text: paconn convert --openapi myapi.json
+        - name: Convert OpenAPI file to specific destination
+          text: paconn convert --openapi myapi.json --dest ./connectors
+"""
+
 helps[_PACKAGE] = """
     type: command
     short-summary: Package Power Platform solution components into a distributable format.
     long-summary: |
         Creates a structured Power Platform solution package from component ZIP files.
-        
+
         The packaging process:
         1. Renames ZIP files according to Power Platform conventions:
-           - Files containing "Connector" → "Connector.zip" (required)
-           - Files containing "Flow" → "Flow.zip" (required)  
-           - Files containing "AIPlugin" → "AIPlugin.zip" (optional)
-        2. Moves all ZIP files to a "PkgAssets" folder
-        3. Creates "intro.md" from "readme.md" (or first available .md file)
-        4. Compresses PkgAssets folder into "package.zip"
-        5. Creates final "ConnectorPackage.zip" containing intro.md and package.zip
+           - Files containing \"Connector\"  \"Connector.zip\" (required)
+           - Files containing \"Flow\"  \"Flow.zip\" (required)
+           - Files containing \"AIPlugin\"  \"AIPlugin.zip\" (optional)
+        2. Moves all ZIP files to a \"PkgAssets\" folder
+        3. Creates \"intro.md\" from \"readme.md\" (or first available .md file)
+        4. Compresses PkgAssets folder into \"package.zip\"
+        5. Creates final \"ConnectorPackage.zip\" containing intro.md and package.zip
         6. Cleans up intermediate files
-        
+
         The final ConnectorPackage.zip is ready for distribution and deployment.
     examples:
         - name: Package solution components in current directory
@@ -82,7 +92,7 @@ helps[_PACKAGE] = """
         - name: Package with custom file mappings
           text: >
             paconn package --custom-mappings
-            '{"*MyConnector*": "Connector.zip", "*MyFlow*": "Flow.zip"}'
+            '{\"*MyConnector*\": \"Connector.zip\", \"*MyFlow*\": \"Flow.zip\"}'
         - name: Package and overwrite existing files
           text: paconn package --overwrite
 """

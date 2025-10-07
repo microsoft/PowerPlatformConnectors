@@ -9,7 +9,7 @@ CLI parameter definitions
 """
 
 from knack.arguments import ArgumentsContext
-from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE, _PACKAGE
+from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE, _CONVERT, _PACKAGE
 
 CLIENT_SECRET = 'client_secret'
 CLIENT_SECRET_OPTIONS = ['--secret', '-r']
@@ -33,7 +33,7 @@ POWERAPPS_VERSION_HELP = 'Power Platform api version.'
 
 SETTINGS = 'settings_file'
 SETTINGS_OPTIONS = ['--settings', '-s']
-SETTINGS_HELP = 'A settings file containing required parameters. When a settings file is specified some commandline parameters are ignored.'  # noqa: E501
+SETTINGS_HELP = 'A settings file containing required parameters. When a settings file is specified some commandline parameters are ignored.'  # noqa: E501   
 
 API_PROPERTIES = 'api_properties'
 API_PROPERTIES_OPTIONS = ['--api-prop', '-p']
@@ -50,6 +50,14 @@ ICON_HELP = 'Location for the icon file.'
 SCRIPT = 'script'
 SCRIPT_OPTIONS = ['--script', '-x']
 SCRIPT_HELP = 'Location for the script file.'
+
+OPENAPI_FILE = 'openapi_file'
+OPENAPI_FILE_OPTIONS = ['--openapi', '-api']
+OPENAPI_FILE_HELP = 'Location of the OpenAPI 3.0 definition file to convert.'
+
+DESTINATION = 'destination'
+DESTINATION_OPTIONS = ['--dest', '-dst']
+DESTINATION_HELP = 'Destination directory for the converted connector files.'
 
 
 # pylint: disable=unused-argument
@@ -279,6 +287,26 @@ def load_arguments(self, command):
             required=False,
             help=SETTINGS_HELP)
 
+    with ArgumentsContext(self, _CONVERT) as arg_context:
+        arg_context.argument(
+            OPENAPI_FILE,
+            options_list=OPENAPI_FILE_OPTIONS,
+            type=str,
+            required=False,
+            help=OPENAPI_FILE_HELP)
+        arg_context.argument(
+            DESTINATION,
+            options_list=DESTINATION_OPTIONS,
+            type=str,
+            required=False,
+            help=DESTINATION_HELP)
+        arg_context.argument(
+            SETTINGS,
+            options_list=SETTINGS_OPTIONS,
+            type=str,
+            required=False,
+            help=SETTINGS_HELP)
+
     with ArgumentsContext(self, _PACKAGE) as arg_context:
         arg_context.argument(
             'source',
@@ -298,7 +326,7 @@ def load_arguments(self, command):
             type=str,
             required=False,
             choices=['standard'],
-            help='Package format. Currently only "standard" format is supported (ConnectorPackage.zip with intro.md and package.zip).')
+            help='Package format. Currently only \"standard\" format is supported (ConnectorPackage.zip with intro.md and package.zip).')
         arg_context.argument(
             SETTINGS,
             options_list=SETTINGS_OPTIONS,
@@ -319,4 +347,4 @@ def load_arguments(self, command):
             options_list=['--custom-mappings', '-cm'],
             type=str,
             required=False,
-            help='JSON string containing custom file renaming mappings. Example: \'{"*MyConnector*": "Connector.zip", "*MyFlow*": "Flow.zip"}\'.')
+            help='JSON string containing custom file renaming mappings. Example: ''{\"*MyConnector*\": \"Connector.zip\", \"*MyFlow*\": \"Flow.zip\"}''.')
