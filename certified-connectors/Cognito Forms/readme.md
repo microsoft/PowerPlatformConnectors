@@ -109,15 +109,47 @@ There will be no output.
 - `form`: The internal form name or Id
 - `entryId`: The entry number or entry Id for the entry to be deleted
 
+#### ImportEntries
+
+This action will create, update, or delete entries using provided file content (.xlsx or .csv).
+The output will be an object containing the import ID and status.
+
+##### Parameters:
+- `form`: The internal form name or Id
+- `File`: The file (.xlsx or .csv) containing the entries to import
+- `ImportMode`: The mode for the import (CreateNew, UpdateExisting, or SyncEntries)
+- `Email`: The email address to receive import notifications (optional)
+- `MatchEntriesUsing`: An entry ID substitute (optional)
+
+#### GetImportStatus
+
+This action will get the current status of an import and returns the number of successful and unsuccessful entries.
+The output will be an object containing the import status, counts, and error information if applicable.
+
+##### Parameters:
+- `form`: The internal form name or Id
+- `importId`: The ID of the import to check status for
+
+#### GetEntryViewEntries
+
+This action will get all entries for a specified view.
+The output will be the entry data based on the view configuration.
+
+##### Parameters:
+- `form`: The internal form name or Id
+- `viewId`: The ID of the view
+- `$count`: Include total count of entries (optional)
+- `$select`: Returns list of entry IDs in a View when $select=Id is specified (optional)
+
 ### Private Operations
 
 These operations are enablers for the public triggers and actions.
 
 #### GetForms
 
-This operation will return a list of forms as objects that contain the `Id`, `InternalName`, and `Name`.
+This operation will return a list of forms as objects that contain the `Id` and `Name`.
 When used for the `form` parameter for actions and triggers, the user should see the `Name`, 
-but the `InternalName` should be sent to the API.
+but the `Id` should be sent to the API. Archived forms are not included in the response.
 
 #### GetFormSchema
 
