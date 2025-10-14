@@ -1,6 +1,6 @@
 
 ## Business Assist Power Connector
-Business Assist uses Machine Learning models which will help in improving the customer experience and provide customer success. This will help you optimize your customer support that can help you forecast call volumes, analyze customer feedback, and provide self-help support for faster service. You can integrate with any platform they already use, allowing them to create their own technology stack based on both preference and value.  
+Business Assist uses Machine learning based tools originally developed internally at Microsoft to automate common customer success-oriented tasks.  They are now being made available to help customers and partners achieve their goals to reduce costs, listen more efficiently to customers, and respond to their needs more quickly. These tools will allow large scale data analysis to be performed quickly using the low code solution. You can integrate with any platform you already use, allowing you to create your own technology stack based on both preference and value. The Business Assist connector give you tools to better understand your customers' wants and needs and respond to them more quickly.
 
 ## Publisher
 Microsoft Corporation
@@ -28,13 +28,20 @@ Content-type: application/json
 The connector supports the following operations:
 
 ### Create Forecast
+Customer service organizations need to reliably predict service call volumes to allocate resources and set staffing levels appropriately. Analyzing past trends and volume levels manually is a time-consuming task. Using machine learning can speed up the process considerably. The Business Assist Forecast API brings the ability to quickly and confidently forecast future support case volume based on historical data.
+
 Forecast support case volume allows you to confidently forecast future support case volume based on historical data. To process forecast share input historical support case volume data in the JSON format. You need to share the seasonality based on what cadence you want to get forecast results. You can retrieve the forecast output results in the JSON file format.
 
 ### Create Text Analytics
-Feedback text analytics allows you to identify key topics and sentiments from large number of free text responses from any customer/employee surveys. Allowing you to understand crucial pain points of your customers and improve the overall experience.
+Business Assist Text Analytics service can reduce time and operation costs in feedback data analysis for open-text questions significantly. Our APIs conform to REST architectural style and allow for interaction with RESTful web services.
+
+The Topic Clustering helps to identify and cluster similar responses together and highlight the topics that require your attention most. Feedback text analytics allows you to identify key topics and sentiments from large number of free text responses from any customer/employee surveys. Allowing you to understand crucial pain points of your customers and improve the overall experience.
 
 ### Get Self-help Insights
-Increase end user satisfaction and reduce your helpdesk costs by integrating with Microsoft 365 self-help, created by product teams and powered by machine learning. M365 Self-help includes instant answers, walk-through solutions and top web search results. Provide end users with instant resolution to common issues.
+Organizations can improve their customers' experience by helping users solve issues on their own without ever needing to contact support. Business Assist Self Help helps find self-serve solutions from Microsoft's extensive library of support articles.
+
+Increase end user satisfaction and reduce your helpdesk costs by integrating with Microsoft 365 self-help, created by product teams, and powered by machine learning. M365 self-help combines user intent (how users express their problem) with what we know about users to show the right self-help solution at the right time. It also returns top web search results to increase self-help success.
+
 
 ## Build Connection to Business Assist Connector
 

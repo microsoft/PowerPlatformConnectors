@@ -2,15 +2,15 @@
   "swagger": "2.0",
   "info": {
     "title": "FactSet",
-    "description": "Prepare for client meetings using the FactSet connector to access key company information in a custom branded, presentation ready PDF. Stay on top of relevant news and events for companies of interest and highlight important topics to drive your discussion with FactSet Signals. Alternatively, use Digital Cards to collaborate with colleagues and send summaries of actionable insights via Teams.",
-    "contact":{
-      "name" : "FactSet Workflow Automation Support",
+    "description": "Automate your workflows using the FactSet Connector to stay on top of relevant news and events for companies of interest, highlight important topics to drive your discussions, prepare for meetings, and more.",
+    "contact": {
+      "name": "FactSet Workflow Automation Support",
       "url": "https://www.factset.com/",
-      "email":"WorkflowAutomation@factset.com"
+      "email": "WorkflowAutomation@factset.com"
     },
-    "version": "1.0"
+    "version": "1.1"
   },
-  "x-ms-connector-metadata":[
+  "x-ms-connector-metadata": [
     {
       "propertyName": "Website",
       "propertyValue": "https://www.factset.com"
@@ -29,8 +29,6 @@
   "schemes": [
     "https"
   ],
-  "consumes": [],
-  "produces": [],
   "paths": {
     "/signals/v2/events/headlines": {
       "get": {
@@ -1119,7 +1117,7 @@
         "description": "Fetch Microsoft's Adaptive Cards, which includes headlines and event details data plus hyperlinks to FactSet reports, based on the filtering criteria"
       }
     },
-    "/cognitive/ner/v2/entities": {
+    "/cognitive/nlp/v1/ner/entities": {
       "post": {
         "responses": {
           "200": {
@@ -1197,39 +1195,30 @@
           {
             "name": "body",
             "in": "body",
-            "required": false,
             "schema": {
               "type": "object",
               "properties": {
-                "text": {
-                  "type": "string",
-                  "description": "English plain text to extract named entities from. Maximum of 10,000 characters",
-                  "title": "Text"
-                },
-                "filterEntities": {
-                  "type": "boolean",
-                  "description": "Drop lower probability entities using machine learning filtering rules.",
-                  "title": "Filter Entities",
-                  "enum": [
-                    true,
-                    false
-                  ],
-                  "default": true
-                },
-                "enableIdLookup": {
-                  "type": "boolean",
-                  "description": "Drop lower probability entities using machine learning filtering rules.",
-                  "title": "Enable ID Lookup",
-                  "enum": [
-                    true,
-                    false
-                  ],
-                  "default": true
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "English plain-text from which entities should be retrieved. Maximum of 10,000 characters",
+                      "x-ms-summary": "Text"
+                    },
+                    "enableIdLookup": {
+                      "type": "boolean",
+                      "description": "Retrieve Entity IDs using FactSet concordance systems.",
+                      "x-ms-summary": "Enable Entity ID Lookup"
+                    },
+                    "filterEntities": {
+                      "description": "Drop potentially spurious entities based on filtering rules.",
+                      "type": "boolean",
+                      "x-ms-summary": "Filter Entities"
+                    }
+                  }
                 }
-              },
-              "required": [
-                "text"
-              ]
+              }
             }
           }
         ],
@@ -1304,7 +1293,7 @@
               }
             }
           },
-          "401":{
+          "401": {
             "description": "Unauthorized"
           }
         },
@@ -1358,7 +1347,9 @@
                   "description": "Template ID"
                 }
               }
-            }
+            },
+            "x-ms-summary": "Body",
+            "description": "."
           }
         ]
       }
@@ -1385,6 +1376,78 @@
             "type": "string",
             "x-ms-summary": "Book ID",
             "description": "ID of the book to download"
+          }
+        ]
+      }
+    },
+    "/content/symbology/v3/identifier-resolution": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "requestId": {
+                        "type": "string",
+                        "description": "Identifier inputted in the request."
+                      },
+                      "inputSymbolType": {
+                        "type": "string",
+                        "description": "The type of identifier inputted in the request"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the requested identifier"
+                      },
+                      "frefListingExchange": {
+                        "type": "string",
+                        "description": "The 3 digit fref exchange code for the primary exchange of the security"
+                      },
+                      "< * >": {
+                        "type": "string",
+                        "description": "The Key in the Key-Value pair is the name of the requested outputSymbolType. The Value in the Key-Value is the requestId translated to the outputSymbolType."
+                      }
+                    }
+                  },
+                  "description": "Response object for Identifier Resolution endpoint."
+                }
+              }
+            }
+          }
+        },
+        "summary": "Symbology API",
+        "description": "Translate Entity ID and market security symbols into FactSet Permanent Security Identifiers.",
+        "operationId": "GetSymbology",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Requested security or entity identifiers. All requested identifiers must be of the same type.",
+            "x-ms-summary": "IDs"
+          },
+          {
+            "name": "inputSymbolType",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "The type of symbol being inputted. Only one type of symbol is accepted with each request.",
+            "x-ms-summary": "Input Symbol Type"
+          },
+          {
+            "name": "outputSymbolTypes",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "The type of symbols being outputted. Multiple types of symbols can be outputted with each request. The user must be authorized for the requested identifier type.",
+            "x-ms-summary": "Output Symbol Types"
           }
         ]
       }
