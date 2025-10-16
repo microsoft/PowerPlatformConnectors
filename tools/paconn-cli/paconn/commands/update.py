@@ -52,4 +52,4 @@ def update(
         is_update=True,
         overwrite_settings=False)
 
-    display('{} updated successfully.'.format(connector_id))
+    display('{} updated successfully. Please publish all customizations'.format(connector_id))
