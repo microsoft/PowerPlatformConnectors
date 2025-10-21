@@ -62,8 +62,8 @@ namespace SnowflakeV2CoreLogic.Providers
                 throw new ArgumentNullException("table");
             }
 
-            var metadataTask = snowflakeDBOperations.GetTableMetadataAsync(table);
-            var primaryKeyTask = snowflakeDBOperations.GetPrimaryKeyAsync(table);
+            var metadataTask = snowflakeDBOperations.GetTableMetadataAsync(table, "GET $metadata.json/datasets/{dataset}/tables/{table}");
+            var primaryKeyTask = snowflakeDBOperations.GetPrimaryKeyAsync(table, "GET $metadata.json/datasets/{dataset}/tables/{table}", null);
 
             // Wait for the both calls to compelte
             await Task.WhenAll(metadataTask, primaryKeyTask).ConfigureAwait(true);

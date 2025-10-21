@@ -9,7 +9,7 @@ CLI parameter definitions
 """
 
 from knack.arguments import ArgumentsContext
-from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE
+from paconn import _LOGIN, _DOWNLOAD, _CREATE, _UPDATE, _VALIDATE, _CONVERT
 
 CLIENT_SECRET = 'client_secret'
 CLIENT_SECRET_OPTIONS = ['--secret', '-r']
@@ -50,6 +50,14 @@ ICON_HELP = 'Location for the icon file.'
 SCRIPT = 'script'
 SCRIPT_OPTIONS = ['--script', '-x']
 SCRIPT_HELP = 'Location for the script file.'
+
+OPENAPI_FILE = 'openapi_file'
+OPENAPI_FILE_OPTIONS = ['--openapi', '-api']
+OPENAPI_FILE_HELP = 'Location of the OpenAPI 3.0 definition file to convert.'
+
+DESTINATION = 'destination'
+DESTINATION_OPTIONS = ['--dest', '-dst']
+DESTINATION_HELP = 'Destination directory for the converted connector files.'
 
 
 # pylint: disable=unused-argument
@@ -291,6 +299,26 @@ def load_arguments(self, command):
             type=str,
             required=False,
             help=POWERAPPS_VERSION_HELP)
+        arg_context.argument(
+            SETTINGS,
+            options_list=SETTINGS_OPTIONS,
+            type=str,
+            required=False,
+            help=SETTINGS_HELP)
+
+    with ArgumentsContext(self, _CONVERT) as arg_context:
+        arg_context.argument(
+            OPENAPI_FILE,
+            options_list=OPENAPI_FILE_OPTIONS,
+            type=str,
+            required=False,
+            help=OPENAPI_FILE_HELP)
+        arg_context.argument(
+            DESTINATION,
+            options_list=DESTINATION_OPTIONS,
+            type=str,
+            required=False,
+            help=DESTINATION_HELP)
         arg_context.argument(
             SETTINGS,
             options_list=SETTINGS_OPTIONS,

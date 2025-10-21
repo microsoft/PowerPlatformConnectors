@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "title": "ISOPlanner",
-    "description": "Connect to the ISOPlanner ecosystem.",
-    "version": "1.0",
+    "description": "ISOPlanner lets you automate compliance work by reacting to events and performing actions such as creating or updating tasks, incidents, and library items. Ideal for ISO 27001/27701 workflows. Requires an active ISOPlanner license.",
+    "version": "1.2",
     "contact": {
       "name": "ISOPlanner Support",
       "url": "https://isoplanner.app/support",
@@ -11,65 +11,269 @@
     }
   },
   "x-ms-connector-metadata": [
-    {
-      "propertyName": "Website",
-      "propertyValue": "https://isoplanner.app/"
-    },
-    {
-      "propertyName": "Privacy policy",
-      "propertyValue": "https://isoplanner.app/privacy-policy/"
-    },
-    {
-      "propertyName": "Categories",
-      "propertyValue": "Productivity"
-    }
+    { "propertyName": "Website", "propertyValue": "https://isoplanner.app/" },
+    { "propertyName": "Privacy policy", "propertyValue": "https://isoplanner.app/privacy-policy/" },
+    { "propertyName": "Categories", "propertyValue": "Productivity" }
   ],
   "host": "svc.isoplanner.app",
   "basePath": "/",
-  "schemes": [
-    "https"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
+    "/api/v1/assets/types": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of Asset types",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "Type": { "type": "integer" }, "TypeName": { "type": "string" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get a list of available asset types",
+        "operationId": "FetchAvailableAssetTypes",
+        "description": "Get a list of available asset types.",
+        "x-ms-visibility": "internal",
+        "parameters": [{ "$ref": "#/parameters/OrgUnitId" }]
+      }
+    },
+    "/api/v1/assets": {
+      "get": {
+        "responses": {
+          "200": { "$ref": "#/responses/assets" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get assets",
+        "description": "Get a list of all assets.",
+        "operationId": "GetAssets",
+        "x-ms-visibility": "important",
+        "parameters": [{ "$ref": "#/parameters/OrgUnitId" }]
+      },
+      "post": {
+        "responses": {
+          "201": { "$ref": "#/responses/asset" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Create an asset",
+        "operationId": "CreateAsset",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "Asset",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/assetForCreate" },
+            "description": "The body of the asset.",
+            "x-ms-summary": "Asset body",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "description": "Create an asset."
+      },
+      "put": {
+        "responses": {
+          "200": { "$ref": "#/responses/asset" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Update an asset",
+        "operationId": "UpdateAsset",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "Asset",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/assetForUpdate" },
+            "description": "The body of the asset.",
+            "x-ms-summary": "Asset body",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "description": "Update an asset."
+      }
+    },
+    "/api/v1/assets/{AssetId}": {
+      "get": {
+        "responses": {
+          "200": { "$ref": "#/responses/asset" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get an asset",
+        "description": "Get the details of an asset.",
+        "operationId": "GetAssetForId",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "AssetId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The Id of the Asset.",
+            "x-ms-summary": "Asset Id",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAssets",
+              "value-path": "AssetId",
+              "value-title": "Name",
+              "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetAssets",
+              "itemValuePath": "AssetId",
+              "itemTitlePath": "Name",
+              "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+            }
+          }
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Delete an asset",
+        "operationId": "DeleteAsset",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "AssetId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The Id of the asset.",
+            "x-ms-summary": "Asset Id",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "description": "Delete an asset."
+      }
+    },
+    "/api/v1/assets/external/{ExternalId}": {
+      "get": {
+        "responses": {
+          "200": { "$ref": "#/responses/asset" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get an asset for an external Id",
+        "description": "Get the details of an asset for an external Id.",
+        "operationId": "GetAssetForExternalId",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "ExternalId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The External Id of the Asset.",
+            "x-ms-summary": "Asset External Id",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetAssets",
+              "value-path": "ExternalId",
+              "value-title": "Name",
+              "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+            },
+            "x-ms-dynamic-list": {
+              "operationId": "GetAssets",
+              "itemValuePath": "ExternalId",
+              "itemTitlePath": "Name",
+              "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+            }
+          }
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Delete an asset for an external Id",
+        "operationId": "DeleteAssetForExternalId",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "ExternalId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The External Id of the asset.",
+            "x-ms-summary": "Asset External Id",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "description": "Delete an asset."
+      }
+    },
     "/api/v1/events/{EventId}": {
       "delete": {
         "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Delete an event",
         "operationId": "DeleteEvent",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -82,37 +286,23 @@
     "/api/v1/tasks/{TaskId}": {
       "delete": {
         "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Delete a task",
         "operationId": "DeleteTask",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "TaskId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the task.",
             "x-ms-summary": "Task Id",
             "x-ms-visibility": "important",
@@ -131,87 +321,74 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "EntityType": {
-                    "type": "integer"
-                  },
-                  "Description": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "EntityType": { "type": "integer" }, "Description": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of Entity Types",
         "description": "Get a list of Entity Types for the KPI data context.",
         "operationId": "FetchAvailableKPIEntityTypes",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/kpis/data/context": {
       "post": {
         "responses": {
-          "201": {
-            "$ref": "#/responses/kpidatacontext"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "$ref": "#/responses/kpidatacontext" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Add context to a KPI data point",
         "description": "Add context to a KPI data point.",
         "operationId": "CreateKPIDataContext",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "KPIData",
             "in": "body",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/kpidatacontext"
-            },
+            "schema": { "$ref": "#/definitions/kpidatacontext" },
+            "description": "The body of the request.",
+            "x-ms-summary": "Body",
+            "x-ms-visibility": "important"
+          }
+        ]
+      }
+    },
+    "/api/v1/kpis/data/evidence": {
+      "post": {
+        "responses": {
+          "201": { "$ref": "#/responses/kpievidenceresponse" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Submit evidence to a KPI",
+        "description": "Check the evidence and add extracted data to a KPI.",
+        "operationId": "SubmitKPIEvidence",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "KPIEvidence",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/kpievidence" },
             "description": "The body of the request.",
             "x-ms-summary": "Body",
             "x-ms-visibility": "important"
@@ -222,32 +399,18 @@
     "/api/v1/library/content/{libraryItemId}": {
       "get": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/libraryitem"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/libraryitem" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a Library item",
         "description": "Get the details of the specified Library item.",
         "operationId": "GetLibraryItem",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "libraryItemId",
             "in": "path",
@@ -261,46 +424,55 @@
         "x-ms-visibility": "important"
       }
     },
+    "/api/v1/library/content/filter/url": {
+      "get": {
+        "responses": {
+          "200": { "$ref": "#/responses/libraryitem" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get a Library item by Url",
+        "description": "Get the details of the specified Library item.",
+        "operationId": "GetLibraryItemByUrl",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "value",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Library Item Url",
+            "description": "The Url of the Library item."
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
     "/api/v1/kpis/data": {
       "post": {
         "responses": {
-          "201": {
-            "$ref": "#/responses/kpidata"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "$ref": "#/responses/kpidata" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Create a KPI data point",
         "description": "Add data to the specified KPI.",
         "operationId": "CreateKPIData",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "KPIData",
             "in": "body",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/kpidataForCreate"
-            },
+            "schema": { "$ref": "#/definitions/kpidataForCreate" },
             "description": "The body of the request.",
             "x-ms-summary": "Body",
             "x-ms-visibility": "important"
@@ -309,43 +481,25 @@
       },
       "put": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/kpidata"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/kpidata" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Update a KPI data point",
         "description": "Update data for the specified KPI.",
         "operationId": "UpdateKPIData",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "KPIData",
             "in": "body",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/kpidata"
-            },
+            "schema": { "$ref": "#/definitions/kpidata" },
             "description": "The body of the request.",
             "x-ms-summary": "Body",
             "x-ms-visibility": "important"
@@ -356,41 +510,25 @@
     "/api/v1/kpis/{KPIId}/data/{KPIDataId}": {
       "get": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/kpidata"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/kpidata" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a KPI data point",
         "description": "Get data for the specified KPI.",
         "operationId": "GetKPIData",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "KPIId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the KPI.",
             "x-ms-summary": "KPI Id",
             "x-ms-visibility": "important",
@@ -399,28 +537,20 @@
               "operationId": "FetchAvailableKPIs",
               "value-path": "KPIId",
               "value-title": "Name",
-              "parameters": {
-                "orgunitid": {
-                  "parameter": "orgunitid"
-                }
-              }
+              "parameters": { "orgunitid": { "parameter": "orgunitid" } }
             },
             "x-ms-dynamic-list": {
               "operationId": "FetchAvailableKPIs",
               "itemValuePath": "KPIId",
               "itemTitlePath": "Name",
-              "parameters": {
-                "orgunitid": {
-                  "parameterReference": "orgunitid"
-                }
-              }
+              "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
             }
           },
           {
             "name": "KPIDataId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Data Id of the KPI.",
             "x-ms-summary": "KPI Data Id",
             "x-ms-visibility": "important",
@@ -430,41 +560,25 @@
       },
       "delete": {
         "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Ok" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Delete a KPI data point",
         "description": "Delete data for the specified KPI.",
         "operationId": "DeleteKPIData",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "KPIId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the KPI.",
             "x-ms-summary": "KPI Id",
             "x-ms-visibility": "important",
@@ -473,28 +587,20 @@
               "operationId": "FetchAvailableKPIs",
               "value-path": "KPIId",
               "value-title": "Name",
-              "parameters": {
-                "orgunitid": {
-                  "parameter": "orgunitid"
-                }
-              }
+              "parameters": { "orgunitid": { "parameter": "orgunitid" } }
             },
             "x-ms-dynamic-list": {
               "operationId": "FetchAvailableKPIs",
               "itemValuePath": "KPIId",
               "itemTitlePath": "Name",
-              "parameters": {
-                "orgunitid": {
-                  "parameterReference": "orgunitid"
-                }
-              }
+              "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
             }
           },
           {
             "name": "KPIDataId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Data Id of the KPI.",
             "x-ms-summary": "KPI Data Id",
             "x-ms-visibility": "important",
@@ -506,41 +612,25 @@
     "/api/v1/kpis/{KPIId}": {
       "get": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/kpi"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/kpi" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a KPI",
         "description": "Get the details of a KPI.",
         "operationId": "GetKPIForId",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "KPIId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the KPI.",
             "x-ms-summary": "KPI Id",
             "x-ms-visibility": "important",
@@ -549,21 +639,13 @@
               "operationId": "FetchAvailableKPIs",
               "value-path": "KPIId",
               "value-title": "Name",
-              "parameters": {
-                "orgunitid": {
-                  "parameter": "orgunitid"
-                }
-              }
+              "parameters": { "orgunitid": { "parameter": "orgunitid" } }
             },
             "x-ms-dynamic-list": {
               "operationId": "FetchAvailableKPIs",
               "itemValuePath": "KPIId",
               "itemTitlePath": "Name",
-              "parameters": {
-                "orgunitid": {
-                  "parameterReference": "orgunitid"
-                }
-              }
+              "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
             }
           }
         ]
@@ -578,45 +660,21 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "KPIId": {
-                    "type": "integer"
-                  },
-                  "Name": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "KPIId": { "type": "integer" }, "Name": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of KPI's",
         "description": "Get a list of available KPI's and details.",
         "operationId": "FetchAvailableKPIs",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/users/orgunits": {
@@ -628,32 +686,15 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "OrgUnitId": {
-                    "type": "string"
-                  },
-                  "Name": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "OrgUnitId": { "type": "string" }, "Name": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of available organizational units for the user",
         "operationId": "FetchAvailableOrgUnits",
@@ -670,81 +711,43 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "EventType": {
-                    "type": "string"
-                  },
-                  "Description": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "EventType": { "type": "string" }, "Description": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of available event types",
         "operationId": "FetchAvailableEventTypes",
         "description": "Get a list of available event types.",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/events/{EventId}/subtasks": {
       "post": {
         "responses": {
-          "201": {
-            "$ref": "#/responses/task"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "$ref": "#/responses/task" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Create a subtask for an event",
         "operationId": "CreateEventSubTask",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -754,9 +757,7 @@
             "name": "Task",
             "in": "body",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/taskForCreate"
-            },
+            "schema": { "$ref": "#/definitions/taskForCreate" },
             "description": "The body of the task.",
             "x-ms-summary": "Task body",
             "x-ms-visibility": "important"
@@ -766,37 +767,23 @@
       },
       "put": {
         "responses": {
-          "201": {
-            "$ref": "#/responses/task"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/task" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Update a subtask for an event",
         "operationId": "UpdateEventSubTask",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -806,9 +793,7 @@
             "name": "Task",
             "in": "body",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/taskForUpdate"
-            },
+            "schema": { "$ref": "#/definitions/taskForUpdate" },
             "description": "The body of the task.",
             "x-ms-summary": "Task body",
             "x-ms-visibility": "important"
@@ -820,40 +805,24 @@
     "/api/v1/events/{EventId}/subtasks/{TaskId}": {
       "get": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/task"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/task" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a subtask of an event based on Id",
         "operationId": "GetEventSubTaskForId",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -863,7 +832,7 @@
             "name": "TaskId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the task.",
             "x-ms-summary": "Task Id",
             "x-ms-visibility": "important",
@@ -874,37 +843,23 @@
       },
       "delete": {
         "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Delete a subtask of an event",
         "operationId": "DeleteEventSubTask",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -914,7 +869,7 @@
             "name": "TaskId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the subtask.",
             "x-ms-summary": "Task Id",
             "x-ms-visibility": "important",
@@ -927,40 +882,24 @@
     "/api/v1/events/{EventId}/subtasks/name/{TaskName}": {
       "get": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/task"
-          },
-          "204": {
-            "$ref": "#/responses/noContent"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/task" },
+          "204": { "$ref": "#/responses/noContent" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a subtask of an event based on Name",
         "operationId": "GetEventSubTaskForName",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -983,37 +922,23 @@
     "/api/v1/library/content/{LibraryItemId}/task/{TaskId}": {
       "post": {
         "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Add a library item to a task",
         "operationId": "AddLibraryItemToTask",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "LibraryItemId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the library item.",
             "x-ms-summary": "Library Item Id",
             "x-ms-visibility": "important",
@@ -1023,7 +948,7 @@
             "name": "TaskId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the task.",
             "x-ms-summary": "Task Id",
             "x-ms-visibility": "important",
@@ -1036,37 +961,23 @@
     "/api/v1/library/content/{LibraryItemId}/event/{EventId}": {
       "post": {
         "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Add a library item to an event",
         "operationId": "AddLibraryItemToEvent",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "LibraryItemId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the library item.",
             "x-ms-summary": "Library Item Id",
             "x-ms-visibility": "important",
@@ -1076,7 +987,7 @@
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -1089,37 +1000,23 @@
     "/api/v1/events/{EventId}/approval": {
       "put": {
         "responses": {
-          "200": {
-            "description": "Ok"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Ok" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Update an event from approval",
         "operationId": "UpdateEventFromApproval",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "EventId",
             "in": "path",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "description": "The Id of the event.",
             "x-ms-summary": "Event Id",
             "x-ms-visibility": "important",
@@ -1139,9 +1036,7 @@
             "name": "Result",
             "in": "body",
             "required": true,
-            "schema": {
-              "type": "object"
-            },
+            "schema": { "type": "object" },
             "description": "The result body of the approval.",
             "x-ms-visibility": "important"
           }
@@ -1150,34 +1045,45 @@
       }
     },
     "/api/v1/events": {
+      "get": {
+        "responses": {
+          "200": { "$ref": "#/responses/events" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get events",
+        "description": "Get all events or filtered events.",
+        "operationId": "GetEvents",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "Filter options for the events."
+          }
+        ],
+        "x-ms-visibility": "important"
+      },
       "post": {
         "responses": {
-          "201": {
-            "$ref": "#/responses/event"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "$ref": "#/responses/event" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Create an event",
         "operationId": "CreateEvent",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "body",
             "in": "body",
@@ -1185,34 +1091,23 @@
             "schema": {
               "type": "object",
               "properties": {
-                "name": {
-                  "title": "Name",
-                  "type": "string",
-                  "description": "Name of the event."
-                },
+                "name": { "title": "Name", "type": "string", "description": "Name of the event." },
+                "externalId": { "title": "External Id", "type": "string", "description": "External Id of the event." },
                 "templateId": {
                   "title": "Template",
                   "type": "integer",
                   "description": "The Id of the template.",
                   "x-ms-dynamic-values": {
-                    "operationId": "FetchAvailableWorkflowTemplates",
+                    "operationId": "FetchAvailableEventTemplates",
                     "value-path": "TaskId",
                     "value-title": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameter": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
                   },
                   "x-ms-dynamic-list": {
-                    "operationId": "FetchAvailableWorkflowTemplates",
+                    "operationId": "FetchAvailableEventTemplates",
                     "itemValuePath": "TaskId",
                     "itemTitlePath": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameterReference": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
                   }
                 },
                 "firstLibraryItemId": {
@@ -1222,9 +1117,7 @@
                 }
               },
               "x-ms-visibility": "important",
-              "required": [
-                "name"
-              ]
+              "required": ["name"]
             },
             "x-ms-visibility": "important"
           }
@@ -1233,40 +1126,19 @@
       },
       "put": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/event"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/event" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Update an event",
         "operationId": "UpdateEvent",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/eventForUpdate"
-            }
-          }
+          { "$ref": "#/parameters/OrgUnitId" },
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/eventForUpdate" } }
         ],
         "description": "Update an event"
       }
@@ -1274,32 +1146,18 @@
     "/api/v1/events/approval": {
       "post": {
         "responses": {
-          "201": {
-            "$ref": "#/responses/event"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "$ref": "#/responses/event" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Create an event for an approval",
         "operationId": "CreateEventApproval",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "body",
             "in": "body",
@@ -1307,20 +1165,8 @@
             "schema": {
               "type": "object",
               "properties": {
-                "Name": {
-                  "title": "Name",
-                  "type": "string",
-                  "description": "The name of the event."
-                },
-                "Type": {
-                  "title": "Type",
-                  "type": "string",
-                  "enum": [
-                    "Latest approval",
-                    "Template",
-                    "Fixed users"
-                  ]
-                },
+                "Name": { "title": "Name", "type": "string", "description": "The name of the event." },
+                "Type": { "title": "Type", "type": "string", "enum": ["Latest approval", "Template", "Fixed users"] },
                 "Users": {
                   "title": "Fixed users",
                   "type": "string",
@@ -1334,33 +1180,24 @@
                     "operationId": "FetchAvailableApprovalTemplates",
                     "value-path": "TaskId",
                     "value-title": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameter": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
                   },
                   "x-ms-dynamic-list": {
                     "operationId": "FetchAvailableApprovalTemplates",
                     "itemValuePath": "TaskId",
                     "itemTitlePath": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameterReference": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
                   }
                 },
                 "LibraryItemId": {
                   "title": "Library Item Id",
                   "type": "integer",
                   "description": "The Id of the Library item to approve."
-                }
+                },
+                "Comment": { "title": "Comment", "type": "string", "description": "The comment of the creator." }
               },
               "x-ms-visibility": "important",
-              "required": [
-                "Name"
-              ]
+              "required": ["Name"]
             },
             "x-ms-visibility": "important"
           }
@@ -1369,34 +1206,45 @@
       }
     },
     "/api/v1/tasks": {
+      "get": {
+        "responses": {
+          "200": { "$ref": "#/responses/tasks" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get tasks",
+        "description": "Get all tasks or filtered tasks.",
+        "operationId": "GetTasks",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "Filter options for the tasks."
+          }
+        ],
+        "x-ms-visibility": "important"
+      },
       "post": {
         "responses": {
-          "201": {
-            "$ref": "#/responses/task"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "$ref": "#/responses/task" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Create a task",
         "operationId": "CreateTask",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "body",
             "in": "body",
@@ -1404,41 +1252,32 @@
             "schema": {
               "type": "object",
               "properties": {
-                "name": {
-                  "title": "Name",
+                "name": { "title": "Name", "type": "string", "description": "The name of the task." },
+                "externalId": {
+                  "title": "ExternalId",
                   "type": "string",
-                  "description": "The name of the task."
+                  "description": "The External Id of the task."
                 },
                 "templateId": {
                   "title": "Template",
                   "type": "integer",
                   "description": "The Id of the Template.",
                   "x-ms-dynamic-values": {
-                    "operationId": "FetchTaskTemplates",
+                    "operationId": "FetchAvailableTaskTemplates",
                     "value-path": "TaskId",
                     "value-title": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameter": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
                   },
                   "x-ms-dynamic-list": {
-                    "operationId": "FetchTaskTemplates",
+                    "operationId": "FetchAvailableTaskTemplates",
                     "itemValuePath": "TaskId",
                     "itemTitlePath": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameterReference": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
                   }
                 }
               },
               "x-ms-visibility": "important",
-              "required": [
-                "name"
-              ]
+              "required": ["name"]
             },
             "x-ms-visibility": "important"
           }
@@ -1447,40 +1286,19 @@
       },
       "put": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/task"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/task" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Update a task",
         "operationId": "UpdateTask",
         "x-ms-visibility": "important",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/taskForUpdate"
-            }
-          }
+          { "$ref": "#/parameters/OrgUnitId" },
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/taskForUpdate" } }
         ],
         "description": "Update a task."
       }
@@ -1488,35 +1306,19 @@
     "/api/v1/library/content": {
       "post": {
         "responses": {
-          "200": {
-            "$ref": "#/responses/libraryitem"
-          },
-          "201": {
-            "$ref": "#/responses/libraryitem"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "$ref": "#/responses/libraryitem" },
+          "201": { "$ref": "#/responses/libraryitem" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Create or Update Library item",
         "description": "Create or Update Library item.",
         "operationId": "CreateUpdateLibraryItem",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "body",
             "in": "body",
@@ -1532,21 +1334,13 @@
                     "operationId": "FetchLibraryCategories",
                     "value-path": "LibraryCategoryId",
                     "value-title": "LibraryCategoryName",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameter": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
                   },
                   "x-ms-dynamic-list": {
                     "operationId": "FetchLibraryCategories",
                     "itemValuePath": "LibraryCategoryId",
                     "itemTitlePath": "LibraryCategoryName",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameterReference": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
                   }
                 },
                 "libraryItemSPItemId": {
@@ -1569,6 +1363,28 @@
                   "type": "string",
                   "title": "Name",
                   "description": "Name of the library item in ISOPlanner."
+                },
+                "libraryItemOwner": {
+                  "type": "object",
+                  "properties": {
+                    "UserId": {
+                      "type": "string",
+                      "title": "Owner Id",
+                      "description": "Id of the owner of this item.",
+                      "x-ms-dynamic-values": {
+                        "operationId": "FetchAvailableUsers",
+                        "value-path": "UserId",
+                        "value-title": "Name",
+                        "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+                      },
+                      "x-ms-dynamic-list": {
+                        "operationId": "FetchAvailableUsers",
+                        "itemValuePath": "UserId",
+                        "itemTitlePath": "Name",
+                        "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+                      }
+                    }
+                  }
                 }
               },
               "x-ms-visibility": "important"
@@ -1588,45 +1404,21 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "FormId": {
-                    "type": "number"
-                  },
-                  "Name": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "FormId": { "type": "integer" }, "Name": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of available forms",
         "operationId": "FetchAvailableForms",
         "description": "Get a list of available forms.",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/users": {
@@ -1639,47 +1431,76 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "UserId": {
-                    "type": "string"
-                  },
-                  "Name": {
-                    "type": "string"
-                  },
-                  "Email": {
-                    "type": "string"
-                  }
+                  "UserId": { "type": "string" },
+                  "Name": { "type": "string" },
+                  "Email": { "type": "string" }
                 }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of available users",
         "operationId": "FetchAvailableUsers",
         "description": "Get a list of available users.",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
+      }
+    },
+    "/api/v1/roles": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of Roles",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "RoleId": { "type": "string" }, "Name": { "type": "string" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get a list of available roles",
+        "operationId": "FetchAvailableRoles",
+        "description": "Get a list of available roles.",
+        "x-ms-visibility": "internal",
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
+      }
+    },
+    "/api/v1/tasks/templates/1": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of Task objects",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "TaskId": { "type": "integer" }, "Name": { "type": "string" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get a all templates",
+        "operationId": "FetchAllTemplates",
+        "description": "Get a list of all task templates and event templates.",
+        "x-ms-visibility": "internal",
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/tasks/templates/2": {
@@ -1691,45 +1512,21 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "TaskId": {
-                    "type": "number"
-                  },
-                  "Name": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "TaskId": { "type": "integer" }, "Name": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a all task templates",
-        "operationId": "FetchTaskTemplates",
+        "operationId": "FetchAvailableTaskTemplates",
         "description": "Get a list of all task templates.",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/tasks/templates/3": {
@@ -1741,45 +1538,21 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "TaskId": {
-                    "type": "number"
-                  },
-                  "Name": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "TaskId": { "type": "integer" }, "Name": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of workflow templates",
-        "operationId": "FetchAvailableWorkflowTemplates",
+        "operationId": "FetchAvailableEventTemplates",
         "description": "Get all available workflow templates.",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/tasks/templates/4": {
@@ -1791,45 +1564,47 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "properties": {
-                  "TaskId": {
-                    "type": "number"
-                  },
-                  "Name": {
-                    "type": "string"
-                  }
-                }
+                "properties": { "TaskId": { "type": "integer" }, "Name": { "type": "string" } }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get a list of approval templates",
         "operationId": "FetchAvailableApprovalTemplates",
         "description": "Get a list of all available approval templates.",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
+      }
+    },
+    "/api/v1/tasks/templates/5": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of Task objects",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "TaskId": { "type": "integer" }, "Name": { "type": "string" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "Get a list of monitoring templates",
+        "operationId": "FetchAvailableMonitoringTemplates",
+        "description": "Get a list of all available monitoring templates.",
+        "x-ms-visibility": "internal",
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/library/categories": {
@@ -1842,75 +1617,40 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "LibraryCategoryId": {
-                    "type": "number"
-                  },
-                  "LibraryCategoryName": {
-                    "type": "string"
-                  }
+                  "LibraryCategoryId": { "type": "integer" },
+                  "LibraryCategoryName": { "type": "string" }
                 }
               }
             }
           },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Get categories in the Library",
         "operationId": "FetchLibraryCategories",
         "description": "Get a list of categories in the Library.",
         "x-ms-visibility": "internal",
-        "parameters": [
-          {
-            "name": "orgunitid",
-            "in": "header",
-            "type": "string",
-            "x-ms-summmary": "Org Unit Id"
-          }
-        ]
+        "parameters": [{ "name": "orgunitid", "in": "header", "type": "string", "x-ms-summmary": "Org Unit Id" }]
       }
     },
     "/api/v1/hooks": {
       "post": {
         "responses": {
-          "201": {
-            "description": "Webhook created"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "Create a webhook",
         "description": "Create a webhook in ISOPlanner",
         "operationId": "CreateWebhook",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "body",
             "in": "body",
@@ -1926,21 +1666,13 @@
                     "operationId": "FetchAvailableEventTypes",
                     "value-path": "EventType",
                     "value-title": "Description",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameter": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
                   },
                   "x-ms-dynamic-list": {
                     "operationId": "FetchAvailableEventTypes",
                     "itemValuePath": "EventType",
                     "itemTitlePath": "Description",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameterReference": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
                   },
                   "x-ms-visibility": "important"
                 },
@@ -1969,11 +1701,7 @@
                   "x-ms-visibility": "important"
                 }
               },
-              "required": [
-                "Url",
-                "EventType",
-                "EventTypeId"
-              ]
+              "required": ["Url", "EventType", "EventTypeId"]
             }
           }
         ],
@@ -1985,53 +1713,33 @@
         "schema": {
           "type": "object",
           "properties": {
-            "TraceId": {
-              "type": "string",
-              "description": "Unique Id for this trigger request.",
-              "title": "TraceId"
-            },
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
             "Secret": {
               "type": "string",
               "description": "Secret to protect from unauthorized activation.",
               "title": "Secret"
             },
-            "Payload": {
-              "$ref": "#/definitions/event"
-            }
+            "Payload": { "$ref": "#/definitions/event" }
           }
         },
         "description": "Response"
       },
       "post": {
         "responses": {
-          "201": {
-            "description": "Webhook created"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "summary": "When an event is created",
-        "description": "When an event is created in ISOPlanner based on the specified template.",
+        "description": "When an event is created based on the specified template.",
         "operationId": "EventCreated",
         "x-ms-trigger": "single",
-        "x-ms-trigger-hint": "To see it work, create an event in ISOPlanner for this template.",
+        "x-ms-trigger-hint": "To see it work, create an event for this template.",
         "parameters": [
-          {
-            "$ref": "#/parameters/OrgUnitId"
-          },
+          { "$ref": "#/parameters/OrgUnitId" },
           {
             "name": "body",
             "in": "body",
@@ -2064,24 +1772,16 @@
                   "title": "Template",
                   "x-ms-visibility": "important",
                   "x-ms-dynamic-values": {
-                    "operationId": "FetchAvailableWorkflowTemplates",
+                    "operationId": "FetchAvailableEventTemplates",
                     "value-path": "TaskId",
                     "value-title": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameter": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
                   },
                   "x-ms-dynamic-list": {
-                    "operationId": "FetchAvailableWorkflowTemplates",
+                    "operationId": "FetchAvailableEventTemplates",
                     "itemValuePath": "TaskId",
                     "itemTitlePath": "Name",
-                    "parameters": {
-                      "orgunitid": {
-                        "parameterReference": "orgunitid"
-                      }
-                    }
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
                   }
                 },
                 "Url": {
@@ -2093,11 +1793,781 @@
                   "default": "test"
                 }
               },
-              "required": [
-                "Url",
-                "EventType",
-                "EventTypeId"
-              ]
+              "required": ["Url", "EventType", "EventTypeId"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/task-created": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/task" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When a task is created",
+        "description": "When a task is created based on the specified template.",
+        "operationId": "TaskCreated",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, create a task for this template.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "task-created",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "EventTypeId": {
+                  "type": "integer",
+                  "description": "Choose the task template.",
+                  "title": "Template",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "FetchAvailableTaskTemplates",
+                    "value-path": "TaskId",
+                    "value-title": "Name",
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "FetchAvailableTaskTemplates",
+                    "itemValuePath": "TaskId",
+                    "itemTitlePath": "Name",
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+                  }
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType", "EventTypeId"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/monitoringtask-started": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/task" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When an annual plan task is started",
+        "description": "When a task in the annual plan is ready to start according to schedule.",
+        "operationId": "MonitoringTaskCreated",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, create an annual plan task and wait for a task in the schedule to start or click the test button.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "monitoringtask-started",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "EventTypeId": {
+                  "type": "integer",
+                  "description": "Choose the annual plan task.",
+                  "title": "Template",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "FetchAvailableMonitoringTemplates",
+                    "value-path": "TaskId",
+                    "value-title": "Name",
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "FetchAvailableMonitoringTemplates",
+                    "itemValuePath": "TaskId",
+                    "itemTitlePath": "Name",
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+                  }
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType", "EventTypeId"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/event-updated": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/event" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When an event is updated",
+        "description": "When an event with the selected template is updated.",
+        "operationId": "EventUpdated",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, update a task that has been created for the selected template.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "event-updated",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "EventTypeId": {
+                  "type": "integer",
+                  "description": "Choose the event template.",
+                  "title": "Template",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "FetchAvailableEventTemplates",
+                    "value-path": "TaskId",
+                    "value-title": "Name",
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "FetchAvailableEventTemplates",
+                    "itemValuePath": "TaskId",
+                    "itemTitlePath": "Name",
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+                  }
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType", "EventTypeId"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/task-updated": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/task" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When a task is updated",
+        "description": "When a task with the selected template is updated.",
+        "operationId": "TaskUpdated",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, update a task that has been created for the selected template.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "task-updated",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "EventTypeId": {
+                  "type": "integer",
+                  "description": "Choose the task template.",
+                  "title": "Template",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "FetchAvailableTaskTemplates",
+                    "value-path": "TaskId",
+                    "value-title": "Name",
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "FetchAvailableTaskTemplates",
+                    "itemValuePath": "TaskId",
+                    "itemTitlePath": "Name",
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+                  }
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType", "EventTypeId"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/event-deleted": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/event" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When an event is deleted",
+        "description": "When an event is deleted based on the specified template.",
+        "operationId": "EventDeleted",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, delete an event for this template.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "event-deleted",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "EventTypeId": {
+                  "type": "integer",
+                  "description": "Choose the event template.",
+                  "title": "Template",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "FetchAvailableEventTemplates",
+                    "value-path": "TaskId",
+                    "value-title": "Name",
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "FetchAvailableEventTemplates",
+                    "itemValuePath": "TaskId",
+                    "itemTitlePath": "Name",
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+                  }
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType", "EventTypeId"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/task-deleted": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/task" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When a task is deleted",
+        "description": "When a task is deleted based on the specified template.",
+        "operationId": "TaskDeleted",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, delete a task for this template.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "task-deleted",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "EventTypeId": {
+                  "type": "integer",
+                  "description": "Choose the task template.",
+                  "title": "Template",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "FetchAvailableTaskTemplates",
+                    "value-path": "TaskId",
+                    "value-title": "Name",
+                    "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "FetchAvailableTaskTemplates",
+                    "itemValuePath": "TaskId",
+                    "itemTitlePath": "Name",
+                    "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+                  }
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType", "EventTypeId"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/risk-created": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/risk" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When a risk is created",
+        "description": "When a risk is created.",
+        "operationId": "RiskCreated",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, create a risk.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "risk-created",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/risk-updated": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/risk" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When a risk is updated",
+        "description": "When a risk is updated.",
+        "operationId": "RiskUpdated",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, update a risk.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "risk-updated",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType"]
+            }
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/hooks/triggers/risk-deleted": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "TraceId": { "type": "string", "description": "Unique Id for this trigger request.", "title": "TraceId" },
+            "Secret": {
+              "type": "string",
+              "description": "Secret to protect from unauthorized activation.",
+              "title": "Secret"
+            },
+            "Payload": { "$ref": "#/definitions/risk" }
+          }
+        },
+        "description": "Response"
+      },
+      "post": {
+        "responses": {
+          "201": { "description": "Webhook created" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
+        },
+        "summary": "When a risk is deleted",
+        "description": "When a risk is deleted.",
+        "operationId": "RiskDeleted",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, delete a risk.",
+        "parameters": [
+          { "$ref": "#/parameters/OrgUnitId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "EventType": {
+                  "type": "string",
+                  "description": "Event",
+                  "title": "",
+                  "default": "risk-deleted",
+                  "x-ms-visibility": "internal"
+                },
+                "WorkflowName": {
+                  "type": "string",
+                  "description": "The name of the workflow shown in ISOPlanner.",
+                  "title": "Workflow Name",
+                  "x-ms-visibility": "important"
+                },
+                "Secret": {
+                  "type": "string",
+                  "description": "The secret to protect from unauthorized activation.",
+                  "title": "Secret",
+                  "x-ms-visibility": "important"
+                },
+                "Url": {
+                  "type": "string",
+                  "description": "The notification Url.",
+                  "title": "",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "default": "test"
+                }
+              },
+              "required": ["Url", "EventType"]
             }
           }
         ],
@@ -2107,24 +2577,12 @@
     "/api/v1/hooks/orgunit/{OrgUnitId}/{WebhookId}": {
       "delete": {
         "responses": {
-          "200": {
-            "description": "Webhook deleted"
-          },
-          "401": {
-            "$ref": "#/responses/unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          },
-          "404": {
-            "$ref": "#/responses/notFound"
-          },
-          "500": {
-            "$ref": "#/responses/internalServerError"
-          },
-          "default": {
-            "$ref": "#/responses/default"
-          }
+          "200": { "description": "Webhook deleted" },
+          "401": { "$ref": "#/responses/unauthorized" },
+          "403": { "$ref": "#/responses/forbidden" },
+          "404": { "$ref": "#/responses/notFound" },
+          "500": { "$ref": "#/responses/internalServerError" },
+          "default": { "$ref": "#/responses/default" }
         },
         "description": "Deletes a webhook.",
         "summary": "Delete as webhook",
@@ -2143,7 +2601,7 @@
             "in": "path",
             "description": "The Id of the webhook.",
             "required": true,
-            "type": "number",
+            "type": "integer",
             "x-ms-url-encoding": "single"
           }
         ],
@@ -2168,75 +2626,119 @@
     }
   },
   "responses": {
-    "unauthorized": {
-      "description": "Unauthorized"
-    },
-    "forbidden": {
-      "description": "Forbidden"
-    },
-    "notFound": {
-      "description": "Not Found"
-    },
-    "noContent": {
-      "description": "No Content"
-    },
-    "internalServerError": {
-      "description": "Internal server error. Unknown error"
-    },
-    "default": {
-      "description": "Operation failed. Unknown error"
-    },
-    "libraryitem": {
-      "description": "ok",
-      "schema": {
-        "$ref": "#/definitions/libraryitem"
-      }
-    },
-    "event": {
-      "description": "ok",
-      "schema": {
-        "$ref": "#/definitions/event"
-      }
-    },
-    "task": {
-      "description": "ok",
-      "schema": {
-        "$ref": "#/definitions/task"
-      }
-    },
-    "kpi": {
-      "description": "ok",
-      "schema": {
-        "$ref": "#/definitions/kpi"
-      }
-    },
-    "kpidata": {
-      "description": "ok",
-      "schema": {
-        "$ref": "#/definitions/kpidata"
-      }
-    },
-    "kpidatacontext": {
-      "description": "ok",
-      "schema": {
-        "$ref": "#/definitions/kpidatacontext"
-      }
-    }
+    "unauthorized": { "description": "Unauthorized" },
+    "forbidden": { "description": "Forbidden" },
+    "notFound": { "description": "Not Found" },
+    "noContent": { "description": "No Content" },
+    "internalServerError": { "description": "Internal server error. Unknown error" },
+    "default": { "description": "Operation failed. Unknown error" },
+    "libraryitem": { "description": "ok", "schema": { "$ref": "#/definitions/libraryitem" } },
+    "event": { "description": "ok", "schema": { "$ref": "#/definitions/event" } },
+    "events": { "description": "ok", "schema": { "type": "array", "items": { "$ref": "#/definitions/event" } } },
+    "task": { "description": "ok", "schema": { "$ref": "#/definitions/task" } },
+    "tasks": { "description": "ok", "schema": { "type": "array", "items": { "$ref": "#/definitions/task" } } },
+    "kpi": { "description": "ok", "schema": { "$ref": "#/definitions/kpi" } },
+    "kpidata": { "description": "ok", "schema": { "$ref": "#/definitions/kpidata" } },
+    "kpidatacontext": { "description": "ok", "schema": { "$ref": "#/definitions/kpidatacontext" } },
+    "kpievidenceresponse": { "description": "ok", "schema": { "$ref": "#/definitions/kpievidenceresponse" } },
+    "asset": { "description": "ok", "schema": { "$ref": "#/definitions/asset" } },
+    "assets": { "description": "ok", "schema": { "type": "array", "items": { "$ref": "#/definitions/asset" } } }
   },
   "definitions": {
+    "kpievidence": {
+      "type": "object",
+      "properties": {
+        "KPIId": {
+          "type": "integer",
+          "title": "KPI Id",
+          "description": "The Id of the KPI.",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchAvailableKPIs",
+            "value-path": "KPIId",
+            "value-title": "Name",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchAvailableKPIs",
+            "itemValuePath": "KPIId",
+            "itemTitlePath": "Name",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          }
+        },
+        "Evidence": { "type": "string", "description": "The evidence object in JSON format.", "title": "Evidence" },
+        "TaskId": { "type": "integer", "description": "The Id of the task.", "title": "Task Id" },
+        "Created": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created",
+          "description": "When the data point is created."
+        },
+        "CreatedBy": {
+          "type": "string",
+          "title": "CreatedBy",
+          "description": "Name or email address of the user who created the data point."
+        },
+        "CreatedById": {
+          "type": "string",
+          "title": "CreatedById",
+          "description": "Id of the user who created the data point.",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchAvailableUsers",
+            "value-path": "UserId",
+            "value-title": "Name",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchAvailableUsers",
+            "itemValuePath": "UserId",
+            "itemTitlePath": "Name",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          }
+        },
+        "ResultComment": {
+          "type": "string",
+          "description": "The comment for the new KPI data point if accepted.",
+          "title": "Comment"
+        }
+      },
+      "required": ["KPIId", "Evidence"]
+    },
+    "kpievidenceresponse": {
+      "type": "object",
+      "properties": {
+        "Accepted": {
+          "type": "boolean",
+          "description": "Whether the evidence is accepted as valid or not.",
+          "title": "Accepted"
+        },
+        "ErrorCode": {
+          "type": "string",
+          "description": "Error code for the reason not accepted.",
+          "title": "Error Code"
+        },
+        "ErrorMsg": {
+          "type": "string",
+          "description": "Error message for the reason not accepted.",
+          "title": "Error Message"
+        },
+        "ResultNumber": {
+          "type": "number",
+          "title": "Value (Number)",
+          "description": "The value of the KPI for type Number."
+        },
+        "ResultText": {
+          "type": "string",
+          "title": "Value (Text)",
+          "description": "The value of the KPI for type Text."
+        }
+      }
+    },
     "taskForCreate": {
       "type": "object",
       "properties": {
-        "Name": {
-          "type": "string",
-          "description": "The name of the task.",
-          "title": "Name"
-        },
-        "Description": {
-          "type": "string",
-          "description": "The description of the task.",
-          "title": "Description"
-        },
+        "ExternalId": { "type": "string", "title": "Task External Id", "description": "The External Id of the task." },
+        "Name": { "type": "string", "description": "The name of the task.", "title": "Name" },
+        "Description": { "type": "string", "description": "The description of the task.", "title": "Description" },
         "FormId": {
           "type": "integer",
           "description": "The form Id of the task.",
@@ -2245,34 +2747,20 @@
             "operationId": "FetchAvailableForms",
             "value-path": "FormId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableForms",
             "itemValuePath": "FormId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "Status": {
           "type": "string",
           "description": "The status of the task.",
           "title": "Status",
-          "enum": [
-            "Request",
-            "Accepted",
-            "InProgress",
-            "Completed",
-            "Rejected"
-          ]
+          "enum": ["Requested", "Accepted", "InProgress", "Completed", "Rejected", "OnHold", "Archived"]
         },
         "AssigneeId": {
           "type": "string",
@@ -2282,21 +2770,13 @@
             "operationId": "FetchAvailableUsers",
             "value-path": "UserId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableUsers",
             "itemValuePath": "UserId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "StartDateTime": {
@@ -2317,34 +2797,17 @@
           "format": "date-time",
           "title": "Deadline"
         },
-        "Hidden": {
-          "type": "boolean",
-          "description": "Whether the task is hidden in user views.",
-          "title": "Hidden"
-        }
+        "Hidden": { "type": "boolean", "description": "Whether the task is hidden in user views.", "title": "Hidden" }
       },
-      "required": [
-        "Name"
-      ]
+      "required": ["Name"]
     },
     "taskForUpdate": {
       "type": "object",
       "properties": {
-        "TaskId": {
-          "type": "integer",
-          "title": "Task Id",
-          "description": "The Id of the task."
-        },
-        "Name": {
-          "type": "string",
-          "description": "The name of the task.",
-          "title": "Name"
-        },
-        "Description": {
-          "type": "string",
-          "description": "The description of the task.",
-          "title": "Description"
-        },
+        "TaskId": { "type": "integer", "title": "Task Id", "description": "The Id of the task." },
+        "ExternalId": { "type": "string", "title": "Task External Id", "description": "The External Id of the task." },
+        "Name": { "type": "string", "description": "The name of the task.", "title": "Name" },
+        "Description": { "type": "string", "description": "The description of the task.", "title": "Description" },
         "FormId": {
           "type": "integer",
           "description": "The form Id of the task.",
@@ -2353,34 +2816,20 @@
             "operationId": "FetchAvailableForms",
             "value-path": "FormId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableForms",
             "itemValuePath": "FormId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "Status": {
           "type": "string",
           "description": "The status of the task.",
           "title": "Status",
-          "enum": [
-            "Request",
-            "Accepted",
-            "InProgress",
-            "Completed",
-            "Rejected"
-          ]
+          "enum": ["Request", "Accepted", "InProgress", "Completed", "Rejected"]
         },
         "AssigneeId": {
           "type": "string",
@@ -2390,21 +2839,13 @@
             "operationId": "FetchAvailableUsers",
             "value-path": "UserId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableUsers",
             "itemValuePath": "UserId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "StartDateTime": {
@@ -2425,34 +2866,21 @@
           "format": "date-time",
           "title": "Deadline"
         },
-        "Hidden": {
-          "type": "boolean",
-          "description": "Whether the task is hidden in user views.",
-          "title": "Hidden"
-        }
+        "Hidden": { "type": "boolean", "description": "Whether the task is hidden in user views.", "title": "Hidden" }
       },
-      "required": [
-        "TaskId"
-      ]
+      "required": ["TaskId"]
     },
     "eventForUpdate": {
       "type": "object",
       "properties": {
-        "EventId": {
-          "type": "integer",
-          "title": "Event Id",
-          "description": "The Id of the event."
-        },
-        "Name": {
+        "EventId": { "type": "integer", "title": "Event Id", "description": "The Id of the event." },
+        "ExternalId": {
           "type": "string",
-          "description": "The name of the task.",
-          "title": "Name"
+          "title": "Event External Id",
+          "description": "The External Id of the event."
         },
-        "Description": {
-          "type": "string",
-          "description": "The description of the task.",
-          "title": "Description"
-        },
+        "Name": { "type": "string", "description": "The name of the task.", "title": "Name" },
+        "Description": { "type": "string", "description": "The description of the task.", "title": "Description" },
         "FormId": {
           "type": "integer",
           "description": "The form Id of the task.",
@@ -2461,82 +2889,42 @@
             "operationId": "FetchAvailableForms",
             "value-path": "FormId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableForms",
             "itemValuePath": "FormId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "Status": {
           "type": "string",
           "description": "The status of the task.",
           "title": "Status",
-          "enum": [
-            "Request",
-            "Accepted",
-            "InProgress",
-            "Completed",
-            "Rejected"
-          ]
+          "enum": ["Request", "Accepted", "InProgress", "Completed", "Rejected"]
         }
       },
-      "required": [
-        "EventId"
-      ]
+      "required": ["EventId"]
     },
     "task": {
       "type": "object",
       "properties": {
-        "TaskId": {
-          "type": "integer",
-          "description": "The Id of the task.",
-          "title": "Task Id"
-        },
-        "TaskType": {
-          "type": "integer",
-          "description": "The type of the task.",
-          "title": "Task Type"
-        },
-        "FormId": {
-          "type": "integer",
-          "description": "The form Id of the task.",
-          "title": "Form Id"
-        },
-        "Status": {
-          "type": "string",
-          "description": "The status of the task.",
-          "title": "Status"
-        },
-        "Name": {
-          "type": "string",
-          "description": "The name of the task.",
-          "title": "Name"
-        },
-        "Description": {
-          "type": "string",
-          "description": "The description of the task.",
-          "title": "Description"
-        },
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
+        "TaskId": { "type": "integer", "description": "The Id of the task.", "title": "Task Id" },
+        "ExternalId": { "type": "string", "title": "Task External Id", "description": "The External Id of the task." },
+        "TaskType": { "type": "integer", "description": "The type of the task.", "title": "Task Type" },
+        "FormId": { "type": "integer", "description": "The form Id of the task.", "title": "Form Id" },
+        "Status": { "type": "string", "description": "The status of the task.", "title": "Status" },
+        "Name": { "type": "string", "description": "The name of the task.", "title": "Name" },
+        "Description": { "type": "string", "description": "The description of the task.", "title": "Description" },
         "Created": {
           "type": "string",
           "description": "Date and time when the task was created.",
           "format": "date-time",
           "title": "Task Created"
         },
-        "Creator": {
-          "$ref": "#/definitions/creator"
-        },
+        "Creator": { "$ref": "#/definitions/creator" },
         "AssigneeId": {
           "type": "string",
           "description": "The user Id to which the task is assigned.",
@@ -2582,17 +2970,13 @@
         },
         "Library": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/libraryitem"
-          },
+          "items": { "$ref": "#/definitions/libraryitem" },
           "title": "Library",
           "description": "Collection of Library items of the task."
         },
         "Tags": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/tag"
-          },
+          "items": { "$ref": "#/definitions/tag" },
           "title": "Tags",
           "description": "Collection of tags of the task."
         },
@@ -2601,26 +2985,20 @@
           "title": "ISOPlanner Task URL",
           "description": "The Url of this task in ISOPlanner."
         },
-        "Hidden": {
-          "type": "boolean",
-          "description": "Whether the task is hidden in user views.",
-          "title": "Hidden"
-        }
+        "Hidden": { "type": "boolean", "description": "Whether the task is hidden in user views.", "title": "Hidden" }
       }
     },
     "event": {
       "type": "object",
       "properties": {
-        "EventId": {
-          "type": "integer",
-          "description": "The Id of the event.",
-          "title": "Event Id"
-        },
-        "Name": {
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
+        "EventId": { "type": "integer", "description": "The Id of the event.", "title": "Event Id" },
+        "ExternalId": {
           "type": "string",
-          "description": "The name of the template.",
-          "title": "Event Name"
+          "title": "Event External Id",
+          "description": "The External Id of the event."
         },
+        "Name": { "type": "string", "description": "The name of the template.", "title": "Event Name" },
         "Description": {
           "type": "string",
           "description": "The description of the template.",
@@ -2632,32 +3010,18 @@
           "format": "date-time",
           "title": "Event Created"
         },
-        "Creator": {
-          "$ref": "#/definitions/creator"
-        },
-        "FormId": {
-          "type": "integer",
-          "description": "The form Id of the event.",
-          "title": "Form Id"
-        },
-        "Status": {
-          "type": "string",
-          "description": "Status of the event.",
-          "title": "Status"
-        },
+        "Creator": { "$ref": "#/definitions/creator" },
+        "FormId": { "type": "integer", "description": "The form Id of the event.", "title": "Form Id" },
+        "Status": { "type": "string", "description": "Status of the event.", "title": "Status" },
         "Tags": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/tag"
-          },
+          "items": { "$ref": "#/definitions/tag" },
           "title": "Tags",
           "description": "Collection of Tags items of the event."
         },
         "Library": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/libraryitem"
-          },
+          "items": { "$ref": "#/definitions/libraryitem" },
           "title": "Library",
           "description": "Collection of Library items of the event."
         },
@@ -2683,9 +3047,7 @@
         },
         "Tasks": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/task"
-          },
+          "items": { "$ref": "#/definitions/task" },
           "title": "Tasks",
           "description": "Collection of Subtasks of the event."
         },
@@ -2694,31 +3056,17 @@
           "title": "ISOPlanner event URL",
           "description": "The Url of this event in ISOPlanner."
         },
-        "Hidden": {
-          "type": "boolean",
-          "description": "Whether the task is hidden in user views.",
-          "title": "Hidden"
-        }
+        "Hidden": { "type": "boolean", "description": "Whether the task is hidden in user views.", "title": "Hidden" }
       }
     },
     "libraryitem": {
       "type": "object",
       "properties": {
-        "LibraryItemId": {
-          "type": "integer",
-          "title": "Id",
-          "description": "The Id of the Library item."
-        },
-        "LibraryItemName": {
-          "type": "string",
-          "title": "Name",
-          "description": "The Name of the Library item."
-        },
-        "LibraryItemUrl": {
-          "type": "string",
-          "title": "Url",
-          "description": "The Url of the Library item."
-        },
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
+        "LibraryItemId": { "type": "integer", "title": "Id", "description": "The Id of the Library item." },
+        "LibraryItemName": { "type": "string", "title": "Name", "description": "The Name of the Library item." },
+        "LibraryItemUrl": { "type": "string", "title": "Url", "description": "The Url of the Library item." },
+        "LibraryItemOwner": { "$ref": "#/definitions/owner" },
         "LibraryItemSPItemId": {
           "type": "string",
           "title": "SharePoint Id",
@@ -2779,101 +3127,54 @@
     "tag": {
       "type": "object",
       "properties": {
-        "TagId": {
-          "type": "integer",
-          "title": "Id",
-          "description": "The Id of the tag."
-        },
-        "TagName": {
-          "type": "string",
-          "title": "Name",
-          "description": "The Name of the tag."
-        },
-        "TagValue": {
-          "type": "string",
-          "title": "Value",
-          "description": "The Value of the tag."
-        },
-        "TagColor": {
-          "type": "string",
-          "title": "Color",
-          "description": "The Color of the tag."
-        },
-        "TagInfo": {
-          "type": "string",
-          "title": "Info",
-          "description": "The Info of the tag."
-        }
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
+        "TagId": { "type": "integer", "title": "Id", "description": "The Id of the tag." },
+        "TagName": { "type": "string", "title": "Name", "description": "The Name of the tag." },
+        "TagValue": { "type": "string", "title": "Value", "description": "The Value of the tag." },
+        "TagColor": { "type": "string", "title": "Color", "description": "The Color of the tag." },
+        "TagInfo": { "type": "string", "title": "Info", "description": "The Info of the tag." }
       }
     },
     "kpi": {
       "type": "object",
       "properties": {
-        "KPIId": {
-          "type": "integer",
-          "title": "KPI Id",
-          "description": "The Id of the KPI."
-        },
-        "Name": {
-          "type": "string",
-          "title": "Name",
-          "description": "The Name of the KPI."
-        },
-        "Description": {
-          "type": "string",
-          "title": "Description",
-          "description": "The Description of the KPI."
-        },
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
+        "KPIId": { "type": "integer", "title": "KPI Id", "description": "The Id of the KPI." },
+        "Name": { "type": "string", "title": "Name", "description": "The Name of the KPI." },
+        "Description": { "type": "string", "title": "Description", "description": "The Description of the KPI." },
         "ExpectedResult": {
           "type": "string",
           "title": "Expected Result",
           "description": "The Expected Result of the KPI."
         },
-        "Instruction": {
-          "type": "string",
-          "title": "Instruction",
-          "description": "The Instruction of the KPI."
-        },
-        "Type": {
-          "type": "integer",
-          "title": "KPI Type",
-          "description": "The Type of the KPI."
-        },
-        "MinValue": {
-          "type": "string",
-          "title": "Minimal Value",
-          "description": "The Minimal Value of the KPI."
-        },
-        "MaxValue": {
-          "type": "string",
-          "title": "Maximum Value",
-          "description": "The Maximum Value of the KPI."
-        },
+        "Instruction": { "type": "string", "title": "Instruction", "description": "The Instruction of the KPI." },
+        "Type": { "type": "integer", "title": "KPI Type", "description": "The Type of the KPI." },
+        "MinValue": { "type": "string", "title": "Minimal Value", "description": "The Minimal Value of the KPI." },
+        "MaxValue": { "type": "string", "title": "Maximum Value", "description": "The Maximum Value of the KPI." },
         "DecimalCount": {
           "type": "integer",
           "title": "Decimal count",
           "description": "The number of decimals of the KPI of type Number."
         },
-        "DefValue": {
-          "type": "string",
-          "title": "Default value",
-          "description": "The Default value of the KPI."
-        },
-        "Required": {
-          "type": "boolean",
-          "title": "Required",
-          "description": "Whether the value is Required or not."
-        },
+        "DefValue": { "type": "string", "title": "Default value", "description": "The Default value of the KPI." },
+        "Required": { "type": "boolean", "title": "Required", "description": "Whether the value is Required or not." },
         "LibraryCategoryId": {
           "type": "integer",
           "title": "Library Category Id",
           "description": "The Id of category where attachments are stored."
+        },
+        "Choices": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/keyvalue" },
+          "title": "Choices",
+          "description": "Collection of Choices for the KPI."
         }
       }
     },
     "kpidata": {
       "type": "object",
       "properties": {
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
         "KPIId": {
           "type": "integer",
           "title": "KPI Id",
@@ -2882,28 +3183,16 @@
             "operationId": "FetchAvailableKPIs",
             "value-path": "KPIId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableKPIs",
             "itemValuePath": "KPIId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
-        "KPIDataId": {
-          "type": "integer",
-          "title": "KPI Data Id",
-          "description": "The Id of the KPI data point."
-        },
+        "KPIDataId": { "type": "integer", "title": "KPI Data Id", "description": "The Id of the KPI data point." },
         "Created": {
           "type": "string",
           "format": "date-time",
@@ -2923,21 +3212,13 @@
             "operationId": "FetchAvailableUsers",
             "value-path": "UserId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableUsers",
             "itemValuePath": "UserId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "Modified": {
@@ -2959,21 +3240,13 @@
             "operationId": "FetchAvailableUsers",
             "value-path": "UserId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableUsers",
             "itemValuePath": "UserId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "ResultNumber": {
@@ -2986,11 +3259,7 @@
           "title": "Value (Text)",
           "description": "The value of the KPI for type Text."
         },
-        "ResultComment": {
-          "type": "string",
-          "title": "Comment",
-          "description": "The comment for this data point."
-        }
+        "ResultComment": { "type": "string", "title": "Comment", "description": "The comment for this data point." }
       }
     },
     "kpidataForCreate": {
@@ -3004,22 +3273,45 @@
             "operationId": "FetchAvailableKPIs",
             "value-path": "KPIId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableKPIs",
             "itemValuePath": "KPIId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
+        },
+        "TaskId": {
+          "type": "integer",
+          "title": "Task Id",
+          "description": "The Task Id of the task context. This KPI data will be set on the form of the task.",
+          "x-ms-visibility": "important"
+        },
+        "ResultNumber": {
+          "type": "number",
+          "title": "Value (Number)",
+          "description": "The value of the KPI for type Number.",
+          "x-ms-visibility": "important"
+        },
+        "ResultText": {
+          "type": "string",
+          "title": "Value (Text)",
+          "description": "The value of the KPI for type Text.",
+          "x-ms-visibility": "important"
+        },
+        "ResultDate": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Value (Date)",
+          "description": "The value of the KPI for type Date and Time.",
+          "x-ms-visibility": "important"
+        },
+        "ResultComment": {
+          "type": "string",
+          "title": "Comment",
+          "description": "The comment for this data point.",
+          "x-ms-visibility": "important"
         },
         "Created": {
           "type": "string",
@@ -3040,21 +3332,13 @@
             "operationId": "FetchAvailableUsers",
             "value-path": "UserId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableUsers",
             "itemValuePath": "UserId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "Modified": {
@@ -3076,39 +3360,17 @@
             "operationId": "FetchAvailableUsers",
             "value-path": "UserId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableUsers",
             "itemValuePath": "UserId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
-        },
-        "ResultNumber": {
-          "type": "number",
-          "title": "Value (Number)",
-          "description": "The value of the KPI for type Number."
-        },
-        "ResultText": {
-          "type": "string",
-          "title": "Value (Text)",
-          "description": "The value of the KPI for type Text."
-        },
-        "ResultComment": {
-          "type": "string",
-          "title": "Comment",
-          "description": "The comment for this data point."
         }
-      }
+      },
+      "required": ["KPIId"]
     },
     "kpidatacontext": {
       "type": "object",
@@ -3121,28 +3383,16 @@
             "operationId": "FetchAvailableKPIs",
             "value-path": "KPIId",
             "value-title": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableKPIs",
             "itemValuePath": "KPIId",
             "itemTitlePath": "Name",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
-        "KPIDataId": {
-          "type": "integer",
-          "title": "KPI Data Id",
-          "description": "The Id of the KPI data point."
-        },
+        "KPIDataId": { "type": "integer", "title": "KPI Data Id", "description": "The Id of the KPI data point." },
         "EntityType": {
           "type": "integer",
           "title": "Entity Type",
@@ -3151,21 +3401,13 @@
             "operationId": "FetchAvailableKPIEntityTypes",
             "value-path": "EntityType",
             "value-title": "Description",
-            "parameters": {
-              "orgunitid": {
-                "parameter": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
           },
           "x-ms-dynamic-list": {
             "operationId": "FetchAvailableKPIEntityTypes",
             "itemValuePath": "EntityType",
             "itemTitlePath": "Description",
-            "parameters": {
-              "orgunitid": {
-                "parameterReference": "orgunitid"
-              }
-            }
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
           }
         },
         "EntityId": {
@@ -3173,34 +3415,408 @@
           "title": "Entity Id",
           "description": "The Id of the entity that matches the type."
         }
+      },
+      "required": ["KPIId", "KPIDataId", "EntityType", "EntityId"]
+    },
+    "owner": {
+      "type": "object",
+      "properties": {
+        "UserId": { "type": "string", "title": "Owner Id", "description": "The Id of the owner." },
+        "Name": { "type": "string", "title": "Owner Name", "description": "The name of the owner." },
+        "Email": { "type": "string", "title": "Owner Email", "description": "The email address of the owner." }
+      }
+    },
+    "ownerForSet": {
+      "type": "object",
+      "properties": {
+        "UserId": {
+          "type": "string",
+          "title": "Owner User Id",
+          "description": "The Id of User that represents the owner.",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchAvailableUsers",
+            "value-path": "UserId",
+            "value-title": "Name",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchAvailableUsers",
+            "itemValuePath": "UserId",
+            "itemTitlePath": "Name",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          },
+          "x-ms-visibility": "important"
+        },
+        "RoleId": {
+          "type": "string",
+          "title": "Owner Role Id",
+          "description": "The Id of Role that represents the owner.",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchAvailableRoles",
+            "value-path": "RoleId",
+            "value-title": "Name",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchAvailableRoles",
+            "itemValuePath": "RoleId",
+            "itemTitlePath": "Name",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          },
+          "x-ms-visibility": "important"
+        }
       }
     },
     "creator": {
       "type": "object",
       "properties": {
-        "UserId": {
+        "UserId": { "type": "string", "title": "Creator Id", "description": "The Id of the creator." },
+        "Name": { "type": "string", "title": "Creator Name", "description": "The name of the creator." },
+        "Email": { "type": "string", "title": "Creator Email", "description": "The email address of the creator." }
+      }
+    },
+    "group": {
+      "type": "object",
+      "properties": {
+        "GroupId": { "type": "string", "title": "Group Id", "description": "The Id of the group." },
+        "Name": { "type": "string", "title": "Group Name", "description": "The name of the group." },
+        "Email": { "type": "string", "title": "Group Email", "description": "The email address of the group." }
+      }
+    },
+    "keyvalue": {
+      "type": "object",
+      "properties": {
+        "Key": { "type": "string", "title": "Key", "description": "Unique Key of the item." },
+        "Value": { "type": "string", "title": "Value", "description": "Value of the item." }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "properties": {
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
+        "AssetId": { "type": "integer", "description": "The Id of the asset.", "title": "Asset Id" },
+        "Code": { "type": "string", "description": "The code of the asset.", "title": "Code" },
+        "Name": { "type": "string", "description": "The name of the asset.", "title": "Name" },
+        "Description": { "type": "string", "description": "The description of the asset.", "title": "Description" },
+        "Owner": { "$ref": "#/definitions/owner" },
+        "Type": { "type": "integer", "description": "The type of asset.", "title": "Type" },
+        "State": { "type": "string", "description": "The status of the asset.", "title": "Status" },
+        "LifeCycleStart": {
           "type": "string",
-          "title": "Creator Id",
-          "description": "The Id of the creator."
+          "format": "date",
+          "description": "Life cycle start of the Asset.",
+          "title": "Life cycle start"
+        },
+        "LifeCycleEnd": {
+          "type": "string",
+          "format": "date",
+          "description": "Life cycle end of the Asset.",
+          "title": "Life cycle end"
+        },
+        "LibraryCategoryId": {
+          "type": "integer",
+          "description": "The Library Category Id connected to the asset.",
+          "title": "Library Category Id"
+        },
+        "ExternalId": {
+          "type": "string",
+          "description": "The external Id of the asset.",
+          "title": "External Id",
+          "x-ms-visibility": "important"
+        },
+        "ExternalContainerIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "title": "Container external Id collection",
+          "description": "Collection of containers of the asset."
+        },
+        "Url": {
+          "type": "string",
+          "description": "The Url of this asset in ISOPlanner.",
+          "title": "ISOPlanner Asset URL"
+        },
+        "Tags": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/tag" },
+          "title": "Tags",
+          "description": "Collection of tags of the asset."
+        }
+      }
+    },
+    "assetForUpdate": {
+      "type": "object",
+      "properties": {
+        "AssetId": {
+          "type": "integer",
+          "description": "The Id of the asset.",
+          "title": "Asset Id",
+          "x-ms-visibility": "important"
+        },
+        "Code": {
+          "type": "string",
+          "description": "The code of the asset.",
+          "title": "Code",
+          "x-ms-visibility": "important"
         },
         "Name": {
           "type": "string",
-          "title": "Creator Name",
-          "description": "The name of the creator."
+          "description": "The name of the asset.",
+          "title": "Name",
+          "x-ms-visibility": "important"
         },
-        "Email": {
+        "Description": {
           "type": "string",
-          "title": "Creator Email",
-          "description": "The email address of the creator."
+          "description": "The description of the asset.",
+          "title": "Description",
+          "x-ms-visibility": "important"
+        },
+        "Owner": { "$ref": "#/definitions/ownerForSet" },
+        "Type": {
+          "type": "integer",
+          "description": "The type of asset.",
+          "title": "Type",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchAvailableAssetTypes",
+            "value-path": "Type",
+            "value-title": "TypeName",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchAvailableAssetTypes",
+            "itemValuePath": "Type",
+            "itemTitlePath": "TypeName",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          }
+        },
+        "State": {
+          "type": "string",
+          "description": "The status of the asset.",
+          "title": "Status",
+          "enum": ["Registered", "Active", "Archived"],
+          "x-ms-visibility": "important"
+        },
+        "LifeCycleStart": {
+          "type": "string",
+          "format": "date",
+          "description": "Life cycle start of the Asset.",
+          "title": "Life cycle start"
+        },
+        "LifeCycleEnd": {
+          "type": "string",
+          "format": "date",
+          "description": "Life cycle end of the Asset.",
+          "title": "Life cycle end"
+        },
+        "LibraryCategoryId": {
+          "type": "integer",
+          "description": "The Library Category Id connected to the asset.",
+          "title": "Library Category Id",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchLibraryCategories",
+            "value-path": "LibraryCategoryId",
+            "value-title": "LibraryCategoryName",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchLibraryCategories",
+            "itemValuePath": "LibraryCategoryId",
+            "itemTitlePath": "LibraryCategoryName",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          }
+        },
+        "ExternalId": {
+          "type": "string",
+          "description": "The external Id of the asset.",
+          "title": "External Id",
+          "x-ms-visibility": "important"
+        },
+        "ExternalContainerIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "title": "Container external Id collection",
+          "description": "Collection of containers of the asset."
+        },
+        "Tags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "TagId": { "type": "integer", "title": "Tag Id", "description": "The Id of the tag." } }
+          },
+          "title": "Tags",
+          "description": "Collection of tags of the asset."
+        }
+      },
+      "required": ["AssetId"]
+    },
+    "assetForCreate": {
+      "type": "object",
+      "properties": {
+        "Code": {
+          "type": "string",
+          "description": "The code of the asset.",
+          "title": "Code",
+          "x-ms-visibility": "important"
+        },
+        "Name": {
+          "type": "string",
+          "description": "The name of the asset.",
+          "title": "Name",
+          "x-ms-visibility": "important"
+        },
+        "Description": {
+          "type": "string",
+          "description": "The description of the asset.",
+          "title": "Description",
+          "x-ms-visibility": "important"
+        },
+        "Owner": { "$ref": "#/definitions/ownerForSet" },
+        "Type": {
+          "type": "integer",
+          "description": "The type of asset.",
+          "title": "Type",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchAvailableAssetTypes",
+            "value-path": "Type",
+            "value-title": "TypeName",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchAvailableAssetTypes",
+            "itemValuePath": "Type",
+            "itemTitlePath": "TypeName",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          },
+          "x-ms-visibility": "important"
+        },
+        "State": {
+          "type": "string",
+          "description": "The status of the asset.",
+          "title": "Status",
+          "enum": ["Registered", "Active", "Archived"],
+          "x-ms-visibility": "important"
+        },
+        "LifeCycleStart": {
+          "type": "string",
+          "format": "date",
+          "description": "Life cycle start of the Asset.",
+          "title": "Life cycle start"
+        },
+        "LifeCycleEnd": {
+          "type": "string",
+          "format": "date",
+          "description": "Life cycle end of the Asset.",
+          "title": "Life cycle end"
+        },
+        "LibraryCategoryId": {
+          "type": "integer",
+          "description": "The Library Category Id connected to the asset.",
+          "title": "Library Category Id",
+          "x-ms-dynamic-values": {
+            "operationId": "FetchLibraryCategories",
+            "value-path": "LibraryCategoryId",
+            "value-title": "LibraryCategoryName",
+            "parameters": { "orgunitid": { "parameter": "orgunitid" } }
+          },
+          "x-ms-dynamic-list": {
+            "operationId": "FetchLibraryCategories",
+            "itemValuePath": "LibraryCategoryId",
+            "itemTitlePath": "LibraryCategoryName",
+            "parameters": { "orgunitid": { "parameterReference": "orgunitid" } }
+          }
+        },
+        "ExternalId": {
+          "type": "string",
+          "description": "The external Id of the asset.",
+          "title": "External Id",
+          "x-ms-visibility": "important"
+        },
+        "ExternalContainerIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "title": "Container external Id collection",
+          "description": "Collection of containers of the asset."
+        },
+        "Tags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "TagId": { "type": "integer", "title": "Tag Id", "description": "The Id of the tag." } }
+          },
+          "title": "Tag Id collection",
+          "description": "Collection of tags of the asset."
+        }
+      },
+      "x-ms-visibility": "important",
+      "required": ["Code", "Name", "Type", "State"]
+    },
+    "risk": {
+      "type": "object",
+      "properties": {
+        "OrgUnitId": { "type": "string", "description": "The Id of the organizational unit.", "title": "Org Unit Id" },
+        "RiskId": { "type": "integer", "description": "The Id of the risk.", "title": "Risk Id" },
+        "Code": { "type": "string", "description": "The code of the risk.", "title": "Code" },
+        "Name": { "type": "string", "description": "The name of the risk.", "title": "Name" },
+        "RiskStateId": { "type": "integer", "description": "The Id of the risk state.", "title": "Risk State Id" },
+        "RiskState": { "type": "string", "description": "The risk state.", "title": "Risk State" },
+        "Owner": { "$ref": "#/definitions/owner" },
+        "Group": { "$ref": "#/definitions/group" },
+        "Description": { "type": "string", "description": "The description risk.", "title": "Risk description" },
+        "AssetDescription": {
+          "type": "string",
+          "description": "The description of the related assets.",
+          "title": "Asset description"
+        },
+        "Analysis": { "type": "string", "description": "The consequence of the risk.", "title": "Consequence" },
+        "LikelihoodStart": {
+          "type": "integer",
+          "description": "The likelihood of the risk (Start).",
+          "title": "Likelihood Start"
+        },
+        "LikelihoodCurrent": {
+          "type": "integer",
+          "description": "The likelihood of the risk (Current).",
+          "title": "Likelihood Current"
+        },
+        "LikelihoodGoal": {
+          "type": "integer",
+          "description": "The likelihood of the risk (Goal).",
+          "title": "Likelihood Goal"
+        },
+        "ImpactStart": { "type": "integer", "description": "The impact of the risk (Start).", "title": "Impact Start" },
+        "ImpactCurrent": {
+          "type": "integer",
+          "description": "The impact of the risk (Current).",
+          "title": "Impact Current"
+        },
+        "ImpactGoal": { "type": "integer", "description": "The impact of the risk (Goal).", "title": "Impact Goal" },
+        "ScoreStart": { "type": "integer", "description": "The score of the risk (Start).", "title": "Score Start" },
+        "ScoreCurrent": {
+          "type": "integer",
+          "description": "The score of the risk (Current).",
+          "title": "Score Current"
+        },
+        "ScoreGoal": { "type": "integer", "description": "The score of the risk (Goal).", "title": "Score Goal" },
+        "Method": { "type": "integer", "description": "The treatment method Id.", "title": "Treatment method" },
+        "Strategy": {
+          "type": "string",
+          "description": "The treatment strategy of the risk.",
+          "title": "Treatment strategy"
+        },
+        "Url": {
+          "type": "string",
+          "description": "The Url of this risk in ISOPlanner.",
+          "title": "ISOPlanner Risk URL"
+        },
+        "Tags": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/tag" },
+          "title": "Tags",
+          "description": "Collection of tags of the risk."
         }
       }
     }
   },
-  "security": [
-    {
-      "oauth2-auth": []
-    }
-  ],
+  "security": [{ "oauth2-auth": [] }],
   "tags": [],
   "securityDefinitions": {
     "oauth2-auth": {
@@ -3209,6 +3825,18 @@
       "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
       "scopes": {},
       "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize"
+    },
+    "oAuthClientCredentials": {
+      "type": "oauth2",
+      "flow": "application",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {}
+    },
+    "certOauth": {
+      "type": "oauth2",
+      "flow": "application",
+      "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
+      "scopes": {}
     }
   }
 }
