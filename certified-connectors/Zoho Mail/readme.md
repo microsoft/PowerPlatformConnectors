@@ -46,13 +46,25 @@ prompt "Show me all the labels for account 1234”, and the operation retrieves 
 
 This endpoint lists emails for the specified Account ID based on search parameters that display information like the Message ID, Summary, Sent on, Sender name, and From. The user enters keywords by Subject, Email content or sender as the search parameter for the specified account.
 
+### Get email attachment info
+
+Retrieves the attachment information of a particular email, based on Account ID and message ID.
+
+### Get email attachment content
+
+Retrieves the content of the attachments in an email and downloads the files based on Account ID, Message ID and Attachment ID.
+
 ## Supported Triggers
 
 The connector supports the following operations:
 
-### New Mail Notification
+### Get mail notificaiton from specified user
 
-Receive a new email notification from sender.
+Receive new email notifications from the specified user.
+
+### Get new mail by condition
+
+Receive new email notifications when the specified condition is met.
 
 ## Obtaining Credentials
 

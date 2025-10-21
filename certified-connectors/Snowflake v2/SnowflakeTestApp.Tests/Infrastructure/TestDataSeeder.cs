@@ -32,7 +32,6 @@ namespace SnowflakeTestApp.Tests.Infrastructure
 
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
-        private readonly string _bearerToken;
         private readonly AccessTokenService _accessTokenService;
 
         /// <summary>

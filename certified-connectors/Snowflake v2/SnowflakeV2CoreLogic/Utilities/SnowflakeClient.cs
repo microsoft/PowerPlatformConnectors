@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -43,10 +43,11 @@ namespace SnowflakeV2CoreLogic.Utilities
         public async Task<SnowflakeTableData> CallAPIAsync(
             HttpClient? client,
             string statement,
+            string endpoint,
             SnowflakeRequestBindings? requestBindings = null,
             SnowflakeConnectionParameters? perRequestConnectionParameters = null,
             RequestParameters? requestParameters = null,
-            bool isSerilalizerSettings = false)
+            bool isSerializerSettings = false)
         {
             logger.LogInformation("CallAPIAsync entered");
 
@@ -64,7 +65,10 @@ namespace SnowflakeV2CoreLogic.Utilities
             var apiURL = $"https://{validatedServer}/api/v2/statements";
 
             var sfRequestBody = new SnowflakeRequestPostBody();
-            sfRequestBody.statement = statement;
+            
+            // Add version comment to the statement with specific endpoint info
+            sfRequestBody.statement = AddVersionComment(statement, endpoint);
+            
             sfRequestBody.bindings = requestBindings?.bindings;
             sfRequestBody.parameters = requestParameters;
 
@@ -76,7 +80,7 @@ namespace SnowflakeV2CoreLogic.Utilities
             sfRequestBody.parameters = requestParameters;
 
             // Create the payload for the HTTP request
-            var postBodyRequestData = isSerilalizerSettings ? Newtonsoft.Json.JsonConvert.SerializeObject(sfRequestBody, serializerSettings) : Newtonsoft.Json.JsonConvert.SerializeObject(sfRequestBody);
+            var postBodyRequestData = isSerializerSettings ? Newtonsoft.Json.JsonConvert.SerializeObject(sfRequestBody, serializerSettings) : Newtonsoft.Json.JsonConvert.SerializeObject(sfRequestBody);
             var postBodyContent = new StringContent(postBodyRequestData, System.Text.Encoding.UTF8, "application/json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, apiURL)
@@ -92,13 +96,19 @@ namespace SnowflakeV2CoreLogic.Utilities
             HttpClient? client,
             ExecuteSqlStatementModel fullAPIRequestPayload,
             HeaderParameters? headerParameters,
-            QueryParameters? queryParameters)
+            QueryParameters? queryParameters,
+            string endpoint)
         {
             logger.LogInformation("ExecuteSqlStatementAsync entered");
 
             var urlBase = $"https://{headerParameters?.Instance}/api/v2/statements";
 
             var apiURL = AddQueryParametersToUrl(urlBase, queryParameters);
+
+            if (!string.IsNullOrEmpty(fullAPIRequestPayload.statement))
+            {
+                fullAPIRequestPayload.statement = AddVersionComment(fullAPIRequestPayload.statement, endpoint);
+            }
 
             // Create the payload for the HTTP request
             var postBodyRequestData = JsonConvert.SerializeObject(fullAPIRequestPayload, serializerSettings);
@@ -249,6 +259,37 @@ namespace SnowflakeV2CoreLogic.Utilities
 
             // Append the query string to the url
             return new Uri(urlBase + "?" + queryString.ToString());
+        }
+
+        /// <summary>
+        /// Adds version comment to SQL statement for query history tracking
+        /// </summary>
+        /// <param name="sqlStatement">The original SQL statement</param>
+        /// <param name="operation">Optional operation name for additional context</param>
+        /// <returns>SQL statement with version comment at the end before semicolon</returns>
+        public static string AddVersionComment(string? sqlStatement = null, string? operation = null)
+        {
+            if (string.IsNullOrWhiteSpace(sqlStatement))
+                return sqlStatement ?? string.Empty;
+
+            var operationInfo = !string.IsNullOrEmpty(operation) ? $" - {operation}" : "";
+            var versionComment = $"\n-- {Constants.ConnectorName} v{Constants.ConnectorVersion}{operationInfo}\n";
+
+            // Trim the SQL statement
+            var trimmedSql = sqlStatement!.Trim();
+
+            // Check if the query ends with a semicolon
+            if (trimmedSql.EndsWith(";"))
+            {
+                // Insert comment before the semicolon
+                var queryWithoutSemicolon = trimmedSql.Substring(0, trimmedSql.Length - 1);
+                return queryWithoutSemicolon + versionComment + ";";
+            }
+            else
+            {
+                // Add comment at the end and add semicolon
+                return trimmedSql + versionComment + ";";
+            }
         }
     }
 }

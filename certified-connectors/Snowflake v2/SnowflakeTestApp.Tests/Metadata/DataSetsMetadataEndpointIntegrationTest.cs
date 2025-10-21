@@ -1,6 +1,8 @@
+using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SnowflakeTestApp.Tests.Metadata
 {
@@ -32,6 +34,23 @@ namespace SnowflakeTestApp.Tests.Metadata
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             var content = await response.Content.ReadAsStringAsync();
             Assert.IsFalse(string.IsNullOrEmpty(content), "Response content should not be empty");
+        }
+
+        /// <summary>
+        /// Test the /$metadata.json/{dataset} endpoint with authentication and check that it return correct dataset source
+        /// </summary>
+        [TestMethod]
+        public async Task GetDataSetMetadataEndpoint_WithAuth_ReturnsValidDataSetMetadataSource()
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+
+            var response = await HttpClient.GetAsync($"{BaseUrl}/$metadata.json/datasets");
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var content = await response.Content.ReadAsStringAsync();
+            var parsedJson = JsonConvert.DeserializeObject<DataSetsMetadata>(content);
+            Assert.AreEqual($"{TestData.DefaultSnowflakeHostname},{TestData.DefaultDatabase}", parsedJson.TabularDataSetsMetadata.Source);
         }
 
         /// <summary>

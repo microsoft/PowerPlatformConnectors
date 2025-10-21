@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Connectors.SnowflakeV2Contracts {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tabel.
+        ///   Looks up a localized string similar to Table.
         /// </summary>
         internal static string TableDefaultDisplayName {
             get {
