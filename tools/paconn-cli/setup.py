@@ -57,8 +57,7 @@ setup(
         'pytest-xdist',
         'virtualenv',
         'requests',
-        'adal',
-        'msrestazure',
+        'msal>=1.20.0',
         'azure-storage-blob>=2.1,<12.0'
     ],
     extras_require={
