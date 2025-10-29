@@ -128,11 +128,12 @@ Monitors the progress of any image processing task and retrieves results.
 - **Plan Limits**: Vary by subscription tier
 - **Enterprise Plans**: Custom limits available
 
+
 ## Support
 
 For technical support and questions:
 
-- **Email**: feedback@nero.com
+- **Email**: ai@nero.com
 - **Documentation**: [Nero AI Documentation](https://docs.nero.com/ai)
 
 ## Privacy and Security
@@ -157,6 +158,32 @@ For technical support and questions:
 - Quality factor control for upscaling operations
 - Asynchronous task processing with real-time status monitoring
 - Support for advanced image formats (HEIC, HEIF)
+
+
+## Screenshots
+
+Below are screenshots demonstrating the connector in action.  
+As required for Independent Publisher certification, these show three unique operations within Power Automate and one test screenshot from the connector UI.
+
+### 1️⃣ Flow Structure – Nero AI Demo
+Demonstrates a Power Automate Flow integrating multiple Nero AI operations.
+![Flow structure](https://subobject.nero.com/suite/ms/flow.png)
+
+### 2️⃣ Flow Execution – Successful Run
+Flow execution with successful steps and results.
+![Flow success](https://subobject.nero.com/suite/ms/success.png)
+
+### 3️⃣ Action – Upscale an Image
+Shows successful execution and output URL from the “Upscale an Image” action.
+![Upscale result](https://subobject.nero.com/suite/ms/upcale.png)
+
+### 4️⃣ Action – Check Task Status
+Displays the “Check Task Status” step output with processing progress and result URL.
+![Check status result](https://subobject.nero.com/suite/ms/done.png)
+
+### 5️⃣ Connector Test UI
+Screenshot of the “Test operations” section within the Custom Connector UI showing a successful request.
+![Test UI](https://subobject.nero.com/suite/ms/test_ui.png)
 
 ## License
 
