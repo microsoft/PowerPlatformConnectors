@@ -17,6 +17,9 @@ When a Feathery form submission is completed
 ### DataReceived
 When any data is received from a Feathery form submission (e.g. a partial submission)
 
+### NewFile
+When a file is uploaded to the form or a document is signed
+
 ## Getting Started
 [Sign up](https://app.feathery.io) for a Feathery account. Then, 
 follow our [quickstart guide](https://docs.feathery.io/platform/quickstart) to get started.

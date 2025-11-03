@@ -1,0 +1,236 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "oncehub",
+    "description": "Integrate OnceHub's intelligent scheduling directly into your workflows. Automate your entire meeting lifecycle by retrieving availability, offering time slots, and booking meetings from within your custom business applications and process automation flows. Perfect for M365 organizations, this connector helps you eliminate manual scheduling for sales, customer service, and recruiting. Build powerful, automated scheduling workflows and bots to save time and reduce administrative tasks.",
+    "contact": {
+      "name": "OnceHub",
+      "url": "https://www.oncehub.com/contact",
+      "email": "contact@oncehub.com"
+    }
+  },
+  "host": "api.oncehub.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/booking-calendars/{Id}/time-slots": {
+      "get": {
+        "summary": "Get available time slots for scheduling",
+        "description": "Retrieve real-time availability based on booking rules and participant calendars. Use this operation to display open time slots to users before confirming a meeting.",
+        "operationId": "GetTimeSlots",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "default": "<your_booking_calendar_id>",
+            "description": "Booking calendar ID",
+            "x-ms-summary": "Booking calendar ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of available time slots",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "start_time",
+                  "locations"
+                ],
+                "properties": {
+                  "start_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601 formatted start time"
+                  },
+                  "locations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "value"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "physical",
+                            "virtual",
+                            "phone"
+                          ],
+                          "description": "Type of meeting location"
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "Location value (e.g., 'google_meet')"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "Optional ID of the location"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Calendar not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/v2/booking-calendars/{Id}/schedule": {
+      "post": {
+        "summary": "Schedule a meeting in a specified time slot",
+        "description": "Schedule a meeting using a previously selected time slot. This action confirms the booking with participant details and creates the meeting in OnceHub.",
+        "operationId": "BookATimeSlot",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the booking calendar",
+            "x-ms-summary": "ID of the booking calendar",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "start_time": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The date and time of the time slot"
+                },
+                "guest_time_zone": {
+                  "type": "string",
+                  "description": "The guest's timezone in IANA format"
+                },
+                "booking_form": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "email"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                },
+                "location_type": {
+                  "type": "string",
+                  "enum": [
+                    "physical",
+                    "virtual",
+                    "phone"
+                  ],
+                  "description": "Type of location"
+                },
+                "location_value": {
+                  "type": "string",
+                  "description": "For virtual meetings: google_meet, etc. For phone: guest's phone number. For physical: address ID (e.g., ADD-1234)."
+                }
+              },
+              "required": [
+                "start_time",
+                "guest_time_zone",
+                "booking_form"
+              ]
+            }
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking successful"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Calendar not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "API-Key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-openai-manifest": {
+    "legalUrl": "https://oncehub.com/trustcenter/legal/msa",
+    "contactEmail": "support@oncehub.com",
+    "modelDescription": "Retrieve availability, offer time slots, and schedule meetings using OnceHub. Integrate seamless scheduling into your Microsoft-based apps, bots, and workflows.",
+    "humanName": "Schedule meetings with OnceHub"
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.oncehub.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.oncehub.com/trustcenter/legal/privacynotice"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Website"
+    }
+  ]
+
+}
