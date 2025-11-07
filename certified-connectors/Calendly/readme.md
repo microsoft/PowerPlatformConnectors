@@ -2,7 +2,7 @@
 
 Calendly helps you easily schedule meetings based on participants availability.
 
-This connector allows you to subscribe to webhook events, such as `invitee.created`, `invitee_no_show.created`, and `routing_form_submission.created`. It also allows you to use the API to perform operations such as reading an Event Type or recording that an invitee did not attend a meeting.
+This connector allows you to subscribe to webhook events, such as `invitee.created`, `invitee_no_show.created`, `invitee_no_show.deleted`, and `routing_form_submission.created`. It also allows you to use the API to perform operations such as reading an Event Type or recording that an invitee did not attend a meeting.
 
 ## Publisher: Calendly
 

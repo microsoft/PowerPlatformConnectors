@@ -3,7 +3,7 @@
   "info": {
     "title": "IA-Connect Session",
     "description": "IA-Connect is a Robotic Process Automation (RPA) platform which adds RPA functionality from the Cloud to on-premises virtual machines or over Citrix or Microsoft Remote Desktop (RDS) connections. This is the module for automating the environment, session, file management and configuring IA-Connect.",
-    "version": "9.4",
+    "version": "9.5",
     "contact": {
       "name": "Ultima Labs",
       "url": "https://www.ultima.com/ultima-labs",
@@ -924,7 +924,7 @@
                   "type": "integer",
                   "format": "int32",
                   "title": "Number of screens",
-                  "description": "The number of screens that were detected."
+                  "description": "The number of screens in this session."
                 },
                 "SecondDisplayHorizontalResolution": {
                   "type": "integer",
@@ -4494,6 +4494,12 @@
                   "description": "Allows you to provide a list of symbols to be randomly used when the symbol 's' is used in the format of a generated password. If not specified, a built-in list is used. For example: !$()*.",
                   "x-ms-visibility": "advanced"
                 },
+                "AttemptUniquePasswords": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Attempt unique passwords",
+                  "description": "Set to true (the default) for the Agent to avoid duplicating random number sequences and hence ensure that generated passwords are unique where possible within a particular Agent session. This doesn't guarantee unique passwords between separate Agents, or if the Agent is closed or restarted, so you should always ensure your passwords are highly random by using complex passwords (for example: wnnws is more random than wnw)."
+                },
                 "Workflow": {
                   "type": "string",
                   "x-ms-visibility": "advanced",
@@ -6791,6 +6797,17 @@
                   "title": "Erase deferral stored data",
                   "description": "If you set this value to true, any deferral stored data will be erased. This is typically used to save storage space for a completed or failed task since the raw data is no longer required.",
                   "x-ms-visibility": "advanced"
+                },
+                "UpdateSourceSystem": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Update source system",
+                  "description": "If you set this value to true and the Orchestrator task is linked to a source system (for example, ServiceNow), the Orchestrator will perform any actions specified in the Source system configuration in the Orchestrator (for example, close the ticket)."
+                },
+                "TaskClosureReason": {
+                  "type": "string",
+                  "title": "Task closure reason",
+                  "description": "If the task status is being changed to 'Completed' or 'Failed', this input allows you to provide a task closure reason, which will be stored in the task. In addition, if the Orchestrator task is linked to a source system (for example, ServiceNow) and 'Update source system' is set to true, the reason will also be passed to the source system (for example, as a ServiceNow work note)."
                 }
               },
               "required": [
@@ -6820,6 +6837,189 @@
           }
         },
         "operationId": "TasksChangeTaskStatus"
+      }
+    },
+    "/Environment/TasksAddNote": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Add a note to an Orchestrator automation task",
+        "description": "Adds a note to a selected Orchestrator automation task. This note will be passed to the source system linked with this automation task (for example, ServiceNow), and is most commonly used to add details into a ticket. If the Orchestrator automation task is not linked to a source, an exception will be raised.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "TasksAddNote",
+            "description": "Inputs for IA-Connect TasksAddNote action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TaskId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Task Id",
+                  "description": "The Id of the Orchestrator task to add the note to."
+                },
+                "NoteText": {
+                  "type": "string",
+                  "title": "Note text",
+                  "description": "The note text message."
+                },
+                "NoteType": {
+                  "type": "string",
+                  "default": "WorkNote",
+                  "title": "Note type",
+                  "description": "If the source system supports different note types (for example, a work note, a closure note or a comment), enter the note type here. This will be interpreted differently, depending on the source system. Currently supported types are 'WorkNote' (the default), 'CloseNote', 'Comment'. If there is only one type of note, enter 'WorkNote'. If you have a custom work note, enter 'Other'.",
+                  "enum": [
+                    "WorkNote",
+                    "CloseNote",
+                    "Comment",
+                    "Other"
+                  ],
+                  "x-ms-enum-values": [
+                    {
+                      "value": "WorkNote",
+                      "displayName": "Work note"
+                    },
+                    {
+                      "value": "CloseNote",
+                      "displayName": "Closure note"
+                    },
+                    {
+                      "value": "Comment",
+                      "displayName": "Comment"
+                    },
+                    {
+                      "value": "Other",
+                      "displayName": "Other (enter value into 'Note type other')"
+                    }
+                  ]
+                },
+                "NoteTypeOther": {
+                  "type": "string",
+                  "title": "Note type other",
+                  "description": "If you have a custom note type, choose a 'Note type' of 'Other' and enter the custom type into this field."
+                }
+              },
+              "required": [
+                "TaskId",
+                "NoteText"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TasksAddNoteResult": {
+                  "type": "boolean",
+                  "title": "Command result",
+                  "description": "The result of the command (success or failure)."
+                },
+                "ErrorMessage": {
+                  "type": "string",
+                  "title": "Error message",
+                  "description": "If the command was not successful, this will contain the error message that was returned."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "TasksAddNote"
+      }
+    },
+    "/Environment/TasksAssignTask": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Assign an Orchestrator automation task",
+        "description": "Assigns a selected Orchestrator automation task to a specified user or group. This assignment will be passed to the source system linked with this automation task (for example, ServiceNow), and is most commonly used to pass a ticket to a different person or group of people, for additional processing. If the Orchestrator automation task is not linked to a source, an exception will be raised.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "TasksAssignTask",
+            "description": "Inputs for IA-Connect TasksAssignTask action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TaskId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Task Id",
+                  "description": "The Id of the Orchestrator task to be assigned."
+                },
+                "AssignToUserId": {
+                  "type": "string",
+                  "title": "Assign to user Id",
+                  "description": "The Id of the user to assign the task to. Use this input if assigning the task to a user, and you know the user Id. Use the user Id or user name input, not both, or if assigning to a group, leave this input blank."
+                },
+                "AssignToUserName": {
+                  "type": "string",
+                  "title": "Assign to user name",
+                  "description": "The name of the user to assign the task to. Use this input if assigning the task to a user, and you know the user name. Use the user Id or user name input, not both, or if assigning to a group, leave this input blank."
+                },
+                "AssignToGroupId": {
+                  "type": "string",
+                  "title": "Assign to group Id",
+                  "description": "The Id of the group to assign the task to. Use this input if assigning the task to a group, and you know the group Id. Use the group Id or group name input, not both, or if assigning to a user, leave this input blank."
+                },
+                "AssignToGroupName": {
+                  "type": "string",
+                  "title": "Assign to group name",
+                  "description": "The name of the group to assign the task to. Use this input if assigning the task to a group, and you know the group name. Use the group Id or group name input, not both, or if assigning to a user, leave this input blank."
+                },
+                "RemoveUserAssignmentIfBlank": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Remove user assignment if blank",
+                  "description": "If the user assignment fields are blank and this field is set to true, any currently assigned user will be removed, otherwise user assignments will be left unchanged."
+                },
+                "RemoveGroupAssignmentIfBlank": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Remove group assignment if blank",
+                  "description": "If the group assignment fields are blank and this field is set to true, any currently assigned group will be removed, otherwise group assignments will be left unchanged."
+                }
+              },
+              "required": [
+                "TaskId"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TasksAssignTaskResult": {
+                  "type": "boolean",
+                  "title": "Command result",
+                  "description": "The result of the command (success or failure)."
+                },
+                "ErrorMessage": {
+                  "type": "string",
+                  "title": "Error message",
+                  "description": "If the command was not successful, this will contain the error message that was returned."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "TasksAssignTask"
       }
     },
     "/DriverControl/SetRemoteLoggingLevel": {
@@ -10835,6 +11035,73 @@
         "operationId": "DeleteAgentThread"
       }
     },
+    "/DriverControl/AllocateWorkerFromOrchestrator": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Allocate worker from Orchestrator",
+        "description": "Allocates a worker from the IA-Connect Orchestrator. You can request a worker by tag or worker name (or neither, or both), allowing you to more precisely choose which worker you require. Once a worker is allocated, it is assigned to your flow and will be reported as performing work. Note that the Orchestrator will still consider 'Supported Flow environment Ids', 'Supported Flow names' and 'Unsupported Flow names' when performing allocation. When multiple workers match the search, normal load balancing rules will apply.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "AllocateWorkerFromOrchestrator",
+            "description": "Inputs for IA-Connect AllocateWorkerFromOrchestrator action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "WorkerTag": {
+                  "type": "string",
+                  "title": "Worker tag",
+                  "description": "The optional tag of the worker to allocate. Tags allow you to categorise workers into groups. Tag names are not case-sensitive. You can specify multiple tags by entering them on separate lines, and the allocation mechanism will then consider any worker with any of those tags. You can perform a wildcard search using the format Wildcard: Tag* (e.g. Wildcard: JML*), and a regular expression search using the format RegEx: TagExpression (e.g. RegEx: ^JML)."
+                },
+                "WorkerName": {
+                  "type": "string",
+                  "title": "Worker name",
+                  "description": "The optional name of the worker to allocate. Worker names are not case-sensitive. You can specify multiple workers by entering them on separate lines, and the allocation mechanism will then consider any worker with a matching name. You can perform a wildcard search using the format Wildcard: Name* (e.g. Wildcard: vmrpa*), and a regular expression search using the format RegEx: Expression (e.g. RegEx: ^vmrpa)."
+                },
+                "RaiseExceptionIfWorkerNotImmediatelyAvailable": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Raise exception if worker not immediately available",
+                  "description": "If set to true and a suitable worker could not be allocated, an exception will be raised. If set to false (the default) and a suitable worker could not be allocated, the Orchestrator will return HTTP status code 500, causing the PA flow to wait, according to the 'Retry policy'."
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "WorkerNameAllocated": {
+                  "type": "string",
+                  "title": "Worker name allocated",
+                  "description": "The name of the worker allocated. Blank if no worker was allocated."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "AllocateWorkerFromOrchestrator"
+      }
+    },
     "/FileManagement/FileExists": {
       "post": {
         "consumes": [
@@ -11902,6 +12169,18 @@
                   "default": true,
                   "title": "Trim headers",
                   "description": "Should the headers be trimmed to remove any leading or trailing whitespace?"
+                },
+                "AllowBlankRows": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Allow blank rows",
+                  "description": "If set to true (the default), completely blank rows in the CSV data are permitted and will be returned as an empty row. If set to false, completely blank rows will be removed in the returned data (the file will be left untouched)."
+                },
+                "ExtendColumnsIfRequired": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Extend columns if required",
+                  "description": "If set to true, and if there are cells in the data without a matching column header (i.e. a row with more cells than the header row), a column header will be automatically created with the name Column_N (where N is the column index). If set to false (the default), there will be an exception if a row contains data without a matching column."
                 },
                 "Workflow": {
                   "type": "string",

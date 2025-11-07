@@ -1,4 +1,10 @@
-﻿public class Script : ScriptBase
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -59,9 +65,17 @@
         if (string.IsNullOrWhiteSpace(jsonText))
             return ErrorMessage("Empty payload");
 
-        var obj = jsonText.AsJObject();
+        var token = JToken.Parse(jsonText);
+        if (token == null)
+            return ErrorMessage("Unable to read payload");
+        if (token.Type == JTokenType.String)
+            token = JToken.Parse(token.Value<string>());
+        if (token.Type != JTokenType.Object)
+            return ErrorMessage("Payload is not a valid json object");
+
+        var obj = token as JObject;
         if (obj == null)
-            return ErrorMessage("Unable to parse payload");
+            return ErrorMessage("Unable to read json from payload");
 
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -87,7 +101,7 @@
         };
 
         if (string.IsNullOrWhiteSpace(emptyJson))
-            return ErrorMessage("Invalid value type", key);
+            return ErrorMessage($"Invalid value type: {key}");
 
         var changes = obj.Property("Changes");
         if (changes == null || changes.Value.Type != JTokenType.Array || changes.Value is not JArray)
@@ -275,7 +289,7 @@
     private static HttpResponseMessage CreateJsonResponse(JToken? token, HttpStatusCode statusCode = HttpStatusCode.OK)
         => CreateJsonResponse(token.GetString(), statusCode);
 
-    private static HttpResponseMessage ErrorMessage(string errorMessage, HttpStatusCode statusCode = HttpStatusCode.OK) => CreateJsonResponse($"{{\"error\":\"{errorMessage}\"}}", statusCode);
+    private static HttpResponseMessage ErrorMessage(string errorMessage, HttpStatusCode statusCode = HttpStatusCode.BadRequest) => CreateJsonResponse($"{{\"error\":\"{errorMessage}\"}}", statusCode);
 
     private static HttpResponseMessage ErrorMessage(string errorMessage, string incomingMessage) => CreateJsonResponse($"{{\"error\":\"{errorMessage}\",\"message\":\"{incomingMessage}\"}}", HttpStatusCode.OK);
 
@@ -497,7 +511,7 @@ public static class SchemaHelper
         "sPurchaseVATCodeDescription","iQuotationMarkupType","bRecepientOfCommissions","sRemarks","iReminderFlowCategory","gReseller","sResellerCode","sResellerName",
         "sSalesCurrency","sSalesCurrencyDescription","sSalesVATCode","sSalesVATCodeDescription","gSBICode","sSbiCodeDescription","gSbiCodeSector","gSbiCodeSubSector",
         "sSearchCode","iSecurityLevel","iSendPurchaseOrderMethod","sSepaDDCreditorIdentifier","bSeparateInvPerProject","bSeparateInvPerSubscription","iShippingLeadDays",
-        "gShippingMethod","sShippingMethodCode","sShippingMethodDescription","iSource","dStartDate","sState","sStateDisplayValue","sStateName","sStatus","dStatusSince",/
+        "gShippingMethod","sShippingMethodCode","sShippingMethodDescription","iSource","dStartDate","sState","sStateDisplayValue","sStateName","sStatus","dStatusSince",
         "sTaxReferenceNumber","sTradeName","sType","bUseTimeSpecification","sVATLiability","sVATNumber","sVatSystem","sWebsite","sWithholdingTaxDescription","sWithholdingTaxKey"
     };
 

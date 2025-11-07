@@ -1,0 +1,411 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "InfoVetted",
+    "version": "v1",
+    "description": "Info Vetted's Right to Work and DBS Checks",
+    "contact": {
+      "name": "Info Vetted Support",
+      "email": "info@infovetted.com"
+    }
+  },
+  "host": "infovetted-api.azure-api.net",
+  "basePath": "/vetting/v1",
+  "schemes": ["https"],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/vetting-status": {
+      "get": {
+        "description": "This endpoint returns the vetting status of a given check identified by the checkId parameter.",
+        "operationId": "vetting-status",
+        "summary": "Get the vetting status for a given checkId",
+        "tags": ["vettingStatus"],
+        "parameters": [
+          {
+            "name": "checkId",
+            "in": "query",
+            "description": "Format - uuid. The **CheckId** parameter, which is a unique identifier for the check.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Check ID parameter"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "The OK response with the vetting status.",
+            "schema": {
+              "$ref": "#/definitions/vettingStatusResponse"
+            },
+            "examples": {
+              "application/json": {
+                "status": 0
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request response in case of missing or invalid parameters.",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error response.",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/process-check": {
+      "post": {
+        "description": "This endpoint processes a check based on the provided JSON request body containing the ProcessCheckRequest.",
+        "operationId": "process-check",
+        "summary": "Process a check request",
+        "tags": ["processCheck"],
+        "parameters": [
+          {
+            "name": "processCheckRequest",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/processCheckRequest"
+            },
+            "description": "JSON request body containing the process check details."
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "The OK response containing the result of the process check.",
+            "schema": {
+              "$ref": "#/definitions/processCheckResponse"
+            },
+            "examples": {
+              "application/json": {
+                "succeeded": true,
+                "checkId": "string",
+                "errorCode": 0,
+                "metaData": {
+                  "traceId": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request response in case of missing or invalid parameters.",
+            "schema": {
+              "$ref": "#/definitions/requestModelError"
+            },
+            "examples": {
+              "application/json": {
+                "field": "string",
+                "error": "string"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response when the client does not have permission to access this resource.",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error response in case of server-side issues.",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pdf-export": {
+      "get": {
+        "description": "This endpoint generates and exports a PDF document for the given check identified by the CheckId parameter.",
+        "operationId": "get-pdf-export",
+        "summary": "Export check result as a PDF",
+        "tags": ["PDF Export"],
+        "parameters": [
+          {
+            "name": "CheckId",
+            "in": "query",
+            "description": "The **CheckId** parameter, which is a unique identifier for the check.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Check ID parameter"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "The OK response containing the PDF document.",
+            "schema": {
+              "format": "binary",
+              "type": "string"
+            },
+            "examples": {
+              "application/json": "string"
+            }
+          },
+          "400": {
+            "description": "Bad request response in case of missing or invalid parameters.",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error response.",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "errorResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "metaData": {
+      "type": "object",
+      "properties": {
+        "traceId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "processCheckRequest": {
+      "type": "object",
+      "required": [ "checkType", "firstName", "surname", "contactViaEmail", "contactViaSms" ],
+      "properties": {
+        "checkType": {
+          "format": "int32",
+          "default": 0,
+          "enum": [0, 1, 2, 3],
+          "type": "integer"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "surname": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "contactViaEmail": {
+          "type": "boolean"
+        },
+        "contactViaSms": {
+          "type": "boolean"
+        },
+        "webhookUrl": {
+          "type": "string"
+        },
+        "dbsInformation": {
+          "$ref": "#/definitions/DBSInformation"
+        }
+      },
+      "example": {
+        "checkType": 0,
+        "firstName": "string",
+        "surname": "string",
+        "dateOfBirth": "string",
+        "email": "string",
+        "phoneNumber": "string",
+        "reference": "string",
+        "contactViaEmail": true,
+        "contactViaSms": true,
+        "webhookUrl": "string",
+        "dbsInformation": {
+          "identityVerified": true,
+          "identityVerifiedBy": "string",
+          "jobTitleOfIndividual": "string",
+          "employmentSector": "string",
+          "isVolunteer": true,
+          "isWorkingWithVulnerableAdults": true,
+          "isWorkingWithChildren": true,
+          "isIndividualsPersonalDetailsChecked": true,
+          "isWorkingAtVulnerablePersonsHomeAddress": true
+        }
+      }
+    },
+    "DBSInformation": {
+      "type": "object",
+      "required": [ "identityVerified", "identityVerifiedBy", "jobTitleOfIndividual", "employmentSector", "isVolunteer" ],
+      "properties": {
+        "identityVerified": {
+          "type": "boolean"
+        },
+        "identityVerifiedBy": {
+          "type": "string"
+        },
+        "jobTitleOfIndividual": {
+          "type": "string"
+        },
+        "employmentSector": {
+          "format": "int32",
+          "enum": [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34
+          ],
+          "type": "integer"
+        },
+        "isVolunteer": {
+          "type": "boolean"
+        },
+        "isWorkingWithVulnerableAdults": {
+          "type": "boolean"
+        },
+        "isWorkingWithChildren": {
+          "type": "boolean"
+        },
+        "isIndividualsPersonalDetailsChecked": {
+          "type": "boolean"
+        },
+        "isWorkingAtVulnerablePersonsHomeAddress": {
+          "type": "boolean"
+        }
+      }
+    },
+    "processCheckResponse": {
+      "type": "object",
+      "properties": {
+        "succeeded": {
+          "type": "boolean"
+        },
+        "checkId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "errorCode": {
+          "format": "int32",
+          "default": 0,
+          "enum": [0, 1, 2, 3, 4, 5],
+          "type": "integer"
+        },
+        "metaData": {
+          "$ref": "#/definitions/metaData"
+        }
+      }
+    },
+    "requestModelError": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "vettingStatusResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "format": "int32",
+          "default": 0,
+          "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Ocp-Apim-Subscription-Key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Identity"
+    },
+    {
+      "name": "DBS"
+    },
+    {
+      "name": "RightToWork"
+    },
+    {
+      "name": "Pre-Employment"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.infovetted.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.infovetted.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Security;Business Management"
+    }
+  ],
+  "x-ms-openai-manifest": {
+    "modelDescription": "Right To Work and DBS checks provided",
+    "humanName": "Vetting Checks",
+    "contactEmail": "info@infovetted.com",
+    "legalUrl": "https://www.infovetted.com/terms-and-conditions"
+  }
+}

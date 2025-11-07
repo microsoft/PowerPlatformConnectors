@@ -20,6 +20,26 @@ Retrieve all templates available in your workspace including default templates a
 Retrieve an individual default or custom template available in your workspace by identifier.
 ### Run template
 Run a default template or custom template by identifier to generate an AI output.
+### Get all knowledges
+Retrieves a list of knowledges available to your workspace, sorted from most recently created.
+### Create a new knowledge
+Creates a knowledge for use in personalizing AI outputs.
+### Get a knowledge
+Retrieves a specific knowledge.
+### Delete a knowledge
+Deletes an existing knowledge.
+### Update a knowledge
+Updates an existing knowledge.
+### Get all tones
+Retrieves a list of tones available to your workspace, sorted from most recently created.
+### Create a new tone
+Creates a tone for use in personalizing AI outputs.
+### Get a tone
+Retrieve a specific tone.
+### Update a tone
+Updates an existing tone.
+### Delete a tone
+Deletes an existing tone.
 
 ## Known Issues and Limitations
 There are no known issues at this time.

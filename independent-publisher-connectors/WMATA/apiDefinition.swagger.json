@@ -1,0 +1,2366 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "WMATA",
+    "version": "1.0",
+    "description": "This connector provides access to various services of the Washington Metropolitan Area Transit Authority (WMATA).",
+    "contact": {
+      "name": "Richard Wilson",
+      "url": "https://www.richardawilson.com",
+      "email": "richard.a.wilson@microsoft.com"
+    }
+  },
+  "host": "api.wmata.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json",
+    "application/octet-stream"
+  ],
+  "paths": {
+    "/NextBusService.svc/json/jPredictions": {
+      "get": {
+        "description": "Returns next bus arrival times at a specified stop.",
+        "operationId": "GetNextBuses",
+        "summary": "Get next bus arrival times",
+        "parameters": [
+          {
+            "name": "StopID",
+            "in": "query",
+            "description": "7-digit regional stop ID.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Stop ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetBusRoutes",
+              "value-collection": "Stops",
+              "value-title": "Name",
+              "value-path": "StopID"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "StopName": {
+                  "type": "string",
+                  "x-ms-summary": "Stop name",
+                  "description": "Full name of the bus stop."
+                },
+                "Predictions": {
+                  "type": "array",
+                  "x-ms-summary": "Bus predictions",
+                  "description": "Array of bus arrival predictions at the stop.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DirectionNum": {
+                        "type": "string",
+                        "x-ms-summary": "Direction number",
+                        "description": "Binary direction of the bus (0 or 1), indicating opposite directions for the same route."
+                      },
+                      "DirectionText": {
+                        "type": "string",
+                        "x-ms-summary": "Direction text",
+                        "description": "Customer-friendly description of the bus direction and destination."
+                      },
+                      "Minutes": {
+                        "type": "integer",
+                        "x-ms-summary": "Minutes to arrival",
+                        "description": "Minutes until the bus arrives at the stop."
+                      },
+                      "RouteID": {
+                        "type": "string",
+                        "x-ms-summary": "Route ID",
+                        "description": "Base route name as displayed on the bus."
+                      },
+                      "TripID": {
+                        "type": "string",
+                        "x-ms-summary": "Trip ID",
+                        "description": "Identifier for the bus trip, useful for correlating with other data."
+                      },
+                      "VehicleID": {
+                        "type": "string",
+                        "x-ms-summary": "Vehicle ID",
+                        "description": "Bus identifier, useful for tracking the specific vehicle."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid Stop ID."
+          }
+        }
+      }
+    },
+    "/Bus.svc/json/jBusPositions": {
+      "get": {
+        "description": "Returns bus positions for the given route, with an optional search radius. If no parameters are specified, all bus positions are returned.",
+        "operationId": "GetBusPositions",
+        "summary": "Get bus positions",
+        "parameters": [
+          {
+            "name": "RouteID",
+            "in": "query",
+            "description": "Base bus route, e.g., 70, 10A.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Route ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetBusRoutes",
+              "value-collection": "Routes",
+              "value-title": "Name",
+              "value-path": "RouteID"
+            }
+          },
+          {
+            "name": "Lat",
+            "in": "query",
+            "description": "Center point latitude, required if Longitude and Radius are specified.",
+            "type": "number",
+            "x-ms-summary": "Latitude"
+          },
+          {
+            "name": "Lon",
+            "in": "query",
+            "description": "Center point longitude, required if Latitude and Radius are specified.",
+            "type": "number",
+            "x-ms-summary": "Longitude"
+          },
+          {
+            "name": "Radius",
+            "in": "query",
+            "description": "Radius (meters) to include in the search area, required if Latitude and Longitude are specified.",
+            "type": "number",
+            "x-ms-summary": "Radius"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "BusPositions": {
+                  "type": "array",
+                  "x-ms-summary": "Bus positions",
+                  "description": "Array containing bus position information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DateTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Last update",
+                        "description": "Date and time of the last position update (Eastern Standard Time)."
+                      },
+                      "Deviation": {
+                        "type": "number",
+                        "x-ms-summary": "Schedule deviation",
+                        "description": "Deviation in minutes from the schedule. Positive values indicate the bus is running late, while negative values indicate it is ahead of schedule."
+                      },
+                      "DirectionText": {
+                        "type": "string",
+                        "x-ms-summary": "Direction",
+                        "description": "General direction of the trip, such as NORTH, SOUTH, EAST, or WEST."
+                      },
+                      "Lat": {
+                        "type": "number",
+                        "x-ms-summary": "Latitude",
+                        "description": "Last reported latitude of the bus."
+                      },
+                      "Lon": {
+                        "type": "number",
+                        "x-ms-summary": "Longitude",
+                        "description": "Last reported longitude of the bus."
+                      },
+                      "RouteID": {
+                        "type": "string",
+                        "x-ms-summary": "Route ID",
+                        "description": "Base route name as shown on the bus."
+                      },
+                      "TripEndTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Trip end time",
+                        "description": "Scheduled end date and time (Eastern Standard Time) of the bus\u0027s current trip."
+                      },
+                      "TripHeadsign": {
+                        "type": "string",
+                        "x-ms-summary": "Trip headsign",
+                        "description": "Destination of the bus."
+                      },
+                      "TripID": {
+                        "type": "string",
+                        "x-ms-summary": "Trip ID",
+                        "description": "Unique trip ID, correlating with schedule-related data."
+                      },
+                      "VehicleID": {
+                        "type": "string",
+                        "x-ms-summary": "Vehicle ID",
+                        "description": "Unique identifier for the bus, typically visible on the bus itself."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid RouteID or other parameters."
+          }
+        }
+      }
+    },
+    "/Bus.svc/json/jRouteDetails": {
+      "get": {
+        "description": "Returns a set of ordered latitude/longitude points along a route variant along with the list of stops served.",
+        "operationId": "GetRouteDetails",
+        "summary": "Get bus route details",
+        "parameters": [
+          {
+            "name": "RouteID",
+            "in": "query",
+            "description": "Bus route variant, e.g., 70, 10A, 10Av1.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Route ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetBusRoutes",
+              "value-collection": "Routes",
+              "value-title": "Name",
+              "value-path": "RouteID"
+            }
+          },
+          {
+            "name": "Date",
+            "in": "query",
+            "description": "Date in YYYY-MM-DD format for which to retrieve route and stop information. Defaults to today\u0027s date unless specified.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Date"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Direction0": {
+                  "type": "object",
+                  "x-ms-summary": "Direction 0 details",
+                  "description": "Details for the route in one direction.",
+                  "properties": {
+                    "DirectionNum": {
+                      "type": "string",
+                      "x-ms-summary": "Direction number",
+                      "description": "Binary property indicating the direction (0 or 1) for the route variant."
+                    },
+                    "DirectionText": {
+                      "type": "string",
+                      "x-ms-summary": "Direction text",
+                      "description": "General direction of the route variant (e.g., NORTH, SOUTH, EAST, WEST, LOOP)."
+                    },
+                    "Shape": {
+                      "type": "array",
+                      "x-ms-summary": "Route shape",
+                      "description": "Array containing shape point information along the route.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Lat": {
+                            "type": "number",
+                            "x-ms-summary": "Latitude",
+                            "description": "Latitude of the shape point."
+                          },
+                          "Lon": {
+                            "type": "number",
+                            "x-ms-summary": "Longitude",
+                            "description": "Longitude of the shape point."
+                          },
+                          "SeqNum": {
+                            "type": "integer",
+                            "x-ms-summary": "Sequence number",
+                            "description": "Order of the point in the sequence of shape points."
+                          }
+                        }
+                      }
+                    },
+                    "Stops": {
+                      "type": "array",
+                      "x-ms-summary": "Stops",
+                      "description": "Array containing stop information along the route.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Lat": {
+                            "type": "number",
+                            "x-ms-summary": "Stop latitude",
+                            "description": "Latitude of the stop."
+                          },
+                          "Lon": {
+                            "type": "number",
+                            "x-ms-summary": "Stop longitude",
+                            "description": "Longitude of the stop."
+                          },
+                          "Name": {
+                            "type": "string",
+                            "x-ms-summary": "Stop name",
+                            "description": "Name of the stop, which may differ slightly from what is displayed on the bus."
+                          },
+                          "StopID": {
+                            "type": "string",
+                            "x-ms-summary": "Stop ID",
+                            "description": "7-digit regional ID for the stop."
+                          },
+                          "Routes": {
+                            "type": "array",
+                            "x-ms-summary": "Routes at stop",
+                            "description": "Array of route variants serving the stop.",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "Direction1": {
+                  "type": "object",
+                  "x-ms-summary": "Direction 1 details",
+                  "description": "Details for the route in the opposite direction.",
+                  "properties": {
+                    "DirectionNum": {
+                      "type": "string",
+                      "x-ms-summary": "Direction number",
+                      "description": "Binary property indicating the direction (0 or 1) for the route variant."
+                    },
+                    "DirectionText": {
+                      "type": "string",
+                      "x-ms-summary": "Direction text",
+                      "description": "General direction of the route variant (e.g., NORTH, SOUTH, EAST, WEST, LOOP)."
+                    },
+                    "Shape": {
+                      "type": "array",
+                      "x-ms-summary": "Route shape",
+                      "description": "Array containing shape point information along the route.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Lat": {
+                            "type": "number",
+                            "x-ms-summary": "Latitude",
+                            "description": "Latitude of the shape point."
+                          },
+                          "Lon": {
+                            "type": "number",
+                            "x-ms-summary": "Longitude",
+                            "description": "Longitude of the shape point."
+                          },
+                          "SeqNum": {
+                            "type": "integer",
+                            "x-ms-summary": "Sequence number",
+                            "description": "Order of the point in the sequence of shape points."
+                          }
+                        }
+                      }
+                    },
+                    "Stops": {
+                      "type": "array",
+                      "x-ms-summary": "Stops",
+                      "description": "Array containing stop information along the route.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Lat": {
+                            "type": "number",
+                            "x-ms-summary": "Stop latitude",
+                            "description": "Latitude of the stop."
+                          },
+                          "Lon": {
+                            "type": "number",
+                            "x-ms-summary": "Stop longitude",
+                            "description": "Longitude of the stop."
+                          },
+                          "Name": {
+                            "type": "string",
+                            "x-ms-summary": "Stop name",
+                            "description": "Name of the stop, which may differ slightly from what is displayed on the bus."
+                          },
+                          "StopID": {
+                            "type": "string",
+                            "x-ms-summary": "Stop ID",
+                            "description": "7-digit regional ID for the stop."
+                          },
+                          "Routes": {
+                            "type": "array",
+                            "x-ms-summary": "Routes at stop",
+                            "description": "Array of route variants serving the stop.",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid RouteID or other parameters."
+          }
+        }
+      }
+    },
+    "/Bus.svc/json/jRoutes": {
+      "get": {
+        "description": "Returns a list of bus routes and their variants.",
+        "operationId": "GetBusRoutes",
+        "summary": "Get bus routes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Routes": {
+                  "type": "array",
+                  "x-ms-summary": "Bus routes",
+                  "description": "Array of bus routes and their variants.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "RouteID": {
+                        "type": "string",
+                        "x-ms-summary": "Route ID",
+                        "description": "Bus route identifier."
+                      },
+                      "Name": {
+                        "type": "string",
+                        "x-ms-summary": "Route name",
+                        "description": "Name of the bus route."
+                      },
+                      "LineDescription": {
+                        "type": "string",
+                        "x-ms-summary": "Line description",
+                        "description": "Description of the bus line."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/Bus.svc/json/jRouteSchedule": {
+      "get": {
+        "description": "Returns the bus schedule for a specific route and date.",
+        "operationId": "GetBusRouteSchedule",
+        "summary": "Get bus route schedule",
+        "parameters": [
+          {
+            "name": "RouteID",
+            "in": "query",
+            "description": "Bus route identifier.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Route ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetBusRoutes",
+              "value-collection": "Routes",
+              "value-title": "Name",
+              "value-path": "RouteID"
+            }
+          },
+          {
+            "name": "Date",
+            "in": "query",
+            "description": "Date in YYYY-MM-DD format for which to retrieve the schedule. Defaults to today\u0027s date if not specified.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Date"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "RouteSchedules": {
+                  "type": "array",
+                  "x-ms-summary": "Route schedules",
+                  "description": "Array containing bus schedule information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "RouteID": {
+                        "type": "string",
+                        "x-ms-summary": "Route ID",
+                        "description": "Bus route identifier."
+                      },
+                      "TripID": {
+                        "type": "string",
+                        "x-ms-summary": "Trip ID",
+                        "description": "Unique identifier for the trip."
+                      },
+                      "StartTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Start time",
+                        "description": "Scheduled start time of the trip."
+                      },
+                      "EndTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "End time",
+                        "description": "Scheduled end time of the trip."
+                      },
+                      "Stops": {
+                        "type": "array",
+                        "x-ms-summary": "Stops",
+                        "description": "Array of stops for the trip.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "StopID": {
+                              "type": "string",
+                              "x-ms-summary": "Stop ID",
+                              "description": "Stop identifier."
+                            },
+                            "Name": {
+                              "type": "string",
+                              "x-ms-summary": "Stop name",
+                              "description": "Name of the stop."
+                            },
+                            "Time": {
+                              "type": "string",
+                              "format": "date-time",
+                              "x-ms-summary": "Arrival time",
+                              "description": "Scheduled arrival time at the stop."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid RouteID or Date parameters."
+          }
+        }
+      }
+    },
+    "/Bus.svc/json/jStopSchedule": {
+      "get": {
+        "description": "Returns the bus schedule for a specific stop and date.",
+        "operationId": "GetBusStopSchedule",
+        "summary": "Get bus stop schedule",
+        "parameters": [
+          {
+            "name": "StopID",
+            "in": "query",
+            "description": "Bus stop identifier.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Stop ID",
+            "x-ms-dynamic-values": {
+              "operationId": "GetBusStops",
+              "value-collection": "Stops",
+              "value-title": "Name",
+              "value-path": "StopID"
+            }
+          },
+          {
+            "name": "Date",
+            "in": "query",
+            "description": "Date in YYYY-MM-DD format for which to retrieve the schedule. Defaults to today\u0027s date if not specified.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Date"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "StopSchedules": {
+                  "type": "array",
+                  "x-ms-summary": "Stop schedules",
+                  "description": "Array containing bus schedule information for the stop.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "RouteID": {
+                        "type": "string",
+                        "x-ms-summary": "Route ID",
+                        "description": "Bus route identifier."
+                      },
+                      "TripID": {
+                        "type": "string",
+                        "x-ms-summary": "Trip ID",
+                        "description": "Unique identifier for the trip."
+                      },
+                      "StartTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Start time",
+                        "description": "Scheduled start time of the trip."
+                      },
+                      "EndTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "End time",
+                        "description": "Scheduled end time of the trip."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid StopID or Date parameters."
+          }
+        }
+      }
+    },
+    "/Bus.svc/json/jStops": {
+      "get": {
+        "description": "Returns a list of bus stops.",
+        "operationId": "GetBusStops",
+        "summary": "Get bus stops",
+        "parameters": [
+          {
+            "name": "Lat",
+            "in": "query",
+            "description": "Center point latitude. Required if Longitude and Radius are specified.",
+            "required": false,
+            "type": "number",
+            "x-ms-summary": "Latitude"
+          },
+          {
+            "name": "Lon",
+            "in": "query",
+            "description": "Center point longitude. Required if Latitude and Radius are specified.",
+            "required": false,
+            "type": "number",
+            "x-ms-summary": "Longitude"
+          },
+          {
+            "name": "Radius",
+            "in": "query",
+            "description": "Radius (meters) to include in the search area. Required if Latitude and Longitude are specified.",
+            "required": false,
+            "type": "number",
+            "x-ms-summary": "Radius"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Stops": {
+                  "type": "array",
+                  "x-ms-summary": "Stops",
+                  "description": "Array of bus stops for the specified route.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "StopID": {
+                        "type": "string",
+                        "x-ms-summary": "Stop ID",
+                        "description": "Stop identifier."
+                      },
+                      "Name": {
+                        "type": "string",
+                        "x-ms-summary": "Stop name",
+                        "description": "Name of the bus stop."
+                      },
+                      "Lat": {
+                        "type": "number",
+                        "x-ms-summary": "Latitude",
+                        "description": "Latitude of the bus stop."
+                      },
+                      "Lon": {
+                        "type": "number",
+                        "x-ms-summary": "Longitude",
+                        "description": "Longitude of the bus stop."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid RouteID parameter."
+          }
+        }
+      }
+    },
+    "/StationPrediction.svc/json/GetPrediction/{StationCodes}": {
+      "get": {
+        "description": "Returns next train arrival information for one or more stations. Will return an empty set of results when no predictions are available. Use All for the StationCodes parameter to return predictions for all stations.",
+        "operationId": "GetNextTrains",
+        "summary": "Get next train arrival times",
+        "parameters": [
+          {
+            "name": "StationCodes",
+            "in": "path",
+            "description": "Comma-separated list of station codes. For all predictions, use All",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Station codes",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Trains": {
+                  "type": "array",
+                  "x-ms-summary": "Trains",
+                  "description": "Array of trains arriving at the station.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Car": {
+                        "type": "string",
+                        "x-ms-summary": "Train cars",
+                        "description": "Number of cars on the train, usually 6 or 8."
+                      },
+                      "Destination": {
+                        "type": "string",
+                        "x-ms-summary": "Destination",
+                        "description": "Abbreviated version of the train\u0027s final destination."
+                      },
+                      "DestinationCode": {
+                        "type": "string",
+                        "x-ms-summary": "Destination station code",
+                        "description": "Station code of the destination, if available."
+                      },
+                      "DestinationName": {
+                        "type": "string",
+                        "x-ms-summary": "Destination name",
+                        "description": "Full name of the destination station."
+                      },
+                      "Group": {
+                        "type": "string",
+                        "x-ms-summary": "Track group",
+                        "description": "Indicates the track group the train is on."
+                      },
+                      "Line": {
+                        "type": "string",
+                        "x-ms-summary": "Line abbreviation",
+                        "description": "Abbreviation of the train line (e.g., RD for Red Line)."
+                      },
+                      "LocationCode": {
+                        "type": "string",
+                        "x-ms-summary": "Arrival station code",
+                        "description": "Station code where the train is arriving."
+                      },
+                      "LocationName": {
+                        "type": "string",
+                        "x-ms-summary": "Arrival station name",
+                        "description": "Full name of the station where the train is arriving."
+                      },
+                      "Min": {
+                        "type": "string",
+                        "x-ms-summary": "Minutes to arrival",
+                        "description": "Minutes until the train arrives. Can be a numeric value or text such as ARR (arriving) or BRD (boarding)."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid StationCodes."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jLines": {
+      "get": {
+        "description": "Returns information about all rail lines.",
+        "operationId": "GetRailLines",
+        "summary": "Get rail lines",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Lines": {
+                  "type": "array",
+                  "x-ms-summary": "Rail lines",
+                  "description": "Array containing line information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DisplayName": {
+                        "type": "string",
+                        "x-ms-summary": "Display name",
+                        "description": "Full name of the line."
+                      },
+                      "EndStationCode": {
+                        "type": "string",
+                        "x-ms-summary": "End station code",
+                        "description": "End station code for the line."
+                      },
+                      "InternalDestination1": {
+                        "type": "string",
+                        "x-ms-summary": "Internal destination 1",
+                        "description": "Intermediate terminal station code for some lines."
+                      },
+                      "InternalDestination2": {
+                        "type": "string",
+                        "x-ms-summary": "Internal destination 2",
+                        "description": "Similar to InternalDestination1."
+                      },
+                      "LineCode": {
+                        "type": "string",
+                        "x-ms-summary": "Line code",
+                        "description": "Two-letter abbreviation for the line."
+                      },
+                      "StartStationCode": {
+                        "type": "string",
+                        "x-ms-summary": "Start station code",
+                        "description": "Start station code for the line."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jStationParking": {
+      "get": {
+        "description": "Returns parking information at a station based on a given StationCode.",
+        "operationId": "GetStationParking",
+        "summary": "Get rail station parking information",
+        "parameters": [
+          {
+            "name": "StationCode",
+            "in": "query",
+            "description": "Station code. Use the Station List method to return a list of all station codes.",
+            "type": "string",
+            "x-ms-summary": "Station Code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "StationsParking": {
+                  "type": "array",
+                  "x-ms-summary": "Stations parking",
+                  "description": "Array containing station parking information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Code": {
+                        "type": "string",
+                        "x-ms-summary": "Station code",
+                        "description": "Station code for the parking information."
+                      },
+                      "Notes": {
+                        "type": "string",
+                        "x-ms-summary": "Parking notes",
+                        "description": "Additional parking resources such as nearby lots."
+                      },
+                      "AllDayParking": {
+                        "type": "object",
+                        "x-ms-summary": "All-day parking",
+                        "description": "Information about all-day parking options.",
+                        "properties": {
+                          "TotalCount": {
+                            "type": "integer",
+                            "x-ms-summary": "Total parking spots",
+                            "description": "Number of all-day parking spots available."
+                          },
+                          "RiderCost": {
+                            "type": "number",
+                            "x-ms-summary": "Rider cost",
+                            "description": "All-day cost per day (weekday) for Metro riders."
+                          },
+                          "NonRiderCost": {
+                            "type": "number",
+                            "x-ms-summary": "Non-rider cost",
+                            "description": "All-day cost per day (weekday) for non-Metro riders."
+                          }
+                        }
+                      },
+                      "ShortTermParking": {
+                        "type": "object",
+                        "x-ms-summary": "Short-term parking",
+                        "description": "Information about short-term parking options.",
+                        "properties": {
+                          "TotalCount": {
+                            "type": "integer",
+                            "x-ms-summary": "Total short-term parking spots",
+                            "description": "Number of short-term parking spots available."
+                          },
+                          "Notes": {
+                            "type": "string",
+                            "x-ms-summary": "Short-term parking notes",
+                            "description": "Miscellaneous information related to short-term parking."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid StationCode."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jPath": {
+      "get": {
+        "description": "Returns a set of ordered stations and distances between two stations on the same line.",
+        "operationId": "GetPathBetweenStations",
+        "summary": "Get path between rail stations",
+        "parameters": [
+          {
+            "name": "FromStationCode",
+            "in": "query",
+            "description": "Station code for the origin station.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "From Station Code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          },
+          {
+            "name": "ToStationCode",
+            "in": "query",
+            "description": "Station code for the destination station.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "To Station Code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Path": {
+                  "type": "array",
+                  "x-ms-summary": "Path between stations",
+                  "description": "Array containing path details.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DistanceToPrev": {
+                        "type": "integer",
+                        "x-ms-summary": "Distance to previous station",
+                        "description": "Distance in feet to the previous station in the list."
+                      },
+                      "LineCode": {
+                        "type": "string",
+                        "x-ms-summary": "Line code",
+                        "description": "Two-letter abbreviation for the line this station\u0027s platform is on."
+                      },
+                      "SeqNum": {
+                        "type": "integer",
+                        "x-ms-summary": "Sequence number",
+                        "description": "Ordered sequence number."
+                      },
+                      "StationCode": {
+                        "type": "string",
+                        "x-ms-summary": "Station code",
+                        "description": "Station code for this station."
+                      },
+                      "StationName": {
+                        "type": "string",
+                        "x-ms-summary": "Station name",
+                        "description": "Full name for this station."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid StationCodes."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jStations": {
+      "get": {
+        "operationId": "GetJsonStations",
+        "summary": "Get rail station list",
+        "description": "Returns a list of station location and address information based on a given LineCode. Omit the LineCode to return all stations. The response is an array of objects identical to those returned in the Station Information method.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "LineCode",
+            "in": "query",
+            "description": "Two-letter line code abbreviation: RD - Red, YL - Yellow, GR - Green, BL - Blue, OR - Orange, SV - Silver.",
+            "type": "string",
+            "x-ms-summary": "Line",
+            "x-ms-dynamic-values": {
+              "operationId": "GetRailLines",
+              "value-collection": "Lines",
+              "value-title": "DisplayName",
+              "value-path": "LineCode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Stations": {
+                  "type": "array",
+                  "x-ms-summary": "Stations",
+                  "description": "Array containing station information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Address": {
+                        "type": "object",
+                        "x-ms-summary": "Address",
+                        "description": "Structure describing address information.",
+                        "properties": {
+                          "City": {
+                            "type": "string",
+                            "x-ms-summary": "City",
+                            "description": "City."
+                          },
+                          "State": {
+                            "type": "string",
+                            "x-ms-summary": "State",
+                            "description": "State (abbreviated)."
+                          },
+                          "Street": {
+                            "type": "string",
+                            "x-ms-summary": "Street",
+                            "description": "Street address (for GPS use)."
+                          },
+                          "Zip": {
+                            "type": "string",
+                            "x-ms-summary": "Zip code",
+                            "description": "Zip code."
+                          }
+                        }
+                      },
+                      "Code": {
+                        "type": "string",
+                        "x-ms-summary": "Station code",
+                        "description": "Station code. Repeated from input."
+                      },
+                      "Lat": {
+                        "type": "number",
+                        "x-ms-summary": "Latitude",
+                        "description": "Latitude."
+                      },
+                      "Lon": {
+                        "type": "number",
+                        "x-ms-summary": "Longitude",
+                        "description": "Longitude."
+                      },
+                      "Name": {
+                        "type": "string",
+                        "x-ms-summary": "Station name",
+                        "description": "Station name."
+                      },
+                      "LineCode1": {
+                        "type": "string",
+                        "x-ms-summary": "Primary line code",
+                        "description": "Two-letter abbreviation for one line served by this station."
+                      },
+                      "LineCode2": {
+                        "type": "string",
+                        "x-ms-summary": "Secondary line code",
+                        "description": "Additional line served by this station, if applicable."
+                      },
+                      "LineCode3": {
+                        "type": "string",
+                        "x-ms-summary": "Tertiary line code",
+                        "description": "Additional line served by this station, if applicable."
+                      },
+                      "LineCode4": {
+                        "type": "string",
+                        "x-ms-summary": "Quaternary line code",
+                        "description": "Additional line served by this station, if applicable."
+                      },
+                      "StationTogether1": {
+                        "type": "string",
+                        "x-ms-summary": "Connected station code 1",
+                        "description": "For stations with multiple platforms, the additional StationCode will be listed here."
+                      },
+                      "StationTogether2": {
+                        "type": "string",
+                        "x-ms-summary": "Connected station code 2",
+                        "description": "Similar in function to StationTogether1."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid LineCode provided."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jStationEntrances": {
+      "get": {
+        "description": "Returns a list of nearby station entrances based on latitude, longitude, and radius.",
+        "operationId": "GetStationEntrances",
+        "summary": "Get rail station entrances",
+        "parameters": [
+          {
+            "name": "Lat",
+            "in": "query",
+            "description": "Center point Latitude, required if Longitude and Radius are specified.",
+            "type": "number",
+            "x-ms-summary": "Latitude"
+          },
+          {
+            "name": "Lon",
+            "in": "query",
+            "description": "Center point Longitude, required if Latitude and Radius are specified.",
+            "type": "number",
+            "x-ms-summary": "Longitude"
+          },
+          {
+            "name": "Radius",
+            "in": "query",
+            "description": "Radius (meters) to include in the search area, required if Latitude and Longitude are specified.",
+            "type": "number",
+            "x-ms-summary": "Radius"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Entrances": {
+                  "type": "array",
+                  "x-ms-summary": "Station entrances",
+                  "description": "Array containing detailed information about station entrances.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Description": {
+                        "type": "string",
+                        "x-ms-summary": "Entrance description",
+                        "description": "Additional information for the entrance."
+                      },
+                      "Lat": {
+                        "type": "number",
+                        "x-ms-summary": "Latitude",
+                        "description": "Latitude of the entrance."
+                      },
+                      "Lon": {
+                        "type": "number",
+                        "x-ms-summary": "Longitude",
+                        "description": "Longitude of the entrance."
+                      },
+                      "Name": {
+                        "type": "string",
+                        "x-ms-summary": "Entrance name",
+                        "description": "Name of the entrance."
+                      },
+                      "StationCode1": {
+                        "type": "string",
+                        "x-ms-summary": "Station code 1",
+                        "description": "The station code associated with this entrance."
+                      },
+                      "StationCode2": {
+                        "type": "string",
+                        "x-ms-summary": "Station code 2",
+                        "description": "For stations containing multiple platforms, the other station code."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jStationInfo": {
+      "get": {
+        "description": "Returns station location and address information based on a given StationCode.",
+        "operationId": "GetStationInfo",
+        "summary": "Get rail station information",
+        "parameters": [
+          {
+            "name": "StationCode",
+            "in": "query",
+            "description": "Station code. Use the Station List method to return a list of all station codes.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Station Code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Address": {
+                  "type": "object",
+                  "x-ms-summary": "Station address",
+                  "description": "Structure describing address information.",
+                  "properties": {
+                    "City": {
+                      "type": "string",
+                      "x-ms-summary": "City",
+                      "description": "City where the station is located."
+                    },
+                    "State": {
+                      "type": "string",
+                      "x-ms-summary": "State",
+                      "description": "State (abbreviated) where the station is located."
+                    },
+                    "Street": {
+                      "type": "string",
+                      "x-ms-summary": "Street",
+                      "description": "Street address of the station."
+                    },
+                    "Zip": {
+                      "type": "string",
+                      "x-ms-summary": "Zip code",
+                      "description": "Zip code of the station."
+                    }
+                  }
+                },
+                "Code": {
+                  "type": "string",
+                  "x-ms-summary": "Station code",
+                  "description": "Station code."
+                },
+                "Lat": {
+                  "type": "number",
+                  "x-ms-summary": "Latitude",
+                  "description": "Latitude of the station."
+                },
+                "Lon": {
+                  "type": "number",
+                  "x-ms-summary": "Longitude",
+                  "description": "Longitude of the station."
+                },
+                "Name": {
+                  "type": "string",
+                  "x-ms-summary": "Station name",
+                  "description": "Full name of the station."
+                },
+                "LineCode1": {
+                  "type": "string",
+                  "x-ms-summary": "Primary line code",
+                  "description": "Two-letter abbreviation for one line served by this station."
+                },
+                "LineCode2": {
+                  "type": "string",
+                  "x-ms-summary": "Secondary line code",
+                  "description": "Additional line served by this station."
+                },
+                "LineCode3": {
+                  "type": "string",
+                  "x-ms-summary": "Tertiary line code",
+                  "description": "Additional line served by this station."
+                },
+                "StationTogether1": {
+                  "type": "string",
+                  "x-ms-summary": "Connected station code 1",
+                  "description": "The additional StationCode will be listed here."
+                },
+                "StationTogether2": {
+                  "type": "string",
+                  "x-ms-summary": "Connected station code 2",
+                  "description": "Similar in function to StationTogether1."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jStationTimes": {
+      "get": {
+        "description": "Returns opening and scheduled first/last train times for a given StationCode.",
+        "operationId": "GetStationTimes",
+        "summary": "Get rail station times",
+        "parameters": [
+          {
+            "name": "StationCode",
+            "in": "query",
+            "description": "Station code. Use the Station List method to return a list of all station codes.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Station Code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "StationTimes": {
+                  "type": "array",
+                  "x-ms-summary": "Station times",
+                  "description": "Array containing station times information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Code": {
+                        "type": "string",
+                        "x-ms-summary": "Station code",
+                        "description": "Station code."
+                      },
+                      "StationName": {
+                        "type": "string",
+                        "x-ms-summary": "Station name",
+                        "description": "Full name of the station."
+                      },
+                      "Monday": {
+                        "$ref": "#/definitions/DaySchedule"
+                      },
+                      "Tuesday": {
+                        "$ref": "#/definitions/DaySchedule"
+                      },
+                      "Wednesday": {
+                        "$ref": "#/definitions/DaySchedule"
+                      },
+                      "Thursday": {
+                        "$ref": "#/definitions/DaySchedule"
+                      },
+                      "Friday": {
+                        "$ref": "#/definitions/DaySchedule"
+                      },
+                      "Saturday": {
+                        "$ref": "#/definitions/DaySchedule"
+                      },
+                      "Sunday": {
+                        "$ref": "#/definitions/DaySchedule"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid StationCode."
+          }
+        }
+      }
+    },
+    "/Rail.svc/json/jSrcStationToDstStationInfo": {
+      "get": {
+        "description": "Returns travel time, distance, and fare information between two stations.",
+        "operationId": "GetStationToStationInfo",
+        "summary": "Get rail station to rail station information",
+        "parameters": [
+          {
+            "name": "FromStationCode",
+            "in": "query",
+            "description": "Station code for the origin station.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "From Station Code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          },
+          {
+            "name": "ToStationCode",
+            "in": "query",
+            "description": "Station code for the destination station.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "To Station Code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "StationToStationInfos": {
+                  "type": "array",
+                  "x-ms-summary": "Station to station info",
+                  "description": "Array containing travel time, distance, and fare information between two stations.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "CompositeMiles": {
+                        "type": "number",
+                        "x-ms-summary": "Distance in miles",
+                        "description": "Distance between the two stations in miles."
+                      },
+                      "DestinationStation": {
+                        "type": "string",
+                        "x-ms-summary": "Destination station",
+                        "description": "Station code for the destination station."
+                      },
+                      "RailFare": {
+                        "type": "object",
+                        "x-ms-summary": "Rail fare",
+                        "description": "Structure containing fare information.",
+                        "properties": {
+                          "PeakTime": {
+                            "type": "number",
+                            "x-ms-summary": "Peak fare",
+                            "description": "Fare during peak hours."
+                          },
+                          "OffPeakTime": {
+                            "type": "number",
+                            "x-ms-summary": "Off-peak fare",
+                            "description": "Fare during off-peak hours."
+                          },
+                          "SeniorDisabled": {
+                            "type": "number",
+                            "x-ms-summary": "Senior/disabled fare",
+                            "description": "Fare for senior citizens and people with disabilities."
+                          }
+                        }
+                      },
+                      "RailTime": {
+                        "type": "integer",
+                        "x-ms-summary": "Travel time",
+                        "description": "Estimated travel time in minutes."
+                      },
+                      "SourceStation": {
+                        "type": "string",
+                        "x-ms-summary": "Source station",
+                        "description": "Station code for the source station."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid StationCodes."
+          }
+        }
+      }
+    },
+    "/TrainPositions/TrainPositions": {
+      "get": {
+        "description": "Returns uniquely identifiable trains in service and what track circuits they currently occupy. Will return an empty set of results when no positions are available.",
+        "operationId": "GetTrainPositions",
+        "summary": "Get live train positions",
+        "parameters": [
+          {
+            "name": "contentType",
+            "in": "query",
+            "description": "Returns response in the specified format. Currently supported formats include json and xml.",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "default": "json",
+            "x-ms-summary": "Content type"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TrainPositions": {
+                  "type": "array",
+                  "x-ms-summary": "Train positions",
+                  "description": "Array containing train position information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "TrainId": {
+                        "type": "string",
+                        "x-ms-summary": "Train ID",
+                        "description": "Uniquely identifiable internal train identifier."
+                      },
+                      "TrainNumber": {
+                        "type": "string",
+                        "x-ms-summary": "Train number",
+                        "description": "Non-unique train identifier used by WMATA."
+                      },
+                      "CarCount": {
+                        "type": "integer",
+                        "x-ms-summary": "Car count",
+                        "description": "Number of cars in the train. Can sometimes be 0 when no data is available."
+                      },
+                      "DirectionNum": {
+                        "type": "integer",
+                        "x-ms-summary": "Direction number",
+                        "description": "Direction of movement. 1 is northbound/eastbound, 2 is southbound/westbound."
+                      },
+                      "CircuitId": {
+                        "type": "integer",
+                        "x-ms-summary": "Circuit ID",
+                        "description": "The circuit identifier the train is currently on."
+                      },
+                      "DestinationStationCode": {
+                        "type": "string",
+                        "x-ms-summary": "Destination station code",
+                        "description": "Destination station code. Can be NULL."
+                      },
+                      "LineCode": {
+                        "type": "string",
+                        "x-ms-summary": "Line code",
+                        "description": "Two-letter abbreviation for the line."
+                      },
+                      "SecondsAtLocation": {
+                        "type": "integer",
+                        "x-ms-summary": "Seconds at location",
+                        "description": "Approximate dwell time at the current track circuit."
+                      },
+                      "ServiceType": {
+                        "type": "string",
+                        "x-ms-summary": "Service type",
+                        "description": "Service type of the train, such as Normal or Special."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/TrainPositions/StandardRoutes": {
+      "get": {
+        "description": "Returns an ordered list of mostly revenue (and some lead) track circuits, arranged by line and track number. This data does not change frequently and should be cached for a reasonable amount of time.",
+        "operationId": "GetStandardRoutes",
+        "summary": "Get standard train routes",
+        "parameters": [
+          {
+            "name": "contentType",
+            "in": "query",
+            "description": "Returns response in the specified format. Currently supported formats include json and xml.",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-summary": "Content type",
+            "default": "json"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "StandardRoutes": {
+                  "type": "array",
+                  "x-ms-summary": "Standard routes",
+                  "description": "Array containing revenue line information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "LineCode": {
+                        "type": "string",
+                        "x-ms-summary": "Line code",
+                        "description": "Abbreviation for the revenue line."
+                      },
+                      "TrackCircuits": {
+                        "type": "array",
+                        "x-ms-summary": "Track circuits",
+                        "description": "Array containing ordered track circuit information.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "CircuitId": {
+                              "type": "integer",
+                              "x-ms-summary": "Circuit ID",
+                              "description": "Uniquely identifiable circuit number."
+                            },
+                            "SeqNum": {
+                              "type": "integer",
+                              "x-ms-summary": "Sequence number",
+                              "description": "Order in which the circuit appears for the given line and track."
+                            },
+                            "StationCode": {
+                              "type": "string",
+                              "x-ms-summary": "Station code",
+                              "description": "Station code if the circuit is at a station, otherwise NULL."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/TrainPositions/TrackCircuits": {
+      "get": {
+        "description": "Returns a list of all track circuits, including those on pocket tracks and crossovers. Each track circuit may include references to its right and left neighbors.",
+        "operationId": "GetTrackCircuits",
+        "summary": "Get track circuits",
+        "parameters": [
+          {
+            "name": "contentType",
+            "in": "query",
+            "description": "Returns response in the specified format. Currently supported formats include json and xml.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Content type",
+            "x-ms-visibility": "internal",
+            "default": "json"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "TrackCircuits": {
+                  "type": "array",
+                  "x-ms-summary": "Track circuits",
+                  "description": "Array containing track circuit information.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "CircuitId": {
+                        "type": "integer",
+                        "x-ms-summary": "Circuit ID",
+                        "description": "Uniquely identifiable circuit number."
+                      },
+                      "Track": {
+                        "type": "integer",
+                        "x-ms-summary": "Track number",
+                        "description": "Track number. 1 and 2 denote main lines, 0 and 3 are connectors and pocket tracks."
+                      },
+                      "Neighbors": {
+                        "type": "array",
+                        "x-ms-summary": "Neighbors",
+                        "description": "Array containing track circuit neighbor information.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "NeighborType": {
+                              "type": "string",
+                              "x-ms-summary": "Neighbor type",
+                              "description": "Left or Right neighbor group."
+                            },
+                            "CircuitIds": {
+                              "type": "array",
+                              "x-ms-summary": "Circuit IDs",
+                              "description": "Array of neighboring circuit IDs.",
+                              "items": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/Incidents.svc/json/BusIncidents": {
+      "get": {
+        "description": "Returns a set of reported bus incidents or delays for a given route. If the Route parameter is omitted, all reported incidents are returned.",
+        "operationId": "GetBusIncidents",
+        "summary": "Get bus incidents",
+        "parameters": [
+          {
+            "name": "Route",
+            "in": "query",
+            "description": "Base bus route. Variations are not recognized (e.g., use C2 instead of C2v1, C2v2).",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Route",
+            "x-ms-dynamic-values": {
+              "operationId": "GetBusRoutes",
+              "value-collection": "Routes",
+              "value-title": "Name",
+              "value-path": "RouteID"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "BusIncidents": {
+                  "type": "array",
+                  "x-ms-summary": "Bus incidents",
+                  "description": "Array of reported bus incidents or delays.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DateUpdated": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Date updated",
+                        "description": "Date and time (Eastern Standard Time) when the incident was last updated."
+                      },
+                      "Description": {
+                        "type": "string",
+                        "x-ms-summary": "Incident description",
+                        "description": "Free-text description of the delay or incident."
+                      },
+                      "IncidentID": {
+                        "type": "string",
+                        "x-ms-summary": "Incident ID",
+                        "description": "Unique identifier for the incident."
+                      },
+                      "IncidentType": {
+                        "type": "string",
+                        "x-ms-summary": "Incident type",
+                        "description": "Free-text description of the incident type, usually \u0027Delay\u0027 or \u0027Alert\u0027."
+                      },
+                      "RoutesAffected": {
+                        "type": "array",
+                        "x-ms-summary": "Routes affected",
+                        "description": "Array of routes affected by the incident.",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from an invalid Route."
+          }
+        }
+      }
+    },
+    "/Incidents.svc/json/ElevatorIncidents": {
+      "get": {
+        "description": "Returns a list of reported elevator and escalator outages at a given station. Omit the StationCode parameter to return all reported outages.",
+        "operationId": "GetElevatorIncidents",
+        "summary": "Get elevator and escalator outages",
+        "parameters": [
+          {
+            "name": "StationCode",
+            "in": "query",
+            "description": "Station code. Use the Station List method to return a list of all station codes.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Station code",
+            "x-ms-dynamic-values": {
+              "operationId": "GetJsonStations",
+              "value-collection": "Stations",
+              "value-title": "Name",
+              "value-path": "Code"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ElevatorIncidents": {
+                  "type": "array",
+                  "x-ms-summary": "Elevator incidents",
+                  "description": "Array of reported elevator and escalator outages.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DateOutOfServ": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Date out of service",
+                        "description": "Date and time (Eastern Standard Time) when the unit was reported out of service."
+                      },
+                      "DateUpdated": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Date updated",
+                        "description": "Date and time (Eastern Standard Time) when the outage details were last updated."
+                      },
+                      "EstimatedReturnToService": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Estimated return to service",
+                        "description": "Estimated date and time by when the unit is expected to return to normal service. May be NULL."
+                      },
+                      "LocationDescription": {
+                        "type": "string",
+                        "x-ms-summary": "Location description",
+                        "description": "Free-text description of the unit\u0027s location within the station."
+                      },
+                      "StationCode": {
+                        "type": "string",
+                        "x-ms-summary": "Station code",
+                        "description": "Station code for the unit\u0027s location."
+                      },
+                      "StationName": {
+                        "type": "string",
+                        "x-ms-summary": "Station name",
+                        "description": "Full station name, may include entrance information."
+                      },
+                      "SymptomDescription": {
+                        "type": "string",
+                        "x-ms-summary": "Symptom description",
+                        "description": "Description for why the unit is out of service or otherwise in reduced operation."
+                      },
+                      "UnitName": {
+                        "type": "string",
+                        "x-ms-summary": "Unit name",
+                        "description": "Unique identifier for the unit."
+                      },
+                      "UnitType": {
+                        "type": "string",
+                        "x-ms-summary": "Unit type",
+                        "description": "Type of unit. Will be either \u0027ELEVATOR\u0027 or \u0027ESCALATOR\u0027."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid StationCode."
+          }
+        }
+      }
+    },
+    "/Incidents.svc/json/Incidents": {
+      "get": {
+        "description": "Returns reported rail incidents, including significant disruptions and delays to normal service. The data is identical to WMATA\u0027s Metrorail Service Status feed.",
+        "operationId": "GetRailIncidents",
+        "summary": "Get rail incidents",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Incidents": {
+                  "type": "array",
+                  "x-ms-summary": "Rail incidents",
+                  "description": "Array of reported rail incidents, including disruptions and delays.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "DateUpdated": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Date updated",
+                        "description": "Date and time (Eastern Standard Time) when the incident was last updated."
+                      },
+                      "Description": {
+                        "type": "string",
+                        "x-ms-summary": "Incident description",
+                        "description": "Free-text description of the incident."
+                      },
+                      "IncidentID": {
+                        "type": "string",
+                        "x-ms-summary": "Incident ID",
+                        "description": "Unique identifier for the incident."
+                      },
+                      "IncidentType": {
+                        "type": "string",
+                        "x-ms-summary": "Incident type",
+                        "description": "Free-text description of the incident type, usually \u0027Delay\u0027 or \u0027Alert\u0027."
+                      },
+                      "LinesAffected": {
+                        "type": "string",
+                        "x-ms-summary": "Lines affected",
+                        "description": "Semi-colon and space-separated list of line codes affected by the incident."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Response from invalid request."
+          }
+        }
+      }
+    },
+    "/gtfs/bus-gtfs-static.zip": {
+      "get": {
+        "description": "Returns the GTFS static data file for WMATA bus.",
+        "operationId": "GetBusGtfsStatic",
+        "summary": "Get bus GTFS static",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS static data as a ZIP file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS static data file"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/bus-gtfsrt-alerts.pb": {
+      "get": {
+        "description": "Returns the GTFS RT service alerts feed for WMATA bus.",
+        "operationId": "GetBusGtfsRtAlerts",
+        "summary": "Get bus GTFS RT alerts",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS RT service alerts feed as a binary file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS RT service alerts feed"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/bus-gtfsrt-tripupdates.pb": {
+      "get": {
+        "description": "Returns the GTFS RT trip updates feed for WMATA bus.",
+        "operationId": "GetBusGtfsRtTripUpdates",
+        "summary": "Get bus GTFS RT trip updates",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS RT trip updates feed as a binary file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS RT trip updates feed"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/bus-gtfsrt-vehiclepositions.pb": {
+      "get": {
+        "description": "Returns the GTFS RT vehicle positions feed for WMATA bus.",
+        "operationId": "GetBusGtfsRtVehiclePositions",
+        "summary": "Get bus GTFS RT vehicle positions",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS RT vehicle positions feed as a binary file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS RT vehicle positions feed"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/rail-gtfs-static.zip": {
+      "get": {
+        "description": "Returns the GTFS static data file for WMATA rail, updated daily.",
+        "operationId": "GetRailGtfsStatic",
+        "summary": "Get rail GTFS static",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS static data as a ZIP file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS static data file"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/rail-gtfsrt-alerts.pb": {
+      "get": {
+        "description": "Returns the GTFS RT service alerts feed for WMATA rail.",
+        "operationId": "GetRailGtfsRtAlerts",
+        "summary": "Get rail GTFS RT alerts",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS RT service alerts feed as a binary file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS RT service alerts feed"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/rail-gtfsrt-tripupdates.pb": {
+      "get": {
+        "description": "Returns the GTFS RT trip updates feed for WMATA rail.",
+        "operationId": "GetRailGtfsRtTripUpdates",
+        "summary": "Get rail GTFS RT trip updates",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS RT trip updates feed as a binary file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS RT trip updates feed"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/rail-gtfsrt-vehiclepositions.pb": {
+      "get": {
+        "description": "Returns the GTFS RT vehicle positions feed for WMATA rail.",
+        "operationId": "GetRailGtfsRtVehiclePositions",
+        "summary": "Get rail GTFS RT vehicle positions",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the GTFS RT vehicle positions feed as a binary file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "GTFS RT vehicle positions feed"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    },
+    "/gtfs/rail-bus-gtfs-static.zip": {
+      "get": {
+        "description": "Returns the GTFS static data file for WMATA rail and bus combined, updated daily.",
+        "operationId": "GetRailBusCombinedGtfsStatic",
+        "summary": "Get rail and bus combined GTFS static",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response, returning the combined GTFS static data as a ZIP file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "Combined GTFS static data file"
+            }
+          },
+          "400": {
+            "description": "Invalid request. Please check the parameters."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DaySchedule": {
+      "type": "object",
+      "properties": {
+        "OpeningTime": {
+          "type": "string",
+          "x-ms-summary": "Opening time",
+          "description": "Scheduled station opening time."
+        },
+        "FirstTrains": {
+          "type": "array",
+          "x-ms-summary": "First trains",
+          "description": "Array containing first train information.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Time": {
+                "type": "string",
+                "x-ms-summary": "Departure time",
+                "description": "Scheduled departure time of the first train."
+              },
+              "DestinationStation": {
+                "type": "string",
+                "x-ms-summary": "Destination station",
+                "description": "Station code of the first train's destination."
+              }
+            }
+          }
+        },
+        "LastTrains": {
+          "type": "array",
+          "x-ms-summary": "Last trains",
+          "description": "Array containing last train information.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Time": {
+                "type": "string",
+                "x-ms-summary": "Departure time",
+                "description": "Scheduled departure time of the last train."
+              },
+              "DestinationStation": {
+                "type": "string",
+                "x-ms-summary": "Destination station",
+                "description": "Station code of the last train's destination."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "api_key"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://developer.wmata.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.wmata.com/about/records/privacy.cfm"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data"
+    }
+  ]
+}

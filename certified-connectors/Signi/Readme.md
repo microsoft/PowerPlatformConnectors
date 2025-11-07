@@ -13,7 +13,7 @@ You will need the following to proceed:
 
 ### How to get started
 
-1. Generate an Signi API key for your workspace by following [this guide](https://signi.refined.site/space/PKNB/383516725), the generation is done at [this page](https://app.signi.com/api)
+1. Generate an Signi API key for your workspace by following [this guide](https://helpdesk.signi.com/en/support/solutions/articles/201000062794-how-to-generate-api-key), the generation is done at [this page](https://app.signi.com)
 2. Fill out the following [form](https://go.tntg.cz/ismlouva-signup) so that we can set everything up for you (the form is in Czech, here is a quick sum-up):
    1. Login name (e-mail)
       * Enter your login name (email) that you use to log in to your company account. We will contact you at this email in case of problems.

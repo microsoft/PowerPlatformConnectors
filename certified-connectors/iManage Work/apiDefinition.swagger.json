@@ -4253,7 +4253,8 @@
             "in": "query",
             "type": "string",
             "enum": [
-              "single_selected_document"
+              "single_selected_document",
+              "multiple_selected_documents"
             ],
             "description": "ID of the trigger from which this action is called.",
             "required": true,
@@ -4372,7 +4373,7 @@
             "itemValuePath": "data"
           }
         },
-        "description": "Single document trigger schema. Contains schema for document ID and user ID, and optionally a form schema."
+        "description": "Contains the schema for document ID, user ID, and optionally a form schema."
       },
       "post": {
         "summary": "For a selected document",
@@ -4384,7 +4385,7 @@
         "operationId": "SingleSelectedDocument",
         "x-ms-visibility": "important",
         "x-ms-trigger": "single",
-        "x-ms-trigger-hint": "To see this trigger work, In iManage Work, from a document's context menu select 'Start a workflow' and choose this workflow.",
+        "x-ms-trigger-hint": "To see this trigger work, In iManage Work, from a document's context menu, select 'Start a workflow' and choose this workflow.",
         "parameters": [
           {
             "in": "header",
@@ -4570,6 +4571,242 @@
                   "type": "string",
                   "title": "Data",
                   "description": "The data returned."
+                }
+              },
+              "required": [
+                "data"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "/hooks/register/multipleSelectedDocuments": {
+      "x-ms-notification-content": {
+        "schema": {
+          "type": "object",
+          "x-ms-dynamic-schema": {
+            "operationId": "GetTriggerSchema",
+            "parameters": {
+              "formId": {
+                "parameter": "formId"
+              },
+              "libraryId": {
+                "parameter": "libraryId"
+              },
+              "triggerId": "multiple_selected_documents",
+              "inferFolderId": {
+                "parameter": "inferFolderId"
+              }
+            },
+            "value-path": "data"
+          },
+          "x-ms-dynamic-properties": {
+            "operationId": "GetTriggerSchema",
+            "parameters": {
+              "formId": {
+                "parameterReference": "body/formId"
+              },
+              "libraryId": {
+                "parameterReference": "body/libraryId"
+              },
+              "triggerId": {
+                "value": "multiple_selected_documents"
+              },
+              "inferFolderId": {
+                "parameterReference": "body/inferFolderId"
+              }
+            },
+            "itemValuePath": "data"
+          }
+        },
+        "description": "Contains the schema for document IDs, user ID, and optionally a form schema."
+      },
+      "post": {
+        "summary": "For multiple selected documents",
+        "description": "This trigger allows you to start a workflow for two or more selected documents in iManage Work. Provide a display name that will be shown to users in iManage Work applications. If 'Wait For Completion' is set to 'Yes', you must use the 'Update workflow state' action in your workflow, otherwise applications will eventually time out without indicating the completion state to the user.",
+        "tags": [
+          "Documents"
+        ],
+        "x-im-controller": "document.triggers.controllers",
+        "operationId": "MultipleSelectedDocuments",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see this trigger work, In iManage Work, select multiple documents, select 'Start a workflow' from the context menu and choose this workflow.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-ms-workflow-name",
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "in": "header",
+            "name": "x-ms-environment-id",
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "in": "header",
+            "name": "x-ms-workflow-version",
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "callbackUrl": {
+                  "type": "string",
+                  "title": "Callback URL",
+                  "description": "Specifies the callbackUrl for the workflow.",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
+                "workflowName": {
+                  "type": "string",
+                  "title": "Workflow Display Name",
+                  "description": "Specifies the display name of the workflow that will be visible to iManage Work users.",
+                  "x-ms-visibility": "important",
+                  "maxLength": 128,
+                  "pattern": "^(?!\\s*$)[*()&\\-_|@$%^?:{}!#+<>;=\\/\\s'.`~\",\\]\\[(\\u00A0-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF)|\\w]+$"
+                },
+                "description": {
+                  "type": "string",
+                  "title": "Description",
+                  "description": "Specifies the description of the workflow.",
+                  "x-ms-visibility": "important",
+                  "maxLength": 256
+                },
+                "libraryId": {
+                  "type": "string",
+                  "title": "Library ID",
+                  "description": "Specifies the ID of the library where the workflow is available.",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetLibraries",
+                    "value-collection": "data",
+                    "value-title": "display_name",
+                    "value-path": "id",
+                    "parameters": {
+                      "hidePreferredLibrary": true
+                    }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetLibraries",
+                    "itemsPath": "data",
+                    "itemTitlePath": "display_name",
+                    "itemValuePath": "id",
+                    "parameters": {
+                      "hidePreferredLibrary": {
+                        "value": true
+                      }
+                    }
+                  }
+                },
+                "formId": {
+                  "type": "string",
+                  "title": "Form ID",
+                  "description": "Specifies the ID of the form that is presented to the user to collect inputs used by the workflow.",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetForms",
+                    "value-collection": "data",
+                    "value-title": "display_name",
+                    "value-path": "id",
+                    "parameters": {
+                      "libraryId": {
+                        "parameter": "libraryId"
+                      },
+                      "context": "multiple_selected_documents"
+                    }
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetForms",
+                    "itemsPath": "data",
+                    "itemTitlePath": "display_name",
+                    "itemValuePath": "id",
+                    "parameters": {
+                      "libraryId": {
+                        "parameterReference": "body/libraryId"
+                      },
+                      "context": {
+                        "value": "multiple_selected_documents"
+                      }
+                    }
+                  }
+                },
+                "inferFolderId": {
+                  "type": "boolean",
+                  "title": "Return Folder ID",
+                  "description": "Specifies whether the document's folder ID is required by the workflow.",
+                  "default": false,
+                  "x-ms-visibility": "important"
+                },
+                "users": {
+                  "type": "string",
+                  "title": "Available To Users",
+                  "description": "Specifies one or more user IDs, separated by semicolons, to whom the workflow is available.",
+                  "x-ms-visibility": "important",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetWorkflowAllowedUserList",
+                    "value-collection": "data",
+                    "value-title": "display_name",
+                    "value-path": "id"
+                  },
+                  "x-ms-dynamic-list": {
+                    "operationId": "GetWorkflowAllowedUserList",
+                    "itemsPath": "data",
+                    "itemTitlePath": "display_name",
+                    "itemValuePath": "id"
+                  }
+                },
+                "groups": {
+                  "type": "string",
+                  "title": "Available To Groups",
+                  "description": "Specifies one or more group IDs, separated by semicolons, to which the workflow is available.",
+                  "x-ms-visibility": "advanced"
+                },
+                "waitForCompletion": {
+                  "type": "boolean",
+                  "title": "Wait For Completion",
+                  "description": "Specifies if applications wait until the workflow completes execution. If set to 'Yes', you must use the 'Update workflow state' action.",
+                  "default": false,
+                  "x-ms-visibility": "advanced"
+                }
+              },
+              "required": [
+                "callbackUrl",
+                "workflowName",
+                "description",
+                "libraryId",
+                "formId",
+                "inferFolderId"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request succeeded.",
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "The URL to unregister the workflow."
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "title": "Data",
+                  "description": "The data returned.",
+                  "properties": {}
                 }
               },
               "required": [
@@ -5771,6 +6008,211 @@
                   "type": "object"
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "/searchUsers": {
+      "get": {
+        "summary": "Search users",
+        "description": "Searches for iManage Work users matching the specified search criteria.",
+        "tags": [
+          "Users"
+        ],
+        "x-im-controller": "user.controllers",
+        "operationId": "SearchUsers",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Email ID",
+            "description": "Specifies the email ID to search for. For example, 'JSMITH@XYZ.COM'.",
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users matching the search criteria.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "topMatchingUser": {
+                      "type": "object",
+                      "title": "Top Matching User",
+                      "properties": {
+                        "allow_logon": {
+                          "type": "boolean",
+                          "title": "Allow Logon",
+                          "description": "Indicates if the user is allowed to logon."
+                        },
+                        "custom1": {
+                          "type": "string",
+                          "title": "Custom1",
+                          "description": "Indicates additional information about the user."
+                        },
+                        "custom2": {
+                          "type": "string",
+                          "title": "Custom2",
+                          "description": "Indicates additional information about the user."
+                        },
+                        "custom3": {
+                          "type": "string",
+                          "title": "Custom3",
+                          "description": "Indicates additional information about the user."
+                        },
+                        "directory_id": {
+                          "type": "string",
+                          "title": "Directory ID",
+                          "description": "Indicates the ID from an external directory (such as ADFS), which is used for user profile synchronization."
+                        },
+                        "distinguished_name": {
+                          "type": "string",
+                          "maxLength": 254,
+                          "title": "Distinguished Name",
+                          "description": "Indicates the name of the object that represents the fully qualified path of names that trace the entry back to the root of the LDAP tree."
+                        },
+                        "edit_date": {
+                          "type": "string",
+                          "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2})(:)(\\d{2})(:)(\\d{2})(\\.\\d+)?(Z|([+-])(\\d{2})(:)?(\\d{2}))$",
+                          "title": "Edit Date",
+                          "description": "Indicates the date and time (in ISO 8601 format) of the most recent change to the user profile."
+                        },
+                        "email": {
+                          "type": "string",
+                          "maxLength": 254,
+                          "title": "Email",
+                          "description": "Indicates the email ID of the user."
+                        },
+                        "exch_autodiscover": {
+                          "type": "string",
+                          "title": "Exchange Auto-discover URL",
+                          "description": "Indicates the exchange server details of the user."
+                        },
+                        "extension": {
+                          "type": "string",
+                          "title": "Extension",
+                          "description": "Indicates the phone number extension of the user."
+                        },
+                        "failed_logins": {
+                          "type": "integer",
+                          "format": "int64",
+                          "title": "Failed Logon Attempts",
+                          "description": "Indicates the current number of failed sign-in attempts of the user."
+                        },
+                        "fax": {
+                          "type": "string",
+                          "title": "Fax",
+                          "description": "Indicates the fax number of the user."
+                        },
+                        "force_password_change": {
+                          "type": "boolean",
+                          "title": "Force Password Change",
+                          "description": "Indicates the user must change their password on next sign-in. Only applicable to virtual users, indicated by 'user_nos' value '2'."
+                        },
+                        "full_name": {
+                          "type": "string",
+                          "title": "Full Name",
+                          "description": "Indicates the full name of the user."
+                        },
+                        "general": {
+                          "type": "string",
+                          "title": "General",
+                          "description": "Indicates general information about the user."
+                        },
+                        "id": {
+                          "type": "string",
+                          "title": "ID",
+                          "description": "Indicates the ID of the user. For example, 'JSMITH'."
+                        },
+                        "is_external": {
+                          "type": "boolean",
+                          "title": "Is External",
+                          "description": "Indicates an external user. An external user has limited access and is commonly used for temporary team members, consultants, or those external to the organization."
+                        },
+                        "last_sync_ts": {
+                          "type": "string",
+                          "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2})(:)(\\d{2})(:)(\\d{2})(\\.\\d+)?(Z|([+-])(\\d{2})(:)?(\\d{2}))$",
+                          "title": "Last Sync Time",
+                          "description": "Indicates the last sync time (in ISO 8601 datetime format) of the user's profile with an external directory, such as LDAP or Microsoft Active Directory (ADFS)."
+                        },
+                        "location": {
+                          "type": "string",
+                          "title": "Location",
+                          "description": "Indicates the geographical location of the user."
+                        },
+                        "password_never_expire": {
+                          "type": "boolean",
+                          "title": "Password Never Expires",
+                          "description": "Indicates if the user's password never expires."
+                        },
+                        "phone": {
+                          "type": "string",
+                          "title": "Phone Number",
+                          "description": "Indicates the phone number of the user."
+                        },
+                        "preferred_library": {
+                          "type": "string",
+                          "title": "Preferred Library",
+                          "description": "Indicates the preferred library. A preferred library is the user's default library. Each user must have one preferred library."
+                        },
+                        "pwd_changed_ts": {
+                          "type": "string",
+                          "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2})(:)(\\d{2})(:)(\\d{2})(\\.\\d+)?(Z|([+-])(\\d{2})(:)?(\\d{2}))$",
+                          "title": "Password Changed Time",
+                          "description": "Indicates the time (in ISO 8601 datetime format) when the user's password was last changed. This is applicable to virtual users only (whose User NOS is 2)."
+                        },
+                        "ssid": {
+                          "type": "string",
+                          "title": "SSID",
+                          "description": "Indicates the unique, system-generated ID for the user."
+                        },
+                        "user_domain": {
+                          "type": "string",
+                          "title": "Domain",
+                          "description": "Indicates the fully qualified domain name for the user's directory service."
+                        },
+                        "user_id_ex": {
+                          "type": "string",
+                          "title": "Extended ID",
+                          "description": "Indicates the original value of the user ID that is received from an external directory such as Microsoft Active Directory (ADFS)."
+                        },
+                        "user_nos": {
+                          "type": "integer",
+                          "format": "int64",
+                          "title": "NOS",
+                          "description": "Indicates the type of operating system from which the user is synced. Possible values are 2 (Virtual user) and 6 (Enterprise user). For more information, contact your iManage Work system administrator."
+                        },
+                        "user_num": {
+                          "type": "integer",
+                          "format": "int64",
+                          "title": "Number",
+                          "description": "Indicates the numeric system ID of the user."
+                        }
+                      }
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/UserProfileInArray"
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              },
+              "required": [
+                "data"
+              ],
+              "additionalProperties": false
             }
           }
         }
@@ -8603,7 +9045,7 @@
           "type": "string",
           "maxLength": 254,
           "title": "Email",
-          "description": "Indicates the email of the user."
+          "description": "Indicates the email ID of the user."
         },
         "exch_autodiscover": {
           "type": "string",
@@ -8683,6 +9125,11 @@
           "title": "Password Changed Time",
           "description": "Indicates the time (in ISO 8601 datetime format) when the user's password was last changed. This is applicable to virtual users only (whose User NOS is 2)."
         },
+        "ssid": {
+          "type": "string",
+          "title": "SSID",
+          "description": "Indicates the unique, system-generated ID for the user."
+        },
         "user_domain": {
           "type": "string",
           "title": "User Domain",
@@ -8697,7 +9144,7 @@
           "type": "integer",
           "format": "int64",
           "title": "User NOS",
-          "description": "Indicates the type of operating system from which the user is synced. Possible values are \u20182\u2019 (Virtual user) and \u20186\u2019 (Enterprise user). For more information, contact your iManage Work system administrator."
+          "description": "Indicates the type of operating system from which the user is synced. Possible values are 2 (Virtual user) and 6 (Enterprise user). For more information, contact your iManage Work system administrator."
         },
         "user_num": {
           "type": "integer",
@@ -8752,7 +9199,7 @@
           "type": "string",
           "maxLength": 254,
           "title": "Email",
-          "description": "Indicates the email of the user."
+          "description": "Indicates the email ID of the user."
         },
         "exch_autodiscover": {
           "type": "string",
@@ -8832,6 +9279,11 @@
           "title": "Password Changed Time",
           "description": "Indicates the time (in ISO 8601 datetime format) when the user's password was last changed. This is applicable to virtual users only (whose User NOS is 2)."
         },
+        "ssid": {
+          "type": "string",
+          "title": "SSID",
+          "description": "Indicates the unique, system-generated ID for the user."
+        },
         "user_domain": {
           "type": "string",
           "title": "Domain",
@@ -8846,7 +9298,7 @@
           "type": "integer",
           "format": "int64",
           "title": "NOS",
-          "description": "Indicates the type of operating system from which the user is synced. Possible values are \u20182\u2019 (Virtual user) and \u20186\u2019 (Enterprise user). For more information, contact your iManage Work system administrator."
+          "description": "Indicates the type of operating system from which the user is synced. Possible values are 2 (Virtual user) and 6 (Enterprise user). For more information, contact your iManage Work system administrator."
         },
         "user_num": {
           "type": "integer",

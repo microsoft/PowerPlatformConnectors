@@ -1,4 +1,4 @@
-public class Script : ScriptBase
+﻿public class Script : ScriptBase
 {
 
     string public_key = "public_key";
@@ -9,27 +9,21 @@ public class Script : ScriptBase
         var accessTokenResponse = await this.getAccessTokenResponse().ConfigureAwait(false);
         if (accessTokenResponse.IsSuccessStatusCode)
         {
+            HttpResponseMessage response = await this.invokeAction(accessTokenResponse).ConfigureAwait(false);
 
-            if (this.Context.OperationId == "GetCustomFieldsSchema")
+            if (response.IsSuccessStatusCode)
             {
-                await this.UpdateGetCustomFieldsSchemaRequest().ConfigureAwait(false);
+                return response;
             }
-
-            var response = await this.invokeAction(accessTokenResponse).ConfigureAwait(false);
-            return response;
+            else
+            {
+                return createErrorMessage(response.StatusCode, await response.Content.ReadAsStringAsync());
+            }
         }
         else
         {
             return accessTokenResponse;
         }
-    }
-
-    private async Task UpdateGetCustomFieldsSchemaRequest()
-    {
-        var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
-        var contentAsJson = new JObject();
-        contentAsJson.Add("entity", contentAsString.Trim('"'));
-        this.Context.Request.Content = CreateJsonContent(contentAsJson.ToString());
     }
 
     private async Task<HttpResponseMessage> getAccessTokenResponse()
@@ -112,11 +106,11 @@ public class Script : ScriptBase
         HttpResponseMessage response = await this.Context.SendAsync(request, cancellationToken).ConfigureAwait(false);
         string responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         JArray lastResponseAsJsonArray = JArray.Parse(responseAsString);
-        foreach (var item in lastResponseAsJsonArray.ToList())
+        foreach (var item in lastResponseAsJsonArray)
         {
-            if ((bool)item["deleted"])
+            if (item["deleted"] == null || !(bool)item["deleted"])
             {
-                item.Remove();
+                newResponseAsJsonArray.Add(item);
             }
         }
         return newResponseAsJsonArray;
@@ -139,6 +133,36 @@ public class Script : ScriptBase
 
         switch (this.Context.OperationId)
         {
+            case "CreateAccount":
+            case "UpdateAccount":
+            case "CreateContact":
+            case "UpdateContact":
+            case "CreateOpportunity":
+            case "UpdateOpportunity":
+            case "CreateSalesOrder":
+            case "UpdateSalesOrder":
+            case "CreateSalesOrderLine":
+            case "UpdateSalesOrderLine":
+                var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var contentAsJson = JObject.Parse(contentAsString);
+
+                if (contentAsJson["customFields"] != null)
+                {
+                    var keysToChange = contentAsJson["customFields"].Children<JProperty>().ToList();
+
+                    foreach (var key in keysToChange)
+                    {
+                        contentAsJson[key.Name] = key.Value;
+                        key.Remove();
+                    }
+
+                    ((JObject)contentAsJson).Remove("customFields");
+                }
+
+                this.Context.Request.Content = CreateJsonContent(contentAsJson.ToString());
+
+                newResponse = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
+                break;
             case "CreateAccountWebhook":
             case "UpdateAccountWebhook":
             case "CreateContactWebhook":
@@ -177,18 +201,47 @@ public class Script : ScriptBase
                 newResponse.Content = CreateJsonContent((await withoutDeletedItems(this.Context.Request, this.CancellationToken)).ToString());
                 break;
             case "GetCustomFieldsSchema":
+                var customFieldSchemaContentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var customFieldSchemaContentAsJson = new JObject();
+                customFieldSchemaContentAsJson.Add("entity", customFieldSchemaContentAsString.Trim('"'));
+                this.Context.Request.Content = CreateJsonContent(customFieldSchemaContentAsJson.ToString());
+
                 response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(false);
                 responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 // var responseAsJson = JObject.Parse(responseAsString);
 
                 var fieldProcessor = new FieldProcessor();
                 var (customFields, requiredFields) = fieldProcessor.DynamicFields(responseAsString, "create");
-                newResponseAsJson.Add("data", new JObject
+                if (customFields.Count > 0)
                 {
-                    ["type"] = "object",
-                    // ["required"] = requiredFields,
-                    ["properties"] = (JObject)JToken.FromObject(customFields)
-                });
+                    newResponseAsJson.Add("data", new JObject
+                    {
+                        ["type"] = "object",
+                        // ["required"] = requiredFields,
+                        ["properties"] = (JObject)JToken.FromObject(customFields)
+                    });
+                }
+                else
+                {
+                    Dictionary<string, ApiProperty> missingProperties = new Dictionary<string, ApiProperty>();
+
+                    var apiProperty = new ApiProperty();
+                    apiProperty.type = "string";
+                    apiProperty.format = "string";
+                    apiProperty.title = "Custom Field Placeholder";
+                    apiProperty.description = "This is just a workaround to support the case in which no custom fields exist " +
+                        "for the specific entity in ForceManager. Since the dynamic schema of Power Automate expects some data, " +
+                        " we return this useless internal property to avoid UI issue in Power Automate modules.";
+                    apiProperty.xmssummary = "Custom Field Placeholder";
+                    apiProperty.xmsvisibility = "internal";
+
+                    missingProperties.Add("Z_NoCustomFieldsPresent", apiProperty);
+                    newResponseAsJson.Add("data", new JObject
+                    {
+                        ["type"] = "object",
+                        ["properties"] = (JObject)JToken.FromObject(missingProperties)
+                    });
+                }
                 newResponse.Content = CreateJsonContent(newResponseAsJson.ToString());
                 break;
             case "ListCountries":
@@ -294,14 +347,26 @@ public class Script : ScriptBase
 
                 var apiProperty = new ApiProperty();
 
-                apiProperty.type = ConvertType(item.Type);
+
+                if (item.Type == "unicode" && !string.IsNullOrEmpty(item.Choices) && !(item.List == true))
+                {
+                    apiProperty.type = "array";
+                    apiProperty.items = new JObject
+                    {
+                        ["type"] = "integer"
+                    };
+                }
+                else
+                {
+                    apiProperty.type = ConvertType(item.Type);
+                }
                 apiProperty.format = ConvertFormat(item.Type);
 
                 apiProperty.title = item.Label;
                 apiProperty.description = item.Label;
                 apiProperty.xmssummary = item.Label;
 
-                var required = (item.Required && action == "create");
+                var required = (item.Required_Via_Api && action == "create");
 
                 // apiProperty.required = required;
                 apiProperty.xmsvisibility = required ? "important" : "advanced";
@@ -370,7 +435,9 @@ public class Script : ScriptBase
     {
         public string Key { get; set; }
         public string Label { get; set; }
+        public string Help_Text { get; set; }
         public bool Required { get; set; }
+        public bool Required_Via_Api { get; set; }
         public string Type { get; set; }
         public string Choices { get; set; }
         public bool? List { get; set; }
@@ -390,6 +457,7 @@ public class Script : ScriptBase
         // public List<ApiProperty> spec { get; set; }
         // [JsonProperty("enum")]
         // public List<ApiOption> options { get; set; }
+        public JObject items { get; set; }
     }
 
     public class ApiOption
