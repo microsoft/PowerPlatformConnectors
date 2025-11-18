@@ -48,5 +48,7 @@ Here are the actions provided:
 
 ## Known Issues & Limitations  
 - Transcript action only works for certain audio file types
-- Blog post / video: <link>  
-- GitHub repository: <link>
+
+## Support & Feedback  
+If you encounter issues or would like to provide feedback, please contact:  
+**svc_act1@ascension-team.com
