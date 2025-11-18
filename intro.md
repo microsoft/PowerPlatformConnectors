@@ -1,7 +1,7 @@
-# Azure OpenAI ResponseAPI
+# SVC Azure OpenAI ResponseAPI
 
 ## Overview  
-The Azure OpenAI ResponseAPI custom connector allows makers in the Power Platform (Power Apps, Power Automate, Logic Apps) to easily interact with our companies Azure AI Foundry REST API.  
+The SVC Azure OpenAI ResponseAPI custom connector allows makers in the Power Platform (Power Apps, Power Automate, Logic Apps) to easily interact with our companies SVC Azure AI Foundry REST API.  
 With this connector you can
 
 - Create an AI Response to a query
@@ -18,7 +18,7 @@ With this connector you can
 
 ## Features  
 ### Authentication & Connection  
-This connector uses api key Authentication to connect to our companies Azure AI Foundry REST API.  
+This connector uses api key Authentication to connect to our companies SVC Azure AI Foundry REST API.  
 To set up the connection:  
 1. Obtain an api key from from <link or instructions>.  
 2. In the connector in your environment, create a new connection and provide the key.  
@@ -41,10 +41,12 @@ Here are the actions provided:
 
 
 ### Getting Started  
-1. In Power Automate / Power Apps, add the connector **Azure OpenAI ResponseAPI**.  
+1. In Power Automate / Power Apps, add the connector **SVC Azure OpenAI ResponseAPI**.  
 2. Choose the connection you created above.  
 3. Insert the action **Create Response**, configure parameters such as api-version, x-ms-oai-image-generation-deployment and body.  
 4. Run the action.  
 
 ## Known Issues & Limitations  
 - Transcript action only works for certain audio file types
+- Blog post / video: <link>  
+- GitHub repository: <link>
