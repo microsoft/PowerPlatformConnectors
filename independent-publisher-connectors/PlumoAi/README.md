@@ -36,5 +36,9 @@ The connector supports the following operations:
 ### Records
 - Retrieve Records from a Table  
 - Load all rows for analytics
-- Retrieve Records from a Table  
-- Load all rows for analytics
+
+
+### Flow Screenshots (3 unique operations)
+![Flow Operation 1](./Screenshot1.png)
+![Flow Operation 2](./Screnshot 2.png)
+![Flow Operation 3](./Screenshot 3.png)
