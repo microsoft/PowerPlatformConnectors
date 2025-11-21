@@ -1,7 +1,7 @@
-# SVC Azure OpenAI (Independent Publisher)
+# ACT Azure OpenAI (Independent Publisher)
 
 ## Overview  
-The SVC Azure OpenAI (Independent Publisher) custom connector allows makers to easily interact with our company’s SVC Azure AI Foundry REST API.
+The ACT Azure OpenAI (Independent Publisher) custom connector enhances the available functions and capabilities to easily interact with Azure AI Foundry Open AI models including advanced functionalities like using the Response API with chaining, files, etc. .
 
 With this connector you can
 
@@ -17,12 +17,14 @@ With this connector you can
 - Transcribes audio into the input language.
 - Generates audio from the input text.
 
+In addition, it can also be used generate codes and images using the create endpoint, chain the responses into a thread.
+
 ## Features  
 ### Authentication & Connection  
-This connector uses API key authentication to connect to our company’s SVC Azure AI Foundry REST API.  
+This connector uses API key authentication to connect to an Azure OpenAI Rest API in Azure Foundry?.  
 To set up the connection:  
-1. Obtain an api key from from <link or instructions>.  
-2. In the connector in your environment, create a new connection and provide the key.  
+1. Obtain an api key and endpoint from Azure AI Foundry.  
+2. In the connector in your environment, create a new connection and provide the key endpoint/host.  
 3. Once connected, all actions/triggers will work as described.
 
 ### Actions & Triggers  
@@ -42,15 +44,15 @@ Here are the actions provided:
 
 
 ### Getting Started  
-1. In Power Automate / Power Apps, add the connector **SVC Azure OpenAI (Independent Publisher)**.  
+1. In Power Automate / Power Apps, add the connector **ACT Azure OpenAI (Independent Publisher)**.  
 2. Choose the connection you created above.  
 3. Insert the action **Create Response**, configure parameters such as api-version, x-ms-oai-image-generation-deployment and body.  
 4. Run the action.  
 
 ## Known Issues & Limitations  
-- Transcript action only works for certain audio file types
+- No known limitations beyond Microsoft's documented limitations of the Azure OpenAI API
 
 ## Support & Feedback  
 If you encounter issues or would like to provide feedback, please contact:  
-**svc_act1@ascension-team.com**
+**contact@actvelocity.com**
 
