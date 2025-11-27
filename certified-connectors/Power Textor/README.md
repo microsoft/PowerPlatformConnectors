@@ -14,6 +14,10 @@ Subscribe to a Power Textor plan `https://powertextor.com/#pricing`.
 
 This operation triggers a flow when a new text message arrives. The flow gets information of sender number, text message body, sender location and address details, recipient number, and recipient location and address details.
 
+### When a text (MMS) message is received (Trigger)
+
+This operation triggers a flow when a new MMS message arrives. The flow gets information of sender number, text message body, sender location and address details, recipient number, and recipient location and address details.
+
 ### Send text (SMS) message to multiple contacts
 
 Send a bulk text (SMS) message to multiple Power Textor Contacts at once.
