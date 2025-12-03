@@ -13,11 +13,10 @@ public class Script : ScriptBase
     private JObject GetServerInfo() => new JObject
     {
         ["name"] = "power-mcp-server",
-        ["version"] = "1.0.0"
-        // Optional fields you can add:
-        // ["title"] = "My MCP Server",
-        // ["description"] = "Description of what this server does",
-        // ["websiteUrl"] = "https://example.com"
+        ["version"] = "1.0.0",
+        ["title"] = "Power MCP Server",
+        ["description"] = "Description of what this Power MCP server does.",
+        ["websiteUrl"] = "https://troystaylor.com"
     };
 
     private JObject GetServerCapabilities() => new JObject
