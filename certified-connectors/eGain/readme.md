@@ -6,7 +6,7 @@ The eGain connector is designed to integrate seamlessly with Microsoft Copilot S
 
 ## Prerequisites
 
-Before using the Egain connector, ensure you have the following prerequisites in place:
+Before using the eGain connector, ensure you have the following prerequisites in place:
 
 1. **eGain Instance Requirements**: You need to have an eGain instance running on Rigel or R21.x.x version or higher.
 
@@ -40,7 +40,7 @@ Before using the Egain connector, ensure you have the following prerequisites in
 
 ## Security and Authentication
 
-**Important**: The Egain connector itself does not require any authentication configuration. However, the eGain APIs are secured and support generic OAuth 2.0 authentication, which is configured in the Security tab of your Copilot Studio agents.
+**Important**: The eGain connector itself does not require any authentication configuration. However, the eGain APIs are secured and support generic OAuth 2.0 authentication, which is configured in the Security tab of your Copilot Studio agents.
 
 Both eGain instances have security enabled, ensuring that all API calls are properly authenticated. The connector automatically handles:
 
@@ -381,4 +381,4 @@ Support for custom URL construction using baseUrl and shortName parameters:
 
 ---
 
-*This documentation is designed to help developers and administrators effectively implement and maintain the Egain connector in Microsoft Copilot Studio agents.*
+*This documentation is designed to help developers and administrators effectively implement and maintain the eGain connector in Microsoft Copilot Studio agents.*
