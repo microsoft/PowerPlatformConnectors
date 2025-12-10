@@ -1,12 +1,12 @@
-# eGain Connector - Copilot Agent Usage Guide
+# eGain - Connector Usage Guide
 
 ## Overview
 
-The eGain Connector is designed to integrate seamlessly with Microsoft Copilot Studio agents, providing powerful knowledge management capabilities through two distinct eGain instances. This connector enables agents to search knowledge bases, generate AI-powered responses, and provide accurate citations with automatic URL generation.
+The eGain connector is designed to integrate seamlessly with Microsoft Copilot Studio agents, providing powerful knowledge management capabilities through two distinct eGain instances. This connector enables agents to search knowledge bases, generate AI-powered responses, and provide accurate citations with automatic URL generation.
 
 ## Prerequisites
 
-Before using the eGain Connector, ensure you have the following prerequisites in place:
+Before using the Egain connector, ensure you have the following prerequisites in place:
 
 1. **eGain Instance Requirements**: You need to have an eGain instance running on Rigel or R21.x.x version or higher.
 
@@ -40,9 +40,9 @@ Before using the eGain Connector, ensure you have the following prerequisites in
 
 ## Security and Authentication
 
-**Important**: The eGain Connector itself does not require any authentication configuration. However, the eGain APIs are secured and support generic OAuth 2.0 authentication, which is configured in the Security tab of your Copilot Studio agents.
+**Important**: The Egain connector itself does not require any authentication configuration. However, the eGain APIs are secured and support generic OAuth 2.0 authentication, which is configured in the Security tab of your Copilot Studio agents.
 
-Both eGain instances have security enabled, ensuring that all API calls are properly authenticated. The connector automatically handles following:
+Both eGain instances have security enabled, ensuring that all API calls are properly authenticated. The connector automatically handles:
 
 - **OAuth 2.0 Support**: Generic OAuth 2.0 authentication configured in Copilot Studio Security tab
 - **Bearer Token Authentication**: Automatically adds `Bearer ` prefix if not present
@@ -381,4 +381,4 @@ Support for custom URL construction using baseUrl and shortName parameters:
 
 ---
 
-*This documentation is designed to help developers and administrators effectively implement and maintain the eGain Connector in Microsoft Copilot Studio agents.*
+*This documentation is designed to help developers and administrators effectively implement and maintain the Egain connector in Microsoft Copilot Studio agents.*
