@@ -66,7 +66,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             logger.LogInformation("Send request to Snowflake to get all tables.");
 
-            SnowflakeTableData data = await snowflakeDBOperations.GetTablesForSchemaAsync(connectionParameters).ConfigureAwait(true);
+            SnowflakeTableData data = await snowflakeDBOperations.GetTablesForSchemaAsync(connectionParameters, "GET datasets/{dataset}/tables").ConfigureAwait(true);
 
             logger.LogInformation(Constants.ClientSuccessMessage);
 

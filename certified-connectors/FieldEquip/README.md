@@ -16,7 +16,7 @@ To successfully run the connector, you would need following information to proce
 
 1. API Key for Authentication, can be requested from FieldEquip team
 2. URL for the origin, where the requests would be sent, can be requested from FieldEquip team
-3. Company ID, for inserting or retrieving information from the relevant company, can be requested from FieldEquip team
+3. Body to be passed as an advanced parameter, it supports single objects or can be passed together as an array.
 
 ## Authentication
 
@@ -25,11 +25,19 @@ This connector uses API Key authentication. The API key must be included in the 
 
 ## Supported Operations
 
-1. Create Records: Updates or inserts field service management related information into the FieldEquip platform, currently supporting only customer records.
-2. Get Records: To retrieve field service management related information into the FieldEquip platform, currently supporting only customer records.
+1. Create Customers: Inserts field service management related information into the FieldEquip platform for customer records.
+2. Update Customers: Updates field service management related information into the FieldEquip platform for customer records.
+3. Create Work Orders: Inserts field service management related information into the FieldEquip platform for work order records.
+4. Update Work Orders: Updates field service management related information into the FieldEquip platform for work order records.
+5. Create Items: Inserts field service management related information into the FieldEquip platform for item records.
+6. Update Items: Updates field service management related information into the FieldEquip platform for item records.
+7. Create Inventory: Inserts field service management related information into the FieldEquip platform for inventory records.
+8. Create Item Adjustment: Inserts field service management related information into the FieldEquip platform for inventory record adjustments for an item.
+9. Create Users: Inserts field service management related information into the FieldEquip platform for user records.
+10. Update Users: Update field service management related information into the FieldEquip platform for user records.
 
 ## Deployment Instructions
 
 1. Import the connector via Power Automate's Custom Connector interface.
-2. Provide the API key, base URL, and Company ID.
-3. Test connectivity using a sample operation such as "Get Records".
+2. Provide the API key, base URL, which can be requested from the FieldEquip team.
+3. Test connectivity using a sample operation such as "Create Customers".
