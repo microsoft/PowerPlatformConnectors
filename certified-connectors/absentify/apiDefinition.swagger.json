@@ -3,7 +3,7 @@
   "info": {
     "title": "absentify",
     "description": "absentify is a comprehensive absence management solution designed for Microsoft 365. This connector enables seamless integration, allowing you to automate workflows based on employee leave requests, track approval statuses, and synchronize absence data across your business systems.",
-    "version": "1.0",
+    "version": "2.0",
     "contact": {
       "name": "absentify Support",
       "url": "https://absentify.com/docs",
@@ -33,129 +33,28 @@
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "paths": {
-    "/webhooks/manage_ms_webhook/request_created": {
+    "/webhooks/manage_ms_webhook_v2/request_created": {
       "x-ms-notification-content": {
-        "description": "Notification content for request creation",
+        "description": "Webhook payload when a leave request is created.",
         "schema": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "title": "Request ID",
-              "description": "Unique identifier of the request",
-              "x-ms-summary": "Request ID"
-            },
-            "request_creator_member": {
-              "type": "object",
-              "title": "Request Creator",
-              "description": "Information about the member who created the request",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "title": "Creator's Email",
-                  "description": "The email address of the person who created the request.",
-                  "x-ms-summary": "Creator's Email"
-                },
-                "name": {
-                  "type": "string",
-                  "title": "Creator's Name",
-                  "description": "The name of the person who created the request.",
-                  "x-ms-summary": "Creator's Name"
-                },
-                "id": {
-                  "type": "string",
-                  "title": "Creator's ID",
-                  "description": "The unique identifier of the person who created the request.",
-                  "x-ms-summary": "Creator's ID"
-                },
-                "custom_id": {
-                  "type": "string",
-                  "title": "Creator's Custom ID",
-                  "description": "A custom identifier for the person who created the request.",
-                  "x-ms-summary": "Creator's Custom ID"
-                }
-              }
-            },
-            "createdAt": {
-              "type": "string",
-              "title": "Creation Date",
-              "description": "Timestamp when the request was created.",
-              "x-ms-summary": "Creation Date"
-            },
-            "updatedAt": {
-              "type": "string",
-              "title": "Last Updated",
-              "description": "Timestamp when the request was last updated.",
-              "x-ms-summary": "Last Updated"
-            },
-            "start": {
-              "type": "string",
-              "title": "Start Date",
-              "description": "Start date of the request.",
-              "x-ms-summary": "Start Date"
-            },
-            "start_at": {
-              "type": "string",
-              "title": "Start Time of Day",
-              "description": "Time of day when the request starts.",
-              "x-ms-summary": "Start Time of Day",
-              "enum": ["morning", "afternoon"]
-            },
-            "end": {
-              "type": "string",
-              "title": "End Date",
-              "description": "End date of the request.",
-              "x-ms-summary": "End Date"
-            },
-            "end_at": {
-              "type": "string",
-              "title": "End Time of Day",
-              "description": "Time of day when the request ends.",
-              "x-ms-summary": "End Time of Day",
-              "enum": ["lunchtime", "end_of_day"]
-            },
-            "leave_unit": {
-              "type": "string",
-              "title": "Leave Unit",
-              "description": "Unit of leave taken.",
-              "x-ms-summary": "Leave Unit",
-              "enum": ["days", "half_days", "hours", "minutes_30", "minutes_15", "minutes_10", "minutes_5", "minutes_1"]
-            },
-            "year": {
-              "type": "integer",
-              "format": "int32",
-              "title": "Year",
-              "description": "Year of the request.",
-              "x-ms-summary": "Year"
-            },
-            "details": {
-              "$ref": "#/definitions/Details"
-            },
-            "duration": {
-              "type": "number",
-              "format": "float",
-              "title": "Total Duration",
-              "description": "Total duration of the request including weekends and holidays.",
-              "x-ms-summary": "Total Duration"
-            }
-          }
+          "$ref": "#/definitions/RequestWebhookPayloadV2"
         }
       },
       "post": {
         "responses": {
           "200": {
-            "description": "Webhook subscription created successfully"
+            "description": "Webhook subscription created successfully."
           },
           "201": {
-            "description": "Webhook subscription created successfully"
+            "description": "Webhook subscription created successfully."
           },
           "default": {
-            "description": "Operation failed"
+            "description": "Operation failed."
           }
         },
         "summary": "When a leave request is created",
-        "description": "Triggers automatically when any employee in your organization submits a new leave or absence request. Use this to start approval workflows, send notifications, or update external calendars.",
-        "operationId": "TriggerRequestCreated",
+        "description": "Triggers when any employee in your organization submits a new leave or absence request. Use this to start approval workflows, send notifications, or update external calendars.",
+        "operationId": "TriggerRequestCreatedV2",
         "x-ms-trigger": "single",
         "x-ms-visibility": "important",
         "tags": ["Triggers"],
@@ -170,7 +69,107 @@
                 "url": {
                   "type": "string",
                   "title": "Webhook URL",
-                  "description": "The callback URL where absentify will send notifications when a leave request is created.",
+                  "description": "The callback URL where absentify will send notifications.",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true
+                }
+              },
+              "required": ["url"]
+            }
+          }
+        ]
+      }
+    },
+    "/webhooks/manage_ms_webhook_v2/request_status_changed": {
+      "x-ms-notification-content": {
+        "description": "Webhook payload when a leave request status changes.",
+        "schema": {
+          "$ref": "#/definitions/RequestWebhookPayloadV2"
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Webhook subscription created successfully."
+          },
+          "201": {
+            "description": "Webhook subscription created successfully."
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        },
+        "summary": "When a leave request status changes",
+        "description": "Triggers when the status of a leave request changes (approved, declined, or canceled). Use this to notify employees, update HR systems, or sync calendar entries.",
+        "operationId": "TriggerRequestStatusChangedV2",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "tags": ["Triggers"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "title": "Webhook URL",
+                  "description": "The callback URL where absentify will send notifications.",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true
+                }
+              },
+              "required": ["url"]
+            }
+          }
+        ]
+      }
+    },
+    "/webhooks/manage_ms_webhook/request_created": {
+      "x-ms-notification-content": {
+        "description": "Legacy webhook payload for request creation.",
+        "schema": {
+          "$ref": "#/definitions/RequestPayloadV1"
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Webhook subscription created successfully."
+          },
+          "201": {
+            "description": "Webhook subscription created successfully."
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        },
+        "summary": "[Deprecated] When a leave request is created",
+        "description": "DEPRECATED: Use 'When a leave request is created' instead. This legacy trigger will be removed in a future version.",
+        "operationId": "TriggerRequestCreated",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "advanced",
+        "x-ms-api-annotation": {
+          "status": "Preview",
+          "family": "TriggerRequestCreated",
+          "revision": 1
+        },
+        "deprecated": true,
+        "tags": ["Triggers (Legacy)"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "title": "Webhook URL",
+                  "description": "The callback URL for webhook notifications.",
                   "x-ms-visibility": "internal",
                   "x-ms-notification-url": true
                 }
@@ -183,130 +182,35 @@
     },
     "/webhooks/manage_ms_webhook/request_status_changed": {
       "x-ms-notification-content": {
-        "description": "Notification content for request status change",
+        "description": "Legacy webhook payload for request status change.",
         "schema": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "title": "Request ID",
-              "description": "Unique identifier of the request.",
-              "x-ms-summary": "Request ID"
-            },
-            "request_creator_member": {
-              "type": "object",
-              "title": "Request Creator",
-              "description": "Information about the member who created the request.",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "title": "Creator's Email",
-                  "description": "The email address of the person who created the request.",
-                  "x-ms-summary": "Creator's Email"
-                },
-                "name": {
-                  "type": "string",
-                  "title": "Creator's Name",
-                  "description": "The name of the person who created the request.",
-                  "x-ms-summary": "Creator's Name"
-                },
-                "id": {
-                  "type": "string",
-                  "title": "Creator's ID",
-                  "description": "The unique identifier of the person who created the request.",
-                  "x-ms-summary": "Creator's ID"
-                },
-                "custom_id": {
-                  "type": "string",
-                  "title": "Creator's Custom ID",
-                  "description": "A custom identifier for the person who created the request.",
-                  "x-ms-summary": "Creator's Custom ID"
-                }
-              }
-            },
-            "createdAt": {
-              "type": "string",
-              "title": "Creation Date",
-              "description": "Timestamp when the request was created.",
-              "x-ms-summary": "Creation Date"
-            },
-            "updatedAt": {
-              "type": "string",
-              "title": "Last Updated",
-              "description": "Timestamp when the request was last updated.",
-              "x-ms-summary": "Last Updated"
-            },
-            "start": {
-              "type": "string",
-              "title": "Start Date",
-              "description": "Start date of the request.",
-              "x-ms-summary": "Start Date"
-            },
-            "start_at": {
-              "type": "string",
-              "title": "Start Time of Day",
-              "description": "Time of day when the request starts.",
-              "x-ms-summary": "Start Time of Day",
-              "enum": ["morning", "afternoon"]
-            },
-            "end": {
-              "type": "string",
-              "title": "End Date",
-              "description": "End date of the request.",
-              "x-ms-summary": "End Date"
-            },
-            "end_at": {
-              "type": "string",
-              "title": "End Time of Day",
-              "description": "Time of day when the request ends.",
-              "x-ms-summary": "End Time of Day",
-              "enum": ["lunchtime", "end_of_day"]
-            },
-            "leave_unit": {
-              "type": "string",
-              "title": "Leave Unit",
-              "description": "Unit of leave taken.",
-              "x-ms-summary": "Leave Unit",
-              "enum": ["days", "half_days", "hours", "minutes_30", "minutes_15", "minutes_10", "minutes_5", "minutes_1"]
-            },
-            "year": {
-              "type": "integer",
-              "format": "int32",
-              "title": "Year",
-              "description": "Year of the request.",
-              "x-ms-summary": "Year"
-            },
-            "details": {
-              "$ref": "#/definitions/Details"
-            },
-            "duration": {
-              "type": "number",
-              "format": "float",
-              "title": "Total Duration",
-              "description": "Total duration of the request including weekends and holidays.",
-              "x-ms-summary": "Total Duration"
-            }
-          }
+          "$ref": "#/definitions/RequestPayloadV1"
         }
       },
       "post": {
         "responses": {
           "200": {
-            "description": "Webhook subscription created successfully"
+            "description": "Webhook subscription created successfully."
           },
           "201": {
-            "description": "Webhook subscription created successfully"
+            "description": "Webhook subscription created successfully."
           },
           "default": {
-            "description": "Operation failed"
+            "description": "Operation failed."
           }
         },
-        "summary": "When a leave request status changes",
-        "description": "Triggers automatically when the status of a leave request changes (e.g., approved, declined, or canceled). Use this to notify employees, update HR systems, or sync calendar entries based on approval outcomes.",
+        "summary": "[Deprecated] When a leave request status changes",
+        "description": "DEPRECATED: Use 'When a leave request status changes' instead. This legacy trigger will be removed in a future version.",
         "operationId": "TriggerRequestStatusChanged",
         "x-ms-trigger": "single",
-        "x-ms-visibility": "important",
-        "tags": ["Triggers"],
+        "x-ms-visibility": "advanced",
+        "x-ms-api-annotation": {
+          "status": "Preview",
+          "family": "TriggerRequestStatusChanged",
+          "revision": 1
+        },
+        "deprecated": true,
+        "tags": ["Triggers (Legacy)"],
         "parameters": [
           {
             "name": "body",
@@ -318,7 +222,7 @@
                 "url": {
                   "type": "string",
                   "title": "Webhook URL",
-                  "description": "The callback URL where absentify will send notifications when a leave request status changes.",
+                  "description": "The callback URL for webhook notifications.",
                   "x-ms-visibility": "internal",
                   "x-ms-notification-url": true
                 }
@@ -331,10 +235,191 @@
     }
   },
   "definitions": {
-    "LeaveType": {
+    "RequestWebhookPayloadV2": {
+      "type": "object",
+      "title": "Request Webhook Payload",
+      "description": "Webhook payload containing leave request data.",
+      "properties": {
+        "event_type": {
+          "type": "string",
+          "title": "Event Type",
+          "description": "The type of event that triggered this webhook.",
+          "x-ms-summary": "Event Type",
+          "enum": ["request_created", "request_status_changed"]
+        },
+        "body": {
+          "$ref": "#/definitions/RequestBodyV2"
+        }
+      }
+    },
+    "RequestBodyV2": {
+      "type": "object",
+      "title": "Request Body",
+      "description": "The leave request details.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Request ID",
+          "description": "Unique identifier of the leave request.",
+          "x-ms-summary": "Request ID"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the request was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the request was last updated.",
+          "x-ms-summary": "Updated At"
+        },
+        "start": {
+          "type": "string",
+          "title": "Start Date",
+          "description": "Start date of the leave request.",
+          "x-ms-summary": "Start Date"
+        },
+        "start_at": {
+          "type": "string",
+          "title": "Start Time",
+          "description": "Time of day when the leave starts.",
+          "x-ms-summary": "Start Time",
+          "enum": ["morning", "afternoon"]
+        },
+        "end": {
+          "type": "string",
+          "title": "End Date",
+          "description": "End date of the leave request.",
+          "x-ms-summary": "End Date"
+        },
+        "end_at": {
+          "type": "string",
+          "title": "End Time",
+          "description": "Time of day when the leave ends.",
+          "x-ms-summary": "End Time",
+          "enum": ["lunchtime", "end_of_day"]
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit used for measuring the leave duration.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "hours"]
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Current status of the leave request.",
+          "x-ms-summary": "Status",
+          "enum": ["PENDING", "APPROVED", "DECLINED", "CANCELED"]
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "Reason provided for the leave request.",
+          "x-ms-summary": "Reason"
+        },
+        "approval_process": {
+          "type": "string",
+          "title": "Approval Process",
+          "description": "Type of approval process for this request.",
+          "x-ms-summary": "Approval Process",
+          "enum": ["ONE_APPROVAL", "ALL_APPROVAL", "AUTOMATIC"]
+        },
+        "cancel_reason": {
+          "type": "string",
+          "title": "Cancel Reason",
+          "description": "Reason for cancellation if the request was canceled.",
+          "x-ms-summary": "Cancel Reason"
+        },
+        "canceld_date": {
+          "type": "string",
+          "title": "Canceled Date",
+          "description": "Date when the request was canceled.",
+          "x-ms-summary": "Canceled Date"
+        },
+        "canceld_by_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "workday_absence_duration": {
+          "type": "number",
+          "format": "float",
+          "title": "Workday Duration",
+          "description": "Duration of absence in workdays.",
+          "x-ms-summary": "Workday Duration"
+        },
+        "duration": {
+          "type": "number",
+          "format": "float",
+          "title": "Total Duration",
+          "description": "Total duration of the leave request.",
+          "x-ms-summary": "Total Duration"
+        },
+        "take_from_allowance": {
+          "type": "boolean",
+          "title": "Take From Allowance",
+          "description": "Whether this leave is deducted from the allowance.",
+          "x-ms-summary": "Take From Allowance"
+        },
+        "request_creator_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "requester_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "leave_type": {
+          "$ref": "#/definitions/LeaveTypeV2"
+        },
+        "allowance_type": {
+          "$ref": "#/definitions/AllowanceTypeV2"
+        },
+        "request_approvers": {
+          "type": "array",
+          "title": "Request Approvers",
+          "description": "List of approvers for this request.",
+          "items": {
+            "$ref": "#/definitions/RequestApproverV2"
+          }
+        }
+      }
+    },
+    "MemberReference": {
+      "type": "object",
+      "title": "Member",
+      "description": "Reference to a member.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Member ID",
+          "description": "Unique identifier of the member.",
+          "x-ms-summary": "Member ID"
+        },
+        "custom_id": {
+          "type": "string",
+          "title": "Custom ID",
+          "description": "Custom identifier for the member.",
+          "x-ms-summary": "Custom ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the member.",
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email",
+          "description": "Email address of the member.",
+          "x-ms-summary": "Email"
+        }
+      }
+    },
+    "LeaveTypeV2": {
       "type": "object",
       "title": "Leave Type",
-      "description": "Information about the type of leave.",
+      "description": "Information about the leave type.",
       "properties": {
         "id": {
           "type": "string",
@@ -348,28 +433,19 @@
           "description": "Name of the leave type.",
           "x-ms-summary": "Leave Type Name"
         },
-        "take_from_allowance": {
-          "type": "boolean",
-          "title": "Take from Allowance",
-          "description": "Indicates if the leave is deducted from the allowance.",
-          "x-ms-summary": "Take from Allowance"
-        },
         "leave_unit": {
           "type": "string",
           "title": "Leave Unit",
-          "description": "Unit of leave.",
+          "description": "Unit of the leave type.",
           "x-ms-summary": "Leave Unit",
-          "enum": ["days", "half_days", "hours", "minutes_30", "minutes_15", "minutes_10", "minutes_5", "minutes_1"]
-        },
-        "allowance_type": {
-          "$ref": "#/definitions/AllowanceType"
+          "enum": ["days", "hours"]
         }
       }
     },
-    "AllowanceType": {
+    "AllowanceTypeV2": {
       "type": "object",
       "title": "Allowance Type",
-      "description": "Details of the allowance type.",
+      "description": "Information about the allowance type.",
       "properties": {
         "id": {
           "type": "string",
@@ -385,9 +461,9 @@
         },
         "ignore_allowance_limit": {
           "type": "boolean",
-          "title": "Ignore Allowance Limit",
-          "description": "Indicates if the allowance limit should be ignored.",
-          "x-ms-summary": "Ignore Allowance Limit"
+          "title": "Ignore Limit",
+          "description": "Whether the allowance limit should be ignored.",
+          "x-ms-summary": "Ignore Limit"
         },
         "allowance_unit": {
           "type": "string",
@@ -398,99 +474,157 @@
         }
       }
     },
-    "Allowances": {
-      "type": "array",
-      "title": "Allowances",
-      "description": "Allowance details for the requester.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "allowance": {
-            "type": "number",
-            "format": "float",
-            "title": "Allowance",
-            "description": "Total allowance for the year.",
-            "x-ms-summary": "Allowance"
-          },
-          "brought_forward": {
-            "type": "number",
-            "format": "float",
-            "title": "Brought Forward",
-            "description": "Brought forward days from the previous year.",
-            "x-ms-summary": "Brought Forward"
-          },
-          "compensatory_time_off": {
-            "type": "number",
-            "format": "float",
-            "title": "Compensatory Time Off",
-            "description": "Compensatory time off.",
-            "x-ms-summary": "Compensatory Time Off"
-          },
-          "remaining": {
-            "type": "number",
-            "format": "float",
-            "title": "Remaining Allowance",
-            "description": "Remaining allowance.",
-            "x-ms-summary": "Remaining Allowance"
-          },
-          "taken": {
-            "type": "number",
-            "format": "float",
-            "title": "Taken Allowance",
-            "description": "Taken allowance.",
-            "x-ms-summary": "Taken Allowance"
-          },
-          "year": {
-            "type": "integer",
-            "format": "int32",
-            "title": "Allowance Year",
-            "description": "Year for the allowance.",
-            "x-ms-summary": "Allowance Year"
-          }
+    "RequestApproverV2": {
+      "type": "object",
+      "title": "Request Approver",
+      "description": "Information about a request approver.",
+      "properties": {
+        "status": {
+          "type": "string",
+          "title": "Approver Status",
+          "description": "Current approval status.",
+          "x-ms-summary": "Approver Status",
+          "enum": ["PENDING", "APPROVED", "DECLINED"]
+        },
+        "reason": {
+          "type": "string",
+          "title": "Approver Reason",
+          "description": "Reason provided by the approver.",
+          "x-ms-summary": "Approver Reason"
+        },
+        "status_changed_date": {
+          "type": "string",
+          "title": "Status Changed Date",
+          "description": "Date when the approval status was changed.",
+          "x-ms-summary": "Status Changed Date"
+        },
+        "status_changed_by_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "approver_member": {
+          "$ref": "#/definitions/MemberReference"
         }
       }
     },
-    "Details": {
+    "RequestPayloadV1": {
       "type": "object",
-      "title": "Request Details",
-      "description": "Details of the request.",
+      "title": "Request Payload (Legacy)",
+      "description": "Legacy webhook payload format.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Request ID",
+          "description": "Unique identifier of the request.",
+          "x-ms-summary": "Request ID"
+        },
+        "request_creator_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the request was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the request was last updated.",
+          "x-ms-summary": "Updated At"
+        },
+        "start": {
+          "type": "string",
+          "title": "Start Date",
+          "description": "Start date of the request.",
+          "x-ms-summary": "Start Date"
+        },
+        "start_at": {
+          "type": "string",
+          "title": "Start Time",
+          "description": "Time of day when the request starts.",
+          "x-ms-summary": "Start Time",
+          "enum": ["morning", "afternoon"]
+        },
+        "end": {
+          "type": "string",
+          "title": "End Date",
+          "description": "End date of the request.",
+          "x-ms-summary": "End Date"
+        },
+        "end_at": {
+          "type": "string",
+          "title": "End Time",
+          "description": "Time of day when the request ends.",
+          "x-ms-summary": "End Time",
+          "enum": ["lunchtime", "end_of_day"]
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit of leave taken.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "half_days", "hours", "minutes_30", "minutes_15", "minutes_10", "minutes_5", "minutes_1"]
+        },
+        "year": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Year",
+          "description": "Year of the request.",
+          "x-ms-summary": "Year"
+        },
+        "duration": {
+          "type": "number",
+          "format": "float",
+          "title": "Total Duration",
+          "description": "Total duration of the request.",
+          "x-ms-summary": "Total Duration"
+        },
+        "details": {
+          "$ref": "#/definitions/DetailsV1"
+        }
+      }
+    },
+    "DetailsV1": {
+      "type": "object",
+      "title": "Request Details (Legacy)",
+      "description": "Legacy details object.",
       "properties": {
         "workday_absence_duration": {
           "type": "number",
           "format": "float",
-          "title": "Workday Absence Duration",
-          "description": "Duration of absence in workdays (only counting the employee's workdays).",
-          "x-ms-summary": "Workday Absence Duration"
+          "title": "Workday Duration",
+          "description": "Duration in workdays.",
+          "x-ms-summary": "Workday Duration"
         },
         "status": {
           "type": "string",
-          "title": "Request Status",
+          "title": "Status",
           "description": "Current status of the request.",
-          "x-ms-summary": "Request Status",
+          "x-ms-summary": "Status",
           "enum": ["PENDING", "APPROVED", "DECLINED", "CANCELED"]
         },
         "cancel_reason": {
           "type": "string",
-          "title": "Cancellation Reason",
-          "description": "Reason for request cancellation.",
-          "x-ms-summary": "Cancellation Reason"
+          "title": "Cancel Reason",
+          "description": "Reason for cancellation.",
+          "x-ms-summary": "Cancel Reason"
         },
         "canceld_date": {
           "type": "string",
-          "title": "Cancellation Date",
-          "description": "Date when the request was canceled.",
-          "x-ms-summary": "Cancellation Date"
+          "title": "Canceled Date",
+          "description": "Date when canceled.",
+          "x-ms-summary": "Canceled Date"
         },
         "reason": {
           "type": "string",
           "title": "Request Reason",
-          "description": "Reason provided for the request.",
+          "description": "Reason for the request.",
           "x-ms-summary": "Request Reason"
         },
         "approval_process": {
           "type": "string",
           "title": "Approval Process",
-          "description": "Approval process type for the request.",
+          "description": "Type of approval process.",
           "x-ms-summary": "Approval Process",
           "enum": [
             "Linear_all_have_to_agree",
@@ -499,160 +633,129 @@
             "Parallel_one_has_to_agree"
           ]
         },
-        "request_approvers": {
-          "type": "array",
-          "title": "Request Approvers",
-          "description": "List of approvers for the request.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "uuid": {
-                "type": "string",
-                "title": "Approver ID",
-                "description": "Unique identifier of the approver.",
-                "x-ms-summary": "Approver ID"
-              },
-              "status": {
-                "type": "string",
-                "title": "Approver Status",
-                "description": "Current approval status.",
-                "x-ms-summary": "Approver Status",
-                "enum": [
-                  "PENDING",
-                  "APPROVED",
-                  "DECLINED",
-                  "CANCELED",
-                  "APPROVED_BY_ANOTHER_MANAGER",
-                  "DECLINED_BY_ANOTHER_MANAGER",
-                  "CANCELED_BY_ANOTHER_MANAGER"
-                ]
-              },
-              "status_changed_by_member": {
-                "type": "object",
-                "title": "Status Changed By",
-                "description": "Member who changed the approval status.",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "title": "Member Email",
-                    "description": "Email of the member who changed the status.",
-                    "x-ms-summary": "Member Email"
-                  },
-                  "name": {
-                    "type": "string",
-                    "title": "Member Name",
-                    "description": "Name of the member who changed the status.",
-                    "x-ms-summary": "Member Name"
-                  },
-                  "id": {
-                    "type": "string",
-                    "title": "Member ID",
-                    "description": "ID of the member who changed the status.",
-                    "x-ms-summary": "Member ID"
-                  },
-                  "custom_id": {
-                    "type": "string",
-                    "title": "Custom ID",
-                    "description": "Custom ID of the member who changed the status.",
-                    "x-ms-summary": "Custom ID"
-                  }
-                }
-              },
-              "status_change_date": {
-                "type": "string",
-                "title": "Status Change Date",
-                "description": "Date when the approval status was changed.",
-                "x-ms-summary": "Status Change Date"
-              },
-              "predecessor_request_member_approver_id": {
-                "type": "string",
-                "title": "Predecessor Approver ID",
-                "description": "ID of the predecessor approver, if applicable.",
-                "x-ms-summary": "Predecessor Approver ID"
-              },
-              "reason": {
-                "type": "string",
-                "title": "Approval Reason",
-                "description": "Reason provided by the approver.",
-                "x-ms-summary": "Approval Reason"
-              }
-            }
-          }
-        },
-        "requester_member": {
-          "type": "object",
-          "title": "Requester",
-          "description": "Information about the requester.",
-          "properties": {
-            "email": {
-              "type": "string",
-              "title": "Requester Email",
-              "description": "Email of the requester.",
-              "x-ms-summary": "Requester Email"
-            },
-            "name": {
-              "type": "string",
-              "title": "Requester Name",
-              "description": "Name of the requester.",
-              "x-ms-summary": "Requester Name"
-            },
-            "id": {
-              "type": "string",
-              "title": "Requester ID",
-              "description": "ID of the requester.",
-              "x-ms-summary": "Requester ID"
-            },
-            "custom_id": {
-              "type": "string",
-              "title": "Requester Custom ID",
-              "description": "Custom ID of the requester.",
-              "x-ms-summary": "Requester Custom ID"
-            },
-            "allowances": {
-              "$ref": "#/definitions/Allowances"
-            }
-          }
-        },
-        "canceld_by_member": {
-          "type": "object",
-          "title": "Canceled By",
-          "description": "Member who canceled the request.",
-          "properties": {
-            "email": {
-              "type": "string",
-              "title": "Canceling Member's Email",
-              "description": "Email of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's Email"
-            },
-            "name": {
-              "type": "string",
-              "title": "Canceling Member's Name",
-              "description": "Name of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's Name"
-            },
-            "id": {
-              "type": "string",
-              "title": "Canceling Member's ID",
-              "description": "ID of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's ID"
-            },
-            "custom_id": {
-              "type": "string",
-              "title": "Canceling Member's Custom ID",
-              "description": "Custom ID of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's Custom ID"
-            }
-          }
-        },
-        "leave_type": {
-          "$ref": "#/definitions/LeaveType"
-        },
         "deducted": {
           "type": "number",
           "format": "float",
           "title": "Deducted Amount",
-          "description": "Amount deducted from the user's allowance.",
+          "description": "Amount deducted from allowance.",
           "x-ms-summary": "Deducted Amount"
+        },
+        "requester_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "canceld_by_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "approver_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "approved_date": {
+          "type": "string",
+          "title": "Approved Date",
+          "description": "Date when approved.",
+          "x-ms-summary": "Approved Date"
+        },
+        "decline_reason": {
+          "type": "string",
+          "title": "Decline Reason",
+          "description": "Reason for declining.",
+          "x-ms-summary": "Decline Reason"
+        },
+        "declined_by_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "declined_date": {
+          "type": "string",
+          "title": "Declined Date",
+          "description": "Date when declined.",
+          "x-ms-summary": "Declined Date"
+        },
+        "leave_type": {
+          "$ref": "#/definitions/LeaveTypeV1"
+        },
+        "request_approvers": {
+          "type": "array",
+          "title": "Request Approvers",
+          "description": "List of approvers.",
+          "items": {
+            "$ref": "#/definitions/RequestApproverV1"
+          }
+        }
+      }
+    },
+    "LeaveTypeV1": {
+      "type": "object",
+      "title": "Leave Type (Legacy)",
+      "description": "Legacy leave type information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Leave Type ID",
+          "description": "Unique identifier.",
+          "x-ms-summary": "Leave Type ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the leave type.",
+          "x-ms-summary": "Name"
+        },
+        "take_from_allowance": {
+          "type": "boolean",
+          "title": "Take From Allowance",
+          "description": "Whether deducted from allowance.",
+          "x-ms-summary": "Take From Allowance"
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit of leave.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "hours"]
+        },
+        "allowance_type": {
+          "$ref": "#/definitions/AllowanceTypeV2"
+        }
+      }
+    },
+    "RequestApproverV1": {
+      "type": "object",
+      "title": "Request Approver (Legacy)",
+      "description": "Legacy approver information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Approver Record ID",
+          "description": "Unique identifier of the approver record.",
+          "x-ms-summary": "Approver Record ID"
+        },
+        "approver_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Approval status.",
+          "x-ms-summary": "Status",
+          "enum": ["PENDING", "APPROVED", "DECLINED"]
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "Reason provided.",
+          "x-ms-summary": "Reason"
+        },
+        "status_change_date": {
+          "type": "string",
+          "title": "Status Change Date",
+          "description": "Date of status change.",
+          "x-ms-summary": "Status Change Date"
+        },
+        "predecessor_request_approver_id": {
+          "type": "string",
+          "title": "Predecessor ID",
+          "description": "ID of predecessor approver.",
+          "x-ms-summary": "Predecessor ID"
         }
       }
     }
@@ -676,7 +779,11 @@
   "tags": [
     {
       "name": "Triggers",
-      "description": "Webhook triggers for leave request events"
+      "description": "Webhook triggers for leave request events."
+    },
+    {
+      "name": "Triggers (Legacy)",
+      "description": "Deprecated triggers. Use the new triggers instead."
     }
   ]
 }
