@@ -1,0 +1,467 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Flingoos-MCP",
+    "description": "Access procedural knowledge and workflows. Includes REST endpoints for automation and an MCP endpoint for AI agents.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Diligent4",
+      "url": "https://www.diligent4.com",
+      "email": "support@diligent4.com"
+    }
+  },
+  "host": "mcp.diligent4.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/workflows": {
+      "get": {
+        "summary": "List Workflows",
+        "description": "Returns a list of workflows accessible to the authenticated user.",
+        "operationId": "ListWorkflows",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 30,
+            "description": "Maximum number of workflows to return (1-100)"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "default": "all",
+            "enum": [
+              "all",
+              "mine",
+              "public"
+            ],
+            "description": "Filter by scope"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/WorkflowListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/workflows/search": {
+      "get": {
+        "summary": "Search Workflows",
+        "description": "Search for workflows using natural language semantic matching.",
+        "operationId": "SearchWorkflows",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "description": "Natural language description of what you want to accomplish"
+          },
+          {
+            "name": "top_k",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 5,
+            "description": "Number of top matches to return (1-20)"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "default": "all",
+            "enum": [
+              "all",
+              "mine",
+              "public"
+            ],
+            "description": "Filter by scope"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SearchResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/workflows/{sessionId}": {
+      "get": {
+        "summary": "Get Workflow",
+        "description": "Retrieves the full content of a specific workflow.",
+        "operationId": "GetWorkflow",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique identifier of the workflow"
+          },
+          {
+            "name": "output_mode",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "default": "rich",
+            "enum": [
+              "tight",
+              "rich",
+              "verbose"
+            ],
+            "description": "Output format"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/WorkflowResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Workflow not found"
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "summary": "List Projects",
+        "description": "Returns a list of projects accessible to the authenticated user.",
+        "operationId": "ListProjects",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 20,
+            "description": "Maximum number of projects to return (1-100)"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "default": "all",
+            "enum": [
+              "all",
+              "mine",
+              "public"
+            ],
+            "description": "Filter by scope"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ProjectListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}": {
+      "get": {
+        "summary": "Get Project",
+        "description": "Retrieves a project with its contained sessions.",
+        "operationId": "GetProject",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique identifier of the project"
+          },
+          {
+            "name": "include_content",
+            "in": "query",
+            "type": "boolean",
+            "required": false,
+            "default": false,
+            "description": "Include full session content"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ProjectResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      }
+    },
+    "/mcp": {
+      "post": {
+        "summary": "Invoke MCP Server",
+        "description": "Sends JSON-RPC commands to the Flingoos Model Context Protocol server.",
+        "operationId": "InvokeMCP",
+        "parameters": [
+          {
+            "name": "mcp-session-id",
+            "in": "header",
+            "type": "string",
+            "required": false,
+            "description": "Session ID for stateful interactions"
+          },
+          {
+            "name": "x-ms-agentic-protocol",
+            "in": "header",
+            "type": "string",
+            "required": true,
+            "default": "mcp-streamable-1.0",
+            "description": "MCP Protocol Version"
+          },
+          {
+            "name": "jsonRpcPayload",
+            "in": "body",
+            "required": true,
+            "description": "The JSON-RPC request body",
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "WorkflowListResponse": {
+      "type": "object",
+      "properties": {
+        "workflows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkflowSummary"
+          }
+        },
+        "count": {
+          "type": "integer"
+        }
+      }
+    },
+    "WorkflowSummary": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "recording_type": {
+          "type": "string",
+          "enum": [
+            "workflow_recording",
+            "teaching_session"
+          ]
+        },
+        "phase_count": {
+          "type": "integer"
+        },
+        "step_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "WorkflowResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "data": {
+          "type": "object",
+          "description": "Dynamic workflow data"
+        }
+      }
+    },
+    "ProjectListResponse": {
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProjectSummary"
+          }
+        },
+        "count": {
+          "type": "integer"
+        }
+      }
+    },
+    "ProjectSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "private",
+            "public"
+          ]
+        },
+        "session_count": {
+          "type": "integer"
+        },
+        "workflow_count": {
+          "type": "integer"
+        },
+        "teaching_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "ProjectResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "data": {
+          "type": "object",
+          "description": "Dynamic project data"
+        }
+      }
+    },
+    "SearchResponse": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AUTO_SELECTED",
+            "SELECTION_REQUIRED",
+            "NO_GOOD_MATCHES",
+            "NO_MATCHES"
+          ]
+        },
+        "instruction": {
+          "type": "string"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchOption"
+          }
+        }
+      }
+    },
+    "SearchOption": {
+      "type": "object",
+      "properties": {
+        "option_number": {
+          "type": "integer"
+        },
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "score_percent": {
+          "type": "string"
+        },
+        "display": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "azure-ad": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+      "tokenUrl": "https://login.microsoftonline.com/common/oauth2/token",
+      "scopes": {
+        "openid": "Sign In",
+        "email": "View Email",
+        "profile": "View Profile",
+        "offline_access": "Access Data Offline",
+        "api://a53cbac8-079c-486f-9848-e763a4da1652/user_impersonation": "Access Flingoos API"
+      }
+    }
+  },
+  "security": [
+    {
+      "azure-ad": [
+        "openid",
+        "email",
+        "profile",
+        "offline_access",
+        "api://a53cbac8-079c-486f-9848-e763a4da1652/user_impersonation"
+      ]
+    }
+  ]
+}
