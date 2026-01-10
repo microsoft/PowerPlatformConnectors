@@ -14,36 +14,37 @@ Flingoos is a procedural knowledge database for AI Agents. It stores, retrieves,
 
 ## Supported Operations
 
-### List Workflows
-Returns a list of workflows accessible to the authenticated user.
+### List Contexts
+Returns a unified list of projects and sessions (workflows/teaching) accessible to the authenticated user.
 - **Parameters:**
-  - `limit` (optional): Maximum number of workflows to return (1-100, default: 30)
+  - `limit` (optional): Maximum number of contexts to return (1-100, default: 50)
   - `scope` (optional): Filter by visibility - "all", "mine", or "public" (default: "all")
+  - `kind` (optional): Filter by context kind - "all", "project", or "session" (default: "all")
+  - `session_type` (optional): Filter sessions by type - "workflow_recording" or "teaching_session"
 
-### Get Workflow
-Retrieves the full content of a specific workflow.
+### Get Context
+Retrieves a context by ID. The ID can be either a project or session - auto-detected.
 - **Parameters:**
-  - `sessionId` (required): The unique identifier of the workflow
-  - `output_mode` (optional): "tight", "rich", or "verbose" (default: "rich")
+  - `id` (required): The unique identifier of the context (project or session)
+  - `detail` (optional): "summary" or "full" (default: "full" for sessions, "summary" for projects)
 
-### Search Workflows
-Search for workflows using natural language semantic matching.
+### Search Contexts
+Search for contexts using natural language semantic matching across projects and sessions.
 - **Parameters:**
   - `q` (required): Natural language description of what you want to accomplish
   - `top_k` (optional): Number of matches to return (1-20, default: 5)
+  - `min_confidence` (optional): Minimum similarity score 0.0-1.0 (default: 0.3)
   - `scope` (optional): Filter by visibility - "all", "mine", or "public"
 
-### List Projects
-Returns a list of projects accessible to the authenticated user.
+### Modify Context
+Modify context content using natural language. Supports workflow steps, phases, knowledge items, and project metadata.
 - **Parameters:**
-  - `limit` (optional): Maximum number of projects to return (1-100, default: 20)
-  - `scope` (optional): Filter by visibility - "all", "mine", or "public"
-
-### Get Project
-Retrieves a project with its contained sessions.
-- **Parameters:**
-  - `projectId` (required): The unique identifier of the project
-  - `include_content` (optional): Include full session content (default: false)
+  - `id` (required): The unique identifier of the context to modify
+  - `target_type` (required): What to modify - "step", "phase" (for workflows), "knowledge_item" (for teaching), or "metadata" (for projects)
+  - `target_number` (optional): Step or phase number (required for step/phase targets)
+  - `target_id` (optional): Knowledge item ID (required for knowledge_item targets)
+  - `change_prompt` (required): Natural language description of the change
+  - `auto_confirm` (optional): If true, save immediately without preview (default: false)
 
 ### Invoke MCP Server
 Sends JSON-RPC commands to the Flingoos Model Context Protocol server. Used by Copilot Studio agents for agentic workflows.
@@ -109,6 +110,11 @@ MCP (Model Context Protocol) is an open protocol that standardizes how AI applic
 ### What's the difference between workflows and teaching sessions?
 - **Workflow recordings** are step-by-step procedures with phases, actions, and success criteria
 - **Teaching sessions** are knowledge artifacts containing concepts, facts, and relationships
+
+### What is a "context" in Flingoos?
+A context is the unit of retrieval for agent execution. There are two kinds:
+- **Projects** (containers): Group related sessions together
+- **Sessions** (units): Individual workflow recordings or teaching sessions
 
 ### Why do I need to create my own app registration?
 As an Independent Publisher connector, users must provide their own OAuth credentials. This ensures your organization controls access to the Flingoos API.

@@ -22,19 +22,19 @@
     "application/json"
   ],
   "paths": {
-    "/api/workflows": {
+    "/api/contexts": {
       "get": {
-        "summary": "List Workflows",
-        "description": "Returns a list of workflows accessible to the authenticated user.",
-        "operationId": "ListWorkflows",
+        "summary": "List Contexts",
+        "description": "Returns a unified list of projects and sessions (workflows/teaching) accessible to the authenticated user.",
+        "operationId": "ListContexts",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
             "type": "integer",
             "required": false,
-            "default": 30,
-            "description": "Maximum number of workflows to return (1-100)"
+            "default": 50,
+            "description": "Maximum number of contexts to return (1-100)"
           },
           {
             "name": "scope",
@@ -48,13 +48,37 @@
               "public"
             ],
             "description": "Filter by scope"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "default": "all",
+            "enum": [
+              "all",
+              "project",
+              "session"
+            ],
+            "description": "Filter by context kind"
+          },
+          {
+            "name": "session_type",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "enum": [
+              "workflow_recording",
+              "teaching_session"
+            ],
+            "description": "Filter sessions by type (only applies when kind is session or all)"
           }
         ],
         "responses": {
           "200": {
             "description": "Success",
             "schema": {
-              "$ref": "#/definitions/WorkflowListResponse"
+              "$ref": "#/definitions/ContextListResponse"
             }
           },
           "401": {
@@ -63,11 +87,11 @@
         }
       }
     },
-    "/api/workflows/search": {
+    "/api/contexts/search": {
       "get": {
-        "summary": "Search Workflows",
-        "description": "Search for workflows using natural language semantic matching.",
-        "operationId": "SearchWorkflows",
+        "summary": "Search Contexts",
+        "description": "Search for contexts using natural language semantic matching across projects and sessions.",
+        "operationId": "SearchContexts",
         "parameters": [
           {
             "name": "q",
@@ -83,6 +107,14 @@
             "required": false,
             "default": 5,
             "description": "Number of top matches to return (1-20)"
+          },
+          {
+            "name": "min_confidence",
+            "in": "query",
+            "type": "number",
+            "required": false,
+            "default": 0.3,
+            "description": "Minimum similarity score (0.0-1.0)"
           },
           {
             "name": "scope",
@@ -111,124 +143,80 @@
         }
       }
     },
-    "/api/workflows/{sessionId}": {
+    "/api/contexts/{id}": {
       "get": {
-        "summary": "Get Workflow",
-        "description": "Retrieves the full content of a specific workflow.",
-        "operationId": "GetWorkflow",
+        "summary": "Get Context",
+        "description": "Retrieves a context by ID. The ID can be either a project or session - auto-detected.",
+        "operationId": "GetContext",
         "parameters": [
           {
-            "name": "sessionId",
+            "name": "id",
             "in": "path",
             "type": "string",
             "required": true,
-            "description": "The unique identifier of the workflow"
+            "description": "The unique identifier of the context (project or session)"
           },
           {
-            "name": "output_mode",
+            "name": "detail",
             "in": "query",
             "type": "string",
             "required": false,
-            "default": "rich",
             "enum": [
-              "tight",
-              "rich",
-              "verbose"
+              "summary",
+              "full"
             ],
-            "description": "Output format"
+            "description": "Detail level. Default: full for sessions, summary for projects"
           }
         ],
         "responses": {
           "200": {
             "description": "Success",
             "schema": {
-              "$ref": "#/definitions/WorkflowResponse"
+              "$ref": "#/definitions/ContextResponse"
             }
           },
           "401": {
             "description": "Unauthorized"
           },
           "404": {
-            "description": "Workflow not found"
+            "description": "Context not found"
           }
         }
-      }
-    },
-    "/api/projects": {
-      "get": {
-        "summary": "List Projects",
-        "description": "Returns a list of projects accessible to the authenticated user.",
-        "operationId": "ListProjects",
+      },
+      "patch": {
+        "summary": "Modify Context",
+        "description": "Modify context content using natural language. Supports workflow steps, phases, knowledge items, and project metadata.",
+        "operationId": "ModifyContext",
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "type": "integer",
-            "required": false,
-            "default": 20,
-            "description": "Maximum number of projects to return (1-100)"
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "type": "string",
-            "required": false,
-            "default": "all",
-            "enum": [
-              "all",
-              "mine",
-              "public"
-            ],
-            "description": "Filter by scope"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "$ref": "#/definitions/ProjectListResponse"
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      }
-    },
-    "/api/projects/{projectId}": {
-      "get": {
-        "summary": "Get Project",
-        "description": "Retrieves a project with its contained sessions.",
-        "operationId": "GetProject",
-        "parameters": [
-          {
-            "name": "projectId",
+            "name": "id",
             "in": "path",
             "type": "string",
             "required": true,
-            "description": "The unique identifier of the project"
+            "description": "The unique identifier of the context to modify"
           },
           {
-            "name": "include_content",
-            "in": "query",
-            "type": "boolean",
-            "required": false,
-            "default": false,
-            "description": "Include full session content"
+            "name": "modifyPayload",
+            "in": "body",
+            "required": true,
+            "description": "The modification request",
+            "schema": {
+              "$ref": "#/definitions/ModifyRequest"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Success",
             "schema": {
-              "$ref": "#/definitions/ProjectResponse"
+              "$ref": "#/definitions/ModifyResponse"
             }
           },
           "401": {
             "description": "Unauthorized"
           },
           "404": {
-            "description": "Project not found"
+            "description": "Context not found"
           }
         }
       }
@@ -276,83 +264,40 @@
     }
   },
   "definitions": {
-    "WorkflowListResponse": {
+    "ContextListResponse": {
       "type": "object",
       "properties": {
-        "workflows": {
+        "contexts": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/WorkflowSummary"
+            "$ref": "#/definitions/Context"
           }
         },
-        "count": {
+        "total_count": {
+          "type": "integer"
+        },
+        "project_count": {
+          "type": "integer"
+        },
+        "session_count": {
           "type": "integer"
         }
       }
     },
-    "WorkflowSummary": {
-      "type": "object",
-      "properties": {
-        "session_id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "goal": {
-          "type": "string"
-        },
-        "recording_type": {
-          "type": "string",
-          "enum": [
-            "workflow_recording",
-            "teaching_session"
-          ]
-        },
-        "phase_count": {
-          "type": "integer"
-        },
-        "step_count": {
-          "type": "integer"
-        }
-      }
-    },
-    "WorkflowResponse": {
-      "type": "object",
-      "properties": {
-        "success": {
-          "type": "boolean"
-        },
-        "data": {
-          "type": "object",
-          "description": "Dynamic workflow data"
-        }
-      }
-    },
-    "ProjectListResponse": {
-      "type": "object",
-      "properties": {
-        "projects": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ProjectSummary"
-          }
-        },
-        "count": {
-          "type": "integer"
-        }
-      }
-    },
-    "ProjectSummary": {
+    "Context": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string"
         },
-        "name": {
-          "type": "string"
+        "kind": {
+          "type": "string",
+          "enum": [
+            "project",
+            "session"
+          ]
         },
-        "description": {
+        "name": {
           "type": "string"
         },
         "visibility": {
@@ -362,18 +307,59 @@
             "public"
           ]
         },
+        "session_type": {
+          "type": "string",
+          "enum": [
+            "workflow_recording",
+            "teaching_session"
+          ],
+          "description": "Only for sessions"
+        },
+        "goal": {
+          "type": "string",
+          "description": "Only for sessions"
+        },
+        "description": {
+          "type": "string",
+          "description": "Only for projects"
+        },
+        "project_id": {
+          "type": "string",
+          "description": "Parent project ID for sessions (null if orphan)"
+        },
+        "project_name": {
+          "type": "string",
+          "description": "Parent project name for sessions"
+        },
         "session_count": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Only for projects"
         },
         "workflow_count": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Only for projects"
         },
         "teaching_count": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Only for projects"
+        },
+        "step_count": {
+          "type": "integer",
+          "description": "Only for workflow_recording sessions"
+        },
+        "item_count": {
+          "type": "integer",
+          "description": "Only for teaching_session sessions"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
         }
       }
     },
-    "ProjectResponse": {
+    "ContextResponse": {
       "type": "object",
       "properties": {
         "success": {
@@ -381,7 +367,7 @@
         },
         "data": {
           "type": "object",
-          "description": "Dynamic project data"
+          "description": "Dynamic context data (project or session with content)"
         }
       }
     },
@@ -403,37 +389,182 @@
         "instruction": {
           "type": "string"
         },
-        "options": {
+        "results": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/SearchOption"
+            "$ref": "#/definitions/SearchResult"
           }
+        },
+        "selected": {
+          "$ref": "#/definitions/SearchResult",
+          "description": "Present when status is AUTO_SELECTED"
+        },
+        "total_candidates": {
+          "type": "integer"
         }
       }
     },
-    "SearchOption": {
+    "SearchResult": {
       "type": "object",
       "properties": {
-        "option_number": {
-          "type": "integer"
-        },
-        "type": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "project",
+            "session"
+          ]
+        },
+        "session_type": {
+          "type": "string",
+          "enum": [
+            "workflow_recording",
+            "teaching_session"
+          ],
+          "description": "Only for sessions"
+        },
+        "name": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string",
+          "description": "Only for sessions"
+        },
+        "description": {
+          "type": "string",
+          "description": "Only for projects"
+        },
+        "project_id": {
+          "type": "string",
+          "description": "Parent project ID for sessions"
+        },
+        "score": {
+          "type": "integer",
+          "description": "Match score (0-100)"
+        },
+        "rank": {
+          "type": "integer"
+        },
+        "contained_sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SessionSummary"
+          },
+          "description": "For projects only"
+        }
+      }
+    },
+    "SessionSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "session_type": {
+          "type": "string",
+          "enum": [
+            "workflow_recording",
+            "teaching_session"
+          ]
         },
         "name": {
           "type": "string"
         },
         "goal": {
           "type": "string"
+        }
+      }
+    },
+    "ModifyRequest": {
+      "type": "object",
+      "required": [
+        "target_type",
+        "change_prompt"
+      ],
+      "properties": {
+        "target_type": {
+          "type": "string",
+          "enum": [
+            "step",
+            "phase",
+            "knowledge_item",
+            "metadata"
+          ],
+          "description": "What to modify: step/phase for workflows, knowledge_item for teaching, metadata for projects"
         },
-        "score_percent": {
+        "target_number": {
+          "type": "integer",
+          "description": "Step or phase number (required for step/phase targets)"
+        },
+        "target_id": {
+          "type": "string",
+          "description": "Knowledge item ID (required for knowledge_item targets)"
+        },
+        "change_prompt": {
+          "type": "string",
+          "description": "Natural language description of the change"
+        },
+        "auto_confirm": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, save immediately without preview"
+        }
+      }
+    },
+    "ModifyResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
           "type": "string"
         },
-        "display": {
+        "id": {
           "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "project",
+            "session"
+          ]
+        },
+        "session_type": {
+          "type": "string",
+          "enum": [
+            "workflow_recording",
+            "teaching_session"
+          ]
+        },
+        "target_type": {
+          "type": "string"
+        },
+        "target_number": {
+          "type": "integer"
+        },
+        "target_id": {
+          "type": "string"
+        },
+        "change_prompt": {
+          "type": "string"
+        },
+        "preview": {
+          "type": "string",
+          "description": "Human-readable diff preview"
+        },
+        "saved": {
+          "type": "boolean"
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of detected changes"
+        },
+        "next_step": {
+          "type": "string",
+          "description": "Guidance for next action when saved=false"
         }
       }
     }
