@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.10",
+    "version": "1.11",
     "title": "CivicPlus Transform",
     "description": "Empowers business users to create and deploy digital forms for enterprise and government organizations as web and native apps, while allowing developers to customize, extend, or harness the forms through their own custom apps. Connect your forms with this connector to allow easy submission of your form data into your backend systems or databases without the need to write complex integration code.",
     "contact": {
@@ -391,15 +391,85 @@
         }
       }
     },
+    "/forms/{formId}": {
+      "get": {
+        "description": "Allow for a Form to be retrieved",
+        "summary": "Retrieve Form",
+        "operationId": "GetForm",
+        "x-ms-visibility": "internal",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "formId",
+            "type": "integer",
+            "required": true,
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "customPDFs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
     "/forms/{formId}/approval-steps": {
       "get": {
         "description": "Allows for Form approval steps to be retrieved",
         "summary": "Retrieve Form Approval Steps",
         "operationId": "GetFormApprovalSteps",
         "x-ms-visibility": "internal",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [
           {
             "in": "path",
@@ -470,9 +540,7 @@
         "summary": "Retrieve Approval Record",
         "operationId": "GetFormSubmissionApprovalByStepLabel",
         "x-ms-visibility": "important",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [
           {
             "in": "path",
@@ -616,6 +684,11 @@
                   "x-ms-summary": "Include submission identifier in PDF",
                   "description": "The submission identifier can be included at the bottom of each page in the PDF"
                 },
+                "includeExternalIdInPdf": {
+                  "type": "boolean",
+                  "x-ms-summary": "Include external identifier in PDF",
+                  "description": "The external identifier can be included at the bottom of each page in the PDF"
+                },
                 "includePaymentInPdf": {
                   "type": "boolean",
                   "x-ms-summary": "Include payment details in PDF",
@@ -625,6 +698,17 @@
                   "type": "boolean",
                   "x-ms-summary": "Page break on form pages",
                   "description": "Form pages can be translated to page breaks in the PDF"
+                },
+                "excludedCSSClasses": {
+                  "type": "array",
+                  "x-ms-summary": "Excluded form elements via CSS classes",
+                  "description": "The CSS classes assigned to the form elements to exclude from the PDF",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "string",
+                    "description": "The CSS class assigned to the form elements to exclude from the PDF",
+                    "x-ms-summary": "CSS class"
+                  }
                 },
                 "excludedElementIds": {
                   "type": "array",
@@ -667,6 +751,111 @@
                   ]
                 }
               }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "description": "Output file content from the PDF Service",
+              "x-ms-summary": "Form Submission PDF Content"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/forms/{formId}/submissions/{submissionId}/custom-pdf-document": {
+      "post": {
+        "description": "Allows for a custom PDF to be generated",
+        "summary": "Generate Custom PDF",
+        "operationId": "GenerateCustomPDF",
+        "x-ms-visibility": "important",
+        "produces": ["application/pdf"],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "description": "Form containing the custom PDF",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Form",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-path": "id",
+              "value-collection": "forms",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "submissionId",
+            "in": "path",
+            "description": "ID of the form submission",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "Request Body",
+            "in": "body",
+            "description": "This is the request body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customPdfId": {
+                  "type": "string",
+                  "x-ms-summary": "Custom PDF",
+                  "x-ms-visibility": "important",
+                  "description": "The custom PDF to generate",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetForm",
+                    "value-path": "id",
+                    "value-collection": "customPDFs",
+                    "value-title": "label",
+                    "parameters": {
+                      "formId": {
+                        "parameter": "formId"
+                      }
+                    }
+                  }
+                },
+                "isCustomPdfEditable": {
+                  "type": "boolean",
+                  "x-ms-summary": "Allow editing PDF",
+                  "x-ms-visibility": "important",
+                  "description": "Allow resulting filled fields on PDF to be edited",
+                  "default": false
+                }
+              },
+              "required": ["customPdfId", "isCustomPdfEditable"]
             }
           }
         ],

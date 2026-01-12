@@ -1,0 +1,553 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "US BLS (Independent Publisher)",
+    "description": "Access Bureau of Labor Statistics (BLS) datasets including time series, popular series, survey lists, and survey metadata. Provides economic indicators such as employment, inflation, wages, and more.\n",
+    "version": "1.0",
+    "contact": {
+      "name": "Bureau of Labor Statistics Developers",
+      "url": "https://www.bls.gov/developers/",
+      "email": "webmaster@bls.gov",
+      "x-ms-privacyPolicyUrl": "https://www.bls.gov/bls/bls-privacy.htm"
+    }
+  },
+  "host": "api.bls.gov",
+  "basePath": "/publicAPI/v2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "query",
+      "name": "registrationkey"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "BLS",
+      "description": "Bureau of Labor Statistics Data API"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.bls.gov/developers/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.bls.gov/bls/bls-privacy.htm"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Finance"
+    }
+  ],
+  "paths": {
+    "/timeseries/data/{series_id}": {
+      "get": {
+        "summary": "Get Single Series Data",
+        "x-ms-summary": "Retrieve a single series",
+        "description": "Retrieve data for a single BLS series ID with optional parameters.",
+        "operationId": "GetSingleSeries",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "series_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Series ID",
+            "description": "A single BLS series ID (e.g., LAUCN040010000000005)."
+          },
+          {
+            "name": "startyear",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Start Year",
+            "description": "First year of data to retrieve (YYYY)."
+          },
+          {
+            "name": "endyear",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "End Year",
+            "description": "Last year of data to retrieve (YYYY)."
+          },
+          {
+            "name": "catalog",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Include Catalog Info",
+            "description": "Set to `true` to include catalog metadata."
+          },
+          {
+            "name": "calculations",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Include Calculations",
+            "description": "Set to `true` to include net and percent changes."
+          },
+          {
+            "name": "annualaverage",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Include Annual Averages",
+            "description": "Set to `true` to include annual averages."
+          },
+          {
+            "name": "aspects",
+            "in": "query",
+            "type": "boolean",
+            "x-ms-summary": "Include Aspects",
+            "description": "Set to `true` to include aspects metadata."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Multiple series response (schemaless)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found - series ID not available",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/timeseries/data/": {
+      "post": {
+        "summary": "Get Multiple Series Data",
+        "x-ms-summary": "Retrieve multiple series",
+        "description": "Retrieve data for one or more BLS series IDs in a single request.",
+        "operationId": "GetMultipleSeries",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Request Body",
+            "description": "Request payload containing one or more series IDs and optional parameters.",
+            "schema": {
+              "$ref": "#/definitions/MultipleSeriesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Multiple series response (schemaless)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found - one or more series IDs not available",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/timeseries/popular": {
+      "get": {
+        "summary": "Get Popular Series",
+        "x-ms-summary": "Retrieve popular series",
+        "description": "Retrieve data for commonly accessed BLS series IDs.",
+        "operationId": "GetPopularSeries",
+        "responses": {
+          "200": {
+            "description": "Multiple series response (schemaless)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found - no popular series found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/surveys": {
+      "get": {
+        "summary": "Get All Surveys",
+        "x-ms-summary": "Retrieve survey list",
+        "description": "Retrieve a list of all available BLS surveys.",
+        "operationId": "GetAllSurveys",
+        "responses": {
+          "200": {
+            "description": "Multiple series response (schemaless)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found - no surveys available",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/surveys/{survey_id}": {
+      "get": {
+        "summary": "Get Survey Metadata",
+        "x-ms-summary": "Retrieve survey metadata",
+        "description": "Retrieve metadata for a specific BLS survey.",
+        "operationId": "GetSurveyMetadata",
+        "parameters": [
+          {
+            "name": "survey_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Survey ID",
+            "description": "Abbreviation of the survey (e.g., CPS, CES)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Multiple series response (schemaless)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found - survey not available",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "MultipleSeriesRequest": {
+      "type": "object",
+      "properties": {
+        "seriesid": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Series IDs",
+          "description": "One or more BLS series IDs."
+        },
+        "startyear": {
+          "type": "string",
+          "x-ms-summary": "Start Year",
+          "description": "First year of data to retrieve (YYYY)."
+        },
+        "endyear": {
+          "type": "string",
+          "x-ms-summary": "End Year",
+          "description": "Last year of data to retrieve (YYYY)."
+        },
+        "catalog": {
+          "type": "boolean",
+          "x-ms-summary": "Include Catalog Info",
+          "description": "Set to `true` to include catalog metadata."
+        },
+        "calculations": {
+          "type": "boolean",
+          "x-ms-summary": "Include Calculations",
+          "description": "Set to `true` to include net and percent changes."
+        },
+        "annualaverage": {
+          "type": "boolean",
+          "x-ms-summary": "Include Annual Averages",
+          "description": "Set to `true` to include annual averages."
+        },
+        "aspects": {
+          "type": "boolean",
+          "x-ms-summary": "Include Aspects",
+          "description": "Set to `true` to include aspects metadata."
+        }
+      },
+      "required": [
+        "seriesid"
+      ]
+    },
+    "SeriesResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "responseTime": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "series": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "seriesID": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "year": {
+                            "type": "string"
+                          },
+                          "period": {
+                            "type": "string"
+                          },
+                          "periodName": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "footnotes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "text": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "SurveyListResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "responseTime": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "survey_abbreviation": {
+                "type": "string"
+              },
+              "survey_name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "SurveyMetadataResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "responseTime": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "survey_abbreviation": {
+                "type": "string"
+              },
+              "survey_name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "responseTime": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
