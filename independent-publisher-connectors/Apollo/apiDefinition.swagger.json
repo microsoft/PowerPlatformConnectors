@@ -1,0 +1,928 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Apollo Enrichment (Independent Publisher)",
+    "description": "Enrich contact and company data using Apollo.io's matching API. Look up people by email to get job titles, phone numbers, and company information. Look up organizations by domain to get firmographic data including employee count, revenue, funding, and technology stack.",
+    "contact": {
+      "name": "Steve Mordue",
+      "url": "https://github.com/forceworks",
+      "email": "steve@forceworks.com"
+    }
+  },
+  "host": "api.apollo.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/people/match": {
+      "post": {
+        "summary": "Enrich Contact",
+        "description": "Enrich a single contact by email address. Returns person details including name, title, phone numbers, and organization information.",
+        "operationId": "PeopleMatch",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "email"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "description": "Email address to match against Apollo database",
+                  "x-ms-summary": "Email"
+                },
+                "reveal_personal_emails": {
+                  "type": "boolean",
+                  "description": "Include personal email addresses in results",
+                  "x-ms-summary": "Reveal Personal Emails",
+                  "default": false
+                },
+                "reveal_phone_numbers": {
+                  "type": "boolean",
+                  "description": "Include phone numbers in results (uses additional credits)",
+                  "x-ms-summary": "Reveal Phone Numbers",
+                  "default": false
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful match response",
+            "schema": {
+              "$ref": "#/definitions/PersonMatchResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/enrich": {
+      "post": {
+        "summary": "Enrich Account",
+        "description": "Enrich an organization by domain. Returns company details including industry, employee count, revenue, funding history, and technology stack.",
+        "operationId": "OrgMatch",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "domain"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string",
+                  "description": "Company website domain (e.g., microsoft.com)",
+                  "x-ms-summary": "Domain"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful enrichment response",
+            "schema": {
+              "$ref": "#/definitions/OrganizationEnrichResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/people/bulk_match": {
+      "post": {
+        "summary": "Bulk Enrich Contacts",
+        "description": "Enrich multiple contacts in a single request. Match by email, or by name and domain combination. Maximum 10 queries per request.",
+        "operationId": "BulkPeopleMatch",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "queries"
+              ],
+              "properties": {
+                "queries": {
+                  "type": "array",
+                  "description": "Array of contact queries to match",
+                  "x-ms-summary": "Queries",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "description": "Email address to match",
+                        "x-ms-summary": "Email"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "description": "First name (use with last_name and domain)",
+                        "x-ms-summary": "First Name"
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "description": "Last name (use with first_name and domain)",
+                        "x-ms-summary": "Last Name"
+                      },
+                      "domain": {
+                        "type": "string",
+                        "description": "Company domain (use with first_name and last_name)",
+                        "x-ms-summary": "Domain"
+                      }
+                    }
+                  }
+                },
+                "reveal_personal_emails": {
+                  "type": "boolean",
+                  "description": "Include personal email addresses in results",
+                  "x-ms-summary": "Reveal Personal Emails",
+                  "default": false
+                },
+                "reveal_phone_numbers": {
+                  "type": "boolean",
+                  "description": "Include phone numbers in results (uses additional credits)",
+                  "x-ms-summary": "Reveal Phone Numbers",
+                  "default": false
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful bulk match response",
+            "schema": {
+              "$ref": "#/definitions/BulkPeopleMatchResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/bulk_enrich": {
+      "post": {
+        "summary": "Bulk Enrich Accounts",
+        "description": "Enrich multiple organizations in a single request by domain. Maximum 10 queries per request.",
+        "operationId": "BulkOrgMatch",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "queries"
+              ],
+              "properties": {
+                "queries": {
+                  "type": "array",
+                  "description": "Array of organization queries to match",
+                  "x-ms-summary": "Queries",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "domain"
+                    ],
+                    "properties": {
+                      "domain": {
+                        "type": "string",
+                        "description": "Company website domain",
+                        "x-ms-summary": "Domain"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful bulk enrichment response",
+            "schema": {
+              "$ref": "#/definitions/BulkOrgEnrichResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "PersonMatchResponse": {
+      "type": "object",
+      "properties": {
+        "person": {
+          "$ref": "#/definitions/Person"
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Apollo unique identifier for the person",
+          "x-ms-summary": "Person ID"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name",
+          "x-ms-summary": "First Name"
+        },
+        "last_name": {
+          "type": "string",
+          "description": "Last name",
+          "x-ms-summary": "Last Name"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name",
+          "x-ms-summary": "Full Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Primary email address",
+          "x-ms-summary": "Email"
+        },
+        "title": {
+          "type": "string",
+          "description": "Job title",
+          "x-ms-summary": "Title"
+        },
+        "headline": {
+          "type": "string",
+          "description": "LinkedIn headline or professional summary",
+          "x-ms-summary": "Headline"
+        },
+        "linkedin_url": {
+          "type": "string",
+          "description": "LinkedIn profile URL",
+          "x-ms-summary": "LinkedIn URL"
+        },
+        "photo_url": {
+          "type": "string",
+          "description": "Profile photo URL",
+          "x-ms-summary": "Photo URL"
+        },
+        "city": {
+          "type": "string",
+          "description": "City",
+          "x-ms-summary": "City"
+        },
+        "state": {
+          "type": "string",
+          "description": "State or province",
+          "x-ms-summary": "State"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country",
+          "x-ms-summary": "Country"
+        },
+        "email_status": {
+          "type": "string",
+          "description": "Email verification status",
+          "x-ms-summary": "Email Status"
+        },
+        "phone_numbers": {
+          "type": "array",
+          "description": "List of phone numbers",
+          "x-ms-summary": "Phone Numbers",
+          "items": {
+            "$ref": "#/definitions/PhoneNumber"
+          }
+        },
+        "organization": {
+          "$ref": "#/definitions/PersonOrganization"
+        }
+      }
+    },
+    "PhoneNumber": {
+      "type": "object",
+      "properties": {
+        "sanitized_number": {
+          "type": "string",
+          "description": "Formatted phone number",
+          "x-ms-summary": "Phone Number"
+        },
+        "type": {
+          "type": "string",
+          "description": "Phone type (mobile, work, etc.)",
+          "x-ms-summary": "Phone Type"
+        }
+      }
+    },
+    "PersonOrganization": {
+      "type": "object",
+      "description": "Organization information for the matched person",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Company name",
+          "x-ms-summary": "Company Name"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Company domain",
+          "x-ms-summary": "Domain"
+        },
+        "website_url": {
+          "type": "string",
+          "description": "Company website URL",
+          "x-ms-summary": "Website URL"
+        },
+        "linkedin_url": {
+          "type": "string",
+          "description": "Company LinkedIn URL",
+          "x-ms-summary": "LinkedIn URL"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Company phone number",
+          "x-ms-summary": "Phone"
+        },
+        "industry": {
+          "type": "string",
+          "description": "Industry",
+          "x-ms-summary": "Industry"
+        },
+        "estimated_num_employees": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Estimated number of employees",
+          "x-ms-summary": "Employee Count"
+        },
+        "city": {
+          "type": "string",
+          "description": "City",
+          "x-ms-summary": "City"
+        },
+        "state": {
+          "type": "string",
+          "description": "State or province",
+          "x-ms-summary": "State"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country",
+          "x-ms-summary": "Country"
+        }
+      }
+    },
+    "OrganizationEnrichResponse": {
+      "type": "object",
+      "properties": {
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        }
+      }
+    },
+    "Organization": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Apollo unique identifier",
+          "x-ms-summary": "Organization ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Company name",
+          "x-ms-summary": "Name"
+        },
+        "website_url": {
+          "type": "string",
+          "description": "Website URL",
+          "x-ms-summary": "Website URL"
+        },
+        "blog_url": {
+          "type": "string",
+          "description": "Blog URL",
+          "x-ms-summary": "Blog URL"
+        },
+        "angellist_url": {
+          "type": "string",
+          "description": "AngelList URL",
+          "x-ms-summary": "AngelList URL"
+        },
+        "linkedin_url": {
+          "type": "string",
+          "description": "LinkedIn company page URL",
+          "x-ms-summary": "LinkedIn URL"
+        },
+        "twitter_url": {
+          "type": "string",
+          "description": "Twitter profile URL",
+          "x-ms-summary": "Twitter URL"
+        },
+        "facebook_url": {
+          "type": "string",
+          "description": "Facebook page URL",
+          "x-ms-summary": "Facebook URL"
+        },
+        "primary_phone": {
+          "type": "string",
+          "description": "Primary phone number",
+          "x-ms-summary": "Primary Phone"
+        },
+        "languages": {
+          "type": "array",
+          "description": "Languages used",
+          "x-ms-summary": "Languages",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alexa_ranking": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Alexa traffic ranking",
+          "x-ms-summary": "Alexa Ranking"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number",
+          "x-ms-summary": "Phone"
+        },
+        "linkedin_uid": {
+          "type": "string",
+          "description": "LinkedIn unique identifier",
+          "x-ms-summary": "LinkedIn UID"
+        },
+        "founded_year": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Year founded",
+          "x-ms-summary": "Founded Year"
+        },
+        "publicly_traded_symbol": {
+          "type": "string",
+          "description": "Stock ticker symbol",
+          "x-ms-summary": "Stock Symbol"
+        },
+        "publicly_traded_exchange": {
+          "type": "string",
+          "description": "Stock exchange",
+          "x-ms-summary": "Stock Exchange"
+        },
+        "logo_url": {
+          "type": "string",
+          "description": "Company logo URL",
+          "x-ms-summary": "Logo URL"
+        },
+        "crunchbase_url": {
+          "type": "string",
+          "description": "Crunchbase profile URL",
+          "x-ms-summary": "Crunchbase URL"
+        },
+        "primary_domain": {
+          "type": "string",
+          "description": "Primary website domain",
+          "x-ms-summary": "Primary Domain"
+        },
+        "industry": {
+          "type": "string",
+          "description": "Primary industry",
+          "x-ms-summary": "Industry"
+        },
+        "keywords": {
+          "type": "array",
+          "description": "Industry and business keywords",
+          "x-ms-summary": "Keywords",
+          "items": {
+            "type": "string"
+          }
+        },
+        "estimated_num_employees": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Estimated employee count",
+          "x-ms-summary": "Employee Count"
+        },
+        "industries": {
+          "type": "array",
+          "description": "List of industries",
+          "x-ms-summary": "Industries",
+          "items": {
+            "type": "string"
+          }
+        },
+        "secondary_industries": {
+          "type": "array",
+          "description": "Secondary industries",
+          "x-ms-summary": "Secondary Industries",
+          "items": {
+            "type": "string"
+          }
+        },
+        "snippets_loaded": {
+          "type": "boolean",
+          "description": "Whether company snippets are loaded",
+          "x-ms-summary": "Snippets Loaded"
+        },
+        "industry_tag_id": {
+          "type": "string",
+          "description": "Industry tag identifier",
+          "x-ms-summary": "Industry Tag ID"
+        },
+        "retail_location_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of retail locations",
+          "x-ms-summary": "Retail Locations"
+        },
+        "raw_address": {
+          "type": "string",
+          "description": "Full address",
+          "x-ms-summary": "Full Address"
+        },
+        "street_address": {
+          "type": "string",
+          "description": "Street address",
+          "x-ms-summary": "Street Address"
+        },
+        "city": {
+          "type": "string",
+          "description": "City",
+          "x-ms-summary": "City"
+        },
+        "state": {
+          "type": "string",
+          "description": "State or province",
+          "x-ms-summary": "State"
+        },
+        "postal_code": {
+          "type": "string",
+          "description": "Postal or ZIP code",
+          "x-ms-summary": "Postal Code"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country",
+          "x-ms-summary": "Country"
+        },
+        "owned_by_organization_id": {
+          "type": "string",
+          "description": "Parent organization ID if subsidiary",
+          "x-ms-summary": "Parent Org ID"
+        },
+        "seo_description": {
+          "type": "string",
+          "description": "SEO meta description",
+          "x-ms-summary": "SEO Description"
+        },
+        "short_description": {
+          "type": "string",
+          "description": "Short company description",
+          "x-ms-summary": "Short Description"
+        },
+        "suborganizations": {
+          "type": "array",
+          "description": "List of subsidiary organizations",
+          "x-ms-summary": "Suborganizations",
+          "items": {
+            "type": "string"
+          }
+        },
+        "num_suborganizations": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of subsidiaries",
+          "x-ms-summary": "Subsidiary Count"
+        },
+        "annual_revenue_printed": {
+          "type": "string",
+          "description": "Annual revenue formatted (e.g., $10M)",
+          "x-ms-summary": "Annual Revenue (Formatted)"
+        },
+        "annual_revenue": {
+          "type": "number",
+          "format": "float",
+          "description": "Annual revenue in dollars",
+          "x-ms-summary": "Annual Revenue"
+        },
+        "total_funding": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total funding raised in dollars",
+          "x-ms-summary": "Total Funding"
+        },
+        "total_funding_printed": {
+          "type": "string",
+          "description": "Total funding formatted (e.g., $50M)",
+          "x-ms-summary": "Total Funding (Formatted)"
+        },
+        "latest_funding_round_date": {
+          "type": "string",
+          "description": "Date of most recent funding round",
+          "x-ms-summary": "Latest Funding Date"
+        },
+        "latest_funding_stage": {
+          "type": "string",
+          "description": "Most recent funding stage (Seed, Series A, etc.)",
+          "x-ms-summary": "Latest Funding Stage"
+        },
+        "funding_events": {
+          "type": "array",
+          "description": "History of funding events",
+          "x-ms-summary": "Funding Events",
+          "items": {
+            "$ref": "#/definitions/FundingEvent"
+          }
+        },
+        "technology_names": {
+          "type": "array",
+          "description": "Technologies used by the company",
+          "x-ms-summary": "Technologies",
+          "items": {
+            "type": "string"
+          }
+        },
+        "current_technologies": {
+          "type": "array",
+          "description": "Current technology stack details",
+          "x-ms-summary": "Current Technologies",
+          "items": {
+            "$ref": "#/definitions/Technology"
+          }
+        },
+        "departmental_head_count": {
+          "$ref": "#/definitions/DepartmentalHeadCount"
+        }
+      }
+    },
+    "FundingEvent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Funding event ID",
+          "x-ms-summary": "Event ID"
+        },
+        "date": {
+          "type": "string",
+          "description": "Funding date",
+          "x-ms-summary": "Date"
+        },
+        "news_url": {
+          "type": "string",
+          "description": "News article URL",
+          "x-ms-summary": "News URL"
+        },
+        "type": {
+          "type": "string",
+          "description": "Funding type",
+          "x-ms-summary": "Type"
+        },
+        "investors": {
+          "type": "string",
+          "description": "Investors",
+          "x-ms-summary": "Investors"
+        },
+        "amount": {
+          "type": "string",
+          "description": "Amount raised",
+          "x-ms-summary": "Amount"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency",
+          "x-ms-summary": "Currency"
+        }
+      }
+    },
+    "Technology": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Technology unique ID",
+          "x-ms-summary": "UID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Technology name",
+          "x-ms-summary": "Name"
+        },
+        "category": {
+          "type": "string",
+          "description": "Technology category",
+          "x-ms-summary": "Category"
+        }
+      }
+    },
+    "DepartmentalHeadCount": {
+      "type": "object",
+      "description": "Employee count by department",
+      "properties": {
+        "engineering": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Engineering headcount",
+          "x-ms-summary": "Engineering"
+        },
+        "marketing": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Marketing headcount",
+          "x-ms-summary": "Marketing"
+        },
+        "operations": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Operations headcount",
+          "x-ms-summary": "Operations"
+        },
+        "support": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Support headcount",
+          "x-ms-summary": "Support"
+        },
+        "human_resources": {
+          "type": "integer",
+          "format": "int32",
+          "description": "HR headcount",
+          "x-ms-summary": "Human Resources"
+        },
+        "sales": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Sales headcount",
+          "x-ms-summary": "Sales"
+        },
+        "finance": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Finance headcount",
+          "x-ms-summary": "Finance"
+        },
+        "consulting": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Consulting headcount",
+          "x-ms-summary": "Consulting"
+        },
+        "legal": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Legal headcount",
+          "x-ms-summary": "Legal"
+        },
+        "arts_and_design": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Arts and Design headcount",
+          "x-ms-summary": "Arts and Design"
+        },
+        "accounting": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Accounting headcount",
+          "x-ms-summary": "Accounting"
+        },
+        "business_development": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Business Development headcount",
+          "x-ms-summary": "Business Development"
+        },
+        "information_technology": {
+          "type": "integer",
+          "format": "int32",
+          "description": "IT headcount",
+          "x-ms-summary": "Information Technology"
+        },
+        "education": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Education headcount",
+          "x-ms-summary": "Education"
+        },
+        "media_and_commmunication": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Media and Communication headcount",
+          "x-ms-summary": "Media and Communication"
+        },
+        "product_management": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Product Management headcount",
+          "x-ms-summary": "Product Management"
+        },
+        "entrepreneurship": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Entrepreneurship headcount",
+          "x-ms-summary": "Entrepreneurship"
+        },
+        "data_science": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Data Science headcount",
+          "x-ms-summary": "Data Science"
+        },
+        "administrative": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Administrative headcount",
+          "x-ms-summary": "Administrative"
+        }
+      }
+    },
+    "BulkPeopleMatchResponse": {
+      "type": "object",
+      "properties": {
+        "matches": {
+          "type": "array",
+          "description": "Array of matched people",
+          "x-ms-summary": "Matches",
+          "items": {
+            "$ref": "#/definitions/Person"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "Request status",
+          "x-ms-summary": "Status"
+        }
+      }
+    },
+    "BulkOrgEnrichResponse": {
+      "type": "object",
+      "properties": {
+        "organizations": {
+          "type": "array",
+          "description": "Array of enriched organizations",
+          "x-ms-summary": "Organizations",
+          "items": {
+            "$ref": "#/definitions/Organization"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "Request status",
+          "x-ms-summary": "Status"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "X-Api-Key",
+      "in": "header",
+      "description": "Apollo.io API Key. Get your key from Settings > Integrations > API Keys in your Apollo account."
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "People",
+      "description": "Contact enrichment operations"
+    },
+    {
+      "name": "Organizations",
+      "description": "Company enrichment operations"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://forceworks.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.apollo.io/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Sales and CRM;Data"
+    }
+  ]
+}

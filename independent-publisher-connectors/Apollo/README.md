@@ -2,7 +2,9 @@
 
 Apollo.io is a sales intelligence platform with a database of over 275 million verified B2B contacts. This connector provides access to Apollo's enrichment APIs, allowing you to look up detailed information about people and companies directly within your Power Automate flows.
 
-## Publisher: Forceworks
+## Publisher: Steve Mordue
+
+[Steve Mordue](https://github.com/forceworks) | [Forceworks](https://forceworks.com)
 
 ## Prerequisites
 
