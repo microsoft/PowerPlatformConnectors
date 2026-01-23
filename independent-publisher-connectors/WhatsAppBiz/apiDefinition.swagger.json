@@ -1,0 +1,970 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "WhatsApp Business",
+    "description": "Connect to WhatsApp Business Cloud API to send messages, manage templates, and engage with customers via WhatsApp. This connector enables businesses to send text messages, media, templates, and interactive messages through the WhatsApp Business Platform.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Your Name",
+      "url": "https://github.com/yourusername",
+      "email": "your.email@example.com"
+    }
+  },
+  "host": "graph.facebook.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ],
+  "paths": {
+    "/v21.0/{phoneNumberId}/messages": {
+      "post": {
+        "summary": "Send Text Message",
+        "description": "Send a text message to a WhatsApp user. Can only be used within the 24-hour customer service window unless using a template.",
+        "operationId": "SendTextMessage",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "messaging_product",
+                "recipient_type",
+                "to",
+                "type",
+                "text"
+              ],
+              "properties": {
+                "messaging_product": {
+                  "type": "string",
+                  "default": "whatsapp",
+                  "description": "Messaging product (always 'whatsapp')",
+                  "x-ms-summary": "Messaging Product",
+                  "x-ms-visibility": "internal"
+                },
+                "recipient_type": {
+                  "type": "string",
+                  "default": "individual",
+                  "description": "Type of recipient",
+                  "x-ms-summary": "Recipient Type",
+                  "x-ms-visibility": "internal"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Recipient phone number with country code (e.g., 14155238886)",
+                  "x-ms-summary": "To Phone Number"
+                },
+                "type": {
+                  "type": "string",
+                  "default": "text",
+                  "description": "Message type",
+                  "x-ms-summary": "Message Type",
+                  "x-ms-visibility": "internal"
+                },
+                "text": {
+                  "type": "object",
+                  "properties": {
+                    "preview_url": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable URL preview in the message",
+                      "x-ms-summary": "Enable URL Preview"
+                    },
+                    "body": {
+                      "type": "string",
+                      "description": "The text message content",
+                      "x-ms-summary": "Message Body"
+                    }
+                  },
+                  "required": [
+                    "body"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message sent successfully",
+            "schema": {
+              "$ref": "#/definitions/MessageResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/v21.0/{phoneNumberId}/messages/template": {
+      "post": {
+        "summary": "Send Template Message",
+        "description": "Send a pre-approved template message. Templates can be sent anytime, even outside the 24-hour customer service window.",
+        "operationId": "SendTemplateMessage",
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "messaging_product",
+                "to",
+                "type",
+                "template"
+              ],
+              "properties": {
+                "messaging_product": {
+                  "type": "string",
+                  "default": "whatsapp",
+                  "x-ms-visibility": "internal"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Recipient phone number with country code",
+                  "x-ms-summary": "To Phone Number"
+                },
+                "type": {
+                  "type": "string",
+                  "default": "template",
+                  "x-ms-visibility": "internal"
+                },
+                "template": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the approved template",
+                      "x-ms-summary": "Template Name"
+                    },
+                    "language": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Language code (e.g., en_US, es_ES)",
+                          "x-ms-summary": "Language Code",
+                          "default": "en_US"
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    },
+                    "components": {
+                      "type": "array",
+                      "description": "Template components with parameters",
+                      "x-ms-summary": "Components",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "Component type (header, body, button)"
+                          },
+                          "parameters": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "language"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template message sent successfully",
+            "schema": {
+              "$ref": "#/definitions/MessageResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{phoneNumberId}/messages/image": {
+      "post": {
+        "summary": "Send Image Message",
+        "description": "Send an image message to a WhatsApp user.",
+        "operationId": "SendImageMessage",
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "messaging_product",
+                "to",
+                "type",
+                "image"
+              ],
+              "properties": {
+                "messaging_product": {
+                  "type": "string",
+                  "default": "whatsapp",
+                  "x-ms-visibility": "internal"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Recipient phone number with country code",
+                  "x-ms-summary": "To Phone Number"
+                },
+                "type": {
+                  "type": "string",
+                  "default": "image",
+                  "x-ms-visibility": "internal"
+                },
+                "image": {
+                  "type": "object",
+                  "properties": {
+                    "link": {
+                      "type": "string",
+                      "description": "Public URL of the image",
+                      "x-ms-summary": "Image URL"
+                    },
+                    "caption": {
+                      "type": "string",
+                      "description": "Caption for the image",
+                      "x-ms-summary": "Caption"
+                    }
+                  },
+                  "required": [
+                    "link"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image message sent successfully",
+            "schema": {
+              "$ref": "#/definitions/MessageResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{phoneNumberId}/messages/document": {
+      "post": {
+        "summary": "Send Document Message",
+        "description": "Send a document (PDF, DOC, etc.) to a WhatsApp user.",
+        "operationId": "SendDocumentMessage",
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "messaging_product",
+                "to",
+                "type",
+                "document"
+              ],
+              "properties": {
+                "messaging_product": {
+                  "type": "string",
+                  "default": "whatsapp",
+                  "x-ms-visibility": "internal"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Recipient phone number with country code",
+                  "x-ms-summary": "To Phone Number"
+                },
+                "type": {
+                  "type": "string",
+                  "default": "document",
+                  "x-ms-visibility": "internal"
+                },
+                "document": {
+                  "type": "object",
+                  "properties": {
+                    "link": {
+                      "type": "string",
+                      "description": "Public URL of the document",
+                      "x-ms-summary": "Document URL"
+                    },
+                    "caption": {
+                      "type": "string",
+                      "description": "Caption for the document",
+                      "x-ms-summary": "Caption"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Filename to display",
+                      "x-ms-summary": "Filename"
+                    }
+                  },
+                  "required": [
+                    "link"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document message sent successfully",
+            "schema": {
+              "$ref": "#/definitions/MessageResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{phoneNumberId}/messages/location": {
+      "post": {
+        "summary": "Send Location Message",
+        "description": "Send a location message with coordinates to a WhatsApp user.",
+        "operationId": "SendLocationMessage",
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "messaging_product",
+                "to",
+                "type",
+                "location"
+              ],
+              "properties": {
+                "messaging_product": {
+                  "type": "string",
+                  "default": "whatsapp",
+                  "x-ms-visibility": "internal"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Recipient phone number with country code",
+                  "x-ms-summary": "To Phone Number"
+                },
+                "type": {
+                  "type": "string",
+                  "default": "location",
+                  "x-ms-visibility": "internal"
+                },
+                "location": {
+                  "type": "object",
+                  "properties": {
+                    "latitude": {
+                      "type": "string",
+                      "description": "Latitude coordinate",
+                      "x-ms-summary": "Latitude"
+                    },
+                    "longitude": {
+                      "type": "string",
+                      "description": "Longitude coordinate",
+                      "x-ms-summary": "Longitude"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Location name",
+                      "x-ms-summary": "Location Name"
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "Full address",
+                      "x-ms-summary": "Address"
+                    }
+                  },
+                  "required": [
+                    "latitude",
+                    "longitude"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location message sent successfully",
+            "schema": {
+              "$ref": "#/definitions/MessageResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{phoneNumberId}/messages/interactive": {
+      "post": {
+        "summary": "Send Interactive Button Message",
+        "description": "Send an interactive message with reply buttons (up to 3 buttons).",
+        "operationId": "SendInteractiveButtonMessage",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "messaging_product",
+                "to",
+                "type",
+                "interactive"
+              ],
+              "properties": {
+                "messaging_product": {
+                  "type": "string",
+                  "default": "whatsapp",
+                  "x-ms-visibility": "internal"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Recipient phone number with country code",
+                  "x-ms-summary": "To Phone Number"
+                },
+                "type": {
+                  "type": "string",
+                  "default": "interactive",
+                  "x-ms-visibility": "internal"
+                },
+                "interactive": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "body",
+                    "action"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "button",
+                      "x-ms-visibility": "internal"
+                    },
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": "string",
+                          "description": "Message body text",
+                          "x-ms-summary": "Body Text"
+                        }
+                      },
+                      "required": [
+                        "text"
+                      ]
+                    },
+                    "action": {
+                      "type": "object",
+                      "properties": {
+                        "buttons": {
+                          "type": "array",
+                          "description": "Reply buttons (max 3)",
+                          "x-ms-summary": "Buttons",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "default": "reply"
+                              },
+                              "reply": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "description": "Button ID"
+                                  },
+                                  "title": {
+                                    "type": "string",
+                                    "description": "Button title (max 20 chars)"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Interactive message sent successfully",
+            "schema": {
+              "$ref": "#/definitions/MessageResponse"
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{phoneNumberId}/messages/status": {
+      "post": {
+        "summary": "Mark Message as Read",
+        "description": "Mark a received message as read.",
+        "operationId": "MarkMessageAsRead",
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "messaging_product",
+                "status",
+                "message_id"
+              ],
+              "properties": {
+                "messaging_product": {
+                  "type": "string",
+                  "default": "whatsapp",
+                  "x-ms-visibility": "internal"
+                },
+                "status": {
+                  "type": "string",
+                  "default": "read",
+                  "x-ms-visibility": "internal"
+                },
+                "message_id": {
+                  "type": "string",
+                  "description": "ID of the message to mark as read",
+                  "x-ms-summary": "Message ID"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message marked as read",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{wabaId}/message_templates": {
+      "get": {
+        "summary": "Get Message Templates",
+        "description": "Retrieve all message templates for your WhatsApp Business Account.",
+        "operationId": "GetMessageTemplates",
+        "parameters": [
+          {
+            "name": "wabaId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Account ID",
+            "x-ms-summary": "WABA ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "description": "Number of templates to return",
+            "x-ms-summary": "Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of message templates",
+            "schema": {
+              "$ref": "#/definitions/TemplatesResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Message Template",
+        "description": "Create a new message template for approval.",
+        "operationId": "CreateMessageTemplate",
+        "parameters": [
+          {
+            "name": "wabaId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Account ID",
+            "x-ms-summary": "WABA ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "language",
+                "category",
+                "components"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Template name (lowercase, underscores only)",
+                  "x-ms-summary": "Template Name"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language code (e.g., en_US)",
+                  "x-ms-summary": "Language"
+                },
+                "category": {
+                  "type": "string",
+                  "description": "Template category",
+                  "x-ms-summary": "Category",
+                  "enum": [
+                    "MARKETING",
+                    "UTILITY",
+                    "AUTHENTICATION"
+                  ]
+                },
+                "components": {
+                  "type": "array",
+                  "description": "Template components (header, body, footer, buttons)",
+                  "x-ms-summary": "Components",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Template ID"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Template status"
+                },
+                "category": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{wabaId}/message_templates/{templateName}": {
+      "delete": {
+        "summary": "Delete Message Template",
+        "description": "Delete a message template by name.",
+        "operationId": "DeleteMessageTemplate",
+        "parameters": [
+          {
+            "name": "wabaId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Account ID",
+            "x-ms-summary": "WABA ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "templateName",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Name of the template to delete",
+            "x-ms-summary": "Template Name",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v21.0/{phoneNumberId}": {
+      "get": {
+        "summary": "Get Phone Number Info",
+        "description": "Get information about a registered WhatsApp Business phone number.",
+        "operationId": "GetPhoneNumberInfo",
+        "parameters": [
+          {
+            "name": "phoneNumberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Your WhatsApp Business Phone Number ID",
+            "x-ms-summary": "Phone Number ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone number information",
+            "schema": {
+              "$ref": "#/definitions/PhoneNumberInfo"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "MessageResponse": {
+      "type": "object",
+      "properties": {
+        "messaging_product": {
+          "type": "string",
+          "description": "Messaging product"
+        },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "string",
+                "description": "Input phone number"
+              },
+              "wa_id": {
+                "type": "string",
+                "description": "WhatsApp ID"
+              }
+            }
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Message ID"
+              }
+            }
+          }
+        }
+      }
+    },
+    "TemplatesResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Template name"
+              },
+              "status": {
+                "type": "string",
+                "description": "Approval status"
+              },
+              "category": {
+                "type": "string",
+                "description": "Template category"
+              },
+              "language": {
+                "type": "string",
+                "description": "Template language"
+              },
+              "id": {
+                "type": "string",
+                "description": "Template ID"
+              }
+            }
+          }
+        },
+        "paging": {
+          "type": "object",
+          "properties": {
+            "cursors": {
+              "type": "object",
+              "properties": {
+                "before": {
+                  "type": "string"
+                },
+                "after": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "PhoneNumberInfo": {
+      "type": "object",
+      "properties": {
+        "verified_name": {
+          "type": "string",
+          "description": "Verified business name"
+        },
+        "code_verification_status": {
+          "type": "string",
+          "description": "Code verification status"
+        },
+        "display_phone_number": {
+          "type": "string",
+          "description": "Display phone number"
+        },
+        "quality_rating": {
+          "type": "string",
+          "description": "Quality rating (GREEN, YELLOW, RED)"
+        },
+        "id": {
+          "type": "string",
+          "description": "Phone number ID"
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://business.whatsapp.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.whatsapp.com/legal/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication;Marketing"
+    }
+  ]
+}

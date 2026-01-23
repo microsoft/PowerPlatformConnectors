@@ -1,0 +1,1615 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Kit",
+    "description": "Kit (formerly ConvertKit) is an email marketing platform built for creators. This connector allows you to manage subscribers, tags, forms, sequences, broadcasts, and automate your email marketing workflows.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Independent Publisher",
+      "url": "https://developers.kit.com/api-reference/overview"
+    }
+  },
+  "host": "api.kit.com",
+  "basePath": "/v4",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-Kit-Api-Key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/account": {
+      "get": {
+        "operationId": "GetAccount",
+        "summary": "Get account information",
+        "description": "Returns information about the authenticated Kit account including name, plan, and subscriber statistics.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/AccountResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/subscribers": {
+      "get": {
+        "operationId": "ListSubscribers",
+        "summary": "List subscribers",
+        "description": "Returns a paginated list of all subscribers in your Kit account.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by subscriber status",
+            "enum": ["active", "inactive", "bounced", "complained", "cancelled"],
+            "x-ms-summary": "Status"
+          },
+          {
+            "name": "email_address",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by email address",
+            "x-ms-summary": "Email Address"
+          },
+          {
+            "name": "created_after",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter subscribers created after this date (ISO 8601)",
+            "x-ms-summary": "Created After"
+          },
+          {
+            "name": "created_before",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter subscribers created before this date (ISO 8601)",
+            "x-ms-summary": "Created Before"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page (max 100)",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination - get results after this cursor",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SubscribersListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateSubscriber",
+        "summary": "Create a subscriber",
+        "description": "Creates a new subscriber or updates an existing one if the email already exists (upsert behavior).",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateSubscriberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber created or updated",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/subscribers/{subscriber_id}": {
+      "get": {
+        "operationId": "GetSubscriber",
+        "summary": "Get a subscriber",
+        "description": "Returns details for a specific subscriber by ID.",
+        "parameters": [
+          {
+            "name": "subscriber_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The subscriber ID",
+            "x-ms-summary": "Subscriber ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          },
+          "404": {
+            "description": "Subscriber not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpdateSubscriber",
+        "summary": "Update a subscriber",
+        "description": "Updates an existing subscriber's information.",
+        "parameters": [
+          {
+            "name": "subscriber_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The subscriber ID",
+            "x-ms-summary": "Subscriber ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateSubscriberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber updated",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          }
+        }
+      }
+    },
+    "/subscribers/{subscriber_id}/unsubscribe": {
+      "post": {
+        "operationId": "UnsubscribeSubscriber",
+        "summary": "Unsubscribe a subscriber",
+        "description": "Unsubscribes a subscriber from your Kit account.",
+        "parameters": [
+          {
+            "name": "subscriber_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The subscriber ID",
+            "x-ms-summary": "Subscriber ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber unsubscribed",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "operationId": "ListTags",
+        "summary": "List tags",
+        "description": "Returns a list of all tags in your Kit account.",
+        "parameters": [
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/TagsListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateTag",
+        "summary": "Create a tag",
+        "description": "Creates a new tag in your Kit account.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateTagRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tag created",
+            "schema": {
+              "$ref": "#/definitions/TagResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tags/{tag_id}": {
+      "put": {
+        "operationId": "UpdateTag",
+        "summary": "Update a tag",
+        "description": "Updates the name of an existing tag.",
+        "parameters": [
+          {
+            "name": "tag_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The tag ID",
+            "x-ms-summary": "Tag ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateTagRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag updated",
+            "schema": {
+              "$ref": "#/definitions/TagResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tags/{tag_id}/subscribers": {
+      "get": {
+        "operationId": "ListSubscribersForTag",
+        "summary": "List subscribers for a tag",
+        "description": "Returns all subscribers that have a specific tag.",
+        "parameters": [
+          {
+            "name": "tag_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The tag ID",
+            "x-ms-summary": "Tag ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SubscribersListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "TagSubscriberByEmail",
+        "summary": "Tag a subscriber by email",
+        "description": "Adds a tag to a subscriber using their email address.",
+        "parameters": [
+          {
+            "name": "tag_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The tag ID",
+            "x-ms-summary": "Tag ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TagSubscriberByEmailRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber tagged",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tags/{tag_id}/subscribers/{subscriber_id}": {
+      "post": {
+        "operationId": "TagSubscriber",
+        "summary": "Tag a subscriber",
+        "description": "Adds a tag to a subscriber using their subscriber ID.",
+        "parameters": [
+          {
+            "name": "tag_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The tag ID",
+            "x-ms-summary": "Tag ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The subscriber ID",
+            "x-ms-summary": "Subscriber ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber tagged",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "RemoveTagFromSubscriber",
+        "summary": "Remove tag from subscriber",
+        "description": "Removes a tag from a subscriber.",
+        "parameters": [
+          {
+            "name": "tag_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The tag ID",
+            "x-ms-summary": "Tag ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The subscriber ID",
+            "x-ms-summary": "Subscriber ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tag removed"
+          }
+        }
+      }
+    },
+    "/forms": {
+      "get": {
+        "operationId": "ListForms",
+        "summary": "List forms",
+        "description": "Returns a list of all forms in your Kit account.",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by form type",
+            "enum": ["embed", "hosted", "all"],
+            "x-ms-summary": "Form Type"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/FormsListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/forms/{form_id}/subscribers": {
+      "get": {
+        "operationId": "ListSubscribersForForm",
+        "summary": "List subscribers for a form",
+        "description": "Returns all subscribers who signed up through a specific form.",
+        "parameters": [
+          {
+            "name": "form_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The form ID",
+            "x-ms-summary": "Form ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SubscribersListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AddSubscriberToForm",
+        "summary": "Add subscriber to form",
+        "description": "Adds an existing subscriber to a form by email address. The subscriber must already exist.",
+        "parameters": [
+          {
+            "name": "form_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The form ID",
+            "x-ms-summary": "Form ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddSubscriberToFormRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber added to form",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sequences": {
+      "get": {
+        "operationId": "ListSequences",
+        "summary": "List sequences",
+        "description": "Returns a list of all email sequences in your Kit account.",
+        "parameters": [
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SequencesListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sequences/{sequence_id}/subscribers": {
+      "get": {
+        "operationId": "ListSubscribersForSequence",
+        "summary": "List subscribers for a sequence",
+        "description": "Returns all subscribers enrolled in a specific sequence.",
+        "parameters": [
+          {
+            "name": "sequence_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The sequence ID",
+            "x-ms-summary": "Sequence ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SubscribersListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AddSubscriberToSequence",
+        "summary": "Add subscriber to sequence",
+        "description": "Adds an existing subscriber to a sequence by email address.",
+        "parameters": [
+          {
+            "name": "sequence_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The sequence ID",
+            "x-ms-summary": "Sequence ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddSubscriberToSequenceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscriber added to sequence",
+            "schema": {
+              "$ref": "#/definitions/SubscriberResponse"
+            }
+          }
+        }
+      }
+    },
+    "/segments": {
+      "get": {
+        "operationId": "ListSegments",
+        "summary": "List segments",
+        "description": "Returns a list of all segments in your Kit account.",
+        "parameters": [
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SegmentsListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/broadcasts": {
+      "get": {
+        "operationId": "ListBroadcasts",
+        "summary": "List broadcasts",
+        "description": "Returns a list of all broadcasts in your Kit account.",
+        "parameters": [
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of results per page",
+            "default": 50,
+            "x-ms-summary": "Per Page"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "type": "string",
+            "description": "Cursor for pagination",
+            "x-ms-summary": "After Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/BroadcastsListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateBroadcast",
+        "summary": "Create a broadcast",
+        "description": "Creates a new broadcast email. The broadcast will be created as a draft and can be sent later.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateBroadcastRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Broadcast created",
+            "schema": {
+              "$ref": "#/definitions/BroadcastResponse"
+            }
+          }
+        }
+      }
+    },
+    "/broadcasts/{broadcast_id}": {
+      "get": {
+        "operationId": "GetBroadcast",
+        "summary": "Get a broadcast",
+        "description": "Returns details for a specific broadcast.",
+        "parameters": [
+          {
+            "name": "broadcast_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The broadcast ID",
+            "x-ms-summary": "Broadcast ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/BroadcastResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpdateBroadcast",
+        "summary": "Update a broadcast",
+        "description": "Updates an existing draft broadcast.",
+        "parameters": [
+          {
+            "name": "broadcast_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The broadcast ID",
+            "x-ms-summary": "Broadcast ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateBroadcastRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Broadcast updated",
+            "schema": {
+              "$ref": "#/definitions/BroadcastResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteBroadcast",
+        "summary": "Delete a broadcast",
+        "description": "Deletes a draft broadcast.",
+        "parameters": [
+          {
+            "name": "broadcast_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The broadcast ID",
+            "x-ms-summary": "Broadcast ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Broadcast deleted"
+          }
+        }
+      }
+    },
+    "/custom_fields": {
+      "get": {
+        "operationId": "ListCustomFields",
+        "summary": "List custom fields",
+        "description": "Returns a list of all custom fields in your Kit account.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CustomFieldsListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateCustomField",
+        "summary": "Create a custom field",
+        "description": "Creates a new custom field for subscribers.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCustomFieldRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Custom field created",
+            "schema": {
+              "$ref": "#/definitions/CustomFieldResponse"
+            }
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "get": {
+        "operationId": "ListWebhooks",
+        "summary": "List webhooks",
+        "description": "Returns a list of all webhooks in your Kit account.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/WebhooksListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateWebhook",
+        "summary": "Create a webhook",
+        "description": "Creates a new webhook subscription for events like subscriber activation, unsubscription, form submission, etc.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateWebhookRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook created",
+            "schema": {
+              "$ref": "#/definitions/WebhookResponse"
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/{webhook_id}": {
+      "delete": {
+        "operationId": "DeleteWebhook",
+        "summary": "Delete a webhook",
+        "description": "Deletes an existing webhook subscription.",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The webhook ID",
+            "x-ms-summary": "Webhook ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Webhook deleted"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AccountResponse": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Account name",
+              "x-ms-summary": "Account Name"
+            },
+            "plan_type": {
+              "type": "string",
+              "description": "Current plan type",
+              "x-ms-summary": "Plan Type"
+            },
+            "primary_email_address": {
+              "type": "string",
+              "description": "Primary email address",
+              "x-ms-summary": "Primary Email"
+            }
+          }
+        },
+        "user": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "User name",
+              "x-ms-summary": "User Name"
+            },
+            "email_address": {
+              "type": "string",
+              "description": "User email address",
+              "x-ms-summary": "User Email"
+            }
+          }
+        }
+      }
+    },
+    "Subscriber": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Subscriber ID",
+          "x-ms-summary": "ID"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name",
+          "x-ms-summary": "First Name"
+        },
+        "email_address": {
+          "type": "string",
+          "description": "Email address",
+          "x-ms-summary": "Email Address"
+        },
+        "state": {
+          "type": "string",
+          "description": "Subscriber state (active, inactive, bounced, complained, cancelled)",
+          "x-ms-summary": "State"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date subscriber was created",
+          "x-ms-summary": "Created At"
+        },
+        "fields": {
+          "type": "object",
+          "description": "Custom field values",
+          "x-ms-summary": "Custom Fields"
+        }
+      }
+    },
+    "SubscriberResponse": {
+      "type": "object",
+      "properties": {
+        "subscriber": {
+          "$ref": "#/definitions/Subscriber"
+        }
+      }
+    },
+    "SubscribersListResponse": {
+      "type": "object",
+      "properties": {
+        "subscribers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Subscriber"
+          },
+          "description": "List of subscribers"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "CreateSubscriberRequest": {
+      "type": "object",
+      "required": ["email_address"],
+      "properties": {
+        "email_address": {
+          "type": "string",
+          "description": "Email address of the subscriber",
+          "x-ms-summary": "Email Address"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name of the subscriber",
+          "x-ms-summary": "First Name"
+        },
+        "state": {
+          "type": "string",
+          "description": "Initial state (active or inactive)",
+          "enum": ["active", "inactive"],
+          "default": "active",
+          "x-ms-summary": "State"
+        },
+        "fields": {
+          "type": "object",
+          "description": "Custom field values as key-value pairs",
+          "x-ms-summary": "Custom Fields"
+        }
+      }
+    },
+    "UpdateSubscriberRequest": {
+      "type": "object",
+      "properties": {
+        "email_address": {
+          "type": "string",
+          "description": "New email address",
+          "x-ms-summary": "Email Address"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name",
+          "x-ms-summary": "First Name"
+        },
+        "fields": {
+          "type": "object",
+          "description": "Custom field values",
+          "x-ms-summary": "Custom Fields"
+        }
+      }
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Tag ID",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Tag name",
+          "x-ms-summary": "Name"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date tag was created",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "TagResponse": {
+      "type": "object",
+      "properties": {
+        "tag": {
+          "$ref": "#/definitions/Tag"
+        }
+      }
+    },
+    "TagsListResponse": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          },
+          "description": "List of tags"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "CreateTagRequest": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the tag",
+          "x-ms-summary": "Tag Name"
+        }
+      }
+    },
+    "TagSubscriberByEmailRequest": {
+      "type": "object",
+      "required": ["email_address"],
+      "properties": {
+        "email_address": {
+          "type": "string",
+          "description": "Email address of the subscriber to tag",
+          "x-ms-summary": "Email Address"
+        }
+      }
+    },
+    "Form": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Form ID",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Form name",
+          "x-ms-summary": "Name"
+        },
+        "type": {
+          "type": "string",
+          "description": "Form type (embed or hosted)",
+          "x-ms-summary": "Type"
+        },
+        "format": {
+          "type": "string",
+          "description": "Form format",
+          "x-ms-summary": "Format"
+        },
+        "embed_js": {
+          "type": "string",
+          "description": "JavaScript embed code URL",
+          "x-ms-summary": "Embed JS"
+        },
+        "embed_url": {
+          "type": "string",
+          "description": "Embed URL",
+          "x-ms-summary": "Embed URL"
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "Whether the form is archived",
+          "x-ms-summary": "Archived"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date form was created",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "FormsListResponse": {
+      "type": "object",
+      "properties": {
+        "forms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Form"
+          },
+          "description": "List of forms"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "AddSubscriberToFormRequest": {
+      "type": "object",
+      "required": ["email_address"],
+      "properties": {
+        "email_address": {
+          "type": "string",
+          "description": "Email address of the subscriber",
+          "x-ms-summary": "Email Address"
+        },
+        "referrer": {
+          "type": "string",
+          "description": "Referrer URL for tracking",
+          "x-ms-summary": "Referrer URL"
+        }
+      }
+    },
+    "Sequence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Sequence ID",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Sequence name",
+          "x-ms-summary": "Name"
+        },
+        "hold": {
+          "type": "boolean",
+          "description": "Whether the sequence is on hold",
+          "x-ms-summary": "On Hold"
+        },
+        "repeat": {
+          "type": "boolean",
+          "description": "Whether the sequence repeats",
+          "x-ms-summary": "Repeat"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date sequence was created",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "SequencesListResponse": {
+      "type": "object",
+      "properties": {
+        "sequences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Sequence"
+          },
+          "description": "List of sequences"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "AddSubscriberToSequenceRequest": {
+      "type": "object",
+      "required": ["email_address"],
+      "properties": {
+        "email_address": {
+          "type": "string",
+          "description": "Email address of the subscriber",
+          "x-ms-summary": "Email Address"
+        }
+      }
+    },
+    "Segment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Segment ID",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Segment name",
+          "x-ms-summary": "Name"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date segment was created",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "SegmentsListResponse": {
+      "type": "object",
+      "properties": {
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Segment"
+          },
+          "description": "List of segments"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Broadcast": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Broadcast ID",
+          "x-ms-summary": "ID"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Email subject line",
+          "x-ms-summary": "Subject"
+        },
+        "preview_text": {
+          "type": "string",
+          "description": "Preview text",
+          "x-ms-summary": "Preview Text"
+        },
+        "description": {
+          "type": "string",
+          "description": "Internal description",
+          "x-ms-summary": "Description"
+        },
+        "public": {
+          "type": "boolean",
+          "description": "Whether the broadcast is public",
+          "x-ms-summary": "Public"
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date broadcast was published",
+          "x-ms-summary": "Published At"
+        },
+        "send_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Scheduled send time",
+          "x-ms-summary": "Send At"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date broadcast was created",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "BroadcastResponse": {
+      "type": "object",
+      "properties": {
+        "broadcast": {
+          "$ref": "#/definitions/Broadcast"
+        }
+      }
+    },
+    "BroadcastsListResponse": {
+      "type": "object",
+      "properties": {
+        "broadcasts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Broadcast"
+          },
+          "description": "List of broadcasts"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "CreateBroadcastRequest": {
+      "type": "object",
+      "required": ["subject", "content"],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "description": "Email subject line",
+          "x-ms-summary": "Subject"
+        },
+        "content": {
+          "type": "string",
+          "description": "Email body content (HTML supported)",
+          "x-ms-summary": "Content"
+        },
+        "preview_text": {
+          "type": "string",
+          "description": "Preview text shown in email clients",
+          "x-ms-summary": "Preview Text"
+        },
+        "description": {
+          "type": "string",
+          "description": "Internal description",
+          "x-ms-summary": "Description"
+        },
+        "public": {
+          "type": "boolean",
+          "description": "Make broadcast publicly viewable",
+          "default": true,
+          "x-ms-summary": "Public"
+        }
+      }
+    },
+    "CustomField": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Custom field ID",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Custom field name",
+          "x-ms-summary": "Name"
+        },
+        "key": {
+          "type": "string",
+          "description": "Custom field key",
+          "x-ms-summary": "Key"
+        },
+        "label": {
+          "type": "string",
+          "description": "Custom field label",
+          "x-ms-summary": "Label"
+        }
+      }
+    },
+    "CustomFieldResponse": {
+      "type": "object",
+      "properties": {
+        "custom_field": {
+          "$ref": "#/definitions/CustomField"
+        }
+      }
+    },
+    "CustomFieldsListResponse": {
+      "type": "object",
+      "properties": {
+        "custom_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CustomField"
+          },
+          "description": "List of custom fields"
+        }
+      }
+    },
+    "CreateCustomFieldRequest": {
+      "type": "object",
+      "required": ["label"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Label for the custom field",
+          "x-ms-summary": "Label"
+        }
+      }
+    },
+    "Webhook": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Webhook ID",
+          "x-ms-summary": "ID"
+        },
+        "account_id": {
+          "type": "integer",
+          "description": "Account ID",
+          "x-ms-summary": "Account ID"
+        },
+        "target_url": {
+          "type": "string",
+          "description": "URL to receive webhook events",
+          "x-ms-summary": "Target URL"
+        },
+        "event": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Event name",
+              "x-ms-summary": "Event Name"
+            }
+          }
+        }
+      }
+    },
+    "WebhookResponse": {
+      "type": "object",
+      "properties": {
+        "webhook": {
+          "$ref": "#/definitions/Webhook"
+        }
+      }
+    },
+    "WebhooksListResponse": {
+      "type": "object",
+      "properties": {
+        "webhooks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Webhook"
+          },
+          "description": "List of webhooks"
+        }
+      }
+    },
+    "CreateWebhookRequest": {
+      "type": "object",
+      "required": ["target_url", "event"],
+      "properties": {
+        "target_url": {
+          "type": "string",
+          "description": "URL to receive webhook events",
+          "x-ms-summary": "Target URL"
+        },
+        "event": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Event type: subscriber.subscriber_activate, subscriber.subscriber_unsubscribe, subscriber.subscriber_bounce, subscriber.subscriber_complain, subscriber.form_subscribe, subscriber.course_subscribe, subscriber.course_complete, subscriber.link_click, subscriber.product_purchase, subscriber.tag_add, subscriber.tag_remove, purchase.purchase_create",
+              "x-ms-summary": "Event Name"
+            },
+            "form_id": {
+              "type": "integer",
+              "description": "Form ID (required for form_subscribe event)",
+              "x-ms-summary": "Form ID"
+            },
+            "tag_id": {
+              "type": "integer",
+              "description": "Tag ID (required for tag_add/tag_remove events)",
+              "x-ms-summary": "Tag ID"
+            },
+            "sequence_id": {
+              "type": "integer",
+              "description": "Sequence ID (required for course_subscribe/course_complete events)",
+              "x-ms-summary": "Sequence ID"
+            },
+            "product_id": {
+              "type": "integer",
+              "description": "Product ID (required for product_purchase event)",
+              "x-ms-summary": "Product ID"
+            },
+            "initiator_value": {
+              "type": "string",
+              "description": "Link URL (required for link_click event)",
+              "x-ms-summary": "Link URL"
+            }
+          }
+        }
+      }
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "has_previous_page": {
+          "type": "boolean",
+          "description": "Whether there is a previous page"
+        },
+        "has_next_page": {
+          "type": "boolean",
+          "description": "Whether there is a next page"
+        },
+        "start_cursor": {
+          "type": "string",
+          "description": "Cursor for the start of this page"
+        },
+        "end_cursor": {
+          "type": "string",
+          "description": "Cursor for the end of this page"
+        },
+        "per_page": {
+          "type": "integer",
+          "description": "Number of items per page"
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://kit.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://kit.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing;Communication"
+    }
+  ]
+}

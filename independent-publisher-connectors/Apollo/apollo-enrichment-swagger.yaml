@@ -1,0 +1,883 @@
+swagger: '2.0'
+info:
+  version: 2.0.0
+  title: Apollo Enrichment
+  description: Apollo.io API connector for enriching contacts and accounts, and prospecting for new leads. Designed for use with RapidStart CRM.
+host: api.apollo.io
+basePath: /
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: X-Api-Key
+    description: Your Apollo.io API Key
+
+security:
+  - api_key: []
+
+paths:
+  # ===================
+  # ENRICHMENT ENDPOINTS
+  # ===================
+  
+  /api/v1/people/match:
+    post:
+      summary: Enrich Contact
+      description: Enrich a single contact with Apollo data including title, company, LinkedIn, phone numbers, and more. Provide as much information as possible for best match results.
+      operationId: PeopleEnrichment
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Apollo person ID (if known)
+              email:
+                type: string
+                description: Email address of the person
+              first_name:
+                type: string
+                description: First name of the person
+              last_name:
+                type: string
+                description: Last name of the person
+              name:
+                type: string
+                description: Full name of the person
+              organization_name:
+                type: string
+                description: Company name where the person works
+              domain:
+                type: string
+                description: Company domain (e.g., apollo.io)
+              linkedin_url:
+                type: string
+                description: LinkedIn profile URL
+              reveal_personal_emails:
+                type: boolean
+                description: Set to true to retrieve personal email addresses (consumes credits)
+                default: false
+              reveal_phone_number:
+                type: boolean
+                description: Set to true to retrieve phone numbers (consumes credits)
+                default: false
+      responses:
+        '200':
+          description: Successful enrichment response
+          schema:
+            $ref: '#/definitions/PersonEnrichmentResponse'
+        '400':
+          description: Bad request - missing or invalid parameters
+        '401':
+          description: Unauthorized - invalid API key
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/people/bulk_match:
+    post:
+      summary: Bulk Enrich Contacts
+      description: Enrich up to 10 contacts in a single API call. Each person's details should be passed as an object in the details array.
+      operationId: BulkPeopleEnrichment
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              details:
+                type: array
+                description: Array of person details to enrich (max 10)
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Apollo person ID (if known)
+                    email:
+                      type: string
+                      description: Email address
+                    first_name:
+                      type: string
+                      description: First name
+                    last_name:
+                      type: string
+                      description: Last name
+                    name:
+                      type: string
+                      description: Full name
+                    organization_name:
+                      type: string
+                      description: Company name
+                    domain:
+                      type: string
+                      description: Company domain
+                    linkedin_url:
+                      type: string
+                      description: LinkedIn profile URL
+              reveal_personal_emails:
+                type: boolean
+                description: Set to true to retrieve personal email addresses
+                default: false
+              reveal_phone_number:
+                type: boolean
+                description: Set to true to retrieve phone numbers
+                default: false
+      responses:
+        '200':
+          description: Successful bulk enrichment response
+          schema:
+            $ref: '#/definitions/BulkPersonEnrichmentResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/organizations/enrich:
+    get:
+      summary: Enrich Account
+      description: Enrich a single organization/account with Apollo data including industry, revenue, employee count, funding details, technologies, and more.
+      operationId: OrganizationEnrichment
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          type: string
+          description: Company domain to enrich (e.g., apollo.io)
+      responses:
+        '200':
+          description: Successful organization enrichment response
+          schema:
+            $ref: '#/definitions/OrganizationEnrichmentResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/organizations/bulk_enrich:
+    post:
+      summary: Bulk Enrich Accounts
+      description: Enrich up to 10 organizations/accounts in a single API call.
+      operationId: BulkOrganizationEnrichment
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              domains:
+                type: array
+                description: Array of company domains to enrich (max 10)
+                items:
+                  type: string
+      responses:
+        '200':
+          description: Successful bulk organization enrichment response
+          schema:
+            $ref: '#/definitions/BulkOrganizationEnrichmentResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Rate limit exceeded
+
+  # ===================
+  # SEARCH ENDPOINTS
+  # ===================
+
+  /api/v1/mixed_people/search:
+    post:
+      summary: Search People
+      description: Search Apollo's database to find new prospects. This endpoint does NOT consume credits and is ideal for prospecting. Returns up to 100 results per page, max 500 pages. Note - this endpoint does not return email or phone; use People Enrichment to get contact details.
+      operationId: PeopleSearch
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              page:
+                type: integer
+                description: Page number (1-500)
+                default: 1
+              per_page:
+                type: integer
+                description: Results per page (max 100)
+                default: 25
+              person_titles:
+                type: array
+                description: Job titles to search for
+                items:
+                  type: string
+              person_seniorities:
+                type: array
+                description: Seniority levels (owner, founder, c_suite, partner, vp, head, director, manager, senior, entry, intern)
+                items:
+                  type: string
+              q_organization_domains:
+                type: array
+                description: Company domains to search within
+                items:
+                  type: string
+              organization_locations:
+                type: array
+                description: Company locations (e.g., "United States", "California, US")
+                items:
+                  type: string
+              person_locations:
+                type: array
+                description: Person locations
+                items:
+                  type: string
+              organization_industry_tag_ids:
+                type: array
+                description: Industry tag IDs
+                items:
+                  type: string
+              organization_num_employees_ranges:
+                type: array
+                description: Employee count ranges (e.g., "1,10", "11,50", "51,200")
+                items:
+                  type: string
+              q_keywords:
+                type: string
+                description: Keywords to search for in profiles
+      responses:
+        '200':
+          description: Successful people search response
+          schema:
+            $ref: '#/definitions/PeopleSearchResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/mixed_companies/search:
+    post:
+      summary: Search Organizations
+      description: Search Apollo's database to find target companies/accounts matching your ideal customer profile.
+      operationId: OrganizationSearch
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              page:
+                type: integer
+                description: Page number
+                default: 1
+              per_page:
+                type: integer
+                description: Results per page (max 100)
+                default: 25
+              organization_industry_tag_ids:
+                type: array
+                description: Industry tag IDs to filter by
+                items:
+                  type: string
+              organization_locations:
+                type: array
+                description: Company locations
+                items:
+                  type: string
+              organization_num_employees_ranges:
+                type: array
+                description: Employee count ranges
+                items:
+                  type: string
+              organization_latest_funding_stage_cd:
+                type: array
+                description: Funding stages (seed, angel, venture, series_a, series_b, series_c, series_d, series_e, series_f, private_equity, other)
+                items:
+                  type: string
+              q_organization_keyword_tags:
+                type: array
+                description: Technology/keyword tags
+                items:
+                  type: string
+              q_organization_name:
+                type: string
+                description: Organization name to search
+      responses:
+        '200':
+          description: Successful organization search response
+          schema:
+            $ref: '#/definitions/OrganizationSearchResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/organizations/{organization_id}/job_postings:
+    get:
+      summary: Get Organization Job Postings
+      description: Get current job postings for a company. Useful as a buying signal - companies that are hiring are often growing and have budget.
+      operationId: OrganizationJobPostings
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          type: string
+          description: Apollo organization ID
+      responses:
+        '200':
+          description: Successful job postings response
+          schema:
+            $ref: '#/definitions/JobPostingsResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Organization not found
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/organizations/{organization_id}:
+    get:
+      summary: Get Complete Organization Info
+      description: Get complete information for a single organization by its Apollo ID.
+      operationId: GetOrganization
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          type: string
+          description: Apollo organization ID
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '#/definitions/OrganizationEnrichmentResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Organization not found
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/news/search:
+    post:
+      summary: Search News Articles
+      description: Search for recent news articles about companies. Useful for sales preparation and identifying trigger events.
+      operationId: NewsArticlesSearch
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              page:
+                type: integer
+                description: Page number
+                default: 1
+              per_page:
+                type: integer
+                description: Results per page
+                default: 10
+              q_organization_domains:
+                type: array
+                description: Company domains to search news for
+                items:
+                  type: string
+              organization_ids:
+                type: array
+                description: Apollo organization IDs to search news for
+                items:
+                  type: string
+      responses:
+        '200':
+          description: Successful news search response
+          schema:
+            $ref: '#/definitions/NewsSearchResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '429':
+          description: Rate limit exceeded
+
+# ===================
+# DEFINITIONS
+# ===================
+
+definitions:
+  PersonEnrichmentResponse:
+    type: object
+    properties:
+      person:
+        $ref: '#/definitions/Person'
+
+  BulkPersonEnrichmentResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Status of the request
+      matches:
+        type: array
+        items:
+          $ref: '#/definitions/Person'
+
+  Person:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Apollo person ID
+      first_name:
+        type: string
+        description: First name
+      last_name:
+        type: string
+        description: Last name
+      name:
+        type: string
+        description: Full name
+      email:
+        type: string
+        description: Work email address
+      email_status:
+        type: string
+        description: Email verification status
+      title:
+        type: string
+        description: Job title
+      headline:
+        type: string
+        description: LinkedIn headline
+      linkedin_url:
+        type: string
+        description: LinkedIn profile URL
+      photo_url:
+        type: string
+        description: Profile photo URL
+      city:
+        type: string
+        description: City
+      state:
+        type: string
+        description: State/Province
+      country:
+        type: string
+        description: Country
+      seniority:
+        type: string
+        description: Seniority level
+      departments:
+        type: array
+        items:
+          type: string
+        description: Departments
+      phone_numbers:
+        type: array
+        items:
+          type: object
+          properties:
+            raw_number:
+              type: string
+              description: Phone number as provided
+            sanitized_number:
+              type: string
+              description: Cleaned phone number
+            type:
+              type: string
+              description: Phone type (mobile, work_direct, etc.)
+        description: Phone numbers (requires reveal_phone_number=true)
+      personal_emails:
+        type: array
+        items:
+          type: string
+        description: Personal email addresses (requires reveal_personal_emails=true)
+      organization_id:
+        type: string
+        description: Apollo organization ID
+      organization:
+        $ref: '#/definitions/OrganizationBasic'
+
+  OrganizationBasic:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Apollo organization ID
+      name:
+        type: string
+        description: Company name
+      domain:
+        type: string
+        description: Primary domain
+      website_url:
+        type: string
+        description: Website URL
+      linkedin_url:
+        type: string
+        description: LinkedIn company page URL
+      phone:
+        type: string
+        description: Company phone number
+      industry:
+        type: string
+        description: Primary industry
+      estimated_num_employees:
+        type: integer
+        description: Estimated employee count
+      city:
+        type: string
+        description: City
+      state:
+        type: string
+        description: State/Province
+      country:
+        type: string
+        description: Country
+
+  OrganizationEnrichmentResponse:
+    type: object
+    properties:
+      organization:
+        $ref: '#/definitions/Organization'
+
+  BulkOrganizationEnrichmentResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Status of the request
+      organizations:
+        type: array
+        items:
+          $ref: '#/definitions/Organization'
+
+  Organization:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Apollo organization ID
+      name:
+        type: string
+        description: Company name
+      website_url:
+        type: string
+        description: Website URL
+      primary_domain:
+        type: string
+        description: Primary domain
+      linkedin_url:
+        type: string
+        description: LinkedIn company page URL
+      twitter_url:
+        type: string
+        description: Twitter URL
+      facebook_url:
+        type: string
+        description: Facebook URL
+      blog_url:
+        type: string
+        description: Blog URL
+      phone:
+        type: string
+        description: Company phone number
+      logo_url:
+        type: string
+        description: Company logo URL
+      industry:
+        type: string
+        description: Primary industry
+      industries:
+        type: array
+        items:
+          type: string
+        description: All industries
+      keywords:
+        type: array
+        items:
+          type: string
+        description: Company keywords/tags
+      estimated_num_employees:
+        type: integer
+        description: Estimated employee count
+      founded_year:
+        type: integer
+        description: Year founded
+      city:
+        type: string
+        description: City
+      state:
+        type: string
+        description: State/Province
+      country:
+        type: string
+        description: Country
+      street_address:
+        type: string
+        description: Street address
+      postal_code:
+        type: string
+        description: Postal/ZIP code
+      raw_address:
+        type: string
+        description: Full address
+      short_description:
+        type: string
+        description: Short company description
+      seo_description:
+        type: string
+        description: SEO description
+      annual_revenue:
+        type: number
+        description: Annual revenue (numeric)
+      annual_revenue_printed:
+        type: string
+        description: Annual revenue (formatted string)
+      total_funding:
+        type: integer
+        description: Total funding amount
+      total_funding_printed:
+        type: string
+        description: Total funding (formatted string)
+      latest_funding_stage:
+        type: string
+        description: Latest funding stage
+      latest_funding_round_date:
+        type: string
+        description: Date of latest funding round
+      publicly_traded_symbol:
+        type: string
+        description: Stock ticker symbol
+      publicly_traded_exchange:
+        type: string
+        description: Stock exchange
+      crunchbase_url:
+        type: string
+        description: Crunchbase URL
+      alexa_ranking:
+        type: integer
+        description: Alexa ranking
+      technology_names:
+        type: array
+        items:
+          type: string
+        description: Technologies used
+      current_technologies:
+        type: array
+        items:
+          type: object
+          properties:
+            uid:
+              type: string
+            name:
+              type: string
+            category:
+              type: string
+        description: Current technology stack details
+      funding_events:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            date:
+              type: string
+            type:
+              type: string
+            amount:
+              type: string
+            currency:
+              type: string
+            investors:
+              type: string
+            news_url:
+              type: string
+        description: Funding history
+      departmental_head_count:
+        type: object
+        properties:
+          engineering:
+            type: integer
+          sales:
+            type: integer
+          marketing:
+            type: integer
+          finance:
+            type: integer
+          human_resources:
+            type: integer
+          operations:
+            type: integer
+          support:
+            type: integer
+          information_technology:
+            type: integer
+          business_development:
+            type: integer
+          product_management:
+            type: integer
+          data_science:
+            type: integer
+          legal:
+            type: integer
+          consulting:
+            type: integer
+          accounting:
+            type: integer
+          arts_and_design:
+            type: integer
+          education:
+            type: integer
+          media_and_commmunication:
+            type: integer
+          administrative:
+            type: integer
+          entrepreneurship:
+            type: integer
+        description: Employee count by department
+
+  PeopleSearchResponse:
+    type: object
+    properties:
+      people:
+        type: array
+        items:
+          $ref: '#/definitions/PersonSearchResult'
+      pagination:
+        $ref: '#/definitions/Pagination'
+
+  PersonSearchResult:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Apollo person ID - use this with People Enrichment to get full details
+      first_name:
+        type: string
+      last_name:
+        type: string
+      name:
+        type: string
+      title:
+        type: string
+      headline:
+        type: string
+      linkedin_url:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country:
+        type: string
+      seniority:
+        type: string
+      departments:
+        type: array
+        items:
+          type: string
+      organization_id:
+        type: string
+      organization:
+        $ref: '#/definitions/OrganizationBasic'
+
+  OrganizationSearchResponse:
+    type: object
+    properties:
+      organizations:
+        type: array
+        items:
+          $ref: '#/definitions/Organization'
+      pagination:
+        $ref: '#/definitions/Pagination'
+
+  JobPostingsResponse:
+    type: object
+    properties:
+      organization_id:
+        type: string
+      job_postings:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            title:
+              type: string
+            url:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            country:
+              type: string
+            posted_at:
+              type: string
+            description:
+              type: string
+
+  NewsSearchResponse:
+    type: object
+    properties:
+      news_articles:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            title:
+              type: string
+            url:
+              type: string
+            snippet:
+              type: string
+            published_at:
+              type: string
+            organization_id:
+              type: string
+            organization_name:
+              type: string
+      pagination:
+        $ref: '#/definitions/Pagination'
+
+  Pagination:
+    type: object
+    properties:
+      page:
+        type: integer
+        description: Current page number
+      per_page:
+        type: integer
+        description: Results per page
+      total_entries:
+        type: integer
+        description: Total number of results
+      total_pages:
+        type: integer
+        description: Total number of pages

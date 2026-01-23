@@ -1,0 +1,228 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "title": "ISV Marketplace Orders & License Tracker",
+    "description": "Daily flow to track marketplace orders and license quantities, storing results in SharePoint and sending a summary email.",
+    "prerequisites": [
+      "Partner Center Marketplace Insights custom connector configured",
+      "SharePoint site with a list for storing analytics data",
+      "Office 365 Outlook connection"
+    ]
+  },
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "Recurrence": {
+      "type": "Recurrence",
+      "recurrence": {
+        "frequency": "Day",
+        "interval": 1,
+        "schedule": {
+          "hours": ["8"],
+          "minutes": [0]
+        },
+        "timeZone": "Eastern Standard Time"
+      }
+    }
+  },
+  "actions": {
+    "Initialize_Summary_Variable": {
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "OrderSummary",
+            "type": "string",
+            "value": ""
+          }
+        ]
+      },
+      "runAfter": {}
+    },
+    "Initialize_Total_Orders": {
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "TotalOrders",
+            "type": "integer",
+            "value": 0
+          }
+        ]
+      },
+      "runAfter": {
+        "Initialize_Summary_Variable": ["Succeeded"]
+      }
+    },
+    "Initialize_Total_Licenses": {
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "TotalLicenses",
+            "type": "integer",
+            "value": 0
+          }
+        ]
+      },
+      "runAfter": {
+        "Initialize_Total_Orders": ["Succeeded"]
+      }
+    },
+    "Get_Active_Orders": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['PartnerCenterMarketplaceInsights']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/ScheduledQueries/testQueryResult",
+        "queries": {
+          "exportQuery": "SELECT OfferName, SKU, Quantity, OrderStatus, OrderPurchaseDate, CustomerCompanyName, BilledRevenue, Currency, IsTrial FROM ISVOrder WHERE OrderStatus = 'Active' ORDER BY OrderPurchaseDate DESC"
+        }
+      },
+      "runAfter": {
+        "Initialize_Total_Licenses": ["Succeeded"]
+      },
+      "description": "Query for all active orders with quantities"
+    },
+    "Parse_Orders_Response": {
+      "type": "ParseJson",
+      "inputs": {
+        "content": "@body('Get_Active_Orders')",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "OfferName": { "type": "string" },
+                  "SKU": { "type": "string" },
+                  "Quantity": { "type": "integer" },
+                  "OrderStatus": { "type": "string" },
+                  "OrderPurchaseDate": { "type": "string" },
+                  "CustomerCompanyName": { "type": "string" },
+                  "BilledRevenue": { "type": "number" },
+                  "Currency": { "type": "string" },
+                  "IsTrial": { "type": "string" }
+                }
+              }
+            },
+            "totalCount": { "type": "integer" },
+            "message": { "type": "string" },
+            "statusCode": { "type": "integer" }
+          }
+        }
+      },
+      "runAfter": {
+        "Get_Active_Orders": ["Succeeded"]
+      }
+    },
+    "Set_Total_Orders": {
+      "type": "SetVariable",
+      "inputs": {
+        "name": "TotalOrders",
+        "value": "@body('Parse_Orders_Response')?['totalCount']"
+      },
+      "runAfter": {
+        "Parse_Orders_Response": ["Succeeded"]
+      }
+    },
+    "Process_Each_Order": {
+      "type": "Foreach",
+      "foreach": "@body('Parse_Orders_Response')?['value']",
+      "actions": {
+        "Increment_License_Count": {
+          "type": "IncrementVariable",
+          "inputs": {
+            "name": "TotalLicenses",
+            "value": "@items('Process_Each_Order')?['Quantity']"
+          }
+        },
+        "Append_to_Summary": {
+          "type": "AppendToStringVariable",
+          "inputs": {
+            "name": "OrderSummary",
+            "value": "<tr><td>@{items('Process_Each_Order')?['OfferName']}</td><td>@{items('Process_Each_Order')?['SKU']}</td><td>@{items('Process_Each_Order')?['Quantity']}</td><td>@{items('Process_Each_Order')?['CustomerCompanyName']}</td><td>@{items('Process_Each_Order')?['BilledRevenue']} @{items('Process_Each_Order')?['Currency']}</td></tr>"
+          },
+          "runAfter": {
+            "Increment_License_Count": ["Succeeded"]
+          }
+        }
+      },
+      "runAfter": {
+        "Set_Total_Orders": ["Succeeded"]
+      }
+    },
+    "Get_License_Summary": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['PartnerCenterMarketplaceInsights']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/ScheduledQueries/testQueryResult",
+        "queries": {
+          "exportQuery": "SELECT OfferName, SKU, SUM(Quantity) as TotalQuantity, COUNT(*) as OrderCount FROM ISVOrder WHERE OrderStatus = 'Active' GROUP BY OfferName, SKU"
+        }
+      },
+      "runAfter": {
+        "Process_Each_Order": ["Succeeded"]
+      },
+      "description": "Get aggregated license counts by offer"
+    },
+    "Get_New_Customers_This_Month": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['PartnerCenterMarketplaceInsights']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/ScheduledQueries/testQueryResult",
+        "queries": {
+          "exportQuery": "SELECT CustomerCompanyName, CustomerCountry, OfferName, OrderPurchaseDate FROM ISVOrder WHERE IsNewCustomer = 'True'"
+        }
+      },
+      "runAfter": {
+        "Get_License_Summary": ["Succeeded"]
+      },
+      "description": "Get new customers for growth tracking"
+    },
+    "Send_Daily_Summary_Email": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['office365']['connectionId']"
+          }
+        },
+        "method": "post",
+        "path": "/v2/Mail",
+        "body": {
+          "To": "your-email@company.com",
+          "Subject": "Daily Marketplace Analytics - @{formatDateTime(utcNow(), 'yyyy-MM-dd')}",
+          "Body": "<html><body><h2>Marketplace Analytics Summary</h2><p><strong>Total Active Orders:</strong> @{variables('TotalOrders')}</p><p><strong>Total Active Licenses:</strong> @{variables('TotalLicenses')}</p><h3>Active Orders Detail</h3><table border='1' cellpadding='5'><tr><th>Offer</th><th>SKU</th><th>Quantity</th><th>Customer</th><th>Revenue</th></tr>@{variables('OrderSummary')}</table><h3>License Summary by Offer</h3><pre>@{body('Get_License_Summary')}</pre><h3>New Customers</h3><pre>@{body('Get_New_Customers_This_Month')}</pre></body></html>",
+          "IsHtml": true,
+          "Importance": "Normal"
+        }
+      },
+      "runAfter": {
+        "Get_New_Customers_This_Month": ["Succeeded"]
+      }
+    }
+  },
+  "outputs": {}
+}

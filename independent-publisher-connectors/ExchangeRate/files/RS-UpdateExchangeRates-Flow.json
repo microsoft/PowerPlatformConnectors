@@ -1,0 +1,476 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "fw_DataverseConnection"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_frcwrks-5fexchangerate-2dapi": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "fw_ExchangeRateAPIConnection"
+        },
+        "api": {
+          "name": "shared_frcwrks-5fexchangerate-2dapi"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "fw_ExchangeRateApiKey (fw_exchangerateapikey)": {
+          "defaultValue": "",
+          "type": "String",
+          "metadata": {
+            "schemaName": "fw_exchangerateapikey",
+            "description": "ExchangeRate-API Key"
+          }
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2026-01-01T06:00:00Z",
+            "timeZone": "UTC"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Initialize_varUpdatedCount": {
+          "runAfter": {},
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varUpdatedCount",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "Initialize_varFailedCount": {
+          "runAfter": {
+            "Initialize_varUpdatedCount": ["Succeeded"]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varFailedCount",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "Initialize_varMessages": {
+          "runAfter": {
+            "Initialize_varFailedCount": ["Succeeded"]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varMessages",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Initialize_varBaseCurrencyCode": {
+          "runAfter": {
+            "Initialize_varMessages": ["Succeeded"]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "varBaseCurrencyCode",
+                "type": "string",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "Get_Exchange_Rate_Settings": {
+          "runAfter": {
+            "Initialize_varBaseCurrencyCode": ["Succeeded"]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+            },
+            "parameters": {
+              "entityName": "fw_exchangeratesettings",
+              "$top": 1
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Condition_-_Settings_Exist_and_Enabled": {
+          "actions": {
+            "Get_Organization": {
+              "runAfter": {},
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "organizations",
+                  "$select": "basecurrencyid,name",
+                  "$top": 1
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Get_Base_Currency": {
+              "runAfter": {
+                "Get_Organization": ["Succeeded"]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "GetItem",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                },
+                "parameters": {
+                  "entityName": "transactioncurrencies",
+                  "recordId": "@first(body('Get_Organization')?['value'])?['_basecurrencyid_value']",
+                  "$select": "isocurrencycode,currencyname,exchangerate"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Set_varBaseCurrencyCode": {
+              "runAfter": {
+                "Get_Base_Currency": ["Succeeded"]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "varBaseCurrencyCode",
+                "value": "@body('Get_Base_Currency')?['isocurrencycode']"
+              }
+            },
+            "Get_Latest_Exchange_Rates": {
+              "runAfter": {
+                "Set_varBaseCurrencyCode": ["Succeeded"]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "connectionName": "shared_frcwrks-5fexchangerate-2dapi",
+                  "operationId": "GetLatestRates",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_frcwrks-5fexchangerate-2dapi"
+                },
+                "parameters": {
+                  "api-key": "@parameters('fw_ExchangeRateApiKey (fw_exchangerateapikey)')",
+                  "base_code": "@variables('varBaseCurrencyCode')"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_API_Success": {
+              "actions": {
+                "List_Transaction_Currencies": {
+                  "runAfter": {},
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "ListRecords",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "transactioncurrencies",
+                      "$select": "transactioncurrencyid,isocurrencycode,currencyname,exchangerate",
+                      "$filter": "statecode eq 0"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Apply_to_each_Currency": {
+                  "foreach": "@body('List_Transaction_Currencies')?['value']",
+                  "actions": {
+                    "Compose_-_Get_API_Rate": {
+                      "runAfter": {},
+                      "type": "Compose",
+                      "inputs": "@body('Get_Latest_Exchange_Rates')?['conversion_rates']?[items('Apply_to_each_Currency')?['isocurrencycode']]"
+                    },
+                    "Condition_-_Rate_Exists": {
+                      "actions": {
+                        "Compose_-_Calculate_Exchange_Rate": {
+                          "runAfter": {},
+                          "type": "Compose",
+                          "inputs": "@if(equals(items('Apply_to_each_Currency')?['isocurrencycode'], variables('varBaseCurrencyCode')), 1, div(1, outputs('Compose_-_Get_API_Rate')))"
+                        },
+                        "Condition_-_Rate_Changed": {
+                          "actions": {
+                            "Update_Transaction_Currency": {
+                              "runAfter": {},
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "UpdateRecord",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "parameters": {
+                                  "entityName": "transactioncurrencies",
+                                  "recordId": "@items('Apply_to_each_Currency')?['transactioncurrencyid']",
+                                  "item/exchangerate": "@outputs('Compose_-_Calculate_Exchange_Rate')"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Increment_varUpdatedCount": {
+                              "runAfter": {
+                                "Update_Transaction_Currency": ["Succeeded"]
+                              },
+                              "type": "IncrementVariable",
+                              "inputs": {
+                                "name": "varUpdatedCount",
+                                "value": 1
+                              }
+                            },
+                            "Append_Success_Message": {
+                              "runAfter": {
+                                "Increment_varUpdatedCount": ["Succeeded"]
+                              },
+                              "type": "AppendToArrayVariable",
+                              "inputs": {
+                                "name": "varMessages",
+                                "value": "Updated @{items('Apply_to_each_Currency')?['isocurrencycode']}: @{items('Apply_to_each_Currency')?['exchangerate']} → @{outputs('Compose_-_Calculate_Exchange_Rate')}"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Compose_-_Calculate_Exchange_Rate": ["Succeeded"]
+                          },
+                          "else": {
+                            "actions": {}
+                          },
+                          "expression": {
+                            "and": [
+                              {
+                                "not": {
+                                  "equals": [
+                                    "@outputs('Compose_-_Calculate_Exchange_Rate')",
+                                    "@items('Apply_to_each_Currency')?['exchangerate']"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {
+                        "Compose_-_Get_API_Rate": ["Succeeded"]
+                      },
+                      "else": {
+                        "actions": {
+                          "Append_Not_Found_Message": {
+                            "runAfter": {},
+                            "type": "AppendToArrayVariable",
+                            "inputs": {
+                              "name": "varMessages",
+                              "value": "Currency @{items('Apply_to_each_Currency')?['isocurrencycode']} not found in API response"
+                            }
+                          }
+                        }
+                      },
+                      "expression": {
+                        "not": {
+                          "equals": [
+                            "@outputs('Compose_-_Get_API_Rate')",
+                            "@null"
+                          ]
+                        }
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "List_Transaction_Currencies": ["Succeeded"]
+                  },
+                  "type": "Foreach",
+                  "runtimeConfiguration": {
+                    "concurrency": {
+                      "repetitions": 1
+                    }
+                  }
+                },
+                "Create_Success_Log": {
+                  "runAfter": {
+                    "Apply_to_each_Currency": ["Succeeded"]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "CreateRecord",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "fw_exchangeratelogs",
+                      "item/fw_name": "Exchange Rate Update - @{utcNow('yyyy-MM-dd HH:mm')}",
+                      "item/fw_updatedon": "@utcNow()",
+                      "item/fw_status": 271500000,
+                      "item/fw_currenciesupdated": "@variables('varUpdatedCount')",
+                      "item/fw_currenciesfailed": "@variables('varFailedCount')",
+                      "item/fw_message": "@join(variables('varMessages'), '\n')",
+                      "item/fw_basecurrency": "@variables('varBaseCurrencyCode')",
+                      "item/fw_triggertype": 271500001
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Update_Settings_-_Success": {
+                  "runAfter": {
+                    "Create_Success_Log": ["Succeeded"]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "UpdateRecord",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "entityName": "fw_exchangeratesettings",
+                      "recordId": "@first(body('Get_Exchange_Rate_Settings')?['value'])?['fw_exchangeratesettingid']",
+                      "item/fw_lastupdated": "@utcNow()",
+                      "item/fw_lastupdatestatus": 271500000,
+                      "item/fw_lastupdatemessage": "Successfully updated @{variables('varUpdatedCount')} currencies"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_Latest_Exchange_Rates": ["Succeeded"]
+              },
+              "else": {
+                "actions": {
+                  "Create_Failed_Log": {
+                    "runAfter": {},
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "host": {
+                        "connectionName": "shared_commondataserviceforapps",
+                        "operationId": "CreateRecord",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                      },
+                      "parameters": {
+                        "entityName": "fw_exchangeratelogs",
+                        "item/fw_name": "Exchange Rate Update FAILED - @{utcNow('yyyy-MM-dd HH:mm')}",
+                        "item/fw_updatedon": "@utcNow()",
+                        "item/fw_status": 271500001,
+                        "item/fw_currenciesupdated": 0,
+                        "item/fw_currenciesfailed": 0,
+                        "item/fw_message": "API Error: @{body('Get_Latest_Exchange_Rates')?['error-type']}",
+                        "item/fw_basecurrency": "@variables('varBaseCurrencyCode')",
+                        "item/fw_triggertype": 271500001
+                      },
+                      "authentication": "@parameters('$authentication')"
+                    }
+                  },
+                  "Update_Settings_-_Failed": {
+                    "runAfter": {
+                      "Create_Failed_Log": ["Succeeded"]
+                    },
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "host": {
+                        "connectionName": "shared_commondataserviceforapps",
+                        "operationId": "UpdateRecord",
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                      },
+                      "parameters": {
+                        "entityName": "fw_exchangeratesettings",
+                        "recordId": "@first(body('Get_Exchange_Rate_Settings')?['value'])?['fw_exchangeratesettingid']",
+                        "item/fw_lastupdated": "@utcNow()",
+                        "item/fw_lastupdatestatus": 271500001,
+                        "item/fw_lastupdatemessage": "API Error: @{body('Get_Latest_Exchange_Rates')?['error-type']}"
+                      },
+                      "authentication": "@parameters('$authentication')"
+                    }
+                  }
+                }
+              },
+              "expression": {
+                "equals": [
+                  "@body('Get_Latest_Exchange_Rates')?['result']",
+                  "success"
+                ]
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Get_Exchange_Rate_Settings": ["Succeeded"]
+          },
+          "else": {
+            "actions": {
+              "Terminate_-_Not_Enabled": {
+                "runAfter": {},
+                "type": "Terminate",
+                "inputs": {
+                  "runStatus": "Cancelled",
+                  "runError": {
+                    "message": "Exchange Rate sync is not enabled or settings not configured"
+                  }
+                }
+              }
+            }
+          },
+          "expression": {
+            "and": [
+              {
+                "greater": [
+                  "@length(body('Get_Exchange_Rate_Settings')?['value'])",
+                  0
+                ]
+              },
+              {
+                "equals": [
+                  "@first(body('Get_Exchange_Rate_Settings')?['value'])?['fw_enabled']",
+                  true
+                ]
+              }
+            ]
+          },
+          "type": "If"
+        }
+      },
+      "outputs": {}
+    }
+  },
+  "schemaVersion": "1.0.0.0"
+}

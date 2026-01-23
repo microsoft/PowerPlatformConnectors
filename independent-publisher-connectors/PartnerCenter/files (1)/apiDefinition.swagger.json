@@ -1,0 +1,847 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Partner Center Marketplace Insights",
+    "description": "Custom connector for Microsoft Partner Center Commercial Marketplace Analytics API. Track orders, usage, customers, revenue, and license quantities for your ISV marketplace offers.",
+    "version": "1.1.0",
+    "contact": {
+      "name": "Partner Center Support",
+      "url": "https://learn.microsoft.com/en-us/partner-center/insights/analytics"
+    }
+  },
+  "host": "api.partnercenter.microsoft.com",
+  "basePath": "/insights/v1.1/cmp",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+      "tokenUrl": "https://login.microsoftonline.com/common/oauth2/token",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": []
+    }
+  ],
+  "paths": {
+    "/ScheduledDataset": {
+      "get": {
+        "operationId": "GetDatasets",
+        "summary": "Get Available Datasets",
+        "description": "Retrieves the list of available datasets (ISVOrder, ISVUsage, ISVCustomer, ISVRevenue, ISVLicense, etc.) and their selectable columns for building custom queries.",
+        "x-ms-visibility": "important",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/DatasetResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/ScheduledQueries": {
+      "get": {
+        "operationId": "GetQueries",
+        "summary": "Get Saved Queries",
+        "description": "Retrieves all saved custom queries that can be used for generating reports.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "queryId",
+            "in": "query",
+            "description": "Filter by specific query ID",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Query ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/QueryListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateQuery",
+        "summary": "Create Custom Query",
+        "description": "Creates a custom SQL-like query against available datasets (e.g., SELECT OrderId, Quantity, OfferName FROM ISVOrder).",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateQueryRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Query created successfully",
+            "schema": {
+              "$ref": "#/definitions/QueryResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid query syntax"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/ScheduledQueries/testQueryResult": {
+      "get": {
+        "operationId": "TestQuery",
+        "summary": "Test Query (Get Sample Data)",
+        "description": "Executes a query and returns up to 100 sample rows. Use this to validate your query before creating a scheduled report.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "exportQuery",
+            "in": "query",
+            "description": "SQL-like query to test (e.g., SELECT OrderId, Quantity FROM ISVOrder)",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Query"
+          },
+          {
+            "name": "queryId",
+            "in": "query",
+            "description": "Alternatively, provide an existing query ID to test",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Query ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/TestQueryResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid query"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/ScheduledQueries/{queryId}": {
+      "delete": {
+        "operationId": "DeleteQuery",
+        "summary": "Delete Query",
+        "description": "Deletes a saved custom query by its ID.",
+        "parameters": [
+          {
+            "name": "queryId",
+            "in": "path",
+            "description": "The ID of the query to delete",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Query ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Query deleted successfully"
+          },
+          "404": {
+            "description": "Query not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/ScheduledReport": {
+      "get": {
+        "operationId": "GetReports",
+        "summary": "Get Scheduled Reports",
+        "description": "Retrieves all scheduled reports.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "query",
+            "description": "Filter by specific report ID",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Report ID"
+          },
+          {
+            "name": "reportName",
+            "in": "query",
+            "description": "Filter by report name",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Report Name"
+          },
+          {
+            "name": "reportStatus",
+            "in": "query",
+            "description": "Filter by status (Active, Inactive)",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Report Status",
+            "enum": ["Active", "Inactive"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ReportListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateReport",
+        "summary": "Create Scheduled Report",
+        "description": "Creates a new scheduled report based on a saved query. Reports can be generated on a recurring schedule.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateReportRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report created successfully",
+            "schema": {
+              "$ref": "#/definitions/ReportResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/ScheduledReport/{reportId}": {
+      "delete": {
+        "operationId": "DeleteReport",
+        "summary": "Delete Report",
+        "description": "Deletes a scheduled report by its ID.",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "description": "The ID of the report to delete",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Report ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report deleted successfully"
+          },
+          "404": {
+            "description": "Report not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/ScheduledReport/execution/{reportId}": {
+      "get": {
+        "operationId": "GetReportExecutions",
+        "summary": "Get Report Executions",
+        "description": "Retrieves the execution history and download links for a scheduled report.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "description": "The ID of the report",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Report ID"
+          },
+          {
+            "name": "executionId",
+            "in": "query",
+            "description": "Filter by specific execution ID",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Execution ID"
+          },
+          {
+            "name": "executionStatus",
+            "in": "query",
+            "description": "Filter by execution status",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Execution Status",
+            "enum": ["Pending", "Running", "Paused", "Completed", "Failed"]
+          },
+          {
+            "name": "getLatestExecution",
+            "in": "query",
+            "description": "Set to true to get only the latest execution",
+            "type": "boolean",
+            "required": false,
+            "x-ms-summary": "Get Latest Only"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ReportExecutionResponse"
+            }
+          },
+          "404": {
+            "description": "Report not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/ScheduledReport/pause/{reportId}": {
+      "put": {
+        "operationId": "PauseReport",
+        "summary": "Pause Report",
+        "description": "Pauses a scheduled report's execution.",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "description": "The ID of the report to pause",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Report ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report paused successfully"
+          },
+          "404": {
+            "description": "Report not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/ScheduledReport/resume/{reportId}": {
+      "put": {
+        "operationId": "ResumeReport",
+        "summary": "Resume Report",
+        "description": "Resumes a paused scheduled report.",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "description": "The ID of the report to resume",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Report ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report resumed successfully"
+          },
+          "404": {
+            "description": "Report not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DatasetResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Dataset"
+          }
+        },
+        "totalCount": {
+          "type": "integer",
+          "x-ms-summary": "Total Count"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message"
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-ms-summary": "Status Code"
+        }
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "properties": {
+        "datasetName": {
+          "type": "string",
+          "x-ms-summary": "Dataset Name",
+          "description": "Name of the dataset (ISVOrder, ISVUsage, ISVCustomer, ISVRevenue, ISVLicense, ISVMarketplaceInsights, ISVOfferRetention, ISVQualityOfService, ISVVMImageVersion)"
+        },
+        "selectableColumns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Available Columns",
+          "description": "List of columns available for querying"
+        },
+        "availableMetrics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Available Metrics"
+        },
+        "availableDateRanges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Available Date Ranges",
+          "description": "LAST_MONTH, LAST_3_MONTHS, LAST_6_MONTHS, LAST_1_YEAR, LIFETIME"
+        },
+        "minimumRecurrenceInterval": {
+          "type": "integer",
+          "x-ms-summary": "Minimum Recurrence Interval (hours)"
+        }
+      }
+    },
+    "CreateQueryRequest": {
+      "type": "object",
+      "required": ["Name", "Query"],
+      "properties": {
+        "Name": {
+          "type": "string",
+          "x-ms-summary": "Query Name",
+          "description": "A friendly name for the query"
+        },
+        "Description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "Description of what the query retrieves"
+        },
+        "Query": {
+          "type": "string",
+          "x-ms-summary": "SQL Query",
+          "description": "SQL-like query (e.g., SELECT OrderId, Quantity, OfferName, OrderStatus FROM ISVOrder WHERE OrderStatus = 'Active')"
+        }
+      }
+    },
+    "QueryResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Query"
+          }
+        },
+        "totalCount": {
+          "type": "integer",
+          "x-ms-summary": "Total Count"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message"
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-ms-summary": "Status Code"
+        }
+      }
+    },
+    "QueryListResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Query"
+          }
+        },
+        "totalCount": {
+          "type": "integer",
+          "x-ms-summary": "Total Count"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message"
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-ms-summary": "Status Code"
+        }
+      }
+    },
+    "Query": {
+      "type": "object",
+      "properties": {
+        "queryId": {
+          "type": "string",
+          "x-ms-summary": "Query ID"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Query Name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description"
+        },
+        "query": {
+          "type": "string",
+          "x-ms-summary": "Query Text"
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Query Type",
+          "description": "userDefined or system"
+        },
+        "user": {
+          "type": "string",
+          "x-ms-summary": "Created By"
+        },
+        "createdTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created Time"
+        },
+        "modifiedTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Modified Time"
+        }
+      }
+    },
+    "TestQueryResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "x-ms-summary": "Query Results"
+        },
+        "totalCount": {
+          "type": "integer",
+          "x-ms-summary": "Total Count"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message"
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-ms-summary": "Status Code"
+        }
+      }
+    },
+    "CreateReportRequest": {
+      "type": "object",
+      "required": ["ReportName", "QueryId", "StartTime", "RecurrenceInterval"],
+      "properties": {
+        "ReportName": {
+          "type": "string",
+          "x-ms-summary": "Report Name",
+          "description": "A friendly name for the report"
+        },
+        "Description": {
+          "type": "string",
+          "x-ms-summary": "Description"
+        },
+        "QueryId": {
+          "type": "string",
+          "x-ms-summary": "Query ID",
+          "description": "The ID of the query to use for this report"
+        },
+        "StartTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Start Time",
+          "description": "When to start generating reports (ISO 8601 format)"
+        },
+        "RecurrenceInterval": {
+          "type": "integer",
+          "x-ms-summary": "Recurrence Interval (hours)",
+          "description": "How often to generate reports (minimum depends on dataset)"
+        },
+        "RecurrenceCount": {
+          "type": "integer",
+          "x-ms-summary": "Recurrence Count",
+          "description": "Number of times to generate the report (optional, runs indefinitely if not set)"
+        },
+        "Format": {
+          "type": "string",
+          "x-ms-summary": "Output Format",
+          "description": "Report format",
+          "enum": ["csv", "tsv"],
+          "default": "csv"
+        },
+        "CallbackUrl": {
+          "type": "string",
+          "x-ms-summary": "Callback URL",
+          "description": "URL to call when report is ready (optional)"
+        },
+        "CallbackMethod": {
+          "type": "string",
+          "x-ms-summary": "Callback Method",
+          "description": "HTTP method for callback",
+          "enum": ["GET", "POST"]
+        },
+        "ExecuteNow": {
+          "type": "boolean",
+          "x-ms-summary": "Execute Now",
+          "description": "Set to true to execute immediately"
+        }
+      }
+    },
+    "ReportResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Report"
+          }
+        },
+        "totalCount": {
+          "type": "integer",
+          "x-ms-summary": "Total Count"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message"
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-ms-summary": "Status Code"
+        }
+      }
+    },
+    "ReportListResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Report"
+          }
+        },
+        "totalCount": {
+          "type": "integer",
+          "x-ms-summary": "Total Count"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message"
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-ms-summary": "Status Code"
+        }
+      }
+    },
+    "Report": {
+      "type": "object",
+      "properties": {
+        "reportId": {
+          "type": "string",
+          "x-ms-summary": "Report ID"
+        },
+        "reportName": {
+          "type": "string",
+          "x-ms-summary": "Report Name"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description"
+        },
+        "queryId": {
+          "type": "string",
+          "x-ms-summary": "Query ID"
+        },
+        "query": {
+          "type": "string",
+          "x-ms-summary": "Query Text"
+        },
+        "user": {
+          "type": "string",
+          "x-ms-summary": "Created By"
+        },
+        "createdTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created Time"
+        },
+        "modifiedTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Modified Time"
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Start Time"
+        },
+        "reportStatus": {
+          "type": "string",
+          "x-ms-summary": "Report Status"
+        },
+        "recurrenceInterval": {
+          "type": "integer",
+          "x-ms-summary": "Recurrence Interval (hours)"
+        },
+        "recurrenceCount": {
+          "type": "integer",
+          "x-ms-summary": "Recurrence Count"
+        },
+        "callbackUrl": {
+          "type": "string",
+          "x-ms-summary": "Callback URL"
+        },
+        "format": {
+          "type": "string",
+          "x-ms-summary": "Output Format"
+        }
+      }
+    },
+    "ReportExecutionResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReportExecution"
+          }
+        },
+        "totalCount": {
+          "type": "integer",
+          "x-ms-summary": "Total Count"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message"
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-ms-summary": "Status Code"
+        }
+      }
+    },
+    "ReportExecution": {
+      "type": "object",
+      "properties": {
+        "executionId": {
+          "type": "string",
+          "x-ms-summary": "Execution ID"
+        },
+        "reportId": {
+          "type": "string",
+          "x-ms-summary": "Report ID"
+        },
+        "recurrenceInterval": {
+          "type": "integer",
+          "x-ms-summary": "Recurrence Interval"
+        },
+        "recurrenceCount": {
+          "type": "integer",
+          "x-ms-summary": "Recurrence Count"
+        },
+        "callbackUrl": {
+          "type": "string",
+          "x-ms-summary": "Callback URL"
+        },
+        "format": {
+          "type": "string",
+          "x-ms-summary": "Format"
+        },
+        "executionStatus": {
+          "type": "string",
+          "x-ms-summary": "Execution Status",
+          "description": "Pending, Running, Paused, Completed, Failed"
+        },
+        "reportAccessSecureLink": {
+          "type": "string",
+          "x-ms-summary": "Report Download URL",
+          "description": "Secure URL to download the report (available when completed)"
+        },
+        "reportExpiryTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Report Expiry Time"
+        },
+        "reportGeneratedTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Report Generated Time"
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://learn.microsoft.com/en-us/partner-center/insights/analytics"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://privacy.microsoft.com/en-us/privacystatement"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management;Sales and CRM"
+    }
+  ]
+}

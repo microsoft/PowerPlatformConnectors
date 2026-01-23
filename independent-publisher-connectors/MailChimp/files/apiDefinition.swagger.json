@@ -1,0 +1,2147 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Mailchimp Marketing (Independent Publisher)",
+    "description": "Comprehensive Mailchimp Marketing API connector for audience management, campaign creation, engagement tracking, and automation workflows. Provides 40+ operations including detailed reporting on opens, clicks, and unsubscribes.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Steve Mordue",
+      "url": "https://www.yourcompany.com",
+      "email": "connect@yourcompany.com"
+    }
+  },
+  "host": "server.api.mailchimp.com",
+  "basePath": "/3.0",
+  "schemes": ["https"],
+  "x-ms-url-encoding": "single",
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetLists"
+    }
+  },
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://mailchimp.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.intuit.com/privacy/statement/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing;Sales and CRM"
+    }
+  ],
+  "paths": {
+    "/lists": {
+      "get": {
+        "operationId": "GetLists",
+        "summary": "Get all audiences",
+        "description": "Retrieves all audiences (lists) in the Mailchimp account. Use count and offset for pagination.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return (max 1000)",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip for pagination",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ListsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid API key"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateList",
+        "summary": "Create audience",
+        "description": "Creates a new audience (list). Note: Most accounts use one audience with tags for segmentation.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Audience details",
+            "x-ms-summary": "Audience",
+            "schema": {
+              "$ref": "#/definitions/CreateListRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/List"
+            }
+          }
+        }
+      }
+    },
+    "/lists/{list_id}": {
+      "get": {
+        "operationId": "GetList",
+        "summary": "Get audience",
+        "description": "Retrieves details and stats for a specific audience by ID",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/List"
+            }
+          }
+        }
+      }
+    },
+    "/lists/{list_id}/members": {
+      "get": {
+        "operationId": "GetListMembers",
+        "summary": "Get audience members",
+        "description": "Retrieves members (subscribers) of a specific audience. Use count/offset for pagination (max 1000 per request).",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return (max 1000)",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["subscribed", "unsubscribed", "cleaned", "pending", "transactional"],
+            "description": "Filter by subscription status",
+            "x-ms-summary": "Status"
+          },
+          {
+            "name": "since_last_changed",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by last changed date (ISO 8601 format)",
+            "x-ms-summary": "Since Last Changed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/MembersResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AddListMember",
+        "summary": "Add member to audience",
+        "description": "Adds a new member to an audience. Use UpsertListMember instead if the member might already exist.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Member details",
+            "x-ms-summary": "Member",
+            "schema": {
+              "$ref": "#/definitions/AddMemberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Member"
+            }
+          }
+        }
+      }
+    },
+    "/lists/{list_id}/members/{subscriber_hash}": {
+      "get": {
+        "operationId": "GetListMember",
+        "summary": "Get member",
+        "description": "Retrieves a specific member by email hash (MD5 of lowercase email)",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MD5 hash of the lowercase email address",
+            "x-ms-summary": "Subscriber Hash",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Member"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpsertListMember",
+        "summary": "Add or update member",
+        "description": "Adds a new member or updates existing (upsert). Recommended over AddListMember for sync scenarios.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MD5 hash of the lowercase email address",
+            "x-ms-summary": "Subscriber Hash",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Member details (use status_if_new for new subscribers)",
+            "x-ms-summary": "Member",
+            "schema": {
+              "$ref": "#/definitions/UpsertMemberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Member"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateListMember",
+        "summary": "Update member",
+        "description": "Updates an existing member's information",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MD5 hash of the lowercase email address",
+            "x-ms-summary": "Subscriber Hash",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Fields to update",
+            "x-ms-summary": "Member",
+            "schema": {
+              "$ref": "#/definitions/UpdateMemberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Member"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteListMember",
+        "summary": "Archive member",
+        "description": "Archives (soft deletes) a member from the audience. They can be re-added later.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MD5 hash of the lowercase email address",
+            "x-ms-summary": "Subscriber Hash",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - No Content"
+          }
+        }
+      }
+    },
+    "/lists/{list_id}/members/{subscriber_hash}/tags": {
+      "post": {
+        "operationId": "UpdateMemberTags",
+        "summary": "Update member tags",
+        "description": "Adds or removes tags from a member. Use status 'active' to add, 'inactive' to remove.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MD5 hash of the lowercase email address",
+            "x-ms-summary": "Subscriber Hash",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Tags to add or remove",
+            "x-ms-summary": "Tags",
+            "schema": {
+              "$ref": "#/definitions/UpdateTagsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - No Content"
+          }
+        }
+      }
+    },
+    "/lists/{list_id}/members/{subscriber_hash}/activity": {
+      "get": {
+        "operationId": "GetMemberActivity",
+        "summary": "Get member activity",
+        "description": "Retrieves activity history (opens, clicks, etc.) for a specific member",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MD5 hash of the lowercase email address",
+            "x-ms-summary": "Subscriber Hash",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/MemberActivityResponse"
+            }
+          }
+        }
+      }
+    },
+    "/lists/{list_id}/members/{subscriber_hash}/activity-feed": {
+      "get": {
+        "operationId": "GetMemberActivityFeed",
+        "summary": "Get member activity feed",
+        "description": "Retrieves detailed activity feed for a member with richer data",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "subscriber_hash",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "MD5 hash of the lowercase email address",
+            "x-ms-summary": "Subscriber Hash",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 10,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/MemberActivityFeedResponse"
+            }
+          }
+        }
+      }
+    },
+    "/lists/{list_id}/segments": {
+      "get": {
+        "operationId": "GetSegments",
+        "summary": "Get segments",
+        "description": "Retrieves all segments for an audience. Note: Segments are read-only via API.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SegmentsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/lists/{list_id}/tags": {
+      "get": {
+        "operationId": "GetListTags",
+        "summary": "Get audience tags",
+        "description": "Retrieves all tags defined for an audience",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the audience",
+            "x-ms-summary": "Audience ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/TagsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/campaigns": {
+      "get": {
+        "operationId": "GetCampaigns",
+        "summary": "Get campaigns",
+        "description": "Retrieves all campaigns. Filter by status, send time, or audience.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["save", "paused", "schedule", "sending", "sent"],
+            "description": "Filter by campaign status",
+            "x-ms-summary": "Status"
+          },
+          {
+            "name": "since_send_time",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by send time (ISO 8601)",
+            "x-ms-summary": "Since Send Time"
+          },
+          {
+            "name": "list_id",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by audience ID",
+            "x-ms-summary": "Audience ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CampaignsResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateCampaign",
+        "summary": "Create campaign",
+        "description": "Creates a new campaign. Set type, recipients, and settings.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Campaign details",
+            "x-ms-summary": "Campaign",
+            "schema": {
+              "$ref": "#/definitions/CreateCampaignRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Campaign"
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaign_id}": {
+      "get": {
+        "operationId": "GetCampaign",
+        "summary": "Get campaign",
+        "description": "Retrieves details for a specific campaign",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Campaign"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateCampaign",
+        "summary": "Update campaign",
+        "description": "Updates campaign settings (subject, from name, etc.)",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Fields to update",
+            "x-ms-summary": "Campaign",
+            "schema": {
+              "$ref": "#/definitions/UpdateCampaignRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Campaign"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteCampaign",
+        "summary": "Delete campaign",
+        "description": "Deletes a campaign (draft campaigns only)",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - No Content"
+          }
+        }
+      }
+    },
+    "/campaigns/{campaign_id}/content": {
+      "get": {
+        "operationId": "GetCampaignContent",
+        "summary": "Get campaign content",
+        "description": "Retrieves the HTML and plain text content of a campaign",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CampaignContent"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "SetCampaignContent",
+        "summary": "Set campaign content",
+        "description": "Sets the HTML and/or plain text content of a campaign",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Content to set",
+            "x-ms-summary": "Content",
+            "schema": {
+              "$ref": "#/definitions/SetCampaignContentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CampaignContent"
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaign_id}/actions/send": {
+      "post": {
+        "operationId": "SendCampaign",
+        "summary": "Send campaign",
+        "description": "Sends a campaign immediately. Campaign must be ready (content set, audience selected).",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - No Content"
+          }
+        }
+      }
+    },
+    "/campaigns/{campaign_id}/actions/schedule": {
+      "post": {
+        "operationId": "ScheduleCampaign",
+        "summary": "Schedule campaign",
+        "description": "Schedules a campaign to send at a specific time",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Schedule details",
+            "x-ms-summary": "Schedule",
+            "schema": {
+              "$ref": "#/definitions/ScheduleCampaignRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - No Content"
+          }
+        }
+      }
+    },
+    "/campaigns/{campaign_id}/actions/test": {
+      "post": {
+        "operationId": "SendTestEmail",
+        "summary": "Send test email",
+        "description": "Sends a test email for a campaign to specified email addresses",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Test email details",
+            "x-ms-summary": "Test Email",
+            "schema": {
+              "$ref": "#/definitions/SendTestEmailRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - No Content"
+          }
+        }
+      }
+    },
+    "/reports": {
+      "get": {
+        "operationId": "GetReports",
+        "summary": "Get campaign reports",
+        "description": "Retrieves performance reports for all campaigns",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          },
+          {
+            "name": "since_send_time",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by send time (ISO 8601)",
+            "x-ms-summary": "Since Send Time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ReportsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reports/{campaign_id}": {
+      "get": {
+        "operationId": "GetCampaignReport",
+        "summary": "Get campaign report",
+        "description": "Retrieves detailed performance report for a specific campaign including opens, clicks, bounces",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CampaignReport"
+            }
+          }
+        }
+      }
+    },
+    "/reports/{campaign_id}/sent-to": {
+      "get": {
+        "operationId": "GetCampaignRecipients",
+        "summary": "Get campaign recipients",
+        "description": "Retrieves the list of recipients for a campaign",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SentToResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reports/{campaign_id}/open-details": {
+      "get": {
+        "operationId": "GetCampaignOpenDetails",
+        "summary": "Get campaign open details",
+        "description": "Retrieves detailed open information - who opened and when",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/OpenDetailsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reports/{campaign_id}/click-details": {
+      "get": {
+        "operationId": "GetCampaignClickDetails",
+        "summary": "Get campaign click details",
+        "description": "Retrieves which URLs were clicked in a campaign and how many times",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ClickDetailsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reports/{campaign_id}/click-details/{link_id}/members": {
+      "get": {
+        "operationId": "GetClickLinkMembers",
+        "summary": "Get members who clicked link",
+        "description": "Retrieves subscribers who clicked a specific link in a campaign",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "link_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the clicked link (from GetCampaignClickDetails)",
+            "x-ms-summary": "Link ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/ClickLinkMembersResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reports/{campaign_id}/unsubscribed": {
+      "get": {
+        "operationId": "GetCampaignUnsubscribes",
+        "summary": "Get campaign unsubscribes",
+        "description": "Retrieves who unsubscribed from a campaign and why",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/UnsubscribesResponse"
+            }
+          }
+        }
+      }
+    },
+    "/reports/{campaign_id}/email-activity": {
+      "get": {
+        "operationId": "GetEmailActivity",
+        "summary": "Get email activity",
+        "description": "Retrieves detailed email activity for a campaign (all actions per subscriber)",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "campaign_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the campaign",
+            "x-ms-summary": "Campaign ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/EmailActivityResponse"
+            }
+          }
+        }
+      }
+    },
+    "/batches": {
+      "get": {
+        "operationId": "GetBatches",
+        "summary": "Get batch operations",
+        "description": "Retrieves all batch operations",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/BatchesResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateBatch",
+        "summary": "Create batch operation",
+        "description": "Creates a batch operation for bulk processing (up to 500 operations per batch)",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Batch operations to perform",
+            "x-ms-summary": "Batch",
+            "schema": {
+              "$ref": "#/definitions/CreateBatchRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Batch"
+            }
+          }
+        }
+      }
+    },
+    "/batches/{batch_id}": {
+      "get": {
+        "operationId": "GetBatch",
+        "summary": "Get batch operation status",
+        "description": "Retrieves the status of a batch operation",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the batch operation",
+            "x-ms-summary": "Batch ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Batch"
+            }
+          }
+        }
+      }
+    },
+    "/templates": {
+      "get": {
+        "operationId": "GetTemplates",
+        "summary": "Get templates",
+        "description": "Retrieves all email templates",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "type": "string",
+            "enum": ["user", "base", "gallery"],
+            "description": "Filter by template type",
+            "x-ms-summary": "Type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/TemplatesResponse"
+            }
+          }
+        }
+      }
+    },
+    "/automations": {
+      "get": {
+        "operationId": "GetAutomations",
+        "summary": "Get automations",
+        "description": "Retrieves all classic automations (not Customer Journeys)",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "type": "integer",
+            "default": 100,
+            "description": "Number of records to return",
+            "x-ms-summary": "Count"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "default": 0,
+            "description": "Number of records to skip",
+            "x-ms-summary": "Offset"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["save", "paused", "sending"],
+            "description": "Filter by automation status",
+            "x-ms-summary": "Status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/AutomationsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/automations/{workflow_id}": {
+      "get": {
+        "operationId": "GetAutomation",
+        "summary": "Get automation",
+        "description": "Retrieves a specific automation workflow",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the automation",
+            "x-ms-summary": "Automation ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Automation"
+            }
+          }
+        }
+      }
+    },
+    "/automations/{workflow_id}/emails": {
+      "get": {
+        "operationId": "GetAutomationEmails",
+        "summary": "Get automation emails",
+        "description": "Retrieves all emails in an automation workflow",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the automation",
+            "x-ms-summary": "Automation ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/AutomationEmailsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/automations/{workflow_id}/emails/{workflow_email_id}": {
+      "get": {
+        "operationId": "GetAutomationEmail",
+        "summary": "Get automation email",
+        "description": "Retrieves a specific email in an automation",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the automation",
+            "x-ms-summary": "Automation ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "workflow_email_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique ID for the automation email",
+            "x-ms-summary": "Email ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/AutomationEmail"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ListsResponse": {
+      "type": "object",
+      "properties": {
+        "lists": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/List" },
+          "x-ms-summary": "Audiences"
+        },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "List": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "x-ms-summary": "Audience ID" },
+        "web_id": { "type": "integer", "x-ms-summary": "Web ID" },
+        "name": { "type": "string", "x-ms-summary": "Name" },
+        "contact": { "type": "object", "x-ms-summary": "Contact Info" },
+        "permission_reminder": { "type": "string", "x-ms-summary": "Permission Reminder" },
+        "campaign_defaults": { "type": "object", "x-ms-summary": "Campaign Defaults" },
+        "date_created": { "type": "string", "x-ms-summary": "Date Created" },
+        "list_rating": { "type": "integer", "x-ms-summary": "List Rating" },
+        "stats": {
+          "type": "object",
+          "x-ms-summary": "Stats",
+          "properties": {
+            "member_count": { "type": "integer", "x-ms-summary": "Member Count" },
+            "unsubscribe_count": { "type": "integer", "x-ms-summary": "Unsubscribe Count" },
+            "cleaned_count": { "type": "integer", "x-ms-summary": "Cleaned Count" },
+            "campaign_count": { "type": "integer", "x-ms-summary": "Campaign Count" },
+            "open_rate": { "type": "number", "x-ms-summary": "Open Rate" },
+            "click_rate": { "type": "number", "x-ms-summary": "Click Rate" }
+          }
+        }
+      }
+    },
+    "CreateListRequest": {
+      "type": "object",
+      "required": ["name", "contact", "permission_reminder", "campaign_defaults", "email_type_option"],
+      "properties": {
+        "name": { "type": "string", "description": "The name of the audience", "x-ms-summary": "Name" },
+        "contact": { "type": "object", "x-ms-summary": "Contact" },
+        "permission_reminder": { "type": "string", "description": "Permission reminder text", "x-ms-summary": "Permission Reminder" },
+        "campaign_defaults": { "type": "object", "x-ms-summary": "Campaign Defaults" },
+        "email_type_option": { "type": "boolean", "x-ms-summary": "Email Type Option" }
+      }
+    },
+    "MembersResponse": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Member" },
+          "x-ms-summary": "Members"
+        },
+        "list_id": { "type": "string", "x-ms-summary": "Audience ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "Member": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "x-ms-summary": "Member ID" },
+        "email_address": { "type": "string", "x-ms-summary": "Email Address" },
+        "unique_email_id": { "type": "string", "x-ms-summary": "Unique Email ID" },
+        "status": { "type": "string", "x-ms-summary": "Status" },
+        "merge_fields": { "type": "object", "x-ms-summary": "Merge Fields" },
+        "stats": {
+          "type": "object",
+          "x-ms-summary": "Stats",
+          "properties": {
+            "avg_open_rate": { "type": "number", "x-ms-summary": "Avg Open Rate" },
+            "avg_click_rate": { "type": "number", "x-ms-summary": "Avg Click Rate" }
+          }
+        },
+        "member_rating": { "type": "integer", "x-ms-summary": "Member Rating" },
+        "last_changed": { "type": "string", "x-ms-summary": "Last Changed" },
+        "vip": { "type": "boolean", "x-ms-summary": "VIP" },
+        "list_id": { "type": "string", "x-ms-summary": "Audience ID" },
+        "tags_count": { "type": "integer", "x-ms-summary": "Tags Count" },
+        "tags": {
+          "type": "array",
+          "x-ms-summary": "Tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "x-ms-summary": "Tag ID" },
+              "name": { "type": "string", "x-ms-summary": "Tag Name" }
+            }
+          }
+        }
+      }
+    },
+    "AddMemberRequest": {
+      "type": "object",
+      "required": ["email_address", "status"],
+      "properties": {
+        "email_address": { "type": "string", "description": "Email address", "x-ms-summary": "Email Address" },
+        "status": {
+          "type": "string",
+          "enum": ["subscribed", "unsubscribed", "cleaned", "pending", "transactional"],
+          "description": "Subscription status",
+          "x-ms-summary": "Status"
+        },
+        "merge_fields": { "type": "object", "description": "Merge field values (FNAME, LNAME, etc.)", "x-ms-summary": "Merge Fields" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags to add to the member",
+          "x-ms-summary": "Tags"
+        },
+        "vip": { "type": "boolean", "x-ms-summary": "VIP" }
+      }
+    },
+    "UpsertMemberRequest": {
+      "type": "object",
+      "required": ["email_address", "status_if_new"],
+      "properties": {
+        "email_address": { "type": "string", "description": "Email address", "x-ms-summary": "Email Address" },
+        "status_if_new": {
+          "type": "string",
+          "enum": ["subscribed", "unsubscribed", "cleaned", "pending", "transactional"],
+          "description": "Status if this is a new subscriber",
+          "x-ms-summary": "Status If New"
+        },
+        "merge_fields": { "type": "object", "description": "Merge field values", "x-ms-summary": "Merge Fields" },
+        "vip": { "type": "boolean", "x-ms-summary": "VIP" }
+      }
+    },
+    "UpdateMemberRequest": {
+      "type": "object",
+      "properties": {
+        "email_address": { "type": "string", "x-ms-summary": "Email Address" },
+        "status": {
+          "type": "string",
+          "enum": ["subscribed", "unsubscribed", "cleaned", "pending", "transactional"],
+          "x-ms-summary": "Status"
+        },
+        "merge_fields": { "type": "object", "x-ms-summary": "Merge Fields" },
+        "vip": { "type": "boolean", "x-ms-summary": "VIP" }
+      }
+    },
+    "UpdateTagsRequest": {
+      "type": "object",
+      "required": ["tags"],
+      "properties": {
+        "tags": {
+          "type": "array",
+          "x-ms-summary": "Tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Tag name", "x-ms-summary": "Name" },
+              "status": {
+                "type": "string",
+                "enum": ["active", "inactive"],
+                "description": "active to add, inactive to remove",
+                "x-ms-summary": "Status"
+              }
+            }
+          }
+        }
+      }
+    },
+    "MemberActivityResponse": {
+      "type": "object",
+      "properties": {
+        "activity": {
+          "type": "array",
+          "x-ms-summary": "Activity",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": { "type": "string", "x-ms-summary": "Action" },
+              "timestamp": { "type": "string", "x-ms-summary": "Timestamp" },
+              "campaign_id": { "type": "string", "x-ms-summary": "Campaign ID" },
+              "title": { "type": "string", "x-ms-summary": "Title" }
+            }
+          }
+        },
+        "email_id": { "type": "string", "x-ms-summary": "Email ID" },
+        "list_id": { "type": "string", "x-ms-summary": "Audience ID" }
+      }
+    },
+    "MemberActivityFeedResponse": {
+      "type": "object",
+      "properties": {
+        "activity": { "type": "array", "x-ms-summary": "Activity", "items": { "type": "object" } },
+        "email_id": { "type": "string", "x-ms-summary": "Email ID" },
+        "list_id": { "type": "string", "x-ms-summary": "Audience ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "SegmentsResponse": {
+      "type": "object",
+      "properties": {
+        "segments": {
+          "type": "array",
+          "x-ms-summary": "Segments",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "x-ms-summary": "Segment ID" },
+              "name": { "type": "string", "x-ms-summary": "Name" },
+              "member_count": { "type": "integer", "x-ms-summary": "Member Count" },
+              "type": { "type": "string", "x-ms-summary": "Type" },
+              "created_at": { "type": "string", "x-ms-summary": "Created At" },
+              "updated_at": { "type": "string", "x-ms-summary": "Updated At" }
+            }
+          }
+        },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "TagsResponse": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "x-ms-summary": "Tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "x-ms-summary": "Tag ID" },
+              "name": { "type": "string", "x-ms-summary": "Tag Name" }
+            }
+          }
+        },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "CampaignsResponse": {
+      "type": "object",
+      "properties": {
+        "campaigns": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Campaign" },
+          "x-ms-summary": "Campaigns"
+        },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "Campaign": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "web_id": { "type": "integer", "x-ms-summary": "Web ID" },
+        "type": { "type": "string", "x-ms-summary": "Type" },
+        "create_time": { "type": "string", "x-ms-summary": "Create Time" },
+        "archive_url": { "type": "string", "x-ms-summary": "Archive URL" },
+        "status": { "type": "string", "x-ms-summary": "Status" },
+        "emails_sent": { "type": "integer", "x-ms-summary": "Emails Sent" },
+        "send_time": { "type": "string", "x-ms-summary": "Send Time" },
+        "recipients": {
+          "type": "object",
+          "x-ms-summary": "Recipients",
+          "properties": {
+            "list_id": { "type": "string", "x-ms-summary": "Audience ID" },
+            "list_name": { "type": "string", "x-ms-summary": "Audience Name" },
+            "recipient_count": { "type": "integer", "x-ms-summary": "Recipient Count" }
+          }
+        },
+        "settings": {
+          "type": "object",
+          "x-ms-summary": "Settings",
+          "properties": {
+            "subject_line": { "type": "string", "x-ms-summary": "Subject Line" },
+            "preview_text": { "type": "string", "x-ms-summary": "Preview Text" },
+            "title": { "type": "string", "x-ms-summary": "Title" },
+            "from_name": { "type": "string", "x-ms-summary": "From Name" },
+            "reply_to": { "type": "string", "x-ms-summary": "Reply To" }
+          }
+        },
+        "report_summary": {
+          "type": "object",
+          "x-ms-summary": "Report Summary",
+          "properties": {
+            "opens": { "type": "integer", "x-ms-summary": "Opens" },
+            "unique_opens": { "type": "integer", "x-ms-summary": "Unique Opens" },
+            "open_rate": { "type": "number", "x-ms-summary": "Open Rate" },
+            "clicks": { "type": "integer", "x-ms-summary": "Clicks" },
+            "subscriber_clicks": { "type": "integer", "x-ms-summary": "Subscriber Clicks" },
+            "click_rate": { "type": "number", "x-ms-summary": "Click Rate" }
+          }
+        }
+      }
+    },
+    "CreateCampaignRequest": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["regular", "plaintext", "absplit", "rss", "variate"],
+          "description": "Campaign type",
+          "x-ms-summary": "Type"
+        },
+        "recipients": {
+          "type": "object",
+          "x-ms-summary": "Recipients",
+          "properties": {
+            "list_id": { "type": "string", "description": "Audience ID to send to", "x-ms-summary": "Audience ID" }
+          }
+        },
+        "settings": {
+          "type": "object",
+          "x-ms-summary": "Settings",
+          "properties": {
+            "subject_line": { "type": "string", "x-ms-summary": "Subject Line" },
+            "preview_text": { "type": "string", "x-ms-summary": "Preview Text" },
+            "title": { "type": "string", "x-ms-summary": "Title" },
+            "from_name": { "type": "string", "x-ms-summary": "From Name" },
+            "reply_to": { "type": "string", "x-ms-summary": "Reply To" }
+          }
+        }
+      }
+    },
+    "UpdateCampaignRequest": {
+      "type": "object",
+      "properties": {
+        "recipients": { "type": "object", "x-ms-summary": "Recipients" },
+        "settings": {
+          "type": "object",
+          "x-ms-summary": "Settings",
+          "properties": {
+            "subject_line": { "type": "string", "x-ms-summary": "Subject Line" },
+            "preview_text": { "type": "string", "x-ms-summary": "Preview Text" },
+            "title": { "type": "string", "x-ms-summary": "Title" },
+            "from_name": { "type": "string", "x-ms-summary": "From Name" },
+            "reply_to": { "type": "string", "x-ms-summary": "Reply To" }
+          }
+        }
+      }
+    },
+    "CampaignContent": {
+      "type": "object",
+      "properties": {
+        "plain_text": { "type": "string", "x-ms-summary": "Plain Text" },
+        "html": { "type": "string", "x-ms-summary": "HTML" },
+        "archive_html": { "type": "string", "x-ms-summary": "Archive HTML" }
+      }
+    },
+    "SetCampaignContentRequest": {
+      "type": "object",
+      "properties": {
+        "plain_text": { "type": "string", "description": "Plain text content", "x-ms-summary": "Plain Text" },
+        "html": { "type": "string", "description": "HTML content", "x-ms-summary": "HTML" }
+      }
+    },
+    "ScheduleCampaignRequest": {
+      "type": "object",
+      "required": ["schedule_time"],
+      "properties": {
+        "schedule_time": { "type": "string", "description": "UTC time to send (ISO 8601)", "x-ms-summary": "Schedule Time" },
+        "timewarp": { "type": "boolean", "description": "Send based on subscriber timezone", "x-ms-summary": "Timewarp" }
+      }
+    },
+    "SendTestEmailRequest": {
+      "type": "object",
+      "required": ["test_emails", "send_type"],
+      "properties": {
+        "test_emails": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Email addresses to send test to",
+          "x-ms-summary": "Test Emails"
+        },
+        "send_type": {
+          "type": "string",
+          "enum": ["html", "plaintext"],
+          "description": "Type of test email",
+          "x-ms-summary": "Send Type"
+        }
+      }
+    },
+    "ReportsResponse": {
+      "type": "object",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CampaignReport" },
+          "x-ms-summary": "Reports"
+        },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "CampaignReport": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "campaign_title": { "type": "string", "x-ms-summary": "Campaign Title" },
+        "type": { "type": "string", "x-ms-summary": "Type" },
+        "list_id": { "type": "string", "x-ms-summary": "Audience ID" },
+        "list_name": { "type": "string", "x-ms-summary": "Audience Name" },
+        "subject_line": { "type": "string", "x-ms-summary": "Subject Line" },
+        "emails_sent": { "type": "integer", "x-ms-summary": "Emails Sent" },
+        "abuse_reports": { "type": "integer", "x-ms-summary": "Abuse Reports" },
+        "unsubscribed": { "type": "integer", "x-ms-summary": "Unsubscribed" },
+        "send_time": { "type": "string", "x-ms-summary": "Send Time" },
+        "bounces": {
+          "type": "object",
+          "x-ms-summary": "Bounces",
+          "properties": {
+            "hard_bounces": { "type": "integer", "x-ms-summary": "Hard Bounces" },
+            "soft_bounces": { "type": "integer", "x-ms-summary": "Soft Bounces" },
+            "syntax_errors": { "type": "integer", "x-ms-summary": "Syntax Errors" }
+          }
+        },
+        "opens": {
+          "type": "object",
+          "x-ms-summary": "Opens",
+          "properties": {
+            "opens_total": { "type": "integer", "x-ms-summary": "Opens Total" },
+            "unique_opens": { "type": "integer", "x-ms-summary": "Unique Opens" },
+            "open_rate": { "type": "number", "x-ms-summary": "Open Rate" },
+            "last_open": { "type": "string", "x-ms-summary": "Last Open" }
+          }
+        },
+        "clicks": {
+          "type": "object",
+          "x-ms-summary": "Clicks",
+          "properties": {
+            "clicks_total": { "type": "integer", "x-ms-summary": "Clicks Total" },
+            "unique_clicks": { "type": "integer", "x-ms-summary": "Unique Clicks" },
+            "unique_subscriber_clicks": { "type": "integer", "x-ms-summary": "Unique Subscriber Clicks" },
+            "click_rate": { "type": "number", "x-ms-summary": "Click Rate" },
+            "last_click": { "type": "string", "x-ms-summary": "Last Click" }
+          }
+        }
+      }
+    },
+    "SentToResponse": {
+      "type": "object",
+      "properties": {
+        "sent_to": {
+          "type": "array",
+          "x-ms-summary": "Sent To",
+          "items": {
+            "type": "object",
+            "properties": {
+              "email_id": { "type": "string", "x-ms-summary": "Email ID" },
+              "email_address": { "type": "string", "x-ms-summary": "Email Address" },
+              "status": { "type": "string", "x-ms-summary": "Status" },
+              "open_count": { "type": "integer", "x-ms-summary": "Open Count" },
+              "last_open": { "type": "string", "x-ms-summary": "Last Open" }
+            }
+          }
+        },
+        "campaign_id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "OpenDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "x-ms-summary": "Members",
+          "items": {
+            "type": "object",
+            "properties": {
+              "email_id": { "type": "string", "x-ms-summary": "Email ID" },
+              "email_address": { "type": "string", "x-ms-summary": "Email Address" },
+              "opens_count": { "type": "integer", "x-ms-summary": "Opens Count" },
+              "opens": { "type": "array", "x-ms-summary": "Opens", "items": { "type": "object" } }
+            }
+          }
+        },
+        "campaign_id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "ClickDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "urls_clicked": {
+          "type": "array",
+          "x-ms-summary": "URLs Clicked",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "x-ms-summary": "Link ID" },
+              "url": { "type": "string", "x-ms-summary": "URL" },
+              "total_clicks": { "type": "integer", "x-ms-summary": "Total Clicks" },
+              "click_percentage": { "type": "number", "x-ms-summary": "Click Percentage" },
+              "unique_clicks": { "type": "integer", "x-ms-summary": "Unique Clicks" },
+              "unique_click_percentage": { "type": "number", "x-ms-summary": "Unique Click Percentage" }
+            }
+          }
+        },
+        "campaign_id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "ClickLinkMembersResponse": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "x-ms-summary": "Members",
+          "items": {
+            "type": "object",
+            "properties": {
+              "email_id": { "type": "string", "x-ms-summary": "Email ID" },
+              "email_address": { "type": "string", "x-ms-summary": "Email Address" },
+              "clicks": { "type": "integer", "x-ms-summary": "Clicks" }
+            }
+          }
+        },
+        "campaign_id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "UnsubscribesResponse": {
+      "type": "object",
+      "properties": {
+        "unsubscribes": {
+          "type": "array",
+          "x-ms-summary": "Unsubscribes",
+          "items": {
+            "type": "object",
+            "properties": {
+              "email_id": { "type": "string", "x-ms-summary": "Email ID" },
+              "email_address": { "type": "string", "x-ms-summary": "Email Address" },
+              "timestamp": { "type": "string", "x-ms-summary": "Timestamp" },
+              "reason": { "type": "string", "x-ms-summary": "Reason" }
+            }
+          }
+        },
+        "campaign_id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "EmailActivityResponse": {
+      "type": "object",
+      "properties": {
+        "emails": {
+          "type": "array",
+          "x-ms-summary": "Emails",
+          "items": {
+            "type": "object",
+            "properties": {
+              "email_id": { "type": "string", "x-ms-summary": "Email ID" },
+              "email_address": { "type": "string", "x-ms-summary": "Email Address" },
+              "activity": { "type": "array", "x-ms-summary": "Activity", "items": { "type": "object" } }
+            }
+          }
+        },
+        "campaign_id": { "type": "string", "x-ms-summary": "Campaign ID" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "CreateBatchRequest": {
+      "type": "object",
+      "required": ["operations"],
+      "properties": {
+        "operations": {
+          "type": "array",
+          "x-ms-summary": "Operations",
+          "items": {
+            "type": "object",
+            "properties": {
+              "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"], "x-ms-summary": "Method" },
+              "path": { "type": "string", "description": "API path (e.g., /lists/{list_id}/members)", "x-ms-summary": "Path" },
+              "operation_id": { "type": "string", "description": "Unique ID for this operation", "x-ms-summary": "Operation ID" },
+              "body": { "type": "string", "description": "JSON string of request body", "x-ms-summary": "Body" }
+            }
+          }
+        }
+      }
+    },
+    "Batch": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "x-ms-summary": "Batch ID" },
+        "status": { "type": "string", "enum": ["pending", "preprocessing", "started", "finalizing", "finished"], "x-ms-summary": "Status" },
+        "total_operations": { "type": "integer", "x-ms-summary": "Total Operations" },
+        "finished_operations": { "type": "integer", "x-ms-summary": "Finished Operations" },
+        "errored_operations": { "type": "integer", "x-ms-summary": "Errored Operations" },
+        "submitted_at": { "type": "string", "x-ms-summary": "Submitted At" },
+        "completed_at": { "type": "string", "x-ms-summary": "Completed At" },
+        "response_body_url": { "type": "string", "x-ms-summary": "Response Body URL" }
+      }
+    },
+    "BatchesResponse": {
+      "type": "object",
+      "properties": {
+        "batches": { "type": "array", "items": { "$ref": "#/definitions/Batch" }, "x-ms-summary": "Batches" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "TemplatesResponse": {
+      "type": "object",
+      "properties": {
+        "templates": {
+          "type": "array",
+          "x-ms-summary": "Templates",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "x-ms-summary": "Template ID" },
+              "type": { "type": "string", "x-ms-summary": "Type" },
+              "name": { "type": "string", "x-ms-summary": "Name" },
+              "category": { "type": "string", "x-ms-summary": "Category" },
+              "date_created": { "type": "string", "x-ms-summary": "Date Created" },
+              "active": { "type": "boolean", "x-ms-summary": "Active" }
+            }
+          }
+        },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "AutomationsResponse": {
+      "type": "object",
+      "properties": {
+        "automations": { "type": "array", "items": { "$ref": "#/definitions/Automation" }, "x-ms-summary": "Automations" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "Automation": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "x-ms-summary": "Automation ID" },
+        "create_time": { "type": "string", "x-ms-summary": "Create Time" },
+        "start_time": { "type": "string", "x-ms-summary": "Start Time" },
+        "status": { "type": "string", "x-ms-summary": "Status" },
+        "emails_sent": { "type": "integer", "x-ms-summary": "Emails Sent" },
+        "recipients": { "type": "object", "x-ms-summary": "Recipients" },
+        "settings": { "type": "object", "x-ms-summary": "Settings" },
+        "report_summary": {
+          "type": "object",
+          "x-ms-summary": "Report Summary",
+          "properties": {
+            "opens": { "type": "integer", "x-ms-summary": "Opens" },
+            "unique_opens": { "type": "integer", "x-ms-summary": "Unique Opens" },
+            "open_rate": { "type": "number", "x-ms-summary": "Open Rate" },
+            "clicks": { "type": "integer", "x-ms-summary": "Clicks" },
+            "subscriber_clicks": { "type": "integer", "x-ms-summary": "Subscriber Clicks" }
+          }
+        }
+      }
+    },
+    "AutomationEmailsResponse": {
+      "type": "object",
+      "properties": {
+        "emails": { "type": "array", "items": { "$ref": "#/definitions/AutomationEmail" }, "x-ms-summary": "Emails" },
+        "total_items": { "type": "integer", "x-ms-summary": "Total Items" }
+      }
+    },
+    "AutomationEmail": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "x-ms-summary": "Email ID" },
+        "web_id": { "type": "integer", "x-ms-summary": "Web ID" },
+        "workflow_id": { "type": "string", "x-ms-summary": "Workflow ID" },
+        "position": { "type": "integer", "x-ms-summary": "Position" },
+        "status": { "type": "string", "x-ms-summary": "Status" },
+        "emails_sent": { "type": "integer", "x-ms-summary": "Emails Sent" },
+        "settings": { "type": "object", "x-ms-summary": "Settings" },
+        "report_summary": { "type": "object", "x-ms-summary": "Report Summary" }
+      }
+    }
+  }
+}
