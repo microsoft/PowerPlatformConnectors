@@ -2,7 +2,7 @@
 
 **Connector Name:** Kit (Independent Publisher)
 **Review Date:** January 23, 2026
-**Status:** ✅ COMPLIANT (Title Fixed)
+**Status:** ⚠️ IN PROGRESS - Files compliant, package/testing pending
 
 ---
 
@@ -138,7 +138,15 @@ Before submitting PR:
 
 ## Estimated Compliance Score
 
-**Current**: 100% ✅ **COMPLIANT**
+**Files Compliance**: 100% ✅
+**Overall Submission Readiness**: 40% ⚠️
+
+**Remaining:**
+- Package creation and validation
+- Testing (10+ calls per operation)
+- Screenshots
+- OneVet verification
+- SAS URL generation
 
 ---
 
