@@ -2,7 +2,9 @@
 
 Kit (formerly ConvertKit) is an email marketing platform built specifically for creators. This connector allows you to automate subscriber management, tagging, form subscriptions, sequences, broadcasts, and more through Power Automate, Power Apps, Logic Apps, and Copilot Studio.
 
-## Publisher: Independent Publisher
+## Publisher: Steve Mordue
+
+[Steve Mordue](https://github.com/forceworks) | [Forceworks](https://forceworks.com)
 
 ## Prerequisites
 
