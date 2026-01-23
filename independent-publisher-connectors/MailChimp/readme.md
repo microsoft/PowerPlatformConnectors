@@ -2,7 +2,9 @@
 
 Mailchimp is an email marketing platform that allows businesses to manage audiences, create campaigns, and track engagement. This connector provides comprehensive access to Mailchimp's Marketing API, enabling advanced automation scenarios including campaign reporting, engagement tracking, audience management, and automation workflows.
 
-## Publisher: Forceworks
+## Publisher: Steve Mordue
+
+[Steve Mordue](https://github.com/forceworks) | [Forceworks](https://forceworks.com)
 
 ## Prerequisites
 
@@ -130,6 +132,6 @@ A: This connector provides significantly more operations including campaign repo
 
 ## Support
 
-For issues with this connector, please contact: connect@forceworks.com
+For issues with this connector, please contact: steve@forceworks.com
 
 For Mailchimp API documentation, visit: https://mailchimp.com/developer/marketing/api/
