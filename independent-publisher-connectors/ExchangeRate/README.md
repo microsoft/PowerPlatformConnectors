@@ -1,6 +1,10 @@
-# ExchangeRate-API Custom Connector for Power Automate
+# ExchangeRate-API (Independent Publisher)
 
 A Power Automate custom connector for [ExchangeRate-API](https://www.exchangerate-api.com), providing easy access to currency exchange rates for 161+ world currencies.
+
+## Publisher: Steve Mordue
+
+[Steve Mordue](https://github.com/forceworks) | [Forceworks](https://forceworks.com)
 
 ## Features
 
