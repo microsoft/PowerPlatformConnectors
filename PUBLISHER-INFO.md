@@ -4,10 +4,11 @@ This file contains the standard publisher information to be used across all conn
 
 ## Publisher Details
 
-**Name:** Steve Mordue  
-**Email:** steve@forceworks.com  
-**GitHub:** https://github.com/forceworks  
-**Website:** https://forceworks.com  
+**Name:** Steve Mordue
+**Email:** steve@forceworks.com
+**Support Email:** steve@forceworks.com
+**GitHub:** https://github.com/forceworks
+**Website:** https://forceworks.com
 
 ## Usage in Connector Files
 
