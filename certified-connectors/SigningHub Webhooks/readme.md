@@ -1,6 +1,6 @@
-# SigningHub Connector
+# SigningHub Webhook Trigger
 
-This connector integrates SigningHub with Power Automate to enhance document workflows and streamline the signing process across various systems. It enables the automation of document signing or other SigningHub actions, all within custom flows designed to suit organisational needs.
+This connector integrates SigningHub with Power Automate and is specifically designed to leverage **SigningHub Webhooks**, allowing you to trigger automated flows instantly when specific events occur within your SigningHub account.
 
 ## Publisher: Ascertia
 
@@ -9,8 +9,8 @@ To use this connector, you must have:
 * An active account with **SigningHub**.
 * A valid **Integration** defined in **SigningHub**.
 
-## Supported Operations
-This connector provides some coverage of the **SigningHub REST API**. For a list of supported actions and their parameters, please refer to [SigningHub API Guide](https://manuals.ascertia.com/SigningHub/10.0/Api).
+### Triggers
+* **Webhook Subscribe Trigger**: This trigger registers a listener in your SigningHub account. It fires in real-time whenever a document status changes (e.g., signed, shared, completed), allowing your flow to process the event data immediately.
 
 ## How to get credentials
 Fill the Login Form fields with the following values:
@@ -21,6 +21,5 @@ Fill the Login Form fields with the following values:
 - **API URL**: The SigningHub API URL, by default https://api.signinghub.com
 
 ## Support & Links
-* [Official API Documentation](https://manuals.ascertia.com/SigningHub/10.0/Api)
 * [Support URL](https://signinghub.com)
 * [Privacy Policy](https://www.signinghub.com/privacy-policy)
