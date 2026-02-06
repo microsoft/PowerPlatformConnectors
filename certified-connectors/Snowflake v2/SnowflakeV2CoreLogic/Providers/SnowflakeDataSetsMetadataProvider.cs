@@ -9,6 +9,7 @@ namespace SnowflakeV2CoreLogic.Providers
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Interfaces;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
     using Microsoft.Extensions.Logging;
+    using SnowflakeV2CoreLogic.Models;
 
     /// <summary>
     /// Class for datasets metadata data provider
@@ -16,11 +17,14 @@ namespace SnowflakeV2CoreLogic.Providers
     public class SnowflakeDataSetsMetadataProvider : IDataSetsMetadataProvider
     {
         private readonly ILogger logger;
+        private readonly SnowflakeConnectionParametersProvider connectionParametersProvider;
 
         public SnowflakeDataSetsMetadataProvider(
-            ILogger logger)
+            ILogger logger,
+            SnowflakeConnectionParametersProvider connectionParametersProvider)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.connectionParametersProvider = connectionParametersProvider ?? throw new ArgumentNullException(nameof(connectionParametersProvider));
         }
 
         /// <summary>
@@ -31,11 +35,13 @@ namespace SnowflakeV2CoreLogic.Providers
         public async Task<DataSetsMetadata> GetDataSetsMetadataAsync(
             HttpRequestMessage request)
         {
+            SnowflakeConnectionParameters connectionParameters = connectionParametersProvider.GetConnectionParameters();
+
             DataSetsMetadata dataSetsMetadata = new DataSetsMetadata
             {
                 TabularDataSetsMetadata = new TabularDataSetsMetadata()
                 {
-                    Source = DataSetsMetadataSource.Singleton,
+                    Source = $"{connectionParameters.Server},{connectionParameters.Database}",
                     UrlEncoding = DataSetsMetadataUrlEncoding.Single,
                 },
             };
