@@ -179,7 +179,7 @@
                         ["valuePath"] = GenerateSchema(templateJson["resource"] as JObject)
                     }
                 };
-                // throw new ConnectorException(HttpStatusCode.InternalServerError, $"newSchema: {newSchema.ToString()}");
+
                 response.Content = CreateJsonContent(newSchema.ToString());
             }
             catch (System.Exception e)
