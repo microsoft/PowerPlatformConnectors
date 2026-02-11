@@ -1,21 +1,17 @@
 # ABN Lookup
-With this ABN Lookup connector, you can search the Australian Business Register for companies and assess what is their current business status.
+This ABN Lookup connector allows searching the Australian Business Register for companies and assess their current business status.
 
 ## Publisher: Joao Lopes, sp365.pro
 
 ## Prerequisites
-You will need to sign up for a unique Guid with the [Australian Business Register](https://abr.business.gov.au/Documentation/WebServiceRegistration) to access this API.
-
-## Obtaining Credentials
-Once you receive your unique Guid, you can use this connector by providing this Guid as the API key.
+You will need the following to proceed:
+- API Key - provided by the [Australian Business Register](https://abr.business.gov.au/Documentation/WebServiceRegistration)
 
 ## Supported Operations
-### Search by ABN (Business number)
-Searches the Australian Business Register by the ABN value.
-### Search by ABN (Company number)
-Searches the Australian Business Register by the ACN value.
-### Search by Name
-Searches the Australian Business Register by the Company name.
+The connector supports the following operations:
+* `Search by ABN`: Find an Australian Business by its ABN (ie. Australian Business Number)
+* `Search by ACN`: Find an Australian Business by its ACN (ie. Australian Company Number)
+* `Search by Name`: Find Australian Businesses by Name sorted by relevance
 
 ## Known Issues and Limitations
 There are no known issues at this time.
