@@ -73,13 +73,16 @@ Retrieve your PDFCrowd account information including remaining credits balance.
 
 You can use the HTTP Username and HTTP Password parameters to provide Basic HTTP authentication credentials for the source URL.
 
-### Can I convert multiple pages into one PDF?
-
-Yes, use the **Merge Multiple URLs** parameter to specify multiple URLs to combine into a single PDF.
-
 ### How do I add headers and footers?
 
-Use the Header HTML and Footer HTML parameters to add custom headers and footers. You can use special variables like `{page}` and `{topage}` for page numbers.
+Use the Header HTML and Footer HTML parameters to add custom headers and footers with dynamic page numbers. Use the special CSS classes `pdfcrowd-page-number` (current page) and `pdfcrowd-page-count` (total pages). For example:
+```html
+<div style="text-align:center">Page <span class="pdfcrowd-page-number"></span> of <span class="pdfcrowd-page-count"></span></div>
+```
+
+### Can I control which part of a page gets converted?
+
+Yes, use the **Element To Convert** parameter with a CSS selector to convert only a specific element from the page (e.g., article content), excluding navigation, headers, and sidebars.
 
 ### What file formats can I convert?
 
