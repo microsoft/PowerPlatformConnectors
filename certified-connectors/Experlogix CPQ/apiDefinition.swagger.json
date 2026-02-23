@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Experlogix CPQ",
-    "description": "Used to manage configurations in Experlogix CPQ.",
+    "description": "Experlogix CPQ (Configure, Price, Quote) helps sales teams quickly and accurately build quotes for complex products and services. Using a logic-based rules engine, Experlogix CPQ software guides users through selecting the right configuration options, applies pricing automatically and prevents incompatible variations from being selected — all through deep integration with leading CRM and ERP systems like Microsoft Dynamics 365 and Salesforce.",
     "version": "1.0",
     "contact": {
         "name": "Experlogix Support",
@@ -32,6 +32,19 @@
   "consumes": [],
   "produces": [],
   "paths": {
+    "/runtime/webhooks/mcp": {
+        "post": {
+            "summary": "Experlogix CPQ MCP Server",
+            "description": "Endpoint for Experlogix CPQ MCP communication.",
+            "x-ms-agentic-protocol": "mcp-streamable-1.0",
+            "operationId": "InvokeMCP",
+            "responses": {
+                "200": {
+                    "description": "Success"
+                }
+            }
+        }
+    },
     "/api/ConfigurationXml": {
       "get": {
         "summary": "Get Configuration Xml",
@@ -59,7 +72,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/GetConfigurationXmlResponse"
+              "$ref": "#/definitions/GetConfigurationResponse"
             }
           },
           "401": {
@@ -93,7 +106,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/GetConfigurationXmlResponse"
+              "$ref": "#/definitions/GetConfigurationResponse"
             }
           },
           "401": {
@@ -127,7 +140,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/GetConfigurationXmlResponse"
+              "$ref": "#/definitions/GetConfigurationResponse"
             }
           },
           "401": {
@@ -161,7 +174,109 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/GetConfigurationXmlResponse"
+              "$ref": "#/definitions/GetConfigurationResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/CreateConfigurationFromChanges": {
+      "post": {
+        "consumes": [
+            "application/json"
+        ],
+        "summary": "Create Configuration From Changes",
+        "description": "Creates a new configuration from the provided changes.",
+        "operationId": "CreateConfigurationFromChanges",
+        "parameters": [
+          {
+              "in": "body",
+              "name": "req",
+              "required": true,
+              "schema": {
+                  "$ref": "#/definitions/CreateConfigurationFromChangesRequest"
+              }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetConfigurationResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/UpdateConfigurationFromChanges": {
+      "post": {
+        "consumes": [
+            "application/json"
+        ],
+        "summary": "Update Configuration From Changes",
+        "description": "Updates the configuration from the provided changes.",
+        "operationId": "UpdateConfigurationFromChanges",
+        "parameters": [
+          {
+              "in": "body",
+              "name": "req",
+              "required": true,
+              "schema": {
+                  "$ref": "#/definitions/UpdateConfigurationFromChangesRequest"
+              }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetConfigurationResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/ModelMetadata": {
+      "post": {
+        "consumes": [
+            "application/json"
+        ],
+        "summary": "Get Model Metadata",
+        "description": "Gets the model metadata for the project.",
+        "operationId": "GetModelMetadata",
+        "parameters": [
+          {
+              "in": "body",
+              "name": "req",
+              "required": false,
+              "schema": {
+                  "$ref": "#/definitions/GetModelMetadataRequest"
+              }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetModelMetadataResponse"
             }
           },
           "401": {
@@ -175,7 +290,7 @@
     }
   },
   "definitions": {
-    "GetConfigurationXmlResponse": {
+    "GetConfigurationResponse": {
       "type": "object",
       "properties": {
         "configurationXml": {
@@ -188,6 +303,78 @@
           "type": "array",
           "items": {
             "type": "integer"
+          }
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "GetModelMetadataResponse": {
+      "type": "object",
+      "properties": {
+        "Categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "CatID": {
+                "type": "string",
+                "description": "The category identifier"
+              },
+              "Description": {
+                "type": "string",
+                "description": "The category description"
+              }
+            }
+          }
+        },
+        "CategoryOptions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Description": {
+                  "type": "string",
+                  "description": "The option description"
+                },
+                "OptionID": {
+                  "type": "string",
+                  "description": "The option identifier"
+                }
+              }
+            }
+          }
+        },
+        "CategoryProperties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Hide": {
+                  "type": "boolean",
+                  "description": "Whether the property should be hidden"
+                },
+                "PropID": {
+                  "type": "string",
+                  "description": "The property identifier"
+                },
+                "Required": {
+                  "type": "boolean",
+                  "description": "Whether the property is required"
+                }
+              }
+            }
           }
         },
         "success": {
@@ -283,6 +470,135 @@
           "id",
           "type",
           "configurationXml"
+      ]
+    },
+    "CreateConfigurationFromChangesRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The identifier of the entity to create the configuration.",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the entity.",
+          "title": "Type",
+          "type": "string"
+        },
+        "seriesId": {
+          "description": "The identifier of the series to create the configuration.",
+          "title": "Series",
+          "type": "string"
+        },
+        "modelId": {
+          "description": "The identifier of the model to create the configuration.",
+          "title": "Model",
+          "type": "string"
+        },
+        "changes": {
+          "description": "The list of configuration changes to apply.",
+          "title": "Changes",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChangeConfig"
+          }
+        }
+      },
+      "required": [
+          "id",
+          "type",
+          "seriesId",
+          "modelId"
+      ]
+    },
+    "UpdateConfigurationFromChangesRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The identifier of the entity to create the configuration.",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the entity.",
+          "title": "Type",
+          "type": "string"
+        },
+        "changes": {
+          "description": "The list of configuration changes to apply.",
+          "title": "Changes",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChangeConfig"
+          }
+        }
+      },
+      "required": [
+          "id",
+          "type"
+      ]
+    },
+    "GetModelMetadataRequest": {
+      "type": "object",
+      "properties": {
+        "relevantCategories": {
+          "description": "The list of relevant categories to include in the metadata.",
+          "title": "Relevant Categories",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ChangeConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The type of the configuration change. (e.g., \"setProperty\", \"selection\", \"recalc\")",
+          "title": "Type",
+          "type": "string"
+        },
+        "configLineIndex": {
+          "description": "The index of the configuration line item to change.",
+          "title": "Config Line Index",
+          "type": "integer"
+        },
+        "changeType": {
+          "description": "The type of change to apply. (for \"selection\" type changes)",
+          "title": "Change Type",
+          "type": "string"
+        },
+        "categoryId": {
+          "description": "The identifier of the category to change.",
+          "title": "Category Id",
+          "type": "string"
+        },
+        "optionId": {
+          "description": "The identifier of the option to change.",
+          "title": "Option Id",
+          "type": "string"
+        },
+        "selectionIndex": {
+          "description": "The index of the selection to change.",
+          "title": "Selection Index",
+          "type": "integer"
+        },
+        "propertyId": {
+          "description": "The identifier of the property to change.",
+          "title": "Property Id",
+          "type": "string"
+        },
+        "value": {
+          "description": "The new value for the property to change.",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+          "type",
+          "categoryId",
+          "optionId"
       ]
     }
   },
