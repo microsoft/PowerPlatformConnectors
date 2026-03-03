@@ -1,68 +1,112 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Airtable [DEPRECATED]",
-    "description": "Connector to read and write data in Airtable. Airtable is a cloud-based spreadsheet-like service that enables users to collaborate and manage different types of data. It is easy-to-use and can act as database or CRM (Customer Relationship Management). It can also be used as project planning, tracking inventory.",
+    "title": "Airtable",
+    "description": "Airtable is a collaborative platform that combines spreadsheet simplicity with database power. This connector enables full record CRUD, base and table discovery, comments, and polling triggers for new records.",
     "version": "1.0",
     "contact": {
-      "name": "Woong Choi",
-      "url": "https://last72.tistory.com/entry/Airtable-Connector-Support",
-      "email": "Woong.Choi@sevensigma.com.au"
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
     }
   },
   "host": "api.airtable.com",
-  "basePath": "/v0",
+  "basePath": "/v0/",
   "schemes": [
     "https"
   ],
-  "consumes": [],
-  "produces": [],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
-    "/{Base ID}/{Table}": {
+    "/meta/bases": {
       "get": {
-        "responses": {
-          "200": {
-            "description": "default",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "records": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "Record ID"
-                      },
-                      "createdTime": {
-                        "type": "string",
-                        "description": "Record Created Time"
-                      }
-                    }
-                  },
-                  "description": "Records"
-                }
-              }
-            }
-          }
-        },
+        "operationId": "listBases",
+        "summary": "List Bases",
+        "description": "Lists all bases accessible to the authenticated user.",
         "parameters": [
           {
-            "name": "Base ID",
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Pagination cursor returned from a previous response.",
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of bases.",
+            "schema": {
+              "$ref": "#/definitions/ListBasesResponse"
+            }
+          }
+        }
+      }
+    },
+    "/meta/bases/{baseId}/tables": {
+      "get": {
+        "operationId": "listTables",
+        "summary": "List Tables",
+        "description": "Lists all tables and their field schemas in a base.",
+        "parameters": [
+          {
+            "name": "baseId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Base ID",
+            "description": "The ID of the base (e.g., appXXXXXXXXXXXX).",
             "x-ms-summary": "Base ID",
-            "x-ms-url-encoding": "single"
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of tables in the base.",
+            "schema": {
+              "$ref": "#/definitions/ListTablesResponse"
+            }
+          }
+        }
+      }
+    },
+    "/{baseId}/{tableIdOrName}": {
+      "get": {
+        "operationId": "listRecords",
+        "summary": "List Records",
+        "description": "Lists records in a table with optional filtering, sorting, and pagination.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the base.",
+            "x-ms-summary": "Base ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
           },
           {
-            "name": "Table",
+            "name": "tableIdOrName",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Table name",
+            "description": "The table name or ID.",
             "x-ms-summary": "Table",
             "x-ms-url-encoding": "single"
           },
@@ -71,309 +115,211 @@
             "in": "query",
             "required": false,
             "type": "string",
-            "x-ms-visibility": "advanced",
-            "description": "A formula used to filter records.",
-            "x-ms-summary": "Formula filter"
+            "description": "Airtable formula to filter records (e.g., {Status}='Active').",
+            "x-ms-summary": "Filter Formula",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "maxRecords",
             "in": "query",
             "required": false,
             "type": "integer",
-            "x-ms-visibility": "advanced",
-            "description": "The maximum total number of records that will be returned in your requests.",
-            "x-ms-summary": "Maximum number of records."
+            "description": "Maximum total records to return across all pages.",
+            "x-ms-summary": "Max Records",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "pageSize",
             "in": "query",
             "required": false,
             "type": "integer",
+            "description": "Records per page (1-100, default 100).",
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "sort[0][field]",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Field name to sort by.",
+            "x-ms-summary": "Sort Field",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "sort[0][direction]",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Sort direction: asc or desc.",
+            "x-ms-summary": "Sort Direction",
             "x-ms-visibility": "advanced",
-            "description": "The number of records returned in each request. Must be less than or equal to 100.",
-            "x-ms-summary": "Page size per request"
+            "enum": [
+              "asc",
+              "desc"
+            ]
           },
           {
             "name": "view",
             "in": "query",
             "required": false,
             "type": "string",
-            "x-ms-visibility": "advanced",
-            "description": "The name or ID of a view in the table. If set, only the records in that view will be returned.",
-            "x-ms-summary": "View"
+            "description": "Name or ID of a view to apply its filters and sorts.",
+            "x-ms-summary": "View",
+            "x-ms-visibility": "advanced"
           },
           {
-            "name": "cellFormat",
+            "name": "offset",
             "in": "query",
             "required": false,
             "type": "string",
-            "x-ms-visibility": "advanced",
-            "description": "The format that should be used for cell values. Supported values are: json: cells will be formatted as JSON, depending on the field type. string: cells will be formatted as user-facing strings, regardless of the field type.",
-            "x-ms-summary": "Cell format"
-          },
-          {
-            "name": "timeZone",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "x-ms-visibility": "advanced",
-            "description": "The time zone that should be used to format dates when using string as the cellFormat. This parameter is required when using string as the cellFormat.",
-            "x-ms-summary": "Time zone"
-          },
-          {
-            "name": "userLocale",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "x-ms-visibility": "advanced",
-            "description": "The user locale that should be used to format dates when using string as the cellFormat. This parameter is required when using string as the cellFormat.",
-            "x-ms-summary": "User locale"
+            "description": "Pagination cursor from a previous response.",
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced"
           }
         ],
-        "summary": "List Records [DEPRECATED]",
-        "description": "List Records in table. Returned records do not include any fields with empty values. You can filter, sort, and format the results with the parameters.",
-        "operationId": "ListRecords"
+        "responses": {
+          "200": {
+            "description": "A list of records.",
+            "schema": {
+              "$ref": "#/definitions/ListRecordsResponse"
+            }
+          }
+        }
       },
       "post": {
-        "responses": {
-          "200": {
-            "description": "default",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Record ID"
-                },
-                "createdTime": {
-                  "type": "string",
-                  "description": "Record Created Time"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Create a record [DEPRECATED]",
-        "description": "Create a record in a table. JSON record needs to be passed.",
-        "operationId": "CreateaRecord",
-        "consumes": ["application/json"],
+        "operationId": "createRecord",
+        "summary": "Create Record",
+        "description": "Creates a new record in a table.",
         "parameters": [
           {
-            "name": "Base ID",
+            "name": "baseId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Base ID",
+            "description": "The ID of the base.",
             "x-ms-summary": "Base ID",
-            "x-ms-url-encoding": "single"
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
           },
           {
-            "name": "Table",
+            "name": "tableIdOrName",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Table name",
+            "description": "The table name or ID.",
             "x-ms-summary": "Table",
             "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "application/json",
-            "x-ms-visibility": "internal",
-            "description": "Content-Type for the body of the request. It is defaulted to JSON.",
-            "x-ms-summary": "Content-Type"
           },
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/CreateRecordRequest"
             }
           }
-        ]
-      }
-    },
-    "/{Base ID}/{Table}/{Record ID}": {
-      "get": {
+        ],
         "responses": {
           "200": {
-            "description": "default",
+            "description": "The created record.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Record ID"
-                },
-                "createdTime": {
-                  "type": "string",
-                  "description": "Record Created Time"
-                }
-              }
+              "$ref": "#/definitions/RecordResponse"
             }
           }
-        },
+        }
+      }
+    },
+    "/{baseId}/{tableIdOrName}/{recordId}": {
+      "get": {
+        "operationId": "getRecord",
+        "summary": "Get Record",
+        "description": "Retrieves a single record by its ID.",
         "parameters": [
           {
-            "name": "Base ID",
+            "name": "baseId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Base ID",
+            "description": "The ID of the base.",
             "x-ms-summary": "Base ID",
-            "x-ms-url-encoding": "single"
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
           },
           {
-            "name": "Table",
+            "name": "tableIdOrName",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Table name",
+            "description": "The table name or ID.",
             "x-ms-summary": "Table",
             "x-ms-url-encoding": "single"
           },
           {
-            "name": "Record ID",
+            "name": "recordId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Record ID to be retrieved.",
+            "description": "The record ID (e.g., recXXXXXXXXXXXX).",
             "x-ms-summary": "Record ID",
             "x-ms-url-encoding": "single"
           }
         ],
-        "summary": "Retrieve a record [DEPRECATED]",
-        "description": "Retrieve a record in a table. Any empty fields (e.g. [], or false) in the record will not be returned.",
-        "operationId": "RetrieveaRecord"
-      },
-      "delete": {
         "responses": {
           "200": {
-            "description": "default",
+            "description": "The record details.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "id"
-                },
-                "deleted": {
-                  "type": "boolean",
-                  "description": "deleted"
-                },
-                "error": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "description": "type"
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "message"
-                    }
-                  },
-                  "description": "error"
-                }
-              }
+              "$ref": "#/definitions/RecordResponse"
             }
           }
-        },
-        "summary": "Delete a record [DEPRECATED]",
-        "description": "Delete a record in a table. Provide Record ID to select a record.",
-        "operationId": "DeleteaRecord",
-        "parameters": [
-          {
-            "name": "Base ID",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Base ID",
-            "x-ms-summary": "Base ID",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "Table",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Table name",
-            "x-ms-summary": "Table",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "Record ID",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Record ID to be deleted.",
-            "x-ms-summary": "Record ID",
-            "x-ms-url-encoding": "single"
-          }
-        ]
+        }
       },
       "patch": {
-        "responses": {
-          "200": {
-            "description": "default",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "id"
-                },
-                "createdTime": {
-                  "type": "string",
-                  "description": "Record Created Time"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Update a record [DEPRECATED]",
-        "description": "Update a record in a table. It will only update the fields provided and leave the rest as they were.",
-        "operationId": "UpdateaRecord",
-        "consumes": ["application/json"],
+        "operationId": "updateRecord",
+        "summary": "Update Record",
+        "description": "Updates specific fields on an existing record without clearing unspecified fields.",
         "parameters": [
           {
-            "name": "Base ID",
+            "name": "baseId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Base ID",
+            "description": "The ID of the base.",
             "x-ms-summary": "Base ID",
-            "x-ms-url-encoding": "single"
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
           },
           {
-            "name": "Table",
+            "name": "tableIdOrName",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Table name",
+            "description": "The table name or ID.",
             "x-ms-summary": "Table",
             "x-ms-url-encoding": "single"
           },
           {
-            "name": "Record ID",
+            "name": "recordId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "Record ID to be updated",
+            "description": "The record ID to update.",
             "x-ms-summary": "Record ID",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "required": false,
-            "type": "string",
-            "description": "Content-Type for the body of the request. It is defaulted to JSON.",
-            "x-ms-summary": "Content-Type",
             "x-ms-url-encoding": "single"
           },
           {
@@ -381,27 +327,575 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/UpdateRecordRequest"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated record.",
+            "schema": {
+              "$ref": "#/definitions/RecordResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRecord",
+        "summary": "Delete Record",
+        "description": "Permanently deletes a record from a table.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the base.",
+            "x-ms-summary": "Base ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The table name or ID.",
+            "x-ms-summary": "Table",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The record ID to delete.",
+            "x-ms-summary": "Record ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion confirmation.",
+            "schema": {
+              "$ref": "#/definitions/DeleteRecordResponse"
+            }
+          }
+        }
+      }
+    },
+    "/meta/whoami": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "summary": "Get Current User",
+        "description": "Returns information about the authenticated user and their token scopes.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The current user information.",
+            "schema": {
+              "$ref": "#/definitions/CurrentUserResponse"
+            }
+          }
+        }
+      }
+    },
+    "/trigger/newRecords": {
+      "get": {
+        "operationId": "triggerNewRecords",
+        "summary": "When a Record Is Created",
+        "description": "Triggers when a new record is created in the specified table.",
+        "x-ms-trigger": "batch",
+        "x-ms-trigger-hint": "A new record is created.",
+        "x-ms-trigger-metadata": {
+          "mode": "polling",
+          "kind": "query"
+        },
+        "parameters": [
+          {
+            "name": "x-base-id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the base to monitor for new records.",
+            "x-ms-summary": "Base ID"
+          },
+          {
+            "name": "x-table-name",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The table name or ID to monitor for new records.",
+            "x-ms-summary": "Table"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of new records.",
+            "schema": {
+              "$ref": "#/definitions/ListRecordsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/{baseId}/{tableIdOrName}/{recordId}/comments": {
+      "post": {
+        "operationId": "createComment",
+        "summary": "Create Comment",
+        "description": "Adds a comment to a specific record.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the base.",
+            "x-ms-summary": "Base ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The table name or ID.",
+            "x-ms-summary": "Table",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The record ID to comment on.",
+            "x-ms-summary": "Record ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCommentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created comment.",
+            "schema": {
+              "$ref": "#/definitions/CommentResponse"
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listComments",
+        "summary": "List Comments",
+        "description": "Lists all comments on a specific record.",
+        "parameters": [
+          {
+            "name": "baseId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the base.",
+            "x-ms-summary": "Base ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "listBases",
+              "value-collection": "bases",
+              "value-path": "id",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "tableIdOrName",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The table name or ID.",
+            "x-ms-summary": "Table",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The record ID.",
+            "x-ms-summary": "Record ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Pagination cursor from a previous response.",
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Number of comments per page.",
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of comments.",
+            "schema": {
+              "$ref": "#/definitions/ListCommentsResponse"
+            }
+          }
+        }
       }
     }
   },
-  "definitions": {},
+  "definitions": {
+    "ListBasesResponse": {
+      "type": "object",
+      "properties": {
+        "bases": {
+          "type": "array",
+          "description": "List of accessible bases.",
+          "items": {
+            "$ref": "#/definitions/Base"
+          }
+        },
+        "offset": {
+          "type": "string",
+          "description": "Pagination cursor for the next page."
+        }
+      }
+    },
+    "Base": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Base ID (e.g., appXXXXXXXXXXXX).",
+          "x-ms-summary": "Base ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable base name.",
+          "x-ms-summary": "Base Name"
+        },
+        "permissionLevel": {
+          "type": "string",
+          "description": "User's permission level on this base.",
+          "x-ms-summary": "Permission Level"
+        }
+      }
+    },
+    "ListTablesResponse": {
+      "type": "object",
+      "properties": {
+        "tables": {
+          "type": "array",
+          "description": "List of tables in the base.",
+          "items": {
+            "$ref": "#/definitions/Table"
+          }
+        }
+      }
+    },
+    "Table": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Table ID (e.g., tblXXXXXXXXXXXX).",
+          "x-ms-summary": "Table ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Table name.",
+          "x-ms-summary": "Table Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Table description.",
+          "x-ms-summary": "Description"
+        },
+        "primaryFieldId": {
+          "type": "string",
+          "description": "ID of the primary field.",
+          "x-ms-summary": "Primary Field ID"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Field (column) definitions.",
+          "items": {
+            "$ref": "#/definitions/Field"
+          }
+        },
+        "views": {
+          "type": "array",
+          "description": "View definitions.",
+          "items": {
+            "$ref": "#/definitions/View"
+          }
+        }
+      }
+    },
+    "Field": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Field ID (e.g., fldXXXXXXXXXXXX).",
+          "x-ms-summary": "Field ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Field name.",
+          "x-ms-summary": "Field Name"
+        },
+        "type": {
+          "type": "string",
+          "description": "Field type (e.g., singleLineText, number, singleSelect).",
+          "x-ms-summary": "Field Type"
+        },
+        "description": {
+          "type": "string",
+          "description": "Field description.",
+          "x-ms-summary": "Description"
+        }
+      }
+    },
+    "View": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "View ID (e.g., viwXXXXXXXXXXXX).",
+          "x-ms-summary": "View ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "View name.",
+          "x-ms-summary": "View Name"
+        },
+        "type": {
+          "type": "string",
+          "description": "View type (e.g., grid, kanban, form).",
+          "x-ms-summary": "View Type"
+        }
+      }
+    },
+    "ListRecordsResponse": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "description": "List of record objects.",
+          "items": {
+            "$ref": "#/definitions/RecordResponse"
+          }
+        },
+        "offset": {
+          "type": "string",
+          "description": "Pagination cursor for the next page."
+        }
+      }
+    },
+    "RecordResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Record ID (e.g., recXXXXXXXXXXXX).",
+          "x-ms-summary": "Record ID"
+        },
+        "createdTime": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created Time"
+        },
+        "fields": {
+          "type": "object",
+          "description": "Dynamic key-value pairs where keys are field names and values vary by field type.",
+          "x-ms-summary": "Fields"
+        }
+      }
+    },
+    "CreateRecordRequest": {
+      "type": "object",
+      "required": [
+        "fields"
+      ],
+      "properties": {
+        "fields": {
+          "type": "object",
+          "description": "Key-value pairs where keys are field names and values match the field type.",
+          "x-ms-summary": "Fields"
+        },
+        "typecast": {
+          "type": "boolean",
+          "description": "If true, Airtable auto-converts string values to the appropriate field type.",
+          "x-ms-summary": "Typecast",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "UpdateRecordRequest": {
+      "type": "object",
+      "required": [
+        "fields"
+      ],
+      "properties": {
+        "fields": {
+          "type": "object",
+          "description": "Key-value pairs of fields to update. Unspecified fields are left unchanged.",
+          "x-ms-summary": "Fields"
+        },
+        "typecast": {
+          "type": "boolean",
+          "description": "If true, auto-convert string values to appropriate types.",
+          "x-ms-summary": "Typecast",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "DeleteRecordResponse": {
+      "type": "object",
+      "properties": {
+        "deleted": {
+          "type": "boolean",
+          "description": "True if the record was successfully deleted.",
+          "x-ms-summary": "Deleted"
+        },
+        "id": {
+          "type": "string",
+          "description": "The ID of the deleted record.",
+          "x-ms-summary": "Record ID"
+        }
+      }
+    },
+    "CurrentUserResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "User ID (e.g., usrXXXXXXXXXXXX).",
+          "x-ms-summary": "User ID"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "x-ms-summary": "Email"
+        },
+        "scopes": {
+          "type": "array",
+          "description": "List of scopes granted to the token.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "CreateCommentRequest": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The comment text to add.",
+          "x-ms-summary": "Comment Text"
+        }
+      }
+    },
+    "CommentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Comment ID (e.g., comXXXXXXXXXXXX).",
+          "x-ms-summary": "Comment ID"
+        },
+        "text": {
+          "type": "string",
+          "description": "The comment text.",
+          "x-ms-summary": "Comment Text"
+        },
+        "author": {
+          "type": "object",
+          "description": "Comment author details.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Author's user ID.",
+              "x-ms-summary": "Author ID"
+            },
+            "email": {
+              "type": "string",
+              "description": "Author's email address.",
+              "x-ms-summary": "Author Email"
+            },
+            "name": {
+              "type": "string",
+              "description": "Author's display name.",
+              "x-ms-summary": "Author Name"
+            }
+          }
+        },
+        "createdTime": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created Time"
+        }
+      }
+    },
+    "ListCommentsResponse": {
+      "type": "object",
+      "properties": {
+        "comments": {
+          "type": "array",
+          "description": "List of comment objects.",
+          "items": {
+            "$ref": "#/definitions/CommentResponse"
+          }
+        },
+        "offset": {
+          "type": "string",
+          "description": "Pagination cursor for the next page."
+        }
+      }
+    }
+  },
   "parameters": {},
   "responses": {},
   "securityDefinitions": {
-    "API Key": {
+    "api_key": {
       "type": "apiKey",
       "in": "header",
-      "name": "Authorization",
-      "description": "Generate a personal access token from https://airtable.com/create/tokens. Prefix your token with 'Bearer ', e.g. 'Bearer abcdefg'"
+      "name": "Authorization"
     }
   },
   "security": [
     {
-      "API Key": []
+      "api_key": []
     }
   ],
   "tags": [],
@@ -416,7 +910,7 @@
     },
     {
       "propertyName": "Categories",
-      "propertyValue": "Data"
+      "propertyValue": "Data;Productivity"
     }
   ]
 }
