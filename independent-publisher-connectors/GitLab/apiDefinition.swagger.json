@@ -1,12 +1,13 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "v4",
+    "version": "1.0",
     "title": "GitLab",
-    "description": "A connector for GitLab DevOps platform. Create projects, repositories, CICD pipelines, forks, branches, and merge requests.",
+    "description": "A connector for GitLab DevOps platform. Manage projects, merge requests, CI/CD pipelines, issues, and automate DevOps workflows.",
     "contact": {
-      "name": "Roy Paar",
-      "email": "roypaar@microsoft.com"
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
     }
   },
   "host": "gitlab.com",
@@ -24,7 +25,7 @@
     "/version": {
       "get": {
         "description": "Retrieve version information for this GitLab instance.",
-        "summary": "getVersion",
+        "summary": "Get Version",
         "tags": [
           "version"
         ],
@@ -36,21 +37,21 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/VersionResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
     "/projects": {
       "post": {
-        "description": "Create a new project.",
-        "summary": "createProject",
+        "description": "Create a new project owned by the authenticated user.",
+        "summary": "Create Project",
         "tags": [
           "project"
         ],
@@ -65,7 +66,7 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The name of the new project.",
+            "x-ms-summary": "Project Name",
             "description": "The name of the new project."
           },
           {
@@ -73,8 +74,8 @@
             "required": false,
             "in": "query",
             "type": "integer",
-            "x-ms-summary": "Repository name for the new project.",
-            "description": "Repository name for the new project."
+            "x-ms-summary": "Namespace ID",
+            "description": "Namespace ID for the new project."
           },
           {
             "name": "initialize_with_readme",
@@ -82,27 +83,65 @@
             "in": "query",
             "type": "boolean",
             "default": true,
-            "x-ms-summary": "Initialize the repository with a readme.",
+            "x-ms-summary": "Initialize with README",
             "description": "Initialize the repository with a readme."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/ProjectResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/fork": {
+    "/projects/{project_id}": {
+      "get": {
+        "description": "Retrieves details of a single GitLab project by its numeric ID.",
+        "summary": "Get Project",
+        "tags": [
+          "project"
+        ],
+        "operationId": "getProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/ProjectDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Project not found."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/fork": {
       "post": {
-        "description": "Fork a project.",
-        "summary": "forkProject",
+        "description": "Fork a project into the user namespace of the authenticated user.",
+        "summary": "Fork Project",
         "tags": [
           "project"
         ],
@@ -113,12 +152,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project.",
-            "description": "The ID or URL-encoded path of the project.",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -126,7 +165,7 @@
             "required": false,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The path assigned to the resultant project after forking.",
+            "x-ms-summary": "Path",
             "description": "The path assigned to the resultant project after forking."
           },
           {
@@ -134,27 +173,27 @@
             "required": false,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The name assigned to the resultant project after forking.",
+            "x-ms-summary": "Name",
             "description": "The name assigned to the resultant project after forking."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/ProjectResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/repository/compare": {
+    "/projects/{project_id}/repository/compare": {
       "get": {
-        "description": "Compare a branch, tag, or commit.",
-        "summary": "compareRepo",
+        "description": "Compare a branch, tag, or commit in a project.",
+        "summary": "Compare Repository",
         "tags": [
           "project"
         ],
@@ -165,12 +204,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user.",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -178,43 +217,43 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The commit SHA or branch name.",
-            "description": "The commit SHA or branch name."
+            "x-ms-summary": "From",
+            "description": "The commit SHA or branch name to compare from."
           },
           {
             "name": "to",
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The commit SHA or branch name.",
-            "description": "The commit SHA or branch name."
+            "x-ms-summary": "To",
+            "description": "The commit SHA or branch name to compare to."
           },
           {
             "name": "from_project_id",
             "required": false,
             "in": "query",
             "type": "integer",
-            "x-ms-summary": "The ID from which to compare.",
-            "description": "The ID from which to compare."
+            "x-ms-summary": "From Project ID",
+            "description": "The ID of the project to compare from."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/CompareResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/repository/branches": {
+    "/projects/{project_id}/repository/branches": {
       "post": {
-        "description": "Create a new branch.",
-        "summary": "createBranch",
+        "description": "Create a new branch in the repository.",
+        "summary": "Create Branch",
         "tags": [
           "project"
         ],
@@ -225,12 +264,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "ID or URL-encoded path of the project owned by the authenticated user.",
-            "description": "ID or URL-encoded path of the project owned by the authenticated user.",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -238,7 +277,7 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The name of the branch.",
+            "x-ms-summary": "Branch Name",
             "description": "The name of the branch."
           },
           {
@@ -247,27 +286,27 @@
             "in": "query",
             "type": "string",
             "default": "main",
-            "x-ms-summary": "Branch name or commit SHA from which to create a branch.",
-            "description": "Branch name or commit SHA from which to create a branch."
+            "x-ms-summary": "Source Ref",
+            "description": "Branch name or commit SHA to create branch from."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/BranchResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/repository/commits": {
+    "/projects/{project_id}/repository/commits": {
       "post": {
-        "description": "Create a new commit.",
-        "summary": "createCommit",
+        "description": "Create a commit by posting a JSON payload.",
+        "summary": "Create Commit",
         "tags": [
           "project"
         ],
@@ -278,12 +317,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project",
-            "description": "The ID or URL-encoded path of the project",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -291,7 +330,7 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "Name of the branch to commit into.",
+            "x-ms-summary": "Branch",
             "description": "Name of the branch to commit into."
           },
           {
@@ -299,13 +338,13 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "Commit message",
-            "description": "Commit message"
+            "x-ms-summary": "Commit Message",
+            "description": "Commit message."
           },
           {
             "name": "actions",
             "in": "body",
-            "description": "actions",
+            "description": "Commit actions payload.",
             "required": true,
             "schema": {
               "type": "object"
@@ -314,205 +353,21 @@
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/CommitResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/merge_requests": {
-      "post": {
-        "description": "Create a merge request.",
-        "summary": "mergeRequest",
-        "tags": [
-          "project"
-        ],
-        "operationId": "mergeRequest",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "source_branch",
-            "required": true,
-            "in": "query",
-            "type": "string",
-            "x-ms-summary": "The source branch.",
-            "description": "The source branch."
-          },
-          {
-            "name": "target_branch",
-            "required": true,
-            "in": "query",
-            "type": "string",
-            "x-ms-summary": "The target branch.",
-            "description": "The target branch."
-          },
-          {
-            "name": "title",
-            "required": true,
-            "in": "query",
-            "type": "string",
-            "x-ms-summary": "Title of the merge request.",
-            "description": "Title of the merge request."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/MergeResponse"
-            }
-          },
-          "401": {
-            "description": "unauthorized operation"
-          }
-        }
-      }
-    },
-    "/projects/{id}/merge_requests/{merge_request_iid}/merge": {
-      "put": {
-        "description": "Merge a merge request.",
-        "summary": "mergeMergeRequest",
-        "tags": [
-          "project"
-        ],
-        "operationId": "mergeMergeRequest",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "merge_request_iid",
-            "required": true,
-            "in": "path",
-            "type": "integer",
-            "x-ms-summary": "The internal ID of the merge request.",
-            "description": "The internal ID of the merge request.",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "merge_commit_message",
-            "required": false,
-            "in": "query",
-            "type": "string",
-            "x-ms-summary": "Custom merge commit message.",
-            "description": "Custom merge commit message."
-          },
-          {
-            "name": "squash",
-            "required": false,
-            "in": "query",
-            "type": "boolean",
-            "default": true,
-            "x-ms-summary": "If true the commits are squashed into a single commit on merge.",
-            "description": "If true the commits are squashed into a single commit on merge."
-          },
-          {
-            "name": "should_remove_source_branch",
-            "required": false,
-            "in": "query",
-            "type": "boolean",
-            "default": true,
-            "x-ms-summary": "If true removes the source branch.",
-            "description": "If true removes the source branch."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/MergeResponse"
-            }
-          },
-          "401": {
-            "description": "unauthorized operation"
-          }
-        }
-      }
-    },
-    "/projects/{id}/merge_requests/{merge_request_iid}": {
-      "put": {
-        "description": "Update a merge request.",
-        "summary": "updateMergeRequest",
-        "tags": [
-          "project"
-        ],
-        "operationId": "updateMergeRequest",
-        "deprecated": false,
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "merge_request_iid",
-            "required": true,
-            "in": "path",
-            "type": "integer",
-            "x-ms-summary": "The internal ID of the merge request.",
-            "description": "The internal ID of the merge request.",
-            "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "state_event",
-            "required": false,
-            "in": "query",
-            "type": "string",
-            "x-ms-summary": "Update the status of the merge request ie close or reopen.",
-            "description": "Update the status of the merge request ie close or reopen."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/MergeResponse"
-            }
-          },
-          "401": {
-            "description": "unauthorized operation"
-          }
-        }
-      }
-    },
-    "/projects/{id}/repository/files/{file_path}": {
+    "/projects/{project_id}/repository/files/{file_path}": {
       "get": {
-        "description": "Get a File from a Repository.",
-        "summary": "getFile",
+        "description": "Get a file from a repository.",
+        "summary": "Get File",
         "tags": [
           "project"
         ],
@@ -523,12 +378,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -536,8 +391,8 @@
             "required": true,
             "in": "path",
             "type": "string",
-            "x-ms-summary": "URL encoded full path to new file.",
-            "description": "URL encoded full path to new file.",
+            "x-ms-summary": "File Path",
+            "description": "URL-encoded full path to the file.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -545,27 +400,27 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The name of branch tag or commit",
-            "description": "The name of branch tag or commit"
+            "x-ms-summary": "Ref",
+            "description": "The name of branch, tag, or commit."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/GetFileResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/triggers": {
+    "/projects/{project_id}/triggers": {
       "post": {
-        "description": "Create a trigger for a project",
-        "summary": "createTrigger",
+        "description": "Create a pipeline trigger for a project.",
+        "summary": "Create Trigger",
         "tags": [
           "project"
         ],
@@ -576,12 +431,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user.",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -589,27 +444,27 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The trigger name.",
+            "x-ms-summary": "Trigger Name",
             "description": "The trigger name."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/CreateTriggerResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/trigger/pipeline": {
+    "/projects/{project_id}/trigger/pipeline": {
       "post": {
-        "description": "Trigger a CICD Pipeline.",
-        "summary": "triggerPipeline",
+        "description": "Trigger a CI/CD pipeline using a trigger token.",
+        "summary": "Trigger Pipeline",
         "tags": [
           "project"
         ],
@@ -620,12 +475,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user.",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -633,35 +488,35 @@
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "URL encoded full path to new file.",
-            "description": "URL encoded full path to new file."
+            "x-ms-summary": "Trigger Token",
+            "description": "The pipeline trigger token."
           },
           {
             "name": "ref",
             "required": true,
             "in": "query",
             "type": "string",
-            "x-ms-summary": "The name of branch tag or commit.",
-            "description": "The name of branch tag or commit."
+            "x-ms-summary": "Ref",
+            "description": "The name of branch, tag, or commit."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/TriggerPipelineResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
           }
         }
       }
     },
-    "/projects/{id}/runners": {
+    "/projects/{project_id}/runners": {
       "post": {
-        "description": "Enable a runner in project.",
-        "summary": "enableRunner",
+        "description": "Enable a runner in a project.",
+        "summary": "Enable Runner",
         "tags": [
           "project"
         ],
@@ -672,12 +527,12 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "project_id",
             "required": true,
             "in": "path",
             "type": "integer",
-            "x-ms-summary": "The ID or URL-encoded path of the project owned by the authenticated user.",
-            "description": "The ID or URL-encoded path of the project owned by the authenticated user.",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
             "x-ms-url-encoding": "single"
           },
           {
@@ -685,133 +540,2316 @@
             "required": true,
             "in": "query",
             "type": "integer",
-            "x-ms-summary": "The ID of a runner.",
+            "x-ms-summary": "Runner ID",
             "description": "The ID of a runner."
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation.",
             "schema": {
               "$ref": "#/definitions/EnableRunnerResponse"
             }
           },
           "401": {
-            "description": "unauthorized operation"
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/merge_requests": {
+      "get": {
+        "description": "Lists merge requests for a project with optional filters for state, date range, labels, and milestone.",
+        "summary": "List Project Merge Requests",
+        "tags": [
+          "merge_requests"
+        ],
+        "operationId": "listProjectMergeRequests",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "opened",
+              "closed",
+              "merged",
+              "locked",
+              "all"
+            ],
+            "x-ms-summary": "State",
+            "description": "Filter by MR state. Default: all."
+          },
+          {
+            "name": "created_after",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Created After",
+            "description": "Return MRs created after this ISO 8601 datetime."
+          },
+          {
+            "name": "updated_after",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Updated After",
+            "description": "Return MRs updated after this ISO 8601 datetime."
+          },
+          {
+            "name": "labels",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Labels",
+            "description": "Comma-separated label names to filter by."
+          },
+          {
+            "name": "milestone",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Milestone",
+            "description": "Milestone title to filter by."
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "created_by_me",
+              "assigned_to_me",
+              "all"
+            ],
+            "x-ms-summary": "Scope",
+            "description": "Scope of results. Default: created_by_me."
+          },
+          {
+            "name": "order_by",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "Order results by: created_at, updated_at. Default: created_at.",
+            "enum": [
+              "created_at",
+              "updated_at"
+            ]
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "x-ms-summary": "Sort Direction",
+            "description": "Sort direction: asc or desc. Default: desc."
+          },
+          {
+            "name": "per_page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 20,
+            "x-ms-summary": "Per Page",
+            "description": "Number of items per page (1-100). Default is 20."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "description": "Page number for pagination. Default is 1."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MergeRequestObject"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new merge request.",
+        "summary": "Create Merge Request",
+        "tags": [
+          "merge_requests"
+        ],
+        "operationId": "mergeRequest",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "source_branch",
+            "required": true,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Source Branch",
+            "description": "The source branch."
+          },
+          {
+            "name": "target_branch",
+            "required": true,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Target Branch",
+            "description": "The target branch."
+          },
+          {
+            "name": "title",
+            "required": true,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Title",
+            "description": "Title of the merge request."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/MergeResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/merge_requests/{merge_request_iid}": {
+      "get": {
+        "description": "Retrieves full details of a single merge request by project ID and merge request IID.",
+        "summary": "Get Merge Request",
+        "tags": [
+          "merge_requests"
+        ],
+        "operationId": "getMergeRequest",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "merge_request_iid",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Merge Request IID",
+            "description": "The project-scoped merge request ID (the number shown in the GitLab UI).",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/MergeRequestDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Merge request not found."
+          }
+        }
+      },
+      "put": {
+        "description": "Update a merge request (title, description, state, etc.).",
+        "summary": "Update Merge Request",
+        "tags": [
+          "merge_requests"
+        ],
+        "operationId": "updateMergeRequest",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "merge_request_iid",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Merge Request IID",
+            "description": "The project-scoped merge request ID (the number shown in the GitLab UI).",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "state_event",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "State Event",
+            "description": "Update the status: close or reopen."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/MergeResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/merge_requests/{merge_request_iid}/merge": {
+      "put": {
+        "description": "Accept and merge changes submitted with a merge request.",
+        "summary": "Merge Merge Request",
+        "tags": [
+          "merge_requests"
+        ],
+        "operationId": "mergeMergeRequest",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "merge_request_iid",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Merge Request IID",
+            "description": "The project-scoped merge request ID (the number shown in the GitLab UI).",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "merge_commit_message",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Merge Commit Message",
+            "description": "Custom merge commit message."
+          },
+          {
+            "name": "squash",
+            "required": false,
+            "in": "query",
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Squash",
+            "description": "Squash commits into a single commit on merge."
+          },
+          {
+            "name": "should_remove_source_branch",
+            "required": false,
+            "in": "query",
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Remove Source Branch",
+            "description": "Remove the source branch after merge."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/MergeResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/merge_requests/{merge_request_iid}/notes": {
+      "post": {
+        "description": "Adds a comment (note) to an existing merge request.",
+        "summary": "Create Merge Request Note",
+        "tags": [
+          "merge_requests"
+        ],
+        "operationId": "createMergeRequestNote",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "merge_request_iid",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Merge Request IID",
+            "description": "The project-scoped merge request ID (the number shown in the GitLab UI).",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NoteBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/NoteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/pipelines": {
+      "get": {
+        "description": "Lists CI/CD pipelines for a project with optional filters for status, branch, and date range.",
+        "summary": "List Project Pipelines",
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "listProjectPipelines",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "created",
+              "pending",
+              "running",
+              "success",
+              "failed",
+              "canceled",
+              "skipped",
+              "manual",
+              "scheduled"
+            ],
+            "x-ms-summary": "Status",
+            "description": "Filter by pipeline status."
+          },
+          {
+            "name": "ref",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Ref",
+            "description": "Filter by branch or tag name."
+          },
+          {
+            "name": "updated_after",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Updated After",
+            "description": "Return pipelines updated after this ISO 8601 datetime."
+          },
+          {
+            "name": "updated_before",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Updated Before",
+            "description": "Return pipelines updated before this ISO 8601 datetime."
+          },
+          {
+            "name": "order_by",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "Order results by: id, status, ref, updated_at, user_id. Default: id.",
+            "enum": [
+              "id",
+              "status",
+              "ref",
+              "updated_at",
+              "user_id"
+            ]
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "x-ms-summary": "Sort Direction",
+            "description": "Sort direction: asc or desc. Default: desc."
+          },
+          {
+            "name": "per_page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 20,
+            "x-ms-summary": "Per Page",
+            "description": "Number of items per page (1-100). Default is 20."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "description": "Page number for pagination. Default is 1."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PipelineObject"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/pipelines/{pipeline_id}": {
+      "get": {
+        "description": "Retrieves full details of a single CI/CD pipeline including duration, user, and status information.",
+        "summary": "Get Pipeline",
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "getPipeline",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "pipeline_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Pipeline ID",
+            "description": "The pipeline ID.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/PipelineDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Pipeline not found."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/pipelines/{pipeline_id}/jobs": {
+      "get": {
+        "description": "Lists all jobs for a specific CI/CD pipeline, optionally filtered by job status.",
+        "summary": "List Pipeline Jobs",
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "listPipelineJobs",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "pipeline_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Pipeline ID",
+            "description": "The pipeline ID.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Scope",
+            "description": "Filter by job status. Comma-separated values: created, pending, running, failed, success, canceled, skipped, manual."
+          },
+          {
+            "name": "per_page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 20,
+            "x-ms-summary": "Per Page",
+            "description": "Number of items per page (1-100). Default is 20."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "description": "Page number for pagination. Default is 1."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/JobObject"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/pipelines/{pipeline_id}/retry": {
+      "post": {
+        "description": "Retries all failed and canceled jobs in a CI/CD pipeline.",
+        "summary": "Retry Pipeline",
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "retryPipeline",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "pipeline_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Pipeline ID",
+            "description": "The pipeline ID.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/PipelineDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/jobs/{job_id}/trace": {
+      "get": {
+        "description": "Retrieves the raw text log (trace) output of a CI/CD job.",
+        "summary": "Get Job Log",
+        "tags": [
+          "pipelines"
+        ],
+        "operationId": "getJobLog",
+        "produces": [
+          "text/plain"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "job_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Job ID",
+            "description": "The job ID.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/issues": {
+      "get": {
+        "description": "Lists issues for a project with optional filters for state, labels, milestone, assignee, and date range.",
+        "summary": "List Project Issues",
+        "tags": [
+          "issues"
+        ],
+        "operationId": "listProjectIssues",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "opened",
+              "closed",
+              "all"
+            ],
+            "x-ms-summary": "State",
+            "description": "Filter by issue state. Default: all."
+          },
+          {
+            "name": "labels",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Labels",
+            "description": "Comma-separated label names. Use None for unlabeled, Any for any label."
+          },
+          {
+            "name": "milestone",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Milestone",
+            "description": "Milestone title to filter by."
+          },
+          {
+            "name": "assignee_id",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "x-ms-summary": "Assignee ID",
+            "description": "Filter by assignee user ID. Use 0 for unassigned."
+          },
+          {
+            "name": "created_after",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Created After",
+            "description": "Return issues created after this ISO 8601 datetime."
+          },
+          {
+            "name": "updated_after",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Updated After",
+            "description": "Return issues updated after this ISO 8601 datetime."
+          },
+          {
+            "name": "order_by",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "Order results by: created_at, updated_at, priority, due_date, label_priority. Default: created_at.",
+            "enum": [
+              "created_at",
+              "updated_at",
+              "priority",
+              "due_date",
+              "label_priority"
+            ]
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "x-ms-summary": "Sort Direction",
+            "description": "Sort direction: asc or desc. Default: desc."
+          },
+          {
+            "name": "per_page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 20,
+            "x-ms-summary": "Per Page",
+            "description": "Number of items per page (1-100). Default is 20."
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "description": "Page number for pagination. Default is 1."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/IssueObject"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new issue in a GitLab project.",
+        "summary": "Create Issue",
+        "tags": [
+          "issues"
+        ],
+        "operationId": "createIssue",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateIssueBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/IssueDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/issues/{issue_iid}": {
+      "get": {
+        "description": "Retrieves full details of a single issue by project ID and issue IID.",
+        "summary": "Get Issue",
+        "tags": [
+          "issues"
+        ],
+        "operationId": "getIssue",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "issue_iid",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Issue IID",
+            "description": "The project-scoped issue ID (the number shown in the GitLab UI).",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/IssueDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Issue not found."
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/issues/{issue_iid}/notes": {
+      "post": {
+        "description": "Adds a comment (note) to an existing issue.",
+        "summary": "Create Issue Note",
+        "tags": [
+          "issues"
+        ],
+        "operationId": "createIssueNote",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Project ID",
+            "description": "The numeric ID of the GitLab project.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "issue_iid",
+            "required": true,
+            "in": "path",
+            "type": "integer",
+            "x-ms-summary": "Issue IID",
+            "description": "The project-scoped issue ID.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NoteBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "$ref": "#/definitions/NoteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
           }
         }
       }
     }
   },
   "definitions": {
+    "UserObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "User ID.",
+          "x-ms-summary": "User ID"
+        },
+        "username": {
+          "type": "string",
+          "description": "Username.",
+          "x-ms-summary": "Username"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name.",
+          "x-ms-summary": "Name"
+        },
+        "avatar_url": {
+          "type": "string",
+          "description": "Avatar image URL.",
+          "x-ms-summary": "Avatar URL"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "User profile URL.",
+          "x-ms-summary": "Web URL"
+        }
+      }
+    },
+    "MilestoneObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Milestone ID.",
+          "x-ms-summary": "Milestone ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped milestone ID.",
+          "x-ms-summary": "Milestone IID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Milestone title.",
+          "x-ms-summary": "Title"
+        },
+        "state": {
+          "type": "string",
+          "description": "Milestone state.",
+          "x-ms-summary": "State"
+        },
+        "due_date": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format.",
+          "x-ms-summary": "Due Date"
+        }
+      }
+    },
+    "ProjectDetailResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Project name.",
+          "x-ms-summary": "Name"
+        },
+        "name_with_namespace": {
+          "type": "string",
+          "description": "Full project name including namespace.",
+          "x-ms-summary": "Full Name"
+        },
+        "path_with_namespace": {
+          "type": "string",
+          "description": "Full project path.",
+          "x-ms-summary": "Full Path"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description.",
+          "x-ms-summary": "Description"
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Visibility level: private, internal, or public.",
+          "x-ms-summary": "Visibility"
+        },
+        "default_branch": {
+          "type": "string",
+          "description": "Default branch name.",
+          "x-ms-summary": "Default Branch"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to project in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "last_activity_at": {
+          "type": "string",
+          "description": "ISO 8601 timestamp of last activity.",
+          "x-ms-summary": "Last Activity At"
+        }
+      }
+    },
+    "MergeRequestObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Global merge request ID.",
+          "x-ms-summary": "MR ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped merge request ID.",
+          "x-ms-summary": "MR IID"
+        },
+        "project_id": {
+          "type": "integer",
+          "description": "Project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Merge request title.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Merge request description in Markdown.",
+          "x-ms-summary": "Description"
+        },
+        "state": {
+          "type": "string",
+          "description": "State: opened, closed, merged, or locked.",
+          "x-ms-summary": "State"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "merged_at": {
+          "type": "string",
+          "description": "ISO 8601 merge timestamp.",
+          "x-ms-summary": "Merged At"
+        },
+        "source_branch": {
+          "type": "string",
+          "description": "Source branch name.",
+          "x-ms-summary": "Source Branch"
+        },
+        "target_branch": {
+          "type": "string",
+          "description": "Target branch name.",
+          "x-ms-summary": "Target Branch"
+        },
+        "author": {
+          "$ref": "#/definitions/UserObject"
+        },
+        "assignees": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserObject"
+          },
+          "description": "Assigned users."
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserObject"
+          },
+          "description": "Reviewer users."
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Label names."
+        },
+        "draft": {
+          "type": "boolean",
+          "description": "Whether the MR is a draft.",
+          "x-ms-summary": "Draft"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to the MR in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "merge_status": {
+          "type": "string",
+          "description": "Merge readiness status.",
+          "x-ms-summary": "Merge Status"
+        },
+        "has_conflicts": {
+          "type": "boolean",
+          "description": "Whether the MR has merge conflicts.",
+          "x-ms-summary": "Has Conflicts"
+        }
+      }
+    },
+    "MergeRequestDetailResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Global merge request ID.",
+          "x-ms-summary": "MR ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped merge request ID.",
+          "x-ms-summary": "MR IID"
+        },
+        "project_id": {
+          "type": "integer",
+          "description": "Project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Merge request title.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Merge request description in Markdown.",
+          "x-ms-summary": "Description"
+        },
+        "state": {
+          "type": "string",
+          "description": "State: opened, closed, merged, or locked.",
+          "x-ms-summary": "State"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "merged_at": {
+          "type": "string",
+          "description": "ISO 8601 merge timestamp.",
+          "x-ms-summary": "Merged At"
+        },
+        "source_branch": {
+          "type": "string",
+          "description": "Source branch name.",
+          "x-ms-summary": "Source Branch"
+        },
+        "target_branch": {
+          "type": "string",
+          "description": "Target branch name.",
+          "x-ms-summary": "Target Branch"
+        },
+        "author": {
+          "$ref": "#/definitions/UserObject"
+        },
+        "assignees": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserObject"
+          },
+          "description": "Assigned users."
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserObject"
+          },
+          "description": "Reviewer users."
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Label names."
+        },
+        "draft": {
+          "type": "boolean",
+          "description": "Whether the MR is a draft.",
+          "x-ms-summary": "Draft"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to the MR in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "merge_status": {
+          "type": "string",
+          "description": "Merge readiness status.",
+          "x-ms-summary": "Merge Status"
+        },
+        "has_conflicts": {
+          "type": "boolean",
+          "description": "Whether the MR has merge conflicts.",
+          "x-ms-summary": "Has Conflicts"
+        },
+        "sha": {
+          "type": "string",
+          "description": "HEAD commit SHA of the source branch.",
+          "x-ms-summary": "SHA"
+        },
+        "merge_commit_sha": {
+          "type": "string",
+          "description": "Merge commit SHA.",
+          "x-ms-summary": "Merge Commit SHA"
+        },
+        "detailed_merge_status": {
+          "type": "string",
+          "description": "Detailed merge status.",
+          "x-ms-summary": "Detailed Merge Status"
+        },
+        "merge_when_pipeline_succeeds": {
+          "type": "boolean",
+          "description": "Whether auto-merge on pipeline success is enabled.",
+          "x-ms-summary": "Auto Merge"
+        },
+        "user_notes_count": {
+          "type": "integer",
+          "description": "Number of comments on the MR.",
+          "x-ms-summary": "Notes Count"
+        },
+        "changes_count": {
+          "type": "string",
+          "description": "Number of file changes.",
+          "x-ms-summary": "Changes Count"
+        }
+      }
+    },
+    "PipelineObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Pipeline ID.",
+          "x-ms-summary": "Pipeline ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped pipeline ID.",
+          "x-ms-summary": "Pipeline IID"
+        },
+        "project_id": {
+          "type": "integer",
+          "description": "Project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "status": {
+          "type": "string",
+          "description": "Pipeline status.",
+          "x-ms-summary": "Status"
+        },
+        "source": {
+          "type": "string",
+          "description": "Pipeline source (push, web, schedule, etc.).",
+          "x-ms-summary": "Source"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Branch or tag name.",
+          "x-ms-summary": "Ref"
+        },
+        "sha": {
+          "type": "string",
+          "description": "Commit SHA.",
+          "x-ms-summary": "SHA"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to pipeline in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "PipelineDetailResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Pipeline ID.",
+          "x-ms-summary": "Pipeline ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped pipeline ID.",
+          "x-ms-summary": "Pipeline IID"
+        },
+        "project_id": {
+          "type": "integer",
+          "description": "Project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "status": {
+          "type": "string",
+          "description": "Pipeline status.",
+          "x-ms-summary": "Status"
+        },
+        "source": {
+          "type": "string",
+          "description": "Pipeline source.",
+          "x-ms-summary": "Source"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Branch or tag name.",
+          "x-ms-summary": "Ref"
+        },
+        "sha": {
+          "type": "string",
+          "description": "Commit SHA.",
+          "x-ms-summary": "SHA"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to pipeline in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "started_at": {
+          "type": "string",
+          "description": "ISO 8601 start timestamp.",
+          "x-ms-summary": "Started At"
+        },
+        "finished_at": {
+          "type": "string",
+          "description": "ISO 8601 finish timestamp.",
+          "x-ms-summary": "Finished At"
+        },
+        "duration": {
+          "type": "number",
+          "description": "Pipeline duration in seconds.",
+          "x-ms-summary": "Duration"
+        },
+        "queued_duration": {
+          "type": "number",
+          "description": "Time spent queued in seconds.",
+          "x-ms-summary": "Queued Duration"
+        },
+        "tag": {
+          "type": "boolean",
+          "description": "Whether pipeline ran on a tag.",
+          "x-ms-summary": "Tag"
+        },
+        "yaml_errors": {
+          "type": "string",
+          "description": "YAML syntax errors if any.",
+          "x-ms-summary": "YAML Errors"
+        },
+        "user": {
+          "$ref": "#/definitions/UserObject"
+        },
+        "detailed_status": {
+          "$ref": "#/definitions/DetailedStatusObject"
+        }
+      }
+    },
+    "DetailedStatusObject": {
+      "type": "object",
+      "properties": {
+        "icon": {
+          "type": "string",
+          "description": "Status icon name.",
+          "x-ms-summary": "Icon"
+        },
+        "text": {
+          "type": "string",
+          "description": "Status text.",
+          "x-ms-summary": "Text"
+        },
+        "label": {
+          "type": "string",
+          "description": "Status label.",
+          "x-ms-summary": "Label"
+        },
+        "group": {
+          "type": "string",
+          "description": "Status group.",
+          "x-ms-summary": "Group"
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Status tooltip.",
+          "x-ms-summary": "Tooltip"
+        }
+      }
+    },
+    "PipelineShortObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Pipeline ID.",
+          "x-ms-summary": "Pipeline ID"
+        },
+        "status": {
+          "type": "string",
+          "description": "Pipeline status.",
+          "x-ms-summary": "Status"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Branch or tag name.",
+          "x-ms-summary": "Ref"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "Pipeline URL.",
+          "x-ms-summary": "Web URL"
+        }
+      }
+    },
+    "JobObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Job ID.",
+          "x-ms-summary": "Job ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Job name.",
+          "x-ms-summary": "Name"
+        },
+        "status": {
+          "type": "string",
+          "description": "Job status.",
+          "x-ms-summary": "Status"
+        },
+        "stage": {
+          "type": "string",
+          "description": "Pipeline stage name.",
+          "x-ms-summary": "Stage"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Branch or tag name.",
+          "x-ms-summary": "Ref"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "started_at": {
+          "type": "string",
+          "description": "ISO 8601 start timestamp.",
+          "x-ms-summary": "Started At"
+        },
+        "finished_at": {
+          "type": "string",
+          "description": "ISO 8601 finish timestamp.",
+          "x-ms-summary": "Finished At"
+        },
+        "duration": {
+          "type": "number",
+          "description": "Job duration in seconds.",
+          "x-ms-summary": "Duration"
+        },
+        "queued_duration": {
+          "type": "number",
+          "description": "Time spent queued in seconds.",
+          "x-ms-summary": "Queued Duration"
+        },
+        "failure_reason": {
+          "type": "string",
+          "description": "Reason for failure if failed.",
+          "x-ms-summary": "Failure Reason"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to job in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "pipeline": {
+          "$ref": "#/definitions/PipelineShortObject"
+        },
+        "user": {
+          "$ref": "#/definitions/UserObject"
+        }
+      }
+    },
+    "IssueObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Global issue ID.",
+          "x-ms-summary": "Issue ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped issue ID.",
+          "x-ms-summary": "Issue IID"
+        },
+        "project_id": {
+          "type": "integer",
+          "description": "Project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Issue title.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Issue description in Markdown.",
+          "x-ms-summary": "Description"
+        },
+        "state": {
+          "type": "string",
+          "description": "State: opened or closed.",
+          "x-ms-summary": "State"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "closed_at": {
+          "type": "string",
+          "description": "ISO 8601 close timestamp.",
+          "x-ms-summary": "Closed At"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Label names."
+        },
+        "milestone": {
+          "$ref": "#/definitions/MilestoneObject"
+        },
+        "author": {
+          "$ref": "#/definitions/UserObject"
+        },
+        "assignees": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserObject"
+          },
+          "description": "Assigned users."
+        },
+        "due_date": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format.",
+          "x-ms-summary": "Due Date"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to issue in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "user_notes_count": {
+          "type": "integer",
+          "description": "Number of comments.",
+          "x-ms-summary": "Notes Count"
+        },
+        "upvotes": {
+          "type": "integer",
+          "description": "Number of upvotes.",
+          "x-ms-summary": "Upvotes"
+        },
+        "downvotes": {
+          "type": "integer",
+          "description": "Number of downvotes.",
+          "x-ms-summary": "Downvotes"
+        },
+        "confidential": {
+          "type": "boolean",
+          "description": "Whether the issue is confidential.",
+          "x-ms-summary": "Confidential"
+        }
+      }
+    },
+    "IssueDetailResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Global issue ID.",
+          "x-ms-summary": "Issue ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped issue ID.",
+          "x-ms-summary": "Issue IID"
+        },
+        "project_id": {
+          "type": "integer",
+          "description": "Project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Issue title.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Issue description in Markdown.",
+          "x-ms-summary": "Description"
+        },
+        "state": {
+          "type": "string",
+          "description": "State: opened or closed.",
+          "x-ms-summary": "State"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "closed_at": {
+          "type": "string",
+          "description": "ISO 8601 close timestamp.",
+          "x-ms-summary": "Closed At"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Label names."
+        },
+        "milestone": {
+          "$ref": "#/definitions/MilestoneObject"
+        },
+        "author": {
+          "$ref": "#/definitions/UserObject"
+        },
+        "assignees": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserObject"
+          },
+          "description": "Assigned users."
+        },
+        "due_date": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format.",
+          "x-ms-summary": "Due Date"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "URL to issue in GitLab UI.",
+          "x-ms-summary": "Web URL"
+        },
+        "user_notes_count": {
+          "type": "integer",
+          "description": "Number of comments.",
+          "x-ms-summary": "Notes Count"
+        },
+        "upvotes": {
+          "type": "integer",
+          "description": "Number of upvotes.",
+          "x-ms-summary": "Upvotes"
+        },
+        "downvotes": {
+          "type": "integer",
+          "description": "Number of downvotes.",
+          "x-ms-summary": "Downvotes"
+        },
+        "confidential": {
+          "type": "boolean",
+          "description": "Whether the issue is confidential.",
+          "x-ms-summary": "Confidential"
+        },
+        "merge_requests_count": {
+          "type": "integer",
+          "description": "Number of related merge requests.",
+          "x-ms-summary": "MR Count"
+        },
+        "task_completion_status": {
+          "type": "object",
+          "description": "Task list progress.",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "description": "Total task count.",
+              "x-ms-summary": "Task Count"
+            },
+            "completed_count": {
+              "type": "integer",
+              "description": "Completed task count.",
+              "x-ms-summary": "Completed Tasks"
+            }
+          }
+        },
+        "time_stats": {
+          "type": "object",
+          "description": "Time tracking statistics.",
+          "properties": {
+            "time_estimate": {
+              "type": "integer",
+              "description": "Time estimate in seconds.",
+              "x-ms-summary": "Time Estimate"
+            },
+            "total_time_spent": {
+              "type": "integer",
+              "description": "Total time spent in seconds.",
+              "x-ms-summary": "Time Spent"
+            },
+            "human_time_estimate": {
+              "type": "string",
+              "description": "Human-readable time estimate.",
+              "x-ms-summary": "Time Estimate (Human)"
+            },
+            "human_total_time_spent": {
+              "type": "string",
+              "description": "Human-readable time spent.",
+              "x-ms-summary": "Time Spent (Human)"
+            }
+          }
+        },
+        "references": {
+          "type": "object",
+          "description": "Reference strings.",
+          "properties": {
+            "short": {
+              "type": "string",
+              "description": "Short reference.",
+              "x-ms-summary": "Short Ref"
+            },
+            "relative": {
+              "type": "string",
+              "description": "Relative reference.",
+              "x-ms-summary": "Relative Ref"
+            },
+            "full": {
+              "type": "string",
+              "description": "Full reference.",
+              "x-ms-summary": "Full Ref"
+            }
+          }
+        }
+      }
+    },
+    "NoteResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Note ID.",
+          "x-ms-summary": "Note ID"
+        },
+        "body": {
+          "type": "string",
+          "description": "Note content.",
+          "x-ms-summary": "Body"
+        },
+        "author": {
+          "$ref": "#/definitions/UserObject"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "ISO 8601 creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "ISO 8601 last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "system": {
+          "type": "boolean",
+          "description": "Whether this is a system-generated note.",
+          "x-ms-summary": "System Note"
+        },
+        "noteable_id": {
+          "type": "integer",
+          "description": "ID of the parent resource.",
+          "x-ms-summary": "Noteable ID"
+        },
+        "noteable_type": {
+          "type": "string",
+          "description": "Type of parent: Issue or MergeRequest.",
+          "x-ms-summary": "Noteable Type"
+        }
+      }
+    },
+    "CreateIssueBody": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Issue title.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Issue description (supports Markdown).",
+          "x-ms-summary": "Description"
+        },
+        "labels": {
+          "type": "string",
+          "description": "Comma-separated label names to apply.",
+          "x-ms-summary": "Labels"
+        },
+        "milestone_id": {
+          "type": "integer",
+          "description": "Milestone ID to assign the issue to.",
+          "x-ms-summary": "Milestone ID"
+        },
+        "assignee_ids": {
+          "type": "string",
+          "description": "Comma-separated user IDs to assign.",
+          "x-ms-summary": "Assignee IDs"
+        },
+        "due_date": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format.",
+          "x-ms-summary": "Due Date"
+        },
+        "confidential": {
+          "type": "boolean",
+          "description": "Whether the issue is confidential.",
+          "x-ms-summary": "Confidential",
+          "default": false
+        }
+      }
+    },
+    "NoteBody": {
+      "type": "object",
+      "required": [
+        "body"
+      ],
+      "properties": {
+        "body": {
+          "type": "string",
+          "description": "The comment text (supports Markdown).",
+          "x-ms-summary": "Body"
+        }
+      }
+    },
     "VersionResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "version": {
+          "type": "string",
+          "description": "GitLab version.",
+          "x-ms-summary": "Version"
+        },
+        "revision": {
+          "type": "string",
+          "description": "GitLab revision.",
+          "x-ms-summary": "Revision"
         }
       }
     },
     "ProjectResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "id": {
+          "type": "integer",
+          "description": "Project ID.",
+          "x-ms-summary": "Project ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Project name.",
+          "x-ms-summary": "Name"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "Project URL.",
+          "x-ms-summary": "Web URL"
+        },
+        "path_with_namespace": {
+          "type": "string",
+          "description": "Full path.",
+          "x-ms-summary": "Full Path"
+        },
+        "default_branch": {
+          "type": "string",
+          "description": "Default branch.",
+          "x-ms-summary": "Default Branch"
         }
       }
     },
     "BranchResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "name": {
+          "type": "string",
+          "description": "Branch name.",
+          "x-ms-summary": "Name"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "Branch URL.",
+          "x-ms-summary": "Web URL"
         }
       }
     },
     "CommitResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "id": {
+          "type": "string",
+          "description": "Commit SHA.",
+          "x-ms-summary": "Commit ID"
+        },
+        "short_id": {
+          "type": "string",
+          "description": "Short commit SHA.",
+          "x-ms-summary": "Short ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Commit title.",
+          "x-ms-summary": "Title"
+        },
+        "message": {
+          "type": "string",
+          "description": "Commit message.",
+          "x-ms-summary": "Message"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "Commit URL.",
+          "x-ms-summary": "Web URL"
         }
       }
     },
     "CompareResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "commit": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Commit SHA.",
+              "x-ms-summary": "Commit ID"
+            },
+            "message": {
+              "type": "string",
+              "description": "Commit message.",
+              "x-ms-summary": "Message"
+            }
+          }
+        },
+        "diffs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "old_path": {
+                "type": "string",
+                "description": "Old file path.",
+                "x-ms-summary": "Old Path"
+              },
+              "new_path": {
+                "type": "string",
+                "description": "New file path.",
+                "x-ms-summary": "New Path"
+              },
+              "diff": {
+                "type": "string",
+                "description": "Diff content.",
+                "x-ms-summary": "Diff"
+              }
+            }
+          }
         }
       }
     },
     "MergeResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "id": {
+          "type": "integer",
+          "description": "Merge request ID.",
+          "x-ms-summary": "MR ID"
+        },
+        "iid": {
+          "type": "integer",
+          "description": "Project-scoped MR ID.",
+          "x-ms-summary": "MR IID"
+        },
+        "title": {
+          "type": "string",
+          "description": "MR title.",
+          "x-ms-summary": "Title"
+        },
+        "state": {
+          "type": "string",
+          "description": "MR state.",
+          "x-ms-summary": "State"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "MR URL.",
+          "x-ms-summary": "Web URL"
         }
       }
     },
     "GetFileResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "file_name": {
+          "type": "string",
+          "description": "File name.",
+          "x-ms-summary": "File Name"
+        },
+        "file_path": {
+          "type": "string",
+          "description": "File path.",
+          "x-ms-summary": "File Path"
+        },
+        "size": {
+          "type": "integer",
+          "description": "File size.",
+          "x-ms-summary": "Size"
+        },
+        "encoding": {
+          "type": "string",
+          "description": "Content encoding.",
+          "x-ms-summary": "Encoding"
+        },
+        "content": {
+          "type": "string",
+          "description": "File content.",
+          "x-ms-summary": "Content"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Branch reference.",
+          "x-ms-summary": "Ref"
         }
       }
     },
     "CreateTriggerResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "id": {
+          "type": "integer",
+          "description": "Trigger ID.",
+          "x-ms-summary": "Trigger ID"
+        },
+        "token": {
+          "type": "string",
+          "description": "Trigger token.",
+          "x-ms-summary": "Token"
+        },
+        "description": {
+          "type": "string",
+          "description": "Trigger description.",
+          "x-ms-summary": "Description"
         }
       }
     },
     "TriggerPipelineResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
+        "id": {
+          "type": "integer",
+          "description": "Pipeline ID.",
+          "x-ms-summary": "Pipeline ID"
+        },
+        "status": {
+          "type": "string",
+          "description": "Pipeline status.",
+          "x-ms-summary": "Status"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Branch or tag.",
+          "x-ms-summary": "Ref"
+        },
+        "web_url": {
+          "type": "string",
+          "description": "Pipeline URL.",
+          "x-ms-summary": "Web URL"
         }
       }
     },
     "EnableRunnerResponse": {
       "type": "object",
       "properties": {
-        "statusDetails": {
-          "$ref": "#/definitions/statusDetails"
-        }
-      }
-    },
-    "statusDetails": {
-      "type": "object",
-      "properties": {
-        "success": {
-          "type": "boolean"
+        "id": {
+          "type": "integer",
+          "description": "Runner ID.",
+          "x-ms-summary": "Runner ID"
         },
-        "statusCode": {
-          "type": "string"
-        },
-        "messages": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/messages"
-          }
-        }
-      }
-    },
-    "messages": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "string"
+        "active": {
+          "type": "boolean",
+          "description": "Whether runner is active.",
+          "x-ms-summary": "Active"
         },
         "description": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
+          "type": "string",
+          "description": "Runner description.",
+          "x-ms-summary": "Description"
         }
       }
     }
@@ -822,7 +2860,7 @@
     "API Key": {
       "type": "apiKey",
       "in": "header",
-      "name": "Private-Token"
+      "name": "PRIVATE-TOKEN"
     }
   },
   "security": [
@@ -845,4 +2883,4 @@
       "propertyValue": "IT Operations"
     }
   ]
-}
+          }
