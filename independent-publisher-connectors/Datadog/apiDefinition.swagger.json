@@ -1,0 +1,1560 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Datadog",
+    "description": "Datadog is a cloud-scale monitoring and security platform. This connector enables you to manage monitors, incidents, events, SLOs, and downtimes, and react to infrastructure alerts in your automation flows.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.datadoghq.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/monitor": {
+      "get": {
+        "operationId": "listMonitors",
+        "summary": "List Monitors",
+        "description": "Retrieves a list of all monitors in your Datadog organization, with optional filtering by name, tags, or state.",
+        "parameters": [
+          {
+            "name": "group_states",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Group States",
+            "description": "Comma-separated list of group states to filter on (e.g., alert,warn,no data)."
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Name Filter",
+            "description": "Filter monitors by name (substring match)."
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Tags",
+            "description": "Comma-separated list of tags to filter monitors (e.g., env:production,team:infra)."
+          },
+          {
+            "name": "monitor_tags",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Monitor Tags",
+            "description": "Comma-separated list of monitor tags to filter on."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced",
+            "description": "Page number for pagination (0-indexed)."
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced",
+            "description": "Number of monitors per page (default 100)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of monitors.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Monitor"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Monitors"
+        ]
+      }
+    },
+    "/api/v1/monitor/{monitor_id}": {
+      "get": {
+        "operationId": "getMonitor",
+        "summary": "Get Monitor",
+        "description": "Retrieves the details of a specific monitor by its ID.",
+        "parameters": [
+          {
+            "name": "monitor_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "x-ms-summary": "Monitor ID",
+            "x-ms-url-encoding": "single",
+            "description": "The ID of the monitor to retrieve."
+          },
+          {
+            "name": "group_states",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Group States",
+            "description": "Comma-separated group states to include in the response."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The monitor details.",
+            "schema": {
+              "$ref": "#/definitions/MonitorDetail"
+            }
+          }
+        },
+        "tags": [
+          "Monitors"
+        ]
+      }
+    },
+    "/api/v1/monitor/{monitor_id}/mute": {
+      "post": {
+        "operationId": "muteMonitor",
+        "summary": "Mute Monitor",
+        "description": "Mutes a monitor to suppress alert notifications, optionally scoped to a specific group and with an expiration time.",
+        "parameters": [
+          {
+            "name": "monitor_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "x-ms-summary": "Monitor ID",
+            "x-ms-url-encoding": "single",
+            "description": "The ID of the monitor to mute."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scope": {
+                  "type": "string",
+                  "x-ms-summary": "Scope",
+                  "description": "Scope to apply the mute to (e.g., host:my-server). If omitted, mutes all scopes."
+                },
+                "end": {
+                  "type": "integer",
+                  "x-ms-summary": "End Timestamp",
+                  "description": "POSIX timestamp for when the mute should expire. If omitted, mutes indefinitely."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The muted monitor.",
+            "schema": {
+              "$ref": "#/definitions/MuteResponse"
+            }
+          }
+        },
+        "tags": [
+          "Monitors"
+        ]
+      }
+    },
+    "/api/v1/monitor/{monitor_id}/unmute": {
+      "post": {
+        "operationId": "unmuteMonitor",
+        "summary": "Unmute Monitor",
+        "description": "Unmutes a previously muted monitor to resume alert notifications.",
+        "parameters": [
+          {
+            "name": "monitor_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "x-ms-summary": "Monitor ID",
+            "x-ms-url-encoding": "single",
+            "description": "The ID of the monitor to unmute."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scope": {
+                  "type": "string",
+                  "x-ms-summary": "Scope",
+                  "description": "Scope to unmute (e.g., host:my-server)."
+                },
+                "all_scopes": {
+                  "type": "boolean",
+                  "x-ms-summary": "All Scopes",
+                  "description": "If true, unmutes all scopes. Default is false."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The unmuted monitor.",
+            "schema": {
+              "$ref": "#/definitions/MuteResponse"
+            }
+          }
+        },
+        "tags": [
+          "Monitors"
+        ]
+      }
+    },
+    "/api/v2/incidents": {
+      "get": {
+        "operationId": "listIncidents",
+        "summary": "List Incidents",
+        "description": "Retrieves a list of incidents from your Datadog organization, sorted by creation date.",
+        "parameters": [
+          {
+            "name": "page[size]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced",
+            "description": "Number of incidents per page (default 10, max 100)."
+          },
+          {
+            "name": "page[offset]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Page Offset",
+            "x-ms-visibility": "advanced",
+            "description": "Offset for pagination."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Sort",
+            "x-ms-visibility": "advanced",
+            "description": "Sort incidents by public_id. Use -public_id for descending (newest first) or public_id for ascending.",
+            "enum": [
+              "-public_id",
+              "public_id"
+            ],
+            "default": "-public_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of incidents.",
+            "schema": {
+              "$ref": "#/definitions/IncidentListResponse"
+            }
+          }
+        },
+        "tags": [
+          "Incidents"
+        ]
+      },
+      "post": {
+        "operationId": "createIncident",
+        "summary": "Create Incident",
+        "description": "Declares a new incident in Datadog with a title, severity, and incident commander.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "attributes",
+                    "relationships"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "incidents",
+                      "x-ms-summary": "Type",
+                      "x-ms-visibility": "internal",
+                      "description": "Resource type. Must be incidents."
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "title",
+                        "customer_impacted"
+                      ],
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "x-ms-summary": "Title",
+                          "description": "Human-readable incident title (e.g., Production API latency spike)."
+                        },
+                        "customer_impacted": {
+                          "type": "boolean",
+                          "x-ms-summary": "Customer Impacted",
+                          "description": "Whether customers are impacted by this incident."
+                        },
+                        "fields": {
+                          "type": "object",
+                          "x-ms-visibility": "advanced",
+                          "properties": {
+                            "severity": {
+                              "type": "object",
+                              "required": [
+                                "type"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "dropdown",
+                                  "x-ms-summary": "Severity Field Type",
+                                  "x-ms-visibility": "internal",
+                                  "description": "Must be dropdown."
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "x-ms-summary": "Severity",
+                                  "description": "Severity level: SEV-1, SEV-2, SEV-3, SEV-4, or SEV-5.",
+                                  "enum": [
+                                    "SEV-1",
+                                    "SEV-2",
+                                    "SEV-3",
+                                    "SEV-4",
+                                    "SEV-5"
+                                  ]
+                                }
+                              },
+                              "description": "Severity field configuration."
+                            }
+                          },
+                          "description": "Incident custom fields."
+                        }
+                      },
+                      "description": "Incident attributes."
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "required": [
+                        "commander_user"
+                      ],
+                      "properties": {
+                        "commander_user": {
+                          "type": "object",
+                          "required": [
+                            "data"
+                          ],
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "required": [
+                                "type",
+                                "id"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "users",
+                                  "x-ms-summary": "Commander User Type",
+                                  "x-ms-visibility": "internal",
+                                  "description": "Must be users."
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "x-ms-summary": "Commander User ID",
+                                  "description": "UUID of the incident commander (Datadog user ID)."
+                                }
+                              },
+                              "description": "Commander user reference."
+                            }
+                          },
+                          "description": "Commander user relationship."
+                        }
+                      },
+                      "description": "Incident relationships."
+                    }
+                  },
+                  "description": "Incident data wrapper."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created incident.",
+            "schema": {
+              "$ref": "#/definitions/IncidentResponse"
+            }
+          }
+        },
+        "tags": [
+          "Incidents"
+        ]
+      }
+    },
+    "/api/v2/incidents/{incident_id}": {
+      "get": {
+        "operationId": "getIncident",
+        "summary": "Get Incident",
+        "description": "Retrieves the full details of a specific incident by its ID.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The UUID of the incident to retrieve."
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Include",
+            "x-ms-visibility": "advanced",
+            "description": "Comma-separated list of related resources to include (e.g., users, attachments)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The incident details.",
+            "schema": {
+              "$ref": "#/definitions/IncidentResponse"
+            }
+          }
+        },
+        "tags": [
+          "Incidents"
+        ]
+      },
+      "patch": {
+        "operationId": "updateIncident",
+        "summary": "Update Incident",
+        "description": "Updates an existing incident's title, severity, state, or customer impact status.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The UUID of the incident to update."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "id"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "incidents",
+                      "x-ms-summary": "Type",
+                      "x-ms-visibility": "internal",
+                      "description": "Resource type. Must be incidents."
+                    },
+                    "id": {
+                      "type": "string",
+                      "x-ms-summary": "Incident ID",
+                      "x-ms-visibility": "internal",
+                      "description": "Must match the incident_id path parameter."
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "x-ms-summary": "Title",
+                          "description": "Updated incident title."
+                        },
+                        "customer_impacted": {
+                          "type": "boolean",
+                          "x-ms-summary": "Customer Impacted",
+                          "description": "Updated customer impact status."
+                        },
+                        "fields": {
+                          "type": "object",
+                          "x-ms-visibility": "advanced",
+                          "properties": {
+                            "severity": {
+                              "type": "object",
+                              "required": [
+                                "type"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "dropdown",
+                                  "x-ms-summary": "Severity Field Type",
+                                  "x-ms-visibility": "internal",
+                                  "description": "Must be dropdown."
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "x-ms-summary": "Severity",
+                                  "description": "Updated severity: SEV-1, SEV-2, SEV-3, SEV-4, or SEV-5.",
+                                  "enum": [
+                                    "SEV-1",
+                                    "SEV-2",
+                                    "SEV-3",
+                                    "SEV-4",
+                                    "SEV-5"
+                                  ]
+                                }
+                              },
+                              "description": "Severity field configuration."
+                            },
+                            "state": {
+                              "type": "object",
+                              "required": [
+                                "type"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "dropdown",
+                                  "x-ms-summary": "State Field Type",
+                                  "x-ms-visibility": "internal",
+                                  "description": "Must be dropdown."
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "x-ms-summary": "State",
+                                  "description": "Updated state: active, stable, resolved, or completed.",
+                                  "enum": [
+                                    "active",
+                                    "stable",
+                                    "resolved",
+                                    "completed"
+                                  ]
+                                }
+                              },
+                              "description": "State field configuration."
+                            }
+                          },
+                          "description": "Incident custom fields."
+                        }
+                      },
+                      "description": "Incident attributes to update."
+                    }
+                  },
+                  "description": "Incident data wrapper."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated incident.",
+            "schema": {
+              "$ref": "#/definitions/IncidentResponse"
+            }
+          }
+        },
+        "tags": [
+          "Incidents"
+        ]
+      }
+    },
+    "/api/v1/events": {
+      "post": {
+        "operationId": "postEvent",
+        "summary": "Post Event",
+        "description": "Posts a custom event to the Datadog event stream, useful for tracking deployments, releases, or external system changes.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "title",
+                "text"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "x-ms-summary": "Title",
+                  "description": "Event title (e.g., Deployment completed â€” v2.1.0)."
+                },
+                "text": {
+                  "type": "string",
+                  "x-ms-summary": "Text",
+                  "description": "Event body text. Supports Markdown."
+                },
+                "priority": {
+                  "type": "string",
+                  "x-ms-summary": "Priority",
+                  "description": "Priority: normal or low. Default is normal.",
+                  "enum": [
+                    "normal",
+                    "low"
+                  ]
+                },
+                "alert_type": {
+                  "type": "string",
+                  "x-ms-summary": "Alert Type",
+                  "description": "Alert type: info, warning, error, or success. Default is info.",
+                  "enum": [
+                    "info",
+                    "warning",
+                    "error",
+                    "success"
+                  ]
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Tags",
+                  "x-ms-visibility": "advanced",
+                  "description": "Tags to apply (e.g., env:production, service:api)."
+                },
+                "host": {
+                  "type": "string",
+                  "x-ms-summary": "Host",
+                  "x-ms-visibility": "advanced",
+                  "description": "Host name to associate the event with."
+                },
+                "source_type_name": {
+                  "type": "string",
+                  "x-ms-summary": "Source Type",
+                  "x-ms-visibility": "advanced",
+                  "description": "Source type name (e.g., POWER_AUTOMATE, MY_APPS)."
+                },
+                "date_happened": {
+                  "type": "integer",
+                  "x-ms-summary": "Date Happened",
+                  "x-ms-visibility": "advanced",
+                  "description": "POSIX timestamp of when the event occurred. Defaults to now."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created event.",
+            "schema": {
+              "$ref": "#/definitions/PostEventResponse"
+            }
+          }
+        },
+        "tags": [
+          "Events"
+        ]
+      }
+    },
+    "/api/v1/hosts/totals": {
+      "get": {
+        "operationId": "getHostTotals",
+        "summary": "Get Host Totals",
+        "description": "Returns the total number of active and up hosts in your Datadog organization.",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "From Timestamp",
+            "x-ms-visibility": "advanced",
+            "description": "POSIX timestamp. Only count hosts that have reported since this time."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Host totals.",
+            "schema": {
+              "$ref": "#/definitions/HostTotals"
+            }
+          }
+        },
+        "tags": [
+          "Infrastructure"
+        ]
+      }
+    },
+    "/api/v1/slo": {
+      "get": {
+        "operationId": "listSLOs",
+        "summary": "List SLOs",
+        "description": "Retrieves a list of all Service Level Objectives (SLOs) in your Datadog organization.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Query",
+            "description": "Filter SLOs by name (substring match)."
+          },
+          {
+            "name": "tags_query",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Tags Query",
+            "description": "Filter SLOs by tags (e.g., env:production)."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Limit",
+            "x-ms-visibility": "advanced",
+            "description": "Maximum number of SLOs to return (default 1000)."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced",
+            "description": "Offset for pagination."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of SLOs.",
+            "schema": {
+              "$ref": "#/definitions/SLOListResponse"
+            }
+          }
+        },
+        "tags": [
+          "SLOs"
+        ]
+      }
+    },
+    "/api/v2/downtime": {
+      "post": {
+        "operationId": "createDowntime",
+        "summary": "Create Downtime",
+        "description": "Schedules a downtime to suppress alert notifications for specific monitors or scopes during planned maintenance.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "attributes"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "downtime",
+                      "x-ms-summary": "Type",
+                      "x-ms-visibility": "internal",
+                      "description": "Resource type. Must be downtime."
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "scope"
+                      ],
+                      "properties": {
+                        "scope": {
+                          "type": "string",
+                          "x-ms-summary": "Scope",
+                          "description": "Scope the downtime applies to (e.g., env:production, host:my-server, or * for all)."
+                        },
+                        "message": {
+                          "type": "string",
+                          "x-ms-summary": "Message",
+                          "description": "Message to include with the downtime notification."
+                        },
+                        "schedule": {
+                          "type": "object",
+                          "properties": {
+                            "start": {
+                              "type": "string",
+                              "x-ms-summary": "Start Time",
+                              "description": "ISO 8601 start time. Defaults to now."
+                            },
+                            "end": {
+                              "type": "string",
+                              "x-ms-summary": "End Time",
+                              "description": "ISO 8601 end time. If omitted, downtime is indefinite until cancelled."
+                            }
+                          },
+                          "description": "Downtime schedule."
+                        },
+                        "monitor_identifier": {
+                          "type": "object",
+                          "x-ms-visibility": "advanced",
+                          "properties": {
+                            "monitor_id": {
+                              "type": "integer",
+                              "x-ms-summary": "Monitor ID",
+                              "description": "ID of a specific monitor to mute. If omitted, applies to all monitors matching the scope."
+                            }
+                          },
+                          "description": "Specific monitor to mute."
+                        },
+                        "mute_first_recovery_notification": {
+                          "type": "boolean",
+                          "x-ms-summary": "Mute First Recovery",
+                          "x-ms-visibility": "advanced",
+                          "description": "If true, mutes the first recovery notification after the downtime ends. Default is false."
+                        }
+                      },
+                      "description": "Downtime attributes."
+                    }
+                  },
+                  "description": "Downtime data wrapper."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created downtime.",
+            "schema": {
+              "$ref": "#/definitions/DowntimeResponse"
+            }
+          }
+        },
+        "tags": [
+          "Downtimes"
+        ]
+      }
+    },
+    "/trigger/monitorAlert": {
+      "get": {
+        "operationId": "triggerMonitorAlert",
+        "summary": "When a monitor is triggered",
+        "description": "Triggers when a Datadog monitor enters Alert or Warn state. Polls periodically for monitors in alert states.",
+        "x-ms-trigger": "batch",
+        "x-ms-trigger-hint": "Triggers when a Datadog monitor enters Alert or Warn state.",
+        "parameters": [
+          {
+            "name": "tags",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Tags Filter",
+            "x-ms-visibility": "advanced",
+            "description": "Comma-separated tags to filter monitors (e.g., env:production)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of monitors in alert state.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Monitor"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Triggers"
+        ],
+        "x-ms-trigger-metadata": {
+          "mode": "polling",
+          "kind": "query"
+        }
+      }
+    },
+    "/trigger/newIncident": {
+      "get": {
+        "operationId": "triggerNewIncident",
+        "summary": "When a new incident is created",
+        "description": "Triggers when a new incident is declared in Datadog. Polls periodically for recently created incidents.",
+        "x-ms-trigger": "batch",
+        "x-ms-trigger-hint": "Triggers when a new incident is declared in Datadog.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of recently created incidents.",
+            "schema": {
+              "$ref": "#/definitions/IncidentListResponse"
+            }
+          }
+        },
+        "tags": [
+          "Triggers"
+        ],
+        "x-ms-trigger-metadata": {
+          "mode": "polling",
+          "kind": "query"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Monitor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "x-ms-summary": "Monitor ID",
+          "description": "Unique monitor ID."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Monitor name."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "Monitor type (e.g., metric alert, service check, event alert)."
+        },
+        "query": {
+          "type": "string",
+          "x-ms-summary": "Query",
+          "description": "Monitor query definition."
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message",
+          "description": "Notification message template."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Tags",
+          "description": "Tags applied to this monitor."
+        },
+        "overall_state": {
+          "type": "string",
+          "x-ms-summary": "Overall State",
+          "description": "Current state: OK, Alert, Warn, No Data, or Unknown."
+        },
+        "priority": {
+          "type": "integer",
+          "x-ms-summary": "Priority",
+          "description": "Monitor priority (1-5, or null)."
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created",
+          "description": "ISO 8601 creation timestamp."
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "description": "ISO 8601 last-modified timestamp."
+        },
+        "creator": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Creator Name",
+              "description": "Name of the user who created the monitor."
+            },
+            "email": {
+              "type": "string",
+              "x-ms-summary": "Creator Email",
+              "description": "Email of the creator."
+            }
+          },
+          "description": "Monitor creator."
+        }
+      }
+    },
+    "MonitorDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "x-ms-summary": "Monitor ID",
+          "description": "Unique monitor ID."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Monitor name."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "Monitor type."
+        },
+        "query": {
+          "type": "string",
+          "x-ms-summary": "Query",
+          "description": "Monitor query definition."
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message",
+          "description": "Notification message template."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Tags",
+          "description": "Tags applied to this monitor."
+        },
+        "overall_state": {
+          "type": "string",
+          "x-ms-summary": "Overall State",
+          "description": "Current state: OK, Alert, Warn, No Data, or Unknown."
+        },
+        "priority": {
+          "type": "integer",
+          "x-ms-summary": "Priority",
+          "description": "Monitor priority (1-5, or null)."
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "thresholds": {
+              "type": "object",
+              "properties": {
+                "critical": {
+                  "type": "number",
+                  "x-ms-summary": "Critical Threshold",
+                  "description": "Critical alert threshold value."
+                },
+                "warning": {
+                  "type": "number",
+                  "x-ms-summary": "Warning Threshold",
+                  "description": "Warning alert threshold value."
+                },
+                "ok": {
+                  "type": "number",
+                  "x-ms-summary": "OK Threshold",
+                  "description": "OK recovery threshold value."
+                }
+              },
+              "description": "Alert thresholds."
+            }
+          },
+          "description": "Monitor options (thresholds, notify settings, etc.)."
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created",
+          "description": "ISO 8601 creation timestamp."
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "description": "ISO 8601 last-modified timestamp."
+        },
+        "creator": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Creator Name",
+              "description": "Name of the user who created the monitor."
+            },
+            "email": {
+              "type": "string",
+              "x-ms-summary": "Creator Email",
+              "description": "Email of the creator."
+            }
+          },
+          "description": "Monitor creator."
+        }
+      }
+    },
+    "MuteResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "x-ms-summary": "Monitor ID",
+          "description": "The monitor ID."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "Monitor name."
+        },
+        "overall_state": {
+          "type": "string",
+          "x-ms-summary": "Overall State",
+          "description": "Current state of the monitor."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Tags",
+          "description": "Monitor tags."
+        }
+      }
+    },
+    "IncidentListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Incident"
+          },
+          "description": "Array of incident objects."
+        }
+      }
+    },
+    "IncidentResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Incident"
+        }
+      }
+    },
+    "Incident": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Incident ID",
+          "description": "Unique incident ID (UUID)."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "Resource type. Always incidents."
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "x-ms-summary": "Title",
+              "description": "Incident title."
+            },
+            "severity": {
+              "type": "string",
+              "x-ms-summary": "Severity",
+              "description": "Severity level: SEV-1 through SEV-5, or UNKNOWN."
+            },
+            "state": {
+              "type": "string",
+              "x-ms-summary": "State",
+              "description": "Incident state (e.g., active, stable, resolved, completed)."
+            },
+            "customer_impacted": {
+              "type": "boolean",
+              "x-ms-summary": "Customer Impacted",
+              "description": "Whether customers are impacted."
+            },
+            "created": {
+              "type": "string",
+              "x-ms-summary": "Created",
+              "description": "ISO 8601 creation timestamp."
+            },
+            "modified": {
+              "type": "string",
+              "x-ms-summary": "Modified",
+              "description": "ISO 8601 last-modified timestamp."
+            },
+            "resolved": {
+              "type": "string",
+              "x-ms-summary": "Resolved",
+              "description": "ISO 8601 resolution timestamp (null if unresolved)."
+            },
+            "time_to_detect": {
+              "type": "integer",
+              "x-ms-summary": "Time to Detect",
+              "description": "Seconds from start to detection."
+            },
+            "time_to_resolve": {
+              "type": "integer",
+              "x-ms-summary": "Time to Resolve",
+              "description": "Seconds from start to resolution."
+            }
+          },
+          "description": "Incident attributes."
+        },
+        "relationships": {
+          "type": "object",
+          "properties": {
+            "commander_user": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "x-ms-summary": "Commander User ID",
+                      "description": "UUID of the incident commander."
+                    },
+                    "type": {
+                      "type": "string",
+                      "x-ms-summary": "Commander Type",
+                      "description": "Always users."
+                    }
+                  },
+                  "description": "Commander user reference."
+                }
+              },
+              "description": "Commander user relationship."
+            }
+          },
+          "description": "Incident relationships."
+        }
+      }
+    },
+    "PostEventResponse": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "x-ms-summary": "Event ID",
+              "description": "ID of the created event."
+            },
+            "title": {
+              "type": "string",
+              "x-ms-summary": "Title",
+              "description": "Event title."
+            },
+            "text": {
+              "type": "string",
+              "x-ms-summary": "Text",
+              "description": "Event body."
+            },
+            "date_happened": {
+              "type": "integer",
+              "x-ms-summary": "Date Happened",
+              "description": "POSIX timestamp."
+            },
+            "priority": {
+              "type": "string",
+              "x-ms-summary": "Priority",
+              "description": "Event priority."
+            },
+            "alert_type": {
+              "type": "string",
+              "x-ms-summary": "Alert Type",
+              "description": "Alert type."
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-ms-summary": "Tags",
+              "description": "Applied tags."
+            },
+            "url": {
+              "type": "string",
+              "x-ms-summary": "URL",
+              "description": "URL to view the event in Datadog."
+            }
+          },
+          "description": "The created event."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Status of the request (ok on success)."
+        }
+      }
+    },
+    "HostTotals": {
+      "type": "object",
+      "properties": {
+        "total_active": {
+          "type": "integer",
+          "x-ms-summary": "Total Active",
+          "description": "Total number of active hosts (reporting within the last 2 hours)."
+        },
+        "total_up": {
+          "type": "integer",
+          "x-ms-summary": "Total Up",
+          "description": "Total number of hosts currently up."
+        }
+      }
+    },
+    "SLOListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SLO"
+          },
+          "description": "Array of SLO objects."
+        }
+      }
+    },
+    "SLO": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "SLO ID",
+          "description": "Unique SLO ID."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "SLO name."
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "SLO type: metric, monitor, or time_slice."
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "SLO description."
+        },
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "type": "number",
+                "x-ms-summary": "Target",
+                "description": "Target percentage (e.g., 99.9)."
+              },
+              "timeframe": {
+                "type": "string",
+                "x-ms-summary": "Timeframe",
+                "description": "Timeframe: 7d, 30d, 90d, or custom."
+              }
+            }
+          },
+          "x-ms-summary": "Thresholds",
+          "description": "SLO target thresholds."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Tags",
+          "description": "SLO tags."
+        },
+        "creator": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Creator Name",
+              "description": "Creator name."
+            }
+          },
+          "description": "SLO creator."
+        },
+        "created_at": {
+          "type": "integer",
+          "x-ms-summary": "Created At",
+          "description": "POSIX timestamp of creation."
+        },
+        "modified_at": {
+          "type": "integer",
+          "x-ms-summary": "Modified At",
+          "description": "POSIX timestamp of last modification."
+        }
+      }
+    },
+    "DowntimeResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "Downtime ID",
+              "description": "Unique downtime ID."
+            },
+            "type": {
+              "type": "string",
+              "x-ms-summary": "Type",
+              "description": "Resource type. Always downtime."
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "scope": {
+                  "type": "string",
+                  "x-ms-summary": "Scope",
+                  "description": "Downtime scope."
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "Downtime status (scheduled, active, ended, or cancelled)."
+                },
+                "message": {
+                  "type": "string",
+                  "x-ms-summary": "Message",
+                  "description": "Downtime message."
+                },
+                "schedule": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "x-ms-summary": "Start Time",
+                      "description": "Start time."
+                    },
+                    "end": {
+                      "type": "string",
+                      "x-ms-summary": "End Time",
+                      "description": "End time."
+                    }
+                  },
+                  "description": "Downtime schedule."
+                },
+                "created_at": {
+                  "type": "string",
+                  "x-ms-summary": "Created At",
+                  "description": "Creation timestamp."
+                },
+                "modified_at": {
+                  "type": "string",
+                  "x-ms-summary": "Modified At",
+                  "description": "Last modification timestamp."
+                }
+              },
+              "description": "Downtime attributes."
+            }
+          },
+          "description": "Downtime data."
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "DD-API-KEY"
+    },
+    "app_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "DD-APPLICATION-KEY"
+    }
+  },
+  "security": [
+    {
+      "api_key": [],
+      "app_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Monitors",
+      "description": "Operations for managing Datadog monitors."
+    },
+    {
+      "name": "Incidents",
+      "description": "Operations for managing Datadog incidents."
+    },
+    {
+      "name": "Events",
+      "description": "Operations for posting events to Datadog."
+    },
+    {
+      "name": "Infrastructure",
+      "description": "Operations for querying infrastructure health."
+    },
+    {
+      "name": "SLOs",
+      "description": "Operations for managing Service Level Objectives."
+    },
+    {
+      "name": "Downtimes",
+      "description": "Operations for scheduling maintenance downtimes."
+    },
+    {
+      "name": "Triggers",
+      "description": "Polling triggers for monitoring Datadog changes."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.datadoghq.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.datadoghq.com/legal/privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "IT Operations;Data"
+    }
+  ]
+}

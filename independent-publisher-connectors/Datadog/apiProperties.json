@@ -1,0 +1,80 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "API Key",
+          "description": "Your Datadog API Key (32-character hex).",
+          "tooltip": "Go to Datadog \u00e2\u2020\u2019 Organization Settings \u00e2\u2020\u2019 API Keys \u00e2\u2020\u2019 New Key. Copy the 32-character key.",
+          "constraints": {
+            "tabIndex": 2,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      },
+      "app_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "Application Key",
+          "description": "Your Datadog Application Key (40-character hex).",
+          "tooltip": "Go to Datadog \u00e2\u2020\u2019 Personal Settings \u00e2\u2020\u2019 Application Keys \u00e2\u2020\u2019 New Key. Leave scopes empty for full permissions. Copy the 40-character key immediately.",
+          "constraints": {
+            "tabIndex": 3,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#da3b01",
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set DD-API-KEY Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "DD-API-KEY",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set DD-APPLICATION-KEY Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "DD-APPLICATION-KEY",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('app_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route triggerMonitorAlert to monitors endpoint",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/api/v1/monitor?group_states=alert,warn",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "triggerMonitorAlert"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route triggerNewIncident to incidents endpoint",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/api/v2/incidents?sort=-public_id&page[size]=20",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "triggerNewIncident"
+          ]
+        }
+      }
+    ],
+    "publisher": "Aaron Mah",
+    "stackOwner": "Datadog"
+  }
+}
