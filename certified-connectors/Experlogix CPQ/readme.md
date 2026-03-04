@@ -6,25 +6,56 @@ Experlogix CPQ (Configure, Price, Quote) helps sales teams quickly and accuratel
 ## Prerequisites
 You need to have access to an Experlogix CPQ project.
 
-## Supported Operations
+## Connector capabilities
+The Experlogix CPQ Power Platform connector supports configuration lifecycle operations, model metadata discovery, and MCP server communication for agentic scenarios.
 
-### ConfigurationXml
-This operation will read and return the configuration XML associated to the provided record in the host system.
+## Supported operations
 
-### CreateConfigurationFromCopy
-This operation will create a new configuration by copying the current configuration at the specified source record to the target record.
+### Get Configuration Xml (`GetConfigurationXml`)
+Reads and returns the configuration XML associated with a provided record in the host system.
+- Required inputs: `type`, `id`
+- Typical output: `configurationXml`, `configureUrl`, `lineItemIds`, `success`, `messages`
 
-### UpdateConfiguration
-This operation will update the configuration to the provided record in the host system.
+### Create Configuration From Copy (`CreateConfigurationFromCopy`)
+Creates a new configuration by copying an existing source configuration to a target record.
+- Required inputs: `targetId`, `sourceId`, `type`
+- Optional input: `lineItemIds`
 
-### CreateConfiguration
-This operation will create a new configuration to the provided record in the host system.
+### Update the Configuration (`UpdateConfiguration`)
+Updates a record's configuration using a complete XML payload.
+- Required inputs: `id`, `type`, `configurationXml`
+
+### Create the Configuration (`CreateConfiguration`)
+Creates a new configuration for a record using a complete XML payload.
+- Required inputs: `id`, `type`, `configurationXml`
+
+### Create Configuration From Changes (`CreateConfigurationFromChanges`) **New**
+Creates a new configuration by applying a list of configuration changes.
+- Required inputs: `id`, `type`, `seriesId`, `modelId`
+- Optional input: `changes[]`
+
+### Update Configuration From Changes (`UpdateConfigurationFromChanges`) **New**
+Updates an existing configuration by applying a list of configuration changes.
+- Required inputs: `id`, `type`
+- Optional input: `changes[]`
+
+### Get Model Metadata (`GetModelMetadata`)
+Returns model metadata to help build guided configuration experiences.
+- Optional input: `relevantCategories[]`
+- Typical output: `Categories`, `CategoryOptions`, `CategoryProperties`, `success`, `messages`
+
+## Change-based configuration payloads
+The `changes[]` collection supports granular configuration updates via `ChangeConfig` entries, including values such as:
+- `type` (for example: `setProperty`, `selection`, `recalc`)
+- `configLineIndex`
+- `changeType` (for selection changes)
+- `categoryId`, `optionId`, `selectionIndex`
+- `propertyId`, `value`
+
+Use change-based operations when you want to apply targeted updates without sending full configuration XML.
 
 ## Known Issues and Limitations
-The current version only support connecting to Microsoft Dynamics 265 CE and Microsoft Finance and Operations. Support for other CPQ host systems will be added in the future.
-
-## Deployment Instructions
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Automate and Power Apps.
+The current version only support connecting to Microsoft Dynamics 365 CE and Microsoft Finance and Operations. Support for other CPQ host systems will be added in the future.
 
 ## Support
 For further support, please contact support@experlogix.com
