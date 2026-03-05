@@ -1,0 +1,1659 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Intercom",
+    "description": "Intercom is a customer communications platform combining help desk, AI chatbot, and engagement tools. Manage conversations, contacts, and tickets to power support workflows.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.intercom.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/conversations/search": {
+      "post": {
+        "operationId": "searchConversations",
+        "summary": "Search Conversations",
+        "description": "Search for conversations using filters such as state, creation date, assignee, or tags.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "object",
+                  "description": "Search query filter object.",
+                  "x-ms-summary": "Query",
+                  "required": [
+                    "field",
+                    "operator",
+                    "value"
+                  ],
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "description": "Field to filter on: created_at, updated_at, state, admin_assignee_id, team_assignee_id, tag_id.",
+                      "x-ms-summary": "Filter Field"
+                    },
+                    "operator": {
+                      "type": "string",
+                      "description": "Comparison operator: =, !=, >, <, ~, IN, NIN.",
+                      "x-ms-summary": "Operator"
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "Value to match. Use UNIX timestamp for date fields; string for state (open, closed, snoozed).",
+                      "x-ms-summary": "Value"
+                    }
+                  }
+                },
+                "sort": {
+                  "type": "object",
+                  "description": "Sort configuration.",
+                  "x-ms-summary": "Sort",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "description": "Sort field: created_at, updated_at, waiting_since.",
+                      "x-ms-summary": "Sort Field",
+                      "default": "created_at"
+                    },
+                    "order": {
+                      "type": "string",
+                      "description": "Sort order: asc or desc.",
+                      "x-ms-summary": "Sort Order",
+                      "default": "desc",
+                      "enum": [
+                        "asc",
+                        "desc"
+                      ]
+                    }
+                  }
+                },
+                "pagination": {
+                  "type": "object",
+                  "description": "Pagination configuration.",
+                  "x-ms-summary": "Pagination",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "per_page": {
+                      "type": "integer",
+                      "description": "Results per page (default 20, max 150).",
+                      "x-ms-summary": "Per Page"
+                    },
+                    "starting_after": {
+                      "type": "string",
+                      "description": "Cursor from a previous response for the next page.",
+                      "x-ms-summary": "Starting After"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of matching conversations.",
+            "schema": {
+              "$ref": "#/definitions/SearchConversationsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}": {
+      "get": {
+        "operationId": "getConversation",
+        "summary": "Get Conversation",
+        "description": "Retrieve a single conversation by ID, including its full message history.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The conversation ID.",
+            "x-ms-summary": "Conversation ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "display_as",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Content format: plaintext or html (default).",
+            "x-ms-summary": "Display As",
+            "x-ms-visibility": "advanced",
+            "enum": [
+              "plaintext",
+              "html"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The conversation object.",
+            "schema": {
+              "$ref": "#/definitions/ConversationDetail"
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/reply": {
+      "post": {
+        "operationId": "replyToConversation",
+        "summary": "Reply to Conversation",
+        "description": "Send a reply to an existing conversation as an admin.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The conversation ID to reply to.",
+            "x-ms-summary": "Conversation ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "message_type",
+                "type",
+                "admin_id",
+                "body"
+              ],
+              "properties": {
+                "message_type": {
+                  "type": "string",
+                  "description": "The message type. Always 'comment' for replies.",
+                  "x-ms-summary": "Message Type",
+                  "default": "comment",
+                  "x-ms-visibility": "internal"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The sender type. Always 'admin'.",
+                  "x-ms-summary": "Sender Type",
+                  "default": "admin",
+                  "x-ms-visibility": "internal"
+                },
+                "admin_id": {
+                  "type": "string",
+                  "description": "The ID of the admin sending the reply. Use List Admins to find admin IDs.",
+                  "x-ms-summary": "Admin ID",
+                  "x-ms-dynamic-values": {
+                    "operationId": "listAdmins",
+                    "value-collection": "admins",
+                    "value-path": "id",
+                    "value-title": "name"
+                  }
+                },
+                "body": {
+                  "type": "string",
+                  "description": "Reply text. Supports HTML formatting.",
+                  "x-ms-summary": "Reply Body"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated conversation.",
+            "schema": {
+              "$ref": "#/definitions/ConversationDetail"
+            }
+          }
+        }
+      }
+    },
+    "/contacts/search": {
+      "post": {
+        "operationId": "searchContacts",
+        "summary": "Search Contacts",
+        "description": "Search for contacts (users and leads) using filters such as email, name, or creation date.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "object",
+                  "description": "Search query filter object.",
+                  "x-ms-summary": "Query",
+                  "required": [
+                    "field",
+                    "operator",
+                    "value"
+                  ],
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "description": "Field to filter on: email, name, phone, role, external_id, created_at, updated_at, last_seen_at, signed_up_at.",
+                      "x-ms-summary": "Filter Field"
+                    },
+                    "operator": {
+                      "type": "string",
+                      "description": "Comparison operator: =, !=, >, <, ~, IN, NIN, contains, starts_with.",
+                      "x-ms-summary": "Operator"
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "Value to match against the specified field.",
+                      "x-ms-summary": "Value"
+                    }
+                  }
+                },
+                "pagination": {
+                  "type": "object",
+                  "description": "Pagination configuration.",
+                  "x-ms-summary": "Pagination",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "per_page": {
+                      "type": "integer",
+                      "description": "Results per page (default 50, max 150).",
+                      "x-ms-summary": "Per Page"
+                    },
+                    "starting_after": {
+                      "type": "string",
+                      "description": "Cursor from a previous response for the next page.",
+                      "x-ms-summary": "Starting After"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of matching contacts.",
+            "schema": {
+              "$ref": "#/definitions/SearchContactsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/contacts/{id}": {
+      "get": {
+        "operationId": "getContact",
+        "summary": "Get Contact",
+        "description": "Retrieve a single contact by ID, including all profile data and custom attributes.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The contact ID.",
+            "x-ms-summary": "Contact ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The contact object.",
+            "schema": {
+              "$ref": "#/definitions/Contact"
+            }
+          }
+        }
+      }
+    },
+    "/contacts": {
+      "post": {
+        "operationId": "createContact",
+        "summary": "Create Contact",
+        "description": "Create a new contact (user or lead) in Intercom.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "role"
+              ],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "description": "Contact role: user or lead.",
+                  "x-ms-summary": "Role",
+                  "enum": [
+                    "user",
+                    "lead"
+                  ]
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email address. Required for users; recommended for leads.",
+                  "x-ms-summary": "Email"
+                },
+                "external_id": {
+                  "type": "string",
+                  "description": "Unique identifier from your external system.",
+                  "x-ms-summary": "External ID",
+                  "x-ms-visibility": "advanced"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Full name of the contact.",
+                  "x-ms-summary": "Name"
+                },
+                "phone": {
+                  "type": "string",
+                  "description": "Phone number.",
+                  "x-ms-summary": "Phone",
+                  "x-ms-visibility": "advanced"
+                },
+                "avatar": {
+                  "type": "string",
+                  "description": "URL to an avatar image.",
+                  "x-ms-summary": "Avatar URL",
+                  "x-ms-visibility": "advanced"
+                },
+                "signed_up_at": {
+                  "type": "integer",
+                  "description": "UNIX timestamp of when the contact signed up in your system.",
+                  "x-ms-summary": "Signed Up At",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created contact.",
+            "schema": {
+              "$ref": "#/definitions/Contact"
+            }
+          }
+        }
+      }
+    },
+    "/tickets/search": {
+      "post": {
+        "operationId": "searchTickets",
+        "summary": "Search Tickets",
+        "description": "Search for tickets using filters such as state, creation date, or ticket type.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "object",
+                  "description": "Search query filter object.",
+                  "x-ms-summary": "Query",
+                  "required": [
+                    "field",
+                    "operator",
+                    "value"
+                  ],
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "description": "Field to filter on: created_at, updated_at, ticket_type_id, ticket_state.",
+                      "x-ms-summary": "Filter Field"
+                    },
+                    "operator": {
+                      "type": "string",
+                      "description": "Comparison operator: =, !=, >, <.",
+                      "x-ms-summary": "Operator"
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "Value to match. For ticket_state: submitted, in_progress, waiting_on_customer, resolved.",
+                      "x-ms-summary": "Value"
+                    }
+                  }
+                },
+                "pagination": {
+                  "type": "object",
+                  "description": "Pagination configuration.",
+                  "x-ms-summary": "Pagination",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "per_page": {
+                      "type": "integer",
+                      "description": "Results per page (default 20, max 150).",
+                      "x-ms-summary": "Per Page"
+                    },
+                    "starting_after": {
+                      "type": "string",
+                      "description": "Cursor from a previous response for the next page.",
+                      "x-ms-summary": "Starting After"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of matching tickets.",
+            "schema": {
+              "$ref": "#/definitions/SearchTicketsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tickets/{id}": {
+      "get": {
+        "operationId": "getTicket",
+        "summary": "Get Ticket",
+        "description": "Retrieve a single ticket by ID, including its type, state, and custom attributes.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ticket ID.",
+            "x-ms-summary": "Ticket ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ticket object.",
+            "schema": {
+              "$ref": "#/definitions/Ticket"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateTicket",
+        "summary": "Update Ticket",
+        "description": "Update a ticket's state, assignment, or custom attributes.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ticket ID.",
+            "x-ms-summary": "Ticket ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "description": "New state: submitted, in_progress, waiting_on_customer, resolved.",
+                  "x-ms-summary": "State",
+                  "enum": [
+                    "submitted",
+                    "in_progress",
+                    "waiting_on_customer",
+                    "resolved"
+                  ]
+                },
+                "assignment": {
+                  "type": "object",
+                  "description": "Reassignment configuration.",
+                  "x-ms-summary": "Assignment",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "admin_id": {
+                      "type": "string",
+                      "description": "Admin ID to assign the ticket to.",
+                      "x-ms-summary": "Admin ID"
+                    },
+                    "team_id": {
+                      "type": "string",
+                      "description": "Team ID to assign the ticket to.",
+                      "x-ms-summary": "Team ID"
+                    }
+                  }
+                },
+                "open": {
+                  "type": "boolean",
+                  "description": "Whether the ticket is open for new replies.",
+                  "x-ms-summary": "Open",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "schema": {
+              "$ref": "#/definitions/Ticket"
+            }
+          }
+        }
+      }
+    },
+    "/tickets": {
+      "post": {
+        "operationId": "createTicket",
+        "summary": "Create Ticket",
+        "description": "Create a new ticket in Intercom linked to an existing contact.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "ticket_type_id",
+                "contacts"
+              ],
+              "properties": {
+                "ticket_type_id": {
+                  "type": "string",
+                  "description": "ID of the ticket type. Find this in Intercom Settings > Tickets > Ticket types.",
+                  "x-ms-summary": "Ticket Type ID"
+                },
+                "contacts": {
+                  "type": "array",
+                  "description": "Contacts to associate with the ticket.",
+                  "x-ms-summary": "Contacts",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Contact ID.",
+                        "x-ms-summary": "Contact ID"
+                      }
+                    }
+                  }
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Ticket title.",
+                  "x-ms-summary": "Title"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Ticket description (HTML supported).",
+                  "x-ms-summary": "Description"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created ticket.",
+            "schema": {
+              "$ref": "#/definitions/Ticket"
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/parts": {
+      "post": {
+        "operationId": "closeConversation",
+        "summary": "Close Conversation",
+        "description": "Close an open conversation as an admin, with an optional closing comment.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The conversation ID.",
+            "x-ms-summary": "Conversation ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "message_type",
+                "type",
+                "admin_id"
+              ],
+              "properties": {
+                "message_type": {
+                  "type": "string",
+                  "description": "The message type. Always 'close' for closing.",
+                  "x-ms-summary": "Message Type",
+                  "default": "close",
+                  "x-ms-visibility": "internal"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The sender type. Always 'admin'.",
+                  "x-ms-summary": "Sender Type",
+                  "default": "admin",
+                  "x-ms-visibility": "internal"
+                },
+                "admin_id": {
+                  "type": "string",
+                  "description": "Admin ID performing the close.",
+                  "x-ms-summary": "Admin ID",
+                  "x-ms-dynamic-values": {
+                    "operationId": "listAdmins",
+                    "value-collection": "admins",
+                    "value-path": "id",
+                    "value-title": "name"
+                  }
+                },
+                "body": {
+                  "type": "string",
+                  "description": "Optional closing comment.",
+                  "x-ms-summary": "Closing Comment",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The closed conversation.",
+            "schema": {
+              "$ref": "#/definitions/ConversationDetail"
+            }
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "operationId": "listTags",
+        "summary": "List Tags",
+        "description": "Retrieve all tags defined in the Intercom workspace.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of tags.",
+            "schema": {
+              "$ref": "#/definitions/ListTagsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/admins": {
+      "get": {
+        "operationId": "listAdmins",
+        "summary": "List Admins",
+        "description": "Retrieve all admins and teammates in the Intercom workspace.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of admins.",
+            "schema": {
+              "$ref": "#/definitions/ListAdminsResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ConversationSource": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Source type (e.g., email, web, api).",
+          "x-ms-summary": "Source Type"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject line (if applicable).",
+          "x-ms-summary": "Subject"
+        },
+        "body": {
+          "type": "string",
+          "description": "Opening message body (HTML).",
+          "x-ms-summary": "Body"
+        },
+        "author": {
+          "type": "object",
+          "description": "Author of the opening message.",
+          "x-ms-summary": "Author",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Author type.",
+              "x-ms-summary": "Type"
+            },
+            "id": {
+              "type": "string",
+              "description": "Author ID.",
+              "x-ms-summary": "ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Author name.",
+              "x-ms-summary": "Name"
+            },
+            "email": {
+              "type": "string",
+              "description": "Author email.",
+              "x-ms-summary": "Email"
+            }
+          }
+        }
+      }
+    },
+    "ConversationAssignee": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Assignee type.",
+          "x-ms-summary": "Type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Assignee ID.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Assignee name.",
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Assignee email.",
+          "x-ms-summary": "Email"
+        }
+      }
+    },
+    "ConversationContacts": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'contact.list'.",
+          "x-ms-summary": "Type"
+        },
+        "contacts": {
+          "type": "array",
+          "description": "Array of associated contacts.",
+          "x-ms-summary": "Contacts",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Contact type.",
+                "x-ms-summary": "Type"
+              },
+              "id": {
+                "type": "string",
+                "description": "Contact ID.",
+                "x-ms-summary": "ID"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ConversationTags": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'tag.list'.",
+          "x-ms-summary": "Type"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Array of applied tags.",
+          "x-ms-summary": "Tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Tag type.",
+                "x-ms-summary": "Type"
+              },
+              "id": {
+                "type": "string",
+                "description": "Tag ID.",
+                "x-ms-summary": "ID"
+              },
+              "name": {
+                "type": "string",
+                "description": "Tag name.",
+                "x-ms-summary": "Name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ConversationStatistics": {
+      "type": "object",
+      "properties": {
+        "time_to_assignment": {
+          "type": "integer",
+          "description": "Seconds until first assignment.",
+          "x-ms-summary": "Time to Assignment"
+        },
+        "time_to_admin_reply": {
+          "type": "integer",
+          "description": "Seconds until first admin reply.",
+          "x-ms-summary": "Time to Admin Reply"
+        },
+        "time_to_first_close": {
+          "type": "integer",
+          "description": "Seconds until first close.",
+          "x-ms-summary": "Time to First Close"
+        },
+        "time_to_last_close": {
+          "type": "integer",
+          "description": "Seconds until last close.",
+          "x-ms-summary": "Time to Last Close"
+        },
+        "last_assignment_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last assignment.",
+          "x-ms-summary": "Last Assignment At"
+        },
+        "last_admin_reply_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last admin reply.",
+          "x-ms-summary": "Last Admin Reply At"
+        },
+        "last_close_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last close.",
+          "x-ms-summary": "Last Close At"
+        },
+        "count_reopens": {
+          "type": "integer",
+          "description": "Number of times the conversation was reopened.",
+          "x-ms-summary": "Reopen Count"
+        },
+        "count_assignments": {
+          "type": "integer",
+          "description": "Number of assignments.",
+          "x-ms-summary": "Assignment Count"
+        },
+        "count_conversation_parts": {
+          "type": "integer",
+          "description": "Number of conversation parts.",
+          "x-ms-summary": "Parts Count"
+        }
+      }
+    },
+    "Conversation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'conversation'.",
+          "x-ms-summary": "Type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Conversation ID.",
+          "x-ms-summary": "ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Conversation title (may be null).",
+          "x-ms-summary": "Title"
+        },
+        "state": {
+          "type": "string",
+          "description": "Conversation state: open, closed, or snoozed.",
+          "x-ms-summary": "State"
+        },
+        "open": {
+          "type": "boolean",
+          "description": "Whether conversation is open.",
+          "x-ms-summary": "Open"
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Whether conversation has been read.",
+          "x-ms-summary": "Read"
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority: priority or not_priority.",
+          "x-ms-summary": "Priority"
+        },
+        "created_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of creation.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last update.",
+          "x-ms-summary": "Updated At"
+        },
+        "waiting_since": {
+          "type": "integer",
+          "description": "UNIX timestamp since waiting for reply.",
+          "x-ms-summary": "Waiting Since"
+        },
+        "source": {
+          "$ref": "#/definitions/ConversationSource"
+        },
+        "assignee": {
+          "$ref": "#/definitions/ConversationAssignee"
+        },
+        "contacts": {
+          "$ref": "#/definitions/ConversationContacts"
+        },
+        "tags": {
+          "$ref": "#/definitions/ConversationTags"
+        },
+        "statistics": {
+          "$ref": "#/definitions/ConversationStatistics"
+        }
+      }
+    },
+    "ConversationPart": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'conversation_part'.",
+          "x-ms-summary": "Type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Part ID.",
+          "x-ms-summary": "ID"
+        },
+        "part_type": {
+          "type": "string",
+          "description": "Part type: comment, assignment, close, open, note, etc.",
+          "x-ms-summary": "Part Type"
+        },
+        "body": {
+          "type": "string",
+          "description": "Message content (HTML or plaintext).",
+          "x-ms-summary": "Body"
+        },
+        "author": {
+          "type": "object",
+          "description": "Author of this part.",
+          "x-ms-summary": "Author",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Author type.",
+              "x-ms-summary": "Type"
+            },
+            "id": {
+              "type": "string",
+              "description": "Author ID.",
+              "x-ms-summary": "ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Author name.",
+              "x-ms-summary": "Name"
+            },
+            "email": {
+              "type": "string",
+              "description": "Author email.",
+              "x-ms-summary": "Email"
+            }
+          }
+        },
+        "created_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of creation.",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "ConversationDetail": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'conversation'.",
+          "x-ms-summary": "Type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Conversation ID.",
+          "x-ms-summary": "ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Conversation title (may be null).",
+          "x-ms-summary": "Title"
+        },
+        "state": {
+          "type": "string",
+          "description": "Conversation state: open, closed, or snoozed.",
+          "x-ms-summary": "State"
+        },
+        "open": {
+          "type": "boolean",
+          "description": "Whether conversation is open.",
+          "x-ms-summary": "Open"
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Whether conversation has been read.",
+          "x-ms-summary": "Read"
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority: priority or not_priority.",
+          "x-ms-summary": "Priority"
+        },
+        "created_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of creation.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last update.",
+          "x-ms-summary": "Updated At"
+        },
+        "waiting_since": {
+          "type": "integer",
+          "description": "UNIX timestamp since waiting for reply.",
+          "x-ms-summary": "Waiting Since"
+        },
+        "source": {
+          "$ref": "#/definitions/ConversationSource"
+        },
+        "assignee": {
+          "$ref": "#/definitions/ConversationAssignee"
+        },
+        "contacts": {
+          "$ref": "#/definitions/ConversationContacts"
+        },
+        "tags": {
+          "$ref": "#/definitions/ConversationTags"
+        },
+        "statistics": {
+          "$ref": "#/definitions/ConversationStatistics"
+        },
+        "conversation_parts": {
+          "type": "object",
+          "description": "Full message history.",
+          "x-ms-summary": "Conversation Parts",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Always 'conversation_part.list'.",
+              "x-ms-summary": "Type"
+            },
+            "conversation_parts": {
+              "type": "array",
+              "description": "Ordered list of conversation parts.",
+              "x-ms-summary": "Parts",
+              "items": {
+                "$ref": "#/definitions/ConversationPart"
+              }
+            },
+            "total_count": {
+              "type": "integer",
+              "description": "Total number of parts.",
+              "x-ms-summary": "Total Count"
+            }
+          }
+        }
+      }
+    },
+    "SearchConversationsResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'conversation.list'.",
+          "x-ms-summary": "Type"
+        },
+        "conversations": {
+          "type": "array",
+          "description": "Array of conversation objects.",
+          "x-ms-summary": "Conversations",
+          "items": {
+            "$ref": "#/definitions/Conversation"
+          }
+        },
+        "total_count": {
+          "type": "integer",
+          "description": "Total matching conversations.",
+          "x-ms-summary": "Total Count"
+        },
+        "pages": {
+          "$ref": "#/definitions/PaginationPages"
+        }
+      }
+    },
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'contact'.",
+          "x-ms-summary": "Type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Contact ID.",
+          "x-ms-summary": "ID"
+        },
+        "role": {
+          "type": "string",
+          "description": "Contact role: user or lead.",
+          "x-ms-summary": "Role"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address.",
+          "x-ms-summary": "Email"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name.",
+          "x-ms-summary": "Name"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number.",
+          "x-ms-summary": "Phone"
+        },
+        "external_id": {
+          "type": "string",
+          "description": "External system identifier.",
+          "x-ms-summary": "External ID"
+        },
+        "created_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of creation.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last update.",
+          "x-ms-summary": "Updated At"
+        },
+        "last_seen_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last activity.",
+          "x-ms-summary": "Last Seen At"
+        },
+        "signed_up_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of signup.",
+          "x-ms-summary": "Signed Up At"
+        },
+        "avatar": {
+          "type": "string",
+          "description": "Avatar URL.",
+          "x-ms-summary": "Avatar"
+        },
+        "unsubscribed_from_emails": {
+          "type": "boolean",
+          "description": "Email opt-out status.",
+          "x-ms-summary": "Unsubscribed"
+        },
+        "location": {
+          "type": "object",
+          "description": "Location information.",
+          "x-ms-summary": "Location",
+          "properties": {
+            "country_name": {
+              "type": "string",
+              "description": "Country name.",
+              "x-ms-summary": "Country"
+            },
+            "region_name": {
+              "type": "string",
+              "description": "Region or state.",
+              "x-ms-summary": "Region"
+            },
+            "city_name": {
+              "type": "string",
+              "description": "City name.",
+              "x-ms-summary": "City"
+            }
+          }
+        },
+        "custom_attributes": {
+          "type": "object",
+          "description": "Custom data attributes.",
+          "x-ms-summary": "Custom Attributes"
+        },
+        "tags": {
+          "type": "object",
+          "description": "Associated tags.",
+          "x-ms-summary": "Tags",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Always 'list'.",
+              "x-ms-summary": "Type"
+            },
+            "data": {
+              "type": "array",
+              "description": "Tag data array.",
+              "x-ms-summary": "Data",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Tag ID.",
+                    "x-ms-summary": "ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Tag name.",
+                    "x-ms-summary": "Name"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "SearchContactsResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'list'.",
+          "x-ms-summary": "Type"
+        },
+        "data": {
+          "type": "array",
+          "description": "Array of contact objects.",
+          "x-ms-summary": "Contacts",
+          "items": {
+            "$ref": "#/definitions/Contact"
+          }
+        },
+        "total_count": {
+          "type": "integer",
+          "description": "Total matching contacts.",
+          "x-ms-summary": "Total Count"
+        },
+        "pages": {
+          "$ref": "#/definitions/PaginationPages"
+        }
+      }
+    },
+    "TicketType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Ticket type ID.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Ticket type name (e.g., Bug Report, Feature Request).",
+          "x-ms-summary": "Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Ticket type description.",
+          "x-ms-summary": "Description"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category: Customer, Back-office, or Tracker.",
+          "x-ms-summary": "Category"
+        }
+      }
+    },
+    "Ticket": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'ticket'.",
+          "x-ms-summary": "Type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Ticket ID.",
+          "x-ms-summary": "ID"
+        },
+        "ticket_type": {
+          "$ref": "#/definitions/TicketType"
+        },
+        "ticket_state": {
+          "type": "string",
+          "description": "State: submitted, in_progress, waiting_on_customer, or resolved.",
+          "x-ms-summary": "State"
+        },
+        "title": {
+          "type": "string",
+          "description": "Ticket title.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Ticket description.",
+          "x-ms-summary": "Description"
+        },
+        "created_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of creation.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "integer",
+          "description": "UNIX timestamp of last update.",
+          "x-ms-summary": "Updated At"
+        },
+        "admin_assignee_id": {
+          "type": "string",
+          "description": "Assigned admin ID (nullable).",
+          "x-ms-summary": "Admin Assignee ID"
+        },
+        "team_assignee_id": {
+          "type": "string",
+          "description": "Assigned team ID (nullable).",
+          "x-ms-summary": "Team Assignee ID"
+        },
+        "contacts": {
+          "type": "object",
+          "description": "Associated contacts.",
+          "x-ms-summary": "Contacts",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Always 'contact.list'.",
+              "x-ms-summary": "Type"
+            },
+            "contacts": {
+              "type": "array",
+              "description": "Contact references.",
+              "x-ms-summary": "Contacts",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Contact type.",
+                    "x-ms-summary": "Type"
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Contact ID.",
+                    "x-ms-summary": "ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ticket_attributes": {
+          "type": "object",
+          "description": "Custom attributes defined on the ticket type.",
+          "x-ms-summary": "Ticket Attributes"
+        }
+      }
+    },
+    "SearchTicketsResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'ticket.list'.",
+          "x-ms-summary": "Type"
+        },
+        "tickets": {
+          "type": "array",
+          "description": "Array of ticket objects.",
+          "x-ms-summary": "Tickets",
+          "items": {
+            "$ref": "#/definitions/Ticket"
+          }
+        },
+        "total_count": {
+          "type": "integer",
+          "description": "Total matching tickets.",
+          "x-ms-summary": "Total Count"
+        },
+        "pages": {
+          "$ref": "#/definitions/PaginationPages"
+        }
+      }
+    },
+    "ListTagsResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'list'.",
+          "x-ms-summary": "Type"
+        },
+        "data": {
+          "type": "array",
+          "description": "Array of tag objects.",
+          "x-ms-summary": "Tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Always 'tag'.",
+                "x-ms-summary": "Type"
+              },
+              "id": {
+                "type": "string",
+                "description": "Tag ID.",
+                "x-ms-summary": "ID"
+              },
+              "name": {
+                "type": "string",
+                "description": "Tag display name.",
+                "x-ms-summary": "Name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Admin": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'admin'.",
+          "x-ms-summary": "Type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Admin ID.",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Admin display name.",
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Admin email address.",
+          "x-ms-summary": "Email"
+        },
+        "job_title": {
+          "type": "string",
+          "description": "Job title (nullable).",
+          "x-ms-summary": "Job Title"
+        },
+        "away_mode_enabled": {
+          "type": "boolean",
+          "description": "Whether away mode is active.",
+          "x-ms-summary": "Away Mode"
+        },
+        "away_mode_reassign": {
+          "type": "boolean",
+          "description": "Whether conversations are reassigned while away.",
+          "x-ms-summary": "Away Reassign"
+        },
+        "has_inbox_seat": {
+          "type": "boolean",
+          "description": "Whether admin has an inbox seat.",
+          "x-ms-summary": "Has Inbox Seat"
+        },
+        "team_ids": {
+          "type": "array",
+          "description": "Teams this admin belongs to.",
+          "x-ms-summary": "Team IDs",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "avatar": {
+          "type": "object",
+          "description": "Avatar information.",
+          "x-ms-summary": "Avatar",
+          "properties": {
+            "image_url": {
+              "type": "string",
+              "description": "Avatar image URL.",
+              "x-ms-summary": "Image URL"
+            }
+          }
+        }
+      }
+    },
+    "ListAdminsResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Always 'admin.list'.",
+          "x-ms-summary": "Type"
+        },
+        "admins": {
+          "type": "array",
+          "description": "Array of admin objects.",
+          "x-ms-summary": "Admins",
+          "items": {
+            "$ref": "#/definitions/Admin"
+          }
+        }
+      }
+    },
+    "PaginationPages": {
+      "type": "object",
+      "description": "Pagination metadata.",
+      "x-ms-summary": "Pages",
+      "properties": {
+        "per_page": {
+          "type": "integer",
+          "description": "Results per page.",
+          "x-ms-summary": "Per Page"
+        },
+        "total_pages": {
+          "type": "integer",
+          "description": "Total number of pages.",
+          "x-ms-summary": "Total Pages"
+        },
+        "next": {
+          "type": "object",
+          "description": "Next page cursor.",
+          "x-ms-summary": "Next",
+          "properties": {
+            "starting_after": {
+              "type": "string",
+              "description": "Cursor for the next page.",
+              "x-ms-summary": "Starting After"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.intercom.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.intercom.com/legal/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication;Customer Engagement"
+    }
+  ]
+}
