@@ -1,242 +1,148 @@
-# Coupa
-See all of your business spend in one place with Coupa to make cost control, compliance and anything spend management related easier and more effective.
-This connector provides robust access to read, edit, or integrate your data with the Coupa platform
+# Coupa (Independent Publisher)
 
-## Publisher: NovaGL
+| | |
+|---|---|
+| **Publisher** | NovaGL |
+| **Website** | [coupa.com](https://www.coupa.com) |
+| **Privacy Policy** | [coupa.com/privacy-policy](https://www.coupa.com/privacy-policy) |
+| **Categories** | Commerce, Finance & Accounting |
+| **Version** | 1.1.9 |
+
+## Overview
+
+This connector provides read and action access to the **Coupa REST API**
+for Power Automate flows and Power Apps. It covers the full P2P lifecycle — requisitions,
+purchase orders, invoices, receipts, contracts, suppliers, matching allocations and more.
+
+A **single connector works across all Coupa tenants** (test, UAT, production) via dynamic host —
+you enter the instance name once at connection time.
 
 ## Prerequisites
 
-*   Go to {instance}.coupahost.com (replacing the word instance with your instance name)
-*   Login with an administrator\integration administrator account
-*	Click Setup > OAuth2/OpenID Connect Clients
-*	Create Client 
-*	Grant Type: Authorization Code
-*	Name: A descriptive name such as “Power Automate Connector”
-*	Redirect URIs: https://global.consent.azure-apim.net/redirect
-*	Select relevant scope such as core.common.read
+1. A Coupa instance on `coupahost.com`
+2. An OAuth2 app registered in Coupa: **Setup → OAuth2/OpenID Connect Clients**
+   - Grant type: `Authorization Code`
+   - Redirect URI: `https://global.consent.azure-apim.net/redirect`
 
-![image](https://user-images.githubusercontent.com/16315601/210454583-f5083eac-ffec-457d-8dfc-1f452afdbf76.png)
+## Credentials
 
-Once saved open up the newly saved connector and copy the details mentioned on the screen
-![image](https://user-images.githubusercontent.com/16315601/212443775-50ed7b37-74f1-4488-9f8a-62a0ea618a1a.png)
-
-For more information Please see here - https://compass.coupa.com/en-us/products/core-platform/integration-playbooks-and-resources/integration-knowledge-articles/oauth-2.0-getting-started-with-coupa-api
-
-## Power Automate
-
-Login to Power Automate 
-*	Click Data > Custom Connectors
-*	Click New custom connector > Create from blank
-
-### General
-
-
-* 	Give it a descriptive name such as Coupa API
-* 	Upload an image such as the Coupa logo
-* 	Add a description eg
-    - 	RESTful API that provides robust access to read, edit, or integrate your data with the Coupa platform.
-* 	Add you instance url eg https://instance.coupahost.com
-
-
-## Supported Operations
-
-### Contracts - Get Contracts
-The following is an example of how to get contracts
-
-**General**
-
-| Summary | Description | Operation ID |
-| ------------- |-------------| -----|
-| Contracts - Get Contract by ID    | Get Contract by ID | Contract_GET|
-
-**Request**
-
-Click Import from sample
-
-| Verb | URL| Headers |
-| ------------- |-------------| -----|
-|` GET `| /api/contracts?return_object=limited&limit=1&offset=50&dir=desc| Accept application/json|
-
-This will fill in query and header elements that can be filled in when you run the follow.
-
-Since some of them have predefined values we can fill them in prior
-
-Eg click return_object > edit
-
-| Title        | Input|           
-| ------------- |-------------|
-| Dropdown type        | Static|
-| Values        | "shallow", "limited", "none"|
-
-Now click on Accept under Headers and press edit
-
-
-| Title        | Input|           
-| ------------- |-------------|
-| Default value       | application/json|
-| Is required?| Yes|
-| Visibility | Internal|
-
-
-### Addresses - Create Address
-
-The following examples explains how to create a ship to address via the Coupa API
-
-Scopes: `core.common.read core.common.write`
-
-**General**
-| Title|  Value |
+| Field | Where to get it |
 |---|---|
-|  Summary |  Addresses - Create Address |
-| Description  |  Create Address |
-| Operation ID|  Address_Create |
+| **Instance Name** | URL prefix — e.g. `mycompany-test` from `mycompany-test.coupahost.com` |
+| **Client ID** | Coupa → Setup → OAuth2/OpenID Connect Clients |
+| **Client Secret** | Generated when you create the OAuth2 app |
+| **Scopes** | Space-separated — see recommended set below |
 
-**Request**
-
-Import from Sample
-| Title|  Value |
-|---|---|
-|  Verb|  `POST`|
-|  URL|  `/api/addresses/`|
-| Headers |  `Accept application/json` (don’t forget to default the value)|
-
-**Body**
-```json
-{
-  "name": "string",
-  "location-code": "string",
-  "street1": "string",
-  "street2": "string",
-  "city": "string",
-  "state": "string",
-  "postal-code": "string"
-} 
+**Required scopes:**
 ```
-**Response**
-
-Click import from sample and copy the above body into the body field.
-
-### Addresses - Update Address
-
-This example is quite similar to the above except for the fact we are updating not creating
-
-Scopes: `core.common.read core.common.write`
-
-**General**
-| Title|  Value |
-|---|---|
-|  Summary |  Addresses - Update an Address |
-| Description  |  Update Address |
-| Operation ID|  Address_Update |
-
-**Request**
-
-Import from Sample
-| Title|  Value |
-|---|---|
-|  Verb|  `POST`|
-|  URL|  `/api/addresses/{id}`|
-| Headers |  `Accept application/json` (don’t forget to default the value)|
-
-**Body**
-```json
-{
-  "name": "string",
-  "location-code": "string",
-  "street1": "string",
-  "street2": "string",
-  "city": "string",
-  "state": "string",
-  "postal-code": "string"
-} 
+offline_access
 ```
-**Response**
 
-Click import from sample and copy the above body into the body field.
+**Recommended scopes:**
+```
+core.purchase_order.read core.invoice.read core.requisition.read
+core.contract.read core.supplier.read core.user.read core.common.read
+```
+Add `core.purchase_order.write` only if using issue/close/cancel/reopen actions.
+Add `core.order_pad.read` and `core.order_pad.write` for Order Lists endpoints.
+Add `core.supplier.write` for supplier update operations.
+
+## Supported Operations (67 total)
+
+| Operation ID | Method | Path | Description |
+|---|---|---|---|
+| `GetAccounts` | GET | `/accounts` |  |
+| `GetAccountById` | GET | `/accounts/{id}` |  |
+| `GetAddresses` | GET | `/addresses` |  |
+| `GetAddressById` | GET | `/addresses/{id}` |  |
+| `GetApprovalChains` | GET | `/approval_chains` |  |
+| `GetApprovalChainById` | GET | `/approval_chains/{id}` |  |
+| `GetApprovals` | GET | `/approvals` |  |
+| `GetApprovalById` | GET | `/approvals/{id}` |  |
+| `GetBudgetLines` | GET | `/budget_lines` |  |
+| `GetBudgetLineById` | GET | `/budget_lines/{id}` |  |
+| `GetCommodities` | GET | `/commodities` |  |
+| `GetCommodityById` | GET | `/commodities/{id}` |  |
+| `GetContracts` | GET | `/contracts` |  |
+| `GetContractById` | GET | `/contracts/{id}` |  |
+| `GetExchangeRates` | GET | `/exchange_rates` | Query FX exchange rates for multi-currency normalisation. |
+| `GetExchangeRateById` | GET | `/exchange_rates/{id}` | Get a single exchange rate. |
+| `GetInvoices` | GET | `/invoices` | Query Invoice headers. Use return_object=shallow to embed invoice-lines in … |
+| `GetInvoiceById` | GET | `/invoices/{id}` | Get a single Invoice by ID. Use return_object=shallow to include embedded i… |
+| `GetInvoiceAttachments` | GET | `/invoices/{id}/attachments` | Get attachments for an Invoice. |
+| `GetInvoiceComments` | GET | `/invoices/{id}/comments` | Get comments for an Invoice. |
+| `GetItems` | GET | `/items` |  |
+| `GetItemById` | GET | `/items/{id}` |  |
+| `GetLookupValues` | GET | `/lookup_values` |  |
+| `GetLookupValueById` | GET | `/lookup_values/{id}` |  |
+| `GetLookups` | GET | `/lookups` |  |
+| `GetLookupById` | GET | `/lookups/{id}` |  |
+| `GetMatchingAllocations` | GET | `/matching_allocations` | Query matching allocations — links PO lines, invoice lines and receipts (3-… |
+| `GetMatchingAllocationById` | GET | `/matching_allocations/{id}` | Get a single matching allocation. |
+| `GetPaymentTerms` | GET | `/payment_terms` | Query payment terms reference data. |
+| `GetPaymentTermById` | GET | `/payment_terms/{id}` | Get a single payment term. |
+| `GetPurchaseOrderChanges` | GET | `/purchase_order_changes` |  |
+| `GetPurchaseOrderChangeById` | GET | `/purchase_order_changes/{id}` |  |
+| `GetPurchaseOrderLines` | GET | `/purchase_order_lines` |  |
+| `GetPurchaseOrderLineById` | GET | `/purchase_order_lines/{id}` |  |
+| `GetPurchaseOrders` | GET | `/purchase_orders` |  |
+| `GetPurchaseOrderById` | GET | `/purchase_orders/{id}` |  |
+| `GetPurchaseOrderAttachments` | GET | `/purchase_orders/{id}/attachments` | Get attachments for a Purchase Order. |
+| `CancelPurchaseOrder` | PUT | `/purchase_orders/{id}/cancel` |  |
+| `ClosePurchaseOrder` | PUT | `/purchase_orders/{id}/close` |  |
+| `GetPurchaseOrderComments` | GET | `/purchase_orders/{id}/comments` | Get comments for a Purchase Order. |
+| `IssuePurchaseOrder` | PUT | `/purchase_orders/{id}/issue` |  |
+| `ReopenPurchaseOrder` | PUT | `/purchase_orders/{id}/reopen` |  |
+| `GetReceipts` | GET | `/receipts` | Query receipt headers (tenant config dependent). |
+| `GetReceiptById` | GET | `/receipts/{id}` | Get a single receipt. |
+| `GetReceivingTransactions` | GET | `/receiving_transactions` |  |
+| `GetReceivingTransactionById` | GET | `/receiving_transactions/{id}` |  |
+| `GetRequisitionLines` | GET | `/requisition_lines` | Query requisition lines — confirmed standalone Coupa endpoint. |
+| `GetRequisitionLineById` | GET | `/requisition_lines/{id}` | Get a single requisition line. |
+| `GetRequisitions` | GET | `/requisitions` |  |
+| `GetRequisitionById` | GET | `/requisitions/{id}` |  |
+| `GetSupplierItems` | GET | `/supplier_items` | Query supplier items with contracted pricing and part numbers. |
+| `GetSupplierItemById` | GET | `/supplier_items/{id}` | Get a single supplier item. |
+| `GetSupplierInformation` | GET | `/supplier_information` | Query Supplier Information (SIM) records. |
+| `GetSupplierInformationById` | GET | `/supplier_information/{id}` | Get a single Supplier Information (SIM) record by ID. |
+| `GetSuppliers` | GET | `/suppliers` |  |
+| `GetSupplierById` | GET | `/suppliers/{id}` |  |
+| `UpdateSupplier` | PUT | `/suppliers/{id}` | Update supplier profile fields such as payment term. |
+| `GetUOMs` | GET | `/uoms` |  |
+| `GetUOMById` | GET | `/uoms/{id}` |  |
+| `GetUserGroupMemberships` | GET | `/user_group_memberships` |  |
+| `GetUserGroupMembershipById` | GET | `/user_group_memberships/{id}` |  |
+| `GetUserGroups` | GET | `/user_groups` |  |
+| `GetUserGroupById` | GET | `/user_groups/{id}` |  |
+| `GetUsers` | GET | `/users` | Query Coupa users. |
+| `GetUserById` | GET | `/users/{id}` | Get a single user by ID. |
 
 
-### Invoices - Delete Invoice by ID
+> **Invoice Lines:** `/invoice_lines` does not exist as a standalone Coupa endpoint.
+> Use `GetInvoices` or `GetInvoiceById` with `return_object=shallow` to get embedded invoice line data.
 
-To delete an invoice we have to make sure its in new status and able to be deleted
+## Dynamic Host
 
-Scopes: `core.invoice.delete`
-
-**General**
-| Title|  Value |
-|---|---|
-|  Summary |  Invoices - Delete Invoices by ID |
-| Description  | Delete Invoices by ID |
-| Operation ID|  Invoices_Delete |
-
-**Request**
-
-Import from Sample
-| Title|  Value |
-|---|---|
-|  Verb|  `DELETE`|
-|  URL|  `/api/invoices/{id}`|
-| Headers |  `Accept application/json` (don’t forget to default the value)|
-| Body | Leave empty |
-
-**Response**
-
-Not valid for this request
-
-## Obtaining Credentials
-
-| Title        | Result |           
-| ------------- |:-------------:|
-| Authentication type       | OAuth 2.0 |
-
-OAuth 2.0
-Copy the following information from the Coupa OAuth client page
-
-| Title        | Input|           
-| ------------- |-------------|
-| Identity Provider       | Generic Oauth 2|
-| Client id      | Coupa Identifier|
-| Client secret| Coupa secret|
-| Authorization URL| https://instance.coupahost.com/oauth2/authorizations/new|
-| Token URL|  https://instance.coupahost.com/oauth2/token|
-| Refresh URL|  https://instance.coupahost.com/oauth2/token|
-| Scope | Oidc Scopes without commas e.g  core.common.read core.contracts.read|
-
-![image](https://user-images.githubusercontent.com/16315601/210454637-4d47e655-eb02-4e66-8a6c-19b96726e68c.png)
-
-## Getting Started
-You can vist your local instance to find out a list of all available API Commands.
-https://instance.coupahost.com/api_docs/0
-
-
-#### Triggers
-This is not currently used in this Coupa connector, but potential uses are polling for changes
-
-#### References 
-If you have multiple actions that have similar objects in the request or response object you can reference them using the Swagger editor
-
-#### Policies
-Policies allow tasks to be automated an example would be to automate the addition of the Accept header.
-
-Rather than changing each request individually we can create a policy to update all of them at once.
-
-| Title        | Input|           
-| ------------- |-------------|
-| Name| Set ACCEPT Header|
-| Template | Set HTTP Header|
-| Operations| Leave blank as this will select all of them|
-| Header name | Accept|
-| Header value      | application/json|
-| Action if header exists      | override|
-| Run policy on      | Request|
-
+All API calls route to `https://{instance}.coupahost.com/api` at runtime via the
+`dynamichosturl` policy. One connector, any tenant.
 
 ## Known Issues and Limitations
 
-Power Automate has a limit of 512 objects. I've tried as far as I can to list all the common objects.
-If what you require is missing please send me a note and I will see what I can do.
+- **Pagination**: `limit` is capped at 50 records per request; use `offset` to retrieve additional pages
 
-## Frequently Asked Questions
+- **Receipts**: Availability depends on tenant config — confirm with your Coupa admin
+- **Matching Allocations**: Only populated if 3-way match is enabled on the tenant
+- **PO Actions** (issue/close/cancel/reopen): Require `core.purchase_order.write` scope
+- **Order Lists** (create/update and line create/update): Require `core.order_pad.write` scope
+- **Suppliers Update**: Requires `core.supplier.write` scope
+- **Supplier Information (SIM)**: Requires SIM API permissions on your Coupa API key/app
+- **Exchange Rates**: Only available if multi-currency is enabled
+- Most operations are read-only `GET`; write operations are PO actions (`PUT`), Order Lists/Order List Lines create/update (`POST`/`PUT`), and Supplier update (`PUT`).
 
-**My results don't match my postman output**
-This connector uses the User scope meaning that all output relates to that user. 
-To see results from a system level you will have to use another method with `client credentials` authorizations method.
+## Version History
+
+| Version | Summary |
+|---|---|
+| 1.2.0 | Added Order Lists (`order_pads`) and Order List Lines endpoints, supplier update, and Supplier Information GET endpoints; updated auth scope guidance to include `offline_access`, `core.order_pad.*`, and `core.supplier.write` |
+| 1.1.9 | 62 paths; added requisition_lines, matching_allocations, payment_terms, exchange_rates, supplier_items, users, receipts, sub-resources; fixed 7 v118 bugs |
+| 1.1.8 | Dynamic host; PO actions, PO changes, PO lines |
