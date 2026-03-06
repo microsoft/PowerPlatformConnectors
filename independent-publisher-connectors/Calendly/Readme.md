@@ -44,9 +44,6 @@ Creates a single-use scheduling link for an event type, ideal for personalized o
 ### List Available Times
 Returns available time slots for a specific event type within a date range. Enables smart scheduling flows that check availability before suggesting times.
 
-### When a New Event Is Scheduled (Trigger)
-Polling trigger that fires when a new event is scheduled for the authenticated user. Works on all Calendly plans (no Professional+ required).
-
 ### List Event Types
 Lists all event types (meeting templates) for the authenticated user, including duration, kind, and scheduling URLs.
 
@@ -63,7 +60,7 @@ Visit [Calendly Developer Docs](https://developer.calendly.com/api-docs) for fur
 ## Known Issues and Limitations
 
 - Calendly uses **full URIs** as resource identifiers (e.g., `https://api.calendly.com/users/ABCDEF123`). You must pass the complete URI for `user`, `event_type`, and similar parameters — not just a UUID.
-- The polling trigger checks for new events periodically. For real-time notifications, use the certified Calendly connector's webhook triggers (requires Professional+ plan).
+- For real-time event notifications, use the certified Calendly connector's webhook triggers (requires Professional+ plan). This IP connector provides action operations only.
 - API rate limit: **Unlimited** for most endpoints, but the Scheduling API (not included in this connector) has a 2 req/min limit.
 - Personal Access Tokens are shown only once at creation. If lost, generate a new one.
 - The `event_type_available_times` endpoint returns slots up to a maximum configurable look-ahead window set in your Calendly event type settings.
