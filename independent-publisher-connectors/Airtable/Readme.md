@@ -44,7 +44,7 @@ Permanently deletes a record from a table.
 Returns information about the authenticated user and their token scopes.
 
 ### When a Record Is Created (Trigger)
-Triggers when a new record is created in the specified table.
+Triggers when a new record is created in the specified table. Requires a **Created Time Field Name** parameter — the name of a "Created time" field in your table (e.g., `Created`). If your table does not have one, add a field with the "Created time" type in Airtable before using this trigger.
 
 ### Create Comment
 Adds a comment to a specific record.
@@ -61,7 +61,7 @@ Visit [Airtable Developer Docs](https://airtable.com/developers/web/api/introduc
 - **Rate limits**: Airtable enforces 5 requests per second per base and 50 requests per second per user. After a 429 response, wait at least 30 seconds.
 - **Page size**: List Records returns a maximum of 100 records per page. Use the `offset` parameter for pagination.
 - **Dynamic fields**: Record `fields` are dynamic — each table has different field names and types. Use the "Parse JSON" action to work with specific fields in Power Automate.
-- **Trigger detection**: The polling trigger detects new records only (based on `createdTime`). Detecting updated records requires a "Last Modified" field and formula filtering.
+- **Trigger detection**: The polling trigger detects new records only (based on `createdTime`). It requires a "Created time" field in the table — the user must provide the field name when configuring the trigger. Detecting updated records requires a "Last Modified" field and formula filtering.
 - **Monthly API limits**: Free plan is limited to 1,000 API calls per month. Team plan allows 100,000 per month.
 - **Formula syntax**: The `filterByFormula` parameter uses Airtable's formula language, which differs from standard expressions.
 
