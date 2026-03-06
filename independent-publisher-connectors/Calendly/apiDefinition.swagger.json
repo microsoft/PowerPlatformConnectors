@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Calendly",
-    "description": "Calendly is a scheduling automation platform. This connector enables listing events, invitees, availability, creating scheduling links, and canceling events to complement the certified connector's trigger-focused coverage.",
+    "description": "Calendly is a scheduling automation platform. This connector enables querying events, invitees, availability, creating single-use booking links, and canceling events to complement the certified connector.",
     "version": "1.0",
     "contact": {
       "name": "Aaron Mah",
@@ -12,20 +12,40 @@
   },
   "host": "api.calendly.com",
   "basePath": "/",
-  "schemes": ["https"],
-  "consumes": ["application/json"],
-  "produces": ["application/json"],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://calendly.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://calendly.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Business Management"
+    }
+  ],
   "paths": {
     "/users/me": {
       "get": {
         "operationId": "getCurrentUser",
         "summary": "Get Current User",
-        "description": "Returns the authenticated user's profile including their URI, organization, and scheduling URL.",
+        "description": "Returns the authenticated user profile including their URI, organization, and scheduling URL.",
         "x-ms-visibility": "important",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The authenticated user's profile.",
+            "description": "The authenticated user profile.",
             "schema": {
               "$ref": "#/definitions/GetCurrentUserResponse"
             }
@@ -37,7 +57,7 @@
       "get": {
         "operationId": "listScheduledEvents",
         "summary": "List Scheduled Events",
-        "description": "Lists scheduled events for the authenticated user with optional filtering by status, date range, and invitee email.",
+        "description": "Lists scheduled events for a user with optional filtering by status, date range, and invitee email.",
         "x-ms-visibility": "important",
         "parameters": [
           {
@@ -45,25 +65,31 @@
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "User URI from Get Current User (resource.uri).",
-            "x-ms-summary": "User URI"
+            "description": "User URI from Get Current User (e.g., https://api.calendly.com/users/ABCDEF123).",
+            "x-ms-summary": "User URI",
+            "x-ms-visibility": "important"
           },
           {
             "name": "status",
             "in": "query",
             "required": false,
             "type": "string",
-            "description": "Filter by event status: active or canceled.",
+            "description": "Filter by event status.",
             "x-ms-summary": "Status",
-            "enum": ["active", "canceled"]
+            "x-ms-visibility": "advanced",
+            "enum": [
+              "active",
+              "canceled"
+            ]
           },
           {
             "name": "min_start_time",
             "in": "query",
             "required": false,
             "type": "string",
-            "description": "Only return events starting at or after this time (ISO 8601).",
-            "x-ms-summary": "Min Start Time"
+            "description": "Only return events starting at or after this time (ISO 8601, e.g., 2024-01-15T00:00:00Z).",
+            "x-ms-summary": "Min Start Time",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "max_start_time",
@@ -71,7 +97,8 @@
             "required": false,
             "type": "string",
             "description": "Only return events starting before this time (ISO 8601).",
-            "x-ms-summary": "Max Start Time"
+            "x-ms-summary": "Max Start Time",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "invitee_email",
@@ -79,15 +106,18 @@
             "required": false,
             "type": "string",
             "description": "Filter events by invitee email address.",
-            "x-ms-summary": "Invitee Email"
+            "x-ms-summary": "Invitee Email",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "count",
             "in": "query",
             "required": false,
             "type": "integer",
+            "format": "int32",
             "description": "Number of results per page (1-100, default 20).",
-            "x-ms-summary": "Count"
+            "x-ms-summary": "Count",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "page_token",
@@ -110,7 +140,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of scheduled events.",
+            "description": "A paginated list of scheduled events.",
             "schema": {
               "$ref": "#/definitions/ListScheduledEventsResponse"
             }
@@ -129,7 +159,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "The UUID of the scheduled event.",
+            "description": "The UUID of the scheduled event (last segment of the event URI).",
             "x-ms-summary": "Event UUID",
             "x-ms-url-encoding": "single"
           }
@@ -148,7 +178,7 @@
       "get": {
         "operationId": "listEventInvitees",
         "summary": "List Event Invitees",
-        "description": "Lists all invitees for a specific scheduled event, including their contact info and custom question responses.",
+        "description": "Lists all invitees for a specific scheduled event, including contact info and custom question responses.",
         "parameters": [
           {
             "name": "event_uuid",
@@ -164,9 +194,13 @@
             "in": "query",
             "required": false,
             "type": "string",
-            "description": "Filter by invitee status: active or canceled.",
+            "description": "Filter by invitee status.",
             "x-ms-summary": "Status",
-            "enum": ["active", "canceled"]
+            "x-ms-visibility": "advanced",
+            "enum": [
+              "active",
+              "canceled"
+            ]
           },
           {
             "name": "email",
@@ -174,15 +208,18 @@
             "required": false,
             "type": "string",
             "description": "Filter by invitee email address.",
-            "x-ms-summary": "Email"
+            "x-ms-summary": "Email",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "count",
             "in": "query",
             "required": false,
             "type": "integer",
+            "format": "int32",
             "description": "Number of results per page (1-100, default 20).",
-            "x-ms-summary": "Count"
+            "x-ms-summary": "Count",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "page_token",
@@ -205,9 +242,9 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of event invitees.",
+            "description": "A paginated list of event invitees.",
             "schema": {
-              "$ref": "#/definitions/ListEventInviteesResponse"
+              "$ref": "#/definitions/ListInviteesResponse"
             }
           }
         }
@@ -248,7 +285,7 @@
           "200": {
             "description": "The cancellation details.",
             "schema": {
-              "$ref": "#/definitions/CancelScheduledEventResponse"
+              "$ref": "#/definitions/CancelEventResponse"
             }
           }
         }
@@ -259,7 +296,6 @@
         "operationId": "createSchedulingLink",
         "summary": "Create Scheduling Link",
         "description": "Creates a single-use scheduling link for an event type, ideal for personalized outreach.",
-        "x-ms-visibility": "important",
         "parameters": [
           {
             "name": "body",
@@ -267,12 +303,17 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["owner", "owner_type", "max_event_count"],
+              "required": [
+                "owner",
+                "owner_type",
+                "max_event_count"
+              ],
               "properties": {
                 "owner": {
                   "type": "string",
                   "description": "Event type URI to create the link for (from List Event Types).",
-                  "x-ms-summary": "Event Type URI"
+                  "x-ms-summary": "Event Type URI",
+                  "x-ms-visibility": "important"
                 },
                 "owner_type": {
                   "type": "string",
@@ -283,16 +324,18 @@
                 },
                 "max_event_count": {
                   "type": "integer",
+                  "format": "int32",
                   "description": "Maximum number of bookings allowed (typically 1 for single-use).",
                   "x-ms-summary": "Max Event Count",
-                  "default": 1
+                  "default": 1,
+                  "x-ms-visibility": "important"
                 }
               }
             }
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "The created scheduling link.",
             "schema": {
               "$ref": "#/definitions/CreateSchedulingLinkResponse"
@@ -313,15 +356,17 @@
             "required": true,
             "type": "string",
             "description": "Event type URI (from List Event Types).",
-            "x-ms-summary": "Event Type URI"
+            "x-ms-summary": "Event Type URI",
+            "x-ms-visibility": "important"
           },
           {
             "name": "start_time",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "Start of the availability window (ISO 8601).",
-            "x-ms-summary": "Start Time"
+            "description": "Start of the availability window (ISO 8601, e.g., 2024-01-15T00:00:00Z).",
+            "x-ms-summary": "Start Time",
+            "x-ms-visibility": "important"
           },
           {
             "name": "end_time",
@@ -329,7 +374,8 @@
             "required": true,
             "type": "string",
             "description": "End of the availability window (ISO 8601).",
-            "x-ms-summary": "End Time"
+            "x-ms-summary": "End Time",
+            "x-ms-visibility": "important"
           }
         ],
         "responses": {
@@ -342,50 +388,21 @@
         }
       }
     },
-    "/trigger/newScheduledEvent": {
-      "get": {
-        "operationId": "triggerNewScheduledEvent",
-        "summary": "When a New Event Is Scheduled",
-        "description": "Triggers when a new event is scheduled for the authenticated user.",
-        "x-ms-trigger": "batch",
-        "x-ms-trigger-hint": "A new event is scheduled.",
-        "x-ms-trigger-metadata": {
-          "mode": "polling",
-          "kind": "query"
-        },
-        "parameters": [
-          {
-            "name": "x-user-uri",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "description": "User URI from Get Current User (resource.uri). Used by the policy to build the real request.",
-            "x-ms-summary": "User URI"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of newly scheduled events.",
-            "schema": {
-              "$ref": "#/definitions/ListScheduledEventsResponse"
-            }
-          }
-        }
-      }
-    },
     "/event_types": {
       "get": {
         "operationId": "listEventTypes",
         "summary": "List Event Types",
         "description": "Lists all event types (meeting templates) for the authenticated user.",
+        "x-ms-visibility": "important",
         "parameters": [
           {
             "name": "user",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "User URI from Get Current User (resource.uri).",
-            "x-ms-summary": "User URI"
+            "description": "User URI from Get Current User (e.g., https://api.calendly.com/users/ABCDEF123).",
+            "x-ms-summary": "User URI",
+            "x-ms-visibility": "important"
           },
           {
             "name": "active",
@@ -393,15 +410,18 @@
             "required": false,
             "type": "boolean",
             "description": "Filter to only active (true) or inactive (false) event types.",
-            "x-ms-summary": "Active Only"
+            "x-ms-summary": "Active",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "count",
             "in": "query",
             "required": false,
             "type": "integer",
+            "format": "int32",
             "description": "Number of results per page (1-100, default 20).",
-            "x-ms-summary": "Count"
+            "x-ms-summary": "Count",
+            "x-ms-visibility": "advanced"
           },
           {
             "name": "page_token",
@@ -424,7 +444,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of event types.",
+            "description": "A paginated list of event types.",
             "schema": {
               "$ref": "#/definitions/ListEventTypesResponse"
             }
@@ -443,8 +463,9 @@
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "User URI from Get Current User (resource.uri).",
-            "x-ms-summary": "User URI"
+            "description": "User URI from Get Current User.",
+            "x-ms-summary": "User URI",
+            "x-ms-visibility": "important"
           },
           {
             "name": "start_time",
@@ -452,7 +473,8 @@
             "required": true,
             "type": "string",
             "description": "Start of the time range to check (ISO 8601).",
-            "x-ms-summary": "Start Time"
+            "x-ms-summary": "Start Time",
+            "x-ms-visibility": "important"
           },
           {
             "name": "end_time",
@@ -460,14 +482,15 @@
             "required": true,
             "type": "string",
             "description": "End of the time range to check (ISO 8601).",
-            "x-ms-summary": "End Time"
+            "x-ms-summary": "End Time",
+            "x-ms-visibility": "important"
           }
         ],
         "responses": {
           "200": {
             "description": "A list of busy time ranges.",
             "schema": {
-              "$ref": "#/definitions/GetUserBusyTimesResponse"
+              "$ref": "#/definitions/ListBusyTimesResponse"
             }
           }
         }
@@ -502,7 +525,7 @@
           "200": {
             "description": "The invitee details.",
             "schema": {
-              "$ref": "#/definitions/GetEventInviteeResponse"
+              "$ref": "#/definitions/GetInviteeResponse"
             }
           }
         }
@@ -512,15 +535,16 @@
       "get": {
         "operationId": "listAvailabilitySchedules",
         "summary": "List Availability Schedules",
-        "description": "Returns the user's configured availability schedules including working hours and time-off rules.",
+        "description": "Returns the user configured availability schedules including working hours and time-off rules.",
         "parameters": [
           {
             "name": "user",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "User URI from Get Current User (resource.uri).",
-            "x-ms-summary": "User URI"
+            "description": "User URI from Get Current User.",
+            "x-ms-summary": "User URI",
+            "x-ms-visibility": "important"
           }
         ],
         "responses": {
@@ -537,45 +561,46 @@
   "definitions": {
     "UserResource": {
       "type": "object",
+      "description": "Calendly user profile.",
       "properties": {
         "uri": {
           "type": "string",
-          "description": "The user's full URI.",
+          "description": "The user full URI identifier.",
           "x-ms-summary": "User URI"
         },
         "name": {
           "type": "string",
-          "description": "User's display name.",
+          "description": "Display name of the user.",
           "x-ms-summary": "Name"
         },
         "email": {
           "type": "string",
-          "description": "User's email address.",
+          "description": "Email address of the user.",
           "x-ms-summary": "Email"
         },
         "timezone": {
           "type": "string",
-          "description": "User's timezone (IANA format).",
+          "description": "IANA timezone (e.g., America/New_York).",
           "x-ms-summary": "Timezone"
         },
         "scheduling_url": {
           "type": "string",
-          "description": "User's Calendly scheduling page URL.",
+          "description": "Public Calendly scheduling page URL.",
           "x-ms-summary": "Scheduling URL"
         },
         "current_organization": {
           "type": "string",
-          "description": "URI of the user's organization.",
+          "description": "URI of the user organization.",
           "x-ms-summary": "Organization URI"
         },
         "slug": {
           "type": "string",
-          "description": "User's Calendly URL slug.",
+          "description": "Calendly URL slug for the user.",
           "x-ms-summary": "Slug"
         },
         "avatar_url": {
           "type": "string",
-          "description": "URL of the user's avatar image.",
+          "description": "URL of the user avatar image.",
           "x-ms-summary": "Avatar URL"
         },
         "created_at": {
@@ -592,24 +617,26 @@
     },
     "GetCurrentUserResponse": {
       "type": "object",
+      "description": "Response containing the authenticated user profile.",
       "properties": {
         "resource": {
           "$ref": "#/definitions/UserResource"
         }
       }
     },
-    "ScheduledEventResource": {
+    "ScheduledEvent": {
       "type": "object",
+      "description": "A Calendly scheduled event.",
       "properties": {
         "uri": {
           "type": "string",
-          "description": "Event URI (unique identifier).",
+          "description": "Unique URI of the scheduled event.",
           "x-ms-summary": "Event URI"
         },
         "name": {
           "type": "string",
-          "description": "Event type name.",
-          "x-ms-summary": "Name"
+          "description": "Name of the event type (e.g., 30 Minute Meeting).",
+          "x-ms-summary": "Event Name"
         },
         "status": {
           "type": "string",
@@ -618,22 +645,22 @@
         },
         "start_time": {
           "type": "string",
-          "description": "Event start time (ISO 8601).",
+          "description": "Event start time in ISO 8601 format.",
           "x-ms-summary": "Start Time"
         },
         "end_time": {
           "type": "string",
-          "description": "Event end time (ISO 8601).",
+          "description": "Event end time in ISO 8601 format.",
           "x-ms-summary": "End Time"
         },
         "event_type": {
           "type": "string",
-          "description": "URI of the event type.",
+          "description": "URI of the associated event type.",
           "x-ms-summary": "Event Type URI"
         },
         "location": {
           "type": "object",
-          "description": "Location details.",
+          "description": "Location details for the event.",
           "properties": {
             "type": {
               "type": "string",
@@ -647,54 +674,55 @@
             },
             "join_url": {
               "type": "string",
-              "description": "Video conference join URL.",
+              "description": "Video conference join URL, if applicable.",
               "x-ms-summary": "Join URL"
             }
           }
         },
         "invitees_counter": {
           "type": "object",
-          "description": "Invitee count summary.",
+          "description": "Summary of invitee counts for this event.",
           "properties": {
             "total": {
               "type": "integer",
               "format": "int32",
-              "description": "Total invitees.",
+              "description": "Total number of invitees.",
               "x-ms-summary": "Total Invitees"
             },
             "active": {
               "type": "integer",
               "format": "int32",
-              "description": "Active (non-canceled) invitees.",
+              "description": "Number of active (non-canceled) invitees.",
               "x-ms-summary": "Active Invitees"
             },
             "limit": {
               "type": "integer",
               "format": "int32",
-              "description": "Max invitees allowed.",
+              "description": "Maximum invitees allowed for this event.",
               "x-ms-summary": "Invitee Limit"
             }
           }
         },
         "created_at": {
           "type": "string",
-          "description": "ISO 8601 creation timestamp.",
+          "description": "ISO 8601 timestamp when the event was created.",
           "x-ms-summary": "Created At"
         },
         "updated_at": {
           "type": "string",
-          "description": "ISO 8601 last update timestamp.",
+          "description": "ISO 8601 timestamp when the event was last updated.",
           "x-ms-summary": "Updated At"
         },
         "event_memberships": {
           "type": "array",
-          "description": "Array of host users for this event.",
+          "description": "List of host users for this event.",
           "items": {
             "type": "object",
+            "description": "Host user membership for this event.",
             "properties": {
               "user": {
                 "type": "string",
-                "description": "Host user URI.",
+                "description": "URI of the host user.",
                 "x-ms-summary": "Host User URI"
               }
             }
@@ -702,52 +730,52 @@
         }
       }
     },
-    "Pagination": {
-      "type": "object",
-      "properties": {
-        "count": {
-          "type": "integer",
-          "format": "int32",
-          "description": "Number of results returned.",
-          "x-ms-summary": "Count"
-        },
-        "next_page_token": {
-          "type": "string",
-          "description": "Token for next page (null if no more pages).",
-          "x-ms-summary": "Next Page Token"
-        }
-      }
-    },
     "ListScheduledEventsResponse": {
       "type": "object",
+      "description": "Response containing a paginated list of scheduled events.",
       "properties": {
         "collection": {
           "type": "array",
           "description": "Array of scheduled event objects.",
           "items": {
-            "$ref": "#/definitions/ScheduledEventResource"
+            "$ref": "#/definitions/ScheduledEvent"
           }
         },
         "pagination": {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Number of results returned in this page.",
+              "x-ms-summary": "Result Count"
+            },
+            "next_page_token": {
+              "type": "string",
+              "description": "Token to retrieve the next page of results. Null if no more pages.",
+              "x-ms-summary": "Next Page Token"
+            }
+          }
         }
       }
     },
     "GetScheduledEventResponse": {
       "type": "object",
+      "description": "Response containing a single scheduled event with full details.",
       "properties": {
         "resource": {
           "type": "object",
+          "description": "The scheduled event details.",
           "properties": {
             "uri": {
               "type": "string",
-              "description": "Event URI.",
+              "description": "Unique URI of the scheduled event.",
               "x-ms-summary": "Event URI"
             },
             "name": {
               "type": "string",
-              "description": "Event type name.",
-              "x-ms-summary": "Name"
+              "description": "Name of the event type.",
+              "x-ms-summary": "Event Name"
             },
             "status": {
               "type": "string",
@@ -756,12 +784,12 @@
             },
             "start_time": {
               "type": "string",
-              "description": "Event start time (ISO 8601).",
+              "description": "Event start time in ISO 8601 format.",
               "x-ms-summary": "Start Time"
             },
             "end_time": {
               "type": "string",
-              "description": "Event end time (ISO 8601).",
+              "description": "Event end time in ISO 8601 format.",
               "x-ms-summary": "End Time"
             },
             "event_type": {
@@ -771,68 +799,69 @@
             },
             "location": {
               "type": "object",
-              "description": "Location details.",
+              "description": "Location details for the event.",
               "properties": {
                 "type": {
                   "type": "string",
-                  "description": "Location type.",
+                  "description": "Location type (e.g., google_conference, zoom, microsoft_teams_conference).",
                   "x-ms-summary": "Location Type"
                 },
                 "location": {
                   "type": "string",
-                  "description": "Location string or URL.",
+                  "description": "Location description or URL.",
                   "x-ms-summary": "Location"
                 },
                 "join_url": {
                   "type": "string",
-                  "description": "Video conference join URL.",
+                  "description": "Video conference join URL, if applicable.",
                   "x-ms-summary": "Join URL"
                 }
               }
             },
             "invitees_counter": {
               "type": "object",
-              "description": "Invitee counts.",
+              "description": "Summary of invitee counts for this event.",
               "properties": {
                 "total": {
                   "type": "integer",
                   "format": "int32",
-                  "description": "Total invitees.",
+                  "description": "Total number of invitees.",
                   "x-ms-summary": "Total Invitees"
                 },
                 "active": {
                   "type": "integer",
                   "format": "int32",
-                  "description": "Active invitees.",
+                  "description": "Number of active (non-canceled) invitees.",
                   "x-ms-summary": "Active Invitees"
                 },
                 "limit": {
                   "type": "integer",
                   "format": "int32",
-                  "description": "Max invitees allowed.",
+                  "description": "Maximum invitees allowed for this event.",
                   "x-ms-summary": "Invitee Limit"
                 }
               }
             },
             "created_at": {
               "type": "string",
-              "description": "ISO 8601 creation timestamp.",
+              "description": "ISO 8601 timestamp when the event was created.",
               "x-ms-summary": "Created At"
             },
             "updated_at": {
               "type": "string",
-              "description": "ISO 8601 last update timestamp.",
+              "description": "ISO 8601 timestamp when the event was last updated.",
               "x-ms-summary": "Updated At"
             },
             "event_memberships": {
               "type": "array",
-              "description": "Host user memberships.",
+              "description": "List of host users for this event.",
               "items": {
                 "type": "object",
+                "description": "Host user membership for this event.",
                 "properties": {
                   "user": {
                     "type": "string",
-                    "description": "Host user URI.",
+                    "description": "URI of the host user.",
                     "x-ms-summary": "Host User URI"
                   }
                 }
@@ -840,7 +869,7 @@
             },
             "event_guests": {
               "type": "array",
-              "description": "Additional guest emails.",
+              "description": "Additional guest emails for this event.",
               "items": {
                 "type": "object",
                 "properties": {
@@ -851,7 +880,7 @@
                   },
                   "created_at": {
                     "type": "string",
-                    "description": "Timestamp when guest was added.",
+                    "description": "ISO 8601 timestamp when the guest was added.",
                     "x-ms-summary": "Created At"
                   }
                 }
@@ -868,8 +897,8 @@
                 },
                 "kind": {
                   "type": "string",
-                  "description": "Calendar type (google or outlook).",
-                  "x-ms-summary": "Calendar Type"
+                  "description": "Calendar type (e.g., google, outlook).",
+                  "x-ms-summary": "Calendar Kind"
                 }
               }
             }
@@ -877,32 +906,33 @@
         }
       }
     },
-    "InviteeResource": {
+    "Invitee": {
       "type": "object",
+      "description": "An invitee for a scheduled event.",
       "properties": {
         "uri": {
           "type": "string",
-          "description": "Invitee URI.",
+          "description": "Unique URI of the invitee.",
           "x-ms-summary": "Invitee URI"
         },
         "email": {
           "type": "string",
-          "description": "Invitee's email address.",
+          "description": "Email address of the invitee.",
           "x-ms-summary": "Email"
         },
         "name": {
           "type": "string",
-          "description": "Invitee's full name.",
+          "description": "Full name of the invitee.",
           "x-ms-summary": "Name"
         },
         "first_name": {
           "type": "string",
-          "description": "Invitee's first name.",
+          "description": "First name of the invitee.",
           "x-ms-summary": "First Name"
         },
         "last_name": {
           "type": "string",
-          "description": "Invitee's last name.",
+          "description": "Last name of the invitee.",
           "x-ms-summary": "Last Name"
         },
         "status": {
@@ -912,24 +942,25 @@
         },
         "timezone": {
           "type": "string",
-          "description": "Invitee's timezone (IANA format).",
+          "description": "IANA timezone of the invitee.",
           "x-ms-summary": "Timezone"
         },
         "created_at": {
           "type": "string",
-          "description": "ISO 8601 booking timestamp.",
+          "description": "ISO 8601 timestamp when the invitee booked.",
           "x-ms-summary": "Created At"
         },
         "updated_at": {
           "type": "string",
-          "description": "ISO 8601 last update timestamp.",
+          "description": "ISO 8601 timestamp of last update.",
           "x-ms-summary": "Updated At"
         },
         "questions_and_answers": {
           "type": "array",
-          "description": "Custom question responses.",
+          "description": "Custom question responses from the invitee.",
           "items": {
             "type": "object",
+            "description": "Custom question and answer from the invitee.",
             "properties": {
               "question": {
                 "type": "string",
@@ -938,13 +969,13 @@
               },
               "answer": {
                 "type": "string",
-                "description": "The invitee's answer.",
+                "description": "The invitee answer.",
                 "x-ms-summary": "Answer"
               },
               "position": {
                 "type": "integer",
                 "format": "int32",
-                "description": "Question display order.",
+                "description": "Display order of the question.",
                 "x-ms-summary": "Position"
               }
             }
@@ -967,27 +998,27 @@
         },
         "no_show": {
           "type": "object",
-          "description": "No-show record if marked.",
+          "description": "No-show record if marked, null otherwise.",
           "properties": {
             "uri": {
               "type": "string",
-              "description": "No-show record URI.",
-              "x-ms-summary": "No Show URI"
+              "description": "URI of the no-show record.",
+              "x-ms-summary": "No-Show URI"
             },
             "created_at": {
               "type": "string",
-              "description": "When the no-show was recorded.",
-              "x-ms-summary": "No Show Created At"
+              "description": "Timestamp when no-show was recorded.",
+              "x-ms-summary": "No-Show Created At"
             }
           }
         },
         "payment": {
           "type": "object",
-          "description": "Payment details if applicable.",
+          "description": "Payment details if applicable, null otherwise.",
           "properties": {
             "external_id": {
               "type": "string",
-              "description": "External payment ID.",
+              "description": "External payment transaction ID.",
               "x-ms-summary": "Payment ID"
             },
             "provider": {
@@ -999,47 +1030,255 @@
               "type": "number",
               "format": "float",
               "description": "Payment amount.",
-              "x-ms-summary": "Payment Amount"
+              "x-ms-summary": "Amount"
             },
             "currency": {
               "type": "string",
               "description": "Payment currency code.",
-              "x-ms-summary": "Payment Currency"
+              "x-ms-summary": "Currency"
             },
             "terms": {
               "type": "string",
-              "description": "Payment terms.",
-              "x-ms-summary": "Payment Terms"
+              "description": "Payment terms text.",
+              "x-ms-summary": "Terms"
             },
             "successful": {
               "type": "boolean",
-              "description": "Whether payment was successful.",
-              "x-ms-summary": "Payment Successful"
+              "description": "Whether the payment was successful.",
+              "x-ms-summary": "Successful"
             }
           }
         }
       }
     },
-    "ListEventInviteesResponse": {
+    "ListInviteesResponse": {
       "type": "object",
+      "description": "Response containing a paginated list of invitees.",
       "properties": {
         "collection": {
           "type": "array",
           "description": "Array of invitee objects.",
           "items": {
-            "$ref": "#/definitions/InviteeResource"
+            "$ref": "#/definitions/Invitee"
           }
         },
         "pagination": {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Number of results returned in this page.",
+              "x-ms-summary": "Result Count"
+            },
+            "next_page_token": {
+              "type": "string",
+              "description": "Token to retrieve the next page of results. Null if no more pages.",
+              "x-ms-summary": "Next Page Token"
+            }
+          }
         }
       }
     },
-    "CancelScheduledEventResponse": {
+    "GetInviteeResponse": {
       "type": "object",
+      "description": "Response containing a single invitee with full details.",
       "properties": {
         "resource": {
           "type": "object",
+          "description": "Full invitee details.",
+          "properties": {
+            "uri": {
+              "type": "string",
+              "description": "Unique URI of the invitee.",
+              "x-ms-summary": "Invitee URI"
+            },
+            "email": {
+              "type": "string",
+              "description": "Email address of the invitee.",
+              "x-ms-summary": "Email"
+            },
+            "name": {
+              "type": "string",
+              "description": "Full name of the invitee.",
+              "x-ms-summary": "Name"
+            },
+            "first_name": {
+              "type": "string",
+              "description": "First name of the invitee.",
+              "x-ms-summary": "First Name"
+            },
+            "last_name": {
+              "type": "string",
+              "description": "Last name of the invitee.",
+              "x-ms-summary": "Last Name"
+            },
+            "status": {
+              "type": "string",
+              "description": "Invitee status: active or canceled.",
+              "x-ms-summary": "Status"
+            },
+            "timezone": {
+              "type": "string",
+              "description": "IANA timezone of the invitee.",
+              "x-ms-summary": "Timezone"
+            },
+            "created_at": {
+              "type": "string",
+              "description": "ISO 8601 timestamp when the invitee booked.",
+              "x-ms-summary": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "description": "ISO 8601 timestamp of last update.",
+              "x-ms-summary": "Updated At"
+            },
+            "questions_and_answers": {
+              "type": "array",
+              "description": "Custom question responses from the invitee.",
+              "items": {
+                "type": "object",
+                "description": "Custom question and answer from the invitee.",
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "description": "The question text.",
+                    "x-ms-summary": "Question"
+                  },
+                  "answer": {
+                    "type": "string",
+                    "description": "The invitee answer.",
+                    "x-ms-summary": "Answer"
+                  },
+                  "position": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Display order of the question.",
+                    "x-ms-summary": "Position"
+                  }
+                }
+              }
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "URL to cancel this booking.",
+              "x-ms-summary": "Cancel URL"
+            },
+            "reschedule_url": {
+              "type": "string",
+              "description": "URL to reschedule this booking.",
+              "x-ms-summary": "Reschedule URL"
+            },
+            "rescheduled": {
+              "type": "boolean",
+              "description": "Whether this invitee was rescheduled.",
+              "x-ms-summary": "Rescheduled"
+            },
+            "old_invitee": {
+              "type": "string",
+              "description": "URI of previous invitee record if rescheduled.",
+              "x-ms-summary": "Old Invitee URI"
+            },
+            "new_invitee": {
+              "type": "string",
+              "description": "URI of new invitee record if rescheduled.",
+              "x-ms-summary": "New Invitee URI"
+            },
+            "no_show": {
+              "type": "object",
+              "description": "No-show record if marked, null otherwise.",
+              "properties": {
+                "uri": {
+                  "type": "string",
+                  "description": "URI of the no-show record.",
+                  "x-ms-summary": "No-Show URI"
+                },
+                "created_at": {
+                  "type": "string",
+                  "description": "Timestamp when no-show was recorded.",
+                  "x-ms-summary": "No-Show Created At"
+                }
+              }
+            },
+            "tracking": {
+              "type": "object",
+              "description": "UTM tracking parameters.",
+              "properties": {
+                "utm_source": {
+                  "type": "string",
+                  "description": "UTM source.",
+                  "x-ms-summary": "UTM Source"
+                },
+                "utm_medium": {
+                  "type": "string",
+                  "description": "UTM medium.",
+                  "x-ms-summary": "UTM Medium"
+                },
+                "utm_campaign": {
+                  "type": "string",
+                  "description": "UTM campaign.",
+                  "x-ms-summary": "UTM Campaign"
+                },
+                "utm_term": {
+                  "type": "string",
+                  "description": "UTM term.",
+                  "x-ms-summary": "UTM Term"
+                },
+                "utm_content": {
+                  "type": "string",
+                  "description": "UTM content.",
+                  "x-ms-summary": "UTM Content"
+                }
+              }
+            },
+            "payment": {
+              "type": "object",
+              "description": "Payment details if applicable, null otherwise.",
+              "properties": {
+                "external_id": {
+                  "type": "string",
+                  "description": "External payment transaction ID.",
+                  "x-ms-summary": "Payment ID"
+                },
+                "provider": {
+                  "type": "string",
+                  "description": "Payment provider name.",
+                  "x-ms-summary": "Payment Provider"
+                },
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "Payment amount.",
+                  "x-ms-summary": "Amount"
+                },
+                "currency": {
+                  "type": "string",
+                  "description": "Payment currency code.",
+                  "x-ms-summary": "Currency"
+                },
+                "terms": {
+                  "type": "string",
+                  "description": "Payment terms text.",
+                  "x-ms-summary": "Terms"
+                },
+                "successful": {
+                  "type": "boolean",
+                  "description": "Whether the payment was successful.",
+                  "x-ms-summary": "Successful"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "CancelEventResponse": {
+      "type": "object",
+      "description": "Response after canceling a scheduled event.",
+      "properties": {
+        "resource": {
+          "type": "object",
+          "description": "Cancellation details.",
           "properties": {
             "canceled_by": {
               "type": "string",
@@ -1054,7 +1293,7 @@
             "created_at": {
               "type": "string",
               "description": "ISO 8601 timestamp of the cancellation.",
-              "x-ms-summary": "Created At"
+              "x-ms-summary": "Canceled At"
             }
           }
         }
@@ -1062,9 +1301,11 @@
     },
     "CreateSchedulingLinkResponse": {
       "type": "object",
+      "description": "Response after creating a scheduling link.",
       "properties": {
         "resource": {
           "type": "object",
+          "description": "The created scheduling link.",
           "properties": {
             "booking_url": {
               "type": "string",
@@ -1074,447 +1315,290 @@
             "owner": {
               "type": "string",
               "description": "The event type URI this link belongs to.",
-              "x-ms-summary": "Owner"
+              "x-ms-summary": "Owner URI"
             },
             "owner_type": {
               "type": "string",
-              "description": "Always EventType.",
+              "description": "Owner type, always EventType.",
               "x-ms-summary": "Owner Type"
             }
           }
         }
       }
     },
+    "AvailableTime": {
+      "type": "object",
+      "description": "An available time slot for booking.",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Slot availability status: available or unavailable.",
+          "x-ms-summary": "Status"
+        },
+        "invitees_remaining": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of spots remaining for group events.",
+          "x-ms-summary": "Invitees Remaining"
+        },
+        "start_time": {
+          "type": "string",
+          "description": "Slot start time in ISO 8601 format.",
+          "x-ms-summary": "Start Time"
+        },
+        "scheduling_url": {
+          "type": "string",
+          "description": "Direct booking URL for this time slot.",
+          "x-ms-summary": "Scheduling URL"
+        }
+      }
+    },
     "ListAvailableTimesResponse": {
       "type": "object",
+      "description": "Response containing available time slots.",
       "properties": {
         "collection": {
           "type": "array",
           "description": "Array of available time slot objects.",
           "items": {
-            "type": "object",
-            "properties": {
-              "status": {
-                "type": "string",
-                "description": "Slot status: available or unavailable.",
-                "x-ms-summary": "Status"
-              },
-              "invitees_remaining": {
-                "type": "integer",
-                "format": "int32",
-                "description": "Number of spots remaining for group events.",
-                "x-ms-summary": "Invitees Remaining"
-              },
-              "start_time": {
-                "type": "string",
-                "description": "Slot start time (ISO 8601).",
-                "x-ms-summary": "Start Time"
-              },
-              "scheduling_url": {
-                "type": "string",
-                "description": "Direct booking URL for this time slot.",
-                "x-ms-summary": "Scheduling URL"
-              }
-            }
+            "$ref": "#/definitions/AvailableTime"
           }
+        }
+      }
+    },
+    "EventType": {
+      "type": "object",
+      "description": "A Calendly event type (meeting template).",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "Unique URI of the event type.",
+          "x-ms-summary": "Event Type URI"
+        },
+        "name": {
+          "type": "string",
+          "description": "Event type name (e.g., 30 Minute Meeting).",
+          "x-ms-summary": "Name"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether this event type is currently active.",
+          "x-ms-summary": "Active"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly identifier.",
+          "x-ms-summary": "Slug"
+        },
+        "scheduling_url": {
+          "type": "string",
+          "description": "Public booking page URL.",
+          "x-ms-summary": "Scheduling URL"
+        },
+        "duration": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Duration in minutes.",
+          "x-ms-summary": "Duration (minutes)"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Event kind: solo or group.",
+          "x-ms-summary": "Kind"
+        },
+        "type": {
+          "type": "string",
+          "description": "StandardEventType or AdhocEventType.",
+          "x-ms-summary": "Type"
+        },
+        "color": {
+          "type": "string",
+          "description": "Display color hex code.",
+          "x-ms-summary": "Color"
+        },
+        "description_plain": {
+          "type": "string",
+          "description": "Plain text description of the event type.",
+          "x-ms-summary": "Description"
+        },
+        "internal_note": {
+          "type": "string",
+          "description": "Internal note not visible to invitees.",
+          "x-ms-summary": "Internal Note"
+        },
+        "pooling_type": {
+          "type": "string",
+          "description": "For round-robin: round_robin or collective.",
+          "x-ms-summary": "Pooling Type"
+        },
+        "secret": {
+          "type": "boolean",
+          "description": "Whether hidden from the public booking page.",
+          "x-ms-summary": "Secret"
         }
       }
     },
     "ListEventTypesResponse": {
       "type": "object",
+      "description": "Response containing a paginated list of event types.",
       "properties": {
         "collection": {
           "type": "array",
           "description": "Array of event type objects.",
           "items": {
-            "type": "object",
-            "properties": {
-              "uri": {
-                "type": "string",
-                "description": "Event type URI.",
-                "x-ms-summary": "Event Type URI"
-              },
-              "name": {
-                "type": "string",
-                "description": "Event type name.",
-                "x-ms-summary": "Name"
-              },
-              "active": {
-                "type": "boolean",
-                "description": "Whether this event type is currently active.",
-                "x-ms-summary": "Active"
-              },
-              "slug": {
-                "type": "string",
-                "description": "URL-friendly identifier.",
-                "x-ms-summary": "Slug"
-              },
-              "scheduling_url": {
-                "type": "string",
-                "description": "Public booking page URL.",
-                "x-ms-summary": "Scheduling URL"
-              },
-              "duration": {
-                "type": "integer",
-                "format": "int32",
-                "description": "Duration in minutes.",
-                "x-ms-summary": "Duration"
-              },
-              "kind": {
-                "type": "string",
-                "description": "Event kind: solo or group.",
-                "x-ms-summary": "Kind"
-              },
-              "type": {
-                "type": "string",
-                "description": "StandardEventType or AdhocEventType.",
-                "x-ms-summary": "Type"
-              },
-              "color": {
-                "type": "string",
-                "description": "Display color hex code.",
-                "x-ms-summary": "Color"
-              },
-              "description_plain": {
-                "type": "string",
-                "description": "Plain text description.",
-                "x-ms-summary": "Description"
-              },
-              "internal_note": {
-                "type": "string",
-                "description": "Internal note (not visible to invitees).",
-                "x-ms-summary": "Internal Note"
-              },
-              "pooling_type": {
-                "type": "string",
-                "description": "For round-robin events: round_robin or collective.",
-                "x-ms-summary": "Pooling Type"
-              },
-              "secret": {
-                "type": "boolean",
-                "description": "Whether the event type is hidden from the public page.",
-                "x-ms-summary": "Secret"
-              }
-            }
+            "$ref": "#/definitions/EventType"
           }
         },
         "pagination": {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Number of results returned in this page.",
+              "x-ms-summary": "Result Count"
+            },
+            "next_page_token": {
+              "type": "string",
+              "description": "Token to retrieve the next page of results. Null if no more pages.",
+              "x-ms-summary": "Next Page Token"
+            }
+          }
         }
       }
     },
-    "GetUserBusyTimesResponse": {
+    "BusyTime": {
       "type": "object",
+      "description": "A time range where the user is busy.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of busy time (e.g., calendly, external).",
+          "x-ms-summary": "Type"
+        },
+        "start_time": {
+          "type": "string",
+          "description": "Busy period start in ISO 8601 format.",
+          "x-ms-summary": "Start Time"
+        },
+        "end_time": {
+          "type": "string",
+          "description": "Busy period end in ISO 8601 format.",
+          "x-ms-summary": "End Time"
+        },
+        "buffered": {
+          "type": "boolean",
+          "description": "Whether this includes buffer time around an event.",
+          "x-ms-summary": "Buffered"
+        },
+        "event": {
+          "type": "object",
+          "description": "Reference to the Calendly event causing the busy time.",
+          "properties": {
+            "uri": {
+              "type": "string",
+              "description": "URI of the Calendly event.",
+              "x-ms-summary": "Event URI"
+            }
+          }
+        }
+      }
+    },
+    "ListBusyTimesResponse": {
+      "type": "object",
+      "description": "Response containing busy time ranges.",
       "properties": {
         "collection": {
           "type": "array",
           "description": "Array of busy time range objects.",
           "items": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "Type of busy time (e.g., calendly, external).",
-                "x-ms-summary": "Type"
-              },
-              "start_time": {
-                "type": "string",
-                "description": "Busy period start time (ISO 8601).",
-                "x-ms-summary": "Start Time"
-              },
-              "end_time": {
-                "type": "string",
-                "description": "Busy period end time (ISO 8601).",
-                "x-ms-summary": "End Time"
-              },
-              "buffered": {
-                "type": "boolean",
-                "description": "Whether this includes buffer time around an event.",
-                "x-ms-summary": "Buffered"
-              },
-              "event": {
-                "type": "object",
-                "description": "Reference to the Calendly event causing the busy time.",
-                "properties": {
-                  "uri": {
-                    "type": "string",
-                    "description": "URI of the Calendly event.",
-                    "x-ms-summary": "Event URI"
-                  }
-                }
-              }
-            }
+            "$ref": "#/definitions/BusyTime"
           }
         }
       }
     },
-    "GetEventInviteeResponse": {
+    "AvailabilityRule": {
       "type": "object",
+      "description": "An availability rule within a schedule.",
       "properties": {
-        "resource": {
-          "type": "object",
-          "properties": {
-            "uri": {
-              "type": "string",
-              "description": "Invitee URI.",
-              "x-ms-summary": "Invitee URI"
-            },
-            "email": {
-              "type": "string",
-              "description": "Invitee's email address.",
-              "x-ms-summary": "Email"
-            },
-            "name": {
-              "type": "string",
-              "description": "Invitee's full name.",
-              "x-ms-summary": "Name"
-            },
-            "first_name": {
-              "type": "string",
-              "description": "Invitee's first name.",
-              "x-ms-summary": "First Name"
-            },
-            "last_name": {
-              "type": "string",
-              "description": "Invitee's last name.",
-              "x-ms-summary": "Last Name"
-            },
-            "status": {
-              "type": "string",
-              "description": "Invitee status: active or canceled.",
-              "x-ms-summary": "Status"
-            },
-            "timezone": {
-              "type": "string",
-              "description": "Invitee's timezone (IANA format).",
-              "x-ms-summary": "Timezone"
-            },
-            "created_at": {
-              "type": "string",
-              "description": "ISO 8601 booking timestamp.",
-              "x-ms-summary": "Created At"
-            },
-            "updated_at": {
-              "type": "string",
-              "description": "ISO 8601 last update timestamp.",
-              "x-ms-summary": "Updated At"
-            },
-            "questions_and_answers": {
-              "type": "array",
-              "description": "Custom question responses.",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "question": {
-                    "type": "string",
-                    "description": "The question text.",
-                    "x-ms-summary": "Question"
-                  },
-                  "answer": {
-                    "type": "string",
-                    "description": "The invitee's answer.",
-                    "x-ms-summary": "Answer"
-                  },
-                  "position": {
-                    "type": "integer",
-                    "format": "int32",
-                    "description": "Question display order.",
-                    "x-ms-summary": "Position"
-                  }
-                }
-              }
-            },
-            "cancel_url": {
-              "type": "string",
-              "description": "Cancellation URL for this booking.",
-              "x-ms-summary": "Cancel URL"
-            },
-            "reschedule_url": {
-              "type": "string",
-              "description": "Reschedule URL for this booking.",
-              "x-ms-summary": "Reschedule URL"
-            },
-            "rescheduled": {
-              "type": "boolean",
-              "description": "Whether this was rescheduled from another event.",
-              "x-ms-summary": "Rescheduled"
-            },
-            "old_invitee": {
-              "type": "string",
-              "description": "URI of the previous invitee record if rescheduled.",
-              "x-ms-summary": "Old Invitee URI"
-            },
-            "new_invitee": {
-              "type": "string",
-              "description": "URI of the new invitee record if rescheduled.",
-              "x-ms-summary": "New Invitee URI"
-            },
-            "no_show": {
-              "type": "object",
-              "description": "No-show record if marked.",
-              "properties": {
-                "uri": {
-                  "type": "string",
-                  "description": "No-show record URI.",
-                  "x-ms-summary": "No Show URI"
-                },
-                "created_at": {
-                  "type": "string",
-                  "description": "When the no-show was recorded.",
-                  "x-ms-summary": "No Show Created At"
-                }
-              }
-            },
-            "tracking": {
-              "type": "object",
-              "description": "UTM tracking parameters.",
-              "properties": {
-                "utm_campaign": {
-                  "type": "string",
-                  "description": "UTM campaign value.",
-                  "x-ms-summary": "UTM Campaign"
-                },
-                "utm_source": {
-                  "type": "string",
-                  "description": "UTM source value.",
-                  "x-ms-summary": "UTM Source"
-                },
-                "utm_medium": {
-                  "type": "string",
-                  "description": "UTM medium value.",
-                  "x-ms-summary": "UTM Medium"
-                },
-                "utm_content": {
-                  "type": "string",
-                  "description": "UTM content value.",
-                  "x-ms-summary": "UTM Content"
-                },
-                "utm_term": {
-                  "type": "string",
-                  "description": "UTM term value.",
-                  "x-ms-summary": "UTM Term"
-                },
-                "salesforce_uuid": {
-                  "type": "string",
-                  "description": "Salesforce UUID for tracking.",
-                  "x-ms-summary": "Salesforce UUID"
-                }
-              }
-            },
-            "payment": {
-              "type": "object",
-              "description": "Payment details if applicable.",
-              "properties": {
-                "external_id": {
-                  "type": "string",
-                  "description": "External payment ID.",
-                  "x-ms-summary": "Payment ID"
-                },
-                "provider": {
-                  "type": "string",
-                  "description": "Payment provider name.",
-                  "x-ms-summary": "Payment Provider"
-                },
-                "amount": {
-                  "type": "number",
-                  "format": "float",
-                  "description": "Payment amount.",
-                  "x-ms-summary": "Payment Amount"
-                },
-                "currency": {
-                  "type": "string",
-                  "description": "Payment currency code.",
-                  "x-ms-summary": "Payment Currency"
-                },
-                "terms": {
-                  "type": "string",
-                  "description": "Payment terms.",
-                  "x-ms-summary": "Payment Terms"
-                },
-                "successful": {
-                  "type": "boolean",
-                  "description": "Whether payment was successful.",
-                  "x-ms-summary": "Payment Successful"
-                }
+        "type": {
+          "type": "string",
+          "description": "Rule type: wday (weekday) or date (specific date).",
+          "x-ms-summary": "Rule Type"
+        },
+        "intervals": {
+          "type": "array",
+          "description": "Time intervals for this rule.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "Start time in HH:MM format.",
+                "x-ms-summary": "From"
+              },
+              "to": {
+                "type": "string",
+                "description": "End time in HH:MM format.",
+                "x-ms-summary": "To"
               }
             }
+          }
+        },
+        "wday": {
+          "type": "string",
+          "description": "Day of week (e.g., monday). Only for wday type rules.",
+          "x-ms-summary": "Weekday"
+        },
+        "date": {
+          "type": "string",
+          "description": "Specific date in YYYY-MM-DD format. Only for date type rules.",
+          "x-ms-summary": "Date"
+        }
+      }
+    },
+    "AvailabilitySchedule": {
+      "type": "object",
+      "description": "A user availability schedule (working hours).",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "Unique URI of the availability schedule.",
+          "x-ms-summary": "Schedule URI"
+        },
+        "name": {
+          "type": "string",
+          "description": "Schedule name (e.g., Working Hours).",
+          "x-ms-summary": "Name"
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Whether this is the default schedule.",
+          "x-ms-summary": "Default"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone for this schedule.",
+          "x-ms-summary": "Timezone"
+        },
+        "rules": {
+          "type": "array",
+          "description": "Array of availability rules.",
+          "items": {
+            "$ref": "#/definitions/AvailabilityRule"
           }
         }
       }
     },
     "ListAvailabilitySchedulesResponse": {
       "type": "object",
+      "description": "Response containing availability schedules.",
       "properties": {
         "collection": {
           "type": "array",
           "description": "Array of availability schedule objects.",
           "items": {
-            "type": "object",
-            "properties": {
-              "uri": {
-                "type": "string",
-                "description": "Schedule URI.",
-                "x-ms-summary": "Schedule URI"
-              },
-              "name": {
-                "type": "string",
-                "description": "Schedule name.",
-                "x-ms-summary": "Name"
-              },
-              "default": {
-                "type": "boolean",
-                "description": "Whether this is the user's default schedule.",
-                "x-ms-summary": "Default"
-              },
-              "timezone": {
-                "type": "string",
-                "description": "Timezone for this schedule (IANA format).",
-                "x-ms-summary": "Timezone"
-              },
-              "rules": {
-                "type": "array",
-                "description": "Array of availability rules.",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "description": "Rule type: wday (weekday) or date (specific date).",
-                      "x-ms-summary": "Rule Type"
-                    },
-                    "intervals": {
-                      "type": "array",
-                      "description": "Time intervals for this rule.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "from": {
-                            "type": "string",
-                            "description": "Start time (HH:MM format).",
-                            "x-ms-summary": "From"
-                          },
-                          "to": {
-                            "type": "string",
-                            "description": "End time (HH:MM format).",
-                            "x-ms-summary": "To"
-                          }
-                        }
-                      }
-                    },
-                    "wday": {
-                      "type": "string",
-                      "description": "Day of week (e.g., monday, tuesday). Only for wday type.",
-                      "x-ms-summary": "Weekday"
-                    },
-                    "date": {
-                      "type": "string",
-                      "description": "Specific date (YYYY-MM-DD). Only for date type.",
-                      "x-ms-summary": "Date"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/definitions/AvailabilitySchedule"
           }
         }
       }
@@ -1524,19 +1608,5 @@
   "responses": {},
   "securityDefinitions": {},
   "security": [],
-  "tags": [],
-  "x-ms-connector-metadata": [
-    {
-      "propertyName": "Website",
-      "propertyValue": "https://calendly.com"
-    },
-    {
-      "propertyName": "Privacy policy",
-      "propertyValue": "https://calendly.com/privacy"
-    },
-    {
-      "propertyName": "Categories",
-      "propertyValue": "Productivity;Collaboration"
-    }
-  ]
+  "tags": []
 }
