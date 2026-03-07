@@ -6,7 +6,7 @@
 | **Website** | [coupa.com](https://www.coupa.com) |
 | **Privacy Policy** | [coupa.com/privacy-policy](https://www.coupa.com/privacy-policy) |
 | **Categories** | Commerce, Finance & Accounting |
-| **Version** | 1.1.9 |
+| **Version** | 12 |
 
 ## Overview
 
@@ -38,16 +38,17 @@ you enter the instance name once at connection time.
 offline_access
 ```
 
-**Recommended scopes:**
+**Optional scopes:**
 ```
 core.purchase_order.read core.invoice.read core.requisition.read
 core.contract.read core.supplier.read core.user.read core.common.read
+core.sourcing.read core.sourcing.write
 ```
 Add `core.purchase_order.write` only if using issue/close/cancel/reopen actions.
 Add `core.order_pad.read` and `core.order_pad.write` for Order Lists endpoints.
 Add `core.supplier.write` for supplier update operations.
 
-## Supported Operations (67 total)
+## Supported Operations (78 total)
 
 | Operation ID | Method | Path | Description |
 |---|---|---|---|
@@ -55,8 +56,6 @@ Add `core.supplier.write` for supplier update operations.
 | `GetAccountById` | GET | `/accounts/{id}` |  |
 | `GetAddresses` | GET | `/addresses` |  |
 | `GetAddressById` | GET | `/addresses/{id}` |  |
-| `GetApprovalChains` | GET | `/approval_chains` |  |
-| `GetApprovalChainById` | GET | `/approval_chains/{id}` |  |
 | `GetApprovals` | GET | `/approvals` |  |
 | `GetApprovalById` | GET | `/approvals/{id}` |  |
 | `GetBudgetLines` | GET | `/budget_lines` |  |
@@ -77,14 +76,20 @@ Add `core.supplier.write` for supplier update operations.
 | `GetLookupValueById` | GET | `/lookup_values/{id}` |  |
 | `GetLookups` | GET | `/lookups` |  |
 | `GetLookupById` | GET | `/lookups/{id}` |  |
-| `GetMatchingAllocations` | GET | `/matching_allocations` | Query matching allocations — links PO lines, invoice lines and receipts (3-… |
+| `GetMatchingAllocations` | GET | `/matching_allocations` | Query matching allocations — links PO lines, invoice lines and receipts (3-way match). |
 | `GetMatchingAllocationById` | GET | `/matching_allocations/{id}` | Get a single matching allocation. |
+| `GetOrderPads` | GET | `/order_pads` | Get Order Lists. |
+| `CreateOrderPad` | POST | `/order_pads` | Create an Order List. |
+| `GetOrderPadById` | GET | `/order_pads/{id}` | Get an Order List by ID. |
+| `UpdateOrderPad` | PUT | `/order_pads/{id}` | Update an Order List. |
+| `GetOrderPadLines` | GET | `/order_pads/{id}/order_pad_lines` | Get Order List Lines. |
+| `CreateOrderPadLine` | POST | `/order_pads/{id}/order_pad_lines` | Create an Order List Line. |
+| `GetOrderPadLineById` | GET | `/order_pads/{id}/order_pad_lines/{line_id}` | Get an Order List Line by ID. |
+| `UpdateOrderPadLine` | PUT | `/order_pads/{id}/order_pad_lines/{line_id}` | Update an Order List Line. |
 | `GetPaymentTerms` | GET | `/payment_terms` | Query payment terms reference data. |
 | `GetPaymentTermById` | GET | `/payment_terms/{id}` | Get a single payment term. |
 | `GetPurchaseOrderChanges` | GET | `/purchase_order_changes` |  |
 | `GetPurchaseOrderChangeById` | GET | `/purchase_order_changes/{id}` |  |
-| `GetPurchaseOrderLines` | GET | `/purchase_order_lines` |  |
-| `GetPurchaseOrderLineById` | GET | `/purchase_order_lines/{id}` |  |
 | `GetPurchaseOrders` | GET | `/purchase_orders` |  |
 | `GetPurchaseOrderById` | GET | `/purchase_orders/{id}` |  |
 | `GetPurchaseOrderAttachments` | GET | `/purchase_orders/{id}/attachments` | Get attachments for a Purchase Order. |
@@ -93,12 +98,21 @@ Add `core.supplier.write` for supplier update operations.
 | `GetPurchaseOrderComments` | GET | `/purchase_orders/{id}/comments` | Get comments for a Purchase Order. |
 | `IssuePurchaseOrder` | PUT | `/purchase_orders/{id}/issue` |  |
 | `ReopenPurchaseOrder` | PUT | `/purchase_orders/{id}/reopen` |  |
-| `GetReceipts` | GET | `/receipts` | Query receipt headers (tenant config dependent). |
-| `GetReceiptById` | GET | `/receipts/{id}` | Get a single receipt. |
+| `GetQuoteRequests` | GET | `/quote_requests` | Get sourcing events. Requires `core.sourcing.read`. |
+| `CreateQuoteRequest` | POST | `/quote_requests` | Create a sourcing event. Requires `core.sourcing.write`. |
+| `GetQuoteRequestById` | GET | `/quote_requests/{id}` | Get a sourcing event by ID. Requires `core.sourcing.read`. |
+| `UpdateQuoteRequest` | PUT | `/quote_requests/{id}` | Update a sourcing event. Requires `core.sourcing.write`. |
+| `GetQuoteResponses` | GET | `/quote_requests/{quote_request_id}/quote_responses` | Get most recent submitted responses per supplier for an event. Requires `core.sourcing.read`. |
+| `GetAllQuoteResponsesForEvent` | GET | `/quote_requests/{quote_request_id}/quote_responses/all` | Get all responses for an event including drafts. Requires `core.sourcing.read`. |
+| `GetAllQuoteResponses` | GET | `/quote_responses` | Get most recent submitted responses across all events. Requires `core.sourcing.read`. |
+| `GetAllQuoteResponsesIncludingDrafts` | GET | `/quote_responses/all` | Get all responses across all events including drafts. Requires `core.sourcing.read`. |
+| `GetQuoteResponseById` | GET | `/quote_responses/{id}` | Get a specific quote response. Requires `core.sourcing.read`. |
+| `AwardQuoteResponse` | POST | `/quote_responses/{id}/award` | Award a supplier response. Requires `core.sourcing.write`. |
+| `RemoveQuoteResponseAward` | DELETE | `/quote_responses/{id}/award` | Remove an award from a response. Requires `core.sourcing.write`. |
+| `GetReceiptRequests` | GET | `/receipt_requests` | Query receipt requests (tenant config dependent). |
+| `GetReceiptRequestById` | GET | `/receipt_requests/{id}` | Get a single receipt request. |
 | `GetReceivingTransactions` | GET | `/receiving_transactions` |  |
 | `GetReceivingTransactionById` | GET | `/receiving_transactions/{id}` |  |
-| `GetRequisitionLines` | GET | `/requisition_lines` | Query requisition lines — confirmed standalone Coupa endpoint. |
-| `GetRequisitionLineById` | GET | `/requisition_lines/{id}` | Get a single requisition line. |
 | `GetRequisitions` | GET | `/requisitions` |  |
 | `GetRequisitionById` | GET | `/requisitions/{id}` |  |
 | `GetSupplierItems` | GET | `/supplier_items` | Query supplier items with contracted pricing and part numbers. |
