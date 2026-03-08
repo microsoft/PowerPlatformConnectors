@@ -1,0 +1,901 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Workast",
+    "description": "Lightweight task and project management for messaging-platform teams. Create, assign, and track tasks across spaces with due dates, comments, and member lookups.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.todobot.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/me": {
+      "get": {
+        "operationId": "GetCurrentUser",
+        "summary": "Get Current User",
+        "description": "Retrieves profile information for the authenticated user. Use this to test the connection or look up your own user ID for task assignment.",
+        "x-ms-summary": "Get Current User",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the current user profile.",
+            "schema": {
+              "$ref": "#/definitions/UserResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/list": {
+      "get": {
+        "operationId": "ListSpaces",
+        "summary": "List Spaces",
+        "description": "Returns all spaces accessible to the authenticated user. Use this to find space IDs for task operations.",
+        "x-ms-summary": "List Spaces",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "group",
+              "personal",
+              "direct",
+              "template"
+            ],
+            "x-ms-summary": "Space Type",
+            "description": "Filter by space type: group, personal, direct, or template."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 50,
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of spaces to return. Default is 50."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of spaces.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SpaceResponse"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          }
+        },
+        "tags": [
+          "Spaces"
+        ]
+      }
+    },
+    "/list/{spaceId}": {
+      "get": {
+        "operationId": "GetSpace",
+        "summary": "Get a Space",
+        "description": "Retrieves details of a specific space by its ID.",
+        "x-ms-summary": "Get a Space",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Space ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListSpaces",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "description": "The unique identifier of the space."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the space details.",
+            "schema": {
+              "$ref": "#/definitions/SpaceResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Space not found."
+          }
+        },
+        "tags": [
+          "Spaces"
+        ]
+      }
+    },
+    "/list/{spaceId}/task": {
+      "get": {
+        "operationId": "ListTasksInSpace",
+        "summary": "List Tasks in Space",
+        "description": "Returns tasks within a specific space. Supports filtering by status and sorting by creation or completion date.",
+        "x-ms-summary": "List Tasks in Space",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Space ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListSpaces",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "description": "The unique identifier of the space to list tasks from."
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "createdAt|asc",
+              "createdAt|desc",
+              "completedAt|asc",
+              "completedAt|desc"
+            ],
+            "default": "createdAt|desc",
+            "x-ms-summary": "Sort Order",
+            "x-ms-visibility": "advanced",
+            "description": "Sort order in field|direction format, e.g. createdAt|desc."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of tasks to return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of tasks.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TaskResponse"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Space not found."
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      },
+      "post": {
+        "operationId": "CreateTask",
+        "summary": "Create a Task",
+        "description": "Creates a new task in the specified space. Returns the created task with its assigned ID.",
+        "x-ms-summary": "Create a Task",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Space ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListSpaces",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "description": "The space to create the task in."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "x-ms-summary": "Task Title",
+                  "x-ms-visibility": "important",
+                  "description": "The title or summary of the task."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "x-ms-visibility": "important",
+                  "description": "Detailed description of the task."
+                },
+                "assignedTo": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Assigned To (User IDs)",
+                  "x-ms-visibility": "advanced",
+                  "description": "Array of user IDs to assign the task to."
+                },
+                "assignedToEmail": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Assigned To (Emails)",
+                  "x-ms-visibility": "advanced",
+                  "description": "Array of email addresses to assign the task to."
+                },
+                "startDate": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-ms-summary": "Start Date",
+                  "description": "When work on the task should start (ISO 8601 format)."
+                },
+                "dueDate": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-ms-summary": "Due Date",
+                  "x-ms-visibility": "important",
+                  "description": "Task deadline (ISO 8601 format)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the task.",
+            "schema": {
+              "$ref": "#/definitions/TaskResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request. Invalid or missing fields."
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Space not found."
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/task/{taskId}":{
+      "get": {
+        "operationId": "GetTask",
+        "summary": "Get a Task",
+        "description": "Retrieves full details of a single task by its ID.",
+        "x-ms-summary": "Get a Task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Task ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique identifier of the task."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the task details.",
+            "schema": {
+              "$ref": "#/definitions/TaskResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Task not found."
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      },
+      "put": {
+        "operationId": "UpdateTask",
+        "summary": "Update a Task",
+        "description": "Updates an existing task. Only include the fields you want to change.",
+        "x-ms-summary": "Update a Task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Task ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique identifier of the task to update."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "x-ms-summary": "Task Title",
+                  "x-ms-visibility": "important",
+                  "description": "Updated task title."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "x-ms-visibility": "important",
+                  "description": "Updated task description."
+                },
+                "startDate": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-ms-summary": "Start Date",
+                  "description": "Updated start date (ISO 8601 format)."
+                },
+                "dueDate": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-ms-summary": "Due Date",
+                  "x-ms-visibility": "important",
+                  "description": "Updated due date (ISO 8601 format)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the task.",
+            "schema": {
+              "$ref": "#/definitions/TaskResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request. Invalid fields."
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Task not found."
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      },
+      "delete": {
+        "operationId": "DeleteTask",
+        "summary": "Delete a Task",
+        "description": "Permanently removes a task by its ID. This action cannot be undone.",
+        "x-ms-summary": "Delete a Task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Task ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique identifier of the task to delete."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the task.",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "204": {
+            "description": "Successfully deleted the task (no content)."
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Task not found."
+          }
+        },
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/list/{spaceId}/lists": {
+      "get": {
+        "operationId": "ListListsInSpace",
+        "summary": "List Lists in Space",
+        "description": "Returns all lists (columns or sections) within a specific space. Lists organize tasks into categories within a space.",
+        "x-ms-summary": "List Lists in Space",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Space ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListSpaces",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "description": "The unique identifier of the space."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the lists.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ListResponse"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Space not found."
+          }
+        },
+        "tags": [
+          "Lists"
+        ]
+      }
+    },
+    "/list/{spaceId}/members": {
+      "get": {
+        "operationId": "ListMembersInSpace",
+        "summary": "List Members in Space",
+        "description": "Returns all members of a specific space. Use this to look up user IDs for task assignment.",
+        "x-ms-summary": "List Members in Space",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Space ID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListSpaces",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "description": "The unique identifier of the space."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the space members.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MemberResponse"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Space not found."
+          }
+        },
+        "tags": [
+          "Members"
+        ]
+      }
+    },
+    "/task/{taskId}/comments": {
+      "post": {
+        "operationId": "AddCommentToTask",
+        "summary": "Add Comment to Task",
+        "description": "Adds a text comment to an existing task. Use this to log notes, status updates, or contextual information.",
+        "x-ms-summary": "Add Comment to Task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Task ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique identifier of the task to add a comment to."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "x-ms-summary": "Comment Text",
+                  "x-ms-visibility": "important",
+                  "description": "The text content of the comment."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully added the comment.",
+            "schema": {
+              "$ref": "#/definitions/CommentResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request. Missing or invalid comment text."
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired API token."
+          },
+          "404": {
+            "description": "Task not found."
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UserResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique user identifier.",
+          "x-ms-summary": "User ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the user.",
+          "x-ms-summary": "Display Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user.",
+          "x-ms-summary": "Email"
+        },
+        "avatar": {
+          "type": "string",
+          "description": "URL to the user's avatar image.",
+          "x-ms-summary": "Avatar URL"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "The user's timezone setting.",
+          "x-ms-summary": "Timezone"
+        }
+      }
+    },
+    "SpaceResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique space identifier.",
+          "x-ms-summary": "Space ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the space.",
+          "x-ms-summary": "Space Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the space.",
+          "x-ms-summary": "Description"
+        },
+        "type": {
+          "type": "string",
+          "description": "Space type: group, personal, direct, or template.",
+          "x-ms-summary": "Space Type"
+        },
+        "privacy": {
+          "type": "string",
+          "description": "Visibility setting: team or private.",
+          "x-ms-summary": "Privacy"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the space was created (ISO 8601).",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "TaskResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique task identifier.",
+          "x-ms-summary": "Task ID"
+        },
+        "spaceId": {
+          "type": "string",
+          "description": "The space this task belongs to.",
+          "x-ms-summary": "Space ID"
+        },
+        "text": {
+          "type": "string",
+          "description": "The title or summary of the task.",
+          "x-ms-summary": "Task Title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the task.",
+          "x-ms-summary": "Description"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status: open, in progress, or completed.",
+          "x-ms-summary": "Status"
+        },
+        "assignedTo": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of user IDs assigned to this task.",
+          "x-ms-summary": "Assigned To"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When work on the task begins (ISO 8601).",
+          "x-ms-summary": "Start Date"
+        },
+        "dueDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Task deadline (ISO 8601).",
+          "x-ms-summary": "Due Date"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the task was completed (ISO 8601).",
+          "x-ms-summary": "Completed At"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the task was created (ISO 8601).",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the task was last updated (ISO 8601).",
+          "x-ms-summary": "Updated At"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tag names applied to this task.",
+          "x-ms-summary": "Tags"
+        }
+      }
+    },
+    "ListResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique list identifier.",
+          "x-ms-summary": "List ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the list.",
+          "x-ms-summary": "List Name"
+        },
+        "spaceId": {
+          "type": "string",
+          "description": "The parent space ID.",
+          "x-ms-summary": "Space ID"
+        },
+        "position": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Display order position within the space.",
+          "x-ms-summary": "Position"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the list was created (ISO 8601).",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "MemberResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique user or member identifier.",
+          "x-ms-summary": "Member ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The member's display name.",
+          "x-ms-summary": "Display Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "The member's email address.",
+          "x-ms-summary": "Email"
+        },
+        "avatar": {
+          "type": "string",
+          "description": "URL to the member's avatar image.",
+          "x-ms-summary": "Avatar URL"
+        },
+        "role": {
+          "type": "string",
+          "description": "The member's role in the space.",
+          "x-ms-summary": "Role"
+        }
+      }
+    },
+    "CommentResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique comment identifier.",
+          "x-ms-summary": "Comment ID"
+        },
+        "taskId": {
+          "type": "string",
+          "description": "The parent task ID.",
+          "x-ms-summary": "Task ID"
+        },
+        "text": {
+          "type": "string",
+          "description": "The text content of the comment.",
+          "x-ms-summary": "Comment Text"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "User ID of the comment author.",
+          "x-ms-summary": "Created By"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the comment was posted (ISO 8601).",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "EmptyResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Confirmation message.",
+          "x-ms-summary": "Message"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "User profile operations."
+    },
+    {
+      "name": "Spaces",
+      "description": "Space management operations."
+    },
+    {
+      "name": "Tasks",
+      "description": "Task CRUD operations."
+    },
+    {
+      "name": "Lists",
+      "description": "List (column/section) operations."
+    },
+    {
+      "name": "Members",
+      "description": "Space member operations."
+    },
+    {
+      "name": "Comments",
+      "description": "Task comment operations."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.workast.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.workast.com/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Collaboration"
+    }
+  ]
+}
+
