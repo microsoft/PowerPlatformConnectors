@@ -1,32 +1,39 @@
-# Seismic Content Discovery
-Seismic content discovery connector provides set of actions required for searching contents in various repositories like library, workspace, recents, favorites and predictive contents.
+# Seismic Power Automate Content Discovery connector
+The Seismic Power Automate Content Discovery connector includes actions related to user favorite and recent items, content search, and predictive content.
 
 ## Publisher: Seismic​
 
 ## Prerequisites
-You must have user created in Seismic tenant.
+You need a Seismic Business or Premium user account for the tenant.
 
 ## Supported Operations
+
 ### Get predictive contents for user
-Gets the list of predictive content for a given predictive content setting for the currently authenticated user.
+Gets the list of predictive content for the currently authenticated user for a given predictive content setting.
 
 ### Get the available predictive content settings
-Gets the list of predictive content settings the current user has access to.
+Gets the list of predictive content settings for which the current user has access.
 
 ### Get current user's favorite contents
-Get current user's favorite contents.
+Gets the current user's favorite content items.
 
 ### Get current user's recent contents
-Get current user's recent contents.
+Gets the current user's recent content items.
 
 ### Search contents
-Seismic action an interface to search Seismic content. Developers can query all content that a user has access to using a search term, and further apply a content filter, specify return fields, and sort the search results.
+Queries all content to which the user has access using a search term and further applies a content filter, specifies return fields, and sorts the search results.
 
 ## Getting Started
-For more information follow https://developer.seismic.com/seismicsoftware/reference/seismiclivedocgetthelistofinputsforalivedoc
+The Seismic Power Automate Content Discovery connector includes the following actions. Each action corresponds to an API endpoint. Refer to the article for each corresponding API endpoint for further information on the fields and properties associated with the action.
+
+* [Get predictive contents for user](https://developer.seismic.com/seismicsoftware/reference/seismicpredictivecontentgetaspecificpredictivecontentresultset)
+* [Get the available predictive content settings](https://developer.seismic.com/seismicsoftware/reference/seismicpredictivecontentgettheavailablepredictivecontentsettings)
+* [Get current user's favorite contents](https://developer.seismic.com/seismicsoftware/reference/seismicusersgetmyfavoritecontents)
+* [Get current user's recent contents](https://developer.seismic.com/seismicsoftware/reference/seismicusersgetmyrecentcontents)
+* [Search contents](https://developer.seismic.com/seismicsoftware/reference/seismicsearchcontentsearch)
 
 ## Obtaining Credentials
-You must have user created in Seismic tenant. If your user is not created, please ask tenant admin to create user for you.
+You need a Seismic Business or Premium user account for the tenant. Contact your Seismic system administrator if you do not have sufficient permissions.
 
 ## Known Issues and Limitations
-No issues and limitations are known at this time.
+No issues and limitations are known at this time. All APIs operate in accordance with Seismic API policy, including Rate Limits. Please refer to the [Seismic Developer portal](https://developer.seismic.com/) for API specifications, restrictions, and standards.

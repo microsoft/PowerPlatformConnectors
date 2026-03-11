@@ -22,10 +22,6 @@ Please check with our customer success team if you have any questions.
 
 Lists all the apps linked to this API token
 
-### `GetAppsById`
-
-Display information about a specific app targeted by its Id
-
 ### `GetAllDataSources`
 
 Lists all the data sources linked to this API token

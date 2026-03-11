@@ -3,7 +3,7 @@
   "info": {
     "title": "IA-Connect Dynamic Code",
     "description": "IA-Connect is a Robotic Process Automation (RPA) platform which adds RPA functionality from the Cloud to on-premises virtual machines or over Citrix or Microsoft Remote Desktop (RDS) connections. This is the module for developing dynamic code modules.",
-    "version": "9.2",
+    "version": "9.4",
     "contact": {
       "name": "Ultima Labs",
       "url": "https://www.ultima.com/ultima-labs",
@@ -297,7 +297,7 @@
           "application/json"
         ],
         "summary": "Run PowerShell script",
-        "description": "Runs a PowerShell script in the session where the IA-Connect Agent is running, where the script contents are passed to the IA-Connect Agent as part of the command. This is the recommended action for running your own custom PowerShell code.",
+        "description": "Runs a PowerShell script in the session where the IA-Connect Agent is running, where the script contents are passed to the IA-Connect Agent in the 'PowerShell script contents' (PowerShellScriptContents) input. This is the recommended action for running your own custom PowerShell code. This action can also be used to retrieve the results from a previous execution of a PowerShell script, run as an Agent thread. The Agent executes the PowerShell using Microsoft PowerShell v3.x to v5.x (whichever version is installed), not PowerShell core (6.x onwards).",
         "parameters": [
           {
             "in": "body",
@@ -383,6 +383,45 @@
                   "title": "Password",
                   "description": "The password to be used if running the script as an alternative user."
                 },
+                "RunScriptAsThread": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Run script as thread",
+                  "description": "If set to false (the default), the IA-Connect Agent will run the PowerShell script immediately and return the results to the Director when the script completes. If running a long or complex PowerShell script, this action may time out. If set to true, the IA-Connect Agent will run the PowerShell script as an Agent thread and the IA-Connect Director (or Orchestrator, PowerShell module, Blue Prism) can monitor the status of this Agent thread, waiting for it to complete. This allows long or complex PowerShell scripts to run without timeouts. IA-Connect Agents 9.3 and earlier cannot run PowerShell scripts as an Agent thread."
+                },
+                "RetrieveOutputDataFromThreadId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Retrieve output data for thread Id",
+                  "description": "If you previously ran a PowerShell script as an Agent thread and set 'Seconds to wait for thread' to 0, provide the Agent thread Id to retrieve the results. This Agent thread Id will have been provided by the earlier call to this action. Set to 0 (the default) if you are simply running a PowerShell script (and hence not retrieving the results of a previous PowerShell script run as an Agent thread)."
+                },
+                "SecondsToWaitForThread": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 90,
+                  "title": "Seconds to wait for thread",
+                  "description": "If 'Run script as thread' is set to true, how many seconds to wait for the Agent thread to complete. If the Agent thread running the PowerShell script hasn't completed in this time, an exception will be raised. Set to 0 to bypass the wait: The Agent will continue to run the PowerShell script, but also be available for the next action. You can then retrieve the script results at a later time by using the action 'Wait for Agent thread to complete successfully' to wait for the Agent thread to complete and then re-run this 'Run PowerShell script' action with the input 'Retrieve output data for thread Id' set to the Agent thread Id."
+                },
+                "ScriptContainsStoredPassword": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Script contains stored password",
+                  "description": "Set to true if the script contains an IA-Connect stored password identifier, in the format {IAConnectPassword:StoredPasswordIdentifier} or an IA-Connect Orchestrator generic credential, in the format {OrchestratorCredential:FriendlyName}. The { } phrase will be replaced by the specified password, escaped and placed in single quotes (unless it is already in quotes in the script)."
+                },
+                "LogVerboseOutput": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Log verbose output",
+                  "description": "Set to true to log any PowerShell verbose output into the IA-Connect logs. This could be useful for debugging.",
+                  "x-ms-visibility": "advanced"
+                },
+                "ReturnSecureStrings": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Return secure strings",
+                  "description": "Set to true to return any secure string properties in the PowerShell script output. Set to false (the default) to not return any properties that are held as a secure string. Only set to true if you know what you are doing, since this could result in passwords being transmitted (if there are passwords in the PowerShell script output).",
+                  "x-ms-visibility": "advanced"
+                },
                 "Workflow": {
                   "type": "string",
                   "x-ms-visibility": "advanced",
@@ -392,7 +431,6 @@
                 }
               },
               "required": [
-                "PowerShellScriptContents",
                 "Workflow"
               ]
             }
@@ -408,12 +446,101 @@
                   "type": "string",
                   "title": "PowerShell output JSON",
                   "description": "The output of the PowerShell script, formatted as JSON."
+                },
+                "ThreadId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Thread Id",
+                  "description": "If the PowerShell script is being run as an Agent thread, this output will hold the Agent thread Id which can be used to monitor the PowerShell script execution and retrieve the PowerShell script results when the script has completed."
                 }
               }
             }
           }
         },
         "operationId": "RunPowerShellAutomationScript"
+      }
+    },
+    "/PowerShellAutomation/GetPowerShellVersion": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get PowerShell version",
+        "description": "Gets the version of PowerShell in the session where the IA-Connect Agent is running. This detects Microsoft PowerShell v3.x to v5.x, not PowerShell core (6.x onwards).",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GetPowerShellVersion",
+            "description": "Inputs for IA-Connect GetPowerShellVersion action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ComputerName": {
+                  "type": "string",
+                  "title": "Computer name",
+                  "description": "The name of the computer to check the PowerShell version. If left blank, the computer where the IA-Connect Agent is running will be used."
+                },
+                "AuthenticationMechanism": {
+                  "type": "string",
+                  "title": "Authentication mechanism",
+                  "description": "The authentication mechanism to be used if connecting to a remote computer or running the script as an alternative user. Supported values are 'Basic', 'Credssp', 'Default', 'Digest', 'Kerberos' and 'Negotiate'.",
+                  "enum": [
+                    "Basic",
+                    "Credssp",
+                    "Default",
+                    "Digest",
+                    "Kerberos",
+                    "Negotiate"
+                  ]
+                },
+                "ConnectionAttempts": {
+                  "type": "integer",
+                  "format": "int32",
+                  "default": 1,
+                  "title": "Connection attempts",
+                  "description": "The number of connections to attempt if connecting to a remote computer."
+                },
+                "Workflow": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "default": "@{workflow()}",
+                  "title": "Workflow",
+                  "description": "Add the following expression here: workflow()"
+                }
+              },
+              "required": [
+                "Workflow"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "PowerShellMajorVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "PowerShell major version",
+                  "description": "The major (integer) version of PowerShell. For example: PowerShell 5.1 would return 5."
+                },
+                "PowerShellMinorVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "PowerShell minor version",
+                  "description": "The minor (after the decimal place) version of PowerShell. For example: PowerShell 5.1 would return 1."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "GetPowerShellVersion"
       }
     },
     "/DynamicCode/GetRegexMatch": {
@@ -3336,6 +3463,88 @@
           }
         },
         "operationId": "LookupColumnsFromIAConnectLookupTable"
+      }
+    },
+    "/DynamicCode/RemoveCharactersFromString": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Remove characters from string",
+        "description": "Takes an input string and returns it with specified characters removed. If the specified characters are not located, the original string will be returned.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "RemoveCharactersFromString",
+            "description": "Inputs for IA-Connect RemoveCharactersFromString action",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "InputString": {
+                  "type": "string",
+                  "title": "Input string",
+                  "description": "The input string upon which the character removal is performed."
+                },
+                "CharactersToRemoveFromInputString": {
+                  "type": "string",
+                  "title": "Characters to remove from input string",
+                  "description": "A string containing all of the characters you wish to remove from the inputs. For example: !@&?^*.",
+                  "x-ms-visibility": "advanced"
+                },
+                "RemoveDiacriticsFromInputString": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Remove diacritics from input string",
+                  "description": "If set to true, IA-Connect will attempt to remove all diacritics from the input string, replacing characters with a diacritic with the same character minus the diacritic. For example: replacing 'acute accented a' with 'a'. In scenarios where there is no direct mapping to a simple character, the character is removed. For example: The German sharp S is removed."
+                },
+                "RemoveNonAlphaNumericFromInputString": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Remove non alphanumeric from input string",
+                  "description": "If set to true, IA-Connect will remove all non-alphanumeric characters from the input string."
+                },
+                "RemoveNumericFromInputString": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Remove numeric characters from input string",
+                  "description": "If set to true, IA-Connect will remove all numeric characters from the input string."
+                },
+                "RemoveLowercaseCharactersFromInputString": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Remove lowercase characters from input string",
+                  "description": "If set to true, IA-Connect will remove all lowercase alphabetical characters from the input string."
+                },
+                "RemoveUppercaseCharactersFromInputString": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "Remove uppercase characters from input string",
+                  "description": "If set to true, IA-Connect will remove all uppercase alphabetical characters from the input string."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OutputString": {
+                  "type": "string",
+                  "title": "Output string",
+                  "description": "The string with the removed characters. This will be the original string if no specified characters were found."
+                }
+              }
+            }
+          }
+        },
+        "operationId": "RemoveCharactersFromString"
       }
     }
   },

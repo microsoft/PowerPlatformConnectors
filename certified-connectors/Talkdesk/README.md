@@ -1,11 +1,11 @@
 # Talkdesk Connector
-The Talkdesk connector provides a better way for organizations to intelligently unlock the promise and potential of great customer experience with end-to-end cloud solutions. Connect to other external systems already supported by Microsoft(within Power Apps and Power Automate) to be able to execute actions in Talkdesk like create an agent, create a callback, get a user by email, etc. or trigger your own flows when a contact is created/updated, note is created, inbound call starts, etc. in Talkdesk.
+The Talkdesk connector provides a better way for organizations to intelligently unlock the promise and potential of great customer experience with end-to-end cloud solutions. Connect to other external systems already supported by Microsoft(within Power Apps and Power Automate) to be able to execute actions in Talkdesk like create a user, create a callback, get a user by email, etc. or trigger your own flows when a contact is created/updated, note is created, inbound call starts, etc. in Talkdesk.
 
 ## Prerequisites
 You will need the following to proceed:
 * A Microsoft Power Apps or Power Automate plan with custom connector feature
 * The [Power platform CLI tools](https://docs.microsoft.com/connectors/custom-connectors/paconn-cli)
-* Access to a Talkdesk account and a Talkdesk Client Id and Client Secret. If you dont have access, please contact our sales team(https://talkdesk.com).
+* Access to a Talkdesk account and a Talkdesk Client Id and Client Secret. If you don't have access, please contact our sales team(https://talkdesk.com).
  
 
 ### Set up an endpoint in Talkdesk for clients to access the instance
@@ -21,7 +21,7 @@ You can follow the steps below:
 	 - For OAuth client name, use a unique name that identifies the application that you require OAuth access for. 
 	 - For Grant type check Refresh token and Authorization code
 	 - In Redirect URI's please add "https://global.consent.azure-apim.net/redirect"
-	 - Add the following scopes: `contacts:read agents-bulk:write callback:write notifications:write industries-activity:write users:read account-custom-status:read ccaas-user-status:write ccaas-user-status:read webhooks-trigger:write webhooks-schema:read account:read`
+	 - Add the following scopes: `contacts:read callback:write users:read webhooks-trigger:write scim`
 	 - Client Id and Client Secret will be automatically generated when you click the Save button
 	 - Save this `Client ID` to be used in apiProperties.json file in later steps and save this `Client Secret` to use it in later steps while deploying the connector.
 
@@ -45,13 +45,9 @@ paconn create -e [Power Platform Environment GUID] --api-prop [Path to apiProper
 ## Supported Actions
 The connector supports the following actions:
 * `Get contact by Id`: Get contact by Id from Talkdesk
-* `Create a new agent`: Create a new agent in Talkdesk
+* `Create a new user`: Create a new user in Talkdesk
 * `Create a callback`: Create a new callback in Talkdesk
-* `Create a workspace notification`: Create a new workspace notification in Talkdesk
 * `Get user by email`: Get user by email from Talkdesk
-* `Get account configured custom status used by agents`: Get account configured custom status used by agents in Talkdesk
-* `Get user status`: Get user status in Talkdesk
-* `Update user status`: Update user status in Talkdesk.
 * `Unsubscribe webhook`: Unsubscribe webhook when trigger is deleted
 
 ## Supported Triggers
