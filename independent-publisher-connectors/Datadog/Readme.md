@@ -46,9 +46,6 @@ Retrieves the full details of a specific incident by its ID, including severity,
 ### Create Incident
 Declares a new incident in Datadog with a title, severity, and incident commander.
 
-### Update Incident
-Updates an existing incident's title, severity, state, or customer impact status.
-
 ### Post Event
 Posts a custom event to Datadog's event stream, useful for tracking deployments, releases, or external system changes.
 
