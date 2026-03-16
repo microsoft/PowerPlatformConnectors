@@ -1,7 +1,5 @@
 {
-  "basePath": "/",
-  "consumes": [],
-  "host": "api.pdf4me.com",
+  "swagger": "2.0",
   "info": {
     "contact": {
       "email": "support@pdf4me.com",
@@ -10,9 +8,13 @@
     },
     "description": "PDF4me gives you all functionalities around PDF, e.g. convert, merge, split, make PDF/A compatible, optimize, protect, unlock, do OCR, create watermarks, create images, rotate PDF, attach barcodes.",
     "title": "PDF4me",
-    "version": "6.7"
+    "version": "6.9"
   },
-  "parameters": {},
+  "host": "api.pdf4me.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": [],
+  "produces": [],
   "paths": {
     "/": {},
     "/v2/FlowV2/ConvertOcrPdf": {
@@ -1592,7 +1594,7 @@
       "post": {
         "consumes": ["application/json"],
         "description": "Split PDF by page number or recurring pages. https://dev.pdf4me.com/power-automate/documentation/actions/split-pdf/",
-        "operationId": "SplitDocument_V2",
+        "operationId": "SplitDocument_V1",
         "parameters": [
           {
             "in": "body",
@@ -1623,7 +1625,12 @@
                 "splitAction": {
                   "default": "SplitAfterPage",
                   "description": "Choose the split action type",
-                  "enum": ["SplitAfterPage", "RecurringSplitAfterPage"],
+                  "enum": [
+                    "SplitAfterPage",
+                    "RecurringSplitAfterPage",
+                    "SplitSequence",
+                    "SplitRanges"
+                  ],
                   "title": "Split Action",
                   "type": "string",
                   "x-ms-visibility": "important"
@@ -1636,6 +1643,26 @@
                   "type": "integer",
                   "x-ms-visibility": "important"
                 },
+                "splitSequence": {
+                  "items": {
+                    "description": "page sequences",
+                    "title": "page sequences",
+                    "format": "int32",
+                    "type": "integer"
+                  },
+                  "description": "Enter the value for split on page number array",
+                  "title": "Split Sequence",
+                  "default": [1, 4, 7],
+                  "type": "array",
+                  "x-ms-visibility": "important"
+                },
+                "splitRanges": {
+                  "default": "1-3,5-",
+                  "description": "Enter the value for split ranges",
+                  "title": "Split Ranges",
+                  "type": "string",
+                  "x-ms-visibility": "important"
+                },
                 "fileNaming": {
                   "default": "NameAsPerOrder",
                   "description": "Split File Naming",
@@ -1645,12 +1672,7 @@
                   "x-ms-visibility": "important"
                 }
               },
-              "required": [
-                "docContent",
-                "document",
-                "splitAction",
-                "splitActionNumber"
-              ],
+              "required": ["docContent", "document", "splitAction"],
               "type": "object"
             }
           }
@@ -3264,13 +3286,13 @@
       "post": {
         "responses": {
           "200": {
-            "description": "Completed successfully!",
+            "description": "File Converted successfully!",
             "schema": {
               "type": "string",
               "description": "Output file content from the PDF4me API response.",
               "title": "File Content",
-              "format": "binary",
-              "x-ms-visibility": "important"
+              "x-ms-visibility": "important",
+              "format": "binary"
             },
             "headers": {
               "FileName": {
@@ -3521,7 +3543,8 @@
                       "Datamatrix",
                       "Code128",
                       "Code39",
-                      "Pdf417"
+                      "Pdf417",
+                      "Code93"
                     ]
                   },
                   "type": "array",
@@ -3943,6 +3966,13 @@
                   "title": "Output Type",
                   "enum": ["PDF", "Docx", "Html"],
                   "x-ms-visibility": "important"
+                },
+                "keepPdfEditable": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Keep the PDF form fields editable after filling the form with data, fafault value is false.",
+                  "title": "Keep Pdf template Editable",
+                  "x-ms-visibility": "important"
                 }
               },
               "required": [
@@ -4052,6 +4082,13 @@
                   "description": "Choose Output Document Type",
                   "title": "Output Type",
                   "enum": ["PDF", "Docx", "Html"],
+                  "x-ms-visibility": "important"
+                },
+                "keepPdfEditable": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Keep the PDF form fields editable after filling the form with data, fafault value is false.",
+                  "title": "Keep Pdf template Editable",
                   "x-ms-visibility": "important"
                 }
               },
@@ -4324,6 +4361,13 @@
                   "description": "Data Collection as list of object.",
                   "title": "Form Data",
                   "x-ms-visibility": "important"
+                },
+                "keepPdfEditable": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Keep the PDF form fields editable after filling the form with data, fafault value is false.",
+                  "title": "Keep Pdf template Editable",
+                  "x-ms-visibility": "important"
                 }
               },
               "required": ["templateDocName", "templateDocContent", "dataArray"]
@@ -4400,6 +4444,13 @@
                   "type": "string",
                   "description": "Data Collection as list of object.",
                   "title": "Form Data",
+                  "x-ms-visibility": "important"
+                },
+                "keepPdfEditable": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Keep the PDF form fields editable after filling the form with data, fafault value is false.",
+                  "title": "Keep Pdf template Editable",
                   "x-ms-visibility": "important"
                 }
               },
@@ -4930,28 +4981,28 @@
                   "description": "Position from bottom of page",
                   "title": "Margin X",
                   "x-ms-visibility": "important",
-                  "default": "0"
+                  "default": 0
                 },
                 "marginY": {
                   "type": "integer",
                   "description": "Position from left of page",
                   "title": "Margin Y",
                   "x-ms-visibility": "important",
-                  "default": "0"
+                  "default": 0
                 },
                 "width": {
                   "type": "integer",
                   "description": "Width of certificate",
                   "title": "Width",
                   "x-ms-visibility": "important",
-                  "default": "100"
+                  "default": 100
                 },
                 "height": {
                   "type": "integer",
                   "description": "Height of certificate",
                   "title": "Height",
                   "x-ms-visibility": "important",
-                  "default": "100"
+                  "default": 100
                 },
                 "sigLocation": {
                   "description": "Certificate Sign Location",
@@ -4976,7 +5027,7 @@
                   "title": "Visible",
                   "type": "boolean",
                   "x-ms-visibility": "important",
-                  "default": "true"
+                  "default": true
                 }
               },
               "required": [
@@ -5523,7 +5574,7 @@
                   "x-ms-visibility": "important"
                 },
                 "skipFirstPage": {
-                  "default": "false",
+                  "default": false,
                   "description": "Skip First Page",
                   "title": "Skip First Page",
                   "type": "boolean",
@@ -6666,7 +6717,7 @@
       "post": {
         "consumes": ["application/json"],
         "tags": ["image"],
-        "description": "Resize an image based on percentage or specific size. Please refer here for more info - https://dev.pdf4me.com/power-automate/documentation/actions/resize-image/",
+        "description": "Resize an image based on Percentage or specific size. Please refer here for more info - https://dev.pdf4me.com/power-automate/documentation/actions/resize-image/",
         "summary": "Resize Image",
         "operationId": "ResizeImage_V1",
         "parameters": [
@@ -6674,11 +6725,11 @@
             "in": "query",
             "name": "schemaVal",
             "x-ms-summary": "Image Resize Type",
-            "default": "Percentange",
+            "default": "Percentage",
             "description": "Set the image resize type",
             "type": "string",
             "x-ms-visibility": "important",
-            "enum": ["Percentange", "Specific"]
+            "enum": ["Percentage", "Specific"]
           },
           {
             "in": "body",
@@ -6867,7 +6918,8 @@
     "/v2/FlowV2/CreateEpcQrCode": {
       "post": {
         "consumes": ["application/json"],
-        "description": "Generate EPC QR Code for SEPA Payment. https://dev.pdf4me.com/power-automate/documentation/actions/create-epc-qrcode/",
+        "description": "Generate EPC QR Code for SEPA Payment. https://dev.pdf4me.com/power-automate/documentation/actions/create-epc-qrcode",
+        "summary": "Generate EPC QR Code for SEPA Payment",
         "operationId": "CreateEpcQrCode_V1",
         "parameters": [
           {
@@ -6921,7 +6973,7 @@
                       "enum": ["SCT"]
                     },
                     "bic": {
-                      "description": "You can specify beneficiary's BIC. BIC is mandatory only for EPC version V1",
+                      "description": "You can specify beneficiary's BIC. BIC is mandatory only for EPC version V1.",
                       "title": "Beneficiary's BIC",
                       "type": "string",
                       "x-ms-visibility": "important"
@@ -7017,7 +7069,6 @@
             }
           }
         },
-        "summary": "Generate EPC QR Code for SEPA Payment",
         "x-ms-visibility": "important",
         "x-ms-api-annotation": {
           "family": "CreateEpcQrCode",
@@ -7029,7 +7080,7 @@
     "/v2/FlowV2/PrepareForPrint": {
       "post": {
         "consumes": ["application/json"],
-        "description": "Prepare a PDF for print through resizing, colour profile etc - https://dev.pdf4me.com/power-automate/documentation/actions/prepare-for-print",
+        "description": "Prepare a PDF for print through resizing, colour profile etc -https://dev.pdf4me.com/power-automate/documentation/actions/prepare-for-print",
         "summary": "Prepare for Print",
         "operationId": "PrepareForPrint_v1",
         "parameters": [
@@ -7080,7 +7131,7 @@
               }
             },
             "schema": {
-              "description": "Output file content from the PDF4me API response",
+              "description": "Output file content from the PDF4me Connect",
               "format": "binary",
               "title": "File Content",
               "type": "string",
@@ -7480,9 +7531,8 @@
       }
     }
   },
-  "produces": [],
+  "parameters": {},
   "responses": {},
-  "schemes": ["https"],
   "security": [
     {
       "undefined": ["openid", "profile", "email", "offline_access"]
@@ -7502,7 +7552,6 @@
       "type": "oauth2"
     }
   },
-  "swagger": "2.0",
   "tags": [],
   "x-ms-connector-metadata": [
     {

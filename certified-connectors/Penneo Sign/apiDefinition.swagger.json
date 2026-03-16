@@ -1,0 +1,730 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Penneo Sign",
+    "x-ms-keywords": [
+      "Document",
+      "Documents",
+      "Doc",
+      "Docs",
+      "Contract",
+      "Contracts",
+      "Penneo",
+      "Penneo E-signature",
+      "Penneo E-signatures",
+      "Penneo Sign",
+      "Penneo Signature",
+      "Penneo Signatures",
+      "Qualified Electronic Signature",
+      "QES",
+      "Advanced Electronic Signature",
+      "AdES",
+      "Sign",
+      "Signs",
+      "Signer",
+      "Signers",
+      "Signature",
+      "Signatures",
+      "Esignature",
+      "Esignatures",
+      "E-signature",
+      "E-signatures",
+      "Esign",
+      "Esigns",
+      "Agreement",
+      "Agreements",
+      "Digital Signature",
+      "Digital Signatures",
+      "Electronic Signature",
+      "Electronic Signatures"
+    ],
+    "version": "1.0.0",
+    "description": "Penneo transforms complex processes into a seamless, human-centric experience. By integrating digital signatures into automated workflows, our platform makes it effortless to validate who approved what data and when, reducing administrative burdens while ensuring full compliance and security. This connector allows you to send documents for signing.",
+    "contact": {
+      "name": "Penneo Support",
+      "url": "https://www.support.penneo.com"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "source",
+      "propertyValue": "Swagger"
+    },
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://penneo.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://penneo.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity"
+    }
+  ],
+  "host": "app.penneo.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/send/api/v1/casefiles/json/20251022/create-production-base64": {
+      "post": {
+        "summary": "Create a new case file",
+        "description": "Creates a new case file in Penneo with the specified documents and signers. The case file will be created asynchronously, and a job UUID and a payloadHash will be returned that can be used to check the creation status via the Penneo check status action. You can configure signers, documents, signing order, email notifications, access control, and various other case file settings.",
+        "operationId": "createCaseFile",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "caseFile"
+              ],
+              "properties": {
+                "caseFile": {
+                  "$ref": "#/definitions/CaseFile"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Case file creation job has been successfully queued. Use the returned job UUID and payloadHash to check the job status via the queue status endpoint.",
+            "schema": {
+              "$ref": "#/definitions/JobResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request - The request is invalid. This may be due to invalid input data, malformed JSON, missing required fields, invalid JWT token format, or validation errors.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/send/api/v1/queue/public/status": {
+      "post": {
+        "summary": "Penneo check status",
+        "description": "Retrieves the current status of an asynchronous job by providing the job UUID and payloadHash. This endpoint is used to poll for job completion status after submitting a case file creation request. The action is rate-limited to 20 requests per minute per uuid-payloadHash combination.",
+        "operationId": "checkJobStatus",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetPublicStatusDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the job status. Returns the complete job information including status, payload, and timestamps.",
+            "schema": {
+              "$ref": "#/definitions/QueueJob"
+            }
+          },
+          "401": {
+            "description": "Unauthorized request \u2014 you do not have permission to perform this action.",
+            "schema": {
+              "$ref": "#/definitions/ApiUnauthorizedException"
+            }
+          },
+          "403": {
+            "description": "Access to this resource is not allowed. You must provide an authentication token."
+          },
+          "404": {
+            "description": "Not Found - The job with the provided UUID and payloadHash was not found. This may occur if the job has expired or been deleted.",
+            "schema": {
+              "$ref": "#/definitions/ApiNotFoundException"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CaseFile": {
+      "type": "object",
+      "required": [
+        "title",
+        "signers",
+        "documents"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "The case file title."
+        },
+        "sendAt": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "Timestamp when case file should be sent. Null = immediately"
+        },
+        "signers": {
+          "type": "array",
+          "description": "List of signers who will sign the documents in the case file.",
+          "items": {
+            "$ref": "#/definitions/Signer"
+          }
+        },
+        "expireAt": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "Timestamp when the case file will expire. If not provided, defaults apply"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "en",
+            "da",
+            "sv",
+            "nl",
+            "fr",
+            "fi",
+            "no",
+            "de"
+          ],
+          "x-nullable": true,
+          "description": "The case file language, will be applied for every signer that does not have a language set"
+        },
+        "documents": {
+          "type": "array",
+          "description": "List of documents to be included in the case file.",
+          "items": {
+            "$ref": "#/definitions/Document"
+          }
+        },
+        "sensitiveData": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, signers must validate their identity before accessing documents. Disables email attachments for signed documents."
+        },
+        "signOnMeeting": {
+          "type": "boolean",
+          "default": false,
+          "description": "Specifies if documents should be signed during a meeting."
+        },
+        "visibilityMode": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "default": 0,
+          "description": "0 = Signers see all documents. 1 = Signers see only documents they need to sign."
+        },
+        "disableEmailAttachments": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disables email attachments for signed documents in finalization emails. Overridden if sensitiveData is true."
+        },
+        "disableNotificationsOwner": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true case file owner will not receive notifications for the case file."
+        },
+        "folderId": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The folder id where you want to place your casefile"
+        },
+        "metaData": {
+          "type": "string",
+          "description": "Metadata of the case file, searchable in Penneo"
+        },
+        "reference": {
+          "type": "string",
+          "description": "The reference of the case file, will be shown in the Penneo web application"
+        },
+        "ccRecipients": {
+          "type": "array",
+          "description": "List of CC recipients for the case file",
+          "items": {
+            "$ref": "#/definitions/CcRecipient"
+          }
+        }
+      }
+    },
+    "Signer": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the signer"
+        },
+        "role": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9 ,_-]*[a-zA-Z0-9,_-]$",
+          "minLength": 3,
+          "description": "Role for the signer. Allowed: letters, numbers, spaces, comma, underscore, hyphen. Must start with a letter/number and must not end with a space."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Signer email. Penneo will handle all communications"
+        },
+        "failUrl": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 5,
+          "description": "Redirect URL after failure"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "en",
+            "da",
+            "sv",
+            "nl",
+            "fr",
+            "fi",
+            "no",
+            "de"
+          ],
+          "x-nullable": true,
+          "description": "Signer language"
+        },
+        "emailText": {
+          "type": "string",
+          "minLength": 5,
+          "description": "Custom text for the signature request email. Defaults to company template if not provided."
+        },
+        "signOrder": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "description": "The signing order. 0 means no enforced order."
+        },
+        "successUrl": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 5,
+          "description": "Redirect URL after success"
+        },
+        "emailSubject": {
+          "type": "string",
+          "minLength": 5,
+          "description": "Subject of the signature request email. Defaults to company template if not provided."
+        },
+        "reminderInterval": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Days before reminder is sent"
+        },
+        "reminderEmailText": {
+          "type": "string",
+          "minLength": 5,
+          "description": "Custom text for the reminder email. Defaults to company template if not provided."
+        },
+        "completedEmailText": {
+          "type": "string",
+          "minLength": 5,
+          "description": "Custom text for the completed email. Defaults to company template if not provided."
+        },
+        "reminderEmailSubject": {
+          "type": "string",
+          "minLength": 5,
+          "description": "Subject of the reminder email. Defaults to company template if not provided."
+        },
+        "completedEmailSubject": {
+          "type": "string",
+          "minLength": 5,
+          "description": "Subject of the completed email. Defaults to company template if not provided."
+        },
+        "enableInsecureSigning": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, signer can use touch signatures (draw, text, image upload)"
+        },
+        "insecureSigningMethods": {
+          "type": "array",
+          "description": "Allowed insecure signing methods. Defaults to company setting if empty.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "text",
+              "draw",
+              "image"
+            ]
+          }
+        },
+        "vatin": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "VAT identification number of signer's company"
+        },
+        "ssnType": {
+          "type": "string",
+          "enum": [
+            "legacy",
+            "dk:cpr",
+            "se:pin",
+            "no:nin",
+            "be:nrn",
+            "fi:pic",
+            "google:oidc",
+            "microsoft:oidc",
+            "sms"
+          ],
+          "description": "Type of SSN/mobile. Example 'dk:cpr', 'se:pin', 'no:nin', 'be:nrn', 'fi:pic' or 'sms'. Defaults to 'legacy'"
+        },
+        "activeAt": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "Activation timestamp"
+        },
+        "expireAt": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "Expiration timestamp"
+        },
+        "accessControl": {
+          "type": "boolean",
+          "default": false,
+          "description": "If enabled, SSN/VATIN/phone is validated before access"
+        },
+        "emailFormat": {
+          "type": "string",
+          "enum": [
+            "text",
+            "html"
+          ],
+          "default": "text",
+          "description": "Defines email format"
+        },
+        "onBehalfOf": {
+          "type": "string",
+          "description": "The company/organization that this signer signs on behalf of"
+        },
+        "storeAsContact": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, signer will be stored as contact in Penneo"
+        },
+        "socialSecurityNumberPlain": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "The signer's SSN or phone number (E.164 format recommended)"
+        }
+      }
+    },
+    "Document": {
+      "type": "object",
+      "required": [
+        "title",
+        "pdf"
+      ],
+      "properties": {
+        "pdf": {
+          "type": "string",
+          "description": "Base64 encoded PDF"
+        },
+        "signable": {
+          "type": "boolean",
+          "default": true,
+          "description": "True creates a signable document. False, the document is added as an attachment and is non signable."
+        },
+        "roles": {
+          "type": "array",
+          "description": "Signer roles allowed to sign this document. Defaults to all signers if empty.",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9 ,_-]*[a-zA-Z0-9,_-]$",
+            "minLength": 3
+          }
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "description": "The document title"
+        },
+        "documentOrder": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The signing order of the document. Defaults to order provided."
+        },
+        "metaData": {
+          "type": "string",
+          "description": "Metadata of the document, searchable in Penneo"
+        }
+      }
+    },
+    "JobResponse": {
+      "type": "object",
+      "properties": {
+        "jobs": {
+          "type": "array",
+          "description": "Array of created jobs (typically contains one job)",
+          "items": {
+            "$ref": "#/definitions/Job"
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "handled",
+            "error"
+          ],
+          "description": "Status of the job creation request"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable message about the job creation"
+        }
+      }
+    },
+    "Job": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for the job that can be used to check status"
+        },
+        "payload": {
+          "type": "object",
+          "description": "The job payload containing case file metadata and tracking information",
+          "properties": {
+            "uuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the created case file"
+            },
+            "bundleUuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the bundle containing the case file"
+            },
+            "etlVersionUuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the ETL version used for processing"
+            },
+            "organizationUuid": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the organization that owns this case file"
+            },
+            "customData": {
+              "type": "object",
+              "description": "Additional metadata and context for the job"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the job was created"
+        },
+        "payloadHash": {
+          "type": "string",
+          "description": "SHA-256 hash of the payload, used for verification when checking job status"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "description": "Error type."
+        },
+        "message": {
+          "type": "string",
+          "description": "Error description."
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code of the error."
+        }
+      }
+    },
+    "QueueJob": {
+      "type": "object",
+      "required": [
+        "uuid",
+        "type",
+        "payload",
+        "payloadHash",
+        "jobStatus",
+        "retries",
+        "maxRetries",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of the queue job (e.g., 'casefile_creation')"
+        },
+        "uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for the job"
+        },
+        "result": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "The result of the queue job execution, returned as JSON when the job is completed. Contains the outcome and any relevant data."
+        },
+        "jobStatus": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "processing",
+            "completed",
+            "failed",
+            "aborted_duplicated"
+          ],
+          "default": "pending",
+          "description": "Current status of the job. Possible values 'pending' (waiting to be processed), 'processing' (currently being executed), 'completed' (successfully finished), 'failed' (execution failed), 'aborted_duplicated' (aborted due to duplication)"
+        },
+        "payload": {
+          "type": "object",
+          "description": "The original payload submitted with the job, stored as JSON. Contains the case file data and metadata."
+        },
+        "retries": {
+          "type": "integer",
+          "default": 0,
+          "description": "The number of times the job has been retried after a failure"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time when the queue job was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time when the queue job was last updated"
+        },
+        "maxRetries": {
+          "type": "integer",
+          "default": 0,
+          "description": "The maximum number of retries allowed for this job before it is marked as failed"
+        },
+        "payloadHash": {
+          "type": "string",
+          "description": "SHA-256 hash of the payload, used for verification and security purposes"
+        },
+        "errorMessage": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Error message describing why the job failed, if applicable. Only present when jobStatus is 'failed'."
+        }
+      }
+    },
+    "GetPublicStatusDto": {
+      "type": "object",
+      "required": [
+        "uuid",
+        "payloadHash"
+      ],
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "The UUID of the job to check. This is returned when the job is created."
+        },
+        "payloadHash": {
+          "type": "string",
+          "description": "The SHA-256 hash of the payload. This is returned when the job is created and is used to verify the request authenticity."
+        }
+      }
+    },
+    "ApiUnauthorizedException": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Error message indicating lack of permissions."
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code indicating unauthorized access."
+        }
+      }
+    },
+    "ApiNotFoundException": {
+      "type": "object",
+      "required": [
+        "message",
+        "statusCode"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Human-readable error message explaining that the job was not found"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code indicating the resource was not found"
+        }
+      }
+    },
+    "CcRecipient": {
+      "type": "object",
+      "required": [
+        "name",
+        "email"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the recipient"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email of the recipient"
+        },
+        "storeAsContact": {
+          "type": "boolean",
+          "default": true,
+          "description": "Signer will be stored as a contact. Defaults to true."
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.penneo.com/oauth/authorize",
+      "tokenUrl": "https://login.penneo.com/oauth/token",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": []
+    }
+  ]
+}
