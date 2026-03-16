@@ -238,6 +238,32 @@ If a Power Automate flow using a prior connectorhas been built (now marked as de
 
 The action "Convert result set rows from array to objects" would also need to be dropped as that functionality is now wrapped in "Check the Status and Get Results".   
 
+## Using Environment Variables with Delegated Auth
+
+Environment variables allow Entra ID administrators to centrally manage OAuth credentials (such as client IDs and secrets) and share them with users in the organization without exposing sensitive values directly. This is the recommended approach for organizations where users should authenticate with their own Microsoft Entra ID credentials (delegated auth) without requiring each user to possess or manage OAuth secrets.
+
+### Step-by-step: Admin setup of environment variables
+
+1. Complete the OAuth configuration steps in sections [A–E](#a-configure-the-oauth-resource-in-microsoft-entra-id) above to obtain the OAuth client ID, client secret, and resource URI.
+1. In [Power Apps](https://make.powerapps.com/), navigate to **Solutions** and open or create a solution.
+1. Click **New** > **More** > **Environment variable**.
+1. Create separate environment variables for the OAuth values that will be shared with users, for example:
+   - `SnowflakeOAuthClientId` – the OAuth client ID (`<OAUTH_CLIENT_ID>` from step B.8)
+   - `SnowflakeOAuthClientSecret` – the OAuth client secret (`<OAUTH_CLIENT_SECRET>` from step B.12); back this variable with **Azure Key Vault** for production environments
+   - `SnowflakeOAuthResourceUri` – the Application ID URI of the Snowflake OAuth Resource (`<SNOWFLAKE_APPLICATION_ID_URI>` from section A)
+1. Set the **Current value** for each variable and save. For secrets, use the **Azure Key Vault** secret type.
+1. Share the solution (or individual environment variables) with the users who will create Snowflake delegated-auth connections. See [Manage environment variables](https://learn.microsoft.com/power-apps/maker/data-platform/environmentvariables) for details.
+
+### Step-by-step: User setup of delegated auth connection using environment variables
+
+Once the admin has shared the environment variables, users follow these steps to create a delegated auth connection:
+
+1. In Power Automate or Power Apps, create a new **Snowflake** connection and choose the **Delegated Auth** authentication type.
+    - In the **Client ID** field, type `@environmentVariables("SnowflakeOAuthClientId")` (replace this with the environment variable name the admin set).
+    - In the **Client Secret** field, type `@environmentVariables("SnowflakeOAuthClientSecret")`.
+    - In the **Resource URI** field, type `@environmentVariables("SnowflakeOAuthResourceUri")`.
+
+
 ## Known issues and limitations
 1. We currently do not support duplicate columns when the join command is executed. A workaround would be to add aliases to the duplicated columns. 
 1. Other limitations with Virtual Tables are listed [here](https://learn.microsoft.com/power-apps/maker/data-platform/create-edit-virtual-entities#considerations-when-you-use-virtual-tables).
