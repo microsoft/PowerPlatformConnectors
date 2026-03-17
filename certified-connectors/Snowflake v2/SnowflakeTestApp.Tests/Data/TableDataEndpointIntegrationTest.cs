@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -315,6 +315,54 @@ namespace SnowflakeTestApp.Tests.Data
             Assert.IsTrue(inactiveData.Value.Count > 0, $"Should return some inactive records");
             
             Assert.IsTrue(inactiveData.Value.All(item => !item.IsActive), "All filtered records should be inactive");
+        }
+
+        /// <summary>
+        /// Test that tolower() enables case-insensitive filtering.
+        /// Seeded data has "John Doe" (mixed case). A plain eq with lowercase should return nothing
+        /// because Snowflake is case-sensitive by default, but tolower(NAME) eq 'john doe' should match.
+        /// </summary>
+        [TestMethod]
+        public async Task GetItemsEndpoint_FilterWithToLower_ReturnsCaseInsensitiveMatch()
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var caseSensitiveResponse = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$filter=NAME eq 'john doe'");
+            Assert.AreEqual(HttpStatusCode.OK, caseSensitiveResponse.StatusCode, "Case-sensitive filter request should succeed");
+
+            var caseSensitiveContent = await caseSensitiveResponse.Content.ReadAsStringAsync();
+            var caseSensitiveData = JsonConvert.DeserializeObject<ODataResponse<TestDataRecord>>(caseSensitiveContent);
+            Assert.IsNotNull(caseSensitiveData?.Value, "Case-sensitive filter response should be parseable");
+            Assert.AreEqual(0, caseSensitiveData.Value.Count,
+                "Plain eq with lowercase 'john doe' should return no results because Snowflake is case-sensitive");
+
+            var toLowerResponse = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$filter=tolower(NAME) eq 'john doe'");
+            Assert.AreEqual(HttpStatusCode.OK, toLowerResponse.StatusCode, "tolower filter request should succeed");
+
+            var toLowerContent = await toLowerResponse.Content.ReadAsStringAsync();
+            var toLowerData = JsonConvert.DeserializeObject<ODataResponse<TestDataRecord>>(toLowerContent);
+            Assert.IsNotNull(toLowerData?.Value, "tolower filter response should contain data");
+            Assert.IsTrue(toLowerData.Value.Count > 0, "tolower(NAME) eq 'john doe' should return at least one record");
+            Assert.IsTrue(
+                toLowerData.Value.All(item => item.Name.Equals("John Doe")),
+                "All returned records should have NAME matching 'John Doe'");
+
+            var bothSidesResponse = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$filter=tolower(NAME) eq tolower('jOhN DOe')");
+            Assert.AreEqual(HttpStatusCode.OK, bothSidesResponse.StatusCode, "tolower on both sides should succeed");
+
+            var bothSidesContent = await bothSidesResponse.Content.ReadAsStringAsync();
+            var bothSidesData = JsonConvert.DeserializeObject<ODataResponse<TestDataRecord>>(bothSidesContent);
+            Assert.IsNotNull(bothSidesData?.Value, "tolower both-sides response should contain data");
+            Assert.IsTrue(bothSidesData.Value.Count > 0,
+                "tolower(NAME) eq tolower('jOhN DOe') should return at least one record");
+            Assert.IsTrue(
+                bothSidesData.Value.All(item => item.Name.Equals("John Doe")),
+                "All returned records should have NAME matching 'John Doe'");
         }
 
         /// <summary>

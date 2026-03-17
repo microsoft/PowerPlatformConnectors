@@ -238,7 +238,7 @@ namespace SnowflakeV2CoreLogic.Tests.Utilities
             var propertyNode = new SingleValueOpenPropertyAccessNode(
                 new ConstantNode("dummy"), "Name");
             var functionNode = new SingleValueFunctionCallNode(
-                "tolower",
+                "trim",
                 new QueryNode[] { propertyNode },
                 EdmCoreModel.Instance.GetString(false));
             var filterClause = MakeFilterClause(functionNode);
@@ -275,6 +275,58 @@ namespace SnowflakeV2CoreLogic.Tests.Utilities
 
             var result = parser.ParseFilterToSql(filterClause);
             Assert.AreEqual("Age = 42", result);
+        }
+
+        #endregion
+
+        #region 9. tolower / toupper
+
+        [TestMethod]
+        public void ParseFilterToSql_ToLower_OnColumn()
+        {
+            var filter = ParseFilter("tolower(Name) eq 'alice'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("LOWER(Name) = 'alice'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ToUpper_OnColumn()
+        {
+            var filter = ParseFilter("toupper(Name) eq 'ALICE'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("UPPER(Name) = 'ALICE'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ToLower_BothSides()
+        {
+            var filter = ParseFilter("tolower(Name) eq tolower('Alice')");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("LOWER(Name) = LOWER('Alice')", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ToUpper_BothSides()
+        {
+            var filter = ParseFilter("toupper(Name) eq toupper('Alice')");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("UPPER(Name) = UPPER('Alice')", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ToLower_WithContains()
+        {
+            var filter = ParseFilter("contains(tolower(Name), 'ali')");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("LOWER(Name) LIKE '%ali%'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ToLower_CombinedWithAnd()
+        {
+            var filter = ParseFilter("tolower(Name) eq 'alice' and Age gt 25");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("(LOWER(Name) = 'alice') AND (Age > 25)", result);
         }
 
         #endregion

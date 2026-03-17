@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic.Utilities
@@ -30,6 +30,8 @@ namespace SnowflakeV2CoreLogic.Utilities
     /// - contains(property, value): Checks if property contains the specified value
     /// - startswith(property, value): Checks if property starts with the specified value
     /// - endswith(property, value): Checks if property ends with the specified value
+    /// - tolower(expression): Converts the expression to lowercase
+    /// - toupper(expression): Converts the expression to uppercase
     /// 
     /// </summary>
     public class ODataToSqlParser
@@ -162,6 +164,24 @@ namespace SnowflakeV2CoreLogic.Utilities
                     value = value.Substring(1, value.Length - 2);
 
                 return $"{property} LIKE '%{value}'";
+            }
+            else if (functionCallNode.Name.Equals("tolower", StringComparison.OrdinalIgnoreCase))
+            {
+                var arguments = functionCallNode.Parameters.ToList();
+                if (arguments.Count != 1)
+                    throw new InvalidOperationException("tolower function requires exactly one argument");
+
+                var operand = ParseExpression(arguments[0] as SingleValueNode);
+                return $"LOWER({operand})";
+            }
+            else if (functionCallNode.Name.Equals("toupper", StringComparison.OrdinalIgnoreCase))
+            {
+                var arguments = functionCallNode.Parameters.ToList();
+                if (arguments.Count != 1)
+                    throw new InvalidOperationException("toupper function requires exactly one argument");
+
+                var operand = ParseExpression(arguments[0] as SingleValueNode);
+                return $"UPPER({operand})";
             }
 
             throw new NotSupportedException($"Unsupported function: {functionCallNode.Name}");
