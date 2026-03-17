@@ -19,12 +19,15 @@ Hivelight is a legal practice management platform that helps law firms and legal
 | **Create Matter** | Create a new matter with optional workflow application. |
 | **Update Matter Details** | Update the name, description, or external reference of a matter. |
 | **Delete Matter** | Permanently delete an archived matter. |
-| **Apply Workflow to Matter** | Apply a roadmap or task list workflow to a matter. |
+| **Apply Roadmap to Matter** | Apply a roadmap to a matter. |
+| **Apply Task List to Matter** | Apply a task list workflow to a matter. |
 | **Update Matter Roles** | Update the team roles assigned to a matter. |
 | **Archive Matter** | Archive a matter. |
 | **Unarchive Matter** | Restore a previously archived matter. |
 | **Create Matter Note** | Add a note to a matter. |
 | **Create Task Note** | Add a note to a specific task within a matter. |
+| **Update Milestone Status** | Updates the status of a specific milestone in a matter. |
+| **Get Matter By External Reference ID** | Retrieves a matter using its External Reference ID. |
 
 ### Users
 | Operation | Description |
@@ -79,6 +82,7 @@ Full API documentation is available at [https://developers.hivelight.com](https:
 - The connector uses the **global endpoint** (`api.hivelight.com`). Workspaces hosted in Australia (`au.api.hivelight.com`) are not currently supported through this connector.
 - Webhook-based triggers require the Hivelight workspace to have webhook capabilities enabled.
 - Dates are represented as milliseconds since Unix epoch (integer format).
+- The connector uses the **global endpoint** (`api.hivelight.com`). Workspaces hosted in Australia (`au.api.hivelight.com`) are not currently supported through this connector.
 
 ## Support
 
