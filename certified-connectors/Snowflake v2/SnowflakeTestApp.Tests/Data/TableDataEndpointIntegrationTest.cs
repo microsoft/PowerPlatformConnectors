@@ -490,6 +490,122 @@ namespace SnowflakeTestApp.Tests.Data
         }
 
         /// <summary>
+        /// Test inserting a record with null column values via POST.
+        /// </summary>
+        [TestMethod]
+        public async Task CreateItemEndpoint_WithNullValues_ReturnsCreated()
+        {
+            string createTableSQL = "CREATE OR REPLACE TABLE NULL_INSERT_TEST (" +
+                                    "  ID NUMBER(38,0) NOT NULL," +
+                                    "  NAME VARCHAR(16777216) NOT NULL," +
+                                    "  DESCRIPTION VARCHAR(16777216)," +
+                                    "  SCORE NUMBER(38,0)," +
+                                    "  PRIMARY KEY (ID)" +
+                                    ");";
+            DataSeeder.ExecuteSqlStatement(createTableSQL).GetAwaiter().GetResult();
+
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var newItem = new
+            {
+                ID = 1,
+                NAME = "NullInsertTest",
+                DESCRIPTION = (string) null,
+                SCORE = (int?) null
+            };
+
+            var response = await HttpClient.PostAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('NULL_INSERT_TEST')/items",
+                CreateJsonContent(newItem));
+
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode,
+                "POST with null column values should succeed");
+
+            var readResponse = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('NULL_INSERT_TEST')/items('1')");
+            Assert.AreEqual(HttpStatusCode.OK, readResponse.StatusCode);
+
+            var content = await readResponse.Content.ReadAsStringAsync();
+            var record = JObject.Parse(content);
+
+            Assert.AreEqual(1, (int) record["ID"]);
+            Assert.AreEqual("NullInsertTest", (string) record["NAME"]);
+            Assert.IsTrue(record["DESCRIPTION"].Type == JTokenType.Null,
+                "DESCRIPTION should be null in the created record");
+            Assert.IsTrue(record["SCORE"].Type == JTokenType.Null,
+                "SCORE should be null in the created record");
+        }
+
+        /// <summary>
+        /// Test updating an existing column to null via PUT.
+        /// </summary>
+        [TestMethod]
+        public async Task UpdateItemEndpoint_WithNullValue_ReturnsOk()
+        {
+            string createTableSQL = "CREATE OR REPLACE TABLE NULL_UPDATE_TEST (" +
+                                    "  ID NUMBER(38,0) NOT NULL," +
+                                    "  NAME VARCHAR(16777216) NOT NULL," +
+                                    "  DESCRIPTION VARCHAR(16777216)," +
+                                    "  SCORE NUMBER(38,0)," +
+                                    "  PRIMARY KEY (ID)" +
+                                    ");";
+            DataSeeder.ExecuteSqlStatement(createTableSQL).GetAwaiter().GetResult();
+
+            string insertSQL = "INSERT INTO DATAVERSE.PUBLIC.NULL_UPDATE_TEST(ID, NAME, DESCRIPTION, SCORE) " +
+                               "VALUES(1, 'Original', 'Has a description', 42);";
+            DataSeeder.ExecuteSqlStatement(insertSQL).GetAwaiter().GetResult();
+
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            // Verify the record exists with non-null values first
+            var beforeResponse = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('NULL_UPDATE_TEST')/items('1')");
+            Assert.AreEqual(HttpStatusCode.OK, beforeResponse.StatusCode);
+
+            var beforeContent = await beforeResponse.Content.ReadAsStringAsync();
+            var beforeRecord = JObject.Parse(beforeContent);
+            Assert.AreEqual("Has a description", (string) beforeRecord["DESCRIPTION"],
+                "DESCRIPTION should initially be non-null");
+            Assert.AreEqual(42, (int) beforeRecord["SCORE"],
+                "SCORE should initially be 42");
+
+            // Update: set DESCRIPTION and SCORE to null
+            var updatedItem = new
+            {
+                ID = 1,
+                NAME = "Original",
+                DESCRIPTION = (string) null,
+                SCORE = (int?) null
+            };
+
+            var updateResponse = await HttpClient.PutAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('NULL_UPDATE_TEST')/items('1')",
+                CreateJsonContent(updatedItem));
+
+            Assert.AreEqual(HttpStatusCode.OK, updateResponse.StatusCode,
+                "PUT with null column values should succeed");
+
+            // Verify the columns are now null
+            var afterResponse = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('NULL_UPDATE_TEST')/items('1')");
+            Assert.AreEqual(HttpStatusCode.OK, afterResponse.StatusCode);
+
+            var afterContent = await afterResponse.Content.ReadAsStringAsync();
+            var afterRecord = JObject.Parse(afterContent);
+
+            Assert.AreEqual(1, (int) afterRecord["ID"]);
+            Assert.AreEqual("Original", (string) afterRecord["NAME"]);
+            Assert.IsTrue(afterRecord["DESCRIPTION"].Type == JTokenType.Null,
+                "DESCRIPTION should be null after update");
+            Assert.IsTrue(afterRecord["SCORE"].Type == JTokenType.Null,
+                "SCORE should be null after update");
+        }
+
+        /// <summary>
         /// Helper method to create JSON content from TestDataRecord
         /// </summary>
         private StringContent CreateJsonContent(TestDataRecord record)
