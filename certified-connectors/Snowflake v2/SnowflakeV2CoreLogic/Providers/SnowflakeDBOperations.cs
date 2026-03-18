@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -46,7 +46,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             using (var latencyLogger = new LatencyLogger(Constants.GetObjectAsync, logger))
             {
-                var metadataStatement = $"SELECT * FROM information_schema.columns where TABLE_NAME=?";
+                var metadataStatement = $"SELECT * FROM information_schema.columns WHERE TABLE_NAME=? AND TABLE_SCHEMA=CURRENT_SCHEMA()";
 
                 // Add request bindings
                 SnowflakeRequestBindings metaDataBindings = new SnowflakeRequestBindings();
