@@ -6855,6 +6855,24 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+  
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      
+      if (body["envelopeDocuments"] != null)
+      {
+        foreach (var document in body["envelopeDocuments"] as JArray)
+        {
+          if (document["errorDetails"] != null)
+          {
+            var errorMessage = document["errorDetails"]["message"]?.ToString() ?? "Document processing error";
+            throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: " + errorMessage);
+          }
+        }
+      } 
+    }
+
     if ("GetWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
