@@ -23,6 +23,15 @@ To create the required API credentials:
 
 **Note:** This connector targets the US1 Datadog site (`api.datadoghq.com`). Users on other sites (EU, US3, US5, GOV, AP1, AP2) are not supported in this version.
 
+## Obtaining Credentials
+
+1. Log in to Datadog at [https://app.datadoghq.com](https://app.datadoghq.com).
+2. Navigate to **Organization Settings → API Keys** ([direct link](https://app.datadoghq.com/organization-settings/api-keys)).
+3. Click **New Key**, name it (e.g., "Power Automate"), and copy the 32-character key.
+4. Navigate to **Personal Settings → Application Keys** ([direct link](https://app.datadoghq.com/personal-settings/application-keys)).
+5. Click **New Key**, name it (e.g., "Power Automate"), leave scopes empty (unscoped = full user permissions), and copy the 40-character key immediately.
+6. In Power Automate, create a new Datadog connection and paste both keys.
+
 ## Supported Operations
 
 ### List Monitors
