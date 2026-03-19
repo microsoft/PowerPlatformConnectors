@@ -19,6 +19,7 @@ namespace SnowflakeV2CoreLogic.Providers
     using SnowflakeV2CoreLogic;
     using SnowflakeV2CoreLogic.Exceptions;
     using SnowflakeV2CoreLogic.Models;
+    using SnowflakeV2CoreLogic.Models.ConnectorModels;
     using SnowflakeV2CoreLogic.Models.SnowflakeAPIModels;
     using SnowflakeV2CoreLogic.Utilities;
 
@@ -93,6 +94,34 @@ namespace SnowflakeV2CoreLogic.Providers
 
                 // Fetch the metadata
                 snowflakeTableData = await snowflakeClient.CallAPIAsync(httpClient, sqlCommand, $"{endpoint} - GetTablesForSchema", stmtBindings, null, null, false).ConfigureAwait(true);
+            }
+
+            return snowflakeTableData;
+        }
+
+        public async Task<SnowflakeTableData?> FetchPartitionAsync(
+            string statementHandle,
+            int partition,
+            SnowflakeConnectionParameters connectionParameters)
+        {
+            SnowflakeTableData? snowflakeTableData = null;
+
+            using (var latencyLogger = new LatencyLogger("FetchPartitionAsync", logger))
+            {
+                string validatedServer = connectionParameters.Server.EnsureValidSnowflakeUrl("Server");
+                var headerParameters = new HeaderParameters { Instance = validatedServer };
+
+                // Snowflake only returns resultSetMetaData with partition 0.
+                // Fetch partition 0 (for metadata) and the target partition (for data) in parallel.
+                var metadataTask = snowflakeClient.GetResultsAsync(
+                    httpClient, statementHandle, headerParameters, new QueryParameters { Partition = 0 });
+                var dataTask = snowflakeClient.GetResultsAsync(
+                    httpClient, statementHandle, headerParameters, new QueryParameters { Partition = partition });
+
+                await Task.WhenAll(metadataTask, dataTask).ConfigureAwait(true);
+
+                snowflakeTableData = SnowflakeTableData.FromPartitionResponse(
+                    metadataTask.Result.ResultSetMetaData, dataTask.Result);
             }
 
             return snowflakeTableData;

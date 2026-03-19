@@ -6,9 +6,11 @@ namespace SnowflakeV2CoreLogic.Providers
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.Globalization;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using System.Web;
     using System.Web.OData.Extensions;
     using System.Web.OData.Query;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Interfaces;
@@ -66,39 +68,79 @@ namespace SnowflakeV2CoreLogic.Providers
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
 
-            SnowflakeTableData? queryResponse = null;
+            NameValueCollection queryParams = HttpUtility.ParseQueryString(request.RequestUri.Query);
+            string? skipToken = queryParams["$skiptoken"];
 
-            queryResponse = await snowflakeDBOperations.ListAllItemsAsync(table, "GET datasets/{dataset}/tables/{table}/items", options, connectionParameters).ConfigureAwait(true);
-            var numberOfRecordsResponse = await snowflakeDBOperations.GetNumberOfRecordsAvailableInTableAsync(table, options, connectionParameters, "GET datasets/{dataset}/tables/{table}/items").ConfigureAwait(true);
+            bool isPartitionFollowUp = SnowflakeToODataHelper.TryParsePartitionSkipToken(
+                skipToken, out string? sfStatementHandle, out int partitionIndex, out int totalPartitions);
+
+            if (isPartitionFollowUp)
+            {
+                logger.LogInformation($"Fetching partition {partitionIndex} for statement handle");
+
+                var partitionResponse = await snowflakeDBOperations.FetchPartitionAsync(sfStatementHandle!, partitionIndex, connectionParameters).ConfigureAwait(true);
+                logger.LogDebug(Constants.ClientSuccessMessage);
+
+                if (partitionResponse == null)
+                {
+                    return new List<Item>();
+                }
+
+                int rowsReturnedInPartition = partitionResponse.Data?.Count ?? 0;
+
+                Uri? nextUrl = SnowflakeToODataHelper.GeneratePartitionNextLink(
+                    snowflakeConnectionParametersProvider.GetReferralUrl(),
+                    options,
+                    sfStatementHandle!,
+                    partitionIndex + 1,
+                    totalPartitions,
+                    rowsReturnedInPartition);
+                request.ODataProperties().NextLink = nextUrl;
+
+                return partitionResponse.ToListOfItems();
+            }
+
+            bool countRequested = options?.Count?.RawValue?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true;
+
+            var dataTask = snowflakeDBOperations.ListAllItemsAsync(table, "GET datasets/{dataset}/tables/{table}/items", options, connectionParameters);
+            Task<SnowflakeTableData>? countTask = countRequested
+                ? snowflakeDBOperations.GetNumberOfRecordsAvailableInTableAsync(table, options, connectionParameters, "GET datasets/{dataset}/tables/{table}/items")
+                : null;
+
+            var queryResponse = await dataTask.ConfigureAwait(true);
 
             logger.LogDebug(Constants.ClientSuccessMessage);
 
-            if (queryResponse != null)
+            if (queryResponse == null)
             {
-                var response = queryResponse.ToListOfItems();
-                var numberOfRecordsAvailable = int.Parse(numberOfRecordsResponse.Data?[0][0].ToString() ?? "0");
-                int numberOfRowsReturned = queryResponse.Data?.Count ?? 0;
-
-                Uri? nextUrl = SnowflakeToODataHelper.GenerateNextLink(snowflakeConnectionParametersProvider.GetReferralUrl(), options, numberOfRowsReturned, numberOfRecordsAvailable);
-
-                if (nextUrl != null)
-                {
-                    request.ODataProperties().NextLink = nextUrl;
-                }
-
-                // Check if `$count` is present
-                bool onlyCountRequested = options?.Count?.RawValue?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true;
-
-                if (onlyCountRequested)
-                {
-                    request.ODataProperties().TotalCount = numberOfRecordsAvailable;
-                }
-
-                return response;
+                return new List<Item>();
             }
 
-            // Return an empty list
-            return new List<Item>();
+            int partitionCount = queryResponse.ResultSetMetaData?.PartitionInfo?.Count ?? 1;
+            string? statementHandle = queryResponse.StatementHandle;
+
+            if (partitionCount > 1 && !string.IsNullOrEmpty(statementHandle))
+            {
+                int rowsReturnedInPartition = queryResponse.Data?.Count ?? 0;
+
+                Uri? nextUrl = SnowflakeToODataHelper.GeneratePartitionNextLink(
+                    snowflakeConnectionParametersProvider.GetReferralUrl(),
+                    options,
+                    statementHandle,
+                    1,
+                    partitionCount,
+                    rowsReturnedInPartition);
+                  request.ODataProperties().NextLink = nextUrl;
+            }
+
+            if (countRequested && countTask != null)
+            {
+                var numberOfRecordsResponse = await countTask.ConfigureAwait(true);
+                var numberOfRecordsAvailable = int.Parse(numberOfRecordsResponse.Data?[0][0].ToString() ?? "0");
+                request.ODataProperties().TotalCount = numberOfRecordsAvailable;
+            }
+
+            return queryResponse.ToListOfItems();
         }
 
         /// <inheritdoc />

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 namespace SnowflakeTestApp.Mocks
@@ -89,6 +89,12 @@ namespace SnowflakeTestApp.Mocks
 
         public Uri GetReferrerUri()
         {
+            var request = HttpContext.Current?.Request;
+            if (request != null)
+            {
+                return request.Url;
+            }
+
             return new Uri("http://localhost");
         }
 

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Castle.Core.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -75,7 +76,7 @@ namespace SnowflakeTestApp.Tests.Data
             Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
         }
 
-                /// <summary>
+        /// <summary>
         /// Test the GET /datasets/{dataset}/tables/{table}/items/{id} endpoint with authentication
         /// This test uses the first active record from seeded data and validates the response
         /// </summary>
@@ -285,7 +286,74 @@ namespace SnowflakeTestApp.Tests.Data
             Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode, "Expected HTTP 400 Bad Request");
         }
 
+        /// <summary>
+        /// Test that $count=true returns the total record count in the response alongside data.
+        /// With partition-based pagination, COUNT(*) is only executed when $count=true is requested.
+        /// </summary>
+        [TestMethod]
+        public async Task GetItemsEndpoint_WithCountTrue_ReturnsODataCount()
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+            var response = await HttpClient.GetAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$count=true");
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.IsFalse(string.IsNullOrEmpty(content), "Response content should not be empty");
+
+            var json = JObject.Parse(content);
+            var count = json["@odata.count"];
+            Assert.IsNotNull(count, "Response should include @odata.count when $count=true");
+            Assert.AreEqual(SeededTestData.Count, (int) count, "@odata.count should equal total seeded records");
+        }
+
+        /// <summary>
+        /// Test that a response without $count=true does not include @odata.count.
+        /// This verifies the optimization that COUNT(*) is skipped when not requested.
+        /// </summary>
+        [TestMethod]
+        public async Task GetItemsEndpoint_WithoutCount_DoesNotIncludeODataCount()
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.GetAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items");
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var json = JObject.Parse(content);
+            var count = json["@odata.count"];
+            Assert.IsNull(count, "Response should NOT include @odata.count when $count is not requested");
+        }
+
+        /// <summary>
+        /// Test that fetching items with $top returns the correct number of items
+        /// and that the response includes partition-based NextLink when more data is available.
+        /// Note: For small datasets, Snowflake may return all results in a single partition,
+        /// so NextLink with sfStatementHandle may not appear. This test validates the basic $top behavior.
+        /// </summary>
+        [TestMethod]
+        public async Task GetItemsEndpoint_WithTop_ReturnsLimitedResults()
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.GetAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$top=2");
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.IsFalse(string.IsNullOrEmpty(content), "Response content should not be empty");
+
+            var json = JObject.Parse(content);
+            var items = json["value"] as JArray;
+            Assert.IsNotNull(items, "Response should contain a 'value' array");
+            Assert.AreEqual(2, items.Count, "$top=2 should return exactly 2 items");
+        }
 
         /// <summary>
         /// Test OData filtering functionality by validating active records count
@@ -603,6 +671,118 @@ namespace SnowflakeTestApp.Tests.Data
                 "DESCRIPTION should be null after update");
             Assert.IsTrue(afterRecord["SCORE"].Type == JTokenType.Null,
                 "SCORE should be null after update");
+        }
+
+        /// <summary>
+        /// Creates a table with 1000 rows containing large padding data to trigger multiple
+        /// Snowflake result partitions, then iterates all pages via @odata.nextLink.
+        /// Validates:
+        ///   - NextLink contains $skiptoken in handle~partition~total format
+        ///   - $top decreases as rows are consumed across pages
+        ///   - All 1000 rows are retrieved with unique, contiguous IDs
+        /// </summary>
+        [TestMethod]
+        public async Task GetItemsEndpoint_LargeDataset_IteratesPartitionsViaNextLink()
+        {
+            const string tableName = "PAGINATION_TEST";
+            const int totalRows = 1000;
+
+            string createTableSQL = "CREATE OR REPLACE TABLE " + tableName + " (" +
+                                    "  ID NUMBER(38,0) NOT NULL," +
+                                    "  LABEL VARCHAR(255) NOT NULL," +
+                                    "  PADDING VARCHAR(16777216)," +
+                                    "  PRIMARY KEY (ID)" +
+                                    ");";
+            DataSeeder.ExecuteSqlStatement(createTableSQL).GetAwaiter().GetResult();
+
+            string insertSQL = "INSERT INTO " + tableName + " (ID, LABEL, PADDING) " +
+                               "SELECT " +
+                               "  ROW_NUMBER() OVER (ORDER BY SEQ4()) AS ID, " +
+                               "  'Row_' || ROW_NUMBER() OVER (ORDER BY SEQ4()) AS LABEL, " +
+                               "  REPEAT(MD5(RANDOM()::VARCHAR), 1563) AS PADDING " +
+                               "FROM TABLE(GENERATOR(ROWCOUNT => " + totalRows + "));";
+            DataSeeder.ExecuteSqlStatement(insertSQL).GetAwaiter().GetResult();
+
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var allItems = new List<JObject>();
+            int pageCount = 0;
+
+            string url = $"{BaseUrl}/datasets('{TestDataset}')/tables('{tableName}')/items?$top={totalRows}";
+
+            while (url != null)
+            {
+                pageCount++;
+                Assert.IsTrue(pageCount <= 50, "Safety limit: too many pages, possible infinite loop");
+
+                var response = await HttpClient.GetAsync(url);
+                var content = await response.Content.ReadAsStringAsync();
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode,
+                    $"Page {pageCount} should return OK. Response: {content}");
+                var json = JObject.Parse(content);
+
+                var items = json["value"] as JArray;
+                Assert.IsNotNull(items, $"Page {pageCount} should contain a 'value' array");
+                Assert.IsTrue(items.Count > 0, $"Page {pageCount} should have at least one item");
+
+                foreach (var item in items)
+                {
+                    allItems.Add((JObject)item);
+                }
+
+                var nextLink = json["@odata.nextLink"]?.ToString();
+
+                if (nextLink != null)
+                {
+                    ValidateNextLinkFormat(nextLink, pageCount, totalRows);
+                }
+
+                url = nextLink;
+            }
+
+            var distinctIds = allItems.Select(i => (int)i["ID"]).Distinct().OrderBy(id => id).ToList();
+
+            Assert.AreEqual(totalRows, allItems.Count,
+                $"Should retrieve all {totalRows} rows across {pageCount} page(s)");
+            Assert.AreEqual(totalRows, distinctIds.Count, "All IDs should be unique");
+            CollectionAssert.AreEqual(
+                Enumerable.Range(1, totalRows).ToList(),
+                distinctIds,
+                "IDs should be contiguous from 1 to " + totalRows);
+
+            Assert.IsTrue(pageCount > 1,
+                "Expected multiple pages (partitions) for the large dataset. " +
+                "If this fails, increase PADDING size to trigger Snowflake partitioning.");
+        }
+
+        private static void ValidateNextLinkFormat(string nextLink, int pageNumber, int originalTop)
+        {
+            var nextUri = new Uri(nextLink);
+            var queryParams = HttpUtility.ParseQueryString(nextUri.Query);
+
+            var skipToken = queryParams["$skiptoken"];
+            Assert.IsNotNull(skipToken, $"NextLink on page {pageNumber} should contain $skiptoken");
+
+            var parts = skipToken.Split('~');
+            Assert.AreEqual(3, parts.Length,
+                $"$skiptoken should have format 'handle~partition~total', got: {skipToken}");
+
+            Assert.IsFalse(string.IsNullOrEmpty(parts[0]),
+                "Statement handle in $skiptoken should not be empty");
+            Assert.IsTrue(int.TryParse(parts[1], out int partitionIndex),
+                $"Partition index should be an integer, got: {parts[1]}");
+            Assert.IsTrue(int.TryParse(parts[2], out int totalPartitions),
+                $"Total partitions should be an integer, got: {parts[2]}");
+            Assert.IsTrue(partitionIndex > 0 && partitionIndex < totalPartitions,
+                $"Partition index ({partitionIndex}) should be between 1 and {totalPartitions - 1}");
+
+            var topParam = queryParams["$top"];
+            Assert.IsNotNull(topParam, $"NextLink on page {pageNumber} should contain $top");
+            Assert.IsTrue(int.TryParse(topParam, out int topValue), "$top should be a valid integer");
+            Assert.IsTrue(topValue > 0 && topValue < originalTop,
+                $"$top ({topValue}) should be between 1 and {originalTop - 1}");
         }
 
         /// <summary>

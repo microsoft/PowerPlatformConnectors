@@ -20,6 +20,7 @@ namespace SnowflakeV2CoreLogic.Utilities
     {
         private const string DateTimeOutputFormat = "yyyy-MM-dd HH:mm:ss.fffffff";
         private const string DateOutputFormat = "yyyy-MM-dd";
+        private const char SkipTokenSeparator = '~';
 
         // Supported filter functions
         // When new functions are added, they need to be added to the capabilityFilterFunction array
@@ -213,6 +214,103 @@ namespace SnowflakeV2CoreLogic.Utilities
             return tableCapabilitiesMetadata;
         }
 
+        public static Uri? GeneratePartitionNextLink(
+            Uri referrerUri,
+            ODataQueryOptions optionsFromRequest,
+            string statementHandle,
+            int nextPartitionIndex,
+            int totalPartitions,
+            int rowsReturnedInCurrentPartition)
+        {
+            if (nextPartitionIndex >= totalPartitions)
+            {
+                return null;
+            }
+
+            string? filter = optionsFromRequest?.Filter?.RawValue;
+            string endpointUrl = referrerUri.GetLeftPart(UriPartial.Path);
+            string? orderBy = optionsFromRequest?.OrderBy?.RawValue;
+            string? select = optionsFromRequest?.SelectExpand?.RawSelect;
+
+            int? topValue = null;
+            if (optionsFromRequest?.Top != null && int.TryParse(optionsFromRequest.Top.RawValue, out int parsedTop))
+            {
+                topValue = parsedTop - rowsReturnedInCurrentPartition;
+                if (topValue <= 0)
+                {
+                    return null;
+                }
+            }
+
+            StringBuilder nextUrl = new StringBuilder();
+            bool firstOption = true;
+
+            if (endpointUrl != null)
+            {
+                nextUrl.Append(endpointUrl);
+                nextUrl.Append("?");
+            }
+
+            void AppendParam(string key, string value)
+            {
+                if (!firstOption)
+                {
+                    nextUrl.Append("&");
+                }
+
+                nextUrl.Append($"{key}={value}");
+                firstOption = false;
+            }
+
+            if (orderBy != null)
+            {
+                AppendParam("$orderby", orderBy);
+            }
+
+            if (select != null)
+            {
+                AppendParam("$select", select);
+            }
+
+            if (topValue != null)
+            {
+                AppendParam("$top", topValue.Value.ToString());
+            }
+
+            if (filter != null)
+            {
+                AppendParam("$filter", filter);
+            }
+
+            string skipToken = $"{statementHandle}{SkipTokenSeparator}{nextPartitionIndex}{SkipTokenSeparator}{totalPartitions}";
+            AppendParam("$skiptoken", skipToken);
+
+            return new Uri(nextUrl.ToString());
+        }
+
+        public static bool TryParsePartitionSkipToken(string? skipToken, out string? statementHandle, out int partitionIndex, out int totalPartitions)
+        {
+            statementHandle = null;
+            partitionIndex = 0;
+            totalPartitions = 0;
+
+            if (string.IsNullOrEmpty(skipToken))
+            {
+                return false;
+            }
+
+            string[] parts = skipToken.Split(SkipTokenSeparator);
+            if (parts.Length != 3)
+            {
+                return false;
+            }
+
+            statementHandle = parts[0];
+            return !string.IsNullOrEmpty(statementHandle)
+                && int.TryParse(parts[1], out partitionIndex)
+                && int.TryParse(parts[2], out totalPartitions);
+        }
+
         /// <summary>
         /// Converts value into the correct .NET data type based on snowflake datatype mapping
         /// </summary>
@@ -256,102 +354,6 @@ namespace SnowflakeV2CoreLogic.Utilities
                 default:
                     return data;
             }
-        }
-
-        public static Uri? GenerateNextLink(
-            Uri referrerUri,
-            ODataQueryOptions optionsFromRequest,
-            int recordsFetched,
-            int totalRecords)
-        {
-            int offset = 0;
-
-            if (optionsFromRequest.Skip?.Value != null)
-            {
-                offset = (int)optionsFromRequest.Skip.Value;
-            }
-
-            int totalNumberOfRecordsRead = (int)recordsFetched + offset;
-
-            // No more records to read
-            if (totalRecords <= totalNumberOfRecordsRead)
-            {
-                return null;
-            }
-
-            // The format of the link should be the baseURL with original filters and adjusted offsets
-            string? filter = (optionsFromRequest.Filter == null) ? null : optionsFromRequest.Filter.RawValue;
-            string endpointUrl = referrerUri.GetLeftPart(UriPartial.Path);
-            string? orderBy = optionsFromRequest.OrderBy != null ? optionsFromRequest.OrderBy.RawValue : null;
-            string? select = optionsFromRequest.SelectExpand != null ? optionsFromRequest.SelectExpand.RawSelect : null;
-            string? top = optionsFromRequest.Top != null ? optionsFromRequest.Top.RawValue : null;
-            string? skip = totalNumberOfRecordsRead.ToString();
-
-            StringBuilder nextUrl = new StringBuilder();
-
-            bool firstOption = true;
-
-            if (endpointUrl != null)
-            {
-                nextUrl.Append(endpointUrl);
-                nextUrl.Append("?");
-            }
-
-            if (orderBy != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$orderby={orderBy}");
-                firstOption = false;
-            }
-
-            if (select != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$select={select}");
-                firstOption = false;
-            }
-
-            if (top != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$top={top}");
-                firstOption = false;
-            }
-
-            if (skip != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$skip={skip}");
-                firstOption = false;
-            }
-
-            if (filter != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$filter={filter}");
-            }
-
-            return new Uri(nextUrl.ToString());
         }
 
         /// <summary>
