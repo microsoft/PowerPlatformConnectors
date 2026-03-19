@@ -19,6 +19,17 @@ To use this connector, you need a Linear account with API access:
 
 > **Note:** The API key provides full read/write access to your workspace. Keep it secure and do not share it. Linear API keys are free on all plans.
 
+## Obtaining Credentials
+
+1. Log into your Linear workspace at [https://linear.app](https://linear.app).
+2. Navigate to **Settings → Account → Security**.
+3. Click **Create new API key**.
+4. Give it a label (e.g., "Power Automate").
+5. Copy the API key (it is shown only once — starts with `lin_api_`).
+6. Paste the key into the Power Automate connection dialog when prompted.
+
+API keys are free on all Linear plans.
+
 ## Supported Operations
 
 ### List Teams
