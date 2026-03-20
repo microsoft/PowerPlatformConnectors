@@ -36,6 +36,13 @@ namespace SnowflakeV2CoreLogic.Utilities
     /// </summary>
     public class ODataToSqlParser
     {
+        private readonly bool useCaseInsensitiveFilters;
+
+        public ODataToSqlParser(bool useCaseInsensitiveFilters = false)
+        {
+            this.useCaseInsensitiveFilters = useCaseInsensitiveFilters;
+        }
+
         public string ParseFilterToSql(FilterClause filterClause)
         {
             if (filterClause == null)
@@ -119,6 +126,8 @@ namespace SnowflakeV2CoreLogic.Utilities
 
         private string ParseFunctionCall(SingleValueFunctionCallNode functionCallNode)
         {
+            var likeOperator = useCaseInsensitiveFilters ? "ILIKE" : "LIKE";
+
             if (functionCallNode.Name.Equals("contains", StringComparison.OrdinalIgnoreCase))
             {
                 var arguments = functionCallNode.Parameters.ToList();
@@ -135,7 +144,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                     value = value.Substring(1, value.Length - 2);
                 }
 
-                return $"{property} LIKE '%{value}%'";
+                return $"{property} {likeOperator} '%{value}%'";
             }
             else if (functionCallNode.Name.Equals("startswith", StringComparison.OrdinalIgnoreCase))
             {
@@ -149,7 +158,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                 if (value.StartsWith("'") && value.EndsWith("'"))
                     value = value.Substring(1, value.Length - 2);
 
-                return $"{property} LIKE '{value}%'";
+                return $"{property} {likeOperator} '{value}%'";
             }
             else if (functionCallNode.Name.Equals("endswith", StringComparison.OrdinalIgnoreCase))
             {
@@ -163,7 +172,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                 if (value.StartsWith("'") && value.EndsWith("'"))
                     value = value.Substring(1, value.Length - 2);
 
-                return $"{property} LIKE '%{value}'";
+                return $"{property} {likeOperator} '%{value}'";
             }
             else if (functionCallNode.Name.Equals("tolower", StringComparison.OrdinalIgnoreCase))
             {

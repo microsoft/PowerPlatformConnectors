@@ -1,4 +1,4 @@
-﻿// Copyright (c) Snowflake Inc.
+// Copyright (c) Snowflake Inc.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic
@@ -103,6 +103,7 @@ namespace SnowflakeV2CoreLogic
         public const string Schema = "schema";
         public const string Warehouse = "warehouse";
         public const string Role = "role";
+        public const string UseCaseInsensitiveFilters = "useCaseInsensitiveFilters";
 
         public const string HeaderApimReferrer = "x-ms-apim-referrer";
 

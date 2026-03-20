@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic.Providers
@@ -60,6 +60,11 @@ namespace SnowflakeV2CoreLogic.Providers
             if (connectionParametersProvider.PropertyExists(Constants.Schema))
             {
                 connectionParameters.Schema = connectionParametersProvider.GetProperty<string>(Constants.Schema);
+            }
+
+            if (connectionParametersProvider.PropertyExists(Constants.UseCaseInsensitiveFilters))
+            {
+                connectionParameters.UseCaseInsensitiveFilters = connectionParametersProvider.GetProperty<bool>(Constants.UseCaseInsensitiveFilters);
             }
 
             connectionParameters.AuthenticationType = GetAuthenticationType();

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic.Models
@@ -16,6 +16,8 @@ namespace SnowflakeV2CoreLogic.Models
         public string Warehouse { get; set; } = null;
 
         public string Schema { get; set; } = null;
+
+        public bool UseCaseInsensitiveFilters { get; set; } = false;
 
         public string AuthType { get; set; } = "OAUTH";
 

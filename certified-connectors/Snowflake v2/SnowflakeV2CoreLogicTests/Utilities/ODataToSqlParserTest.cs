@@ -330,5 +330,72 @@ namespace SnowflakeV2CoreLogic.Tests.Utilities
         }
 
         #endregion
+
+        #region 10. Case-insensitive mode (ILIKE)
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_Contains()
+        {
+            var ciParser = new ODataToSqlParser(useCaseInsensitiveFilters: true);
+            var filter = ParseFilter("contains(Name, 'Ali')");
+            var result = ciParser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name ILIKE '%Ali%'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_StartsWith()
+        {
+            var ciParser = new ODataToSqlParser(useCaseInsensitiveFilters: true);
+            var filter = ParseFilter("startswith(Name, 'Ali')");
+            var result = ciParser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name ILIKE 'Ali%'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_EndsWith()
+        {
+            var ciParser = new ODataToSqlParser(useCaseInsensitiveFilters: true);
+            var filter = ParseFilter("endswith(Name, 'ce')");
+            var result = ciParser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name ILIKE '%ce'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_ContainsWithAnd()
+        {
+            var ciParser = new ODataToSqlParser(useCaseInsensitiveFilters: true);
+            var filter = ParseFilter("contains(Name, 'Al') and Age gt 25");
+            var result = ciParser.ParseFilterToSql(filter);
+            Assert.AreEqual("(Name ILIKE '%Al%') AND (Age > 25)", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_DefaultFalse_UsesLike()
+        {
+            var defaultParser = new ODataToSqlParser();
+            var filter = ParseFilter("contains(Name, 'Ali')");
+            var result = defaultParser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name LIKE '%Ali%'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_ExplicitFalse_UsesLike()
+        {
+            var csParser = new ODataToSqlParser(useCaseInsensitiveFilters: false);
+            var filter = ParseFilter("contains(Name, 'Ali')");
+            var result = csParser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name LIKE '%Ali%'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_EqUnaffected()
+        {
+            var ciParser = new ODataToSqlParser(useCaseInsensitiveFilters: true);
+            var filter = ParseFilter("Name eq 'Alice'");
+            var result = ciParser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name = 'Alice'", result);
+        }
+
+        #endregion
     }
 }

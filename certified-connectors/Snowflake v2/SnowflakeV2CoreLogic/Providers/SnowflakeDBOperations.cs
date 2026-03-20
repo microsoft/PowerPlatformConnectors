@@ -162,7 +162,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 orderBy = options.OrderBy != null ? options.OrderBy.RawValue : null;
                 top = queryOptions.IsTopSet ? queryOptions.Top.ToString() : Constants.DefaultNumberOfRowsToReturn.ToString();
                 skip = queryOptions.Skip.ToString();
-                filter = ConvertODataFilterToSql(options);
+                filter = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
             }
 
             using (var latencyLogger = new LatencyLogger(Constants.ListAllItemsAsync, logger))
@@ -232,12 +232,12 @@ namespace SnowflakeV2CoreLogic.Providers
             return snowflakeTableData;
         }
 
-        public string ConvertODataFilterToSql(ODataQueryOptions options)
+        public string ConvertODataFilterToSql(ODataQueryOptions options, bool useCaseInsensitiveFilters = false)
         {
             if (options?.Filter != null)
             {
                 var filterClause = options.Filter.FilterClause;
-                var sqlConverter = new ODataToSqlParser();
+                var sqlConverter = new ODataToSqlParser(useCaseInsensitiveFilters);
                 return sqlConverter.ParseFilterToSql(filterClause);
             }
 
@@ -421,7 +421,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 string filterText = string.Empty;
                 if (options.Filter != null)
                 {
-                    filterText = ConvertODataFilterToSql(options);
+                    filterText = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
                     query = $"SELECT COUNT(*) FROM {table} WHERE {filterText}";
                 }   
             }

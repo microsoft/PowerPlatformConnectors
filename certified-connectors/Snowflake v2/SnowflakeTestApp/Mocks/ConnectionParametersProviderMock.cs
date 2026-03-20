@@ -55,6 +55,11 @@ namespace SnowflakeTestApp.Mocks
         /// </summary>
         public static string TestRole = "ACCOUNTADMIN";
 
+        /// <summary>
+        /// When true, contains/startswith/endswith use case-insensitive matching (ILIKE).
+        /// </summary>
+        public static bool TestUseCaseInsensitiveFilters = false;
+
         // ====== MOCK IMPLEMENTATION ======
 
         public T GetProperty<T>(string key)
@@ -82,6 +87,11 @@ namespace SnowflakeTestApp.Mocks
             if (key.Equals(Constants.Schema, StringComparison.OrdinalIgnoreCase))
             {
                 return (T)Convert.ChangeType(TestSchema, typeof(T));
+            }
+
+            if (key.Equals(Constants.UseCaseInsensitiveFilters, StringComparison.OrdinalIgnoreCase))
+            {
+                return (T)Convert.ChangeType(TestUseCaseInsensitiveFilters, typeof(T));
             }
 
             throw new ArgumentException();
