@@ -1,0 +1,419 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "WPForms by Reenhanced LLC",
+    "description": "Connect your WordPress forms powered by WPForms to the Power Platform.",
+    "contact": {
+      "name": "Reenhanced Team",
+      "url": "https://www.reehanced.com",
+      "email": "support@reenhanced.com"
+    }
+  },
+  "host": "we.buildbettersoftware.com",
+  "basePath": "/wpforms",
+  "schemes": ["https"],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/resources": {
+      "get": {
+        "tags": ["Resources"],
+        "summary": "Get resources",
+        "description": "Get resources",
+        "x-ms-visibility": "internal",
+        "operationId": "GetResources",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Resource"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Throttled"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/resources/forms": {
+      "get": {
+        "operationId": "GetForms",
+        "tags": ["Forms"],
+        "summary": "Get forms",
+        "description": "Get a list of WPForms",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "Form ID"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Form name"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/forms/{id}": {
+      "get": {
+        "operationId": "GetForm",
+        "tags": ["Forms"],
+        "summary": "Get form",
+        "description": "Get a WPForm (Work in Progress)",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "x-ms-summary": "Form ID",
+            "description": "The ID of the form to get",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Form ID"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Form name"
+                },
+                "post_content": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/flows": {
+      "x-ms-notification-content": {
+        "schema": {
+          "x-ms-dynamic-properties": {
+            "operationId": "GetEntrySchema",
+            "itemValuePath": "schema",
+            "parameters": {
+              "form_id": {
+                "parameterReference": "body/form_id"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateFlow",
+        "summary": "When a new WPForms entry is submitted",
+        "description": "Trigger a flow when a new WPForms entry is submitted",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "To see it work, submit a new entry to the selected form",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Request body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "form_id",
+                "meta"
+              ],
+              "properties": {
+                "form_id": {
+                  "type": "string",
+                  "x-ms-summary": "Form ID",
+                  "description": "Select the form that will trigger the flow when submitted",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetForms",
+                    "value-title": "title",
+                    "value-path": "id"
+                  }
+                },
+                "meta": {
+                  "type": "object",
+                  "description": "Meta data",
+                  "required": [ "powerAutomateUrl" ],
+                  "properties": {
+                    "powerAutomateUrl": {
+                      "type":"string",
+                      "x-ms-notification-url": true,
+                      "x-ms-visibility": "internal"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/resources/flows/{id}": {
+      "delete": {
+        "operationId": "DeleteFlow",
+        "summary": "Delete a flow -- Internal usage",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Flow ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/resources/entries/query": {
+      "post": {
+        "operationId": "GetEntries",
+        "summary": "Get WPForms entries",
+        "description": "Get a list of WPForms entries",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "form_id",
+            "description": "Select the form that you want to get entries from",
+            "x-ms-summary": "Form to get entries from",
+            "type": "string",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-title": "title",
+              "value-path": "id"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "x-ms-dynamic-properties": {
+                "operationId": "GetEntrySchema",
+                "itemValuePath": "get",
+                "parameters": {
+                  "form_id": {
+                    "parameterReference": "form_id"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "x-ms-dynamic-properties": {
+                  "operationId": "GetEntrySchema",
+                  "itemValuePath": "schema",
+                  "parameters": {
+                    "form_id": {
+                      "parameterReference": "form_id"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      }
+    },
+    "/resources/entries": {
+      "options": {
+        "operationId": "GetEntrySchema",
+        "summary": "Get the schema for an entry. Internal use only",
+        "description": "Get the schema for an entry. Internal use only",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "form_id",
+            "x-ms-summary": "Form",
+            "description": "Form ID",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-title": "title",
+              "value-path": "id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "get": {
+                  "type": "object"
+                },
+                "post": {
+                  "type": "object"
+                },
+                "schema": {
+                  "type": "object"
+                },
+                "patch": {
+                  "type": "object"
+                },
+                "delete": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resources/entries/{id}": {
+      "get": {
+        "operationId": "GetEntry",
+        "summary": "Get a WPForms entry",
+        "description": "Get a single WPForms entry containing all the fields",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the entry/form submission to get",
+            "x-ms-summary": "Entry ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "form_id",
+            "description": "Select the form that you want to get entries from",
+            "x-ms-summary": "Form",
+            "type": "string",
+            "required": true,
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-title": "title",
+              "value-path": "id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "x-ms-dynamic-properties": {
+                "operationId": "GetEntrySchema",
+                "itemValuePath": "schema",
+                "parameters": {
+                  "form_id": {
+                    "parameterReference": "form_id"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Resource": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Resource name"
+        },
+        "key": {
+          "type": "string",
+          "description": "Resource key"
+        },
+        "schema_path": {
+          "type": "string",
+          "description": "Resource schema path"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {
+    "403": {
+      "schema": {},
+      "description": "Unauthorized"
+    },
+    "429": {
+      "schema": {},
+      "description": "Throttled"
+    },
+    "500": {
+      "schema": {},
+      "description": "Server Error"
+    }
+  },
+  "security": [
+  ],
+  "securityDefinitions": {
+    "secretKey": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-Secret-Key"
+    }
+  },
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.reenhanced.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.reehanced.com/privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Marketing"
+    }
+  ]
+}

@@ -21,6 +21,7 @@ The connector supports the following operations:
 
 - `Update a Measure`: Updates an existing Measure's value based off of its Measure ID and a number value.
 - `Update a Measure's Historical Values`: Updates an existing Measure's historical values based off of its Measure ID and list of date-value pairs.
+- `Update an Action`: Updates an existing Action's progress based off of its Action ID and a number value.
 
 ## Deployment Instructions
 

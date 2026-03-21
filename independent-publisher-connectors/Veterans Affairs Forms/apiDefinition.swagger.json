@@ -1,0 +1,520 @@
+{
+  "info": {
+    "version": "0.0.0",
+    "title": "Veterans Affairs Forms",
+    "description": "Access the VA Forms API to search, retrieve PDF links, and metadata for VA forms, including version tracking. Stay updated with the latest VA form information, search by form number or keyword, get detailed metadata, and more. Authenticate using an API token. Test in the sandbox environment before requesting a production API key. Track SHA256 revision history to ensure data integrity and validate PDF links. Identify deleted forms through metadata.",
+    "contact": {
+      "name": "Richard Wilson",
+      "email": "richard.a.wilson@microsoft.com",
+      "url": "https://www.richardawilson.com/"
+    }
+  },
+  "basePath": "/",
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/forms": {
+      "get": {
+        "summary": "List forms",
+        "description": "Retrieve all available VA forms. Optionally filter by form number or title.",
+        "operationId": "ListForms",
+        "produces": ["application/json"],
+        "tags": ["Forms"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Retrieve form data based on entered form name.",
+            "x-ms-summary": "Query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "VA Forms index response",
+            "schema": {
+              "type": "object",
+              "required": ["data"],
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/FormsIndex"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information not provided"
+          },
+          "403": {
+            "description": "Invalid authorization"
+          },
+          "413": {
+            "description": "Payload too large"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        }
+      }
+    },
+    "/forms/{form_name}": {
+      "get": {
+        "summary": "Get form by name",
+        "description": "Retrieve a single form and its full revision history",
+        "operationId": "GetFormByName",
+        "tags": ["Forms"],
+        "parameters": [
+          {
+            "name": "form_name",
+            "in": "path",
+            "description": "The VA form name of the form being requested. Include prefixes and hyphens where necessary.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Form Name",
+            "x-example": "10-10EZ",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "VA Form Show response",
+            "schema": {
+              "$ref": "#/definitions/FormShow"
+            }
+          },
+          "401": {
+            "description": "Authorization information not provided"
+          },
+          "403": {
+            "description": "Invalid authorization"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "413": {
+            "description": "Payload too large"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        },
+        "produces": ["application/json"]
+      }
+    }
+  },
+  "swagger": "2.0",
+  "host": "api.va.gov",
+  "schemes": ["https"],
+  "definitions": {
+    "FormsIndex": {
+      "type" : "object",
+      "description": "A listing of available VA forms and their location.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "description": "JSON API identifier",
+          "type": "string",
+          "example": "5403"
+        },
+        "type": {
+          "title": "Type",
+          "description": "JSON API type specification",
+          "type": "string",
+          "example": "va_form"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "form_name": {
+              "title": "Form Name",
+              "description": "Name of the VA Form",
+              "type": "string",
+              "example": "10-10EZ"
+            },
+            "url": {
+              "title": "Url",
+              "description": "Web location of the form",
+              "type": "string",
+              "example": "https://www.va.gov/vaforms/medical/pdf/10-10EZ-fillable.pdf"
+            },
+            "title": {
+              "title": "Title",
+              "description": "Title of the form as given by VA",
+              "type": "string",
+              "example": "Instructions and Enrollment Application for Health Benefits"
+            },
+            "first_issued_on": {
+              "title": "First Issued On",
+              "description": "The date the form first became available",
+              "type": "string",
+
+              "example": "2016-07-10",
+              "format": "date"
+            },
+            "last_revision_on": {
+              "title": "Last Revision On",
+              "description": "The date the form was last updated",
+              "type": "string",
+
+              "example": "2020-01-17",
+              "format": "date"
+            },
+            "pages": {
+              "title": "Pages",
+              "description": "Number of pages contained in the form",
+              "type": "integer",
+              "format": "int32",
+              "example": 5
+            },
+            "sha256": {
+              "title": "Sha256",
+              "description": "A sha256 hash of the form contents",
+              "type": "string",
+
+              "example": "6e6465e2e1c89225871daa9b6d86b92d1c263c7b02f98541212af7b35272372b"
+            },
+            "last_sha256_change": {
+              "title": "Last Sha256 Change",
+              "description": "The date of the last sha256 hash change",
+              "type": "string",
+
+              "example": "2019-05-30",
+              "format": "date"
+            },
+            "valid_pdf": {
+              "title": "Valid Pdf",
+              "description": "A flag indicating whether the form URL was confirmed as a valid download",
+              "type": "boolean",
+              "example": "true"
+            },
+            "form_usage": {
+              "title": "Form Usage",
+              "description": "A description of how the form is to be used",
+              "type": "string",
+
+              "example": "<p>Use VA Form 10-10EZ if you’re a Veteran and want to apply for VA health care. You must be enrolled in...</p>"
+            },
+            "form_tool_intro": {
+              "title": "Form Tool Intro",
+              "description": "Introductory text describing the VA online tool for this form",
+              "type": "string",
+
+              "example": "You can apply online instead of filling out and sending us the paper form."
+            },
+            "form_tool_url": {
+              "title": "Form Tool Url",
+              "description": "Location of the online tool for this form",
+              "type": "string",
+
+              "example": "https://www.va.gov/health-care/apply/application/introduction"
+            },
+            "form_details_url": {
+              "title": "Form Details Url",
+              "description": "Location on www.va.gov of the info page for this form",
+              "type": "string",
+
+              "example": "https://www.va.gov/find-forms/about-form-10-10ez"
+            },
+            "form_type": {
+              "title": "Form Type",
+              "description": "VA Type of the form",
+              "type": "string",
+
+              "example": "benefit"
+            },
+            "language": {
+              "title": "Language",
+              "description": "Language code of the form",
+              "type": "string",
+              "example": "en"
+            },
+            "deleted_at": {
+              "title": "Deleted At",
+              "description": "The timestamp at which the form was deleted",
+              "type": "string",
+
+              "example": "null",
+              "format": "date-time"
+            },
+            "related_forms": {
+              "title": "Related Forms",
+              "description": "A listing of other forms that relate to the current form",
+              "type": "array",
+
+              "items": {
+                "type": "string",
+                "example": "10-10EZR"
+              }
+            },
+            "benefit_categories": {
+              "title": "Benefit Categories",
+              "description": "Listing of benefit categories and match",
+              "type": "array",
+
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "description": "Name of the benefit category of the form",
+                    "type": "string",
+                    "example": "Health care"
+                  },
+                  "description": {
+                    "title": "Description",
+                    "description": "Description of the benefit category of the form",
+                    "type": "string",
+                    "example": "VA health care"
+                  }
+                }
+              }
+            },
+            "va_form_administration": {
+              "title": "VA Form Administration",
+              "description": "The VA organization that administers the form",
+              "type": "string",
+
+              "example": "Veterans Health Administration"
+            }
+          }
+        }
+      }
+    },
+    "FormShow": {
+      "type": "object",
+      "description": "Data for a particular VA form, including form version history.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "description": "JSON API identifier",
+          "type": "string",
+          "example": "10-10-EZ"
+        },
+        "type": {
+          "title": "Type",
+          "description": "JSON API type specification",
+          "type": "string",
+          "example": "va_form"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "form_name": {
+              "title": "Form Name",
+              "description": "Name of the VA Form",
+              "type": "string",
+              "example": "10-10EZ"
+            },
+            "url": {
+              "title": "Url",
+              "description": "Web location of the form",
+              "type": "string",
+              "example": "https://www.va.gov/vaforms/medical/pdf/10-10EZ-fillable.pdf"
+            },
+            "title": {
+              "title": "Title",
+              "description": "Title of the form as given by VA",
+              "type": "string",
+              "example": "Instructions and Enrollment Application for Health Benefits"
+            },
+            "first_issued_on": {
+              "title": "First Issued On",
+              "description": "The date the form first became available",
+              "type": "string",
+
+              "example": "2016-07-10",
+              "format": "date"
+            },
+            "last_revision_on": {
+              "title": "Last Revision On",
+              "description": "The date the form was last updated",
+              "type": "string",
+
+              "example": "2020-01-17",
+              "format": "date"
+            },
+            "created_at": {
+              "title": "Created At",
+              "description": "Internal field for VA.gov use",
+              "type": "string",
+
+              "example": "2021-03-30T16:28:30.338Z",
+              "format": "date-time"
+            },
+            "pages": {
+              "title": "Pages",
+              "description": "Number of pages contained in the form",
+              "type": "integer",
+              "format": "int32",
+              "example": 5
+            },
+            "sha256": {
+              "title": "Sha256",
+              "description": "A sha256 hash of the form contents",
+              "type": "string",
+
+              "example": "5fe171299ece147e8b456961a38e17f1391026f26e9e170229317bc95d9827b7"
+            },
+            "valid_pdf": {
+              "title": "Valid Pdf",
+              "description": "A flag indicating whether the form URL was confirmed as a valid download",
+              "type": "boolean",
+              "example": "true"
+            },
+            "form_usage": {
+              "title": "Form Usage",
+              "description": "A description of how the form is to be used",
+              "type": "string",
+
+              "example": "<p>Use VA Form 10-10EZ if you’re a Veteran and want to apply for VA health care. You must be enrolled in...</p>"
+            },
+            "form_tool_intro": {
+              "title": "Form Tool Intro",
+              "description": "Introductory text describing the VA online tool for this form",
+              "type": "string",
+
+              "example": "You can apply online instead of filling out and sending us the paper form."
+            },
+            "form_tool_url": {
+              "title": "Form Tool Url",
+              "description": "Location of the online tool for this form",
+              "type": "string",
+
+              "example": "https://www.va.gov/health-care/apply/application/introduction"
+            },
+            "form_details_url": {
+              "title": "Form Details Url",
+              "description": "Location on www.va.gov of the info page for this form",
+              "type": "string",
+
+              "example": "https://www.va.gov/find-forms/about-form-10-10ez"
+            },
+            "form_type": {
+              "title": "Form Type",
+              "description": "VA Type of the form",
+              "type": "string",
+
+              "example": "benefit"
+            },
+            "language": {
+              "title": "Language",
+              "description": "Language code of the form",
+              "type": "string",
+
+              "example": "en"
+            },
+            "deleted_at": {
+              "title": "Deleted At",
+              "description": "The timestamp at which the form was deleted",
+              "type": "string",
+
+              "example": null,
+              "format": "date-time"
+            },
+            "related_forms": {
+              "title": "Related Forms",
+              "description": "A listing of other forms that relate to current form",
+              "type": "array",
+
+              "items": {
+                "type": "string",
+                "example": "10-10EZR"
+              }
+            },
+            "benefit_categories": {
+              "title": "Benefit Categories",
+              "description": "Listing of benefit categories and match",
+              "type": "array",
+
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "description": "Name of the benefit category of the form",
+                    "type": "string",
+                    "example": "Health care"
+                  },
+                  "description": {
+                    "title": "Description",
+                    "description": "Description of the benefit category of the form",
+                    "type": "string",
+                    "example": "VA health care"
+                  }
+                }
+              }
+            },
+            "va_form_administration": {
+              "title": "VA Form Administration",
+              "description": "The VA organization that administers the form",
+              "type": "string",
+
+              "example": "Veterans Health Administration"
+            },
+            "versions": {
+              "type": "array",
+
+              "description": "The version history of revisions to the form",
+              "items": {
+                "type" : "object",
+                "properties": {
+                  "sha256": {
+                    "title": "Sha256",
+                    "description": "A sha256 hash of the form contents for that version",
+                    "type": "string",
+                    "example": "5fe171299ece147e8b456961a38e17f1391026f26e9e170229317bc95d9827b7"
+                  },
+                  "revision_on": {
+                    "title": "Revision On",
+                    "description": "The date the sha256 hash was calculated",
+                    "type": "string",
+                    "example": "2012-01-01",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "apikey": {
+      "type": "apiKey",
+      "name": "apikey",
+      "in": "header"
+    }
+  },
+  "x-components": {
+    "examples": {},
+    "links": {},
+    "parameters": {},
+    "requestBodies": {},
+    "responses": {}
+  },
+  "tags": [
+    {
+      "description": "VA Forms API",
+      "name": "forms"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://developer.va.gov/explore/api/va-facilities"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://department.va.gov/privacy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Human Resources"
+    }
+  ]
+}

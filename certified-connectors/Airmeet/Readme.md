@@ -32,5 +32,8 @@ The connector supports the following operations:
 - `Add a speaker`: Add a speaker to your Airmeet event.
 - `Create Session`: Add a Session to your Airmeet.
 - `Add Registrant`: Add Registrant to an Airmeet.
+- `Create Booth`: Add Booth to an Airmeet session.
+- `Remove Attendee`: Remove attendee from airmeet event.
+
 - `Register an Airmeet Trigger`: Select a trigger from the available options. Setup reminders and alerts based on event registration, attendance, event start and end time.
   Avaible triggers are "trigger.airmeet.registrant.added","trigger.airmeet.attendee.added","trigger.airmeet.attendee.joined","trigger.airmeet.created","trigger.airmeet.started","trigger.airmeet.finished","trigger.airmeet.reminder","trigger.airmeet.questions","trigger.attendee.booth.joined"

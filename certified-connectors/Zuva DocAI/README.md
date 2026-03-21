@@ -40,6 +40,13 @@ Categorize your document: is it a contract and, if so, what type of contract (re
 - `Create Document Classification Request`: Initiate asynchronous classification of the document type.
 - `Get Document Classification Request Status`: Get status and results of document classification.
 
+### Multi-level Classification
+
+Categorize your document's type using a multi-level classifier (e.g. ["Contract", "Real Estate Agt", "Real Estate Lease"]`).
+
+- `Create Multi-Level Classification Request`: Initiate asynchronous classification of the document.
+- `Get Multi-Level Classification Request Status`: Get status and results of multi-level classification.
+
 ### Optical Character Recognition (OCR)
 
 Obtain the text of your documents, regardless of their original file type (pdf, docx, png ...), as well
@@ -54,7 +61,13 @@ as images of the document.
 
 Find out what fields are available to you.
 
-- `Get All Fields`: Return a list of all available fields (both built-in and custom).
+- `Get Field List`: Return a list of all available fields (both built-in and custom).
+
+### Normalization
+
+Normalize a string of text to a standard format.
+
+- `Normalize Dates`: Convert dates found in text to an integer representation (e.g. year/month/day).
 
 ## Obtaining Credentials
 

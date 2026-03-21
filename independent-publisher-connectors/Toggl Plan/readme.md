@@ -2,7 +2,7 @@
 
 Easy-to-use visual planning tool for project management. Plan project steps on a colorful timeline and have a clear overview of when things need to be done. Use boards view to follow up on task statuses. Change of plans? The simple drag-and-drop interface makes flexible planning easy.
 
-## Publisher: Daniel Laskewitz | Sogeti
+## Publisher: Daniel Laskewitz
 
 ## Prerequisites
 
