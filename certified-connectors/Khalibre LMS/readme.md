@@ -1,6 +1,6 @@
 # Khalibre LMS connector
 
-Khalibre is the provider of the Khalibre Platform, used by Crosswired and other collaboration and capacity building portals. We are a social enterprise, formed in 2010 in Singapore and Cambodia to deliver business technology solutions, capacity building and learning platform for medium and large organizations globally. With the Khalibre LMS Connector, you can extend LMS capabilities by integrating with the system of your choice through the APIs. This connector allows you to manage course published in Khalibre platform for your organization. You can book learner into the course that your organization has published and query their progress. You can also see available courses published in the platform and detail course information.
+Khalibre is the provider of the Khalibre Platform, used by Crosswired and other collaboration and capacity building portals. We are a social enterprise, formed in 2010 in Singapore and Cambodia to deliver business technology solutions, capacity building and learning platform for medium and large organizations globally. With the Khalibre LMS Connector, you can extend LMS capabilities by integrating with the system of your choice through the APIs.
 
 # Prerequisites
 
