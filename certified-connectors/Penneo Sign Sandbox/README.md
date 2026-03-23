@@ -11,7 +11,7 @@ To use this connector, you will need an active Penneo Sandbox account.
 ### Create a new case file
 Creates a new case file in Penneo with the specified documents and signers. The case file will be created in Penneo, and a UUID and a payloadHash will be returned that can be used to check the creation status via the queue status endpoint.
 
-### Penneo check status
+### Check job status
 Retrieves the current status of a casefile by providing the job UUID and payloadHash. This endpoint is used to poll for job completion status after submitting a case file creation request. The endpoint is rate-limited to 20 requests per minute per uuid-payloadHash combination.
 
 ## Obtaining Credentials
@@ -40,14 +40,14 @@ The connector has been configured to use OAuth with Authorization Code Grant. Us
 
 4. **Check CaseFile creation status**:
     - After creating a case file, you'll receive a UUID and payloadHash
-    - Use the "Penneo check status" action to poll for job completion
+    - Use the "Check job status" action to poll for job completion
     - Respect the rate limit of 20 requests per minute per uuid-hash combination
 
 Note: You can check what each field does by checking https://penneo.readme.io/reference/createcasefile.
 
 ## Known Issues and Limitations
 
-1. **Rate Limiting**: The Penneo check status endpoint is rate-limited to 20 requests per minute per uuid-hash combination. Implement appropriate retry logic with exponential backoff.
+1. **Rate Limiting**: The Check job status endpoint is rate-limited to 20 requests per minute per uuid-hash combination. Implement appropriate retry logic with exponential backoff.
 
 2. **Asynchronous Processing**: Case file creation is asynchronous. You must use the job status endpoint to check completion rather than expecting immediate results.
 
