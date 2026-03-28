@@ -71,3 +71,4 @@ You need a kwtSMS account with API access enabled. [Sign up at kwtsms.com](https
 - [kwtSMS Support](https://www.kwtsms.com/support.html)
 - [Power Automate Custom Connectors](https://learn.microsoft.com/en-us/connectors/custom-connectors/)
 - [Independent Publisher Program](https://learn.microsoft.com/en-us/connectors/custom-connectors/certification-submission-ip)
+
