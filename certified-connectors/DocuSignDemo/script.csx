@@ -3607,6 +3607,15 @@ public class Script : ScriptBase
     return fontNames;
   }
 
+  private static JToken FindAccountById(JObject userInfo, string accountId)
+  {
+    if (string.IsNullOrEmpty(accountId) || userInfo?["accounts"] == null)
+      return null;
+      
+    return userInfo["accounts"].FirstOrDefault(a => 
+      string.Equals(a["account_id"]?.ToString(), accountId, StringComparison.OrdinalIgnoreCase));
+  }
+
   private static JObject ParseContentAsJObject(string content, bool isRequest)
   {
     JObject body;
@@ -6225,8 +6234,49 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       if (userInfoResponse.IsSuccessStatusCode)
       {
         var jsonContent = JObject.Parse(content);
-        var baseUri = jsonContent["accounts"]?[0]?["base_uri"]?.ToString();
-        var accountId = (string)jsonContent["accounts"].Where(a => (bool)a["is_default"]).FirstOrDefault()["account_id"];
+        
+        // Check if theres an accountId in the query
+        var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+        string requestedAccountId = query.Get("accountId");
+
+        // If accountId is not present split query in segments to find the account id in the list of accounts returned by the userinfo endpoint.
+        // Split URI by "/" and check if any segment matches an account ID in the accounts list
+        if (string.IsNullOrEmpty(requestedAccountId))
+        {
+          var uriSegments = this.Context.Request.RequestUri.AbsolutePath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+          foreach (var segment in uriSegments)
+          {
+            // Check if this segment matches any account_id in the accounts
+            if (FindAccountById(jsonContent, segment) != null)
+            {
+              requestedAccountId = segment;
+              break;
+            }
+          }
+        }
+        
+        // Check headers for account ID if not found in URI or query
+        if (string.IsNullOrEmpty(requestedAccountId))
+        {
+          var headerNames = new[] { "AccountId", "X-DocuSign-AccountId" };
+          foreach (var headerName in headerNames)
+          {
+            if (this.Context.Request.Headers.Contains(headerName))
+            {
+              requestedAccountId = this.Context.Request.Headers.GetValues(headerName).FirstOrDefault();
+              break;
+            }
+          }
+        }
+
+        // Find the account using priority: requested -> default -> first available
+        var selectedAccount = FindAccountById(jsonContent, requestedAccountId) 
+                           ?? jsonContent["accounts"]?.FirstOrDefault(a => (bool?)a["is_default"] == true)
+                           ?? jsonContent["accounts"]?.FirstOrDefault();
+        
+        var baseUri = selectedAccount?["base_uri"]?.ToString();
+        var accountId = selectedAccount?["account_id"]?.ToString();
+
         if (!string.IsNullOrEmpty(baseUri))
         {
           this.Context.Request.RequestUri = new Uri(new Uri(baseUri), this.Context.Request.RequestUri.PathAndQuery);
