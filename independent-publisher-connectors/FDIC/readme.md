@@ -1,4 +1,4 @@
-# FDIC
+# FDIC (Independent Publisher)
 The Federal Deposit Insurance Corporation (FDIC) provides access to financial institution data, including bank financials, institution details, failure history, and location data.
 
 ## Publisher: Dan Romano (swolcat)
