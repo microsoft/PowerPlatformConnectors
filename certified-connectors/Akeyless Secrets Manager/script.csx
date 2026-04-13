@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -15,29 +16,35 @@ public class Script : ScriptBase
 
         if (string.Equals(operationId, "GetSecret", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(operationId, "GetPassword", StringComparison.OrdinalIgnoreCase))
-            return await HandleGetSecretAsync();
+            return await HandleGetSecretAsync(operationId);
 
         var bad = new HttpResponseMessage(HttpStatusCode.BadRequest);
         bad.Content = CreateJsonContent("{\"error\":\"Unknown operation: " + operationId + "\"}");
         return bad;
     }
 
-    private async Task<HttpResponseMessage> HandleGetSecretAsync()
+    private async Task<HttpResponseMessage> HandleGetSecretAsync(string operationId)
     {
         var bodyText = await this.Context.Request.Content.ReadAsStringAsync();
         var body = string.IsNullOrWhiteSpace(bodyText) ? new JObject() : JObject.Parse(bodyText);
 
-        var accessId = (string)body["access-id"] ?? (string)body["Access Id"] ?? (string)body["accessId"];
-        var accessKey = (string)body["access-key"] ?? (string)body["Access Key"] ?? (string)body["accessKey"];
-        var secretName = (string)body["secret_name"] ?? (string)body["Secret Name"] ?? (string)body["name"];
-
-        if (string.IsNullOrEmpty(accessId) || string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretName))
+        if (!TryGetCredentials(out var accessId, out var accessKey, body))
         {
             var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
             err.Content = CreateJsonContent(
-                "{\"error\":\"access-id, access-key, and secret_name are required on each action (per exported connector).\"}");
+                "{\"error\":\"Set Access Id and Access Key on the connection, or pass access-id and access-key in the action body.\"}");
             return err;
         }
+
+        var secretName = (string)body["secret_name"] ?? (string)body["Secret Name"] ?? (string)body["name"];
+        if (string.IsNullOrEmpty(secretName))
+        {
+            var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            err.Content = CreateJsonContent("{\"error\":\"secret_name is required\"}");
+            return err;
+        }
+
+        var useJsonOutput = string.Equals(operationId, "GetPassword", StringComparison.OrdinalIgnoreCase);
 
         var authReq = new HttpRequestMessage(HttpMethod.Post, ApiHost + "/auth");
         authReq.Content = CreateJsonContent(new JObject
@@ -67,7 +74,7 @@ public class Script : ScriptBase
             ["token"] = tToken,
             ["accessibility"] = "regular",
             ["ignore-cache"] = "false",
-            ["json"] = false
+            ["json"] = useJsonOutput
         }.ToString());
 
         var secretResp = await this.Context.SendAsync(secretReq, this.CancellationToken);
@@ -76,5 +83,41 @@ public class Script : ScriptBase
         var finalResp = new HttpResponseMessage(secretResp.StatusCode);
         finalResp.Content = CreateJsonContent(secretText);
         return finalResp;
+    }
+
+    private bool TryGetCredentials(out string accessId, out string accessKey, JObject body)
+    {
+        accessId = null;
+        accessKey = null;
+
+        if (this.Context.Request.Headers.TryGetValues("Authorization", out var authHeaders))
+        {
+            var authHeader = authHeaders.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(authHeader) &&
+                authHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    var encoded = authHeader.Substring(6).Trim();
+                    var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
+                    var sep = decoded.IndexOf(':');
+                    if (sep > 0)
+                    {
+                        accessId = decoded.Substring(0, sep);
+                        accessKey = decoded.Substring(sep + 1);
+                        if (!string.IsNullOrEmpty(accessId) && !string.IsNullOrEmpty(accessKey))
+                            return true;
+                    }
+                }
+                catch
+                {
+                    // fall through to body
+                }
+            }
+        }
+
+        accessId = (string)body["access-id"] ?? (string)body["Access Id"] ?? (string)body["accessId"];
+        accessKey = (string)body["access-key"] ?? (string)body["Access Key"] ?? (string)body["accessKey"];
+        return !string.IsNullOrEmpty(accessId) && !string.IsNullOrEmpty(accessKey);
     }
 }
