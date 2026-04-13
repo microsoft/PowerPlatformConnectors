@@ -6,8 +6,45 @@ This connector calls the Akeyless REST API to retrieve secrets. **Akeyless Acces
 
 ## Prerequisites
 
-- Akeyless account with permission to authenticate and read the target secrets.
-- An **API Key** authentication method with **Access ID** and **Access Key** ([Authenticate with API Key](https://docs.akeyless.io/docs/auth-with-api-key)).
+- An Akeyless account and permissions to read the secrets you will call from Power Platform.
+- An **API Key** authentication method that provides an **Access ID** and **Access Key** pair (see below).
+
+## How to create the Access ID and Access Key (API Key authentication)
+
+This connector uses Akeyless **API Key** authentication: a programmatic **Access ID** plus **Access Key**, not a human “email + password” for the Akeyless web console (unless you choose that flow elsewhere). Full product documentation: **[Authenticate with API Key](https://docs.akeyless.io/docs/auth-with-api-key)**.
+
+### Create an API Key authentication method (Akeyless Console)
+
+These steps match the official guide above:
+
+1. Sign in to the **[Akeyless Console](https://console.akeyless.io)**.
+2. Under **Administration**, open **Users & Auth Methods**.
+3. Select **+ New** to open **Create Authentication Method**.
+4. On the **Type** screen, choose **API Key**, then continue (**Next** / **Finish** as prompted).
+5. Enter a **Name** (you can use path-style names with `/` if you organize auth methods in folders).
+6. Complete the wizard. **Download the generated CSV** (or copy the values from the confirmation flow). It contains the **Access ID** and **Access Key**.
+
+**Important:**
+
+- The **Access Key** is shown **only once**. Store it in a secure vault or password manager. If you lose it, use **Reset Access Key** on that authentication method in the Console (documented in the same [API Key](https://docs.akeyless.io/docs/auth-with-api-key) page).
+- Associate the new authentication method with an **Access Role** in Akeyless so it has permission to read the paths and secrets you use from Power Platform (see **What’s Next** on the [API Key](https://docs.akeyless.io/docs/auth-with-api-key) page and [RBAC](https://docs.akeyless.io/docs/rbac) in Akeyless documentation).
+
+### Optional: CLI
+
+You can also create an API Key auth method with the Akeyless CLI; see the **“Creating an API Key Authentication Method with the CLI”** section on **[Authenticate with API Key](https://docs.akeyless.io/docs/auth-with-api-key)**. The CLI returns credentials once—store them securely.
+
+### How this maps to Power Platform
+
+After you have the pair from Akeyless:
+
+- Put **Access ID** in the first Basic-auth field (labeled **Akeyless Access ID** or “username” depending on screen).
+- Put **Access Key** in the second field (**Akeyless Access Key** or “password”).
+
+The connector sends them to Akeyless `/auth` with `access-type` **`access_key`**, consistent with Akeyless CLI usage (`akeyless auth --access-type access_key --access-id … --access-key …`) described in the [same documentation](https://docs.akeyless.io/docs/auth-with-api-key).
+
+### Akeyless guidance on use of API Key auth
+
+Akeyless documents API Key auth as suited to **CLI, SDK, and automation** (including integrations like this connector). Their page also notes it is **not recommended for direct interactive Console sign-in** and is **not recommended for production** for some scenarios—evaluate against your security standards and consider other [authentication methods](https://docs.akeyless.io/docs/auth-with-api-key) if your organization requires them.
 
 ## Why the product may say “Username” and “Password” (important)
 
