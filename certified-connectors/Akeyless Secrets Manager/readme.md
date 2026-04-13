@@ -11,7 +11,12 @@ This connector calls the Akeyless REST API to retrieve secrets. **Access Id** an
 
 ## Where to enter Access Id and Access Key
 
-When you **create or edit the connection**, Power Platform shows **Access Id** and **Access Key** (from `connectionParameters` in `apiProperties.json`). They are stored on the connection and sent as **Basic** authentication to the connector script.
+The OpenAPI file declares **Basic** security (`securityDefinitions` / `security`) so Power Platform sends **`Authorization: Basic …`** on each request using the connection.
+
+1. **In the custom connector (designer):** open **Security** → **Authentication type** must be **Basic authentication** (it should align with the OpenAPI; if you changed the Swagger, **Update connector** after re-import).  
+2. **In a flow or app:** add an action from this connector → **Sign in** / **Create connection** → enter **Access Id** and **Access Key** once. Those values are stored on the **connection**, not on each action.
+
+If you still see the script error about missing credentials, **re-import** or **Update from OpenAPI** so the definition includes Basic security, then **delete the old connection** and create a new one.
 
 In each flow action you only provide **`secret_name`** (full path to the secret in Akeyless).
 
