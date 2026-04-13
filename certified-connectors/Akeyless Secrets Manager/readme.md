@@ -11,12 +11,19 @@ This connector calls the Akeyless REST API to retrieve secrets. **Access Id** an
 
 ## Where to enter Access Id and Access Key
 
-The OpenAPI file declares **Basic** security (`securityDefinitions` / `security`) so Power Platform sends **`Authorization: Basic …`** on each request using the connection.
+Power Platform’s **Basic authentication** type always uses two underlying slots called **username** and **password** in the HTTP `Authorization: Basic …` header. **That is how the protocol works**, not Akeyless naming. This connector maps them as:
 
-1. **In the custom connector (designer):** open **Security** → **Authentication type** must be **Basic authentication** (it should align with the OpenAPI; if you changed the Swagger, **Update connector** after re-import).  
-2. **In a flow or app:** add an action from this connector → **Sign in** / **Create connection** → enter **Access Id** and **Access Key** once. Those values are stored on the **connection**, not on each action.
+| Basic slot (protocol) | What you enter (Akeyless) |
+|----------------------|---------------------------|
+| Username             | **Akeyless Access ID**    |
+| Password             | **Akeyless Access Key**   |
 
-If you still see the script error about missing credentials, **re-import** or **Update from OpenAPI** so the definition includes Basic security, then **delete the old connection** and create a new one.
+In **apiProperties.json** the connection fields are labeled **Akeyless Access ID** and **Akeyless Access Key** so the connection dialog is clear. The script decodes the Basic header and sends `access-id` / `access-key` to Akeyless `/auth`.
+
+1. **Custom connector → Security:** **Basic authentication** (must match OpenAPI `security`).  
+2. **Flow / app → connection:** create or edit the connection and fill **Akeyless Access ID** and **Akeyless Access Key** (not your Microsoft account).
+
+If the designer still shows the words “Username” / “Password” on the **Security** tab, that is the generic Basic-auth label; the **connection** form should still use the display names above after `apiProperties` is applied. **Re-import** `apiProperties.json` with your connector if labels look wrong.
 
 In each flow action you only provide **`secret_name`** (full path to the secret in Akeyless).
 
