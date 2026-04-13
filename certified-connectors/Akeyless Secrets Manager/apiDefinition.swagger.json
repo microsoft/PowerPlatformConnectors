@@ -1,0 +1,238 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Akeyless Secrets Manager",
+    "description": "Connect to Akeyless Secrets Manager to list vault items and retrieve secret values. Uses an Access ID and Access Key from an API Key authentication method (see Akeyless documentation for API Key auth).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Akeyless",
+      "url": "https://www.akeyless.io/"
+    }
+  },
+  "host": "api.akeyless.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/list-items/local": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Folders and items under the requested path (Akeyless list-items response shape).",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "folders": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Subfolder paths returned by Akeyless."
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "description": "Item metadata entries."
+                  },
+                  "description": "Items (secrets, keys, etc.) in the path."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error or non-success response from the API.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "Error message.",
+                  "title": "Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "List Items",
+        "description": "Lists folders and items under a path in your Akeyless vault. See https://docs.akeyless.io/reference/listitems",
+        "operationId": "ListItems",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Folder path to list (for example `/` or `/Production`). Leave empty for vault root.",
+                  "title": "Folder path"
+                },
+                "filter": {
+                  "type": "string",
+                  "description": "Filter by item name or substring (Akeyless filter parameter).",
+                  "title": "Name filter"
+                },
+                "pagination_token": {
+                  "type": "string",
+                  "description": "Pagination token from a previous response for the next page.",
+                  "title": "Pagination token"
+                },
+                "current_folder": {
+                  "type": "boolean",
+                  "description": "If true, list only direct children of the folder.",
+                  "title": "Current folder only",
+                  "default": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/get-secret-value/text": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Secret value payload from Akeyless.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "SecretValue": {
+                  "type": "string",
+                  "description": "Plain-text secret value for non-JSON static secrets.",
+                  "title": "Secret value"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error or non-success response from the API.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "Error message.",
+                  "title": "Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Secret",
+        "description": "Retrieves a secret value by full path (for example `/Production/Database/Password`).",
+        "operationId": "GetSecret",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "secret_name"
+              ],
+              "properties": {
+                "secret_name": {
+                  "type": "string",
+                  "description": "Full path and name of the secret in Akeyless.",
+                  "title": "Secret path"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/get-secret-value/json": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Structured secret fields (for example username/password).",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "description": "Username field when the secret is stored as credentials.",
+                  "title": "Username"
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Password field when the secret is stored as credentials.",
+                  "title": "Password"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error or non-success response from the API.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "Error message.",
+                  "title": "Error"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Password",
+        "description": "Retrieves a structured username/password style secret with JSON output.",
+        "operationId": "GetPassword",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "secret_name"
+              ],
+              "properties": {
+                "secret_name": {
+                  "type": "string",
+                  "description": "Full path and name of the secret in Akeyless.",
+                  "title": "Secret path"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {},
+  "security": [],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.akeyless.io/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.akeyless.io/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Security;IT Operations"
+    }
+  ]
+}
