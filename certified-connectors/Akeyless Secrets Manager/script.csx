@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -14,111 +13,31 @@ public class Script : ScriptBase
     {
         var operationId = this.Context.OperationId;
 
-        if (string.Equals(operationId, "ListItems", StringComparison.OrdinalIgnoreCase))
-            return await HandleListItemsAsync();
-
         if (string.Equals(operationId, "GetSecret", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(operationId, "GetPassword", StringComparison.OrdinalIgnoreCase))
-            return await HandleGetSecretAsync(operationId);
+            return await HandleGetSecretAsync();
 
         var bad = new HttpResponseMessage(HttpStatusCode.BadRequest);
         bad.Content = CreateJsonContent("{\"error\":\"Unknown operation: " + operationId + "\"}");
         return bad;
     }
 
-    private async Task<HttpResponseMessage> HandleListItemsAsync()
+    private async Task<HttpResponseMessage> HandleGetSecretAsync()
     {
         var bodyText = await this.Context.Request.Content.ReadAsStringAsync();
         var body = string.IsNullOrWhiteSpace(bodyText) ? new JObject() : JObject.Parse(bodyText);
 
-        if (!TryGetCredentials(out var accessId, out var accessKey, body))
-        {
-            var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            err.Content = CreateJsonContent("{\"error\":\"Configure the connection with Access Id and Access Key, or supply access-id and access-key in the body.\"}");
-            return err;
-        }
-
-        var authReq = new HttpRequestMessage(HttpMethod.Post, ApiHost + "/auth");
-        authReq.Content = CreateJsonContent(new JObject
-        {
-            ["access-id"] = accessId,
-            ["access-key"] = accessKey,
-            ["access-type"] = "access_key"
-        }.ToString());
-
-        var authResp = await this.Context.SendAsync(authReq, this.CancellationToken);
-        var authText = await authResp.Content.ReadAsStringAsync();
-
-        if (!authResp.IsSuccessStatusCode)
-        {
-            var err = new HttpResponseMessage(authResp.StatusCode);
-            err.Content = CreateJsonContent(
-                new JObject { ["error"] = "Authentication failed", ["details"] = authText }.ToString());
-            return err;
-        }
-
-        var tToken = (string)JObject.Parse(authText)["token"];
-        if (string.IsNullOrEmpty(tToken))
-        {
-            var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            err.Content = CreateJsonContent("{\"error\":\"Auth response did not include a token\"}");
-            return err;
-        }
-
-        var path = (string)body["path"] ?? (string)body["Path"] ?? "";
-        var filter = (string)body["filter"] ?? (string)body["Filter"];
-        var paginationToken = (string)body["pagination_token"] ?? (string)body["pagination-token"];
-        var currentFolder = body["current_folder"] ?? body["current-folder"];
-        var currentFolderBool = currentFolder != null && currentFolder.Type == JTokenType.Boolean
-            ? currentFolder.Value<bool>()
-            : string.Equals((string)currentFolder, "true", StringComparison.OrdinalIgnoreCase);
-
-        var listBody = new JObject
-        {
-            ["token"] = tToken,
-            ["path"] = path,
-            ["accessibility"] = "regular",
-            ["json"] = true,
-            ["current-folder"] = currentFolderBool
-        };
-
-        if (!string.IsNullOrEmpty(filter))
-            listBody["filter"] = filter;
-        if (!string.IsNullOrEmpty(paginationToken))
-            listBody["pagination-token"] = paginationToken;
-
-        var listReq = new HttpRequestMessage(HttpMethod.Post, ApiHost + "/list-items");
-        listReq.Content = CreateJsonContent(listBody.ToString());
-
-        var listResp = await this.Context.SendAsync(listReq, this.CancellationToken);
-        var listText = await listResp.Content.ReadAsStringAsync();
-
-        var finalResp = new HttpResponseMessage(listResp.StatusCode);
-        finalResp.Content = CreateJsonContent(listText);
-        return finalResp;
-    }
-
-    private async Task<HttpResponseMessage> HandleGetSecretAsync(string operationId)
-    {
-        var bodyText = await this.Context.Request.Content.ReadAsStringAsync();
-        var body = string.IsNullOrWhiteSpace(bodyText) ? new JObject() : JObject.Parse(bodyText);
-
-        if (!TryGetCredentials(out var accessId, out var accessKey, body))
-        {
-            var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            err.Content = CreateJsonContent("{\"error\":\"Configure the connection with Access Id and Access Key, or supply access-id and access-key in the body.\"}");
-            return err;
-        }
-
+        var accessId = (string)body["access-id"] ?? (string)body["Access Id"] ?? (string)body["accessId"];
+        var accessKey = (string)body["access-key"] ?? (string)body["Access Key"] ?? (string)body["accessKey"];
         var secretName = (string)body["secret_name"] ?? (string)body["Secret Name"] ?? (string)body["name"];
-        if (string.IsNullOrEmpty(secretName))
+
+        if (string.IsNullOrEmpty(accessId) || string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretName))
         {
             var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            err.Content = CreateJsonContent("{\"error\":\"secret_name is required\"}");
+            err.Content = CreateJsonContent(
+                "{\"error\":\"access-id, access-key, and secret_name are required on each action (per exported connector).\"}");
             return err;
         }
-
-        var useJsonOutput = string.Equals(operationId, "GetPassword", StringComparison.OrdinalIgnoreCase);
 
         var authReq = new HttpRequestMessage(HttpMethod.Post, ApiHost + "/auth");
         authReq.Content = CreateJsonContent(new JObject
@@ -148,7 +67,7 @@ public class Script : ScriptBase
             ["token"] = tToken,
             ["accessibility"] = "regular",
             ["ignore-cache"] = "false",
-            ["json"] = useJsonOutput
+            ["json"] = false
         }.ToString());
 
         var secretResp = await this.Context.SendAsync(secretReq, this.CancellationToken);
@@ -157,41 +76,5 @@ public class Script : ScriptBase
         var finalResp = new HttpResponseMessage(secretResp.StatusCode);
         finalResp.Content = CreateJsonContent(secretText);
         return finalResp;
-    }
-
-    private bool TryGetCredentials(out string accessId, out string accessKey, JObject body)
-    {
-        accessId = null;
-        accessKey = null;
-
-        if (this.Context.Request.Headers.TryGetValues("Authorization", out var authHeaders))
-        {
-            var authHeader = authHeaders.FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(authHeader) &&
-                authHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var encoded = authHeader.Substring(6).Trim();
-                    var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
-                    var sep = decoded.IndexOf(':');
-                    if (sep > 0)
-                    {
-                        accessId = decoded.Substring(0, sep);
-                        accessKey = decoded.Substring(sep + 1);
-                        if (!string.IsNullOrEmpty(accessId) && !string.IsNullOrEmpty(accessKey))
-                            return true;
-                    }
-                }
-                catch
-                {
-                    // fall through to body
-                }
-            }
-        }
-
-        accessId = (string)body["access-id"] ?? (string)body["Access Id"] ?? (string)body["accessId"];
-        accessKey = (string)body["access-key"] ?? (string)body["Access Key"] ?? (string)body["accessKey"];
-        return !string.IsNullOrEmpty(accessId) && !string.IsNullOrEmpty(accessKey);
     }
 }
