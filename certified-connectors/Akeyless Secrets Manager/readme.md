@@ -1,6 +1,6 @@
 # Akeyless Secrets Manager
 
-This connector calls the Akeyless REST API to retrieve secrets. **Access Id** and **Access Key** are configured **once** on the connection; each action only needs the **secret path** (`secret_name`).
+This connector calls the Akeyless REST API to retrieve secrets. **Akeyless Access ID** and **Akeyless Access Key** are configured **once** on the connection; each action only needs the **secret path** (`secret_name`).
 
 ## Publisher: Akeyless
 
@@ -9,25 +9,33 @@ This connector calls the Akeyless REST API to retrieve secrets. **Access Id** an
 - Akeyless account with permission to authenticate and read the target secrets.
 - An **API Key** authentication method with **Access ID** and **Access Key** ([Authenticate with API Key](https://docs.akeyless.io/docs/auth-with-api-key)).
 
-## Where to enter Access Id and Access Key
+## Why the product may say “Username” and “Password” (important)
 
-Power Platform’s **Basic authentication** type always uses two underlying slots called **username** and **password** in the HTTP `Authorization: Basic …` header. **That is how the protocol works**, not Akeyless naming. This connector maps them as:
+Power Platform and the HTTP standard use a connection type called **Basic authentication**. In that standard, the two credential fields are always named **username** and **password** in the protocol. **Those names are fixed by Microsoft and the web standard — they are not Akeyless-specific.**
 
-| Basic slot (protocol) | What you enter (Akeyless) |
-|----------------------|---------------------------|
-| Username             | **Akeyless Access ID**    |
-| Password             | **Akeyless Access Key**   |
+**What you should do:** Ignore the generic words *username* and *password* as meaning “Microsoft account” or “Windows login.” For this connector they mean:
 
-In **apiProperties.json** the connection fields are labeled **Akeyless Access ID** and **Akeyless Access Key** so the connection dialog is clear. The script decodes the Basic header and sends `access-id` / `access-key` to Akeyless `/auth`.
+| What you might see in the UI | What you actually enter |
+|-------------------------------|-------------------------|
+| Username (or “Akeyless Access ID” if labels updated) | Your **Akeyless Access ID** from the Akeyless Console (often starts with `p-`) |
+| Password (or “Akeyless Access Key” if labels updated) | Your **Akeyless Access Key** from the same API Key authentication method |
 
-1. **Custom connector → Security:** **Basic authentication** (must match OpenAPI `security`).  
-2. **Flow / app → connection:** create or edit the connection and fill **Akeyless Access ID** and **Akeyless Access Key** (not your Microsoft account).
+**Do not enter:** your Microsoft 365 email, your Power Platform sign-in, or any password other than the **Akeyless Access Key** secret.
 
-If the designer still shows the words “Username” / “Password” on the **Security** tab, that is the generic Basic-auth label; the **connection** form should still use the display names above after `apiProperties` is applied. **Re-import** `apiProperties.json` with your connector if labels look wrong.
+**Do enter:** exactly the **Access ID** and **Access Key** that Akeyless issued for API Key authentication, as described in [Akeyless API Key documentation](https://docs.akeyless.io/docs/auth-with-api-key).
 
-In each flow action you only provide **`secret_name`** (full path to the secret in Akeyless).
+The connector receives those two values in the standard Basic header, then calls Akeyless `/auth` using `access-id` and `access-key` as Akeyless expects.
 
-**Optional override:** You can still pass `access-id` and `access-key` in the action body; if present, they take precedence over the connection (for advanced scenarios).
+### Where to type them in Power Automate / Power Apps
+
+1. **Custom connector (authoring):** **Security** → authentication type **Basic authentication** (required for this connector).
+2. **When you use the connector in a flow or app:** when you **create or edit the connection** (Sign in / Connections), you will see two fields. Use them only for **Akeyless Access ID** and **Akeyless Access Key**, in that order (first field = Access ID, second field = Access Key).
+
+On some screens the **Security** tab of the connector designer may still show the generic labels “Username” and “Password.” That is normal for Basic auth. The **connection** experience in flows should show clearer names (**Akeyless Access ID** / **Akeyless Access Key**) when the connector’s `apiProperties.json` is imported; if not, use the table above as the mapping.
+
+### What you enter on each action
+
+For **Get Secret** and **Get Password**, you only need **`secret_name`** (the full path to the secret in Akeyless), unless you intentionally override credentials in the body for advanced scenarios.
 
 ## Supported operations
 
@@ -48,7 +56,7 @@ Retrieves structured credential-style fields (`json: true` on the Akeyless `get-
 
 1. Validate: `paconn validate --api-def apiDefinition.swagger.json`.
 2. Import `apiDefinition.swagger.json`, `apiProperties.json`, and `script.csx` as a custom connector.
-3. Create a **connection** and enter **Access Id** and **Access Key** once; test **Get Secret** and **Get Password** with a real `secret_name`.
+3. Create a **connection** and enter your **Akeyless Access ID** and **Akeyless Access Key** once; test **Get Secret** and **Get Password** with a real `secret_name`.
 
 ## Certification
 
