@@ -1,0 +1,662 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Dewey",
+    "description": "Dewey turns document collections into a research-grade knowledge base. Ingest PDFs, Word docs, and more; then search, query, and extract structured insights — all from your automation flows.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Dewey Support",
+      "url": "https://meetdewey.com",
+      "email": "support@meetdewey.com"
+    }
+  },
+  "host": "api.meetdewey.com",
+  "basePath": "/v1",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://meetdewey.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://meetdewey.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Productivity"
+    }
+  ],
+  "paths": {
+    "/integration/webhooks/document-ready": {
+      "x-ms-notification-content": {
+        "description": "Document ready event payload",
+        "schema": { "$ref": "#/definitions/WebhookPayload" }
+      },
+      "post": {
+        "summary": "When a document is ready",
+        "description": "Triggers when a document finishes processing and is ready to search. Use this to start a flow as soon as a newly uploaded document has been indexed.",
+        "operationId": "TriggerDocumentReady",
+        "x-ms-trigger": "single",
+        "security": [{ "api_key": [] }],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["url"],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "title": "Webhook URL",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscription registered",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Subscription ID",
+                  "x-ms-summary": "Subscription ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/integration/webhooks/document-error": {
+      "x-ms-notification-content": {
+        "description": "Document error event payload",
+        "schema": { "$ref": "#/definitions/WebhookPayload" }
+      },
+      "post": {
+        "summary": "When a document has an error",
+        "description": "Triggers when a document fails to process. Use this to alert your team or retry ingestion when processing fails.",
+        "operationId": "TriggerDocumentError",
+        "x-ms-trigger": "single",
+        "security": [{ "api_key": [] }],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["url"],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "title": "Webhook URL",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscription registered",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Subscription ID",
+                  "x-ms-summary": "Subscription ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/integration/webhooks/{id}": {
+      "delete": {
+        "summary": "Unsubscribe from document event",
+        "description": "Removes a webhook subscription. Called automatically when a flow is deleted or disabled.",
+        "operationId": "UnsubscribeDocumentEvent",
+        "x-ms-visibility": "internal",
+        "security": [{ "api_key": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Subscription ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Unsubscribed successfully"
+          }
+        }
+      }
+    },
+
+    "/collections": {
+      "get": {
+        "summary": "List collections",
+        "description": "Returns all collections in your organisation.",
+        "operationId": "ListCollections",
+        "security": [{ "api_key": [] }],
+        "responses": {
+          "200": {
+            "description": "List of collections",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Collection" }
+            }
+          }
+        }
+      }
+    },
+
+    "/collections/{collectionId}": {
+      "get": {
+        "summary": "Get collection",
+        "description": "Returns details for a single collection.",
+        "operationId": "GetCollection",
+        "security": [{ "api_key": [] }],
+        "parameters": [{ "$ref": "#/parameters/collectionId" }],
+        "responses": {
+          "200": {
+            "description": "Collection details",
+            "schema": { "$ref": "#/definitions/Collection" }
+          },
+          "404": { "description": "Collection not found" }
+        }
+      }
+    },
+
+    "/collections/{collectionId}/documents/upload-url": {
+      "post": {
+        "summary": "Get document upload URL",
+        "description": "Returns a pre-signed S3 URL to upload a document. After uploading the file directly to that URL with an HTTP PUT, call 'Confirm document upload' to begin processing. Use 'Wait for document' to block until the document is indexed.",
+        "operationId": "GetDocumentUploadUrl",
+        "security": [{ "api_key": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/collectionId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "filename",
+                "contentType",
+                "fileSizeBytes",
+                "contentHash"
+              ],
+              "properties": {
+                "filename": {
+                  "type": "string",
+                  "title": "Filename",
+                  "x-ms-summary": "Filename",
+                  "description": "Original filename including extension (e.g. report.pdf)"
+                },
+                "contentType": {
+                  "type": "string",
+                  "title": "Content Type",
+                  "x-ms-summary": "Content Type",
+                  "description": "MIME type of the file (e.g. application/pdf)"
+                },
+                "fileSizeBytes": {
+                  "type": "integer",
+                  "title": "File Size (bytes)",
+                  "x-ms-summary": "File Size (bytes)",
+                  "description": "Exact byte length of the file"
+                },
+                "contentHash": {
+                  "type": "string",
+                  "title": "SHA-256 Hash",
+                  "x-ms-summary": "SHA-256 Hash",
+                  "description": "SHA-256 hex digest of the file contents, used for deduplication"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Upload URL ready. documentId is always returned; uploadUrl is null when the file was already indexed (duplicate).",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "documentId": {
+                  "type": "string",
+                  "title": "Document ID",
+                  "x-ms-summary": "Document ID"
+                },
+                "uploadUrl": {
+                  "type": "string",
+                  "title": "Upload URL",
+                  "x-ms-summary": "Upload URL",
+                  "description": "Pre-signed S3 URL. PUT your file to this URL (expires in 15 minutes). Null when the file is already indexed."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/collections/{collectionId}/documents/{documentId}/confirm": {
+      "post": {
+        "summary": "Confirm document upload",
+        "description": "Tells Dewey that the file upload to S3 is complete and processing should begin. Call this after a successful PUT to the upload URL.",
+        "operationId": "ConfirmDocumentUpload",
+        "security": [{ "api_key": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/collectionId" },
+          { "$ref": "#/parameters/documentId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Processing started",
+            "schema": { "$ref": "#/definitions/Document" }
+          },
+          "404": { "description": "Document not found" }
+        }
+      }
+    },
+
+    "/documents/{documentId}": {
+      "get": {
+        "summary": "Get document",
+        "description": "Returns the current status and metadata for a document.",
+        "operationId": "GetDocument",
+        "security": [{ "api_key": [] }],
+        "parameters": [{ "$ref": "#/parameters/documentId" }],
+        "responses": {
+          "200": {
+            "description": "Document details",
+            "schema": { "$ref": "#/definitions/Document" }
+          },
+          "404": { "description": "Document not found" }
+        }
+      }
+    },
+
+    "/documents/{documentId}/wait": {
+      "get": {
+        "summary": "Wait for document",
+        "description": "Blocks until the document reaches a terminal state (ready or error) and returns the result. Times out after 5 minutes with a 408 response. Use this after 'Confirm document upload' to pause a flow until the document is searchable.",
+        "operationId": "WaitForDocument",
+        "security": [{ "api_key": [] }],
+        "parameters": [{ "$ref": "#/parameters/documentId" }],
+        "responses": {
+          "200": {
+            "description": "Document reached terminal state",
+            "schema": { "$ref": "#/definitions/Document" }
+          },
+          "404": { "description": "Document not found" },
+          "408": {
+            "description": "Timed out waiting for processing to complete"
+          }
+        }
+      }
+    },
+
+    "/collections/{collectionId}/research/sync": {
+      "post": {
+        "summary": "Research collection",
+        "description": "Runs an agentic research loop against the collection and returns a complete answer with cited sources. Ideal for deep question-answering flows where you need a synthesised response rather than raw chunks.",
+        "operationId": "ResearchCollection",
+        "security": [{ "api_key": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/collectionId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["q"],
+              "properties": {
+                "q": {
+                  "type": "string",
+                  "title": "Question",
+                  "x-ms-summary": "Question",
+                  "description": "Research question to answer"
+                },
+                "depth": {
+                  "type": "string",
+                  "title": "Depth",
+                  "x-ms-summary": "Depth",
+                  "description": "Controls how thoroughly the collection is searched (default: balanced)",
+                  "x-ms-visibility": "advanced",
+                  "enum": ["quick", "balanced", "deep", "exhaustive"],
+                  "default": "balanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Research complete",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "answer": {
+                  "type": "string",
+                  "title": "Answer",
+                  "x-ms-summary": "Answer",
+                  "description": "Full research answer with inline source citations"
+                },
+                "sessionId": {
+                  "type": "string",
+                  "title": "Session ID",
+                  "x-ms-summary": "Session ID"
+                },
+                "sources": {
+                  "type": "array",
+                  "title": "Sources",
+                  "x-ms-summary": "Sources",
+                  "items": { "$ref": "#/definitions/ResearchSource" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/collections/{collectionId}/query": {
+      "post": {
+        "summary": "Search collection",
+        "description": "Runs a hybrid semantic and keyword search against the collection and returns the most relevant text chunks. Ideal for RAG flows where you want to feed context into a subsequent AI step.",
+        "operationId": "SearchCollection",
+        "security": [{ "api_key": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/collectionId" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["q"],
+              "properties": {
+                "q": {
+                  "type": "string",
+                  "title": "Query",
+                  "x-ms-summary": "Query",
+                  "description": "Natural language search query"
+                },
+                "limit": {
+                  "type": "integer",
+                  "title": "Result limit",
+                  "x-ms-summary": "Result limit",
+                  "description": "Maximum number of chunks to return (default 10, max 50)",
+                  "x-ms-visibility": "advanced",
+                  "default": 10,
+                  "maximum": 50
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/SearchResult" }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "parameters": {
+    "collectionId": {
+      "name": "collectionId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Collection",
+      "description": "The collection ID",
+      "x-ms-url-encoding": "single",
+      "x-ms-dynamic-values": {
+        "operationId": "ListCollections",
+        "value-collection": "",
+        "value-path": "id",
+        "value-title": "name"
+      }
+    },
+    "documentId": {
+      "name": "documentId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Document ID",
+      "description": "The document ID",
+      "x-ms-url-encoding": "single"
+    }
+  },
+
+  "definitions": {
+    "Collection": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "title": "ID", "x-ms-summary": "ID" },
+        "name": { "type": "string", "title": "Name", "x-ms-summary": "Name" },
+        "description": {
+          "type": "string",
+          "title": "Description",
+          "x-ms-summary": "Description"
+        },
+        "visibility": {
+          "type": "string",
+          "title": "Visibility",
+          "x-ms-summary": "Visibility"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "Document": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "title": "ID", "x-ms-summary": "ID" },
+        "collectionId": {
+          "type": "string",
+          "title": "Collection ID",
+          "x-ms-summary": "Collection ID"
+        },
+        "filename": {
+          "type": "string",
+          "title": "Filename",
+          "x-ms-summary": "Filename"
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "x-ms-summary": "Status",
+          "description": "One of: pending, uploading, processing, sectioned, embedded, ready, error"
+        },
+        "pageCount": {
+          "type": "integer",
+          "title": "Page Count",
+          "x-ms-summary": "Page Count"
+        },
+        "sectionCount": {
+          "type": "integer",
+          "title": "Section Count",
+          "x-ms-summary": "Section Count"
+        },
+        "chunkCount": {
+          "type": "integer",
+          "title": "Chunk Count",
+          "x-ms-summary": "Chunk Count"
+        },
+        "fileSizeBytes": {
+          "type": "integer",
+          "title": "File Size (bytes)",
+          "x-ms-summary": "File Size (bytes)"
+        },
+        "errorMessage": {
+          "type": "string",
+          "title": "Error Message",
+          "x-ms-summary": "Error Message"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "SearchResult": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "title": "Content",
+          "x-ms-summary": "Content"
+        },
+        "documentId": {
+          "type": "string",
+          "title": "Document ID",
+          "x-ms-summary": "Document ID"
+        },
+        "filename": {
+          "type": "string",
+          "title": "Filename",
+          "x-ms-summary": "Filename"
+        },
+        "sectionTitle": {
+          "type": "string",
+          "title": "Section Title",
+          "x-ms-summary": "Section Title"
+        },
+        "score": {
+          "type": "number",
+          "title": "Relevance Score",
+          "x-ms-summary": "Relevance Score"
+        }
+      }
+    },
+    "ResearchSource": {
+      "type": "object",
+      "properties": {
+        "chunkId": {
+          "type": "string",
+          "title": "Chunk ID",
+          "x-ms-summary": "Chunk ID"
+        },
+        "content": {
+          "type": "string",
+          "title": "Content",
+          "x-ms-summary": "Content"
+        },
+        "documentId": {
+          "type": "string",
+          "title": "Document ID",
+          "x-ms-summary": "Document ID"
+        },
+        "filename": {
+          "type": "string",
+          "title": "Filename",
+          "x-ms-summary": "Filename"
+        },
+        "sectionId": {
+          "type": "string",
+          "title": "Section ID",
+          "x-ms-summary": "Section ID"
+        },
+        "sectionTitle": {
+          "type": "string",
+          "title": "Section Title",
+          "x-ms-summary": "Section Title"
+        },
+        "sectionLevel": {
+          "type": "integer",
+          "title": "Section Level",
+          "x-ms-summary": "Section Level"
+        }
+      }
+    },
+    "WebhookPayload": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Event ID",
+          "x-ms-summary": "Event ID"
+        },
+        "type": {
+          "type": "string",
+          "title": "Event Type",
+          "x-ms-summary": "Event Type"
+        },
+        "created": {
+          "type": "integer",
+          "title": "Timestamp",
+          "x-ms-summary": "Timestamp"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "documentId": {
+              "type": "string",
+              "title": "Document ID",
+              "x-ms-summary": "Document ID"
+            },
+            "collectionId": {
+              "type": "string",
+              "title": "Collection ID",
+              "x-ms-summary": "Collection ID"
+            },
+            "filename": {
+              "type": "string",
+              "title": "Filename",
+              "x-ms-summary": "Filename"
+            },
+            "status": {
+              "type": "string",
+              "title": "Status",
+              "x-ms-summary": "Status"
+            },
+            "errorMessage": {
+              "type": "string",
+              "title": "Error Message",
+              "x-ms-summary": "Error Message"
+            }
+          }
+        }
+      }
+    }
+  }
+}
