@@ -90,6 +90,5 @@ Use this flow when you need explicit deduplication or want to avoid routing larg
 API reference: [meetdewey.com/docs](https://meetdewey.com/docs)
 
 ## Known Issues and Limitations
-- **Research queries** use Server-Sent Events and cannot be used as a connector action. Use **Search collection** to retrieve relevant chunks and feed them into an AI Builder or Azure OpenAI step instead.
 - **Wait for document** holds the flow connection open for up to 5 minutes. For high-volume ingestion flows, set trigger concurrency to limit parallel executions.
 - **SHA-256 (advanced flow only)**: SHA-256 is not natively available in Power Automate expressions. If you use **Get document upload URL**, compute the hash with `base64(sha256(fileContent))` and `dataUriToString()`, or pass the SharePoint `eTag` as a consistent proxy. The **Upload document** action handles deduplication internally — no hash required.
