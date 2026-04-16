@@ -20,7 +20,7 @@ Within Planful platform UI, you need to first create "Data Load Rules" (DLRs). T
 ### File load
 This operation allows you to load data from flat file (csv) into Planful. You also need to specify the 'Data Load Rule' when using this operation to send the file to Planful.
 
-## Ontaining credentials
+## Obtaining credentials
 
 - Step1: Sign in to your Planful account
 
