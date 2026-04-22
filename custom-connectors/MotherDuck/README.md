@@ -11,13 +11,7 @@ The server implements the [Model Context Protocol](https://modelcontextprotocol.
 
 ## Authentication
 
-The connector uses API key authentication. When creating a connection, enter your MotherDuck access token in the `Authorization` field, prefixed with `Bearer `:
-
-```text
-Bearer <your_motherduck_token>
-```
-
-The connector sends this value as the `Authorization` header on every request to the MCP server.
+The connector uses API key authentication. When creating a connection, paste your MotherDuck access token into the **MotherDuck access token** field. The connector sets the `Authorization: Bearer <token>` header on every request to the MCP server — you don't need to add the `Bearer ` prefix yourself.
 
 ## Usage
 
