@@ -17,7 +17,7 @@ Accepts a multi-formatted string of numbers which all will be summed together an
 Will parse out any HTML/XML tags, and special characters from text input. 
 
 ## Obtaining Credentials
-Visit https://buy.stripe.com/bIY3fN6sNeLacEwfYY and purchase a subscription. You will recieve an email with your subscription key. Your email address and the subscription key will be used for credentials for this connector.
+Visit https://buy.stripe.com/bIY3fN6sNeLacEwfYY and purchase a subscription. You will receive an email with your subscription key. Your email address and the subscription key will be used for credentials for this connector.
 
 ## Known Issues and Limitations
 Sanitize Input will leave special characters such as . and @ as they are valid in email addresses.
