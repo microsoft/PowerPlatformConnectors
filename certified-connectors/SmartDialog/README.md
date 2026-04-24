@@ -19,7 +19,7 @@ This connector can be used to send and recieve SMS messages using the SmartDialo
 
 ## Supported Actions
 
-- New Message (Trigger for recieving messages)
+- New Message (Trigger for receiving messages)
 - Send Message
 - Send WhatsApp Message
 - Send Discussion Reply Message
