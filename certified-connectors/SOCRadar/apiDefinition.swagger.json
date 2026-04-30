@@ -1,0 +1,309 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "SOCRadar Threat Intelligence",
+    "description": "Real-time threat intelligence enrichment, dark web leak monitoring and IOC feeds from SOCRadar Extended Threat Intelligence (XTI) platform.",
+    "version": "1.0",
+    "contact": {
+      "name": "SOCRadar Support",
+      "url": "https://socradar.io/support",
+      "email": "support@socradar.io"
+    }
+  },
+  "host": "platform.socradar.com",
+  "basePath": "/api",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "x-ms-connector-metadata": [
+    { "propertyName": "Website", "propertyValue": "https://socradar.io" },
+    { "propertyName": "Privacy policy", "propertyValue": "https://socradar.io/privacy-policy" },
+    { "propertyName": "Categories", "propertyValue": "Security;IT Operations" }
+  ],
+  "securityDefinitions": {
+    "api_key": { "type": "apiKey", "in": "header", "name": "Api-Key" }
+  },
+  "security": [{ "api_key": [] }],
+  "paths": {
+    "/company/{company_id}/threathose/query": {
+      "get": {
+        "summary": "Query threat intelligence (IOC lookup)",
+        "description": "Search SOCRadar threat intelligence for an indicator (IP, domain, hash, URL) or boolean query. Use this to enrich Defender alerts.",
+        "operationId": "QueryThreatIntel",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "maxLength": 500,
+            "x-ms-summary": "Indicator or boolean query",
+            "description": "IOC value (IP, domain, hash, URL) or boolean expression"
+          },
+          {
+            "name": "requested_fields",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Fields to return",
+            "description": "Comma-separated list of fields to include in the response",
+            "default": "content_hash,categorized_tags,insert_date,content_link,source,content_preview"
+          },
+          {
+            "name": "checkpoint",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Pagination checkpoint",
+            "description": "Opaque pagination token returned by a previous response",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Results", "schema": { "$ref": "#/definitions/ThreatIntelResult" } },
+          "401": { "description": "Unauthorized" },
+          "429": { "description": "Rate limited" }
+        }
+      }
+    },
+    "/company/{company_id}/threathose/content/details": {
+      "get": {
+        "summary": "Get detailed threat content",
+        "description": "Retrieve full threat content body for a specific item identified by its content hash.",
+        "operationId": "GetThreatDetails",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          },
+          {
+            "name": "content_hash",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Content hash",
+            "description": "Unique hash identifying the threat content item"
+          }
+        ],
+        "responses": { "200": { "description": "Threat content", "schema": { "type": "object" } } }
+      }
+    },
+    "/threat/intelligence/feed_list/{collection_uuid}.json": {
+      "get": {
+        "summary": "Get IOC feed for a collection",
+        "description": "Download a curated IOC feed for the specified collection UUID.",
+        "operationId": "GetIOCFeed",
+        "parameters": [
+          {
+            "name": "collection_uuid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Collection UUID",
+            "x-ms-url-encoding": "single",
+            "description": "Unique identifier of the IOC feed collection"
+          }
+        ],
+        "responses": { "200": { "description": "IOC feed", "schema": { "$ref": "#/definitions/IOCFeed" } } }
+      }
+    },
+    "/company/{company_id}/dark-web-monitoring/pii-exposure/v2": {
+      "get": {
+        "summary": "Get PII exposure findings",
+        "description": "Retrieve personally identifiable information (PII) exposure findings detected by SOCRadar dark web monitoring.",
+        "operationId": "GetPIIExposure",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Start date",
+            "description": "Filter findings detected on or after this date (YYYY-MM-DD)"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "End date",
+            "description": "Filter findings detected on or before this date (YYYY-MM-DD)"
+          }
+        ],
+        "responses": { "200": { "description": "Findings", "schema": { "type": "array", "items": { "$ref": "#/definitions/DarkWebFinding" } } } }
+      }
+    },
+    "/company/{company_id}/dark-web-monitoring/black-market/v2": {
+      "get": {
+        "summary": "Get black market findings",
+        "description": "Retrieve dark web black market findings related to the company.",
+        "operationId": "GetBlackMarket",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          }
+        ],
+        "responses": { "200": { "description": "Findings", "schema": { "type": "array", "items": { "$ref": "#/definitions/DarkWebFinding" } } } }
+      }
+    },
+    "/company/{company_id}/dark-web-monitoring/botnet-data/v2": {
+      "get": {
+        "summary": "Get botnet data findings",
+        "description": "Retrieve stealer log and botnet credential findings associated with the company.",
+        "operationId": "GetBotnetData",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          }
+        ],
+        "responses": { "200": { "description": "Findings", "schema": { "type": "array", "items": { "$ref": "#/definitions/DarkWebFinding" } } } }
+      }
+    },
+    "/company/{company_id}/dark-web-monitoring/im-content/v2": {
+      "get": {
+        "summary": "Get IM channel findings",
+        "description": "Retrieve instant messaging (Telegram, Discord) channel findings mentioning the company.",
+        "operationId": "GetIMContent",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          }
+        ],
+        "responses": { "200": { "description": "Findings", "schema": { "type": "array", "items": { "$ref": "#/definitions/DarkWebFinding" } } } }
+      }
+    },
+    "/company/{company_id}/dark-web-monitoring/suspicious-content/v2": {
+      "get": {
+        "summary": "Get suspicious content findings",
+        "description": "Retrieve suspicious surface web and dark web content findings related to the company.",
+        "operationId": "GetSuspiciousContent",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          }
+        ],
+        "responses": { "200": { "description": "Findings", "schema": { "type": "array", "items": { "$ref": "#/definitions/DarkWebFinding" } } } }
+      }
+    }
+  },
+  "definitions": {
+    "ThreatIntelResult": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "content_hash": { "type": "string" },
+              "categorized_tags": { "type": "array", "items": { "type": "string" } },
+              "insert_date": { "type": "string" },
+              "content_link": { "type": "string" },
+              "content_date": { "type": "string" },
+              "content_preview": { "type": "string" },
+              "source": { "type": "string" },
+              "checkpoint": { "type": "string" }
+            }
+          }
+        },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "next_checkpoint": { "type": "string" },
+            "has_more": { "type": "boolean" },
+            "total_results": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "IOCFeed": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["ipv4","domain","url","md5","sha1","sha256","email"] },
+              "value": { "type": "string" },
+              "score": { "type": "integer" },
+              "confidence": { "type": "integer" },
+              "first_seen": { "type": "string" },
+              "last_seen": { "type": "string" },
+              "tags": { "type": "array", "items": { "type": "string" } },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "DarkWebFinding": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "source": { "type": "string" },
+        "severity": { "type": "string", "enum": ["low","medium","high","critical"] },
+        "detected_at": { "type": "string" },
+        "affected_entity": { "type": "string" },
+        "evidence": { "type": "string" }
+      }
+    }
+  }
+}
