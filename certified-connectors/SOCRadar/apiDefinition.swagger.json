@@ -107,7 +107,7 @@
     "/threat/intelligence/feed_list/{collection_uuid}.json": {
       "get": {
         "summary": "Get IOC feed for a collection",
-        "description": "Download a curated IOC feed for the specified collection UUID.",
+        "description": "Download a curated IOC feed for one collection UUID. Each collection is a distinct endpoint; call this operation once per UUID and supply the optional collection_name parameter to identify results when iterating over multiple collections.",
         "operationId": "GetIOCFeed",
         "parameters": [
           {
@@ -117,10 +117,24 @@
             "type": "string",
             "x-ms-summary": "Collection UUID",
             "x-ms-url-encoding": "single",
-            "description": "Unique identifier of the IOC feed collection"
+            "description": "Unique identifier of the IOC feed collection (e.g. a1b2c3d4-0000-0000-0000-111122223333)"
+          },
+          {
+            "name": "collection_name",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Collection name",
+            "description": "Human-readable label for this collection (e.g. 'Ransomware IPs'). Passed through in the response envelope for traceability when looping over multiple collections.",
+            "x-ms-visibility": "advanced"
           }
         ],
-        "responses": { "200": { "description": "IOC feed", "schema": { "$ref": "#/definitions/IOCFeed" } } }
+        "responses": {
+          "200": {
+            "description": "IOC feed",
+            "schema": { "$ref": "#/definitions/IOCFeedResponse" }
+          }
+        }
       }
     },
     "/company/{company_id}/dark-web-monitoring/pii-exposure/v2": {
@@ -271,9 +285,18 @@
         }
       }
     },
-    "IOCFeed": {
+    "IOCFeedResponse": {
       "type": "object",
+      "description": "Response envelope for a single IOC feed collection. When iterating over multiple collections use the collection_name field to identify the source.",
       "properties": {
+        "collection_name": {
+          "type": "string",
+          "description": "Echo of the collection_name query parameter — use this to correlate results when looping over multiple collections."
+        },
+        "collection_uuid": {
+          "type": "string",
+          "description": "UUID of the collection that produced these results."
+        },
         "results": {
           "type": "array",
           "items": {
@@ -289,6 +312,21 @@
               "description": { "type": "string" }
             }
           }
+        }
+      }
+    },
+    "CollectionInput": {
+      "type": "object",
+      "description": "A single entry in a collection list variable. Build an array of these in Power Automate and feed it into an 'Apply to each' loop targeting GetIOCFeed.",
+      "required": ["uuid"],
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "description": "Collection UUID (e.g. a1b2c3d4-0000-0000-0000-111122223333)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional human-readable label (e.g. 'Ransomware IPs'). Pass as collection_name to GetIOCFeed."
         }
       }
     },
