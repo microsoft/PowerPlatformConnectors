@@ -1,4 +1,4 @@
-﻿// Copyright (c) Snowflake Inc.
+// Copyright (c) Snowflake Inc.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic
@@ -64,11 +64,6 @@ namespace SnowflakeV2CoreLogic
         public const string DataSets = "datasets";
 
         /// <summary>
-        /// Default dataSet for Snowflake
-        /// </summary>
-        public const string DefaultDataSetName = "default";
-
-        /// <summary>
         /// Default number of records to skip
         /// </summary>
         public const long Skip = 0;
@@ -108,6 +103,7 @@ namespace SnowflakeV2CoreLogic
         public const string Schema = "schema";
         public const string Warehouse = "warehouse";
         public const string Role = "role";
+        public const string UseCaseInsensitiveFilters = "useCaseInsensitiveFilters";
 
         public const string HeaderApimReferrer = "x-ms-apim-referrer";
 

@@ -3,13 +3,12 @@
 
 namespace SnowflakeV2CoreLogic.Providers
 {
-    using System;
-    using System.Net.Http;
-    using System.Threading.Tasks;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Interfaces;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
     using Microsoft.Extensions.Logging;
-    using SnowflakeV2CoreLogic;
+    using System;
+    using System.Net.Http;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Implements operations performed on DataSets.
@@ -17,15 +16,18 @@ namespace SnowflakeV2CoreLogic.Providers
     public class SnowflakeDataSetProvider : IDataSetProvider
     {
         private readonly ILogger logger;
+        private readonly SnowflakeConnectionParametersProvider connectionParametersProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnowflakeDataSetProvider"/> class.
         /// </summary>
         /// <param name="logger">logger</param>
         public SnowflakeDataSetProvider(
-            ILogger logger)
+            ILogger logger,
+            SnowflakeConnectionParametersProvider connectionParametersProvider)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.connectionParametersProvider = connectionParametersProvider;
         }
 
         /// <inheritdoc />
@@ -39,11 +41,12 @@ namespace SnowflakeV2CoreLogic.Providers
                 throw new ArgumentNullException("request");
             }
 
+            var connectionParameters = connectionParametersProvider.GetConnectionParameters();
             var dataSetCollection = new DataSetCollection
             {
                 new DataSet()
                 {
-                    Name = Constants.DefaultDataSetName,
+                    Name = $"{connectionParameters.Server},{connectionParameters.Database}",
                     DisplayName = "dataset",
                 },
             };

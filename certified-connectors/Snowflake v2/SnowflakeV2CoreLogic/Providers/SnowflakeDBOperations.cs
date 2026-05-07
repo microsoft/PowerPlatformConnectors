@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -19,6 +19,7 @@ namespace SnowflakeV2CoreLogic.Providers
     using SnowflakeV2CoreLogic;
     using SnowflakeV2CoreLogic.Exceptions;
     using SnowflakeV2CoreLogic.Models;
+    using SnowflakeV2CoreLogic.Models.ConnectorModels;
     using SnowflakeV2CoreLogic.Models.SnowflakeAPIModels;
     using SnowflakeV2CoreLogic.Utilities;
 
@@ -46,7 +47,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             using (var latencyLogger = new LatencyLogger(Constants.GetObjectAsync, logger))
             {
-                var metadataStatement = $"SELECT * FROM information_schema.columns where TABLE_NAME=?";
+                var metadataStatement = $"SELECT * FROM information_schema.columns WHERE TABLE_NAME=? AND TABLE_SCHEMA=CURRENT_SCHEMA()";
 
                 // Add request bindings
                 SnowflakeRequestBindings metaDataBindings = new SnowflakeRequestBindings();
@@ -98,6 +99,34 @@ namespace SnowflakeV2CoreLogic.Providers
             return snowflakeTableData;
         }
 
+        public async Task<SnowflakeTableData?> FetchPartitionAsync(
+            string statementHandle,
+            int partition,
+            SnowflakeConnectionParameters connectionParameters)
+        {
+            SnowflakeTableData? snowflakeTableData = null;
+
+            using (var latencyLogger = new LatencyLogger("FetchPartitionAsync", logger))
+            {
+                string validatedServer = connectionParameters.Server.EnsureValidSnowflakeUrl("Server");
+                var headerParameters = new HeaderParameters { Instance = validatedServer };
+
+                // Snowflake only returns resultSetMetaData with partition 0.
+                // Fetch partition 0 (for metadata) and the target partition (for data) in parallel.
+                var metadataTask = snowflakeClient.GetResultsAsync(
+                    httpClient, statementHandle, headerParameters, new QueryParameters { Partition = 0 });
+                var dataTask = snowflakeClient.GetResultsAsync(
+                    httpClient, statementHandle, headerParameters, new QueryParameters { Partition = partition });
+
+                await Task.WhenAll(metadataTask, dataTask).ConfigureAwait(true);
+
+                snowflakeTableData = SnowflakeTableData.FromPartitionResponse(
+                    metadataTask.Result.ResultSetMetaData, dataTask.Result);
+            }
+
+            return snowflakeTableData;
+        }
+
         public async Task<SnowflakeTableData?> ListAllItemsAsync(
             string table,
             string endpoint,
@@ -133,7 +162,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 orderBy = options.OrderBy != null ? options.OrderBy.RawValue : null;
                 top = queryOptions.IsTopSet ? queryOptions.Top.ToString() : Constants.DefaultNumberOfRowsToReturn.ToString();
                 skip = queryOptions.Skip.ToString();
-                filter = ConvertODataFilterToSql(options);
+                filter = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
             }
 
             using (var latencyLogger = new LatencyLogger(Constants.ListAllItemsAsync, logger))
@@ -203,12 +232,12 @@ namespace SnowflakeV2CoreLogic.Providers
             return snowflakeTableData;
         }
 
-        public string ConvertODataFilterToSql(ODataQueryOptions options)
+        public string ConvertODataFilterToSql(ODataQueryOptions options, bool useCaseInsensitiveFilters = false)
         {
             if (options?.Filter != null)
             {
                 var filterClause = options.Filter.FilterClause;
-                var sqlConverter = new ODataToSqlParser();
+                var sqlConverter = new ODataToSqlParser(useCaseInsensitiveFilters);
                 return sqlConverter.ParseFilterToSql(filterClause);
             }
 
@@ -392,7 +421,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 string filterText = string.Empty;
                 if (options.Filter != null)
                 {
-                    filterText = ConvertODataFilterToSql(options);
+                    filterText = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
                     query = $"SELECT COUNT(*) FROM {table} WHERE {filterText}";
                 }   
             }
