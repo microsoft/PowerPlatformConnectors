@@ -183,4 +183,3 @@ Impact:
 - [apiDefinition.swagger.json](./apiDefinition.swagger.json): custom connector trigger definition
 - [apiProperties.json](./apiProperties.json): connector properties, auth inputs, icon color, and policies
 - [script.csx](./script.csx): policy script that performs API key or JWT exchange before forwarding requests
-- [icon.png](./icon.png): connector icon
