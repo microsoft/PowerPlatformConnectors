@@ -1,0 +1,743 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "PDF Tools by Tachytelic",
+    "description": "PDF Tools is a free set of actions for working with PDF files. It provides capabilities to merge, split, extract pages, extract text, optimize file size, and manage PDF metadata. Designed to simplify PDF operations in your flows.",
+    "version": "1.0.0.3",
+    "contact": {
+      "name": "Paul Murana",
+      "url": "https://tachytelic.net",
+      "email": "paulie@tachytelic.net"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://tachytelic.net/pdf-tools-for-power-automate/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://tachytelic.net/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data"
+    }
+  ],
+  "host": "pdf.tachytelic.net",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/optimize": {
+      "post": {
+        "summary": "Optimize PDF",
+        "description": "Optimise a PDF by cleaning and recompressing internal objects. Takes a base64-encoded PDF and returns an optimised base64-encoded PDF.",
+        "operationId": "OptimizePdf",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "PdfFileContent"
+              ],
+              "properties": {
+                "PdfFileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "PDF File Content",
+                  "description": "Base64-encoded content of the PDF file to optimize.",
+                  "x-ms-summary": "PDF File Content"
+                },
+                "Mode": {
+                  "type": "string",
+                  "enum": [
+                    "aggressive",
+                    "safe"
+                  ],
+                  "default": "aggressive",
+                  "title": "Optimization Mode",
+                  "description": "Choose aggressive for maximum compression or safe for compatibility.",
+                  "x-ms-summary": "Mode"
+                },
+                "Garbage": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4,
+                  "default": 4,
+                  "title": "Garbage Collection Level",
+                  "description": "Level of unused object removal (0-4). Higher values remove more unused data.",
+                  "x-ms-summary": "Garbage Level",
+                  "x-ms-visibility": "advanced"
+                },
+                "Deflate": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Apply Deflate Compression",
+                  "description": "Whether to apply deflate compression to streams.",
+                  "x-ms-summary": "Deflate",
+                  "x-ms-visibility": "advanced"
+                },
+                "Clean": {
+                  "type": "boolean",
+                  "default": true,
+                  "title": "Clean Document",
+                  "description": "Whether to clean and sanitize the PDF content.",
+                  "x-ms-summary": "Clean",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Optimised PDF content.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "OptimizedPdf": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "Optimized PDF",
+                  "description": "Base64-encoded content of the optimized PDF file.",
+                  "x-ms-summary": "Optimized PDF"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extractpages": {
+      "post": {
+        "summary": "Extract Specific Pages",
+        "description": "Extract specific pages from a PDF file using a page range (e.g., \"1-3,7\").",
+        "operationId": "ExtractPdfPages",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Base64-encoded PDF content and the page range to extract.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "PdfFileContent",
+                "PageRange"
+              ],
+              "properties": {
+                "PdfFileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "PDF File Content",
+                  "description": "Base64-encoded content of the PDF file.",
+                  "x-ms-summary": "PDF File Content"
+                },
+                "PageRange": {
+                  "type": "string",
+                  "title": "Page Range",
+                  "description": "Page range to extract (e.g., \"1-3,7\")",
+                  "x-ms-summary": "Page Range"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Extracted PDF content",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ExtractedPdf": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "Extracted PDF",
+                  "description": "Base64-encoded content of the extracted PDF file.",
+                  "x-ms-summary": "Extracted PDF"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid input",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string",
+                  "description": "Error message"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string",
+                  "description": "Error message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getinfo": {
+      "post": {
+        "summary": "Extract Info",
+        "description": "Extracts detailed metadata from a PDF file (e.g., Title, Author, CreationDate, PDF version, File size, etc.).",
+        "operationId": "GetPdfInfo",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Base64-encoded PDF file content",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "PdfFileContent"
+              ],
+              "properties": {
+                "PdfFileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "The base64-encoded content of the PDF file",
+                  "title": "PDF File Content",
+                  "x-ms-summary": "PDF File Content"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The metadata information of the PDF",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Title": {
+                  "type": "string",
+                  "title": "Document Title",
+                  "description": "The PDF's Title metadata",
+                  "x-ms-summary": "Title"
+                },
+                "Author": {
+                  "type": "string",
+                  "title": "Document Author",
+                  "description": "The PDF's Author metadata",
+                  "x-ms-summary": "Author"
+                },
+                "Subject": {
+                  "type": "string",
+                  "title": "Document Subject",
+                  "description": "The PDF's Subject metadata",
+                  "x-ms-summary": "Subject"
+                },
+                "Keywords": {
+                  "type": "string",
+                  "title": "Document Keywords",
+                  "description": "The PDF's Keywords metadata",
+                  "x-ms-summary": "Keywords"
+                },
+                "IsEncrypted": {
+                  "type": "boolean",
+                  "title": "Is Encrypted?",
+                  "description": "Indicates whether the PDF is encrypted",
+                  "x-ms-summary": "Is Encrypted"
+                },
+                "HasText": {
+                  "type": "boolean",
+                  "title": "Has Extractable Text?",
+                  "description": "Indicates whether the PDF pages contain extractable text",
+                  "x-ms-summary": "Has Text"
+                },
+                "Creator": {
+                  "type": "string",
+                  "title": "Creator Application",
+                  "description": "The name of the application used to create the PDF",
+                  "x-ms-summary": "Creator"
+                },
+                "Producer": {
+                  "type": "string",
+                  "title": "Producer",
+                  "description": "The software that produced the PDF",
+                  "x-ms-summary": "Producer"
+                },
+                "CreationDate": {
+                  "type": "string",
+                  "title": "Creation Date",
+                  "description": "The date the PDF was originally created",
+                  "x-ms-summary": "Creation Date"
+                },
+                "ModDate": {
+                  "type": "string",
+                  "title": "Modification Date",
+                  "description": "The date the PDF was last modified",
+                  "x-ms-summary": "Modification Date"
+                },
+                "PageCount": {
+                  "type": "integer",
+                  "title": "Page Count",
+                  "description": "The total number of pages in the PDF",
+                  "x-ms-summary": "Page Count"
+                },
+                "PDFVersion": {
+                  "type": "string",
+                  "title": "PDF Version",
+                  "description": "The PDF specification version (e.g., 1.4, 1.7)",
+                  "x-ms-summary": "PDF Version"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, such as missing required parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setmetadata": {
+      "post": {
+        "summary": "Set Metadata",
+        "description": "Sets metadata values (title, author, dates, etc.) on a PDF file.",
+        "operationId": "SetPdfMetadata",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Base64-encoded PDF and metadata values to set.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "PdfFileContent"
+              ],
+              "properties": {
+                "PdfFileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "PDF File Content",
+                  "description": "Base64-encoded PDF content",
+                  "x-ms-summary": "PDF File Content"
+                },
+                "Title": {
+                  "type": "string",
+                  "title": "Title",
+                  "description": "The document title",
+                  "x-ms-summary": "Title"
+                },
+                "Author": {
+                  "type": "string",
+                  "title": "Author",
+                  "description": "The document author",
+                  "x-ms-summary": "Author"
+                },
+                "Subject": {
+                  "type": "string",
+                  "title": "Subject",
+                  "description": "The document subject",
+                  "x-ms-summary": "Subject"
+                },
+                "Keywords": {
+                  "type": "string",
+                  "title": "Keywords",
+                  "description": "Document keywords",
+                  "x-ms-summary": "Keywords"
+                },
+                "CreationDate": {
+                  "type": "string",
+                  "title": "Creation Date",
+                  "description": "Date the PDF was created",
+                  "x-ms-summary": "Creation Date"
+                },
+                "ModificationDate": {
+                  "type": "string",
+                  "title": "Modification Date",
+                  "description": "Date the PDF was modified",
+                  "x-ms-summary": "Modification Date"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The PDF with updated metadata",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "UpdatedPdf": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "Updated PDF",
+                  "description": "Base64-encoded PDF with updated metadata",
+                  "x-ms-summary": "Updated PDF"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid input",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extracttext": {
+      "post": {
+        "summary": "Extract Text",
+        "description": "Extracts all text from a PDF file, with optional StartPage and EndPage.",
+        "operationId": "ExtractTextFromPdf",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "PDF file content and optional page range",
+            "schema": {
+              "type": "object",
+              "required": [
+                "PdfFileContent"
+              ],
+              "properties": {
+                "PdfFileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "PDF File Content",
+                  "description": "Base64-encoded PDF file",
+                  "x-ms-summary": "PDF File Content"
+                },
+                "StartPage": {
+                  "type": "integer",
+                  "title": "Start Page",
+                  "description": "Page number to start extraction from",
+                  "x-ms-summary": "Start Page"
+                },
+                "EndPage": {
+                  "type": "integer",
+                  "title": "End Page",
+                  "description": "Page number to stop extraction at (inclusive)",
+                  "x-ms-summary": "End Page"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Extracted PDF text",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ExtractedText": {
+                  "type": "string",
+                  "title": "Extracted Text",
+                  "description": "Combined text from all selected pages",
+                  "x-ms-summary": "Extracted Text"
+                },
+                "ExtractedTextByPage": {
+                  "type": "array",
+                  "title": "Text by Page",
+                  "description": "Array of extracted text objects per page",
+                  "x-ms-summary": "Text By Page",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Page": {
+                        "type": "integer",
+                        "title": "Page Number",
+                        "description": "Page number of the PDF",
+                        "x-ms-summary": "Page"
+                      },
+                      "Text": {
+                        "type": "string",
+                        "title": "Text Content",
+                        "description": "Text extracted from that page",
+                        "x-ms-summary": "Text"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/split": {
+      "post": {
+        "summary": "Split PDF",
+        "description": "Splits a PDF file either by a fixed number of pages or by specified page ranges.",
+        "operationId": "SplitPdf",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "PDF content and split parameters.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "PdfFileContent",
+                "SplitType"
+              ],
+              "properties": {
+                "PdfFileContent": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "PDF File Content",
+                  "description": "Base64-encoded content of the PDF file.",
+                  "x-ms-summary": "PDF File Content"
+                },
+                "SplitType": {
+                  "type": "string",
+                  "title": "Split Type",
+                  "description": "Choose how to split the PDF.",
+                  "x-ms-summary": "Split Type",
+                  "enum": [
+                    "NumberOfPages",
+                    "SpecifiedRanges"
+                  ],
+                  "x-ms-enum-values": [
+                    {
+                      "displayName": "Split by Number of Pages",
+                      "value": "NumberOfPages"
+                    },
+                    {
+                      "displayName": "Split by Specified Ranges",
+                      "value": "SpecifiedRanges"
+                    }
+                  ]
+                },
+                "PagesPerSplit": {
+                  "type": "integer",
+                  "title": "Pages Per Split",
+                  "description": "Number of pages per output file (required if Split Type is Number Of Pages).",
+                  "x-ms-summary": "Pages Per Split"
+                },
+                "PageRanges": {
+                  "type": "string",
+                  "title": "Page Ranges",
+                  "description": "Page ranges to split by (e.g., \"1-2,4\") (required if Split Type is Specified Ranges).",
+                  "x-ms-summary": "Page Ranges"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of split PDF files (Base64-encoded).",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "SplitPdfs": {
+                  "title": "Split PDF Files",
+                  "x-ms-summary": "Split PDFs",
+                  "description": "Array of split PDF files.",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "byte",
+                    "description": "Base64-encoded content of a split PDF part."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/merge": {
+      "post": {
+        "summary": "Merge PDFs",
+        "description": "Merges multiple PDF files provided as base64 strings into a single PDF.",
+        "operationId": "MergePdfs",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "PdfFiles"
+              ],
+              "properties": {
+                "PdfFiles": {
+                  "type": "array",
+                  "description": "An array of base64-encoded PDF files to merge",
+                  "title": "PDF Files",
+                  "x-ms-summary": "PDF Files",
+                  "items": {
+                    "type": "string",
+                    "format": "byte"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The merged PDF content",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "MergedPdf": {
+                  "type": "string",
+                  "format": "byte",
+                  "title": "Merged PDF",
+                  "x-ms-summary": "Merged PDF",
+                  "description": "Base64-encoded content of the merged PDF"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "Error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {},
+  "security": []
+}
