@@ -1,77 +1,68 @@
 # PROS AI
 
-Unlock the full potential of your sales team with the seamless integration of PROS AI and Microsoft Copilot for Sales. Our innovative connector is designed to streamline your sales processes and supercharge your decision-making capabilities, giving you a competitive edge in today's fast-paced business landscape.
+Unlock the full potential of your sales team with the seamless integration of PROS AI and Microsoft Copilot for Sales. The PROS AI connector streamlines sales processes and enhances decision-making capabilities, giving you a competitive edge in today's fast-paced business landscape.
 
 ## Publisher: PROS
 
 ## Prerequisites
 
-You will need the following to proceed:
+To use the PROS AI connector, ensure you have the following:
 
-- A PROS Smart Configure Price Quote (CPQ) for CRM license
-- A Dynamics 365 Sales or Salesforce Sales Cloud license
-- A Microsoft Power Apps or Power Automate license
-- A Microsoft Copilot for Sales license
-- The Power Platform CLI tools
-
-## Obtaining Credentials
-
-The PROS AI connector uses OAuth 2.0 authentication.
-
-For additional steps to set up authentication based on your CRM system, please reach out to [PROS Support](https://pros.com/customer-experience/customer-support/).
+- **Licenses**:
+  - PROS Smart Configure Price Quote (CPQ) for CRM
+  - Dynamics 365 Sales or Salesforce Sales Cloud
+  - Microsoft Power Apps or Power Automate
+  - Microsoft Copilot for Sales
+- **Tools**:
+  - Power Platform CLI tools
 
 ## Supported Operations
 
 The connector supports the following operations:
 
-### `GET testconnection`
+- **`GET testconnection`**: Test the connection.
+- **`GET getrelatedrecords`**: Retrieve related records from PROS Smart CPQ to display in Copilot for Sales when viewing CRM record details.
 
-Test the connection.
+## Authentication
 
-### `GET getrelatedrecords`
-
-Get related records from PROS Smart CPQ to be shown in Copilot for Sales when a seller views details of a CRM record.
+The PROS AI connector uses **OAuth 2.0 authentication**. For setup instructions specific to your CRM system, contact [PROS Support](https://pros.com/customer-experience/customer-support/).
 
 ## Getting Started
 
-Contact [PROS Support](https://pros.com/customer-experience/customer-support/) for more information.
+For setup and configuration assistance, contact [PROS Support](https://pros.com/customer-experience/customer-support/).
 
 ## Known Issues and Limitations
 
-A user must have a PROS Smart Configure Price license in order to use this connector.
-
-The PROS AI connector is compatible with Dynamics 365 Sales and Salesforce Sales Cloud.
+- A PROS Smart Configure Price Quote (CPQ) license is required to use this connector.
+- The connector is compatible with **Dynamics 365 Sales** and **Salesforce Sales Cloud**.
 
 ## Frequently Asked Questions
 
 ### What is PROS Smart Configure Price Quote (CPQ) for CRM?
 
-PROS Smart CPQ is a cloud-based, enterprise-class CPQ solution that enables sales teams to quickly and accurately create quotes for all types of products and services. It seamlessly integrates with CRM platforms like Dynamics 365 and Salesforce, providing a native user experience and leveraging the data and security features of these platforms.
-
-### What is PROS AI?
-
-Unlock the full potential of your sales team with the seamless integration of PROS AI and Microsoft Copilot for Sales. Our innovative connector is designed to streamline your sales processes and supercharge your decision-making capabilities, giving you a competitive edge in today's fast-paced business landscape.
+PROS Smart CPQ is a cloud-based, enterprise-class solution that enables sales teams to quickly and accurately create quotes for all types of products and services. It integrates seamlessly with CRM platforms like Dynamics 365 and Salesforce, providing a native user experience and leveraging the data and security features of these platforms.
 
 ### What is the PROS AI connector?
 
-The PROS AI connector enables users to integrate PROS AI with Microsoft Copilot for Sales, Power Automate and Power Apps.
+The PROS AI connector integrates PROS AI with Microsoft Copilot for Sales, Power Automate, and Power Apps. It streamlines sales processes and enhances decision-making capabilities, empowering sales teams to perform at their best.
 
-### What's the authentication type?
+### What authentication type does the connector use?
 
-The PROS AI connector uses OAuth 2.0 authentication.
+The PROS AI connector uses **OAuth 2.0 authentication**.
 
-### What's the difference between the standard and preview connector?
+### What is the difference between the standard and preview connector?
 
-The standard connector is designed for production use, while the preview connector (PROS AI PV connector) is intended for testing and provides early access to upcoming features. The preview connector connects exclusively to PROS Preview environments, allowing you to test configurations before updating the production environment.
+- **Standard Connector**: Designed for production use.
+- **Preview Connector**: Intended for testing and provides early access to upcoming features. It connects exclusively to PROS Preview environments, allowing you to test configurations before updating the production environment.
 
-### How do I get a PROS Smart CPQ for CRM license?
+### How do I obtain licenses for PROS Smart CPQ or PROS AI?
 
 Contact [PROS Support](https://pros.com/customer-experience/customer-support/) for more information.
 
 ## Deployment Instructions
 
-Please use [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as custom connector in Microsoft Power Apps.
+Follow [these instructions](https://docs.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in Microsoft Power Apps.
 
 ## Support
 
-For further support, please contact ConnectSupport@pros.com
+For further assistance, contact [ConnectSupport@pros.com](mailto:ConnectSupport@pros.com).
