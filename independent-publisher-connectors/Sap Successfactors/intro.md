@@ -82,6 +82,6 @@ The SuccessFactors Career Connector is intended to become a dedicated integratio
 
 This phased approach allows the connector to deliver value early while keeping the architecture flexible for future SuccessFactors Career module extensions.
 
-# Contact
+## Contact
 Sascha Bajonczak (xbeejayx@hotmail.com)
 https://blog.bajonczak.com
