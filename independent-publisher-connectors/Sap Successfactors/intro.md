@@ -81,3 +81,7 @@ Future development will focus on expanding the recruiting scope, especially arou
 The SuccessFactors Career Connector is intended to become a dedicated integration layer for SAP SuccessFactors recruiting and career processes. The first implementation step focuses on candidates and candidate metadata enrichment. Future versions will expand the connector to support job offerings and broader recruiting workflows.
 
 This phased approach allows the connector to deliver value early while keeping the architecture flexible for future SuccessFactors Career module extensions.
+
+# Contact
+Sascha Bajonczak (xbeejayx@hotmail.com)
+https://blog.bajonczak.com
