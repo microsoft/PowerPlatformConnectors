@@ -1,6 +1,6 @@
 # Converter by Power2Apps for Power Automate
 
-Converter by Power2Apps is a single connector for everyday document and data work. It can convert between CSV, JSON, XML and Excel, create and edit Word (DOCX) files, generate, merge, protect, compress or split PDFs, render HTML to PDF or image, produce charts, QR codes and images, run regular expressions and flatten SharePoint search results — all without custom code or extra services.
+Convert PDF, HTML, Word, Excel, CSV, JSON, XML, PowerPoint and images. Create, merge, split, protect, unlock, compress PDF (incl. PDF/A) and extract pages. Create or edit Word (DOCX), Excel (XLSX), PowerPoint (PPTX) files. Convert CSV/JSON/XML to Excel/CSV, HTML to PDF/image, HTML tables to Excel/CSV. Resize, rotate, compress images (PNG, JPEG, WebP, BMP, SVG). Generate QR codes, barcodes, charts, watermarks. Run regex, translate text, parse XRechnung/ZUGFeRD e-invoices.
 
 ## Setup
 
@@ -89,9 +89,6 @@ Extracts form or content controls (e.g., text fields, checkboxes, dropdowns) fro
 ### Extract results from Send HTTP request to SharePoint search
 Extract results from the action 'Send HTTP request to SharePoint' search - https://converter.power2apps.com/6000_SharePoint/V6011_ConvertSharePointSearchResults
 
-### Convert HTML Table to JSON
-Convert an HTML table to a JSON or extract the first HTML table from an URL and convert it to a JSON - https://converter.power2apps.com/7000_html/V7012_ConvertHtmlTableToJson
-
 ### Convert HTML to Word File
 Convert HTML to a Word file (DOCX) - https://converter.power2apps.com/7000_html/V7041_ConvertHtmlToWord
 
@@ -161,9 +158,6 @@ Updates a Word content control or form element - https://converter.power2apps.co
 ### Update multiple Word Content Controls
 Updates several Word content controls or form element within one action - https://converter.power2apps.com/5000_word/V5151_UpdateMultipleWordContentControls
 
-### Convert CSV to Excel
-Convert a CSV to a Excel file (XLSX) - https://converter.power2apps.com/1000_fileConversions/V1034_ConvertCsvToExcel
-
 ### Convert JSON to Excel
 Convert a JSON to an Excel file (XLSX) - https://converter.power2apps.com/1000_fileConversions/V1064_ConvertJsonToExcel
 
@@ -227,8 +221,26 @@ Convert an HTML to a PDF or convert an URL containing HTML to a PDF - https://co
 ### Convert HTML or URL to JPG Image
 Convert an HTML to an JPG (JPEG) Image or convert an URL containing HTML to an JPG (JPEG) Image - https://converter.power2apps.com/7000_html/V7032_ConvertHtmlToImage
 
-### Convert HTML Table to Excel File
-Convert an HTML table to a Excel (XLSX) or extract the first HTML table from an URL and convert it to a Excel - https://converter.power2apps.com/7000_html/V7081_ConvertHtmlTableToExcel
-
 ### Convert XRechnung to PDF
 Convert a XRechnung to a PDF - https://converter.power2apps.com/8000_XRechnung/V8011_ConvertXRechnungToPdf
+
+### Convert multiple CSVs to one Excel
+Convert multiple CSV files into a single Excel file (XLSX), one sheet per CSV - https://converter.power2apps.com/1000_fileConversions/V1110_ConvertMultiCsvToExcel
+
+### Merge multiple PDFs
+Merge multiple PDF files into one. Optional: add page numbers, bookmarks per source PDF, and PDF metadata - https://converter.power2apps.com/4000_pdf/V4120_MergeMultiplePdfs
+
+### Convert XML to Excel
+Convert an XML to an Excel file (XLSX). Hierarchical XML is automatically flattened (nested elements become prefixed columns) - https://converter.power2apps.com/1000_fileConversions/V1120_ConvertXmlToExcel
+
+### Convert XML to CSV
+Convert an XML to a CSV. Hierarchical XML is automatically flattened into one CSV table - https://converter.power2apps.com/1000_fileConversions/V1130_ConvertXmlToCsv
+
+### Convert CSV to Excel
+Convert a CSV to an Excel file (XLSX). Lets you pick the CSV input encoding (UTF-8, Windows-1252, Latin-1, UTF-16) for cases where special characters arrive garbled - https://converter.power2apps.com/1000_fileConversions/V1035_ConvertCsvToExcel
+
+### Convert HTML Table to JSON
+Convert an HTML table to JSON. Tolerates messy tables: rows with extra or missing cells are auto-padded, duplicate column names are made unique. Any fixes are listed in the 'Notes' field - https://converter.power2apps.com/7000_html/V7013_ConvertHtmlTableToJson
+
+### Convert HTML Table to Excel File
+Convert HTML table(s) to an Excel (XLSX). Tolerates messy tables: rows with extra or missing cells are auto-padded, duplicate column names are made unique. Any fixes are listed in the 'Notes' field - https://converter.power2apps.com/7000_html/V7082_ConvertHtmlTableToExcel
