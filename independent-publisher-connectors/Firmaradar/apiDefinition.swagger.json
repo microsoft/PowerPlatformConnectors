@@ -1,0 +1,2480 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Firmaradar",
+    "version": "0.3.0",
+    "description": "Enrichment platform for Norwegian company intelligence. Fuses data from BRREG, Skatteetaten, foreign PEP and sanctions registers, public-grants registries and distress signals, with proprietary enrichment on top (risk scoring, fuzzy person matching, group analytics, audit-grade compliance). Built for KYC, AML, credit, ownership and risk workflows.",
+    "contact": {
+      "name": "Firmaradar support",
+      "url": "https://firmaradar.no/kontakt",
+      "email": "support@firmaradar.no"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "host": "firmaradar.no",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "OAuth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://mcp.firmaradar.no/oauth/authorize",
+      "tokenUrl": "https://mcp.firmaradar.no/oauth/token",
+      "scopes": {
+        "mcp": "Read company data via MCP-delegated access"
+      }
+    },
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "name": "X-API-Key",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "OAuth2": [
+        "mcp"
+      ]
+    },
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "definitions": {
+    "Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "description": "Norsk feilmelding ment for sluttbruker / agent."
+        },
+        "error_code": {
+          "type": "string",
+          "description": "Stabil maskinlesbar feilkode (når tilgjengelig)."
+        }
+      },
+      "required": [
+        "error"
+      ]
+    },
+    "Company": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string",
+          "description": "9-sifret norsk organisasjonsnummer.",
+          "example": "923609016"
+        },
+        "navn": {
+          "type": "string",
+          "example": "Equinor ASA"
+        },
+        "organisasjonsform": {
+          "type": "string",
+          "description": "BRREG-organisasjonsform-kode (AS, ASA, ENK, ...)."
+        },
+        "konsernstruktur": {
+          "type": "object",
+          "description": "Konsern-tre med morselskap + døtre."
+        },
+        "eiere": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Owner"
+          }
+        },
+        "tildelinger": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "brreg_tildelinger": {
+          "type": "object"
+        },
+        "endringer": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Announcement"
+          }
+        },
+        "financial_metrics": {
+          "$ref": "#/definitions/FinancialMetrics"
+        },
+        "foretaksklassifisering": {
+          "type": "object"
+        },
+        "summary": {
+          "type": "string",
+          "description": "LLM-vennlig kort oppsummering."
+        }
+      },
+      "required": [
+        "orgnr"
+      ]
+    },
+    "Owner": {
+      "type": "object",
+      "properties": {
+        "navn": {
+          "type": "string"
+        },
+        "orgnr": {
+          "type": "string",
+          "description": "For business owners — eierens orgnr."
+        },
+        "owner_person_key": {
+          "type": "string",
+          "description": "For personlige eiere — stabil nøkkel for /person/shareholdings."
+        },
+        "eierandel_prosent": {
+          "type": "number",
+          "format": "float"
+        },
+        "antall_aksjer": {
+          "type": "integer"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "business",
+            "person",
+            "foreign",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "Role": {
+      "type": "object",
+      "properties": {
+        "rolle_type": {
+          "type": "string",
+          "description": "BRREG-rolle-beskrivelse (Styreleder, Daglig leder, ...)."
+        },
+        "navn": {
+          "type": "string"
+        },
+        "fodselsaar": {
+          "type": "string",
+          "description": "4-sifret fødselsår, eller null."
+        },
+        "fra_dato": {
+          "type": "string",
+          "format": "date"
+        },
+        "til_dato": {
+          "type": "string",
+          "format": "date"
+        },
+        "signatur_alene": {
+          "type": "boolean"
+        },
+        "is_active": {
+          "type": "boolean"
+        }
+      }
+    },
+    "FinancialMetrics": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "regnskapstype": {
+          "type": "string",
+          "enum": [
+            "SELSKAP",
+            "KONSERN"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FinancialYear"
+          }
+        },
+        "freshness": {
+          "type": "object"
+        }
+      }
+    },
+    "FinancialYear": {
+      "type": "object",
+      "properties": {
+        "regnskapsar": {
+          "type": "integer"
+        },
+        "omsetning": {
+          "type": "number"
+        },
+        "driftsresultat": {
+          "type": "number"
+        },
+        "aarsresultat": {
+          "type": "number"
+        },
+        "sum_egenkapital": {
+          "type": "number"
+        },
+        "sum_gjeld": {
+          "type": "number"
+        },
+        "sum_eiendeler": {
+          "type": "number"
+        },
+        "antall_ansatte": {
+          "type": "integer"
+        }
+      }
+    },
+    "Announcement": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "navn": {
+          "type": "string"
+        },
+        "dato": {
+          "type": "string",
+          "format": "date"
+        },
+        "kunngjoring_type": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "hendelse_type": {
+          "type": "string"
+        },
+        "niva1_label": {
+          "type": "string"
+        }
+      }
+    },
+    "PersonHit": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "birth_year": {
+          "type": "string",
+          "description": "Maskert til 4-sifret år eller null."
+        },
+        "owner_person_key": {
+          "type": "string"
+        },
+        "role_person_id": {
+          "type": "string"
+        },
+        "poststed": {
+          "type": "string"
+        },
+        "antall_selskaper": {
+          "type": "integer"
+        }
+      }
+    },
+    "PersonProfile": {
+      "type": "object",
+      "properties": {
+        "owner_person_key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "birth_year": {
+          "type": "string"
+        },
+        "poststed": {
+          "type": "string"
+        },
+        "shareholdings": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "total_ownership_value_nok": {
+          "type": "number"
+        }
+      }
+    },
+    "RolePersonProfile": {
+      "type": "object",
+      "properties": {
+        "role_person_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "birth_year": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Role"
+          }
+        }
+      }
+    },
+    "CompanyHit": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "navn": {
+          "type": "string"
+        },
+        "organisasjonsform": {
+          "type": "string"
+        },
+        "naeringskode": {
+          "type": "string"
+        },
+        "kommune": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "antall_ansatte": {
+          "type": "integer"
+        }
+      }
+    },
+    "CompanySearchResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CompanyHit"
+          }
+        },
+        "next_cursor": {
+          "type": "string"
+        },
+        "total_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "CompareRequest": {
+      "type": "object",
+      "properties": {
+        "orgnrs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 5
+        },
+        "years": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 5
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "omsetning",
+              "driftsresultat",
+              "aarsresultat",
+              "sum_egenkapital",
+              "sum_gjeld",
+              "antall_ansatte"
+            ]
+          }
+        }
+      },
+      "required": [
+        "orgnrs"
+      ]
+    },
+    "CompareResponse": {
+      "type": "object",
+      "properties": {
+        "orgnrs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "years": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "companies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "orgnr": {
+                "type": "string"
+              },
+              "navn": {
+                "type": "string"
+              },
+              "financials_by_year": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "comparison": {
+          "type": "object",
+          "description": "{<metric>: {<orgnr>: [<value_per_year>]}}"
+        },
+        "computed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "OwnershipResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "down",
+            "up",
+            "both"
+          ]
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "owners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Owner"
+          }
+        },
+        "holdings": {
+          "type": "object"
+        }
+      }
+    },
+    "RolesResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Role"
+          }
+        },
+        "total_count": {
+          "type": "integer"
+        },
+        "cached": {
+          "type": "boolean"
+        }
+      }
+    },
+    "SignalsResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "days_back": {
+          "type": "integer"
+        },
+        "kyc_signals": {
+          "type": "object"
+        },
+        "distress": {
+          "type": "object"
+        },
+        "interim_balance": {
+          "type": "object"
+        },
+        "aggregate": {
+          "type": "object"
+        }
+      }
+    },
+    "AmlCheckRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200
+        },
+        "birth_year": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "kategori": {
+          "type": "string",
+          "enum": [
+            "sanksjon",
+            "pep",
+            "both"
+          ],
+          "default": "both"
+        },
+        "min_match_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.85
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "AmlHit": {
+      "type": "object",
+      "properties": {
+        "primart_navn": {
+          "type": "string"
+        },
+        "kategori": {
+          "type": "string"
+        },
+        "entitet_type": {
+          "type": "string"
+        },
+        "kilder": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "match_ratio": {
+          "type": "number"
+        },
+        "match_type": {
+          "type": "string",
+          "enum": [
+            "eksakt",
+            "fuzzy"
+          ]
+        },
+        "ekstern_id": {
+          "type": "string"
+        }
+      }
+    },
+    "AmlCheckResponse": {
+      "type": "object",
+      "properties": {
+        "query_name": {
+          "type": "string"
+        },
+        "query_birth_year": {
+          "type": "integer"
+        },
+        "hits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AmlHit"
+          }
+        },
+        "hit_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "AmlScoreRequest": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "DPA-formål for AML-screening (eks. `kyc_onboarding`).\n"
+        }
+      },
+      "required": [
+        "orgnr"
+      ]
+    },
+    "AmlScoreResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "rapport_id": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "factors": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "NaceCompaniesResponse": {
+      "type": "object",
+      "properties": {
+        "nace_code": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CompanyHit"
+          }
+        },
+        "next_cursor": {
+          "type": "string"
+        },
+        "total_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "RelatedCompaniesResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "via": {
+          "type": "string",
+          "enum": [
+            "person",
+            "address"
+          ]
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "orgnr": {
+                "type": "string"
+              },
+              "navn": {
+                "type": "string"
+              },
+              "relation_strength": {
+                "type": "integer"
+              },
+              "shared_entities": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "total_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "AnnouncementsSearchResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Announcement"
+          }
+        },
+        "next_cursor": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "object"
+        }
+      }
+    },
+    "RiskScoreResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "lav",
+            "moderat",
+            "høy",
+            "kritisk"
+          ]
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "FivResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": "NUES a-e-status, eks. `not_distressed`, `distressed`."
+        },
+        "score": {
+          "type": "number"
+        },
+        "rules_fired": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "KonsernStotteOversikt": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "selskap_stotte": {
+          "type": "object",
+          "description": "Direkte støtte til orgnr (post-#134-skjema).\nDirect grants to the orgnr (post-#134 shape).\n"
+        },
+        "konsern_aggregat": {
+          "type": "object",
+          "description": "Aggregert konsern-støtte oppover i eier-tre.\nAggregated group-level support.\n"
+        },
+        "tildelinger": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "SkattelisterSelskap": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "skatteaar": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "aar": {
+                "type": "integer"
+              },
+              "inntekt": {
+                "type": "number"
+              },
+              "formue": {
+                "type": "number"
+              },
+              "skatt": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "FinancialHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "regnskapstype": {
+          "type": "string",
+          "enum": [
+            "SELSKAP",
+            "KONSERN"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FinancialYear"
+          }
+        },
+        "freshness": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "responses": {
+    "BadRequest": {
+      "description": "Ugyldig request (manglende eller feilformatert parameter)",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "Unauthorized": {
+      "description": "Manglende eller ugyldig autentisering",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "Forbidden": {
+      "description": "Autentisert, men ikke autorisert (manglende tilgangs-flagg)",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "NotFound": {
+      "description": "Ressursen ble ikke funnet",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    },
+    "ServerError": {
+      "description": "Intern feil — prøv igjen, eller kontakt support",
+      "schema": {
+        "$ref": "#/definitions/Error"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Selskap",
+      "description": "Selskaps-data fra BRREG + lokal beriking (regnskap, eierskap, roller).\nCompany data from the Norwegian register with local enrichment.\n"
+    },
+    {
+      "name": "Person",
+      "description": "Aksjonær- og rolle-personer (16-årsgrense, fødselsår-maskering).\nPerson shareholders and role holders (16-year minimum, birth-year masked).\n"
+    },
+    {
+      "name": "Risiko",
+      "description": "Risikoscoring, foretak-i-vanskeligheter, kunngjørings-signaler.\nRisk scoring, financial-distress assessment, change signals.\n"
+    },
+    {
+      "name": "Bransje",
+      "description": "NACE-baserte bransjelister og felles-nettverk-relasjoner.\nIndustry (NACE) lists and shared-network discovery.\n"
+    },
+    {
+      "name": "AML",
+      "description": "Sanksjons/PEP-screening + AML-rapporter (krever DPA).\nSanctions/PEP screening + AML reports (DPA required).\n"
+    },
+    {
+      "name": "Skattelister",
+      "description": "Inntekt, formue og skatt per skatteår (full_ownership-gate, audit-logget).\nTax-lists (income/wealth/tax) per fiscal year — gated and audited.\n"
+    },
+    {
+      "name": "Markedsplass",
+      "description": "Markedsplass-utvidelser eksponert via MCP/Power Automate\n(risikoscoring, FIV, konsernstøtte, AML-rapport, skattelister).\nMarketplace extensions exposed via MCP / Power Automate.\n"
+    }
+  ],
+  "paths": {
+    "/api/v1/company/{orgnr}": {
+      "get": {
+        "operationId": "getCompany",
+        "summary": "Get full company profile",
+        "description": "Returns the full company profile for a Norwegian organization number (orgnr): registry status, NACE-industry, employees, address, financial history, ownership tree and key roles. Combines BRREG, financial data and proprietary enrichment.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "description": "9-sifret organisasjonsnummer.",
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "Komma-separert subset, eks.\n`group,owners,grants,changes,financial_metrics`.\n",
+            "type": "string",
+            "x-ms-summary": "Fields"
+          },
+          {
+            "name": "owners",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "business",
+              "full"
+            ],
+            "x-ms-summary": "Include owners",
+            "description": "If true, includes ownership information in the response."
+          },
+          {
+            "name": "grants",
+            "in": "query",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "x-ms-summary": "Include grants",
+            "description": "If true, includes public-grants data in the response."
+          },
+          {
+            "name": "brreg_grants",
+            "in": "query",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "x-ms-summary": "Include BRREG grants",
+            "description": "If true, includes BRREG public-grants data in the response. Adds one extra upstream call."
+          },
+          {
+            "name": "financial_metrics",
+            "in": "query",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "x-ms-summary": "Financial metrics",
+            "description": "Comma-separated list of financial metrics to include (revenue, operating_result, equity, etc.)."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Company"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/ownership": {
+      "get": {
+        "operationId": "getCompanyOwnership",
+        "summary": "Get ownership tree (up, down or both)",
+        "description": "Returns the ownership tree for a company. `direction=down` lists subsidiaries; `direction=up` traces parent companies; `direction=both` returns the full group. Optional depth (1-12) and include_persons for personal shareholders.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "down",
+              "up",
+              "both"
+            ],
+            "default": "down",
+            "x-ms-summary": "Tree direction",
+            "description": "Tree traversal direction. 'down' returns subsidiaries; 'up' returns parents; 'both' returns the full group."
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 5,
+            "x-ms-summary": "Tree depth",
+            "description": "How many levels of the ownership tree to traverse. Integer 1-12. Higher depth means slower call."
+          },
+          {
+            "name": "include_persons",
+            "in": "query",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "default": 0,
+            "x-ms-summary": "Include persons",
+            "description": "If true, includes personal shareholders in the ownership tree (otherwise only legal entities)."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/OwnershipResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/roles": {
+      "get": {
+        "operationId": "getCompanyRoles",
+        "summary": "Get company roles (board, CEO, signatories)",
+        "description": "Returns BRREG role-holders (chair, board member, CEO, signatory, power of attorney) for a company. Optional filter on role type and inclusion of historical roles.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "include_historic",
+            "in": "query",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "default": 0,
+            "x-ms-summary": "Include historic",
+            "description": "If true, includes historical (resigned) role-holders in addition to current ones."
+          },
+          {
+            "name": "role_type",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "styreleder",
+              "styremedlem",
+              "varamedlem",
+              "daglig_leder",
+              "signatur",
+              "prokura",
+              "revisor"
+            ],
+            "x-ms-summary": "Role type",
+            "description": "Filter on Norwegian role-type code (e.g. styreleder, daglig_leder, signatur). See the Firmaradar docs for the full list."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RolesResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          },
+          "503": {
+            "description": "BRREG midlertidig utilgjengelig",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/changes": {
+      "get": {
+        "operationId": "getCompanyChanges",
+        "summary": "Get BRREG announcements and recent changes",
+        "description": "Returns BRREG announcements (legal events) and recent changes (role, address, signal, signature) within the configured window for a company. Used for monitoring and change tracking.",
+        "tags": [
+          "Selskap",
+          "Risiko"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Announcement"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          },
+          "502": {
+            "description": "BRREG-kunngjøringsoppslag feilet",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/person/search": {
+      "get": {
+        "operationId": "searchPersons",
+        "summary": "Search persons (shareholders and role-holders)",
+        "description": "Search for persons across BRREG role-holders and shareholder registry. Supports fuzzy name matching with initial-expansion and middle-name dropping; optional birth-year filter.",
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "minLength": 2,
+            "x-ms-summary": "Search query",
+            "description": "Free-text search query matched against company name or organization number."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 30,
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of items to return in this page. Default and maximum vary per endpoint."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "shareholders": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PersonHit"
+                  }
+                },
+                "shareholders_count": {
+                  "type": "integer"
+                },
+                "role_persons": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PersonHit"
+                  }
+                },
+                "role_persons_count": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/person/roles/{role_person_id}": {
+      "get": {
+        "operationId": "getPersonRoles",
+        "summary": "Get full role history for a person",
+        "description": "Returns the complete role history (active and historical) for a role-person identified by their stable role_person_id.",
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "role_person_id",
+            "in": "path",
+            "required": true,
+            "description": "Stable ID identifying a role-holder, returned by searchPersons or roles endpoints.",
+            "type": "string",
+            "x-ms-summary": "Role person ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RolePersonProfile"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/person/shareholdings/{owner_person_key}": {
+      "get": {
+        "operationId": "getPersonCompanies",
+        "summary": "Get shareholding portfolio for a person",
+        "description": "Returns all companies a person holds shares in, with ownership percentage and share-class details, identified by stable owner_person_key.",
+        "tags": [
+          "Person"
+        ],
+        "parameters": [
+          {
+            "name": "owner_person_key",
+            "in": "path",
+            "required": true,
+            "description": "Stable key identifying a personal shareholder, returned by searchPersons or ownership endpoints.",
+            "type": "string",
+            "x-ms-summary": "Owner person key",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PersonProfile"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/signals": {
+      "get": {
+        "operationId": "getCompanySignals",
+        "summary": "Aggregated risk signals",
+        "description": "Aggregates signals from three sources: KYC announcement signals (bankruptcy, merger, division), distress classification (FIV) and interim-balance signals.",
+        "tags": [
+          "Risiko"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "ISO-dato (YYYY-MM-DD). Overstyrer default 730 dager bakover.\nCappes til 1825 dager.\n",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Since"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SignalsResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/aml/check": {
+      "post": {
+        "operationId": "checkAmlPep",
+        "summary": "AML and PEP screening (requires DPA headers)",
+        "description": "Screens a person against sanctions and PEP lists. Requires signed DPA and per-call X-FR-Purpose plus X-FR-DPA-Confirmed headers. All calls are audit-logged for 60 months as required by Norwegian KYC regulations.",
+        "tags": [
+          "AML"
+        ],
+        "parameters": [
+          {
+            "name": "X-FR-Purpose",
+            "in": "header",
+            "required": true,
+            "description": "Purpose tag for the AML lookup. One of: kyc_onboarding, kyc_review, risk_monitoring, manual. Required for AML calls and persisted in the audit log.",
+            "type": "string",
+            "maxLength": 500,
+            "x-ms-summary": "Purpose tag"
+          },
+          {
+            "name": "X-FR-DPA-Confirmed",
+            "in": "header",
+            "required": true,
+            "description": "Confirmation that you have a signed Data Processing Agreement covering this AML lookup. Required for AML calls.",
+            "type": "string",
+            "enum": [
+              "true"
+            ],
+            "x-ms-summary": "DPA confirmation"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AmlCheckRequest"
+            },
+            "x-ms-summary": "Request body",
+            "description": "Request payload with operation-specific fields. See the schema linked from this parameter for details."
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AmlCheckResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Manglende DPA-headers",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "AML-rate-limit overskredet",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          },
+          "503": {
+            "description": "AML-repo midlertidig utilgjengelig",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/aml/score": {
+      "post": {
+        "operationId": "getAmlScore",
+        "summary": "Generate AML report and score (two-call flow)",
+        "description": "Generates an AML report for a company and returns a structured score (0-100) with factor breakdown. Server-side two-call flow; client sees one structured response.",
+        "tags": [
+          "AML",
+          "Markedsplass"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AmlScoreRequest"
+            },
+            "x-ms-summary": "Request body",
+            "description": "Request payload with operation-specific fields. See the schema linked from this parameter for details."
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AmlScoreResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/nace/{code}/companies": {
+      "get": {
+        "operationId": "listCompaniesInNace",
+        "summary": "List companies in a NACE-industry code",
+        "description": "Returns companies registered with a given NACE-industry code (prefix match). Supports municipality and employee filters; paginated with stable cursor.",
+        "tags": [
+          "Bransje"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "description": "NACE-kode eller prefix (eks. `47`, `47.11`, `47.110`).",
+            "type": "string",
+            "pattern": "^\\d{2}(?:\\.\\d{1,3})?$",
+            "x-ms-summary": "NACE code",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "aktiv",
+              "konkurs",
+              "under_avvikling",
+              "avregistrert"
+            ],
+            "x-ms-summary": "Status filter",
+            "description": "Filter on legal status (e.g. active, under_liquidation, struck_off)."
+          },
+          {
+            "name": "kommune",
+            "in": "query",
+            "type": "string",
+            "pattern": "^\\d{4}$",
+            "x-ms-summary": "Municipality",
+            "description": "Norwegian municipality code (4 digits, e.g. 0301 for Oslo) used to filter results geographically."
+          },
+          {
+            "name": "min_ansatte",
+            "in": "query",
+            "type": "integer",
+            "minimum": 0,
+            "x-ms-summary": "Min employees",
+            "description": "Minimum number of employees the company should have (inclusive)."
+          },
+          {
+            "name": "max_ansatte",
+            "in": "query",
+            "type": "integer",
+            "minimum": 0,
+            "x-ms-summary": "Max employees",
+            "description": "Maximum number of employees the company should have (inclusive)."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50,
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of items to return in this page. Default and maximum vary per endpoint."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Pagination cursor",
+            "description": "Opaque pagination cursor returned by a previous call. Pass it back verbatim to fetch the next page. Do not parse or modify."
+          },
+          {
+            "name": "include_total",
+            "in": "query",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "x-ms-summary": "Include totals",
+            "description": "If true, includes group-aggregate totals in the response."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/NaceCompaniesResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/related": {
+      "get": {
+        "operationId": "findRelatedCompanies",
+        "summary": "Find related companies (shared persons or address)",
+        "description": "Finds companies sharing role-holders or business address with the input company. Used for due-diligence and network-mapping.",
+        "tags": [
+          "Bransje"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "via",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "person",
+              "address"
+            ],
+            "default": "person",
+            "x-ms-summary": "Relation via",
+            "description": "How relatedness is determined. 'person' uses shared role-holders; 'address' uses shared business address."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25,
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of items to return in this page. Default and maximum vary per endpoint."
+          },
+          {
+            "name": "min_overlap",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "x-ms-summary": "Min overlap",
+            "description": "Minimum number of shared persons or addresses required for a related-company match."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RelatedCompaniesResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/announcements/search": {
+      "get": {
+        "operationId": "searchAnnouncements",
+        "summary": "Search BRREG announcements across companies",
+        "description": "Cross-orgnr search in BRREG announcements. Filter by type, date range, status. Used for portfolio monitoring and ad-hoc lookups.",
+        "tags": [
+          "Risiko"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter on the type of the item (varies per endpoint; see operation description).",
+            "type": "string",
+            "x-ms-summary": "Type filter"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Date from",
+            "description": "Start of date range in ISO format (YYYY-MM-DD). Inclusive."
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Date to",
+            "description": "End of date range in ISO format (YYYY-MM-DD). Inclusive."
+          },
+          {
+            "name": "orgnr",
+            "in": "query",
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Free-text search query matched against company name or organization number.",
+            "type": "string",
+            "x-ms-summary": "Search query"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50,
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of items to return in this page. Default and maximum vary per endpoint."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Pagination cursor",
+            "description": "Opaque pagination cursor returned by a previous call. Pass it back verbatim to fetch the next page. Do not parse or modify."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AnnouncementsSearchResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/risikoscoring/score/{orgnr}": {
+      "get": {
+        "operationId": "getRiskScore",
+        "summary": "Risk score 0-100 with level and components",
+        "description": "Structured risk score (0-100) with named level (low / moderate / high / critical) and component breakdown for the company's financial health. Returns blocked_enk error for sole-proprietorships. Not a personal credit check.",
+        "tags": [
+          "Risiko",
+          "Markedsplass"
+        ],
+        "x-firmaradar-compliance-gate": "marketplace_hidden",
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RiskScoreResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Compliance-gate aktiv (marketplace_hidden=true).\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/fiv/assess/{orgnr}": {
+      "get": {
+        "operationId": "checkForetakIVanskeligheter",
+        "summary": "FIV status (company in difficulty)",
+        "description": "Assesses whether a company qualifies as 'foretak i vanskeligheter' (FIV / company in difficulty) per the Norwegian NUES a-e rules, based on the latest available financial statements.",
+        "tags": [
+          "Risiko",
+          "Markedsplass"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FivResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/konsernstotte/oversikt/{orgnr}": {
+      "get": {
+        "operationId": "getKonsernstotte",
+        "summary": "Public grants exposure across group",
+        "description": "Tree structure of public grants (NAV grants, Covid-19 support, Innovasjon Norge, SkatteFUNN, EU-grants) received by a company and its group. Used for due-diligence on public-sector exposure.",
+        "tags": [
+          "Markedsplass"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/KonsernStotteOversikt"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/skattelister/selskap/{orgnr}": {
+      "get": {
+        "operationId": "getSkattelister",
+        "summary": "Income, wealth and tax per year",
+        "description": "Tax records (income, wealth, tax) per fiscal year for a company. Requires full access tier; every call is audit-logged.",
+        "tags": [
+          "Skattelister",
+          "Markedsplass"
+        ],
+        "x-firmaradar-compliance-gate": "marketplace_hidden",
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SkattelisterSelskap"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Compliance-gate aktiv eller manglende full_ownership-tilgang.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/companies/search": {
+      "get": {
+        "operationId": "searchCompanies",
+        "summary": "Search companies (name, NACE, municipality)",
+        "description": "Unified search across company name, NACE-industry code and municipality. Returns paginated results with stable cursor for next page.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Free-text search query matched against company name or organization number.",
+            "type": "string",
+            "x-ms-summary": "Search query"
+          },
+          {
+            "name": "nace",
+            "in": "query",
+            "type": "string",
+            "pattern": "^\\d{2}(?:\\.\\d{1,3})?$",
+            "x-ms-summary": "NACE filter",
+            "description": "Filter results by NACE-industry code (2-5 digits, prefix match supported)."
+          },
+          {
+            "name": "kommune",
+            "in": "query",
+            "type": "string",
+            "pattern": "^\\d{4}$",
+            "x-ms-summary": "Municipality",
+            "description": "Norwegian municipality code (4 digits, e.g. 0301 for Oslo) used to filter results geographically."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20,
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of items to return in this page. Default and maximum vary per endpoint."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Pagination cursor",
+            "description": "Opaque pagination cursor returned by a previous call. Pass it back verbatim to fetch the next page. Do not parse or modify."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CompanySearchResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/companies/compare": {
+      "post": {
+        "operationId": "compareCompanies",
+        "summary": "Compare financial metrics across companies",
+        "description": "Server-side orchestration: fetches financial history for multiple companies in parallel and returns them in a table-friendly comparison format for benchmarking.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CompareRequest"
+            },
+            "x-ms-summary": "Request body",
+            "description": "Request payload with operation-specific fields. See the schema linked from this parameter for details."
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CompareResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/person/get": {
+      "get": {
+        "operationId": "getPerson",
+        "summary": "Get person profile (client-side orchestration)",
+        "description": "Client-side helper that orchestrates searchPersons + getPersonRoles + getPersonCompanies into a single profile view. Documented here for parity with the MCP tool catalog.",
+        "tags": [
+          "Person"
+        ],
+        "x-firmaradar-client-side": true,
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "minLength": 2,
+            "x-ms-summary": "Name",
+            "description": "Full or partial person name. Fuzzy match with initial-expansion and middle-name dropping is applied automatically."
+          },
+          {
+            "name": "birth_year",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1900,
+            "maximum": 2100,
+            "x-ms-summary": "Birth year",
+            "description": "Four-digit birth year used as an additional filter in person search to disambiguate common names."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PersonProfile"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/recent-changes": {
+      "get": {
+        "operationId": "getRecentChanges",
+        "summary": "Get recent changes (alias to changes endpoint)",
+        "description": "Documentation alias used by the MCP-tool catalog (get_recent_changes). Forwards to the canonical /company/{orgnr}/changes endpoint.",
+        "tags": [
+          "Risiko"
+        ],
+        "x-firmaradar-alias-of": "getCompanyChanges",
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Announcement"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/announcements": {
+      "get": {
+        "operationId": "getCompanyAnnouncements",
+        "summary": "Get BRREG announcements (alias to changes endpoint)",
+        "description": "Documentation alias used by the MCP-tool catalog (get_company_announcements). Forwards to the canonical /company/{orgnr}/changes endpoint.",
+        "tags": [
+          "Selskap",
+          "Risiko"
+        ],
+        "x-firmaradar-alias-of": "getCompanyChanges",
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Announcement"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/regnskap/{orgnr}/historikk": {
+      "get": {
+        "operationId": "getCompanyFinancials",
+        "summary": "Get financial history",
+        "description": "Returns financial history (revenue, operating result, equity, total assets, employees) for up to 10 years back for a Norwegian company.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "years",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 5,
+            "x-ms-summary": "Years back",
+            "description": "Number of years of financial history to return (1-10)."
+          },
+          {
+            "name": "regnskapstype",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "SELSKAP",
+              "KONSERN"
+            ],
+            "default": "SELSKAP",
+            "x-ms-summary": "Statement type",
+            "description": "Type of financial statement to filter on (e.g. selskap, konsern). Default returns the canonical statement."
+          },
+          {
+            "name": "skip_freshness",
+            "in": "query",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "x-ms-summary": "Skip freshness cache",
+            "description": "If true, bypasses the freshness cache and forces an upstream refresh. Use sparingly."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FinancialHistoryResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://firmaradar.no"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://firmaradar.no/personvern"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Business Intelligence"
+    }
+  ]
+}
