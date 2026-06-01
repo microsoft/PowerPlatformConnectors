@@ -6,7 +6,7 @@ Zoho Mail connector gives you the power to manage your emails and perform action
 
 ## Prerequisites
 
-A verified Zoho Mail account. Click [here](https://zoho.com/zohomail) to create your first account.
+A verified Zoho Mail account. Click [here](https://zoho.com/mail) to create your first account.
 
 ## Supported Operations
 
@@ -20,21 +20,51 @@ Send a new email from a specified email address
 
 Save the email content either as a draft or as a template
 
-### Get email content
+### Get email details
 
-Get the email content based on message ID
+This endpoint gets the email details based on Account ID and message ID such as Message ID, Summary, Email content, Sent on, Sender name, and From. 
+The operation takes the message ID and Account ID as input. 
+Sample prompt "get the email details of message ID 1234 for the account 4567"
 
-### Search Mail
+### Get account details
 
-Search for emails based on search parameters.
+This endpoint gets the account details of the currently authenticated user such as their Account ID and Account display name. Sample prompt as "Get my mail account details" (The plugin would respond with the retrieved Account ID and Account display name).
+
+### Get folders
+
+This endpoint gets details of all folders for the specified user account such as Folder ID and Folder name based on the Account ID.
+The user enters Account ID as the input. 
+Sample prompt "List all folders for account 1234”, and the operation retrieves all the folders associated with the account 1234.
+
+### Get labels
+
+This endpoint gets the details of all labels for the specified user account such as Label ID and Label name based on the Account ID. 
+The user enters Account ID as the input. 
+prompt "Show me all the labels for account 1234”, and the operation retrieves all the labels associated with the account 1234.
+
+### Search emails
+
+This endpoint lists emails for the specified Account ID based on search parameters that display information like the Message ID, Summary, Sent on, Sender name, and From. The user enters keywords by Subject, Email content or sender as the search parameter for the specified account.
+
+### Get email attachment info
+
+Retrieves the attachment information of a particular email, based on Account ID and message ID.
+
+### Get email attachment content
+
+Retrieves the content of the attachments in an email and downloads the files based on Account ID, Message ID and Attachment ID.
 
 ## Supported Triggers
 
 The connector supports the following operations:
 
-### New Mail Notification
+### Get mail notificaiton from specified user
 
-Receive a new email notification from sender.
+Receive new email notifications from the specified user.
+
+### Get new mail by condition
+
+Receive new email notifications when the specified condition is met.
 
 ## Obtaining Credentials
 

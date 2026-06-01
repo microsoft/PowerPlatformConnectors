@@ -3,7 +3,7 @@
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
         var dict = new Dictionary<string,string>();
-       
+
         if(this.Context.OperationId == "Get_Sender_Details"){
             string url = this.Context.Request.RequestUri.LocalPath;
             string pattern = "^/api/accounts/([0-9]+)";
@@ -30,8 +30,8 @@
                        if(dataElement["sendMailDetails"] != null)
                        {
                            send_mail_details = (JArray) dataElement["sendMailDetails"];
-                           
-                           for(int mailIndex=0; mailIndex<send_mail_details.Count;mailIndex++) 
+
+                           for(int mailIndex=0; mailIndex<send_mail_details.Count;mailIndex++)
                            {
                                JObject sendMailDetail = (JObject)send_mail_details[mailIndex];
                                if((bool)sendMailDetail["status"])
@@ -51,7 +51,7 @@
         {
             JObject sendMailObj = JObject.Parse(await this.Context.Request.Content.ReadAsStringAsync());
             JArray attachments = (JArray)sendMailObj["attachmentDetails"];
-            
+
             if(attachments != null) {
                 Task<HttpResponseMessage> attResponseMessage = uploadAllAttachments(attachments);
                 HttpResponseMessage httpRespMsg = await attResponseMessage;
@@ -63,12 +63,12 @@
                 sendMailObj.Remove("attachmentDetails");
                 sendMailObj.Add(new JProperty("attachments",(JArray)attRes["data"]));
             }
-            
+
             this.Context.Request.Content = CreateJsonContent(sendMailObj.ToString());
             HttpResponseMessage mailRes = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             return mailRes;
 
-        } 
+        }
         else if(this.Context.OperationId == "Save_Draft")
         {
             JObject sendMailObj = JObject.Parse(await this.Context.Request.Content.ReadAsStringAsync());
@@ -78,12 +78,12 @@
                 HttpResponseMessage httpRespMsg = await attResponseMessage;
                 string responseString = await httpRespMsg.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
                 JObject attRes = JObject.Parse(responseString);
-               
+
                 sendMailObj.Remove("attachmentDetails");
                 sendMailObj.Add(new JProperty("attachments",(JArray)attRes["data"]));
-                
+
             }
-           
+
             Uri originalUri = this.Context.Request.RequestUri;
             string modifiedUri = originalUri.ToString().Replace("/draft", "");
             this.Context.Request.RequestUri = new Uri(modifiedUri);
@@ -124,15 +124,74 @@
            query["searchKey"] = searchString;
            uriBuilder.Query = query.ToString();
            this.Context.Request.RequestUri = uriBuilder.Uri;
-            HttpResponseMessage mailRes = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-            return mailRes;
+            HttpResponseMessage mailSearchRes = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+            if(!mailSearchRes.IsSuccessStatusCode){
+                return mailSearchRes;
+            }
+            string mailSearchResString = await mailSearchRes.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+            JObject result = JObject.Parse(mailSearchResString);
+            JObject respObj = JObject.Parse("{}");
+            JArray dataArray = (JArray)result["data"];
 
-        } 
+            if(dataArray != null)
+            {
+               for(int i=0; i<dataArray.Count;i++)
+               {
+                   JObject metaData = (JObject)dataArray[i];
+                   if(metaData.ContainsKey("toAddress")){
+                        metaData["toAddress"] = HttpUtility.HtmlDecode((string)metaData["toAddress"]);
+                    }
+                   if(metaData.ContainsKey("ccAddress")){
+                        metaData["ccAddress"] = HttpUtility.HtmlDecode((string)metaData["ccAddress"]);
+                    }
+                    dataArray[i] = metaData;
+               }
+               respObj["data"] = dataArray;
+               mailSearchRes.Content = CreateJsonContent(respObj.ToString());
+            }
+            return mailSearchRes;
+
+        }
+        else if(this.Context.OperationId == "Get_Email_Content")
+        {
+             HttpRequestMessage mailMetaRequest = CloneHttpRequest(this.Context.Request);
+            HttpResponseMessage mailContentRes = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+
+            if(mailContentRes.IsSuccessStatusCode ){
+
+                String url = mailMetaRequest.RequestUri.ToString();
+                url = url.Replace("/content","/details");
+                mailMetaRequest.RequestUri = new Uri(url);
+                var query = System.Web.HttpUtility.ParseQueryString(mailMetaRequest.RequestUri.Query);
+                var uriBuilder = new UriBuilder(mailMetaRequest.RequestUri);
+                query.Remove("includeBlockContent");
+                uriBuilder.Query = query.ToString();
+                mailMetaRequest.RequestUri = uriBuilder.Uri;
+                mailMetaRequest.Headers.TryAddWithoutValidation("Content-Type", "aapplication/json");
+                HttpResponseMessage mailMetaRes = await this.Context.SendAsync(mailMetaRequest, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                string metaResString = await mailMetaRes.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+                JObject metaResObj = JObject.Parse(metaResString);
+                JObject metaData = (JObject)metaResObj["data"];
+                string contentResString= await mailContentRes.Content.ReadAsStringAsync().ConfigureAwait(continueOnCapturedContext: false);
+                JObject contentResObj = JObject.Parse(contentResString);
+                JObject contentData = (JObject)contentResObj["data"];
+                metaData["content"] = contentData["content"];
+                metaData["toAddress"] = HttpUtility.HtmlDecode((string)metaData["toAddress"]);
+                if(metaData.ContainsKey("ccAddress")){
+                    metaData["ccAddress"] = HttpUtility.HtmlDecode((string)metaData["ccAddress"]);
+                }
+                metaResObj["data"]=metaData;
+                mailMetaRes.Content = CreateJsonContent(metaResObj.ToString());
+                return mailMetaRes;
+            }
+
+            return mailContentRes;
+        }
         HttpResponseMessage errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest);
         errorResponse.Content = CreateJsonContent("{}");
         return errorResponse;
     }
-    public async Task<HttpResponseMessage> uploadAllAttachments(JArray attachments) 
+    public async Task<HttpResponseMessage> uploadAllAttachments(JArray attachments)
     {
         using(HttpRequestMessage attachmentReq = CloneHttpRequest(this.Context.Request))
         {
@@ -164,7 +223,7 @@
     public static HttpRequestMessage CloneHttpRequest(HttpRequestMessage request)
     {
         HttpRequestMessage clone = new HttpRequestMessage(request.Method, request.RequestUri);
-        
+
         clone.Version = request.Version;
         foreach (KeyValuePair<string, object> prop in request.Properties)
         {
