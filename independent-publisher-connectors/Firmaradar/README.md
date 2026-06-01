@@ -11,7 +11,7 @@ adds proprietary enrichment on top: distress classification, risk
 scoring, fuzzy person-matching, group-structure analytics, announcement
 signal-detection, and audit-grade compliance pipelines.
 
-This connector exposes 22 operations that you can drop into any Power
+This connector exposes 21 operations that you can drop into any Power
 Automate flow to enrich customers, suppliers, partners and counterparties
 with structured Norwegian company intelligence — without writing code.
 
@@ -71,17 +71,16 @@ view:
    `X-API-Key` HTTP header in every request.
 3. Active subscription for the operations you intend to use. Some
    operations require additional data-processing agreements (DPA)
-   signed in your Firmaradar account — most notably AML/PEP screening
-   and tax-list lookups.
+   signed in your Firmaradar account — most notably AML/PEP screening.
 
 The free tier covers a generous slice of company-profile, ownership,
 roles, financial-history and announcement operations. Compliance-tier
-operations (AML, tax lists, audit-grade risk scoring) require a paid
+operations (AML, audit-grade risk scoring) require a paid
 plan and explicit DPA acceptance.
 
 ## Supported operations
 
-The connector exposes 22 production operations across 7 functional
+The connector exposes 21 production operations across 6 functional
 areas. Many operations combine multiple upstream sources behind a
 single call.
 
@@ -128,12 +127,6 @@ single call.
 | `checkAmlPep` | POST | `/api/v1/aml/check` |
 | `getAmlScore` | POST | `/api/v1/aml/score` |
 
-### Tax lists (Skattelister)
-
-| Operation | Method | Path |
-|-----------|--------|------|
-| `getSkattelister` | GET | `/api/v1/skattelister/selskap/{orgnr}` |
-
 ### Marketplace (Markedsplass)
 
 | Operation | Method | Path |
@@ -166,18 +159,17 @@ You can revoke or rotate the key from the same page at any time.
 - **Rate limits.** Free-tier accounts are limited to 60 requests per
   minute. AML operations (`checkAmlPep`, `getAmlScore`) have a stricter
   limit of 50 requests per 30 minutes regardless of plan.
-- **Audit logging.** Calls to AML, tax-list and marketplace risk
+- **Audit logging.** Calls to AML and marketplace risk
   operations are persisted in an audit log for 60 months as required
   by Norwegian KYC regulations. The `X-FR-Purpose` and
   `X-FR-DPA-Confirmed` headers must be set on AML calls; missing
   headers return HTTP 403.
-- **Compliance gates.** Two operations (`getRiskScore`, `getSkattelister`)
-  may return HTTP 403 with `error_code=marketplace_hidden` until the
-  user's account passes the relevant compliance gate (sole-proprietor
-  rules for personal risk scoring, Skatteetaten API approval for tax
-  lists). The spec marks these operations with the
+- **Compliance gates.** One operation (`getRiskScore`) may return HTTP
+  403 with `error_code=marketplace_hidden` until the user's account
+  passes the relevant compliance gate (sole-proprietor rules for
+  personal risk scoring). The spec marks this operation with the
   `x-firmaradar-compliance-gate` extension so consuming clients can
-  hide or disable them dynamically.
+  hide or disable it dynamically.
 - **9-digit org numbers only.** All `orgnr` path parameters must be
   exactly 9 digits (Norwegian organization-number format). The
   connector rejects values matching other patterns at the API layer.
