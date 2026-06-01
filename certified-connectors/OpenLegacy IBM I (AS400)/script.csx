@@ -1,9 +1,9 @@
 public class Script : ScriptBase {
 
-    private const string OL_HUB_BASE_URL = "https://api.ol-hub.com";
     private const string OL_PATH_FIELD_SUFFIX = "_ol_path_auto_gen";
     private const string OL_QUERY_FIELD_SUFFIX = "_ol_query_auto_gen";
     private const string OL_HEADER_FIELD_SUFFIX = "_ol_header_auto_gen";
+    private const string OL_HUB_URL_HEADER = "ol-hub-url";
     private const string OL_HUB_API_KEY_HEADER = "ol-hub-x-api-key";
     private const string OL_API_KEY_HEADER = "x-api-key";
 
@@ -28,12 +28,15 @@ public class Script : ScriptBase {
     private async Task UpdateRequest() {
         if ("AS400Cobol".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
             || "AS400Rpg".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
-            || "AS400DataQueue".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
+            || "AS400DataQueue".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "AS400Db2Queries".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+            || "AS400Db2Executables".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) {
+            var host = this.Context.Request.Headers.GetValues(OL_HUB_URL_HEADER).First();
             // get selected method id
             var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
             var methodId = query.Get("method");
             // create a new request to get method metadata with HTTP enrichment
-            using var methodMetadataRequest = new HttpRequestMessage(HttpMethod.Get, $"{OL_HUB_BASE_URL}/backend/api/v1/methods/{methodId}?enrichmentType=HTTP");
+            using var methodMetadataRequest = new HttpRequestMessage(HttpMethod.Get, $"{host}/backend/api/v1/methods/{methodId}?enrichmentType=HTTP");
             // set Hub's x-api-key header
             methodMetadataRequest.Headers.Add(OL_API_KEY_HEADER, this.Context.Request.Headers.GetValues(OL_HUB_API_KEY_HEADER));
             string content = string.Empty;
@@ -59,6 +62,7 @@ public class Script : ScriptBase {
                             throw new ConnectorException(HttpStatusCode.InternalServerError, "Selected API requires parameters, but request content is empty.");
                         }
                         try {
+                            var newBody = new JObject();
                             var newQuery = HttpUtility.ParseQueryString("");
                             if (!string.IsNullOrEmpty(originalRequestContent)) {
                                 var originalRequest = JObject.Parse(originalRequestContent);
@@ -77,12 +81,9 @@ public class Script : ScriptBase {
                                     } else if (name.Contains(OL_HEADER_FIELD_SUFFIX)) {
                                         string originalName = name.Replace(OL_HEADER_FIELD_SUFFIX, "");
                                         this.Context.Request.Headers.Add(originalName, entry.Value.ToString());
-                                    } else {
-                                        // body
-                                        var newBody = new JObject {
-                                            [name] = entry.Value,
-                                        };
-                                        this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+                                    } else {                                        
+                                        // body                                        
+                                        newBody[name] = entry.Value;                                        
                                     }
                                 }
                             }
@@ -92,6 +93,7 @@ public class Script : ScriptBase {
                             this.Context.Request.RequestUri = uriBuilder.Uri;
                             var httpMethod = jsonContent["enrichment"]?["method"]?.ToString() ?? "POST";
                             this.Context.Request.Method = new HttpMethod(httpMethod);
+                            this.Context.Request.Content = CreateJsonContent(newBody.ToString());
                         } catch (JsonReaderException ex) {
                             throw new ConnectorException(HttpStatusCode.BadGateway, "Unable to parse a content of original request: " + originalRequestContent, ex);
                         }
@@ -158,8 +160,8 @@ public class Script : ScriptBase {
 
                 foreach (var entry in elements) {
                     string httpMethod = entry["enrichment"]?["method"]?.ToString() ?? "POST";
-                    string routingKey = entry["enrichment"]?["routingKey"]?.ToString() ?? entry["name"].ToString();
-                    entry["combinedRoute"] = $"{httpMethod} {routingKey}";
+                    string name = entry["name"].ToString();
+                    entry["combinedRoute"] = $"{name} - {httpMethod}".Trim();
                 }
                 response.Content = CreateJsonContent(result.ToString());
             }
