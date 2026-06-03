@@ -1,0 +1,336 @@
+{
+  "swagger": "2.0", "x-ms-connector-metadata": [{"propertyName": "Website", "propertyValue": "https://authbinder.com"}, {"propertyName": "Privacy policy", "propertyValue": "https://authbinder.com/privacy"}, {"propertyName": "Categories", "propertyValue": "AI;Security"}], "x-ms-iconBrandColor": "#da3b01",
+  "info": {
+    "title": "AuthBinder (Independent Publisher)",
+    "description": "AuthBinder is an AI agent audit platform. Connect your Copilot Studio agents or Power Automate flows to capture tool call telemetry, score behavioural risk, and receive a structured compliance report delivered by a security analyst. AuthBinder helps organisations meet their duty of care obligations under modern product liability laws by identifying AI agent behaviours that could expose them to regulatory penalties or criminal liability.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "AuthBinder",
+      "email": "info@getauthbinder.com",
+      "url": "https://authbinder.com"
+    }
+  },
+  "host": "authbinder-prod-api.azurewebsites.net",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key",
+      "description": "Your AuthBinder API key. Obtained from the AuthBinder portal after purchasing an audit package."
+    }
+  },
+  "security": [
+    {
+      "apiKey": []
+    }
+  ],
+  "paths": {
+    "/events": {
+      "post": {
+        "summary": "Log Agent Event",
+        "description": "Send a single telemetry event from your AI agent to AuthBinder. Use this action each time your agent calls a tool, accesses an external service, or performs an action you want to audit.",
+        "operationId": "LogAgentEvent",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EventIngest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Event successfully logged",
+            "schema": {
+              "$ref": "#/definitions/EventResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key"
+          },
+          "403": {
+            "description": "Forbidden - tenantId does not match authenticated tenant"
+          },
+          "422": {
+            "description": "Validation error - missing or invalid fields"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/events/batch": {
+      "post": {
+        "summary": "Log Agent Events (Batch)",
+        "description": "Send up to 500 telemetry events in a single call. Use this action when your agent performs multiple actions in sequence and you want to log them together.",
+        "operationId": "LogAgentEventsBatch",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EventBatch"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Batch accepted for processing",
+            "schema": {
+              "$ref": "#/definitions/BatchResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key"
+          },
+          "422": {
+            "description": "Validation error - missing or invalid fields"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/connection-status": {
+      "get": {
+        "summary": "Get Connection Status",
+        "description": "Check whether your agent is successfully connected to AuthBinder and how many events have been received. Use this to verify your integration is working.",
+        "operationId": "GetConnectionStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Connection status retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/ConnectionStatus"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing API key"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Check that the AuthBinder API is running and reachable.",
+        "operationId": "HealthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "schema": {
+              "$ref": "#/definitions/HealthResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "EventIngest": {
+      "type": "object",
+      "required": ["tenantId", "agentId", "tool"],
+      "properties": {
+        "tenantId": {
+          "type": "string",
+          "description": "Your AuthBinder tenant ID. Found in your AuthBinder portal.",
+          "x-ms-summary": "Tenant ID"
+        },
+        "agentId": {
+          "type": "string",
+          "description": "A unique identifier for your AI agent. Use a consistent value so AuthBinder can track activity across sessions.",
+          "x-ms-summary": "Agent ID"
+        },
+        "tool": {
+          "type": "string",
+          "description": "The name of the tool or action your agent called. For example: email_sender, crm_lookup, file_delete.",
+          "x-ms-summary": "Tool Name"
+        },
+        "destination": {
+          "type": "string",
+          "description": "The external system or service the tool connected to. For example: gmail, salesforce, sharepoint.",
+          "x-ms-summary": "Destination"
+        },
+        "action": {
+          "type": "string",
+          "description": "The type of action performed. For example: read, write, send, delete.",
+          "x-ms-summary": "Action Type"
+        },
+        "approved": {
+          "type": "boolean",
+          "description": "Whether this action was explicitly approved by a human before execution.",
+          "x-ms-summary": "Human Approved"
+        },
+        "success": {
+          "type": "boolean",
+          "description": "Whether the tool call completed successfully.",
+          "x-ms-summary": "Success"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Optional. The ID of the user who triggered this agent action.",
+          "x-ms-summary": "User ID"
+        },
+        "durationMs": {
+          "type": "integer",
+          "description": "Optional. How long the tool call took in milliseconds.",
+          "x-ms-summary": "Duration (ms)"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The UTC timestamp when this event occurred. ISO 8601 format.",
+          "x-ms-summary": "Timestamp"
+        }
+      }
+    },
+    "EventBatch": {
+      "type": "object",
+      "required": ["events"],
+      "properties": {
+        "events": {
+          "type": "array",
+          "description": "List of events to log. Maximum 500 per batch.",
+          "x-ms-summary": "Events",
+          "items": {
+            "$ref": "#/definitions/EventIngest"
+          }
+        }
+      }
+    },
+    "EventResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique ID of the logged event.",
+          "x-ms-summary": "Event ID"
+        },
+        "tenantId": {
+          "type": "string",
+          "description": "Your tenant ID.",
+          "x-ms-summary": "Tenant ID"
+        },
+        "agentRef": {
+          "type": "string",
+          "description": "The agent ID this event was logged against.",
+          "x-ms-summary": "Agent Reference"
+        },
+        "toolName": {
+          "type": "string",
+          "description": "The tool name that was logged.",
+          "x-ms-summary": "Tool Name"
+        },
+        "riskLevel": {
+          "type": "string",
+          "description": "The risk level AuthBinder assigned to this event: low, medium, high, or critical.",
+          "x-ms-summary": "Risk Level"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this event occurred.",
+          "x-ms-summary": "Timestamp"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When AuthBinder received and stored this event.",
+          "x-ms-summary": "Received At"
+        }
+      }
+    },
+    "BatchResponse": {
+      "type": "object",
+      "properties": {
+        "ingested": {
+          "type": "integer",
+          "description": "Number of events successfully ingested.",
+          "x-ms-summary": "Ingested Count"
+        },
+        "errors": {
+          "type": "array",
+          "description": "Any events that failed to ingest, with error details.",
+          "x-ms-summary": "Errors",
+          "items": {
+            "type": "object"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "description": "Total number of events submitted.",
+          "x-ms-summary": "Total Count"
+        }
+      }
+    },
+    "ConnectionStatus": {
+      "type": "object",
+      "properties": {
+        "tenantId": {
+          "type": "string",
+          "description": "Your tenant ID.",
+          "x-ms-summary": "Tenant ID"
+        },
+        "connected": {
+          "type": "boolean",
+          "description": "Whether AuthBinder has received at least one event from your agent.",
+          "x-ms-summary": "Connected"
+        },
+        "eventsReceived": {
+          "type": "integer",
+          "description": "Total number of events AuthBinder has received from your agent.",
+          "x-ms-summary": "Events Received"
+        },
+        "lastSeen": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When AuthBinder last received an event from your agent.",
+          "x-ms-summary": "Last Seen"
+        },
+        "firstSeen": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When AuthBinder first received an event from your agent.",
+          "x-ms-summary": "First Seen"
+        }
+      }
+    },
+    "HealthResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "API health status.",
+          "x-ms-summary": "Status"
+        },
+        "version": {
+          "type": "string",
+          "description": "API version.",
+          "x-ms-summary": "Version"
+        }
+      }
+    }
+  }
+}
+
+
+
