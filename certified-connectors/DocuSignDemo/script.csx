@@ -52,11 +52,35 @@ public class Script : ScriptBase
   {
     if ("GetMaestroWorkflowDefinitions".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        if (response.StatusCode == HttpStatusCode.Unauthorized && content.Equals("Jwt payload is an invalid JSON"))
-        {
-          response.Content = new StringContent("You will need to reconnect to your Docusign account", Encoding.UTF8, "text/plain");
-        }
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (response.StatusCode == HttpStatusCode.Unauthorized && content.Equals("Jwt payload is an invalid JSON"))
+      {
+        response.Content = new StringContent("You will need to reconnect to your Docusign account", Encoding.UTF8, "text/plain");
+      }
+    }
+    else if ("GetOrganizations".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (response.StatusCode == HttpStatusCode.Unauthorized && content.Contains("INVALID_SCOPES"))
+      {
+        response.Content = new StringContent("You will need to reconnect to your Docusign account and provide consent to access organization data.", Encoding.UTF8, "text/plain");
+      }
+      else if (response.StatusCode == HttpStatusCode.BadRequest && content.Contains("Organization Connect is not enabled"))
+      {
+        response.Content = new StringContent("Your Docusign account is not enabled for organization management. Please contact Docusign support to enable this feature.", Encoding.UTF8, "text/plain");
+      }
+    }
+    else if ("CreateOrgHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (response.StatusCode == HttpStatusCode.BadRequest && content.Contains("Organization Connect is not enabled"))
+      {
+        response.Content = new StringContent("Your Docusign account is not enabled for organization management. Please contact Docusign support to enable this feature.", Encoding.UTF8, "text/plain");
+      }
+      else if (response.StatusCode == HttpStatusCode.BadRequest && content.Contains("exceeding"))
+      {
+        response.Content = new StringContent("Your Docusign organization is exceeding its configuration limits. Please contact Docusign support for assistance.", Encoding.UTF8, "text/plain");
+      }
     }
   }
 
@@ -1415,7 +1439,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1009.0.0"
+          ["x-ms-summary"] = "DS1009.0.5"
       };
     }
 
@@ -3583,6 +3607,15 @@ public class Script : ScriptBase
     return fontNames;
   }
 
+  private static JToken FindAccountById(JObject userInfo, string accountId)
+  {
+    if (string.IsNullOrEmpty(accountId) || userInfo?["accounts"] == null)
+      return null;
+      
+    return userInfo["accounts"].FirstOrDefault(a => 
+      string.Equals(a["account_id"]?.ToString(), accountId, StringComparison.OrdinalIgnoreCase));
+  }
+
   private static JObject ParseContentAsJObject(string content, bool isRequest)
   {
     JObject body;
@@ -4713,6 +4746,8 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
 
       query["status"] = string.IsNullOrEmpty(query.Get("envelopeStatus")) ? 
         null : envelopeStatusMapping[query.Get("envelopeStatus")];
+      query["search_text"] = string.IsNullOrEmpty(query.Get("search_text")) ? 
+        null : query.Get("search_text");
       query["folder_ids"] = string.IsNullOrEmpty(query.Get("folder_ids")) ? 
         null : folderIDMapping[query.Get("folder_ids").ToString()];
        query["order_by"] = string.IsNullOrEmpty(query.Get("order_by")) ? 
@@ -4816,7 +4851,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     body["authenticationMethod"] = query.Get("authenticationMethod");
     
     var returnUrl = query.Get("returnUrl");
-    if (returnUrl.Equals("Default URL"))
+    if (returnUrl.Equals("Default URL (Not compatible with iframes)"))
     {
       body["returnUrl"] = "https://postsign.docusign.com/postsigning/en/finish-signing";
     }
@@ -5175,7 +5210,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       var phoneNumber = new JObject();
       phoneNumber["countryCode"] = query.Get("countryCode");
       phoneNumber["number"] = query.Get("phoneNumber");
-      if (body["email"] != null)
+      if (!string.IsNullOrEmpty(body["email"]?.ToString()))
       {
         var additionalNotification = new JObject();
         additionalNotification["secondaryDeliveryMethod"] = "SMS";
@@ -5302,7 +5337,8 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
         docGenFormFieldList.Add(new JObject
         {
           ["name"] = column["name"],
-          ["value"] = column["value"]
+          ["value"] = column["value"],
+          ["label"] = column["label"]
         });
       }
 
@@ -5368,13 +5404,13 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     else
     {
       signers[0]["name"] = body["name"];
-      if (body["email"] == null && string.IsNullOrEmpty(query.Get("signingGroupId")) && string.IsNullOrEmpty(query.Get("phoneNumber"))) 
+      if (string.IsNullOrEmpty(body["email"]?.ToString()) && string.IsNullOrEmpty(query.Get("signingGroupId")) && string.IsNullOrEmpty(query.Get("phoneNumber"))) 
       {
         return true;
       }
       else 
       {
-        if (body["email"] != null)
+        if (!string.IsNullOrEmpty(body["email"]?.ToString()))
         {
           signers[0]["email"] = body["email"];
         }
@@ -6198,8 +6234,49 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       if (userInfoResponse.IsSuccessStatusCode)
       {
         var jsonContent = JObject.Parse(content);
-        var baseUri = jsonContent["accounts"]?[0]?["base_uri"]?.ToString();
-        var accountId = (string)jsonContent["accounts"].Where(a => (bool)a["is_default"]).FirstOrDefault()["account_id"];
+        
+        // Check if theres an accountId in the query
+        var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+        string requestedAccountId = query.Get("accountId");
+
+        // If accountId is not present split query in segments to find the account id in the list of accounts returned by the userinfo endpoint.
+        // Split URI by "/" and check if any segment matches an account ID in the accounts list
+        if (string.IsNullOrEmpty(requestedAccountId))
+        {
+          var uriSegments = this.Context.Request.RequestUri.AbsolutePath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+          foreach (var segment in uriSegments)
+          {
+            // Check if this segment matches any account_id in the accounts
+            if (FindAccountById(jsonContent, segment) != null)
+            {
+              requestedAccountId = segment;
+              break;
+            }
+          }
+        }
+        
+        // Check headers for account ID if not found in URI or query
+        if (string.IsNullOrEmpty(requestedAccountId))
+        {
+          var headerNames = new[] { "AccountId", "X-DocuSign-AccountId" };
+          foreach (var headerName in headerNames)
+          {
+            if (this.Context.Request.Headers.Contains(headerName))
+            {
+              requestedAccountId = this.Context.Request.Headers.GetValues(headerName).FirstOrDefault();
+              break;
+            }
+          }
+        }
+
+        // Find the account using priority: requested -> default -> first available
+        var selectedAccount = FindAccountById(jsonContent, requestedAccountId) 
+                           ?? jsonContent["accounts"]?.FirstOrDefault(a => (bool?)a["is_default"] == true)
+                           ?? jsonContent["accounts"]?.FirstOrDefault();
+        
+        var baseUri = selectedAccount?["base_uri"]?.ToString();
+        var accountId = selectedAccount?["account_id"]?.ToString();
+
         if (!string.IsNullOrEmpty(baseUri))
         {
           this.Context.Request.RequestUri = new Uri(new Uri(baseUri), this.Context.Request.RequestUri.PathAndQuery);
@@ -6269,6 +6346,12 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+    if("DeleteHookV4".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("connectV4", "connect");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -6718,7 +6801,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
         { "Chinese Simplified", "zh_CN" },
         { "Chinese Traditional", "zh_TW" },
         { "Dutch", "nl" },
-        { "English", "en" },
+        { "English (default)", "en" },
         { "French", "fr" },
         { "German", "de" },
         { "Italian", "it" },
@@ -6830,11 +6913,11 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       foreach (var item in payload as JArray)
       {
         var propertyName = (string)item["propertyName"];
-        if (!propertyName.Equals("dacId") && !propertyName.Equals("id"))
+        if (!propertyName.Equals("dacId") && !propertyName.Equals("id") && !propertyName.Equals("workflowBuilder") && !propertyName.Equals("workflowPreparer"))
         {     
           itemProperties.Add(propertyName, new JObject());
           var type = (string)item["type"];
-          itemProperties[propertyName]["type"] = type == "Float" ? "number" : type.ToLower();
+          itemProperties[propertyName]["type"] = type == "Float" ? "number" : type == "Email" ? "string" : type.ToLower();
         }
       }
       var newBody = new JObject
@@ -7413,47 +7496,40 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
         {"customFieldName", customFieldName},
         {"customFieldValue", customFieldValue}
       };
-
-      foreach (var filter in envelopeFilterMap.Keys)
+      filteredEnvelopes = new JArray(envelopes.Where(envelope =>
       {
-        if (envelopeFilterMap[filter] != null)
+        // Check recipient filters
+        if ((envelopeFilterMap["recipientName"] != null || envelopeFilterMap["recipientEmailId"] != null))
         {
-          switch (filter)
-          {
-            case "recipientName":
-            case "recipientEmailId":
-              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                envelope["recipients"]?.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower()) ?? false));
-              break;
-            case "envelopeTitle":
-              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                envelope["emailSubject"]?.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower()) ?? false));
-              break;
-            case "customFieldName":
-            case "customFieldValue":
-              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-              {
-                var customFields = envelope["customFields"] as JToken;
-                return customFields?.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower()) ?? false;
-              }));
-              break;
-            default:
-              break;
-          }
-
-          if (filteredEnvelopes.Count > 0)
-          {
-            envelopes.Clear();
-            envelopes = new JArray(filteredEnvelopes);
-            filteredEnvelopes.Clear();
-          }
-          else
-          {
-            envelopes.Clear();
-            break;
-          }
+          var recipientsStr = envelope["recipients"]?.ToString().ToLower() ?? "";
+          if (envelopeFilterMap["recipientName"] != null && !recipientsStr.Contains(envelopeFilterMap["recipientName"].ToString().ToLower()))
+            return false;
+          if (envelopeFilterMap["recipientEmailId"] != null && !recipientsStr.Contains(envelopeFilterMap["recipientEmailId"].ToString().ToLower()))
+            return false;
         }
-      }
+
+        // Check envelope title filter
+        if (envelopeFilterMap["envelopeTitle"] != null)
+        {
+          var subject = envelope["emailSubject"]?.ToString().ToLower() ?? "";
+          if (!subject.Contains(envelopeFilterMap["envelopeTitle"].ToString().ToLower()))
+            return false;
+        }
+
+        // Check custom field filters
+        if (envelopeFilterMap["customFieldName"] != null || envelopeFilterMap["customFieldValue"] != null)
+        {
+          var customFieldsStr = envelope["customFields"]?.ToString().ToLower() ?? "";
+          if (envelopeFilterMap["customFieldName"] != null && !customFieldsStr.Contains(envelopeFilterMap["customFieldName"].ToString().ToLower()))
+            return false;
+          if (envelopeFilterMap["customFieldValue"] != null && !customFieldsStr.Contains(envelopeFilterMap["customFieldValue"].ToString().ToLower()))
+            return false;
+        }
+
+        return true;
+      }));
+
+      envelopes = filteredEnvelopes;
 
       filteredEnvelopesDetails = this.Context.OperationId.Contains("SalesCopilot") ?
         GetFilteredEnvelopeDetailsForSalesCopilot(envelopes) :
