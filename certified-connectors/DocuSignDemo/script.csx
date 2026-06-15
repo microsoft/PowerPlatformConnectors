@@ -4851,7 +4851,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     body["authenticationMethod"] = query.Get("authenticationMethod");
     
     var returnUrl = query.Get("returnUrl");
-    if (returnUrl.Equals("Default URL (Not compatible with iframes)"))
+    if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.Equals("Default URL"))
     {
       body["returnUrl"] = "https://postsign.docusign.com/postsigning/en/finish-signing";
     }
@@ -4898,6 +4898,18 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
 
 
     var recipientType = query.Get("recipientType");
+
+    var recipientTypeMap = new Dictionary<string, string>() {
+      {"agent", "agents"},
+      {"editor", "editors"},
+      {"inpersonsigner", "inPersonSigners"},
+      {"certifieddelivery", "certifiedDeliveries"},
+      {"signer", "signers"},
+      {"carboncopy", "carbonCopies"},
+      {"intermediary", "intermediaries"},
+      {"witness", "witnesses"}
+    };
+
     var recipientId = query.Get("recipientId");
 
     var recipient = new JObject();
@@ -4962,7 +4974,10 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     
     recipient["recipientId"] = recipientId;
     recipientArray.Add(recipient);
-    body[recipientType] = recipientArray;
+
+    body[!string.IsNullOrEmpty(recipientType) && recipientTypeMap.ContainsKey(recipientType) 
+    ? recipientTypeMap[recipientType] :
+     recipientType] = recipientArray;
 
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
@@ -6421,7 +6436,7 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
       await this.TransformRequestJsonBody(this.listEnvelopeIdsBodyTransformation).ConfigureAwait(false);
     }
     
-    if (("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
+    if ("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.SearchListEnvelopesTransformation).ConfigureAwait(false);
     }
