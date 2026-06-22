@@ -55,7 +55,7 @@ The `changes[]` collection supports granular configuration updates via `ChangeCo
 Use change-based operations when you want to apply targeted updates without sending full configuration XML.
 
 ## Known Issues and Limitations
-The current version only support connecting to Microsoft Dynamics 365 CE and Microsoft Finance and Operations. Support for other CPQ host systems will be added in the future.
+The current version supports connecting to Microsoft Dynamics 365 CE, Microsoft Finance and Operations, and Microsoft Dynamics 365 Business Central. Support for other CPQ host systems will be added in the future.
 
 ## Support
 For further support, please contact support@experlogix.com
