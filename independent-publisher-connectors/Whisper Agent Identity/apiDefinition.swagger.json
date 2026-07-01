@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Whisper Agent Identity",
-    "description": "Verify the identity of an AI agent by its Whisper IPv6 address. Whisper gives every agent a real, routable IPv6 /128 identity (from 2a04:2a01::/32, AS219419) anchored in DNS. This connector wraps Whisper's public, keyless identity surface: ask \"is this IP a real Whisper agent, and whose?\" and get one signed-where-possible verdict; look up the RDAP record for a /128; read the tamper-evident issuance/revocation transparency log; and see who has been resolving an agent's name. No account, credentials, or API key are required.",
+    "description": "Give every AI agent a real, routable IPv6 /128 identity (from 2a04:2a01::/32, announced by AS219419) anchored in DNS, RDAP and a tamper-evident transparency log — and operate it from Power Platform. This is a TWO-TIER connector (Postel's law): with NO key the public, keyless identity operations answer \"is this IP a real Whisper agent, and whose?\", return its RDAP record, its transparency log and who has been resolving its name. Provide your Whisper API key (optional connection field) and the full control plane unlocks — register agents, list your fleet, set per-tenant resolver policy, read activity logs, and revoke. Keyless operations keep working with or without a key.",
     "version": "1.0",
     "contact": {
       "name": "Whisper Security",
@@ -171,6 +171,216 @@
           },
           "400": {
             "description": "Malformed IP address."
+          }
+        }
+      }
+    },
+    "/control/register": {
+      "post": {
+        "summary": "Register a new agent",
+        "description": "Mint a brand-new agent with its own routable IPv6 /128 identity AND its own API key (op:register). The new key is returned once in the result — capture it. Requires your API key in the connection. Edit the label (the agent's human name) and optional contact_email inside args.",
+        "operationId": "RegisterAgent",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "x-ms-summary": "Control call",
+                  "description": "The whisper.agents control call to run, expressed as a Cypher CALL. It is pre-filled for this operation — edit the values inside args. Sent verbatim in {\"query\": ...}; keep it well-formed.",
+                  "default": "CALL whisper.agents({op:'register', args:{label:'my-agent'}})"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The control-plane result table (columns + rows).",
+            "schema": {
+              "$ref": "#/definitions/ControlResult"
+            }
+          },
+          "400": {
+            "description": "The request was rejected — e.g. an anonymous call to the control plane (a Whisper API key is required in the connection) or a malformed query.",
+            "schema": {
+              "$ref": "#/definitions/ControlError"
+            }
+          }
+        }
+      }
+    },
+    "/control/list": {
+      "post": {
+        "summary": "List your agents",
+        "description": "List the caller's agents (or, with kind:'records' / kind:'identities', those instead), confined to your tenant (op:list). Requires your API key in the connection.",
+        "operationId": "ListAgents",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "x-ms-summary": "Control call",
+                  "description": "The whisper.agents control call to run, expressed as a Cypher CALL. It is pre-filled for this operation — edit the values inside args. Sent verbatim in {\"query\": ...}; keep it well-formed.",
+                  "default": "CALL whisper.agents({op:'list', args:{kind:'agents'}})"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The control-plane result table (columns + rows).",
+            "schema": {
+              "$ref": "#/definitions/ControlResult"
+            }
+          },
+          "400": {
+            "description": "The request was rejected — e.g. an anonymous call to the control plane (a Whisper API key is required in the connection) or a malformed query.",
+            "schema": {
+              "$ref": "#/definitions/ControlError"
+            }
+          }
+        }
+      }
+    },
+    "/control/policy": {
+      "post": {
+        "summary": "Set resolver policy",
+        "description": "Read or set your per-tenant DNS resolver policy (op:policy). default is 'allow' or 'deny'; block and allow are name lists (max 1000 combined). Omit block/allow/default to READ the current policy back. Requires your API key in the connection.",
+        "operationId": "SetPolicy",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "x-ms-summary": "Control call",
+                  "description": "The whisper.agents control call to run, expressed as a Cypher CALL. It is pre-filled for this operation — edit the values inside args. Sent verbatim in {\"query\": ...}; keep it well-formed.",
+                  "default": "CALL whisper.agents({op:'policy', args:{default:'allow', block:['ads.example.com']}})"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The control-plane result table (columns + rows).",
+            "schema": {
+              "$ref": "#/definitions/ControlResult"
+            }
+          },
+          "400": {
+            "description": "The request was rejected — e.g. an anonymous call to the control plane (a Whisper API key is required in the connection) or a malformed query.",
+            "schema": {
+              "$ref": "#/definitions/ControlError"
+            }
+          }
+        }
+      }
+    },
+    "/control/logs": {
+      "post": {
+        "summary": "Get activity logs",
+        "description": "Query the caller's recent DNS / connection / allocation activity from warm storage (op:logs). kind is dns | conn | alloc | all; narrow with agent (id or /128), from / to (epoch-ms, RFC-3339, or relative like -1h), and limit (default 1000, cap 10000). Requires your API key in the connection.",
+        "operationId": "GetLogs",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "x-ms-summary": "Control call",
+                  "description": "The whisper.agents control call to run, expressed as a Cypher CALL. It is pre-filled for this operation — edit the values inside args. Sent verbatim in {\"query\": ...}; keep it well-formed.",
+                  "default": "CALL whisper.agents({op:'logs', args:{kind:'all', limit:100}})"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The control-plane result table (columns + rows).",
+            "schema": {
+              "$ref": "#/definitions/ControlResult"
+            }
+          },
+          "400": {
+            "description": "The request was rejected — e.g. an anonymous call to the control plane (a Whisper API key is required in the connection) or a malformed query.",
+            "schema": {
+              "$ref": "#/definitions/ControlError"
+            }
+          }
+        }
+      }
+    },
+    "/control/revoke": {
+      "post": {
+        "summary": "Revoke an agent",
+        "description": "Fully revoke an agent (op:revoke): withdraw its /128, PTR, tokens and its API key. IRREVERSIBLE. Set agent to the agent id (or its /128 address). Requires your API key in the connection.",
+        "operationId": "RevokeAgent",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "query"
+              ],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "x-ms-summary": "Control call",
+                  "description": "The whisper.agents control call to run, expressed as a Cypher CALL. It is pre-filled for this operation — edit the values inside args. Sent verbatim in {\"query\": ...}; keep it well-formed.",
+                  "default": "CALL whisper.agents({op:'revoke', args:{agent:'agent-abcd1234'}})"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The control-plane result table (columns + rows).",
+            "schema": {
+              "$ref": "#/definitions/ControlResult"
+            }
+          },
+          "400": {
+            "description": "The request was rejected — e.g. an anonymous call to the control plane (a Whisper API key is required in the connection) or a malformed query.",
+            "schema": {
+              "$ref": "#/definitions/ControlError"
+            }
           }
         }
       }
@@ -560,6 +770,93 @@
               }
             }
           }
+        }
+      }
+    },
+    "ControlTable": {
+      "type": "object",
+      "description": "A control-plane result table: column names plus rows of positionally-aligned values.",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Column names.",
+          "title": "Columns"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {}
+          },
+          "description": "Rows; each row is an array of values aligned with columns.",
+          "title": "Rows"
+        }
+      }
+    },
+    "ControlError": {
+      "type": "object",
+      "description": "RFC 7807 problem object returned when a control call fails.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Type"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "status": {
+          "type": "integer",
+          "title": "Status"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Human-readable, secret-free explanation.",
+          "title": "Detail"
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Suggestions"
+        }
+      }
+    },
+    "ControlResult": {
+      "type": "object",
+      "description": "The normalised control-plane reply. The live control plane returns the Neo4j procedure-row wrapper (rows[].result); the documented envelope shape (ok/status/result/error) is also accepted.",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "True on success (documented envelope shape).",
+          "title": "OK"
+        },
+        "status": {
+          "type": "integer",
+          "title": "Status"
+        },
+        "rows": {
+          "type": "array",
+          "description": "The live wrapper: each element carries a result table.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "result": {
+                "$ref": "#/definitions/ControlTable"
+              }
+            }
+          },
+          "title": "Rows"
+        },
+        "result": {
+          "$ref": "#/definitions/ControlTable"
+        },
+        "error": {
+          "$ref": "#/definitions/ControlError"
         }
       }
     }
