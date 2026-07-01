@@ -5,15 +5,19 @@ screenshots, and generates EU-compliant hybrid e-invoices (ZUGFeRD / Factur-X).
 Conversions render in a real browser engine, so what you see in the page is what
 you get in the document.
 
-This is a proposal to reserve the connector name and start the verified
-credentials process. The complete, validated connector files
-(`apiDefinition.swagger.json`, `apiProperties.json`, `readme.md`) are ready and
-will be added to this same pull request, together with the required operation
-screenshots, once verification is set up.
+This proposal reserves the connector name and starts the verified credentials
+process. The complete, validated connector files
+(`apiDefinition.swagger.json`, `apiProperties.json`, `readme.md`) are included in
+this pull request. The remaining operation screenshots will be added once the
+verified credentials setup is complete.
 
 ## Publisher
 
 PolyDoc
+
+## Contact
+
+hello@polydoc.tech
 
 ## Supported operations
 
