@@ -1,0 +1,660 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "PolyDoc (Independent Publisher)",
+    "description": "Convert HTML or a URL into pixel-perfect PDFs and screenshots, and generate EU-compliant hybrid e-invoices (ZUGFeRD / Factur-X). PolyDoc renders with a real browser engine, so what you see in the page is what you get in the document.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "PolyDoc",
+      "url": "https://polydoc.tech",
+      "email": "hello@polydoc.tech"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://polydoc.tech"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://polydoc.tech/legal/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files"
+    }
+  ],
+  "host": "api.polydoc.tech",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/pdf/convert": {
+      "post": {
+        "operationId": "ConvertToPdf",
+        "summary": "Convert to PDF",
+        "description": "Render HTML, a URL, or a saved template into a PDF. Populate the E-invoice fields to embed a ZUGFeRD / Factur-X hybrid invoice instead of a plain PDF. Returns the file as binary content.",
+        "x-ms-visibility": "important",
+        "consumes": ["application/json"],
+        "produces": ["application/pdf"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/SandboxHeader"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PdfRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The generated PDF as binary file content. When Cloud storage or Webhook delivery is configured the response is JSON instead (see the connector README).",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "400": {
+            "description": "Validation error in the request body.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "402": {
+            "description": "Monthly conversion quota exhausted. Upgrade the plan or wait for the next billing period.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "403": {
+            "description": "The account is disabled.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Inspect the Retry-After header.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          }
+        }
+      }
+    },
+    "/screenshot/convert": {
+      "post": {
+        "operationId": "CaptureScreenshot",
+        "summary": "Capture screenshot",
+        "description": "Render HTML, a URL, or a saved template and capture a PNG, JPEG, or WebP screenshot. Returns the image as binary content.",
+        "x-ms-visibility": "important",
+        "consumes": ["application/json"],
+        "produces": ["image/png", "image/jpeg", "image/webp"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/SandboxHeader"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ScreenshotRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The captured image as binary file content. When Cloud storage or Webhook delivery is configured the response is JSON instead (see the connector README).",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "400": {
+            "description": "Validation error in the request body.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "402": {
+            "description": "Monthly conversion quota exhausted. Upgrade the plan or wait for the next billing period.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "403": {
+            "description": "The account is disabled.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Inspect the Retry-After header.",
+            "schema": { "$ref": "#/definitions/ErrorResponse" }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "SandboxHeader": {
+      "name": "X-Sandbox",
+      "in": "header",
+      "required": false,
+      "type": "string",
+      "enum": ["false", "true"],
+      "default": "false",
+      "description": "Run the conversion in sandbox mode. Sandbox output is watermarked and draws from a separate quota with a lower rate limit. Use false for production documents.",
+      "x-ms-summary": "Sandbox mode",
+      "x-ms-visibility": "advanced"
+    }
+  },
+  "definitions": {
+    "PdfRequest": {
+      "type": "object",
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "A URL (https://...), an inline HTML string, or a saved template reference in the form [template:TEMPLATE_ID].",
+          "x-ms-summary": "Source",
+          "x-ms-visibility": "important"
+        },
+        "filename": {
+          "type": "string",
+          "description": "Output filename, e.g. invoice.pdf.",
+          "x-ms-summary": "Filename"
+        },
+        "templateData": {
+          "type": "object",
+          "description": "Key/value data passed to the Liquid template renderer when Source is a [template:ID] reference.",
+          "x-ms-summary": "Template data"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Label for logging and analytics (max 30 characters).",
+          "x-ms-summary": "Tag",
+          "x-ms-visibility": "advanced"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Conversion timeout in milliseconds (max 600000).",
+          "x-ms-summary": "Timeout (ms)",
+          "x-ms-visibility": "advanced"
+        },
+        "layout": {
+          "$ref": "#/definitions/Layout"
+        },
+        "pdf": {
+          "$ref": "#/definitions/PdfPostProcess"
+        },
+        "eInvoice": {
+          "$ref": "#/definitions/EInvoice"
+        },
+        "render": {
+          "$ref": "#/definitions/Render"
+        },
+        "request": {
+          "$ref": "#/definitions/RequestOptions"
+        },
+        "webhook": {
+          "$ref": "#/definitions/Webhook"
+        },
+        "cloudStorage": {
+          "$ref": "#/definitions/CloudStorage"
+        }
+      }
+    },
+    "ScreenshotRequest": {
+      "type": "object",
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "A URL (https://...), an inline HTML string, or a saved template reference in the form [template:TEMPLATE_ID].",
+          "x-ms-summary": "Source",
+          "x-ms-visibility": "important"
+        },
+        "filename": {
+          "type": "string",
+          "description": "Output filename, e.g. screenshot.png.",
+          "x-ms-summary": "Filename"
+        },
+        "templateData": {
+          "type": "object",
+          "description": "Key/value data passed to the Liquid template renderer when Source is a [template:ID] reference.",
+          "x-ms-summary": "Template data"
+        },
+        "screenshot": {
+          "$ref": "#/definitions/ScreenshotSettings"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Label for logging and analytics (max 30 characters).",
+          "x-ms-summary": "Tag",
+          "x-ms-visibility": "advanced"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Conversion timeout in milliseconds (max 600000).",
+          "x-ms-summary": "Timeout (ms)",
+          "x-ms-visibility": "advanced"
+        },
+        "render": {
+          "$ref": "#/definitions/Render"
+        },
+        "request": {
+          "$ref": "#/definitions/RequestOptions"
+        },
+        "webhook": {
+          "$ref": "#/definitions/Webhook"
+        },
+        "cloudStorage": {
+          "$ref": "#/definitions/CloudStorage"
+        }
+      }
+    },
+    "Layout": {
+      "type": "object",
+      "description": "PDF page layout options.",
+      "x-ms-summary": "Layout",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["Letter", "Legal", "Tabloid", "Ledger", "A0", "A1", "A2", "A3", "A4", "A5", "A6"],
+          "description": "Paper format. Defaults to A4.",
+          "x-ms-summary": "Paper format"
+        },
+        "landscape": {
+          "type": "boolean",
+          "description": "Use landscape orientation.",
+          "x-ms-summary": "Landscape"
+        },
+        "printBackground": {
+          "type": "boolean",
+          "description": "Print background graphics and colors.",
+          "x-ms-summary": "Print background"
+        },
+        "scale": {
+          "type": "number",
+          "description": "Render scale, between 0.1 and 2.",
+          "x-ms-summary": "Scale"
+        },
+        "pageRanges": {
+          "type": "string",
+          "description": "Pages to include, e.g. \"1-5, 8\". Empty means all pages.",
+          "x-ms-summary": "Page ranges"
+        },
+        "outline": {
+          "type": "boolean",
+          "description": "Generate PDF bookmarks from HTML headings.",
+          "x-ms-summary": "Outline (bookmarks)",
+          "x-ms-visibility": "advanced"
+        },
+        "tagged": {
+          "type": "boolean",
+          "description": "Produce a tagged (accessible) PDF.",
+          "x-ms-summary": "Tagged (accessible)",
+          "x-ms-visibility": "advanced"
+        },
+        "preferCSSPageSize": {
+          "type": "boolean",
+          "description": "Honor the @page size declared in CSS over the Paper format.",
+          "x-ms-summary": "Prefer CSS page size",
+          "x-ms-visibility": "advanced"
+        },
+        "omitBackground": {
+          "type": "boolean",
+          "description": "Render with a transparent background.",
+          "x-ms-summary": "Omit background",
+          "x-ms-visibility": "advanced"
+        },
+        "displayHeaderFooter": {
+          "type": "boolean",
+          "description": "Render the header and footer templates.",
+          "x-ms-summary": "Display header/footer",
+          "x-ms-visibility": "advanced"
+        },
+        "headerTemplate": {
+          "type": "string",
+          "description": "HTML for the page header. Requires Display header/footer.",
+          "x-ms-summary": "Header template",
+          "x-ms-visibility": "advanced"
+        },
+        "footerTemplate": {
+          "type": "string",
+          "description": "HTML for the page footer. Requires Display header/footer.",
+          "x-ms-summary": "Footer template",
+          "x-ms-visibility": "advanced"
+        },
+        "margin": {
+          "$ref": "#/definitions/Margin"
+        }
+      }
+    },
+    "Margin": {
+      "type": "object",
+      "description": "Page margins. Each value is a number or a CSS length such as \"10mm\" or \"0.5in\".",
+      "x-ms-summary": "Margins",
+      "x-ms-visibility": "advanced",
+      "properties": {
+        "top": { "type": "string", "x-ms-summary": "Top" },
+        "right": { "type": "string", "x-ms-summary": "Right" },
+        "bottom": { "type": "string", "x-ms-summary": "Bottom" },
+        "left": { "type": "string", "x-ms-summary": "Left" }
+      }
+    },
+    "ScreenshotSettings": {
+      "type": "object",
+      "description": "Screenshot capture options.",
+      "x-ms-summary": "Screenshot options",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["png", "jpeg", "webp"],
+          "description": "Image format. Defaults to png.",
+          "x-ms-summary": "Image type"
+        },
+        "fullPage": {
+          "type": "boolean",
+          "description": "Capture the entire scrollable page.",
+          "x-ms-summary": "Full page"
+        },
+        "quality": {
+          "type": "integer",
+          "description": "Compression quality 0-100 for JPEG/WebP.",
+          "x-ms-summary": "Quality"
+        },
+        "omitBackground": {
+          "type": "boolean",
+          "description": "Capture with a transparent background (PNG/WebP).",
+          "x-ms-summary": "Omit background",
+          "x-ms-visibility": "advanced"
+        },
+        "viewport": {
+          "$ref": "#/definitions/Viewport"
+        },
+        "clip": {
+          "$ref": "#/definitions/Clip"
+        }
+      }
+    },
+    "Viewport": {
+      "type": "object",
+      "description": "Browser viewport.",
+      "x-ms-summary": "Viewport",
+      "properties": {
+        "width": { "type": "integer", "x-ms-summary": "Width (px)" },
+        "height": { "type": "integer", "x-ms-summary": "Height (px)" },
+        "devicePixelRatio": { "type": "number", "x-ms-summary": "Device pixel ratio", "x-ms-visibility": "advanced" }
+      }
+    },
+    "Clip": {
+      "type": "object",
+      "description": "Capture only a rectangular region of the page.",
+      "x-ms-summary": "Clip region",
+      "x-ms-visibility": "advanced",
+      "properties": {
+        "x": { "type": "number", "x-ms-summary": "X" },
+        "y": { "type": "number", "x-ms-summary": "Y" },
+        "width": { "type": "number", "x-ms-summary": "Width" },
+        "height": { "type": "number", "x-ms-summary": "Height" },
+        "scale": { "type": "number", "x-ms-summary": "Scale" }
+      }
+    },
+    "PdfPostProcess": {
+      "type": "object",
+      "description": "PDF post-processing: metadata, encryption, watermark, and PDF/A archival conversion.",
+      "x-ms-summary": "PDF post-processing",
+      "x-ms-visibility": "advanced",
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "x-ms-summary": "Metadata",
+          "properties": {
+            "title": { "type": "string", "x-ms-summary": "Title" },
+            "author": { "type": "string", "x-ms-summary": "Author" },
+            "subject": { "type": "string", "x-ms-summary": "Subject" },
+            "keywords": { "type": "array", "items": { "type": "string" }, "x-ms-summary": "Keywords" },
+            "producer": { "type": "string", "x-ms-summary": "Producer" },
+            "creator": { "type": "string", "x-ms-summary": "Creator" }
+          }
+        },
+        "encryption": {
+          "type": "object",
+          "x-ms-summary": "Encryption",
+          "properties": {
+            "userPassword": { "type": "string", "x-ms-summary": "User password" },
+            "ownerPassword": { "type": "string", "x-ms-summary": "Owner password" }
+          }
+        },
+        "watermark": {
+          "type": "object",
+          "x-ms-summary": "Watermark",
+          "required": ["source", "type"],
+          "properties": {
+            "source": { "type": "string", "description": "Watermark text, or an image URL / data URI.", "x-ms-summary": "Source" },
+            "type": { "type": "string", "enum": ["text", "image"], "x-ms-summary": "Type" },
+            "options": { "type": "object", "description": "Font, opacity, rotation, scale, repeat and offset options.", "x-ms-summary": "Options" }
+          }
+        },
+        "pdfa": {
+          "type": "object",
+          "x-ms-summary": "PDF/A",
+          "required": ["level"],
+          "properties": {
+            "level": { "type": "string", "enum": ["1b", "2b", "3b"], "x-ms-summary": "Level" },
+            "verify": { "type": "boolean", "x-ms-summary": "Verify compliance" }
+          }
+        },
+        "pdfua": {
+          "type": "object",
+          "description": "Produce an accessible tagged PDF targeting PDF/UA-1. Cannot be combined with PDF/A or e-invoice.",
+          "x-ms-summary": "PDF/UA",
+          "properties": {
+            "verify": { "type": "boolean", "description": "Validate against veraPDF PDF/UA-1; returns an error if validation fails.", "x-ms-summary": "Verify compliance" }
+          }
+        }
+      }
+    },
+    "EInvoice": {
+      "type": "object",
+      "description": "Embed a ZUGFeRD / Factur-X hybrid e-invoice into the PDF.",
+      "x-ms-summary": "E-invoice",
+      "x-ms-visibility": "advanced",
+      "required": ["standard", "profile", "invoice"],
+      "properties": {
+        "standard": {
+          "type": "string",
+          "enum": ["zugferd", "facturx"],
+          "description": "Hybrid invoice standard.",
+          "x-ms-summary": "Standard"
+        },
+        "profile": {
+          "type": "string",
+          "enum": ["minimum", "basicwl", "basic", "en16931", "extended"],
+          "description": "Data granularity profile to validate against.",
+          "x-ms-summary": "Profile"
+        },
+        "verify": {
+          "type": "boolean",
+          "description": "Verify PDF/A and e-invoice compliance; returns an error if validation fails.",
+          "x-ms-summary": "Verify compliance"
+        },
+        "invoice": {
+          "$ref": "#/definitions/Invoice"
+        }
+      }
+    },
+    "Invoice": {
+      "type": "object",
+      "description": "Structured invoice data.",
+      "x-ms-summary": "Invoice",
+      "required": ["number", "issueDate", "currencyCode", "seller", "buyer", "lines", "totalNetAmount", "totalTaxAmount", "totalGrossAmount"],
+      "properties": {
+        "number": { "type": "string", "x-ms-summary": "Invoice number" },
+        "issueDate": { "type": "string", "description": "Issue date, YYYY-MM-DD.", "x-ms-summary": "Issue date" },
+        "dueDate": { "type": "string", "description": "Due date, YYYY-MM-DD. Provide this or Payment terms (EN 16931 rule BR-CO-25).", "x-ms-summary": "Due date" },
+        "currencyCode": { "type": "string", "description": "ISO 4217 currency code, e.g. EUR.", "x-ms-summary": "Currency" },
+        "seller": { "$ref": "#/definitions/Party" },
+        "buyer": { "$ref": "#/definitions/Party" },
+        "lines": { "type": "array", "items": { "$ref": "#/definitions/InvoiceLine" }, "x-ms-summary": "Lines" },
+        "taxSummary": { "type": "array", "items": { "$ref": "#/definitions/TaxSummary" }, "x-ms-summary": "Tax summary" },
+        "paymentTerms": { "type": "string", "description": "Free-text payment terms. Provide this or Due date.", "x-ms-summary": "Payment terms" },
+        "paymentMeans": { "$ref": "#/definitions/PaymentMeans" },
+        "totalNetAmount": { "type": "number", "x-ms-summary": "Total net" },
+        "totalTaxAmount": { "type": "number", "x-ms-summary": "Total tax" },
+        "totalGrossAmount": { "type": "number", "description": "Must equal net + tax.", "x-ms-summary": "Total gross" },
+        "note": { "type": "string", "x-ms-summary": "Note" },
+        "buyerReference": { "type": "string", "description": "Buyer reference / Leitweg-ID for public-sector invoices.", "x-ms-summary": "Buyer reference" }
+      }
+    },
+    "Party": {
+      "type": "object",
+      "description": "Invoice party (seller or buyer).",
+      "required": ["name", "address"],
+      "properties": {
+        "name": { "type": "string", "x-ms-summary": "Name" },
+        "address": { "$ref": "#/definitions/Address" },
+        "taxId": { "type": "string", "description": "VAT identifier. Required for the seller when a line uses VAT category S.", "x-ms-summary": "Tax ID" },
+        "email": { "type": "string", "x-ms-summary": "Email" },
+        "phone": { "type": "string", "x-ms-summary": "Phone" }
+      }
+    },
+    "Address": {
+      "type": "object",
+      "required": ["line1", "city", "postalCode", "countryCode"],
+      "properties": {
+        "line1": { "type": "string", "x-ms-summary": "Address line 1" },
+        "line2": { "type": "string", "x-ms-summary": "Address line 2" },
+        "city": { "type": "string", "x-ms-summary": "City" },
+        "postalCode": { "type": "string", "x-ms-summary": "Postal code" },
+        "countryCode": { "type": "string", "description": "ISO 3166-1 alpha-2 country code, e.g. DE.", "x-ms-summary": "Country code" }
+      }
+    },
+    "InvoiceLine": {
+      "type": "object",
+      "required": ["description", "quantity", "unitPrice", "lineTotal"],
+      "properties": {
+        "description": { "type": "string", "x-ms-summary": "Description" },
+        "quantity": { "type": "number", "x-ms-summary": "Quantity" },
+        "unitCode": { "type": "string", "description": "UN/ECE unit code, e.g. C62 (piece).", "x-ms-summary": "Unit code" },
+        "unitPrice": { "type": "number", "x-ms-summary": "Unit price" },
+        "lineTotal": { "type": "number", "x-ms-summary": "Line total" },
+        "vatRate": { "type": "number", "x-ms-summary": "VAT rate (%)" },
+        "vatCategoryCode": { "type": "string", "description": "VAT category code, e.g. S (standard), Z (zero), E (exempt).", "x-ms-summary": "VAT category" }
+      }
+    },
+    "TaxSummary": {
+      "type": "object",
+      "required": ["categoryCode", "rate", "taxableAmount", "taxAmount"],
+      "properties": {
+        "categoryCode": { "type": "string", "x-ms-summary": "Category code" },
+        "rate": { "type": "number", "x-ms-summary": "Rate (%)" },
+        "taxableAmount": { "type": "number", "x-ms-summary": "Taxable amount" },
+        "taxAmount": { "type": "number", "x-ms-summary": "Tax amount" }
+      }
+    },
+    "PaymentMeans": {
+      "type": "object",
+      "description": "How the invoice should be paid.",
+      "x-ms-summary": "Payment means",
+      "required": ["typeCode"],
+      "properties": {
+        "typeCode": { "type": "string", "description": "UN/ECE 4461 payment means code, e.g. 30 (credit transfer).", "x-ms-summary": "Type code" },
+        "iban": { "type": "string", "x-ms-summary": "IBAN" },
+        "bic": { "type": "string", "x-ms-summary": "BIC" },
+        "accountName": { "type": "string", "x-ms-summary": "Account name" },
+        "paymentReference": { "type": "string", "x-ms-summary": "Payment reference" }
+      }
+    },
+    "Render": {
+      "type": "object",
+      "description": "Browser render controls applied before capture.",
+      "x-ms-summary": "Render options",
+      "x-ms-visibility": "advanced",
+      "properties": {
+        "disableJavascript": { "type": "boolean", "x-ms-summary": "Disable JavaScript" },
+        "css": { "type": "string", "description": "Extra CSS injected into the page.", "x-ms-summary": "Inject CSS" },
+        "javascript": { "type": "string", "description": "JavaScript executed in the page before capture.", "x-ms-summary": "Inject JavaScript" },
+        "waitForSelector": { "type": "string", "description": "Wait until this CSS selector appears.", "x-ms-summary": "Wait for selector" },
+        "waitForFunction": { "type": "string", "description": "Wait until this JS expression returns true.", "x-ms-summary": "Wait for function" },
+        "mediaType": { "type": "string", "enum": ["print", "screen"], "x-ms-summary": "Media type" },
+        "blockAds": { "type": "boolean", "x-ms-summary": "Block ads" }
+      }
+    },
+    "RequestOptions": {
+      "type": "object",
+      "description": "Options applied when Source is a URL: user agent, cookies, headers, and HTTP authentication.",
+      "x-ms-summary": "Request options",
+      "x-ms-visibility": "advanced",
+      "properties": {
+        "userAgent": { "type": "string", "x-ms-summary": "User agent" },
+        "httpHeaders": { "type": "object", "description": "Extra HTTP headers as key/value pairs.", "x-ms-summary": "HTTP headers" },
+        "cookies": { "type": "array", "items": { "$ref": "#/definitions/Cookie" }, "x-ms-summary": "Cookies" },
+        "authentication": {
+          "type": "object",
+          "x-ms-summary": "Authentication",
+          "required": ["username", "password"],
+          "properties": {
+            "type": { "type": "string", "enum": ["basic", "web"], "x-ms-summary": "Type" },
+            "username": { "type": "string", "x-ms-summary": "Username" },
+            "password": { "type": "string", "x-ms-summary": "Password" }
+          }
+        }
+      }
+    },
+    "Cookie": {
+      "type": "object",
+      "required": ["name", "value"],
+      "properties": {
+        "name": { "type": "string", "x-ms-summary": "Name" },
+        "value": { "type": "string", "x-ms-summary": "Value" },
+        "url": { "type": "string", "x-ms-summary": "URL" },
+        "domain": { "type": "string", "x-ms-summary": "Domain" },
+        "path": { "type": "string", "x-ms-summary": "Path" },
+        "expires": { "type": "number", "x-ms-summary": "Expires (epoch)" },
+        "httpOnly": { "type": "boolean", "x-ms-summary": "HTTP only" },
+        "secure": { "type": "boolean", "x-ms-summary": "Secure" },
+        "sameSite": { "type": "string", "enum": ["Strict", "Lax", "None"], "x-ms-summary": "SameSite" }
+      }
+    },
+    "Webhook": {
+      "type": "object",
+      "description": "Deliver the generated file to a webhook instead of returning it inline. The action then returns a JSON acknowledgement (202 when async).",
+      "x-ms-summary": "Webhook delivery",
+      "x-ms-visibility": "advanced",
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "x-ms-summary": "Webhook URL" },
+        "async": { "type": "boolean", "description": "Deliver in the background and return 202 immediately.", "x-ms-summary": "Async" },
+        "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"], "x-ms-summary": "Method" },
+        "headers": { "type": "object", "description": "Extra headers for the webhook request.", "x-ms-summary": "Headers" },
+        "timeout": { "type": "number", "x-ms-summary": "Timeout (ms)" },
+        "retries": { "type": "integer", "x-ms-summary": "Retries" },
+        "retryDelay": { "type": "number", "x-ms-summary": "Retry delay (ms)" }
+      }
+    },
+    "CloudStorage": {
+      "type": "object",
+      "description": "Upload the generated file to a presigned URL (S3/GCS/Azure). The action then returns JSON containing the stored URL instead of the file.",
+      "x-ms-summary": "Cloud storage delivery",
+      "x-ms-visibility": "advanced",
+      "required": ["presignedUrl"],
+      "properties": {
+        "presignedUrl": { "type": "string", "description": "HTTP PUT presigned URL from your storage provider.", "x-ms-summary": "Presigned URL" }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean", "x-ms-summary": "Success" },
+        "error": { "type": "string", "x-ms-summary": "Error" },
+        "message": { "type": "string", "x-ms-summary": "Message" },
+        "code": { "type": "string", "x-ms-summary": "Code" }
+      }
+    }
+  },
+  "securityDefinitions": {},
+  "security": [],
+  "tags": []
+}
