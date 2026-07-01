@@ -1,0 +1,586 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Whisper Agent Identity",
+    "description": "Verify the identity of an AI agent by its Whisper IPv6 address. Whisper gives every agent a real, routable IPv6 /128 identity (from 2a04:2a01::/32, AS219419) anchored in DNS. This connector wraps Whisper's public, keyless identity surface: ask \"is this IP a real Whisper agent, and whose?\" and get one signed-where-possible verdict; look up the RDAP record for a /128; read the tamper-evident issuance/revocation transparency log; and see who has been resolving an agent's name. No account, credentials, or API key are required.",
+    "version": "1.0",
+    "contact": {
+      "name": "Whisper Security",
+      "url": "https://whisper.online",
+      "email": "hostmaster@whisper.online"
+    }
+  },
+  "host": "rdap.whisper.online",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/verify-identity": {
+      "get": {
+        "summary": "Verify agent identity",
+        "description": "Run the full Whisper-agent verification chain server-side for one IPv6 address (reverse PTR, forward-confirm AAAA / FCrDNS, DANE-TLSA pin, and the signed identity document) and return a single verdict: whether the address is a real Whisper agent, its canonical hostname, its operator/tenant handle, and the supporting evidence. Returns HTTP 200 when the address is a Whisper agent and HTTP 404 (with is_whisper_agent=false) when it is not.",
+        "operationId": "VerifyIdentity",
+        "parameters": [
+          {
+            "name": "ip",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Agent IPv6 address",
+            "description": "The IPv6 /128 address to verify, e.g. 2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478.",
+            "default": "2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The address is a Whisper agent; the verdict describes how strongly it verified.",
+            "schema": {
+              "$ref": "#/definitions/VerifyResult"
+            }
+          },
+          "404": {
+            "description": "The address is not a Whisper agent (no anchoring identity). Body carries is_whisper_agent=false.",
+            "schema": {
+              "$ref": "#/definitions/VerifyResult"
+            }
+          }
+        }
+      }
+    },
+    "/ip/{address}": {
+      "get": {
+        "summary": "RDAP lookup for an agent address",
+        "description": "Return the RDAP (RFC 9082/9083) record for a Whisper agent IPv6 /128: its handle, canonical name, registrant/operator entity, status, country, registration event, behavioural posture, and related links. Returns HTTP 404 when the address has no Whisper agent identity.",
+        "operationId": "LookupRdap",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Agent IPv6 address",
+            "description": "The IPv6 /128 address to look up, e.g. 2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478.",
+            "default": "2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The RDAP IP-network record for the agent address.",
+            "schema": {
+              "$ref": "#/definitions/RdapIpNetwork"
+            }
+          },
+          "404": {
+            "description": "No Whisper agent identity for this address.",
+            "schema": {
+              "$ref": "#/definitions/RdapError"
+            }
+          }
+        }
+      }
+    },
+    "/ip/{address}/transparency": {
+      "get": {
+        "summary": "Get identity transparency log",
+        "description": "Return the public, append-only, tamper-evident transparency log for an agent IPv6 /128: the ordered feed of issuance and revocation events, each chained to the previous by a SHA-256 proof, with a signed (ES256) chain root and an inclusion proof against the global Merkle ledger. A consumer can recompute the chain and verify the signature independently.",
+        "operationId": "GetTransparency",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Agent IPv6 address",
+            "description": "The IPv6 /128 address whose transparency log to read, e.g. 2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478.",
+            "default": "2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Maximum events",
+            "description": "Maximum number of events to return (default 1000, capped at 10000).",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The (possibly empty) chained transparency feed for the address.",
+            "schema": {
+              "$ref": "#/definitions/TransparencyFeed"
+            }
+          },
+          "400": {
+            "description": "Malformed IP address."
+          }
+        }
+      }
+    },
+    "/ip/{address}/lookups": {
+      "get": {
+        "summary": "Get inbound identity lookups",
+        "description": "Return the public feed of who has resolved or queried this agent's name: the PTR / AAAA / TLSA lookups against its authoritative-zone records and the RDAP accesses to it, each row k-anonymised to the source /48 (IPv6) or /24 (IPv4) prefix. It is the reverse-observability companion to an agent's own outbound resolution log.",
+        "operationId": "GetLookups",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Agent IPv6 address",
+            "description": "The IPv6 /128 address whose inbound lookups to read, e.g. 2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478.",
+            "default": "2a04:2a01:b69a:6717:e3b0:51ff:3bf7:f478"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "dns",
+              "rdap"
+            ],
+            "x-ms-summary": "Lookup source filter",
+            "description": "Narrow the feed by lookup source: 'dns' (authoritative-zone queries) or 'rdap' (RDAP accesses). Omit for all sources.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Maximum rows",
+            "description": "Maximum number of lookup rows to return (default 1000, capped at 10000).",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The (possibly empty) inbound-lookup feed for the address.",
+            "schema": {
+              "$ref": "#/definitions/LookupsFeed"
+            }
+          },
+          "400": {
+            "description": "Malformed IP address."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "VerifyResult": {
+      "type": "object",
+      "properties": {
+        "is_whisper_agent": {
+          "type": "boolean",
+          "description": "True when the address is a verified Whisper agent identity.",
+          "title": "Is Whisper agent"
+        },
+        "fqdn": {
+          "type": "string",
+          "description": "The agent's canonical fully-qualified hostname.",
+          "title": "FQDN"
+        },
+        "operator": {
+          "type": "string",
+          "description": "The operator (tenant) handle that holds the identity.",
+          "title": "Operator"
+        },
+        "tenant": {
+          "type": "string",
+          "description": "The tenant handle that holds the identity.",
+          "title": "Tenant"
+        },
+        "dane_ok": {
+          "type": "boolean",
+          "description": "True when a strong DANE-EE TLSA pin is published (and, when checkable, the served leaf matches it).",
+          "title": "DANE OK"
+        },
+        "jws_ok": {
+          "type": "boolean",
+          "description": "True when the signed identity document verified against the fleet key.",
+          "title": "JWS OK"
+        },
+        "verified_at": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Epoch-millisecond timestamp at which the verdict was produced.",
+          "title": "Verified at"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Human-readable explanation, present on a negative verdict.",
+          "title": "Detail"
+        },
+        "evidence": {
+          "type": "object",
+          "description": "The supporting evidence gathered during verification.",
+          "title": "Evidence",
+          "properties": {
+            "address": {
+              "type": "string",
+              "description": "The address that was verified.",
+              "title": "Address"
+            },
+            "ptr": {
+              "type": "string",
+              "description": "The reverse-DNS PTR name for the address (null when none).",
+              "title": "PTR"
+            },
+            "forward_aaaa": {
+              "type": "string",
+              "description": "The forward-confirming AAAA record (FCrDNS).",
+              "title": "Forward AAAA"
+            },
+            "agent": {
+              "type": "string",
+              "description": "The opaque agent handle.",
+              "title": "Agent"
+            },
+            "allocated_at": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Epoch-millisecond time the address was allocated to the agent.",
+              "title": "Allocated at"
+            },
+            "posture": {
+              "type": "string",
+              "description": "The agent's connectivity posture (e.g. tier1, tier1.5).",
+              "title": "Posture"
+            },
+            "dane_tlsa_sha256": {
+              "type": "string",
+              "description": "The SHA-256 DANE-TLSA association data pinned in DNS.",
+              "title": "DANE TLSA SHA-256"
+            },
+            "rdap": {
+              "type": "string",
+              "description": "Canonical RDAP URL for the address.",
+              "title": "RDAP URL"
+            },
+            "identity_doc": {
+              "type": "string",
+              "description": "URL of the agent's signed identity document.",
+              "title": "Identity document URL"
+            }
+          }
+        }
+      }
+    },
+    "RdapIpNetwork": {
+      "type": "object",
+      "properties": {
+        "rdapConformance": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "RDAP conformance levels.",
+          "title": "RDAP conformance"
+        },
+        "objectClassName": {
+          "type": "string",
+          "description": "RDAP object class (ip network).",
+          "title": "Object class"
+        },
+        "handle": {
+          "type": "string",
+          "description": "The agent handle.",
+          "title": "Handle"
+        },
+        "startAddress": {
+          "type": "string",
+          "description": "First address of the network (equals endAddress for a /128).",
+          "title": "Start address"
+        },
+        "endAddress": {
+          "type": "string",
+          "description": "Last address of the network (equals startAddress for a /128).",
+          "title": "End address"
+        },
+        "ipVersion": {
+          "type": "string",
+          "description": "IP version (v6).",
+          "title": "IP version"
+        },
+        "name": {
+          "type": "string",
+          "description": "The agent name.",
+          "title": "Name"
+        },
+        "type": {
+          "type": "string",
+          "description": "The record type (Whisper agent identity).",
+          "title": "Type"
+        },
+        "status": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "RDAP status values (e.g. active).",
+          "title": "Status"
+        },
+        "country": {
+          "type": "string",
+          "description": "ISO country code.",
+          "title": "Country"
+        },
+        "behavioral_posture": {
+          "type": "string",
+          "description": "The agent's behavioural posture (e.g. clean-30d).",
+          "title": "Behavioural posture"
+        },
+        "entities": {
+          "type": "array",
+          "description": "Related RDAP entities (e.g. the registrant).",
+          "title": "Entities",
+          "items": {
+            "type": "object",
+            "properties": {
+              "objectClassName": {
+                "type": "string",
+                "title": "Object class"
+              },
+              "handle": {
+                "type": "string",
+                "title": "Handle"
+              },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "title": "Roles"
+              }
+            }
+          }
+        },
+        "events": {
+          "type": "array",
+          "description": "RDAP events (e.g. registration).",
+          "title": "Events",
+          "items": {
+            "type": "object",
+            "properties": {
+              "eventAction": {
+                "type": "string",
+                "title": "Event action"
+              },
+              "eventDate": {
+                "type": "string",
+                "title": "Event date"
+              }
+            }
+          }
+        }
+      }
+    },
+    "RdapError": {
+      "type": "object",
+      "properties": {
+        "rdapConformance": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "RDAP conformance"
+        },
+        "errorCode": {
+          "type": "integer",
+          "description": "HTTP-style RDAP error code.",
+          "title": "Error code"
+        },
+        "title": {
+          "type": "string",
+          "description": "Short error title.",
+          "title": "Title"
+        },
+        "description": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Human-readable error detail.",
+          "title": "Description"
+        }
+      }
+    },
+    "TransparencyFeed": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Object type (identity-transparency).",
+          "title": "Object"
+        },
+        "address": {
+          "type": "string",
+          "description": "The address the feed describes.",
+          "title": "Address"
+        },
+        "count": {
+          "type": "integer",
+          "description": "Number of events in the feed.",
+          "title": "Count"
+        },
+        "events": {
+          "type": "array",
+          "description": "The ordered, hash-chained identity events.",
+          "title": "Events",
+          "items": {
+            "type": "object",
+            "properties": {
+              "event": {
+                "type": "object",
+                "title": "Event",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "description": "issuance or revocation.",
+                    "title": "Action"
+                  },
+                  "address": {
+                    "type": "string",
+                    "title": "Address"
+                  },
+                  "holder": {
+                    "type": "string",
+                    "description": "The opaque holder (tenant) handle.",
+                    "title": "Holder"
+                  },
+                  "agent": {
+                    "type": "string",
+                    "title": "Agent"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "format": "int64",
+                    "title": "Timestamp"
+                  }
+                }
+              },
+              "proof": {
+                "type": "string",
+                "description": "SHA-256(prev_proof || event_json) chaining this event.",
+                "title": "Proof"
+              },
+              "prev_proof": {
+                "type": "string",
+                "description": "The proof of the previous event (empty for the base event).",
+                "title": "Previous proof"
+              }
+            }
+          }
+        },
+        "root_hash": {
+          "type": "string",
+          "description": "The hash-chain root.",
+          "title": "Root hash"
+        },
+        "root_signature": {
+          "type": "string",
+          "description": "ES256 JWS over the chain root (empty when unsigned).",
+          "title": "Root signature"
+        },
+        "root_signature_alg": {
+          "type": "string",
+          "description": "Signature algorithm (ES256).",
+          "title": "Root signature algorithm"
+        }
+      }
+    },
+    "LookupsFeed": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Object type (identity-lookups).",
+          "title": "Object"
+        },
+        "address": {
+          "type": "string",
+          "description": "The address the feed describes.",
+          "title": "Address"
+        },
+        "count": {
+          "type": "integer",
+          "description": "Number of lookup rows in the feed.",
+          "title": "Count"
+        },
+        "lookups": {
+          "type": "array",
+          "description": "The inbound lookup rows (who resolved/queried this agent).",
+          "title": "Lookups",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ts": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Epoch-millisecond time of the lookup.",
+                "title": "Timestamp"
+              },
+              "kind": {
+                "type": "string",
+                "title": "Kind"
+              },
+              "qname": {
+                "type": "string",
+                "description": "The queried name.",
+                "title": "Query name"
+              },
+              "qtype": {
+                "type": "string",
+                "description": "The query type (PTR, AAAA, TLSA, RDAP).",
+                "title": "Query type"
+              },
+              "rcode": {
+                "type": "string",
+                "description": "The response code / outcome.",
+                "title": "Response code"
+              },
+              "source": {
+                "type": "string",
+                "description": "The lookup source (auth-zone or rdap).",
+                "title": "Source"
+              },
+              "agent": {
+                "type": "string",
+                "title": "Agent"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {},
+  "security": [],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://whisper.online/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://whisper.online/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;IT Operations"
+    }
+  ]
+}
