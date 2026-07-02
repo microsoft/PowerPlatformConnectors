@@ -4120,7 +4120,8 @@ public class Script : ScriptBase
 
     string eventData = @"[
       'tabs',
-      'custom_fields'
+      'custom_fields',
+      'recipients'
     ]";
 
     JArray includeData = JArray.Parse(eventData);
