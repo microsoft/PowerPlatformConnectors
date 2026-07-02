@@ -3785,7 +3785,6 @@ public class Script : ScriptBase
       var envelopeSummary = body["data"]["envelopeSummary"];
       var customFields = envelopeSummary["customFields"];
       var parsedCustomFields = new JObject();
-      var envelopeDocuments = new JArray();
 
       if (customFields is JObject)
       {
@@ -3797,19 +3796,6 @@ public class Script : ScriptBase
       }
 
       body["data"]["envelopeSummary"]["customFields"] = parsedCustomFields;
-
-      // documents code
-      foreach (var envelopeDocument in envelopeSummary["envelopeDocuments"] ?? new JArray())
-      {
-        envelopeDocuments.Add(new JObject()
-        {
-          ["documentId"] = envelopeDocument["documentId"],
-          ["documentGuid"] = envelopeDocument["documentIdGuid"],
-          ["documentName"] = envelopeDocument["name"]
-        });
-      }
-
-      body["data"]["envelopeSummary"]["envelopeDocuments"] = envelopeDocuments;
 
       // tab code
       var recipientStatuses = envelopeSummary["recipients"];
@@ -4132,16 +4118,9 @@ public class Script : ScriptBase
     body["configurationType"] = "custom";
     body["deliveryMode"] = "sim";
 
-    if (!uriBuilder.Path.Contains(this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault()))
-    {
-      throw new ConnectorException(HttpStatusCode.BadRequest, "User is not an account administrator. Please contact DocuSign account admin");
-    }
-
     string eventData = @"[
       'tabs',
-      'custom_fields',
-      'recipients',
-      'document_fields'
+      'custom_fields'
     ]";
 
     JArray includeData = JArray.Parse(eventData);
@@ -4851,8 +4830,8 @@ private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyM
     body["authenticationMethod"] = query.Get("authenticationMethod");
     
     var returnUrl = query.Get("returnUrl");
-if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.Equals("Default URL")) 
-{  
+    if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.Equals("Default URL"))
+    {
       body["returnUrl"] = "https://postsign.docusign.com/postsigning/en/finish-signing";
     }
     else if (returnUrl.Equals("Add A Different URL"))
@@ -4898,6 +4877,7 @@ if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.E
 
 
     var recipientType = query.Get("recipientType");
+
     var recipientTypeMap = new Dictionary<string, string>() {
       {"agent", "agents"},
       {"editor", "editors"},
@@ -4908,6 +4888,7 @@ if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.E
       {"intermediary", "intermediaries"},
       {"witness", "witnesses"}
     };
+
     var recipientId = query.Get("recipientId");
 
     var recipient = new JObject();
@@ -4972,6 +4953,7 @@ if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.E
     
     recipient["recipientId"] = recipientId;
     recipientArray.Add(recipient);
+
     body[!string.IsNullOrEmpty(recipientType) && recipientTypeMap.ContainsKey(recipientType) 
     ? recipientTypeMap[recipientType] :
      recipientType] = recipientArray;
@@ -6433,7 +6415,7 @@ if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.E
       await this.TransformRequestJsonBody(this.listEnvelopeIdsBodyTransformation).ConfigureAwait(false);
     }
     
-    if (("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
+    if ("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.SearchListEnvelopesTransformation).ConfigureAwait(false);
     }
