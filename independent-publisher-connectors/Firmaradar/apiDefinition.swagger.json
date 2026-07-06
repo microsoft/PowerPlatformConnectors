@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Firmaradar",
-    "version": "0.5.1",
+    "version": "0.5.3",
     "description": "Enrichment platform for Norwegian company intelligence. Fuses data from BRREG, Skatteetaten, foreign PEP and sanctions registers, public-grants registries and distress signals, with proprietary enrichment on top (risk scoring, fuzzy person matching, group analytics, audit-grade compliance). Built for KYC, AML, credit, ownership and risk workflows.",
     "contact": {
       "name": "Firmaradar support",
@@ -26,6 +26,15 @@
     "application/json"
   ],
   "securityDefinitions": {
+    "OAuth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://mcp.firmaradar.no/oauth/authorize",
+      "tokenUrl": "https://mcp.firmaradar.no/oauth/token",
+      "scopes": {
+        "mcp": "Read company data via MCP-delegated access"
+      }
+    },
     "ApiKeyAuth": {
       "type": "apiKey",
       "name": "X-API-Key",
@@ -33,6 +42,11 @@
     }
   },
   "security": [
+    {
+      "OAuth2": [
+        "mcp"
+      ]
+    },
     {
       "ApiKeyAuth": []
     }
@@ -97,6 +111,39 @@
         },
         "financial_metrics": {
           "$ref": "#/definitions/FinancialMetrics"
+        },
+        "ip_rettigheter": {
+          "type": "object",
+          "description": "Immaterielle rettigheter fra Patentstyret (kun ved ip=1 / fields=ip): patenter, varemerker og design — totalt og aktive, samt en capped liste rettigheter med lenker til Patentstyret-sakene.\n",
+          "properties": {
+            "patents": {
+              "type": "integer"
+            },
+            "patents_active": {
+              "type": "integer"
+            },
+            "trademarks": {
+              "type": "integer"
+            },
+            "trademarks_active": {
+              "type": "integer"
+            },
+            "designs": {
+              "type": "integer"
+            },
+            "designs_active": {
+              "type": "integer"
+            },
+            "is_ip_active": {
+              "type": "boolean"
+            },
+            "rights": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          }
         },
         "foretaksklassifisering": {
           "type": "object"
@@ -705,6 +752,96 @@
         }
       }
     },
+    "SharedConnectionsResponse": {
+      "type": "object",
+      "properties": {
+        "selskaper": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "risiko_score": {
+          "type": "number"
+        },
+        "risiko_niva": {
+          "type": "string",
+          "enum": [
+            "lav",
+            "middels",
+            "hoy"
+          ]
+        },
+        "risiko_indikatorer": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kode": {
+                "type": "string"
+              },
+              "tittel": {
+                "type": "string"
+              },
+              "vekt": {
+                "type": "number"
+              },
+              "forklaring": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "felles_personer": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "felles_adresser": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "felles_eiere": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "felles_revisor_selskap": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "felles_morselskap": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "sirkulaer_eierskap": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "stiftet_tett": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "graf": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object"
+        }
+      }
+    },
     "AnnouncementsSearchResponse": {
       "type": "object",
       "properties": {
@@ -829,6 +966,121 @@
           "type": "object"
         }
       }
+    },
+    "CurrencyConvertResponse": {
+      "type": "object",
+      "description": "NOK-beløp konvertert til målvaluta (NOK-originalen bevares).",
+      "properties": {
+        "amount_nok": {
+          "type": "number",
+          "description": "Opprinnelig NOK-beløp (null når kun kurs ble etterspurt)."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Konvertert beløp i målvaluta (null når amount ikke ble oppgitt)."
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217-kode for målvaluta."
+        },
+        "rate": {
+          "type": "number",
+          "format": "float",
+          "description": "Antall enheter målvaluta per 1 NOK."
+        },
+        "rate_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Dato kursen er hentet (Norges Bank)."
+        },
+        "source": {
+          "type": "string",
+          "description": "Kurskilde."
+        }
+      }
+    },
+    "WebhookSubscriptionCreate": {
+      "type": "object",
+      "required": [
+        "orgnr",
+        "url"
+      ],
+      "properties": {
+        "orgnr": {
+          "type": "string",
+          "pattern": "^\\d{9}$",
+          "description": "9-sifret norsk organisasjonsnummer som skal overvåkes."
+        },
+        "url": {
+          "type": "string",
+          "description": "HTTPS callback-URL Firmaradar POSTer hendelser til (uten credentials, ikke intern/loopback-IP)."
+        },
+        "delivery_key": {
+          "type": "string",
+          "description": "Valgfri hemmelighet sendt som Authorization Bearer ved levering."
+        }
+      }
+    },
+    "WebhookSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer",
+          "description": "Stabil abonnement-ID (brukes ved sletting)."
+        },
+        "orgnr": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "WebhookSubscriptionListResponse": {
+      "type": "object",
+      "properties": {
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "orgnr": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "last_triggered_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Siste gang en hendelse ble levert til denne URLen."
+              }
+            }
+          }
+        }
+      }
+    },
+    "WebhookSubscriptionDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        }
+      }
     }
   },
   "responses": {
@@ -887,6 +1139,14 @@
     {
       "name": "Markedsplass",
       "description": "Markedsplass-utvidelser eksponert via MCP/Power Automate\n(risikoscoring, FIV, konsernstøtte, AML-rapport).\nMarketplace extensions exposed via MCP / Power Automate.\n"
+    },
+    {
+      "name": "Overvåkning",
+      "description": "Webhook-abonnementer per orgnr — Firmaradar POSTer selskaps-hendelser\ntil din callback-URL når noe endrer seg.\nPer-orgnr webhook subscriptions — events pushed to your callback URL.\n"
+    },
+    {
+      "name": "Valuta",
+      "description": "Hjelpe-endepunkt som konverterer NOK-beløp til utenlandsk valuta med\ndaglig oppdaterte kurser fra Norges Bank.\nCurrency helper — convert NOK figures using daily Norges Bank rates.\n"
     }
   ],
   "paths": {
@@ -912,9 +1172,20 @@
           {
             "name": "fields",
             "in": "query",
-            "description": "Komma-separert subset, eks.\n`group,owners,grants,changes,financial_metrics`.\n",
+            "description": "Komma-separert subset, eks.\n`group,owners,grants,ip,changes,financial_metrics`.\n",
             "type": "string",
             "x-ms-summary": "Fields"
+          },
+          {
+            "name": "ip",
+            "in": "query",
+            "description": "If 1, includes the company's intellectual-property portfolio (patents, trademarks and designs from Patentstyret) in the response. Equivalent to fields=ip.",
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "x-ms-summary": "Include IP"
           },
           {
             "name": "owners",
@@ -1208,6 +1479,94 @@
             "schema": {
               "$ref": "#/definitions/Error"
             }
+          }
+        }
+      }
+    },
+    "/api/v1/company/{orgnr}/ip": {
+      "get": {
+        "operationId": "getCompanyIp",
+        "summary": "Get intellectual-property portfolio (patents, trademarks, designs)",
+        "description": "Returns a company's intellectual-property portfolio from the Norwegian Industrial Property Office (Patentstyret): patent, trademark and design counts (total and active) with links to each case. Proprietary enrichment fused onto the company profile — IP data is not part of the company registry itself.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "orgnr": {
+                  "type": "string"
+                },
+                "navn": {
+                  "type": "string"
+                },
+                "ip_rettigheter": {
+                  "type": "object",
+                  "properties": {
+                    "patents": {
+                      "type": "integer"
+                    },
+                    "patents_active": {
+                      "type": "integer"
+                    },
+                    "trademarks": {
+                      "type": "integer"
+                    },
+                    "trademarks_active": {
+                      "type": "integer"
+                    },
+                    "designs": {
+                      "type": "integer"
+                    },
+                    "designs_active": {
+                      "type": "integer"
+                    },
+                    "is_ip_active": {
+                      "type": "boolean"
+                    },
+                    "rights": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
           }
         }
       }
@@ -1757,6 +2116,49 @@
         }
       }
     },
+    "/api/v1/find-shared-connections": {
+      "get": {
+        "operationId": "findSharedConnections",
+        "summary": "Find shared connections across companies (network analysis)",
+        "description": "Analyzes hidden connections across 2-10 Norwegian companies — shared persons, addresses, owners, auditor and parent company, plus circular ownership and companies founded close in time. Returns weighted risk indicators, an overall risk level and a node-edge graph. Proprietary group-network enrichment for due-diligence and fraud-ring detection.",
+        "tags": [
+          "Risiko"
+        ],
+        "parameters": [
+          {
+            "name": "orgnrs",
+            "in": "query",
+            "required": true,
+            "description": "Comma-separated list of 2-10 Norwegian organization numbers (9 digits each) to analyze together, e.g. 923609016,914778271.",
+            "type": "string",
+            "x-ms-summary": "Organization numbers"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SharedConnectionsResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
     "/api/v1/announcements/search": {
       "get": {
         "operationId": "searchAnnouncements",
@@ -2266,6 +2668,180 @@
           },
           "400": {
             "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/currency/convert": {
+      "get": {
+        "operationId": "convertCurrency",
+        "summary": "Convert a NOK amount to foreign currency",
+        "description": "Converts a Norwegian-krone (NOK) amount to a target currency (EUR, USD, GBP, SEK, DKK) using Norges Bank reference rates. Omit the amount to return rate metadata only. Lets downstream flows present comparable figures without a separate FX lookup.",
+        "tags": [
+          "Valuta"
+        ],
+        "parameters": [
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "ISO 4217 currency code to convert the NOK amount into. One of EUR, USD, GBP, SEK, DKK.",
+            "type": "string",
+            "enum": [
+              "EUR",
+              "USD",
+              "GBP",
+              "SEK",
+              "DKK"
+            ],
+            "x-ms-summary": "Target currency"
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "description": "Norwegian-krone (NOK) amount to convert to the target currency. Omit to return exchange-rate metadata only.",
+            "type": "number",
+            "x-ms-summary": "Amount (NOK)"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CurrencyConvertResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/monitoring/webhooks": {
+      "get": {
+        "operationId": "listMonitoringWebhooks",
+        "summary": "List monitoring webhook subscriptions",
+        "description": "Lists the caller's active webhook subscriptions — one per monitored company. Use it to review which organization numbers are wired for real-time change delivery.",
+        "tags": [
+          "Overvåkning"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/WebhookSubscriptionListResponse"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createMonitoringWebhook",
+        "summary": "Subscribe a company to a webhook callback",
+        "description": "Subscribes a single organization number to an HTTPS callback URL. Firmaradar POSTs change events (announcements, status, ownership, grants) to the URL as they occur. Supports an optional delivery secret for authenticating the callback.",
+        "tags": [
+          "Overvåkning"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WebhookSubscriptionCreate"
+            },
+            "x-ms-summary": "Request body",
+            "description": "Request payload with operation-specific fields. See the schema linked from this parameter for details."
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Opprettet / oppdatert",
+            "schema": {
+              "$ref": "#/definitions/WebhookSubscriptionResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/monitoring/webhooks/{id}": {
+      "delete": {
+        "operationId": "deleteMonitoringWebhook",
+        "summary": "Delete a webhook subscription",
+        "description": "Removes a webhook subscription by its numeric ID. Firmaradar stops delivering change events for that company to the callback URL.",
+        "tags": [
+          "Overvåkning"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Subscription ID",
+            "description": "Numeric ID of the webhook subscription, returned when it was created or listed.",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Slettet",
+            "schema": {
+              "$ref": "#/definitions/WebhookSubscriptionDeleteResponse"
+            }
           },
           "401": {
             "$ref": "#/responses/Unauthorized"
