@@ -160,6 +160,85 @@
           }
         }
       }
+    },
+    "/api/v3/casefiles/{caseFileId}": {
+      "get": {
+        "summary": "Get case file details",
+        "description": "Retrieves the details of a specific case file from Penneo, including its signers, documents, and current status. Case file statuses: 0=new, 1=pending, 2=rejected, 3=deleted, 4=signed, 5=completed, 6=failed, 7=expired, 8=anonymized. Use status 5 (completed) as trigger for downloading the signed documents.",
+        "operationId": "GetCaseFileDetails",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "caseFileId",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Case File Id",
+            "x-ms-url-encoding": "single",
+            "description": "The id of the case file to retrieve. Retrieve the case file id with the \"Check job status\" action."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the case file details.",
+            "schema": {
+              "$ref": "#/definitions/CaseFileDetails"
+            }
+          },
+          "403": {
+            "description": "Returned when access to the case file is denied."
+          },
+          "404": {
+            "description": "Returned when the case file is not found."
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}/content": {
+      "get": {
+        "summary": "Download document",
+        "description": "Downloads the content of a document from Penneo as a base64 encoded string. By default, the signed version of the document is returned.",
+        "operationId": "DownloadDocument",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Document Id",
+            "x-ms-url-encoding": "single",
+            "description": "The id of the document to download. Retrieve the documentIds with the \"Get case file details\"-action."
+          },
+          {
+            "in": "query",
+            "name": "signed",
+            "required": false,
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Signed",
+            "description": "Get the signed or the unsigned document. By default, the signed document is returned if the document has been signed."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the document content.",
+            "schema": {
+              "$ref": "#/definitions/DocumentContent"
+            }
+          },
+          "403": {
+            "description": "Returned when access to the document is denied."
+          },
+          "404": {
+            "description": "Returned when the document is not found."
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -371,6 +450,25 @@
               "text",
               "draw",
               "image"
+            ]
+          }
+        },
+        "secureSigningMethods": {
+          "type": "array",
+          "description": "The allowed secure electronic signing methods. Overrides case file and customer settings when set.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "mitid.dk",
+              "bankid_se",
+              "bankid_no",
+              "itsme.be",
+              "ftn.fi",
+              "eid.belgium.be",
+              "passport-reader.eident.dk",
+              "ausweisapp.bund.de",
+              "qes.personal.mitid.dk"
             ]
           }
         },
@@ -710,6 +808,318 @@
           "type": "boolean",
           "default": true,
           "description": "Signer will be stored as a contact. Defaults to true."
+        }
+      }
+    },
+    "CaseFileDetails": {
+      "type": "object",
+      "description": "Details of a case file retrieved from the Penneo secure archive.",
+      "properties": {
+        "userId": {
+          "type": "integer",
+          "description": "Id of the user who owns the case file."
+        },
+        "customerId": {
+          "type": "integer",
+          "description": "Id of the customer the case file belongs to."
+        },
+        "signers": {
+          "type": "array",
+          "description": "List of signers on the case file.",
+          "items": {
+            "$ref": "#/definitions/SignerDetails"
+          }
+        },
+        "id": {
+          "type": "integer",
+          "description": "The case file id."
+        },
+        "title": {
+          "type": "string",
+          "description": "The case file title."
+        },
+        "status": {
+          "type": "integer",
+          "description": "The case file status."
+        },
+        "documents": {
+          "type": "array",
+          "description": "List of documents in the case file.",
+          "items": {
+            "$ref": "#/definitions/DocumentDetails"
+          }
+        },
+        "signOnMeeting": {
+          "type": "boolean",
+          "description": "Specifies if documents should be signed during a meeting."
+        },
+        "signIteration": {
+          "type": "integer",
+          "description": "The signing iteration of the case file."
+        },
+        "expireAt": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "UNIX timestamp when the case file expires."
+        },
+        "visibilityMode": {
+          "type": "integer",
+          "description": "0 = Signers see all documents. 1 = Signers see only documents they need to sign."
+        },
+        "documentDisplayMode": {
+          "type": "integer",
+          "description": "The document display mode of the case file."
+        },
+        "sensitiveData": {
+          "type": "boolean",
+          "description": "If true, signers must validate their identity before accessing documents."
+        },
+        "disableNotificationsOwner": {
+          "type": "boolean",
+          "description": "If true, the case file owner will not receive notifications for the case file."
+        },
+        "disableEmailAttachments": {
+          "type": "boolean",
+          "description": "If true, signed documents are not attached to completion emails."
+        },
+        "ccRecipients": {
+          "type": "array",
+          "description": "List of CC recipients who receive a copy of the signed documents.",
+          "items": {
+            "$ref": "#/definitions/CcRecipient"
+          }
+        },
+        "created": {
+          "type": "integer",
+          "description": "UNIX timestamp when the case file was created."
+        },
+        "activated": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "UNIX timestamp when the case file was activated."
+        },
+        "updated": {
+          "type": "integer",
+          "description": "UNIX timestamp when the case file was last updated."
+        },
+        "encryptionModeSigned": {
+          "type": "string",
+          "description": "The encryption mode used for the signed case file."
+        },
+        "language": {
+          "type": "string",
+          "description": "The case file language."
+        }
+      }
+    },
+    "SignerDetails": {
+      "type": "object",
+      "description": "A signer on a case file.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the signer."
+        },
+        "types": {
+          "type": "array",
+          "description": "List of signer types.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "integer",
+          "description": "The signer id."
+        },
+        "ssnType": {
+          "type": "string",
+          "description": "The SSN type used for this signer (e.g. 'legacy', 'dk:cpr', 'se:pin', 'no:nin', 'be:nrn', 'fi:pic', 'sms')."
+        },
+        "signingRequest": {
+          "$ref": "#/definitions/SigningRequestDetails"
+        },
+        "storeAsContact": {
+          "type": "boolean",
+          "description": "If true, the signer is stored as a contact in Penneo."
+        }
+      }
+    },
+    "SigningRequestDetails": {
+      "type": "object",
+      "description": "The signing request associated with a signer.",
+      "properties": {
+        "communicationChannel": {
+          "type": "string",
+          "description": "The communication channel used to contact the signer (e.g. 'email')."
+        },
+        "insecureSigningMethods": {
+          "type": "array",
+          "description": "Allowed insecure signing methods.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "secureSigningMethods": {
+          "type": "array",
+          "description": "Allowed secure signing methods.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "language": {
+          "type": "string",
+          "description": "The language of the signing request."
+        },
+        "id": {
+          "type": "integer",
+          "description": "The signing request id."
+        },
+        "email": {
+          "type": "string",
+          "description": "Signer email."
+        },
+        "emailSubject": {
+          "type": "string",
+          "description": "Subject of the signature request email."
+        },
+        "emailText": {
+          "type": "string",
+          "description": "Text of the signature request email."
+        },
+        "reminderEmailSubject": {
+          "type": "string",
+          "description": "Subject of the reminder email."
+        },
+        "reminderEmailText": {
+          "type": "string",
+          "description": "Text of the reminder email."
+        },
+        "completedEmailSubject": {
+          "type": "string",
+          "description": "Subject of the completed email."
+        },
+        "completedEmailText": {
+          "type": "string",
+          "description": "Text of the completed email."
+        },
+        "emailFormat": {
+          "type": "string",
+          "description": "The format of the emails sent for this signing request."
+        },
+        "status": {
+          "type": "integer",
+          "description": "The status of the signing request."
+        },
+        "reminderInterval": {
+          "type": "integer",
+          "description": "Days before a reminder is sent."
+        },
+        "accessControl": {
+          "type": "boolean",
+          "description": "If enabled, SSN/VATIN/phone is validated before access."
+        },
+        "enableInsecureSigning": {
+          "type": "boolean",
+          "description": "If true, the signer can use insecure signing methods."
+        }
+      }
+    },
+    "DocumentDetails": {
+      "type": "object",
+      "description": "A document in a case file.",
+      "properties": {
+        "caseFileId": {
+          "type": "integer",
+          "description": "The id of the case file this document belongs to."
+        },
+        "id": {
+          "type": "integer",
+          "description": "The document id."
+        },
+        "documentId": {
+          "type": "string",
+          "description": "The unique document identifier."
+        },
+        "documentOrder": {
+          "type": "integer",
+          "description": "The signing order of the document."
+        },
+        "fileSize": {
+          "type": "integer",
+          "description": "The file size in bytes."
+        },
+        "title": {
+          "type": "string",
+          "description": "The document title."
+        },
+        "status": {
+          "type": "integer",
+          "description": "The document status."
+        },
+        "signable": {
+          "type": "boolean",
+          "description": "True if the document is signable."
+        },
+        "signatureLines": {
+          "type": "array",
+          "description": "List of signature lines on the document.",
+          "items": {
+            "$ref": "#/definitions/SignatureLineDetails"
+          }
+        },
+        "created": {
+          "type": "integer",
+          "description": "Timestamp when the document was created."
+        },
+        "encryptionModeSigned": {
+          "type": "string",
+          "description": "The encryption mode used for the signed document."
+        },
+        "format": {
+          "type": "string",
+          "description": "The document format."
+        }
+      }
+    },
+    "SignatureLineDetails": {
+      "type": "object",
+      "description": "A signature line on a document.",
+      "properties": {
+        "signerId": {
+          "type": "integer",
+          "description": "The id of the signer assigned to this signature line."
+        },
+        "documentId": {
+          "type": "integer",
+          "description": "The id of the document this signature line belongs to."
+        },
+        "id": {
+          "type": "integer",
+          "description": "The signature line id."
+        },
+        "role": {
+          "type": "string",
+          "description": "The role assigned to this signature line."
+        },
+        "signOrder": {
+          "type": "integer",
+          "description": "The signing order of this signature line."
+        },
+        "activatedAt": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "UNIX timestamp when this signature line was activated."
+        }
+      }
+    },
+    "DocumentContent": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "format": "byte",
+          "x-ms-summary": "Document Content",
+          "description": "Base64 encoded content of the document."
         }
       }
     }
