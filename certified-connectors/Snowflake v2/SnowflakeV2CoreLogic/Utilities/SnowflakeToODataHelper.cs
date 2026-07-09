@@ -390,16 +390,22 @@ namespace SnowflakeV2CoreLogic.Utilities
         private static string ConvertSnowflakeDateTimeNtzToString(
             string snowflakeDateTime)
         {
-            // Snowflake returns data as "unixTime.F9" (meaning utc.9 fractional seconds) which doesn't parse natively with .NET
-            // We need to split the two parts up and parse handle them separately before recombining them
+            // Snowflake returns data as "unixTime.F" (seconds since epoch, optionally followed by fractional
+            // seconds) which doesn't parse natively with .NET. The number of fractional digits depends on the
+            // column's scale (0-9): scale 0 columns are returned with no fractional part at all (no '.'), while
+            // higher scales include that many fractional digits. We split the parts and handle them separately.
             string[] dateTimeParts = snowflakeDateTime.Split('.');
 
             // Convert the time since epoch to a datetimeoffset
             var parsedDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(dateTimeParts[0]));
 
-            DateTimeOffset parsedDateTimeWithFullPrecision = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            // A fractional component is only present when the column scale is greater than 0.
+            if (dateTimeParts.Length > 1)
+            {
+                parsedDateTime = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            }
 
-            return parsedDateTimeWithFullPrecision.ToString(DateTimeOutputFormat);
+            return parsedDateTime.ToString(DateTimeOutputFormat);
         }
 
         /// <summary>
@@ -410,16 +416,21 @@ namespace SnowflakeV2CoreLogic.Utilities
         private static string ConvertSnowflakeDateTimeWithTzToString(
             string snowflakeDateTime)
         {
-            // Snowflake returns data as "unixTime.F9 +0000" which doesn't parse natively with .NET
-            // We need to split the components two parts up and parse them separately before recombining them
+            // Snowflake returns data as "unixTime.F +0000" which doesn't parse natively with .NET.
+            // As with TIMESTAMP_NTZ, the fractional part is only present when the column scale is greater than 0.
+            // We first strip the trailing time zone offset, then split the seconds and fractional parts.
             // Note: the offset is not used because snowflake stores the timestamp in UTC which is what we want to return
-            string[] dateTimeParts = snowflakeDateTime.Split('.', ' ');
+            string timePart = snowflakeDateTime.Split(' ')[0];
+            string[] dateTimeParts = timePart.Split('.');
 
             // Convert the time since epoch to a datetimeoffset
             var parsedDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(dateTimeParts[0]));
 
-            // Include the fractional seconds
-            parsedDateTime = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            // Include the fractional seconds when present (scale > 0)
+            if (dateTimeParts.Length > 1)
+            {
+                parsedDateTime = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            }
 
             return parsedDateTime.ToString(DateTimeOutputFormat);
         }
@@ -434,8 +445,20 @@ namespace SnowflakeV2CoreLogic.Utilities
             string fractionalSeconds,
             DateTimeOffset dateTime)
         {
-            // Add the nanoseconds to the parsed datetime
-            var nanoseconds = long.Parse(fractionalSeconds);
+            if (string.IsNullOrEmpty(fractionalSeconds))
+            {
+                return dateTime;
+            }
+
+            // The fractional component is a decimal fraction of a second whose length matches the column's
+            // scale (1-9 digits). To interpret it correctly regardless of scale we normalize it to nanosecond
+            // precision (9 digits) by right-padding with zeros, e.g. scale 6 ".123456" -> "123456000" ns.
+            // Anything beyond 9 digits is truncated since nanoseconds are the finest unit Snowflake supports.
+            string nanosecondsString = fractionalSeconds.Length >= 9
+                ? fractionalSeconds.Substring(0, 9)
+                : fractionalSeconds.PadRight(9, '0');
+
+            var nanoseconds = long.Parse(nanosecondsString);
 
             // Convert nanoseconds to Ticks (1 Tick == 100 nanoseconds)
             var ticks = nanoseconds / 100;
