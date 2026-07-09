@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic.Utilities
@@ -10,6 +10,9 @@ namespace SnowflakeV2CoreLogic.Utilities
 
     /// <summary>
     /// OData to SQL Parser
+    /// 
+    /// Caller-supplied string values are escaped before being embedded as SQL string literals, and
+    /// identifiers (column/property names) are validated as Snowflake identifiers.
     /// 
     /// Supported Operations:
     /// 
@@ -30,19 +33,10 @@ namespace SnowflakeV2CoreLogic.Utilities
     /// - contains(property, value): Checks if property contains the specified value
     /// - startswith(property, value): Checks if property starts with the specified value
     /// - endswith(property, value): Checks if property ends with the specified value
-    /// - tolower(expression): Converts the expression to lowercase
-    /// - toupper(expression): Converts the expression to uppercase
     /// 
     /// </summary>
     public class ODataToSqlParser
     {
-        private readonly bool useCaseInsensitiveFilters;
-
-        public ODataToSqlParser(bool useCaseInsensitiveFilters = false)
-        {
-            this.useCaseInsensitiveFilters = useCaseInsensitiveFilters;
-        }
-
         public string ParseFilterToSql(FilterClause filterClause)
         {
             if (filterClause == null)
@@ -75,25 +69,34 @@ namespace SnowflakeV2CoreLogic.Utilities
             }
             else if (expression is SingleValuePropertyAccessNode propertyAccessNode)
             {
-                return propertyAccessNode.Property.Name;
+
+                return propertyAccessNode.Property.Name.ToSafeSnowflakeIdentifier("Filter property");
             }
             // Handle open property access (dynamic properties)
             else if (expression is SingleValueOpenPropertyAccessNode openPropertyNode)
             {
-                // For open properties, we use the property name directly
-                return openPropertyNode.Name;
+                return openPropertyNode.Name.ToSafeSnowflakeIdentifier("Filter property");
             }
             else if (expression is ConstantNode constantNode)
             {
                 if (constantNode.Value == null)
                     return "NULL";
-                else if (constantNode.Value is string)
-                    return $"'{constantNode.Value}'";
+                else if (constantNode.Value is string stringValue)
+                    return $"'{EscapeStringLiteral(stringValue)}'";
                 else
                     return constantNode.Value.ToString();
             }
 
             throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}");
+        }
+
+        /// <summary>
+        /// Escapes a string so it can be safely embedded inside a single-quoted Snowflake string literal.
+        /// Backslashes are escaped first (Snowflake honours backslash escape sequences) and then single quotes.
+        /// </summary>
+        private static string EscapeStringLiteral(string value)
+        {
+            return value.Replace("\\", "\\\\").Replace("'", "''");
         }
 
         private string ParseBinaryOperator(BinaryOperatorNode binaryOperatorNode)
@@ -126,8 +129,6 @@ namespace SnowflakeV2CoreLogic.Utilities
 
         private string ParseFunctionCall(SingleValueFunctionCallNode functionCallNode)
         {
-            var likeOperator = useCaseInsensitiveFilters ? "ILIKE" : "LIKE";
-
             if (functionCallNode.Name.Equals("contains", StringComparison.OrdinalIgnoreCase))
             {
                 var arguments = functionCallNode.Parameters.ToList();
@@ -138,13 +139,13 @@ namespace SnowflakeV2CoreLogic.Utilities
                 var property = ParseExpression(arguments[0] as SingleValueNode);
                 var value = ParseExpression(arguments[1] as SingleValueNode);
 
-                // Remove quotes from value if present
+                // Remove the surrounding quotes (the escaped content is preserved).
                 if (value.StartsWith("'") && value.EndsWith("'"))
                 {
                     value = value.Substring(1, value.Length - 2);
                 }
 
-                return $"{property} {likeOperator} '%{value}%'";
+                return $"{property} LIKE '%{value}%'";
             }
             else if (functionCallNode.Name.Equals("startswith", StringComparison.OrdinalIgnoreCase))
             {
@@ -158,7 +159,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                 if (value.StartsWith("'") && value.EndsWith("'"))
                     value = value.Substring(1, value.Length - 2);
 
-                return $"{property} {likeOperator} '{value}%'";
+                return $"{property} LIKE '{value}%'";
             }
             else if (functionCallNode.Name.Equals("endswith", StringComparison.OrdinalIgnoreCase))
             {
@@ -172,25 +173,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                 if (value.StartsWith("'") && value.EndsWith("'"))
                     value = value.Substring(1, value.Length - 2);
 
-                return $"{property} {likeOperator} '%{value}'";
-            }
-            else if (functionCallNode.Name.Equals("tolower", StringComparison.OrdinalIgnoreCase))
-            {
-                var arguments = functionCallNode.Parameters.ToList();
-                if (arguments.Count != 1)
-                    throw new InvalidOperationException("tolower function requires exactly one argument");
-
-                var operand = ParseExpression(arguments[0] as SingleValueNode);
-                return $"LOWER({operand})";
-            }
-            else if (functionCallNode.Name.Equals("toupper", StringComparison.OrdinalIgnoreCase))
-            {
-                var arguments = functionCallNode.Parameters.ToList();
-                if (arguments.Count != 1)
-                    throw new InvalidOperationException("toupper function requires exactly one argument");
-
-                var operand = ParseExpression(arguments[0] as SingleValueNode);
-                return $"UPPER({operand})";
+                return $"{property} LIKE '%{value}'";
             }
 
             throw new NotSupportedException($"Unsupported function: {functionCallNode.Name}");
