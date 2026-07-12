@@ -2,261 +2,649 @@
   "swagger": "2.0",
   "info": {
     "title": "PremiumConnector SF",
-    "description": "Connector for SAP SuccessFactors Modules.",
-    "version": "1.0.0",
+    "description": "SAP SuccessFactors integration via PremiumConnector SF. Manage candidates, job postings, applications, interviews, picklists, and metadata. Monitor and adjust your quota at https://sap-connectors.bajonczak.com.",
     "contact": {
       "name": "Sascha Bajonczak",
       "url": "https://sap-connectors.bajonczak.com",
       "email": "xbeejayx@hotmail.com"
-    }
+    },
+    "version": "v1"
   },
   "host": "sap-api.bajonczak.com",
-  "basePath": "/",
   "schemes": [
     "https"
   ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
-  "x-ms-connector-metadata": [
-    {
-      "propertyName": "Website",
-      "propertyValue": "https://sap-connectors.bajonczak.com"
-    },
-    {
-      "propertyName": "Privacy policy",
-      "propertyValue": "https://blog.bajonczak.com/privacy-policy/"
-    }
-  ],
-  "securityDefinitions": {
-    "oauth2_auth": {
-      "type": "oauth2",
-      "flow": "accessCode",
-      "authorizationUrl": "https://sap-api.bajonczak.com/oauth2/authorize",
-      "tokenUrl": "https://sap-api.bajonczak.com/oauth2/token",
-      "refreshUrl": "https://sap-api.bajonczak.com/oauth2/token",
-      "clientId": "c6917df8-0049-46b5-8136-11b10d8d7e59",
-      "clientSecret": "Dummy value - replace in production",
-      "scopes": {
-        "premiumconnector.read": "Read access to PremiumConnector resources",
-        "premiumconnector.write": "Write access to PremiumConnector resources"
-      }
-    }
-  },
-  "security": [
-    {
-      "oauth2_auth": [
-        "premiumconnector.read"
-      ]
-    }
-  ],
   "paths": {
-    "/api/v1/plans": {
+    "/api/v1/candidates": {
       "get": {
-        "summary": "List plans",
-        "description": "Returns all active plans for pricing and onboarding.",
-        "operationId": "Plans_GetAll",
-        "x-ms-summary": "List plans",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Plan list",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/PlanDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/job-postings": {
-      "get": {
-        "summary": "List job postings",
-        "description": "Returns job requisitions from SuccessFactors through PremiumConnector.",
-        "operationId": "JobPosting_GetJobPostings",
-        "x-ms-summary": "List job postings",
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Get Candidates",
+        "description": "Returns a list of candidates from SAP SuccessFactors.",
+        "operationId": "Candidate_GetCandidates_GET",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "templateType",
             "in": "query",
-            "type": "string",
-            "required": false,
-            "x-ms-summary": "Template type",
-            "x-ms-visibility": "advanced",
-            "description": "Optional template type filter, for example JOB_REQ."
-          },
-          {
-            "name": "activeOnly",
-            "in": "query",
-            "type": "boolean",
-            "required": false,
-            "default": false,
-            "x-ms-summary": "Active only",
-            "description": "When true, returns only active postings."
-          },
-          {
             "name": "top",
-            "in": "query",
+            "description": "Maximum number of records to return (default: 20).",
             "type": "integer",
             "format": "int32",
-            "required": false,
-            "default": 50,
-            "x-ms-summary": "Page size",
-            "x-ms-visibility": "advanced",
-            "description": "Maximum number of results to return."
-          },
-          {
-            "name": "skip",
-            "in": "query",
-            "type": "integer",
-            "format": "int32",
-            "required": false,
-            "default": 0,
-            "x-ms-summary": "Offset",
-            "x-ms-visibility": "advanced",
-            "description": "Number of items to skip for paging."
+            "default": 20
           }
         ],
         "responses": {
           "200": {
-            "description": "Job posting list",
+            "description": "List of candidates.",
             "schema": {
-              "$ref": "#/definitions/JobPostingListResponse"
+              "$ref": "#/definitions/CandidateListResponse"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
             }
           }
-        }
-      }
-    },
-    "/api/v1/job-postings/{id}": {
-      "get": {
-        "summary": "Get job posting by id",
-        "description": "Returns a single job requisition by id.",
-        "operationId": "JobPosting_GetJobPostingById",
-        "x-ms-summary": "Get job posting by id",
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      },
+      "post": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Create Candidate",
+        "description": "Creates a new candidate in SAP SuccessFactors.",
+        "operationId": "Candidate_CreateCandidate_POST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "in": "body",
+            "name": "body",
             "required": true,
-            "type": "integer",
-            "format": "int32",
-            "x-ms-summary": "Job posting id",
-            "description": "Internal PremiumConnector job posting identifier."
+            "schema": {
+              "$ref": "#/definitions/CandidateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Candidate created successfully.",
+            "schema": {
+              "$ref": "#/definitions/CandidateResponse"
+            }
+          },
+          "400": {
+            "description": "Required fields missing or invalid.",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/candidates/{candidateId}": {
+      "get": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Get Candidate by ID",
+        "description": "Returns a single candidate by their SAP SuccessFactors candidate ID.",
+        "operationId": "Candidate_GetCandidateById_GET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidateId",
+            "description": "SF candidate ID, e.g. \"12333\".",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Job posting",
+            "description": "Candidate data.",
             "schema": {
-              "$ref": "#/definitions/JobRequisition"
+              "$ref": "#/definitions/CandidateResponse"
             }
           },
-          "404": {
-            "description": "Not found"
+          "502": {
+            "description": "SAP SuccessFactors API error or candidate not found.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      },
+      "patch": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Update Candidate",
+        "description": "Updates an existing candidate via upsert.",
+        "operationId": "Candidate_UpdateCandidate_PATCH",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidateId",
+            "description": "SF candidate ID, e.g. \"45417\".",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Fields to update.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CandidateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate updated successfully.",
+            "schema": {
+              "$ref": "#/definitions/CandidateResponse"
+            }
+          },
+          "400": {
+            "description": "Required fields missing.",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/candidates/{candidateId}/education": {
+      "put": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Set Candidate Education",
+        "description": "Sets the education record for an existing candidate via upsert. Fields not sent remain unchanged.",
+        "operationId": "Candidate_UpsertCandidateEducation_PUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidateId",
+            "description": "SF candidate ID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Education data.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CandidateEducation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Education set successfully.",
+            "schema": {
+              "$ref": "#/definitions/CandidateResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request data.",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/candidates/{candidateId}/work-experience": {
+      "put": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Set Candidate Work Experience",
+        "description": "Sets the outside work experience for an existing candidate via upsert.",
+        "operationId": "Candidate_UpsertCandidateWorkExperience_PUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidateId",
+            "description": "SF candidate ID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Work experience data.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CandidateWorkExperience"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Work experience set successfully.",
+            "schema": {
+              "$ref": "#/definitions/CandidateResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request data.",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/candidates/{candidateId}/attachments": {
+      "post": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Add Candidate Attachment",
+        "description": "Adds a file attachment (for example a CV) to an existing candidate.",
+        "operationId": "Candidate_AddCandidateAttachment_POST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidateId",
+            "description": "SF candidate ID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Attachment with Base64-encoded file content.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CandidateAttachment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Attachment added successfully.",
+            "schema": {
+              "$ref": "#/definitions/CandidateResponse"
+            }
+          },
+          "400": {
+            "description": "Required fields missing.",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/candidates/{candidateId}/comments": {
+      "post": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Add Candidate Comment",
+        "description": "Adds a comment to an existing candidate.",
+        "operationId": "Candidate_AddCandidateComment_POST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidateId",
+            "description": "SF candidate ID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Comment content.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CandidateComment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Comment added successfully.",
+            "schema": {
+              "$ref": "#/definitions/CandidateResponse"
+            }
+          },
+          "400": {
+            "description": "Required fields missing.",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/candidates/{candidateId}/tags": {
+      "post": {
+        "tags": [
+          "Candidate"
+        ],
+        "summary": "Add Candidate Tag",
+        "description": "Adds a tag to an existing candidate.",
+        "operationId": "Candidate_AddCandidateTag_POST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidateId",
+            "description": "SF candidate ID.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Tag label.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CandidateTag"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tag added successfully.",
+            "schema": {
+              "$ref": "#/definitions/CandidateResponse"
+            }
+          },
+          "400": {
+            "description": "Required fields missing.",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
       }
     },
     "/api/v1/job-applications": {
       "get": {
-        "summary": "List job applications",
-        "description": "Returns paged job applications and supports filtering by jobReqId and status.",
-        "operationId": "JobApplication_GetJobApplications",
-        "x-ms-summary": "List job applications",
+        "tags": [
+          "JobApplication"
+        ],
+        "summary": "Get Job Applications",
+        "description": "Returns a paginated list of job applications.",
+        "operationId": "JobApplication_GetJobApplications_GET",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "jobReqId",
             "in": "query",
+            "name": "JobReqId",
+            "description": "Filter nach Job-Ausschreibungs-ID.\r\nEmpfohlen um nur Bewerbungen für eine bestimmte Stelle zu erhalten.",
             "type": "integer",
-            "format": "int64",
-            "required": false,
-            "x-ms-summary": "Job requisition id",
-            "x-ms-visibility": "advanced"
+            "format": "int64"
           },
           {
-            "name": "status",
             "in": "query",
-            "type": "string",
-            "required": false,
-            "x-ms-summary": "Application status",
-            "x-ms-visibility": "advanced"
+            "name": "Status",
+            "description": "Filter nach Bewerbungsstatus, z.B. \"Active\".",
+            "type": "string"
           },
           {
-            "name": "top",
             "in": "query",
+            "name": "Skip",
+            "description": "Anzahl zu überspringender Einträge (OData $skip).",
             "type": "integer",
             "format": "int32",
-            "required": false,
-            "default": 50,
-            "x-ms-summary": "Page size",
-            "x-ms-visibility": "advanced"
+            "maximum": 2147483647,
+            "minimum": 0
           },
           {
-            "name": "skip",
             "in": "query",
+            "name": "Top",
+            "description": "Maximale Anzahl zurückgegebener Einträge (OData $top). Default 50, Max 200.",
             "type": "integer",
             "format": "int32",
-            "required": false,
-            "default": 0,
-            "x-ms-summary": "Offset",
-            "x-ms-visibility": "advanced"
+            "maximum": 200,
+            "minimum": 1
           }
         ],
         "responses": {
           "200": {
-            "description": "Job application list",
+            "description": "Paginated list of job applications.",
             "schema": {
               "$ref": "#/definitions/JobApplicationListResponse"
             }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
       }
     },
     "/api/v1/job-applications/{id}": {
       "get": {
-        "summary": "Get job application by id",
-        "description": "Returns a single job application by its id.",
-        "operationId": "JobApplication_GetJobApplicationById",
-        "x-ms-summary": "Get job application by id",
+        "tags": [
+          "JobApplication"
+        ],
+        "summary": "Get Job Application by ID",
+        "description": "Returns a single job application by its ID.",
+        "operationId": "JobApplication_GetJobApplicationById_GET",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
+            "description": "The application ID (applicationId).",
             "required": true,
             "type": "integer",
-            "format": "int64",
-            "x-ms-summary": "Application id"
+            "format": "int64"
           }
         ],
         "responses": {
           "200": {
-            "description": "Job application",
+            "description": "The job application.",
             "schema": {
               "$ref": "#/definitions/JobApplication"
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Not found.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
       }
     },
     "/api/v1/job-interviews": {
       "post": {
-        "summary": "Create interview",
-        "description": "Creates a new interview for an existing job application.",
-        "operationId": "JobInterview_CreateInterview",
-        "x-ms-summary": "Create interview",
+        "tags": [
+          "JobInterview"
+        ],
+        "summary": "Create Job Interview",
+        "description": "Creates a new job interview for an application in SAP SuccessFactors.",
+        "operationId": "JobInterview_CreateInterview_POST",
+        "consumes": [
+          "application/json-patch+json",
+          "application/json",
+          "text/json",
+          "application/*+json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "body",
             "in": "body",
-            "required": true,
+            "name": "body",
+            "description": "Interview details.",
             "schema": {
               "$ref": "#/definitions/CreateJobInterviewRequest"
             }
@@ -264,423 +652,506 @@
         ],
         "responses": {
           "201": {
-            "description": "Interview created",
+            "description": "Interview created successfully.",
             "schema": {
               "$ref": "#/definitions/CreateJobInterviewResponse"
             }
+          },
+          "400": {
+            "description": "Invalid request (e.g. applicationId missing).",
+            "schema": {
+              "$ref": "#/definitions/ValidationProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
       }
     },
-    "/api/v1/candidates": {
+    "/api/v1/job-postings": {
       "get": {
-        "summary": "List candidates",
-        "description": "Returns a list of candidates.",
-        "operationId": "Candidate_GetCandidates",
-        "x-ms-summary": "List candidates",
+        "tags": [
+          "JobPosting"
+        ],
+        "summary": "Get Job Postings",
+        "description": "Returns a paginated list of job postings.",
+        "operationId": "JobPosting_GetJobPostings_GET",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "top",
             "in": "query",
-            "type": "integer",
-            "format": "int32",
-            "required": false,
-            "default": 20,
-            "x-ms-summary": "Max results",
-            "x-ms-visibility": "advanced"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Candidate list",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CandidateResponse"
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create candidate",
-        "description": "Creates a candidate in SuccessFactors.",
-        "operationId": "Candidate_CreateCandidate",
-        "x-ms-summary": "Create candidate",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CandidateRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Candidate created",
-            "schema": {
-              "$ref": "#/definitions/CandidateResponse"
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/candidates/{candidateId}": {
-      "get": {
-        "summary": "Get candidate by id",
-        "description": "Returns a candidate by SuccessFactors candidate id.",
-        "operationId": "Candidate_GetCandidateById",
-        "x-ms-summary": "Get candidate by id",
-        "parameters": [
-          {
-            "name": "candidateId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Candidate id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Candidate",
-            "schema": {
-              "$ref": "#/definitions/CandidateResponse"
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update candidate",
-        "description": "Updates an existing candidate.",
-        "operationId": "Candidate_UpdateCandidate",
-        "x-ms-summary": "Update candidate",
-        "parameters": [
-          {
-            "name": "candidateId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Candidate id"
+            "name": "ActiveOnly",
+            "description": "Nur aktive (nicht gelöschte) Ausschreibungen zurückgeben.\r\ntrue = nur aktive, false = alle inkl. gelöschte. Default: true.",
+            "type": "boolean"
           },
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CandidateRequest"
-            }
+            "in": "query",
+            "name": "TemplateType",
+            "description": "Filter nach Template-Typ, z.B. \"JOB_REQ\". Leer = alle.",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "Skip",
+            "description": "Anzahl zu überspringender Einträge (OData $skip).",
+            "type": "integer",
+            "format": "int32",
+            "maximum": 2147483647,
+            "minimum": 0
+          },
+          {
+            "in": "query",
+            "name": "Top",
+            "description": "Maximale Anzahl zurückgegebener Einträge (OData $top). Default 50, Max 200.",
+            "type": "integer",
+            "format": "int32",
+            "maximum": 200,
+            "minimum": 1
           }
         ],
         "responses": {
           "200": {
-            "description": "Candidate updated",
+            "description": "Paginated list of job postings.",
             "schema": {
-              "$ref": "#/definitions/CandidateResponse"
+              "$ref": "#/definitions/JobPostingListResponse"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
       }
     },
-    "/api/v1/picklists/{picklistId}": {
+    "/api/v1/job-postings/{id}": {
       "get": {
-        "summary": "Get picklist values",
-        "description": "Returns all values for the given picklist id.",
-        "operationId": "Picklist_GetPicklist",
-        "x-ms-summary": "Get picklist values",
+        "tags": [
+          "JobPosting"
+        ],
+        "summary": "Get Job Posting by ID",
+        "description": "Returns a single job posting by its requisition ID.",
+        "operationId": "JobPosting_GetJobPostingById_GET",
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
-            "name": "picklistId",
             "in": "path",
+            "name": "id",
+            "description": "The job requisition ID.",
             "required": true,
-            "type": "string",
-            "x-ms-summary": "Picklist id"
+            "type": "integer",
+            "format": "int64"
           }
         ],
         "responses": {
           "200": {
-            "description": "Picklist values",
+            "description": "The job posting.",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/PicklistOption"
-              }
+              "$ref": "#/definitions/JobRequisition"
+            }
+          },
+          "404": {
+            "description": "Not found.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
             }
           }
-        }
-      }
-    },
-    "/api/v1/metadata/entities/{entityName}/fields": {
-      "get": {
-        "summary": "Get entity fields",
-        "description": "Returns available field names for a SuccessFactors entity.",
-        "operationId": "Metadata_GetEntityFields",
-        "x-ms-summary": "Get entity fields",
-        "parameters": [
+        },
+        "security": [
           {
-            "name": "entityName",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "x-ms-summary": "Entity name"
+            "ApiKeyAuth": [ ]
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Entity fields",
-            "schema": {
-              "$ref": "#/definitions/EntityFieldsResponse"
-            }
-          }
-        }
+        "x-ms-visibility": "important"
       }
     },
     "/api/v1/metadata/raw": {
       "get": {
-        "summary": "Get raw metadata",
-        "description": "Returns raw EDMX metadata XML as text.",
-        "operationId": "Metadata_GetRawMetadata",
-        "x-ms-summary": "Get raw metadata",
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Get Raw Metadata",
+        "description": "Returns the raw OData metadata (EDMX/XML) of the SAP SuccessFactors instance. Contains all entity types and their fields.",
+        "operationId": "Metadata_GetRawMetadata_GET",
         "produces": [
           "application/xml",
           "application/json"
         ],
         "responses": {
           "200": {
-            "description": "Raw metadata",
+            "description": "EDMX XML document with all entities and fields.",
             "schema": {
               "type": "string"
             }
+          },
+          "502": {
+            "description": "SF API unreachable or authentication error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/metadata/entities/{entityName}/fields": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Get Entity Fields",
+        "description": "Returns all available field names for a given entity (for example JobRequisition or JobApplicationInterview). Useful for discovering which fields are available in this SAP SuccessFactors instance.",
+        "operationId": "Metadata_GetEntityFields_GET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entityName",
+            "description": "OData entity name, e.g. \"JobRequisition\".",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available field names.",
+            "schema": {
+              "$ref": "#/definitions/EntityFieldsResponse"
+            }
+          },
+          "502": {
+            "description": "SF API unreachable, entity does not exist, or authentication error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/v1/picklists/{picklistId}": {
+      "get": {
+        "tags": [
+          "Picklist"
+        ],
+        "summary": "Get Picklist Options",
+        "description": "Returns all options for a given picklist.",
+        "operationId": "Picklist_GetPicklist_GET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "picklistId",
+            "description": "The picklist ID, e.g. \"Gender\".",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of picklist options.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PicklistOption"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or unknown tenant.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          },
+          "502": {
+            "description": "SAP SuccessFactors API error.",
+            "schema": {
+              "$ref": "#/definitions/ProblemDetails"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": [ ]
+          }
+        ],
+        "x-ms-visibility": "important"
       }
     }
   },
   "definitions": {
-    "PlanDto": {
-      "type": "object",
+    "CandidateAttachment": {
       "required": [
-        "id",
-        "name",
-        "requestQuota",
-        "pricePerMonth"
+        "fileContent",
+        "fileName"
       ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid"
-        },
-        "name": {
-          "type": "string"
-        },
-        "requestQuota": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "maxApiKeys": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "pricePerMonth": {
-          "type": "number",
-          "format": "double"
-        }
-      }
-    },
-    "JobPostingListResponse": {
       "type": "object",
       "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JobRequisition"
-          }
-        },
-        "top": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "skip": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "JobRequisition": {
-      "type": "object",
-      "properties": {
-        "jobReqId": {
+        "fileName": {
+          "description": "File name including extension, e.g. \"CV_John_Doe.pdf\".",
+          "minLength": 1,
           "type": "string"
         },
-        "jobReqLocale": {
+        "fileContent": {
+          "description": "File content as a Base64-encoded string.",
+          "minLength": 1,
           "type": "string"
         },
-        "title": {
+        "module": {
+          "description": "SF module. Default: \"RECRUITING\".",
           "type": "string"
         },
-        "templateType": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        }
-      }
-    },
-    "JobApplicationListResponse": {
-      "type": "object",
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/JobApplication"
-          }
-        },
-        "count": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "top": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "skip": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "JobApplication": {
-      "type": "object",
-      "properties": {
-        "applicationId": {
-          "type": "string"
-        },
-        "jobReqId": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        },
-        "candidateId": {
-          "type": "string"
-        },
-        "candidateNameLF": {
-          "type": "string"
-        },
-        "applicationDate": {
-          "type": "string"
-        },
-        "lastModifiedDate": {
+        "moduleCategory": {
+          "description": "SF category. Default: \"ATTACHMENTS\".",
           "type": "string"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": false
     },
-    "CreateJobInterviewRequest": {
-      "type": "object",
+    "CandidateComment": {
       "required": [
-        "applicationId"
+        "content"
       ],
-      "properties": {
-        "applicationId": {
-          "type": "string"
-        },
-        "startDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "endDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "isTimeSet": {
-          "type": "boolean"
-        },
-        "templateType": {
-          "type": "string"
-        },
-        "source": {
-          "type": "string"
-        },
-        "notes": {
-          "type": "string"
-        },
-        "interviewerUserId": {
-          "type": "string"
-        }
-      }
-    },
-    "CreateJobInterviewResponse": {
       "type": "object",
       "properties": {
-        "applicationId": {
+        "content": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CandidateEducation": {
+      "type": "object",
+      "properties": {
+        "school": {
+          "description": "School or university, e.g. \"TU München\".",
           "type": "string"
         },
         "startDate": {
-          "type": "string",
-          "format": "date-time"
+          "description": "Start date (ISO or OData /Date(ms)/).",
+          "type": "string"
         },
         "endDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "isTimeSet": {
-          "type": "boolean"
-        },
-        "templateType": {
-          "type": "string"
-        },
-        "source": {
-          "type": "string"
-        },
-        "notes": {
-          "type": "string"
-        },
-        "interviewerUserId": {
+          "description": "End date (ISO or OData /Date(ms)/).",
           "type": "string"
         }
-      }
+      },
+      "additionalProperties": false
+    },
+    "CandidateListResponse": {
+      "description": "Paged list of candidates returned by GET /api/v1/candidates.",
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CandidateResponse"
+          }
+        },
+        "count": {
+          "format": "int32",
+          "type": "integer",
+          "readOnly": true
+        }
+      },
+      "additionalProperties": false
     },
     "CandidateRequest": {
-      "type": "object",
+      "description": "Request to create or update a candidate in SAP SuccessFactors.\r\nOnly firstName, lastName, country, and primaryEmail are required; all other fields are optional.\r\n            \r\nCreate  → POST /api/v1/candidates\r\nUpdate  → PATCH /api/v1/candidates/{candidateId}",
       "required": [
+        "country",
         "firstName",
         "lastName",
-        "country",
         "primaryEmail"
       ],
+      "type": "object",
       "properties": {
         "firstName": {
+          "minLength": 1,
           "type": "string"
         },
         "lastName": {
+          "minLength": 1,
           "type": "string"
         },
         "country": {
+          "description": "ISO country code, e.g. \"US\", \"DE\", \"BR\".",
+          "minLength": 1,
           "type": "string"
         },
         "primaryEmail": {
-          "type": "string",
-          "format": "email"
+          "format": "email",
+          "minLength": 1,
+          "type": "string"
         },
         "address": {
           "type": "string"
         },
         "cellPhone": {
+          "description": "Mobile phone number, e.g. \"+1 866 9999-9999\".",
           "type": "string"
         },
         "gender": {
+          "description": "Gender: \"M\" or \"F\".",
           "type": "string"
         },
         "minAnnualSal": {
+          "description": "Desired minimum salary as a string, e.g. \"70000\".",
           "type": "string"
         },
         "city": {
+          "description": "City (optional). Free text.",
+          "type": "string"
+        },
+        "zip": {
+          "description": "ZIP code (optional). Free text.",
+          "type": "string"
+        },
+        "education": {
+          "$ref": "#/definitions/CandidateEducation"
+        },
+        "outsideWorkExperience": {
+          "$ref": "#/definitions/CandidateWorkExperience"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CandidateTag"
+          }
+        },
+        "educationSchool": {
+          "description": "School or university (flat, for Power Platform).",
+          "type": "string"
+        },
+        "educationMajor": {
+          "description": "Field of study or major (flat).",
+          "type": "string"
+        },
+        "educationDegree": {
+          "description": "Degree, e.g. \"Bachelor\", \"Master\", or SF code \"217\" (flat).",
+          "type": "string"
+        },
+        "educationStartDate": {
+          "description": "Education start date (ISO or OData /Date(ms)/) (flat).",
+          "type": "string"
+        },
+        "educationEndDate": {
+          "description": "Education end date (ISO or OData /Date(ms)/) (flat).",
+          "type": "string"
+        },
+        "workExperienceEmployer": {
+          "description": "Employer (flat, for Power Platform).",
+          "type": "string"
+        },
+        "workExperienceStartDate": {
+          "description": "Work experience start date (ISO or OData /Date(ms)/) (flat).",
+          "type": "string"
+        },
+        "workExperienceEndDate": {
+          "description": "Work experience end date (ISO or OData /Date(ms)/) (flat).",
+          "type": "string"
+        },
+        "attachmentFileName": {
+          "description": "Attachment file name including extension (flat), e.g. \"CV.pdf\".",
+          "type": "string"
+        },
+        "attachmentFileContent": {
+          "description": "Attachment file content as a Base64-encoded string (flat).",
+          "type": "string"
+        },
+        "attachmentModule": {
+          "description": "SF module for the attachment (flat). Default: \"RECRUITING\".",
+          "type": "string"
+        },
+        "attachmentModuleCategory": {
+          "description": "SF category for the attachment (flat). Default: \"ATTACHMENTS\".",
+          "type": "string"
+        },
+        "commentContent": {
+          "description": "Comment text (flat, single entry). Stored as the candidate's resume/note field in SF.",
+          "type": "string"
+        },
+        "tagLabel": {
+          "description": "Tag label (flat, single entry). Comma-separated values create multiple tags.",
           "type": "string"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": false,
+      "example": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "country": "US",
+        "primaryEmail": "john.doe@example.com",
+        "city": "New York",
+        "address": "5th Avenue 350",
+        "cellPhone": "+1 866 9999-9999",
+        "education": {
+          "school": "ABC institute",
+          "degree": "217",
+          "major": "111",
+          "startDate": "/Date(1577836800000)/",
+          "endDate": "/Date(1703980800000)/"
+        },
+        "outsideWorkExperience": {
+          "employer": "ACME GmbH",
+          "startDate": "/Date(1577836800000)/",
+          "endDate": "/Date(1703980800000)/"
+        },
+        "educationSchool": "ABC institute",
+        "educationDegree": "217",
+        "educationMajor": "111",
+        "educationStartDate": "2020-01-01",
+        "educationEndDate": "2023-12-31",
+        "workExperienceEmployer": "ACME GmbH",
+        "workExperienceStartDate": "2020-01-01",
+        "workExperienceEndDate": "2023-12-31",
+        "attachmentFileName": "CV.pdf",
+        "attachmentFileContent": "base64encodedcontent==",
+        "commentContent": "Sehr guter Kandidat.",
+        "tagLabel": "Favorite"
+      }
     },
     "CandidateResponse": {
       "type": "object",
@@ -695,8 +1166,7 @@
           "type": "string"
         },
         "primaryEmail": {
-          "type": "string",
-          "format": "email"
+          "type": "string"
         },
         "country": {
           "type": "string"
@@ -711,25 +1181,115 @@
           "type": "string"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": { }
     },
-    "PicklistOption": {
+    "CandidateTag": {
+      "required": [
+        "label"
+      ],
       "type": "object",
       "properties": {
-        "picklistId": {
-          "type": "string"
-        },
-        "optionId": {
-          "type": "string"
-        },
-        "externalCode": {
-          "type": "string"
-        },
-        "value": {
+        "label": {
+          "minLength": 1,
           "type": "string"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": false
+    },
+    "CandidateWorkExperience": {
+      "type": "object",
+      "properties": {
+        "employer": {
+          "description": "Employer name, e.g. \"ACME GmbH\".",
+          "type": "string"
+        },
+        "startDate": {
+          "description": "Start date (ISO or OData /Date(ms)/).",
+          "type": "string"
+        },
+        "endDate": {
+          "description": "End date (ISO or OData /Date(ms)/).",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CreateJobInterviewRequest": {
+      "description": "Request zum Erstellen eines Job-Interviews in SAP SuccessFactors.\r\nBasiert auf dem OData-Payload von /odata/v2/JobApplicationInterview.\r\n            \r\nWorkflow:\r\n  1. GET /api/v1/job-applications?jobReqId=X  → applicationId ermitteln\r\n  2. POST /api/v1/job-interviews mit dieser applicationId",
+      "required": [
+        "applicationId"
+      ],
+      "type": "object",
+      "properties": {
+        "applicationId": {
+          "description": "Bewerbungs-ID aus GET /api/v1/job-applications (Feld applicationId).\r\nPflichtfeld — Primary Key des Interviews in SF.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "description": "Startdatum und -uhrzeit des Interviews (UTC).\r\nWird in OData /Date(ms+0000)/ Format konvertiert.",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "description": "Enddatum des Interviews (UTC). Optional.",
+          "type": "string"
+        },
+        "isTimeSet": {
+          "description": "Gibt an ob Startdatum eine genaue Uhrzeit enthält (true)\r\noder nur ein Datum ohne Zeit (false/null).",
+          "type": "boolean"
+        },
+        "templateType": {
+          "description": "Template-Typ der Ausschreibung.\r\nTypischer Wert: \"JOB_REQ\".",
+          "type": "string"
+        },
+        "source": {
+          "description": "Quelle der Bewerbung.\r\nMögliche Werte: \"INTERNAL\", \"EXTERNAL\".",
+          "type": "string"
+        },
+        "notes": {
+          "description": "Notizen zum Interview-Verlauf.",
+          "type": "string"
+        },
+        "interviewerUserId": {
+          "description": "userId des Interviewers in SAP SuccessFactors (z.B. \"mhoff1\").\r\nWird als Navigation Property interviewer.userId gesetzt.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CreateJobInterviewResponse": {
+      "type": "object",
+      "properties": {
+        "applicationId": {
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "isTimeSet": {
+          "type": "boolean"
+        },
+        "templateType": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "interviewerUserId": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     },
     "EntityFieldsResponse": {
       "type": "object",
@@ -744,10 +1304,249 @@
           }
         },
         "count": {
-          "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "type": "integer"
         }
-      }
+      },
+      "additionalProperties": false
+    },
+    "JobApplication": {
+      "description": "Bewerbung (JobApplication) aus SAP SuccessFactors.\r\nVerknüpft einen Kandidaten mit einer Ausschreibung (JobRequisition).",
+      "type": "object",
+      "properties": {
+        "applicationId": {
+          "description": "Eindeutige ID der Bewerbung.",
+          "type": "string"
+        },
+        "jobReqId": {
+          "description": "Verknüpfte Job-Ausschreibungs-ID.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Bewerbungsstatus, z.B. \"Active\", \"Rejected\".",
+          "type": "string"
+        },
+        "candidateId": {
+          "description": "Kandidaten-ID.",
+          "type": "string"
+        },
+        "candidateNameLF": {
+          "description": "Name des Kandidaten (Nachname, Vorname).",
+          "type": "string"
+        },
+        "applicationDate": {
+          "description": "Bewerbungsdatum (OData /Date(ms)/ Format).",
+          "type": "string"
+        },
+        "lastModifiedDate": {
+          "description": "Letztes Änderungsdatum (OData /Date(ms)/ Format).",
+          "type": "string"
+        }
+      },
+      "additionalProperties": { }
+    },
+    "JobApplicationListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JobApplication"
+          }
+        },
+        "count": {
+          "format": "int32",
+          "type": "integer",
+          "readOnly": true
+        },
+        "skip": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "top": {
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "JobPostingListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JobRequisition"
+          }
+        },
+        "count": {
+          "format": "int32",
+          "type": "integer",
+          "readOnly": true
+        },
+        "skip": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "top": {
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "JobRequisition": {
+      "description": "Job-Ausschreibung aus SAP SuccessFactors (JobRequisition).\r\nBeinhaltet die häufigsten Felder; weitere Instanz-spezifische\r\nFelder sind in PremiumConnector.SF.Models.JobPosting.JobRequisition.AdditionalFields verfügbar.",
+      "type": "object",
+      "properties": {
+        "jobReqId": {
+          "description": "Eindeutige ID der Ausschreibung.",
+          "type": "string"
+        },
+        "templateType": {
+          "description": "Template-Typ, z.B. \"JOB_REQ\".",
+          "type": "string"
+        },
+        "jobCode": {
+          "description": "Interne Job-Code Nummer.",
+          "type": "string"
+        },
+        "departmentCode": {
+          "description": "Abteilungs-Code.",
+          "type": "string"
+        },
+        "locationCode": {
+          "description": "Standort-Code.",
+          "type": "string"
+        },
+        "divisionCode": {
+          "description": "Divisions-Code.",
+          "type": "string"
+        },
+        "numberOpenings": {
+          "description": "Anzahl offener Stellen.",
+          "type": "string"
+        },
+        "deleted": {
+          "description": "Löschstatus, z.B. \"Deleted\" oder null.",
+          "type": "string"
+        },
+        "defaultLanguage": {
+          "description": "Standardsprache der Ausschreibung.",
+          "type": "string"
+        },
+        "currency": {
+          "description": "Währung.",
+          "type": "string"
+        },
+        "ratedApplicantCount": {
+          "description": "Anzahl bewerteter Bewerber.",
+          "type": "string"
+        },
+        "createdDateTime": {
+          "description": "Erstelldatum (OData /Date(ms+tz)/ Format).",
+          "type": "string"
+        },
+        "closedDateTime": {
+          "description": "Schlussdatum (OData /Date(ms+tz)/ Format).",
+          "type": "string"
+        },
+        "intranetPosting": {
+          "description": "Im Internet publiziert.",
+          "type": "boolean"
+        },
+        "corporatePosting": {
+          "description": "Unternehmensweit publiziert.",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": { }
+    },
+    "PicklistOption": {
+      "description": "Eine einzelne Option in einer SAP SuccessFactors Pickliste.",
+      "type": "object",
+      "properties": {
+        "picklistId": {
+          "type": "string"
+        },
+        "optionId": {
+          "type": "string"
+        },
+        "externalCode": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": { }
+    },
+    "ProblemDetails": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "instance": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": { }
+    },
+    "ValidationProblemDetails": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "instance": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": { }
+    }
+  },
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "name": "X-api-key",
+      "in": "header",
+      "description": "API key issued via the PremiumConnector portal (https://sap-connectors.bajonczak.com). Include it as the **X-api-key** request header."
     }
   }
 }
