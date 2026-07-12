@@ -9,9 +9,7 @@ PremiumConnector SF is not affiliated with, associated with, authorized by, endo
 There are no speciel requirements needed. Only the Authentication settings described below.
 
 ## Authentication
-- Connector authentication in Power Platform: OAuth 2.0 (authorization code flow).
-- The client ID is provided 
-- I will share the secred on a secure channel with you. please tell me your prefered way to send this secret to you
+- The connector uses an api key that cann be created for free on httpss://sa-connectors.bajonczak.com
 
 ## Supported Operations
 
