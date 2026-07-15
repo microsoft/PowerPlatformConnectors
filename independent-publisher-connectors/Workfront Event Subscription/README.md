@@ -44,7 +44,7 @@ Adobe Workfront documentation:
 
 This connector still supports API key authentication for legacy environments.
 
-![Workfront API key setup](./images/001-workfront-api-key-setup.png)
+![Workfront API key setup](https://github.com/P-Product-Inc/AdobeWorkfrontEventSubscriberPreparationScripts/blob/1f1cda8fbb2b24cec25d7959e1b9c8974baef73f/GithubCertificationPullRequestImages/001-workfront-api-key-setup.png?raw=true)
 
 1. Generate or retrieve an API key for the Workfront user that will own the subscription.
 2. Create a connector connection with:
@@ -61,7 +61,7 @@ Adobe notes that API keys are legacy and recommends JWT or OAuth2-based authenti
 
 This is the preferred setup for machine-to-machine integrations.
 
-![Workfront OAuth JWT setup](./images/002-workfront-oath-jwt-setup.png)
+![Workfront OAuth JWT setup](https://github.com/P-Product-Inc/AdobeWorkfrontEventSubscriberPreparationScripts/blob/1f1cda8fbb2b24cec25d7959e1b9c8974baef73f/GithubCertificationPullRequestImages/002-workfront-oath-jwt-setup.png?raw=true)
 
 1. In Workfront, open `Setup` -> `System` -> `OAuth2 Applications`.
 2. Create a new `Machine to Machine Application`.
