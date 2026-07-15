@@ -72,11 +72,4 @@ Semantic search requires AI features to be enabled for your zeroheight organisat
 
 ## Deployment Instructions
 
-Use the [Power Platform Connectors CLI (`paconn`)](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli) to deploy this connector as a custom connector in your environment:
-
-```bash
-pip install paconn
-paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --icon icon.png
-```
-
-For more information about zeroheight, see [https://zeroheight.com](https://zeroheight.com).
+This connector is submitted for Microsoft certification, once certified, users can add it from the official connector catalog.
