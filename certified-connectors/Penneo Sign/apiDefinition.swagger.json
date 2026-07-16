@@ -160,6 +160,85 @@
           }
         }
       }
+    },
+    "/api/v3/casefiles/{caseFileId}": {
+      "get": {
+        "summary": "Get case file details",
+        "description": "Retrieves the details of a specific case file from Penneo, including its signers, documents, and current status. Case file statuses: 0=new, 1=pending, 2=rejected, 3=deleted, 4=signed, 5=completed, 6=failed, 7=expired, 8=anonymized. Use status 5 (completed) as trigger for downloading the signed documents.",
+        "operationId": "GetCaseFileDetails",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "caseFileId",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Case File Id",
+            "x-ms-url-encoding": "single",
+            "description": "The id of the case file to retrieve. Retrieve the case file id with the \"Check job status\" action."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the case file details.",
+            "schema": {
+              "$ref": "#/definitions/CaseFileDetails"
+            }
+          },
+          "403": {
+            "description": "Returned when access to the case file is denied."
+          },
+          "404": {
+            "description": "Returned when the case file is not found."
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{documentId}/content": {
+      "get": {
+        "summary": "Download document",
+        "description": "Downloads the content of a document from Penneo as a base64 encoded string. By default, the signed version of the document is returned.",
+        "operationId": "DownloadDocument",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Document Id",
+            "x-ms-url-encoding": "single",
+            "description": "The id of the document to download. Retrieve the documentIds with the \"Get case file details\"-action."
+          },
+          {
+            "in": "query",
+            "name": "signed",
+            "required": false,
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Signed",
+            "description": "Get the signed or the unsigned document. By default, the signed document is returned if the document has been signed."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the document content.",
+            "schema": {
+              "$ref": "#/definitions/DocumentContent"
+            }
+          },
+          "403": {
+            "description": "Returned when access to the document is denied."
+          },
+          "404": {
+            "description": "Returned when the document is not found."
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -371,6 +450,25 @@
               "text",
               "draw",
               "image"
+            ]
+          }
+        },
+        "secureSigningMethods": {
+          "type": "array",
+          "description": "The allowed secure electronic signing methods. Overrides case file and customer settings when set.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "mitid.dk",
+              "bankid_se",
+              "bankid_no",
+              "itsme.be",
+              "ftn.fi",
+              "eid.belgium.be",
+              "passport-reader.eident.dk",
+              "ausweisapp.bund.de",
+              "qes.personal.mitid.dk"
             ]
           }
         },
@@ -705,11 +803,140 @@
           "type": "string",
           "format": "email",
           "description": "Email of the recipient"
+        }
+      }
+    },
+    "CaseFileDetails": {
+      "type": "object",
+      "description": "Details of a case file retrieved from the Penneo secure archive.",
+      "properties": {
+        "userId": {
+          "type": "integer",
+          "description": "Id of the user who owns the case file."
         },
-        "storeAsContact": {
+        "customerId": {
+          "type": "integer",
+          "description": "Id of the customer the case file belongs to."
+        },
+        "signers": {
+          "type": "array",
+          "description": "List of signers on the case file.",
+          "items": {
+            "$ref": "#/definitions/SignerDetails"
+          }
+        },
+        "id": {
+          "type": "integer",
+          "description": "The case file id."
+        },
+        "title": {
+          "type": "string",
+          "description": "The case file title."
+        },
+        "status": {
+          "type": "integer",
+          "description": "The case file status."
+        },
+        "documents": {
+          "type": "array",
+          "description": "List of documents in the case file.",
+          "items": {
+            "$ref": "#/definitions/DocumentDetails"
+          }
+        },
+        "expireAt": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "UNIX timestamp when the case file expires."
+        },
+        "ccRecipients": {
+          "type": "array",
+          "description": "List of CC recipients who receive a copy of the signed documents.",
+          "items": {
+            "$ref": "#/definitions/CcRecipient"
+          }
+        },
+        "created": {
+          "type": "integer",
+          "description": "UNIX timestamp when the case file was created."
+        },
+        "activated": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "UNIX timestamp when the case file was activated."
+        },
+        "updated": {
+          "type": "integer",
+          "description": "UNIX timestamp when the case file was last updated."
+        },
+        "completed": {
+          "type": "integer",
+          "x-nullable": true,
+          "description": "UNIX timestamp when the case file was completed."
+        }
+      }
+    },
+    "SignerDetails": {
+      "type": "object",
+      "description": "A signer on a case file.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the signer."
+        },
+        "id": {
+          "type": "integer",
+          "description": "The signer id."
+        },
+        "signingRequest": {
+          "$ref": "#/definitions/SigningRequestDetails"
+        }
+      }
+    },
+    "SigningRequestDetails": {
+      "type": "object",
+      "description": "The signing request associated with a signer.",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The signing request id."
+        },
+        "email": {
+          "type": "string",
+          "description": "Signer email."
+        },
+        "status": {
+          "type": "integer",
+          "description": "The status of the signing request."
+        }
+      }
+    },
+    "DocumentDetails": {
+      "type": "object",
+      "description": "A document in a case file.",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The document id. Use this to download the document with the \"Download document\" action."
+        },
+        "status": {
+          "type": "integer",
+          "description": "The document status."
+        },
+        "signable": {
           "type": "boolean",
-          "default": true,
-          "description": "Signer will be stored as a contact. Defaults to true."
+          "description": "True if the document is signable."
+        }
+      }
+    },
+    "DocumentContent": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "format": "byte",
+          "x-ms-summary": "Document Content",
+          "description": "Base64 encoded content of the document."
         }
       }
     }
