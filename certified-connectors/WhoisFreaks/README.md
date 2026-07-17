@@ -1,6 +1,12 @@
+# WhoisFreaks
 WhoisFreaks is an advanced domain and network intelligence platform offering real-time and historical WHOIS, DNS, SSL, and subdomain data tracking, alongside IP geolocation and reputation capabilities.
 
-## Actions
+## Publisher: WhoisFreaks
+
+## Prerequisits
+Free or Paid Plan of whoisfreaks.com
+
+## Supported Operations
 
 This node natively supports the following WhoisFreaks features across both single targets and bulk inputs:
 
@@ -25,12 +31,14 @@ This node natively supports the following WhoisFreaks features across both singl
 * **Bulk Domain Availability Lookup:** Perform scalable automated availability sweeps.
 * **Bulk IP Geolocation Lookup:** Map arrays of network traffic coordinates in one call.
 * **Bulk IP Reputation Lookup:** Fast-track incident response logs by batch scanning malicious assets.
+* **Account Usage:** Tell how much credits available and api subscriptions details.
+* **Rotate API Key:** Returns a plain string, the new API key. The old key is immediately invalidated.
 
 ---
 
-## Credentials
+## Obtaining Credentials
 
-To authorize your node requests, you must obtain an API Key from the service provider.
+To authorize your node requests, you must obtain an API Key from whoifreaks.com the service provider. Or you can get a new one from https://billing.whoisfreaks.com/
 
 ### Setting up the connection:
 1. Log in or create an account via the [WhoisFreaks Dashboard](https://billing.whoisfreaks.com/).
@@ -39,23 +47,9 @@ To authorize your node requests, you must obtain an API Key from the service pro
 4. Paste your key into the **API Key** parameter space and hit save.
 
 ---
+## Known Issues and Limitations
+For actions like pagination for first time alway pass page=1, if you send any other number you will not get response. And with free api plan you can get only free 500 credits. For further actions you have to buy subscription.
 
-![](./imgs/ms1.png)
-![](./imgs/ms2.png)
-![](./imgs/ms3.png)
-![](./imgs/ms4.png)
-![](./imgs/ms5.png)
-![](./imgs/ms6.png)
-![](./imgs/ms7.png)
-![](./imgs/ms8.png)
-![](./imgs/ms9.png)
-![](./imgs/ms10.png)
-![](./imgs/ms11.png)
-![](./imgs/ms12.png)
-![](./imgs/ms13.png)
-![](./imgs/ms14.png)
-![](./imgs/ms15.png)
-![](./imgs/ms16.png)
-![](./imgs/ms17.png)
-![](./imgs/ms18.png)
+## Deployment Instructions
 
+This connector is submitted for Microsoft certification, once certified, users can add it from the official connector catalog.
