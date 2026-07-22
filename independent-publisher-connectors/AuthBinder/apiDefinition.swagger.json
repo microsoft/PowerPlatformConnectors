@@ -1,0 +1,189 @@
+{
+  "swagger": "2.0",
+  "x-ms-connector-metadata": [
+    {"propertyName": "Website", "propertyValue": "https://authbinder.com"},
+    {"propertyName": "Privacy policy", "propertyValue": "https://authbinder.com/privacy"},
+    {"propertyName": "Categories", "propertyValue": "AI;Security"}
+  ],
+  "x-ms-iconBrandColor": "#da3b01",
+  "info": {
+    "title": "AuthBinder (Independent Publisher)",
+    "description": "AuthBinder is an AI agent assurance platform. Connect your Copilot Studio agents or Power Automate flows to capture tool call telemetry, score behavioural risk, and receive a structured compliance report delivered by a security analyst. AuthBinder helps organisations meet their duty of care obligations under modern product liability laws by identifying AI agent behaviours that could expose them to regulatory penalties or criminal liability.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "AuthBinder",
+      "email": "info@getauthbinder.com",
+      "url": "https://authbinder.com"
+    }
+  },
+  "host": "authbinder-prod-api.azurewebsites.net",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/events": {
+      "post": {
+        "summary": "Log Agent Event",
+        "description": "Send a single telemetry event from your AI agent to AuthBinder for risk scoring and compliance reporting.",
+        "operationId": "LogAgentEvent",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EventIngest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Event logged successfully.",
+            "schema": {
+              "$ref": "#/definitions/EventResponse"
+            }
+          },
+          "401": {"description": "Invalid or missing API key."},
+          "403": {"description": "Audit window has expired."}
+        },
+        "security": [{"api_key": []}]
+      }
+    },
+    "/events/batch": {
+      "post": {
+        "summary": "Log Agent Events Batch",
+        "description": "Send up to 500 telemetry events in a single call for efficient bulk logging.",
+        "operationId": "LogAgentEventsBatch",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EventBatch"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Batch accepted for processing.",
+            "schema": {
+              "$ref": "#/definitions/BatchResponse"
+            }
+          },
+          "401": {"description": "Invalid or missing API key."},
+          "403": {"description": "Audit window has expired."}
+        },
+        "security": [{"api_key": []}]
+      }
+    },
+    "/connection-status": {
+      "get": {
+        "summary": "Get Connection Status",
+        "description": "Check whether your agent is connected to AuthBinder and how many events have been received.",
+        "operationId": "GetConnectionStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Connection status retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/ConnectionStatus"
+            }
+          },
+          "401": {"description": "Invalid or missing API key."}
+        },
+        "security": [{"api_key": []}]
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Verify the AuthBinder API is reachable and operational.",
+        "operationId": "HealthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API is healthy.",
+            "schema": {
+              "$ref": "#/definitions/HealthResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "EventIngest": {
+      "type": "object",
+      "required": ["tenantId", "agentId", "tool"],
+      "properties": {
+        "tenantId": {"type": "string", "description": "Your AuthBinder Tenant ID."},
+        "agentId": {"type": "string", "description": "A unique identifier for your agent."},
+        "tool": {"type": "string", "description": "The name of the tool or action called."},
+        "destination": {"type": "string", "description": "The external service or system accessed."},
+        "action": {"type": "string", "description": "The type of action performed (read, write, delete, execute)."},
+        "approved": {"type": "boolean", "description": "Whether this action was explicitly approved by a human."},
+        "success": {"type": "boolean", "description": "Whether the tool call succeeded."},
+        "userId": {"type": "string", "description": "Optional identifier of the user who triggered the agent."},
+        "durationMs": {"type": "integer", "description": "How long the tool call took in milliseconds."},
+        "timestamp": {"type": "string", "format": "date-time", "description": "When the event occurred."}
+      }
+    },
+    "EventBatch": {
+      "type": "object",
+      "required": ["events"],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/EventIngest"},
+          "description": "Array of events to log. Maximum 500 per call."
+        }
+      }
+    },
+    "EventResponse": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "tenantId": {"type": "string"},
+        "agentRef": {"type": "string"},
+        "toolName": {"type": "string"},
+        "riskLevel": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+        "timestamp": {"type": "string"},
+        "createdAt": {"type": "string"}
+      }
+    },
+    "BatchResponse": {
+      "type": "object",
+      "properties": {
+        "ingested": {"type": "integer"},
+        "total": {"type": "integer"},
+        "errors": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "ConnectionStatus": {
+      "type": "object",
+      "properties": {
+        "tenantId": {"type": "string"},
+        "connected": {"type": "boolean"},
+        "eventsReceived": {"type": "integer"},
+        "lastSeen": {"type": "string"},
+        "firstSeen": {"type": "string"}
+      }
+    },
+    "HealthResponse": {
+      "type": "object",
+      "properties": {
+        "status": {"type": "string"},
+        "version": {"type": "string"}
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  }
+}
