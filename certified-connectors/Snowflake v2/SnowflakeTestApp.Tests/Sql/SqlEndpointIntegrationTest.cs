@@ -246,10 +246,10 @@ namespace SnowflakeTestApp.Tests.Sql
         }
 
         /// <summary>
-        /// Test cancellation of already completed SQL statement - should return 422
+        /// Test cancellation of already completed SQL statement - Snowflake returns 200
         /// </summary>
         [TestMethod]
-        public async Task SqlExecutionFlow_CancelCompletedStatement_Returns422()
+        public async Task SqlExecutionFlow_CancelCompletedStatement_Returns200()
         {
             var testToken = GetTestToken();
             HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
@@ -281,11 +281,11 @@ namespace SnowflakeTestApp.Tests.Sql
             string statementHandle = executeResult["Metadata"]["StatementHandle"].ToString();
             Assert.IsFalse(string.IsNullOrEmpty(statementHandle), "Statement handle should be present in response");
 
-            // Try to cancel already completed statement - should return 422
+            // Try to cancel already completed statement - Snowflake returns 200
             var cancelContent = new StringContent("{}", Encoding.UTF8, "application/json");
             var cancelResponse = await HttpClient.PostAsync($"{BaseUrl}/sql/{statementHandle}/cancel", cancelContent);
             
-            Assert.AreEqual(422, (int)cancelResponse.StatusCode, "Cancel should return 422 for already completed statement");
+            Assert.AreEqual(HttpStatusCode.OK, cancelResponse.StatusCode, "Cancel of completed statement should return 200");
         }
     }
 } 
