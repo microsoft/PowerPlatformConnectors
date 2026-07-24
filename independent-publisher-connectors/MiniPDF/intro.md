@@ -1,59 +1,49 @@
-# MiniPDF Connector Proposal
+# MiniPDF (Independent Publisher)
 
-## Overview
+MiniPDF automates common PDF tasks such as merging, splitting, watermarking,
+page manipulation, text extraction, rendering, metadata management, and form
+processing. It provides structured actions so makers do not need to compose
+HTTP requests manually.
 
-MiniPDF is a PDF automation service that exposes API operations for common
-document-processing tasks. This proposed connector makes those operations
-available in Microsoft Power Automate and Power Apps so makers can automate PDF
-processing without manually composing HTTP requests.
+## Service
 
-## API
+https://minipdf.org
 
-- Service: MiniPDF
-- Website: https://minipdf.org
-- API style: REST with JSON request and response bodies
-- Authentication: API key passed in the `x-api-key` request header
+## Authentication
 
-## What Problem Does This Connector Solve?
+MiniPDF uses an API key supplied through the `x-api-key` request header. Create
+or sign in to a MiniPDF account to obtain an API key.
 
-Business workflows frequently need to merge, split, watermark, inspect, or
-transform PDF files. Without a connector, makers must build and maintain custom
-HTTP requests, encode file content, and manually handle the returned data.
-MiniPDF provides these capabilities as named Power Platform actions with defined
-inputs and outputs.
+## Features
 
-## Proposed Operations
-
-- Add text watermark
-- Merge PDFs
-- Split PDF
-- Extract text
-- Render PDF pages to images
-- Add page numbers
-- Extract metadata
-- Set metadata
-- Extract pages
-- Delete pages
-- Rotate pages
-- Fill PDF forms
-- Extract PDF form data
-- Flatten PDF form fields
+- Add text watermarks and page numbers.
+- Merge or split PDF files.
+- Extract, delete, or rotate selected pages.
+- Extract text and metadata.
+- Update PDF metadata.
+- Render PDF pages as images.
+- Fill, extract, and flatten AcroForm fields.
 
 ## Typical Use Cases
 
-- Combine documents produced by multiple workflow steps into one PDF
-- Split incoming documents for routing or archival
-- Add watermarks and page numbers before distribution
-- Extract PDF text or metadata for downstream processing
-- Prepare selected pages for review or storage
-- Fill and flatten PDF forms in automated business processes
+- Combine documents created by multiple workflow steps.
+- Add watermarks and page numbers before distributing a document.
+- Extract text or metadata for indexing and downstream processing.
+- Prepare selected pages for review, routing, or archival.
+- Automate PDF form completion and flattening.
 
 ## Publisher
 
 NGUYEN DINH VAN
 
-## Notes
+## Support
 
-The connector has been tested as a Power Platform custom connector against the
-production MiniPDF API. PDF content is transferred as Base64 JSON content, so
-Power Platform and service payload limits apply.
+For connector support, contact vanqn95@gmail.com.
+
+## Known Issues and Limitations
+
+- PDF content is transferred as Base64 JSON, so platform and service payload
+  limits apply.
+- Large, encrypted, or malformed PDF files might be rejected.
+- Rate-limited requests return an HTTP 429 response.
+- Some operations can return nonfatal warnings for unsupported PDF features.
