@@ -11,7 +11,7 @@ adds proprietary enrichment on top: distress classification, risk
 scoring, fuzzy person-matching, group-structure analytics, announcement
 signal-detection, and audit-grade compliance pipelines.
 
-This connector exposes 21 operations that you can drop into any Power
+This connector exposes 28 operations that you can drop into any Power
 Automate flow to enrich customers, suppliers, partners and counterparties
 with structured Norwegian company intelligence — without writing code.
 
@@ -80,8 +80,8 @@ plan and explicit DPA acceptance.
 
 ## Supported operations
 
-The connector exposes 21 production operations across 6 functional
-areas. Many operations combine multiple upstream sources behind a
+The connector exposes 28 production operations, grouped by functional
+area below. Many operations combine multiple upstream sources behind a
 single call.
 
 ### Company (Selskap)
@@ -133,10 +133,11 @@ single call.
 |-----------|--------|------|
 | `getKonsernstotte` | GET | `/api/v1/konsernstotte/oversikt/{orgnr}` |
 
-In addition, three documentation aliases are exposed in the spec to
-give a 1-to-1 mapping with the Firmaradar MCP-tool catalog
-(`getCompanyAnnouncements`, `getRecentChanges`, `getPerson`); these
-forward to the same backend as the canonical operations above.
+In addition, two alias operations are exposed to give a 1-to-1 mapping
+with the Firmaradar MCP-tool catalog (`getCompanyAnnouncements` and
+`getRecentChanges`); these are served by the same backend as the
+canonical `getCompanyChanges` above. `getPerson` was previously listed
+here as an alias; it is now a first-class endpoint of its own.
 
 ## Obtaining credentials
 
