@@ -2,7 +2,7 @@
 
 ITOC360 is an on-call alert routing and incident management platform for DevOps, SRE, and IT operations teams. It receives alerts from inbound integrations, deduplicates them, applies escalation logic, and notifies the right on-call engineer through their preferred channel. Use this connector to send alert and resolve events to ITOC360 from your flows.
 
-## Publisher: Mehmet Talha Bektas, ITOC360
+## Publisher: ITOC360
 
 ## Prerequisites
 
