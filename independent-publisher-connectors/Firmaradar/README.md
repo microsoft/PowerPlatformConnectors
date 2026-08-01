@@ -11,7 +11,7 @@ adds proprietary enrichment on top: distress classification, risk
 scoring, fuzzy person-matching, group-structure analytics, announcement
 signal-detection, and audit-grade compliance pipelines.
 
-This connector exposes 41 operations that you can drop into any Power
+This connector exposes 39 operations that you can drop into any Power
 Automate flow to enrich customers, suppliers, partners and counterparties
 with structured Norwegian company intelligence — without writing code.
 
@@ -80,52 +80,82 @@ plan and explicit DPA acceptance.
 
 ## Supported operations
 
-The connector exposes 28 production operations, grouped by functional
-area below. Many operations combine multiple upstream sources behind a
-single call.
+The connector exposes 39 operations (37 actions and
+2 instant triggers), grouped by functional area below. Many
+operations combine multiple upstream sources behind a single call.
 
 ### Company (Selskap)
 
 | Operation | Method | Path |
 |-----------|--------|------|
+| `compareCompanies` | POST | `/api/v1/companies/compare` |
 | `getCompany` | GET | `/api/v1/company/{orgnr}` |
+| `getCompanyAnnouncements` | GET | `/api/v1/company/{orgnr}/announcements` |
+| `getCompanyChanges` | GET | `/api/v1/company/{orgnr}/changes` |
+| `getCompanyFinancials` | GET | `/api/regnskap/{orgnr}/historikk` |
+| `getCompanyIp` | GET | `/api/v1/company/{orgnr}/ip` |
 | `getCompanyOwnership` | GET | `/api/v1/company/{orgnr}/ownership` |
 | `getCompanyRoles` | GET | `/api/v1/company/{orgnr}/roles` |
-| `getCompanyFinancials` | GET | `/api/regnskap/{orgnr}/historikk` |
-| `getCompanyChanges` | GET | `/api/v1/company/{orgnr}/changes` |
 | `searchCompanies` | GET | `/api/v1/companies/search` |
-| `compareCompanies` | POST | `/api/v1/companies/compare` |
 
 ### Person
 
 | Operation | Method | Path |
 |-----------|--------|------|
-| `searchPersons` | GET | `/api/v1/person/search` |
-| `getPersonRoles` | GET | `/api/v1/person/roles/{role_person_id}` |
+| `checkKonkursEksponering` | GET | `/api/v1/person/konkurs-eksponering` |
+| `getPerson` | GET | `/api/v1/person/{person_id}` |
 | `getPersonCompanies` | GET | `/api/v1/person/shareholdings/{owner_person_key}` |
+| `getPersonRoles` | GET | `/api/v1/person/roles/{role_person_id}` |
+| `searchPersons` | GET | `/api/v1/person/search` |
 
 ### Risk (Risiko)
 
 | Operation | Method | Path |
 |-----------|--------|------|
-| `getCompanySignals` | GET | `/api/v1/company/{orgnr}/signals` |
-| `searchAnnouncements` | GET | `/api/v1/announcements/search` |
-| `getRiskScore` | GET | `/api/v1/risikoscoring/score/{orgnr}` |
+| `checkFivBulk` | POST | `/api/v1/fiv/bulk` |
 | `checkForetakIVanskeligheter` | GET | `/api/v1/fiv/assess/{orgnr}` |
+| `confirmRiskScoreDisclaimer` | POST | `/api/v1/risikoscoring/confirm-disclaimer` |
+| `findSharedConnections` | GET | `/api/v1/find-shared-connections` |
+| `getCompanySignals` | GET | `/api/v1/company/{orgnr}/signals` |
+| `getRecentChanges` | GET | `/api/v1/company/{orgnr}/recent-changes` |
+| `getRiskScore` | GET | `/api/v1/risikoscoring/score/{orgnr}` |
+| `getRiskScoreBulk` | POST | `/api/v1/risikoscoring/score/bulk` |
+| `searchAnnouncements` | GET | `/api/v1/announcements/search` |
 
 ### Industry (Bransje)
 
 | Operation | Method | Path |
 |-----------|--------|------|
-| `listCompaniesInNace` | GET | `/api/v1/nace/{code}/companies` |
 | `findRelatedCompanies` | GET | `/api/v1/company/{orgnr}/related` |
+| `listCompaniesInNace` | GET | `/api/v1/nace/{code}/companies` |
+| `listNaceCodes` | GET | `/api/v1/nace/catalog` |
 
 ### AML
 
 | Operation | Method | Path |
 |-----------|--------|------|
 | `checkAmlPep` | POST | `/api/v1/aml/check` |
+| `getAmlReport` | GET | `/api/v1/aml/report/{report_id}` |
 | `getAmlScore` | POST | `/api/v1/aml/score` |
+| `startAmlReport` | POST | `/api/v1/aml/report` |
+
+### Monitoring (Overvåkning)
+
+| Operation | Method | Path |
+|-----------|--------|------|
+| `addCompanyMonitoring` | POST | `/monitoring/targets/add` |
+| `deleteMonitoringWebhook` | DELETE | `/api/v1/monitoring/webhooks/{id}` |
+| `deleteNaceSubscription` | DELETE | `/api/v1/nace/subscriptions/{id}` |
+| `listMonitoringWebhooks` | GET | `/api/v1/monitoring/webhooks` |
+| `listNaceSubscriptions` | GET | `/api/v1/nace/subscriptions` |
+| `onCompanyChanged` *(trigger)* | POST | `/api/v1/monitoring/webhooks` |
+| `onNaceEvent` *(trigger)* | POST | `/api/v1/nace/subscriptions` |
+
+### Currency (Valuta)
+
+| Operation | Method | Path |
+|-----------|--------|------|
+| `convertCurrency` | GET | `/api/v1/currency/convert` |
 
 ### Marketplace (Markedsplass)
 
