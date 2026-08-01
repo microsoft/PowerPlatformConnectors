@@ -11,7 +11,7 @@ adds proprietary enrichment on top: distress classification, risk
 scoring, fuzzy person-matching, group-structure analytics, announcement
 signal-detection, and audit-grade compliance pipelines.
 
-This connector exposes 28 operations that you can drop into any Power
+This connector exposes 41 operations that you can drop into any Power
 Automate flow to enrich customers, suppliers, partners and counterparties
 with structured Norwegian company intelligence — without writing code.
 
