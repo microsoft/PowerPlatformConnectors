@@ -970,6 +970,83 @@
         }
       }
     },
+    "FivGroupAssessment": {
+      "type": "object",
+      "description": "Konsern-leddet i to-nivå-testen (GBER art. 2(18)). Vurderingen gjøres på både selskaps- og konsernnivå, og det er tilstrekkelig at ett av nivåene slår til.",
+      "properties": {
+        "evaluated": {
+          "type": "boolean",
+          "description": "False når selskapet ikke inngår i noe konsern."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "distressed",
+            "doubt",
+            "unknown"
+          ],
+          "description": "`unknown` betyr at konsernet ikke lot seg vurdere — typisk utenlandsk konsernspiss, som ikke finnes som enhet i norske registre."
+        },
+        "basis": {
+          "type": "string",
+          "description": "`konsernregnskap` (avlagt konsernregnskap), `aggregert_selskapsregnskap` (selskapsregnskapene summert aritmetisk — indikativt), `utenlandsk_majoritet` eller `ingen_data`."
+        },
+        "root_orgnr": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "root_name": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "members_total": {
+          "type": "integer",
+          "x-nullable": true
+        },
+        "members_evaluated": {
+          "type": "integer",
+          "x-nullable": true
+        },
+        "members_distressed": {
+          "type": "array",
+          "description": "Selskapene i konsernet som hver for seg er i vanskeligheter.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "capital_loss_ratio": {
+          "type": "number",
+          "description": "Andel av konsernets innskutte kapital som er tapt.",
+          "x-nullable": true
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "True når konsernet er større enn grensen vi vurderer i ett svar. Vurderingen er da ufullstendig — vi kutter aldri stille."
+        }
+      }
+    },
+    "FivRescueEstimate": {
+      "type": "object",
+      "description": "Hva konsernet må tilføre for å fjerne kapitalkriteriet (a). Satt kun når `rescuable_by_group` er true.",
+      "properties": {
+        "konsernbidrag_min_nok": {
+          "type": "number",
+          "description": "Minste konsernbidrag/tilskudd, i NOK.",
+          "x-nullable": true
+        },
+        "kapitalforhoyelse_min_nok": {
+          "type": "number",
+          "description": "Minste kapitalforhøyelse, i NOK.",
+          "x-nullable": true
+        },
+        "frist": {
+          "type": "string",
+          "description": "Senest ved godkjenningstidspunktet for støtten. En besluttet, men ennå ikke registrert, kapitalforhøyelse teller med.",
+          "x-nullable": true
+        }
+      }
+    },
     "FivResponse": {
       "type": "object",
       "properties": {
@@ -978,7 +1055,7 @@
         },
         "status": {
           "type": "string",
-          "description": "NUES a-e-status, eks. `not_distressed`, `distressed`."
+          "description": "FIV-status etter GBER art. 2(18), eks. `not_distressed`, `distressed`. Reflekterer BEGGE nivåene i vurderingen — et selskap med rene egne tall er `distressed` når konsernet er det."
         },
         "score": {
           "type": "number"
@@ -995,6 +1072,41 @@
         "as_of": {
           "type": "string",
           "format": "date-time"
+        },
+        "company_status": {
+          "type": "string",
+          "description": "Selskaps-leddet alene, før konsern-leddet ble lagt på. Lik `status` når konsernet ikke endret dommen.",
+          "x-nullable": true
+        },
+        "distress_basis": {
+          "type": "string",
+          "enum": [
+            "company",
+            "group",
+            "company_and_group"
+          ],
+          "description": "Hvilket ledd i to-nivå-testen som gjør selskapet til FIV. Null når selskapet ikke er i vanskeligheter.",
+          "x-nullable": true
+        },
+        "group_assessment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FivGroupAssessment"
+            }
+          ],
+          "x-nullable": true
+        },
+        "rescuable_by_group": {
+          "type": "boolean",
+          "description": "True når selskapet kun trigger kapitalkriteriet (a) og konsernet er verifisert friskt — konsernet kan da rette opp forholdet."
+        },
+        "rescue_estimate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FivRescueEstimate"
+            }
+          ],
+          "x-nullable": true
         }
       }
     },
@@ -1043,6 +1155,63 @@
           "type": "object"
         }
       }
+    },
+    "RegnskapsrapportResponse": {
+      "type": "object",
+      "description": "Metadata + et kortlevd, signert nedlastings-URL for en formatert regnskapsrapport (Excel eller PDF) — selve filen leveres ALDRI inline. `download_url` er selv-autentiserende (signert token i URL-en) og krever ingen ekstra auth; gyldig i `expires_in` sekunder.",
+      "properties": {
+        "orgnr": {
+          "type": "string"
+        },
+        "regnskapstype": {
+          "type": "string",
+          "enum": [
+            "SELSKAP",
+            "KONSERN"
+          ]
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "xlsx",
+            "pdf"
+          ]
+        },
+        "antall_aar": {
+          "type": "integer",
+          "description": "Antall regnskapsår faktisk levert i rapporten."
+        },
+        "maks_aar": {
+          "type": "integer"
+        },
+        "aar": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "Årene som inngår, nyeste først."
+        },
+        "kilde": {
+          "type": "string",
+          "description": "Kilde-etikett vist i rapporten."
+        },
+        "valuta": {
+          "type": "string"
+        },
+        "download_url": {
+          "type": "string",
+          "description": "Kortlevd, signert nedlastings-URL. Ikke sesjons-/API-nøkkel-gatet — tokenet i URL-en er selve kapabiliteten."
+        },
+        "expires_in": {
+          "type": "integer",
+          "description": "Sekunder til download_url slutter å virke."
+        }
+      },
+      "required": [
+        "orgnr",
+        "download_url",
+        "expires_in"
+      ]
     },
     "MonitoringChangeEvent": {
       "type": "object",
@@ -1192,6 +1361,41 @@
         },
         "confidence": {
           "type": "number"
+        },
+        "company_status": {
+          "type": "string",
+          "description": "Selskaps-leddet alene, før konsern-leddet ble lagt på.",
+          "x-nullable": true
+        },
+        "distress_basis": {
+          "type": "string",
+          "enum": [
+            "company",
+            "group",
+            "company_and_group"
+          ],
+          "description": "Hvilket ledd i to-nivå-testen som utløste dommen. `group` betyr at selskapets egne tall er rene, men konsernet er i vanskeligheter — tilstrekkelig etter GBER art. 2(18).",
+          "x-nullable": true
+        },
+        "group_assessment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FivGroupAssessment"
+            }
+          ],
+          "x-nullable": true
+        },
+        "rescuable_by_group": {
+          "type": "boolean",
+          "description": "True når konsernet kan rette opp forholdet med en kapitaltilførsel før godkjenningstidspunktet."
+        },
+        "rescue_estimate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FivRescueEstimate"
+            }
+          ],
+          "x-nullable": true
         }
       }
     },
@@ -2979,7 +3183,7 @@
       "get": {
         "operationId": "checkForetakIVanskeligheter",
         "summary": "FIV status (company in difficulty)",
-        "description": "Assesses whether a company qualifies as 'foretak i vanskeligheter' (FIV / company in difficulty) per the Norwegian NUES a-e rules, based on the latest available financial statements.",
+        "description": "Assesses whether a company qualifies as 'foretak i vanskeligheter' (FIV / company in difficulty) per EU GBER art. 2(18) criteria a-e, based on the latest available financial statements. Assessed at both company and group level (two-level test) — a company with clean accounts is distressed when its group is. Customer-facing outcomes: \"Ja (konsern)\" (group-only trigger), \"Ja (!)\" (company distressed but group is clean and can rescue it — see rescue_estimate), \"Tvil\" (group level indeterminate).",
         "tags": [
           "Risiko",
           "Markedsplass"
@@ -3352,7 +3556,7 @@
       "post": {
         "operationId": "checkFivBulk",
         "summary": "Bulk distress check (up to 50 companies)",
-        "description": "Screens up to 50 Norwegian companies for financial distress (foretak i vanskeligheter, statutory NUES a-e criteria) in a single call. Each organization number is evaluated independently; per-company compliance blocks are returned inline instead of failing the batch. Each counts as one unit against your quota. Built for portfolio and supplier-list screening at scale.",
+        "description": "Screens up to 50 Norwegian companies for financial distress (foretak i vanskeligheter, EU GBER art. 2(18) criteria a-e) in a single call, assessed at both company and group level per company. Each organization number is evaluated independently; per-company compliance blocks are returned inline instead of failing the batch. Each counts as one unit against your quota. Built for portfolio and supplier-list screening at scale.",
         "tags": [
           "Risiko",
           "Markedsplass"
@@ -4230,6 +4434,94 @@
           },
           {}
         ]
+      }
+    },
+    "/api/v1/regnskapsrapport/{orgnr}": {
+      "get": {
+        "operationId": "getRegnskapsrapport",
+        "summary": "Get formatted financial report (Excel or PDF)",
+        "description": "Builds a decision-ready, formatted financial report — Excel or PDF, the same builder behind the portal export — for a Norwegian company, and returns metadata plus a short-lived signed download URL; never inline binary data. Fetch download_url directly to retrieve the file; no further authentication is needed (the signed token in the URL is the credential, valid roughly 15 minutes). Requires the Excel-export or PDF-export add-on matching the requested format. Charges 1 credit per financial year included.",
+        "tags": [
+          "Selskap"
+        ],
+        "parameters": [
+          {
+            "name": "orgnr",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "pattern": "^\\d{9}$",
+            "x-ms-summary": "Organization number",
+            "description": "Norwegian organization number (exactly 9 digits) issued by Brønnøysundregistrene.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "xlsx",
+              "pdf"
+            ],
+            "default": "pdf",
+            "x-ms-summary": "Report format",
+            "description": "Output file format: xlsx (Excel) or pdf. Defaults to pdf."
+          },
+          {
+            "name": "regnskapstype",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "SELSKAP",
+              "KONSERN"
+            ],
+            "default": "SELSKAP",
+            "x-ms-summary": "Statement type",
+            "description": "Type of financial statement to include (e.g. selskap, konsern). Defaults to the company-level statement."
+          },
+          {
+            "name": "years",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 5,
+            "x-ms-summary": "Years to include",
+            "description": "Number of financial years to include in the report (1-5, enforced server-side)."
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK — metadata plus a short-lived download URL.",
+            "schema": {
+              "$ref": "#/definitions/RegnskapsrapportResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The excel_feed/print_til_pdf add-on is not enabled for the account, or the caller has no company association.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "No financial data found for the organization number.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
       }
     },
     "/monitoring/targets/add": {

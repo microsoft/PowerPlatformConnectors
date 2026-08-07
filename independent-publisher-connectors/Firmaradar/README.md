@@ -11,7 +11,7 @@ adds proprietary enrichment on top: distress classification, risk
 scoring, fuzzy person-matching, group-structure analytics, announcement
 signal-detection, and audit-grade compliance pipelines.
 
-This connector exposes 39 operations that you can drop into any Power
+This connector exposes 40 operations that you can drop into any Power
 Automate flow to enrich customers, suppliers, partners and counterparties
 with structured Norwegian company intelligence — without writing code.
 
@@ -80,7 +80,7 @@ plan and explicit DPA acceptance.
 
 ## Supported operations
 
-The connector exposes 39 operations (37 actions and
+The connector exposes 40 operations (38 actions and
 2 instant triggers), grouped by functional area below. Many
 operations combine multiple upstream sources behind a single call.
 
@@ -96,6 +96,7 @@ operations combine multiple upstream sources behind a single call.
 | `getCompanyIp` | GET | `/api/v1/company/{orgnr}/ip` |
 | `getCompanyOwnership` | GET | `/api/v1/company/{orgnr}/ownership` |
 | `getCompanyRoles` | GET | `/api/v1/company/{orgnr}/roles` |
+| `getRegnskapsrapport` | GET | `/api/v1/regnskapsrapport/{orgnr}` |
 | `searchCompanies` | GET | `/api/v1/companies/search` |
 
 ### Person
