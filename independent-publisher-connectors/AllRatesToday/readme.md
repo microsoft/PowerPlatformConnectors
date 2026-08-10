@@ -26,26 +26,24 @@ Get the live mid-market exchange rate between two currencies. Supports multiple 
 
 **Response:** Array of rate objects with `source`, `target`, `rate`, and `time` fields.
 
-### Get Public Rate
-Get a single exchange rate between two currencies without authentication. Useful for quick lookups and testing.
+### Get Single Rate
+Get a single exchange rate between two currencies. Useful for quick lookups and testing. Requires an API key, like every other operation.
 
 **Parameters:**
 - `source` (required): Source currency code, e.g. `USD`
 - `target` (required): Target currency code, e.g. `EUR`
 
-**Response:** Object with `data.source`, `data.target`, `data.rate`, and `data.time` fields.
+**Response:** Object with `rate` and `source` fields.
 
-### Get Historical Rate
-Get historical exchange rates for a specific date range. Supports grouping by day, week, or month. Requires authentication.
+### Get Historical Rates
+Get the historical exchange rate series for a currency pair over a preset period (`1d`, `7d`, `30d` or `1y`). Requires authentication.
 
 **Parameters:**
 - `source` (required): Source currency code, e.g. `USD`
 - `target` (required): Target currency code, e.g. `EUR`
-- `from` (required): Start date in ISO format, e.g. `2024-01-01T00:00:00+00:00`
-- `to` (required): End date in ISO format, e.g. `2024-01-31T23:59:59+00:00`
-- `group` (optional): Grouping interval: `day`, `week`, or `month`
+- `period` (required): Length of the series — `1d`, `7d`, `30d` or `1y`
 
-**Response:** Array of rate objects with `source`, `target`, `rate`, and `time` fields.
+**Response:** Object with `source`, `target`, `period`, `source_api`, and a `data` array of `{date, rate, timestamp}` entries.
 
 ### List Supported Currencies
 List all 160+ supported currency codes, names, and symbols. No authentication required.

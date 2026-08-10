@@ -151,33 +151,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "rate": {
-                      "type": "number",
-                      "format": "float",
-                      "description": "The exchange rate value.",
-                      "title": "Rate"
-                    },
-                    "source": {
-                      "type": "string",
-                      "description": "Source currency code.",
-                      "title": "Source"
-                    },
-                    "target": {
-                      "type": "string",
-                      "description": "Target currency code.",
-                      "title": "Target"
-                    },
-                    "time": {
-                      "type": "string",
-                      "description": "Timestamp of the rate.",
-                      "title": "Time"
-                    }
-                  },
-                  "description": "Rate data object.",
-                  "title": "Data"
+                "rate": {
+                  "type": "number",
+                  "format": "float",
+                  "description": "The exchange rate value.",
+                  "title": "Rate"
+                },
+                "source": {
+                  "type": "string",
+                  "description": "Data source identifier.",
+                  "title": "Source"
                 }
               }
             }
@@ -187,11 +170,14 @@
           },
           "500": {
             "description": "Internal Server Error"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
-        "summary": "Get Public Rate",
-        "description": "Get a single exchange rate between two currencies without authentication",
-        "operationId": "GetPublicRate",
+        "summary": "Get Single Rate",
+        "description": "Get a single exchange rate between two currencies. Requires an API key, like every other operation.",
+        "operationId": "GetSingleRate",
         "parameters": [
           {
             "name": "source",
@@ -212,36 +198,59 @@
         ]
       }
     },
-    "/api/v1/rates-historical": {
+    "/api/historical-rates": {
       "get": {
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "rate": {
-                    "type": "number",
-                    "format": "float",
-                    "description": "The exchange rate value.",
-                    "title": "Rate"
-                  },
-                  "source": {
-                    "type": "string",
-                    "description": "Source currency code.",
-                    "title": "Source"
-                  },
-                  "target": {
-                    "type": "string",
-                    "description": "Target currency code.",
-                    "title": "Target"
-                  },
-                  "time": {
-                    "type": "string",
-                    "description": "Timestamp of the rate.",
-                    "title": "Time"
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "description": "Source currency code.",
+                  "title": "Source"
+                },
+                "target": {
+                  "type": "string",
+                  "description": "Target currency code.",
+                  "title": "Target"
+                },
+                "period": {
+                  "type": "string",
+                  "description": "The requested period.",
+                  "title": "Period"
+                },
+                "source_api": {
+                  "type": "string",
+                  "description": "Upstream data source identifier.",
+                  "title": "Source API"
+                },
+                "data": {
+                  "type": "array",
+                  "description": "One entry per day in the series.",
+                  "title": "Data",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "date": {
+                        "type": "string",
+                        "description": "Date of the rate, YYYY-MM-DD.",
+                        "title": "Date"
+                      },
+                      "rate": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "The exchange rate value.",
+                        "title": "Rate"
+                      },
+                      "timestamp": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Unix timestamp in milliseconds.",
+                        "title": "Timestamp"
+                      }
+                    }
                   }
                 }
               }
@@ -260,9 +269,9 @@
             "description": "Internal Server Error"
           }
         },
-        "summary": "Get Historical Rate",
-        "description": "Get historical exchange rates for a specific date range",
-        "operationId": "GetHistoricalRate",
+        "summary": "Get Historical Rates",
+        "description": "Get the historical exchange rate series for a currency pair over a preset period.",
+        "operationId": "GetHistoricalRates",
         "parameters": [
           {
             "name": "source",
@@ -281,28 +290,19 @@
             "x-ms-summary": "Target currency"
           },
           {
-            "name": "from",
+            "name": "period",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "Start date in ISO format, eg '2024-01-01T00:00:00+00:00'",
-            "x-ms-summary": "From date"
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "description": "End date in ISO format, eg '2024-01-31T23:59:59+00:00'",
-            "x-ms-summary": "To date"
-          },
-          {
-            "name": "group",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "Grouping interval: 'day', 'week', or 'month'",
-            "x-ms-summary": "Group by"
+            "enum": [
+              "1d",
+              "7d",
+              "30d",
+              "1y"
+            ],
+            "default": "7d",
+            "description": "Length of the series to return.",
+            "x-ms-summary": "Period"
           }
         ]
       }
