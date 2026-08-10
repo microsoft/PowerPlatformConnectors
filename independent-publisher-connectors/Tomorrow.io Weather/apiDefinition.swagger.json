@@ -1,0 +1,729 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Tomorrow.io Weather",
+    "description": "Bring Tomorrow.io's hyper-local weather intelligence into Power Automate and Power Apps. Turn live forecasts, historical records, and severe-weather events into automated decisions — trigger a flow on tomorrow's high, log daily conditions to a list, or watch for storms along a delivery route, anywhere on Earth.\n\nTwo actions work on any Tomorrow.io API key (subject to usage limits): Get timeline and Get on-demand weather events. Four more tap premium datasets — the historical archive, climate normals, weather along a route, and on-demand events on routes — and need a paid plan; called with a free key they return HTTP 403. Create a key, free or paid, at https://app.tomorrow.io/development/keys.",
+    "version": "1.2.0",
+    "contact": {
+      "name": "Tomorrow.io Support",
+      "url": "https://www.tomorrow.io/support/",
+      "email": "support@tomorrow.io"
+    }
+  },
+  "host": "api.tomorrow.io",
+  "basePath": "/v4",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "query",
+      "name": "apikey",
+      "description": "Tomorrow.io API key. Get yours at https://app.tomorrow.io/development/keys."
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/timelines": {
+      "post": {
+        "operationId": "GetTimeline",
+        "summary": "Get timeline",
+        "description": "Free tier — works on any Tomorrow.io API key. The flexible Timelines feed: request any data-layer fields over any time range — past, present, or future — at the timestep you choose. This is the most general weather query; use the dedicated realtime/forecast/history actions when you want something simpler.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TimelineRequest"
+            },
+            "description": "Timeline request body: location and fields, plus optional timesteps, start/end time, units, timezone, and daily start hour."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Timelines payload",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events": {
+      "post": {
+        "operationId": "GetOnDemandEvents",
+        "summary": "Get on-demand weather events",
+        "description": "Free tier — works on any Tomorrow.io API key. Evaluate active and upcoming weather events (severe-weather advisories and custom insights) for a location, on demand. Returns events over roughly the next five days with severity, certainty, and a human-readable headline.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OnDemandEventsRequest"
+            },
+            "description": "On-demand events request body: a GeoJSON Point location and the insight categories or custom insight IDs to evaluate."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "On-demand events payload",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/historical": {
+      "post": {
+        "operationId": "GetHistoricalWeather",
+        "summary": "Get historical weather (paid plan)",
+        "description": "Paid plan — requires a Tomorrow.io plan that includes the historical archive; a free API key returns HTTP 403. Get observed historical weather for a location over an arbitrary past date range. Data is available up to roughly six days before now — for more recent data use \"Get timeline\".",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HistoricalRequest"
+            },
+            "description": "Historical request body: location, fields, timesteps, and the past start/end time range, plus optional units and timezone."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical timelines payload",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/historical/normals": {
+      "post": {
+        "operationId": "GetClimateNormals",
+        "summary": "Get climate normals (paid plan)",
+        "description": "Paid plan — requires a Tomorrow.io plan that includes climate normals; a free API key returns HTTP 403. Get long-term climate averages for a location across a date range (data aggregated from 2000-2020).",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClimateNormalsRequest"
+            },
+            "description": "Climate normals request body: location, fields, and the MM-DD start/end date range, plus optional units."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Climate normals payload",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/route": {
+      "post": {
+        "operationId": "GetWeatherOnRoute",
+        "summary": "Get weather on route (paid plan)",
+        "description": "Paid plan — requires a Tomorrow.io plan that includes routing; a free API key returns HTTP 403. Get forecast conditions at each waypoint along a route. To check weather events along a route on a free key instead, loop your waypoints through \"Get on-demand weather events\".",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RouteRequest"
+            },
+            "description": "Route request body: the ordered legs (each a GeoJSON Point plus travel duration) and fields, plus optional start time, timestep, units, and timezone."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route weather payload",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events-timeline/routes": {
+      "post": {
+        "operationId": "GetRouteEvents",
+        "summary": "Get on-demand events on routes (paid plan)",
+        "description": "Paid plan — requires a Tomorrow.io plan that includes routing and on-demand events; a free API key returns HTTP 403. Monitor weather-based insights along a route — severe-weather advisories via a pre-registered insight ID, or a custom condition tree — evaluated separately at the origin, at the destination, and en route. Wrap the route in a \"route\" object whose legs each pair one or more GeoJSON geometries with a time window; tag a leg with attributes.legType = \"origin\" or \"destination\" to match the origin/destination triggers (omit it for waypoints matched by routeTrigger). Supply at least one of originTrigger, destinationTrigger, or routeTrigger.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RouteEventsRequest"
+            },
+            "description": "Route-events request body: the route object (id, overall window, and legs) plus at least one origin, destination, or route trigger."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route events payload",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "x-ms-summary": "Error code"
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Error type"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Error message"
+        }
+      }
+    },
+    "TimelineRequest": {
+      "type": "object",
+      "required": [
+        "location",
+        "fields"
+      ],
+      "properties": {
+        "location": {
+          "type": "string",
+          "x-ms-summary": "Location",
+          "x-ms-visibility": "important",
+          "description": "Coordinate pair as \"latitude,longitude\" (e.g. \"40.7128,-74.006\"), a pre-defined location ID, or a GeoJSON geometry as a JSON string."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Fields",
+          "x-ms-visibility": "important",
+          "description": "Data layer fields to return (e.g. [\"temperature\", \"windSpeed\", \"precipitationIntensity\"])."
+        },
+        "timesteps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "1m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "1d",
+              "current"
+            ]
+          },
+          "x-ms-summary": "Timesteps",
+          "x-ms-visibility": "important",
+          "description": "Sampling interval(s): 1m, 5m, 15m, 30m, 1h, 1d, or current. Pass one or more. Server default is 1h."
+        },
+        "startTime": {
+          "type": "string",
+          "x-ms-summary": "Start time",
+          "x-ms-visibility": "advanced",
+          "description": "Start of the range. \"now\", a relative offset (e.g. \"nowMinus6h\"), or ISO 8601. Server default is now."
+        },
+        "endTime": {
+          "type": "string",
+          "x-ms-summary": "End time",
+          "x-ms-visibility": "advanced",
+          "description": "End of the range. \"now\", a relative offset (e.g. \"nowPlus5d\"), or ISO 8601. Default depends on the timestep."
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "metric",
+            "imperial"
+          ],
+          "x-ms-summary": "Units",
+          "x-ms-visibility": "advanced",
+          "description": "Unit system for the response values. Server default is metric."
+        },
+        "timezone": {
+          "type": "string",
+          "x-ms-summary": "Timezone",
+          "x-ms-visibility": "advanced",
+          "description": "IANA timezone name (e.g. \"America/New_York\"). Server default is UTC."
+        },
+        "dailyStartHour": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 23,
+          "x-ms-summary": "Daily start hour",
+          "x-ms-visibility": "advanced",
+          "description": "Hour (0-23) at which daily (1d) aggregation begins. Server default is 6."
+        }
+      }
+    },
+    "OnDemandEventsRequest": {
+      "type": "object",
+      "required": [
+        "location",
+        "insights"
+      ],
+      "properties": {
+        "location": {
+          "$ref": "#/definitions/GeoJSONGeometry"
+        },
+        "insights": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Insights",
+          "x-ms-visibility": "important",
+          "description": "Event categories to evaluate, or custom insight IDs (UUIDs) from your Tomorrow.io account. Categories include: fires, wind, winter, air, thunderstorms, tornado, floods, fog, tropical, marine, temperature, special. Pass several as separate array entries — do not comma-join them."
+        }
+      }
+    },
+    "HistoricalRequest": {
+      "type": "object",
+      "required": [
+        "location",
+        "fields",
+        "timesteps",
+        "startTime",
+        "endTime"
+      ],
+      "properties": {
+        "location": {
+          "type": "string",
+          "x-ms-summary": "Location",
+          "x-ms-visibility": "important",
+          "description": "Coordinate pair as \"latitude,longitude\" (e.g. \"40.7128,-74.006\"), a pre-defined location ID, or a GeoJSON geometry as a JSON string."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Fields",
+          "x-ms-visibility": "important",
+          "description": "Data layer fields to return (e.g. [\"temperature\", \"windSpeed\", \"precipitationIntensity\"])."
+        },
+        "timesteps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "1h",
+              "1d"
+            ]
+          },
+          "x-ms-summary": "Timesteps",
+          "x-ms-visibility": "important",
+          "description": "Aggregation interval(s). 1h = hourly, 1d = daily. Pass one or both."
+        },
+        "startTime": {
+          "type": "string",
+          "x-ms-summary": "Start time",
+          "x-ms-visibility": "important",
+          "description": "Start of the range. ISO 8601 (e.g. \"2026-06-01T00:00:00Z\") or relative (e.g. \"nowMinus30d\"). Historical data lags roughly six days behind now."
+        },
+        "endTime": {
+          "type": "string",
+          "x-ms-summary": "End time",
+          "x-ms-visibility": "important",
+          "description": "End of the range. ISO 8601 or relative (e.g. \"nowMinus6d\"). Must be at least ~6 days before now."
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "metric",
+            "imperial"
+          ],
+          "x-ms-summary": "Units",
+          "x-ms-visibility": "advanced",
+          "description": "Unit system for the response values. Server default is metric."
+        },
+        "timezone": {
+          "type": "string",
+          "x-ms-summary": "Timezone",
+          "x-ms-visibility": "advanced",
+          "description": "IANA timezone name (e.g. \"America/New_York\"). Server default is UTC."
+        }
+      }
+    },
+    "ClimateNormalsRequest": {
+      "type": "object",
+      "required": [
+        "location",
+        "fields",
+        "timesteps",
+        "startDate",
+        "endDate"
+      ],
+      "properties": {
+        "location": {
+          "type": "string",
+          "x-ms-summary": "Location",
+          "x-ms-visibility": "important",
+          "description": "Coordinate pair as \"latitude,longitude\" (e.g. \"42.3478,-71.0466\"), a pre-defined location ID, or a GeoJSON geometry as a JSON string."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Fields",
+          "x-ms-visibility": "important",
+          "description": "Data layer fields to return (e.g. [\"temperatureAvg\", \"precipitationIntensityAvg\"])."
+        },
+        "timesteps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "1d"
+          ],
+          "x-ms-summary": "Timesteps",
+          "x-ms-visibility": "important",
+          "description": "Aggregation interval. Climate normals only support [\"1d\"]."
+        },
+        "startDate": {
+          "type": "string",
+          "x-ms-summary": "Start date (MM-DD)",
+          "x-ms-visibility": "important",
+          "description": "Start of the date range in MM-DD format (e.g. \"01-01\"). 365 days max."
+        },
+        "endDate": {
+          "type": "string",
+          "x-ms-summary": "End date (MM-DD)",
+          "x-ms-visibility": "important",
+          "description": "End of the date range in MM-DD format (e.g. \"12-31\"). 365 days max."
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "metric",
+            "imperial"
+          ],
+          "x-ms-summary": "Units",
+          "x-ms-visibility": "advanced",
+          "description": "Unit system for the response values. Server default is metric."
+        }
+      }
+    },
+    "RouteRequest": {
+      "type": "object",
+      "required": [
+        "legs",
+        "fields"
+      ],
+      "properties": {
+        "legs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteLeg"
+          },
+          "x-ms-summary": "Legs",
+          "x-ms-visibility": "important",
+          "description": "Route segments. Each leg pairs a GeoJSON geometry with a duration in minutes."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Fields",
+          "x-ms-visibility": "important",
+          "description": "Data layer fields to return at each waypoint (e.g. [\"temperature\", \"precipitationIntensity\", \"windSpeed\"])."
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Start time",
+          "x-ms-visibility": "advanced",
+          "description": "Route start time in ISO 8601 format (e.g. \"2026-06-28T14:00:00Z\"). Server default is now."
+        },
+        "timestep": {
+          "type": "string",
+          "enum": [
+            "1m",
+            "5m",
+            "10m",
+            "15m",
+            "30m",
+            "60m"
+          ],
+          "x-ms-summary": "Timestep",
+          "x-ms-visibility": "advanced",
+          "description": "Sampling interval along the route. Server default is 5m."
+        },
+        "units": {
+          "type": "string",
+          "enum": [
+            "metric",
+            "imperial"
+          ],
+          "x-ms-summary": "Units",
+          "x-ms-visibility": "advanced",
+          "description": "Unit system for the response values. Server default is metric."
+        },
+        "timezone": {
+          "type": "string",
+          "x-ms-summary": "Timezone",
+          "x-ms-visibility": "advanced",
+          "description": "IANA timezone name (e.g. \"America/New_York\"). Server default is UTC."
+        }
+      }
+    },
+    "RouteLeg": {
+      "type": "object",
+      "required": [
+        "location",
+        "duration"
+      ],
+      "properties": {
+        "location": {
+          "$ref": "#/definitions/GeoJSONGeometry"
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0,
+          "x-ms-summary": "Duration (minutes)",
+          "description": "Time spent on this leg in minutes."
+        }
+      }
+    },
+    "GeoJSONGeometry": {
+      "type": "object",
+      "required": [
+        "type",
+        "coordinates"
+      ],
+      "x-ms-summary": "GeoJSON geometry",
+      "description": "GeoJSON Point or LineString. NOTE: GeoJSON uses [longitude, latitude] order — not [latitude, longitude].",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Point",
+            "LineString"
+          ],
+          "x-ms-summary": "Geometry type",
+          "description": "\"Point\" for a single coordinate, \"LineString\" for a polyline."
+        },
+        "coordinates": {
+          "type": "array",
+          "items": {},
+          "x-ms-summary": "Coordinates",
+          "description": "For Point: [longitude, latitude]. For LineString: [[longitude, latitude], [longitude, latitude], ...]."
+        }
+      }
+    },
+    "RouteEventsRequest": {
+      "type": "object",
+      "required": [
+        "route"
+      ],
+      "description": "Provide at least one of originTrigger, destinationTrigger, or routeTrigger; each trigger takes either an insightId or a conditions tree.",
+      "properties": {
+        "route": {
+          "$ref": "#/definitions/RouteEventsRoute"
+        },
+        "originTrigger": {
+          "$ref": "#/definitions/RouteEventTrigger"
+        },
+        "destinationTrigger": {
+          "$ref": "#/definitions/RouteEventTrigger"
+        },
+        "routeTrigger": {
+          "$ref": "#/definitions/RouteEventTrigger"
+        }
+      }
+    },
+    "RouteEventsRoute": {
+      "type": "object",
+      "required": [
+        "id",
+        "start",
+        "end",
+        "legs"
+      ],
+      "x-ms-summary": "Route",
+      "description": "The route to evaluate: an id, an overall time window, and the ordered legs.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Route ID",
+          "x-ms-visibility": "important",
+          "description": "Your identifier for this route (e.g. \"route_789\"). Echoed back in the response."
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Route start",
+          "x-ms-visibility": "important",
+          "description": "Route start time in ISO 8601 format (e.g. \"2026-07-13T08:00:00Z\")."
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Route end",
+          "x-ms-visibility": "important",
+          "description": "Route end time in ISO 8601 format (e.g. \"2026-07-13T18:00:00Z\")."
+        },
+        "legs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteEventLeg"
+          },
+          "x-ms-summary": "Legs",
+          "x-ms-visibility": "important",
+          "description": "Ordered route legs. Each leg has its own id, time window, and one or more GeoJSON geometries."
+        },
+        "attributes": {
+          "type": "object",
+          "x-ms-summary": "Attributes",
+          "x-ms-visibility": "advanced",
+          "description": "Optional free-form metadata for the route (e.g. {\"mode\": \"road\"})."
+        }
+      }
+    },
+    "RouteEventLeg": {
+      "type": "object",
+      "required": [
+        "id",
+        "start",
+        "end",
+        "locations"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Leg ID",
+          "description": "Your identifier for this leg (e.g. \"leg-1\")."
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Leg name",
+          "x-ms-visibility": "advanced",
+          "description": "Optional human-readable leg name (e.g. \"Depot to Hub\")."
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Leg start",
+          "description": "Leg start time in ISO 8601 format."
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Leg end",
+          "description": "Leg end time in ISO 8601 format."
+        },
+        "attributes": {
+          "type": "object",
+          "x-ms-summary": "Attributes",
+          "description": "Optional leg metadata. Set {\"legType\": \"origin\"} or {\"legType\": \"destination\"} to match this leg to originTrigger / destinationTrigger; omit legType for waypoints matched by routeTrigger."
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteEventLocation"
+          },
+          "x-ms-summary": "Locations",
+          "description": "One or more GeoJSON geometries covering this leg."
+        }
+      }
+    },
+    "RouteEventLocation": {
+      "type": "object",
+      "required": [
+        "geojsonGeometry"
+      ],
+      "properties": {
+        "geojsonGeometry": {
+          "$ref": "#/definitions/GeoJSONGeometry"
+        }
+      }
+    },
+    "RouteEventTrigger": {
+      "type": "object",
+      "description": "Provide insightId or conditions, not both.",
+      "properties": {
+        "insightId": {
+          "type": "string",
+          "x-ms-summary": "Insight ID",
+          "description": "A pre-registered insight UUID from your Tomorrow.io account."
+        },
+        "conditions": {
+          "type": "object",
+          "x-ms-summary": "Conditions",
+          "description": "A condition tree (AST). Example — precipitationIntensity greater than 0: {\"type\": \"OPERATOR\", \"content\": {\"operator\": \"GREATER\"}, \"children\": [{\"type\": \"PARAMETER\", \"content\": {\"parameter\": \"precipitationIntensity\"}}, {\"type\": \"CONST\", \"content\": {\"const\": 0}}]}. Operators: EQUAL, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, NOT_EQUAL, AND, OR."
+        }
+      }
+    }
+  }
+}
