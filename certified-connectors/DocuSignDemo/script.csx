@@ -1439,7 +1439,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1009.0.5"
+          ["x-ms-summary"] = "DS1009.0.6"
       };
     }
 
@@ -3785,7 +3785,6 @@ public class Script : ScriptBase
       var envelopeSummary = body["data"]["envelopeSummary"];
       var customFields = envelopeSummary["customFields"];
       var parsedCustomFields = new JObject();
-      var envelopeDocuments = new JArray();
 
       if (customFields is JObject)
       {
@@ -3797,19 +3796,6 @@ public class Script : ScriptBase
       }
 
       body["data"]["envelopeSummary"]["customFields"] = parsedCustomFields;
-
-      // documents code
-      foreach (var envelopeDocument in envelopeSummary["envelopeDocuments"] ?? new JArray())
-      {
-        envelopeDocuments.Add(new JObject()
-        {
-          ["documentId"] = envelopeDocument["documentId"],
-          ["documentGuid"] = envelopeDocument["documentIdGuid"],
-          ["documentName"] = envelopeDocument["name"]
-        });
-      }
-
-      body["data"]["envelopeSummary"]["envelopeDocuments"] = envelopeDocuments;
 
       // tab code
       var recipientStatuses = envelopeSummary["recipients"];
@@ -3934,16 +3920,11 @@ public class Script : ScriptBase
   private JObject CreateHookEnvelopeV2BodyTransformation(JObject original)
   {
     var body = new JObject();
-    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    
 
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
-
-    if (!uriBuilder.Path.Contains(this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault()))
-    {
-      throw new ConnectorException(HttpStatusCode.BadRequest, "User is not an account administrator. Please contact DocuSign account admin");
-    }
 
     // TODO: This map is added for backward compatibility. This will be removed once old events are deprecated
     var envelopeEventMap = new Dictionary<string, string>() {
@@ -3983,7 +3964,7 @@ public class Script : ScriptBase
       ["format"] = "json",
       ["includeData"] = includeData
     };
-
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
@@ -3992,7 +3973,6 @@ public class Script : ScriptBase
     private JObject CreateHookEnvelopeV4BodyTransformation(JObject original)
   {
     var body = new JObject();
-    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
 
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
@@ -4008,10 +3988,6 @@ public class Script : ScriptBase
     body["configurationType"] = "custom";
     body["deliveryMode"] = "sim";
 
-    if (!uriBuilder.Path.Contains(this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault()))
-    {
-      throw new ConnectorException(HttpStatusCode.BadRequest, "User is not an account administrator. Please contact DocuSign account admin");
-    }
 
     string eventData = @"[
       'tabs',
@@ -4027,6 +4003,7 @@ public class Script : ScriptBase
       ["format"] = "json",
       ["includeData"] = includeData
     };
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
 
     uriBuilder.Path = uriBuilder.Path.Replace("connectV4", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
@@ -4112,7 +4089,6 @@ public class Script : ScriptBase
   private JObject CreateHookEnvelopeV3BodyTransformation(JObject original)
   {
     var body = new JObject();
-    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
 
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
@@ -4132,16 +4108,10 @@ public class Script : ScriptBase
     body["configurationType"] = "custom";
     body["deliveryMode"] = "sim";
 
-    if (!uriBuilder.Path.Contains(this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault()))
-    {
-      throw new ConnectorException(HttpStatusCode.BadRequest, "User is not an account administrator. Please contact DocuSign account admin");
-    }
-
     string eventData = @"[
       'tabs',
       'custom_fields',
-      'recipients',
-      'document_fields'
+      'recipients'
     ]";
 
     JArray includeData = JArray.Parse(eventData);
@@ -4152,6 +4122,7 @@ public class Script : ScriptBase
       ["includeData"] = includeData
     };
 
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
@@ -4160,16 +4131,11 @@ public class Script : ScriptBase
   private JObject CreateHookEnvelopeBodyTransformation(JObject original)
   {
     var body = new JObject();
-    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
 
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
 
-    if (!uriBuilder.Path.Contains(this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault()))
-    {
-      throw new ConnectorException(HttpStatusCode.BadRequest, "User is not an account administrator. Please contact DocuSign account admin");
-    }
 
     body["allUsers"] = "true";
     body["allowEnvelopePublish"] = "true";
@@ -4182,6 +4148,7 @@ public class Script : ScriptBase
     body["envelopeEvents"] = original["envelopeEvents"]?.ToString();
     body["includeSenderAccountasCustomField"] = "true";
     
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("v2.1", "v2");
     this.Context.Request.RequestUri = uriBuilder.Uri;
 
