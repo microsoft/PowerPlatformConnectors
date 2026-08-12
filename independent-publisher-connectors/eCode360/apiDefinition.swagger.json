@@ -1,0 +1,861 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "eCode360",
+    "version": "1.17",
+    "description": "# Introduction The eCode360 API provides a RESTful interface to request data for municipality codes that are hosted on eCode360. # Authentication Authentication is provided through a key/secret pair that are supplied in every call to the API as HTTP headers.  Consumers of this API will need to directly contact the municipality to request an API key.   <!-- ReDoc-Inject: <security-definitions> --> ",
+    "contact": {
+      "name": "Dan Romano",
+      "email": "dan.romano@swolcat.com"
+    }
+  },
+  "host": "api.ecode360.com",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/customer/{customer}/structure/{guid}": {
+      "get": {
+        "tags": [
+          "Structure"
+        ],
+        "summary": "Get a simple representation of the structure of a guid along with its children",
+        "description": "Returns the a structure object that matches guid. The structure object has all the basic information (guid, title, number, type, label, parent guid, child guids). If no structure object is found with the specified guid, a [NOT_FOUND status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404) is returned.  The recommended way to form a link to a specific structure is to use the `guid` for the url and concatenate the `number` + 'title' fields to form the text. Include a space between `number` and `title` if `number` is non blank.  ```bash     <a href=\"https://ecode360.com/${guid}\">${number} ${title}</a> ```  Label is contained in the number when it is needed for the reference and is provided for use when you need a separate noun to describe the content. ",
+        "operationId": "GetCodeStructure",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customer",
+            "in": "path",
+            "required": true,
+            "description": "The customer ID of the municipality.",
+            "x-ms-summary": "The customer ID of the municipality",
+            "type": "string"
+          },
+          {
+            "name": "guid",
+            "in": "path",
+            "required": true,
+            "description": "The unique structure identifier or 'ROOT' to get the root of the structure",
+            "x-ms-summary": "The unique structure identifier or 'ROOT' to get the root of the structure",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StructureModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "403": {
+            "description": "No access to customer",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Unknown Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/states": {
+      "get": {
+        "tags": [
+          "States"
+        ],
+        "summary": "List all states where there are customers",
+        "description": "Returns an array of state abbreviation strings. The state abbreviations returned corresponds to all the states where there are customers that your key gives you VIEW access to.",
+        "operationId": "GetPublicStates",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StatesModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Unknown Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/customer/{customer}/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Get search results for a search query",
+        "description": "Returns an array of search result objects given the specified query. The array is limited to a single page (20 results) and each search result object contains basic information about the result (title, number, type, the url, whether it's a pdf, a snippet of text, and the hit map).",
+        "operationId": "SearchCustomer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customer",
+            "in": "path",
+            "required": true,
+            "description": "The custId of the customer you want to search on",
+            "type": "string",
+            "x-ms-summary": "The custId of the customer you want to search on"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "x-ms-summary": "Simple search term (e.g. query=fence)",
+            "description": "Simple search term (e.g. query=fence)  OR a more advanced query like:  query=\"city council\"~3  which searches for any of the words city and council within three words of each other.  The format is the same as that used by eCode360's advanced search tool.  The query format is documented here: https://ecode360.com/help/search#advanced ",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page of search results",
+            "type": "string",
+            "x-ms-summary": "Page of search results"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SearchResultsModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "403": {
+            "description": "No access to customer",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Unknown Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/customer/{customer}/code/content/{guid}": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Get a simple representation of the content at this ID along with its children",
+        "description": "Returns the content object that matches the specified content guid. The content object has all the basic information for the content (id, title, number, type, content text) as well as a list of images, a list of nested content objects, and a map of attachments. If no content object is found with the specified guid, a [NOT_FOUND status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404) is returned.",
+        "operationId": "GetCodeContent",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customer",
+            "in": "path",
+            "required": true,
+            "description": "Customer Id",
+            "type": "string",
+            "x-ms-summary": "Customer Id"
+          },
+          {
+            "name": "guid",
+            "in": "path",
+            "required": true,
+            "description": "GUID representation",
+            "type": "string",
+            "x-ms-summary": "GUID representation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ContentModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "403": {
+            "description": "No access to customer",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Unknown Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/customer/{customer}": {
+      "get": {
+        "tags": [
+          "Customer"
+        ],
+        "summary": "Get information about a single customer",
+        "description": "Returns a single customer object whose custId matches the custId specified in the path. The customer object has all the basic information related to the customer (id, name, shortened name, state, county, government type, sub-government type, population, eCode url, and map url). If no customer is found with the specified custId, a [NOT_FOUND status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404) is returned.",
+        "operationId": "GetCustomerFromCustId",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customer",
+            "in": "path",
+            "required": true,
+            "description": "Customer Id",
+            "type": "string",
+            "x-ms-summary": "Customer Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CustomerModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "403": {
+            "description": "No access to customer",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Unknown Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/customer": {
+      "get": {
+        "tags": [
+          "Customer"
+        ],
+        "summary": "Get a (filtered) list of all customers available to you",
+        "description": "Returns an array of customer objects. The customer objects returned will be filtered based on the customers that your key gives you VIEW access to and they have all the basic information related to the customer (id, name, shortened name, state, county, government type, sub-government type, population, eCode url, and map url).",
+        "operationId": "GetCustomers",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "reverse",
+            "in": "query",
+            "required": false,
+            "description": "Simple search term (fence, street, etc.)",
+            "type": "string",
+            "x-ms-summary": "Search term"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "description": "US state",
+            "type": "string",
+            "x-ms-summary": "US State"
+          },
+          {
+            "name": "govtype",
+            "in": "query",
+            "required": false,
+            "description": "Gov type",
+            "type": "string",
+            "x-ms-summary": "Government type"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Sort order",
+            "type": "string",
+            "x-ms-summary": "Sort order"
+          },
+          {
+            "name": "includeOptions",
+            "in": "query",
+            "required": false,
+            "description": "Options to include",
+            "type": "string",
+            "x-ms-summary": "Options to include"
+          },
+          {
+            "name": "maxPop",
+            "in": "query",
+            "required": false,
+            "description": "Max population amount",
+            "type": "string",
+            "x-ms-summary": "Max population"
+          },
+          {
+            "name": "county",
+            "in": "query",
+            "required": false,
+            "description": "County value",
+            "type": "string",
+            "x-ms-summary": "County"
+          },
+          {
+            "name": "govtypesub",
+            "in": "query",
+            "required": false,
+            "description": "Sub-government type",
+            "type": "string",
+            "x-ms-summary": "Sub-government type"
+          },
+          {
+            "name": "minPop",
+            "in": "query",
+            "required": false,
+            "description": "Minimum population amount",
+            "type": "string",
+            "x-ms-summary": "Minimum population amount"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Name",
+            "type": "string",
+            "x-ms-summary": "Name value"
+          },
+          {
+            "name": "distance",
+            "in": "query",
+            "required": false,
+            "description": "Distance",
+            "type": "string",
+            "x-ms-summary": "Distance value"
+          },
+          {
+            "name": "zipcode",
+            "in": "query",
+            "required": false,
+            "description": "ZIP Code",
+            "type": "string",
+            "x-ms-summary": "ZIP Code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CustomersModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          },
+          "500": {
+            "description": "Unknown Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    }
+  },
+  "definitions": {
+    "ContentModel": {
+      "title": "ContentModel",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifier for the content (AKA guid)"
+        },
+        "attachments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Relative links for attached files"
+        },
+        "children": {
+          "type": "array",
+          "description": "List of children in document order",
+          "items": {
+            "$ref": "#/definitions/ContentModel"
+          }
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the content not including children"
+        },
+        "images": {
+          "type": "array",
+          "description": "Relative links for images included in the content",
+          "items": {
+            "type": "string"
+          }
+        },
+        "number": {
+          "type": "string",
+          "description": "Number for the content (may be blank or null if the number is included in the title)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title for the content"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of content: container = holds other types of content section = actual code content subsection = subordinates of a section; e.g. ordered lists  definition = a term and its definition  definitiondetail = subordinate definition pieces; e.g. example usages or clarifications"
+        },
+        "label": {
+          "type": "string",
+          "description": "User presentable name for the type of content (may be blank or null if the number is included in the title)"
+        }
+      },
+      "description": "A nested structure of a part of the code and its children"
+    },
+    "StatesModel": {
+      "title": "StatesModel",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean"
+        },
+        "results": {
+          "type": "array",
+          "description": "An array of state abbreviations for states with public code access",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "An array of state abbreviations for states with public code access"
+    },
+    "CustomerModel": {
+      "title": "CustomerModel",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean"
+        },
+        "results": {
+          "$ref": "#/definitions/CustomerModel_results"
+        }
+      }
+    },
+    "CustomersModel": {
+      "title": "CustomersModel",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CustomersModel_results"
+          }
+        }
+      },
+      "description": "A single customer"
+    },
+    "SearchResultModel": {
+      "title": "SearchResultModel",
+      "required": [
+        "pdf",
+        "title",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "snippet": {
+          "type": "string",
+          "description": "Part of the matched text for this result with highlighting html"
+        },
+        "hits": {
+          "type": "object",
+          "description": "Map of matching phrase with number of occurances for each phrase"
+        },
+        "number": {
+          "type": "string",
+          "description": "Index number where the result was from"
+        },
+        "pdf": {
+          "type": "boolean",
+          "description": "True if the linked document is a pdf"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title where the result was from"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of result"
+        },
+        "url": {
+          "type": "string",
+          "description": "Link to the result"
+        }
+      },
+      "description": "A single search result"
+    },
+    "ErrorModel": {
+      "title": "ErrorModel",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "description": "Default error type"
+    },
+    "SearchResultsModel": {
+      "title": "SearchResultsModel",
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean",
+          "description": "True if there was an error in the request"
+        },
+        "self": {
+          "type": "string",
+          "description": "Path for these results"
+        },
+        "next": {
+          "type": "string",
+          "description": "Path for the next page of search results if available otherwise missing"
+        },
+        "customer": {
+          "type": "string",
+          "description": "ID for the searched customer",
+          "x-ms-summary": "The customer ID of the municipality"
+        },
+        "page": {
+          "minimum": 0,
+          "type": "integer",
+          "description": "Current page",
+          "format": "int32"
+        },
+        "query": {
+          "type": "string",
+          "description": "The query string passed in"
+        },
+        "maxPages": {
+          "minimum": 0,
+          "type": "integer",
+          "description": "Total number of result pages available",
+          "format": "int32"
+        },
+        "totalResultCount": {
+          "minimum": 0,
+          "type": "integer",
+          "description": "Total number of results for search",
+          "format": "int32"
+        },
+        "prev": {
+          "type": "string",
+          "description": "Path for the previous page of search results if available otherwise missing"
+        },
+        "results": {
+          "minItems": 0,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchResultModel"
+          }
+        }
+      },
+      "description": "A collection of search results"
+    },
+    "StructureChildModel": {
+      "title": "StructureChildModel",
+      "type": "object",
+      "properties": {
+        "guid": {
+          "type": "string",
+          "description": "Unique identifier for this structure point"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title for the content"
+        },
+        "number": {
+          "type": "string",
+          "description": "Number for the content (may be blank or null if the number is included in the title)"
+        },
+        "label": {
+          "type": "string",
+          "description": "User presentable name for the type of content (may be blank or null if the number is included in the title)"
+        }
+      }
+    },
+    "StructureModel": {
+      "title": "StructureModel",
+      "type": "object",
+      "properties": {
+        "guid": {
+          "type": "string",
+          "description": "Unique identifier for this structure point"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title for the content"
+        },
+        "number": {
+          "type": "string",
+          "description": "Number for the content (may be blank or null if the number is included in the title)"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of content: container = holds other types of content section = actual code content subsection = subordinates of a section; e.g. ordered lists  definition = a term and its definition  definitiondetail = subordinate definition pieces; e.g. example usages or clarifications"
+        },
+        "label": {
+          "type": "string",
+          "description": "User presentable name for the type of content (may be blank or null if the number is included in the title)"
+        },
+        "parent": {
+          "type": "string",
+          "description": "Guid of the parent structure"
+        },
+        "children": {
+          "type": "array",
+          "description": "List of details about children",
+          "items": {
+            "$ref": "#/definitions/StructureChildModel"
+          }
+        }
+      },
+      "description": "Structure of a part of the code and its children"
+    },
+    "CustomerModel_results": {
+      "type": "object",
+      "properties": {
+        "counties": {
+          "type": "array",
+          "description": "The counties that the customer is located in",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "description": "A unique identifier for the customer"
+        },
+        "govtype": {
+          "type": "string",
+          "description": "The type of the municipality (City, Town, etc.)"
+        },
+        "govtypesub": {
+          "type": "string",
+          "description": "Subtype of municipality"
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the customer, usually following the form {govtype} of {municipality}, {state}"
+        },
+        "shortName": {
+          "type": "string",
+          "description": "The short name of the customer, usually the municipality name."
+        },
+        "state": {
+          "type": "string",
+          "description": "The state that the customer is located in"
+        },
+        "updatedDate": {
+          "type": "string",
+          "description": "The date the customer's code was last updated"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the customer's eCode"
+        },
+        "mapurl": {
+          "type": "string",
+          "description": "The URL of the customer's Maplink site or null"
+        }
+      }
+    },
+    "CustomersModel_results": {
+      "type": "object",
+      "properties": {
+        "counties": {
+          "type": "array",
+          "description": "The counties that the customer is located in",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier"
+        },
+        "govtype": {
+          "type": "string",
+          "description": "The type of the municipality (City, Town, etc.)"
+        },
+        "govtypesub": {
+          "type": "string",
+          "description": "Subtype of municipality"
+        },
+        "shortName": {
+          "type": "string",
+          "description": "The short name of the customer"
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the customer, usually following the form {govtype} of {shortName}, {state}"
+        },
+        "population": {
+          "type": "integer",
+          "description": "Population of the municipality"
+        },
+        "state": {
+          "type": "string",
+          "description": "The state that the customer is located in"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the customer's eCode"
+        },
+        "mapUrl": {
+          "type": "string",
+          "description": "The URL of the customer's Maplink site or null"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "api-key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Structure",
+      "description": "Structure operations"
+    },
+    {
+      "name": "States",
+      "description": "States operations"
+    },
+    {
+      "name": "Search",
+      "description": "Search operations"
+    },
+    {
+      "name": "Content",
+      "description": "Content operations"
+    },
+    {
+      "name": "Customer",
+      "description": "Customer operations"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://developer.ecode360.com/"
+    },
+    {
+      "propertyName": "Privacy Policy",
+      "propertyValue": "https://www.iccsafe.org/about/icc-online-privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data"
+    }
+  ]
+}

@@ -60,6 +60,10 @@ Get particular template details
 
 List of Templates
 
+### Invoke API
+
+Invoke an API of Zoho Sign 
+
 ## Supported Triggers
 
 The connector supports the following triggers:

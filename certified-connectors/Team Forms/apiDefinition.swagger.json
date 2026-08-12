@@ -3,7 +3,7 @@
   "info": {
     "title": "Team Forms",
     "description": "Teams Forms brings digital forms into Microsoft Teams. The software will empower your teams to build and deliver forms from within the productivity tools that they already know and trust. Unlike many other forms solutions on the market, Team Forms talks directly with your Teams SharePoint so that data captured by forms remains in your ownership and never leaves your trusted office 365 environment.",
-    "version": "1.0",
+    "version": "1.1.1",
     "termsOfService": "https://teamforms.app/terms",
     "contact": {
       "name": "Team Forms",
@@ -48,7 +48,11 @@
         "description": "Get forms for a team.",
         "operationId": "Forms",
         "x-ms-visibility": "important",
-        "parameters": [{ "$ref": "#/parameters/groupId" }]
+        "parameters": [
+          {
+            "$ref": "#/parameters/groupId"
+          }
+        ]
       }
     },
     "/form": {
@@ -66,8 +70,12 @@
         "operationId": "Form",
         "x-ms-visibility": "important",
         "parameters": [
-          { "$ref": "#/parameters/groupId" },
-          { "$ref": "#/parameters/formId" }
+          {
+            "$ref": "#/parameters/groupId"
+          },
+          {
+            "$ref": "#/parameters/formId"
+          }
         ]
       }
     },
@@ -176,7 +184,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/dynamicResponseSchema"
+              "type": "object"
             }
           }
         },
@@ -188,14 +196,11 @@
           {
             "name": "groupId",
             "in": "query",
-            "type": "string",
-            "description": "",
-            "required": true
+            "type": "string"
           },
           {
             "name": "formId",
             "in": "query",
-            "required": true,
             "type": "string"
           }
         ]
@@ -207,41 +212,6 @@
         "schema": {
           "$ref": "#/definitions/dynamicResponseSchema"
         }
-      },
-      "post": {
-        "responses": {
-          "201": {
-            "description": "created",
-            "schema": {}
-          }
-        },
-        "summary": "When a new form response is submitted",
-        "description": "Triggered a flow when a response is submitted in Team Forms.",
-        "operationId": "SubscribeResponse",
-        "x-ms-visibility": "important",
-        "x-ms-trigger": "single",
-        "consumes": ["application/json"],
-        "parameters": [
-          { "$ref": "#/parameters/groupId" },
-          { "$ref": "#/parameters/formId" },
-          { "$ref": "#/parameters/environment" },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "webHookUrl": {
-                  "type": "string",
-                  "x-ms-visibility": "internal",
-                  "x-ms-notification-url": true
-                }
-              },
-              "required": ["webHookUrl"]
-            }
-          }
-        ]
       },
       "delete": {
         "responses": {
@@ -272,17 +242,188 @@
           {
             "name": "formId",
             "in": "query",
-            "required": true,
             "type": "string"
           },
           {
             "name": "webHookId",
             "in": "query",
-            "required": true,
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
             "type": "string"
           }
         ],
         "x-ms-visibility": "internal"
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {}
+          }
+        },
+        "summary": "When a new form response is submitted",
+        "description": "Triggered a flow when a response is submitted in Team Forms.",
+        "operationId": "SubscribeResponse",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/groupId"
+          },
+          {
+            "name": "formId",
+            "in": "query",
+            "type": "string",
+            "description": "Unique id for the form. Leave blank to trigger for all forms in the selected team.",
+            "x-ms-summary": "Form",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "Forms",
+              "value-path": "fields/tfFormId",
+              "value-title": "fields/tfTitle",
+              "parameters": {
+                "groupId": {
+                  "parameter": "groupId"
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/parameters/environment"
+          },
+          {
+            "$ref": "#/parameters/triggers"
+          },
+          {
+            "name": "requestBody",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webHookUrl": {
+                  "type": "string",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true
+                }
+              },
+              "required": ["webHookUrl"]
+            }
+          }
+        ]
+      }
+    },
+    "/response-deletion-subscription": {
+      "x-ms-notification-content": {
+        "description": "Webhook response",
+        "schema": {
+          "$ref": "#/definitions/dynamicResponseSchema"
+        }
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "status"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Delete a subscription",
+        "description": "Internal operation used to delete Webhook if the hook is edited or deleted",
+        "operationId": "UnsubscribeResponseDeletion",
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "query",
+            "type": "string",
+            "description": "",
+            "required": true
+          },
+          {
+            "name": "formId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "webHookId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "x-ms-visibility": "internal"
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "created",
+            "schema": {}
+          }
+        },
+        "summary": "When a form response is deleted",
+        "description": "Triggered a flow when a response is deleted in Team Forms.",
+        "operationId": "SubscribeResponseDeletion",
+        "x-ms-visibility": "important",
+        "x-ms-trigger": "single",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/groupId"
+          },
+          {
+            "name": "formId",
+            "in": "query",
+            "type": "string",
+            "description": "Unique id for the form. Leave blank to trigger for all forms in the selected team.",
+            "x-ms-summary": "Form",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "Forms",
+              "value-path": "fields/tfFormId",
+              "value-title": "fields/tfTitle",
+              "parameters": {
+                "groupId": {
+                  "parameter": "groupId"
+                }
+              }
+            }
+          },
+          {
+            "name": "requestBody",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webHookUrl": {
+                  "type": "string",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true
+                }
+              },
+              "required": ["webHookUrl"]
+            }
+          }
+        ]
       }
     }
   },
@@ -546,11 +687,6 @@
     },
     "dynamicResponseSchema": {
       "type": "object",
-      "properties": {
-        "schema": {
-          "type": "object"
-        }
-      },
       "x-ms-dynamic-schema": {
         "operationId": "ResponseSchema",
         "value-path": "schema",
@@ -584,6 +720,9 @@
         },
         "webUrl": {
           "type": "string"
+        },
+        "itemId": {
+          "description": "The SharePoint item id"
         }
       }
     },
@@ -641,6 +780,15 @@
       "x-ms-summary": "Response",
       "x-ms-visibility": "important"
     },
+    "triggers": {
+      "name": "triggers",
+      "in": "query",
+      "type": "string",
+      "description": "Types of events to trigger this workflow. Submitted and Resubmitted by default",
+      "enum": ["Submitted", "Resubmitted", "Submitted and Resubmitted"],
+      "x-ms-summary": "Triggers",
+      "x-ms-visibility": "advanced"
+    },
     "environment": {
       "name": "environment",
       "in": "query",
@@ -657,7 +805,7 @@
     "oauth2_auth": {
       "type": "oauth2",
       "flow": "accessCode",
-      "authorizationUrl": "https://login.windows.net/common/oauth2/authorize",
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
       "tokenUrl": "https://login.windows.net/common/oauth2/authorize",
       "scopes": {}
     }

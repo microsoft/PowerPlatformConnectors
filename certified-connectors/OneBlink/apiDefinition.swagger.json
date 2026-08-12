@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "1.4",
+    "version": "1.11",
     "title": "OneBlink",
     "description": "Empowers business users to create and deploy digital forms for enterprise and government organisations as web and native apps, while allowing developers to customise, extend, or harness the forms through their own custom apps. Connect your forms with this connector to allow easy submission of your form data into your backend systems or databases without the need to write complex integration code.",
     "contact": {
@@ -15,15 +15,9 @@
   },
   "host": "auth-api.blinkm.io",
   "basePath": "/",
-  "schemes": [
-    "https"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
     "/form-submission-meta/web-hooks": {
       "x-ms-notification-content": {
@@ -46,9 +40,7 @@
             "x-ms-visibility": "important",
             "schema": {
               "type": "object",
-              "required": [
-                "callbackUrl"
-              ],
+              "required": ["callbackUrl"],
               "properties": {
                 "callbackUrl": {
                   "type": "string",
@@ -74,6 +66,23 @@
                     "value-path": "id",
                     "value-title": "name"
                   }
+                },
+                "trigger": {
+                  "type": "string",
+                  "x-ms-visibility": "advanced",
+                  "title": "Trigger",
+                  "description": "Select when this trigger will occur",
+                  "enum": ["AFTER_SUBMISSION", "AFTER_APPROVAL"],
+                  "x-ms-enum-values": [
+                    {
+                      "value": "AFTER_SUBMISSION",
+                      "displayName": "After a user submits a form"
+                    },
+                    {
+                      "value": "AFTER_APPROVAL",
+                      "displayName": "After the submission has been approved"
+                    }
+                  ]
                 }
               }
             }
@@ -194,7 +203,7 @@
         }
       }
     },
-    "/submissions/{formId}/{submissionId}.json": {
+    "/storage/forms/{formId}/submissions/{submissionId}": {
       "get": {
         "description": "Allows for Form Submission data to be retrieved",
         "summary": "Retrieve Form Submission Data",
@@ -252,15 +261,13 @@
         }
       }
     },
-    "/submissions/{formId}/attachments/{attachmentId}": {
+    "/storage/forms/{formId}/attachments/{attachmentId}": {
       "get": {
         "description": "Allows for Form Submission attachments to be retrieved",
         "summary": "Retrieve Form Submission Attachment",
         "operationId": "GetFormSubmissionAttachment",
         "x-ms-visibility": "important",
-        "produces": [
-          "*/*"
-        ],
+        "produces": ["*/*"],
         "parameters": [
           {
             "name": "formId",
@@ -277,6 +284,16 @@
             "required": true,
             "type": "string",
             "x-ms-summary": "Attachment Id"
+          },
+          {
+            "name": "range",
+            "in": "header",
+            "description": "The range of bytes to gather for a chunked file.",
+            "required": true,
+            "type": "string",
+            "default": "bytes=0-10000000",
+            "x-ms-visibility": "internal",
+            "x-ms-summary": "range"
           }
         ],
         "responses": {
@@ -322,9 +339,7 @@
         "summary": "Retrieve Forms",
         "operationId": "GetForms",
         "x-ms-visibility": "internal",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [],
         "responses": {
           "200": {
@@ -376,15 +391,270 @@
         }
       }
     },
+    "/forms/{formId}": {
+      "get": {
+        "description": "Allow for a Form to be retrieved",
+        "summary": "Retrieve Form",
+        "operationId": "GetForm",
+        "x-ms-visibility": "internal",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "formId",
+            "type": "integer",
+            "required": true,
+            "x-ms-visibility": "important"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "customPDFs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/forms/{formId}/approval-steps": {
+      "get": {
+        "description": "Allows for Form approval steps to be retrieved",
+        "summary": "Retrieve Form Approval Steps",
+        "operationId": "GetFormApprovalSteps",
+        "x-ms-visibility": "internal",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "formId",
+            "type": "integer",
+            "required": true,
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-path": "id",
+              "value-collection": "forms",
+              "value-title": "name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "approvalSteps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/form-submission-meta/{submissionId}/approval-steps/{approvalLabel}": {
+      "get": {
+        "description": "Allows for Form Approval data for a single step to be retrieved",
+        "summary": "Retrieve Approval Record",
+        "operationId": "GetFormSubmissionApprovalByStepLabel",
+        "x-ms-visibility": "important",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "submissionId",
+            "description": "ID of the form submission",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "in": "query",
+            "name": "formId",
+            "type": "integer",
+            "required": true,
+            "x-ms-summary": "Form",
+            "x-ms-visibility": "important",
+            "description": "Form to select an approval step",
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-path": "id",
+              "value-collection": "forms",
+              "value-title": "name"
+            }
+          },
+          {
+            "in": "path",
+            "name": "approvalLabel",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Approval Step",
+            "x-ms-visibility": "important",
+            "description": "Approval step to retrieve approval record",
+            "x-ms-dynamic-values": {
+              "operationId": "GetFormApprovalSteps",
+              "value-path": "label",
+              "value-collection": "approvalSteps",
+              "value-title": "label",
+              "parameters": {
+                "formId": {
+                  "parameter": "formId"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "formSubmissionApproval": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "updatedBy": {
+                      "type": "string",
+                      "format": "date-time",
+                      "x-ms-summary": "Approved By: Email Address"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "x-ms-summary": "Approved Timestamp"
+                    },
+                    "approvalFormId": {
+                      "type": "number",
+                      "x-ms-summary": "Approval Form Id"
+                    },
+                    "approvalFormSubmissionId": {
+                      "type": "string",
+                      "x-ms-summary": "Approval Form Submission Id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
     "/forms/{formId}/submissions/{submissionId}/pdf-document": {
       "post": {
         "description": "Allows for Form Submission PDF to be generated",
         "summary": "Generate Form Submission PDF",
         "operationId": "GenerateFormSubmissionPDF",
         "x-ms-visibility": "important",
-        "produces": [
-          "application/pdf"
-        ],
+        "produces": ["application/pdf"],
         "parameters": [
           {
             "name": "formId",
@@ -414,6 +684,11 @@
                   "x-ms-summary": "Include submission identifier in PDF",
                   "description": "The submission identifier can be included at the bottom of each page in the PDF"
                 },
+                "includeExternalIdInPdf": {
+                  "type": "boolean",
+                  "x-ms-summary": "Include external identifier in PDF",
+                  "description": "The external identifier can be included at the bottom of each page in the PDF"
+                },
                 "includePaymentInPdf": {
                   "type": "boolean",
                   "x-ms-summary": "Include payment details in PDF",
@@ -423,6 +698,17 @@
                   "type": "boolean",
                   "x-ms-summary": "Page break on form pages",
                   "description": "Form pages can be translated to page breaks in the PDF"
+                },
+                "excludedCSSClasses": {
+                  "type": "array",
+                  "x-ms-summary": "Excluded form elements via CSS classes",
+                  "description": "The CSS classes assigned to the form elements to exclude from the PDF",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "string",
+                    "description": "The CSS class assigned to the form elements to exclude from the PDF",
+                    "x-ms-summary": "CSS class"
+                  }
                 },
                 "excludedElementIds": {
                   "type": "array",
@@ -443,11 +729,26 @@
                       "x-ms-summary": "Include Approval Details In PDF",
                       "title": "Include Approval Details In PDF",
                       "x-ms-visibility": "advanced",
-                      "enum": [
-                        "ALL"
-                      ]
+                      "enum": ["ALL"]
                     }
                   }
+                },
+                "pdfSize": {
+                  "type": "string",
+                  "x-ms-summary": "Change PDF page sizing",
+                  "title": "PDF Page Size",
+                  "x-ms-visibility": "advanced",
+                  "enum": ["Letter", "A4"],
+                  "x-ms-enum-values": [
+                    {
+                      "value": "Letter",
+                      "displayName": "US Letter Size"
+                    },
+                    {
+                      "value": "A4",
+                      "displayName": "A4 Size"
+                    }
+                  ]
                 }
               }
             }
@@ -461,6 +762,162 @@
               "format": "binary",
               "description": "Output file content from the PDF Service",
               "x-ms-summary": "Form Submission PDF Content"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/forms/{formId}/submissions/{submissionId}/custom-pdf-document": {
+      "post": {
+        "description": "Allows for a custom PDF to be generated",
+        "summary": "Generate Custom PDF",
+        "operationId": "GenerateCustomPDF",
+        "x-ms-visibility": "important",
+        "produces": ["application/pdf"],
+        "parameters": [
+          {
+            "name": "formId",
+            "in": "path",
+            "description": "Form containing the custom PDF",
+            "required": true,
+            "type": "integer",
+            "x-ms-summary": "Form",
+            "x-ms-visibility": "important",
+            "x-ms-dynamic-values": {
+              "operationId": "GetForms",
+              "value-path": "id",
+              "value-collection": "forms",
+              "value-title": "name"
+            }
+          },
+          {
+            "name": "submissionId",
+            "in": "path",
+            "description": "ID of the form submission",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission Id",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "Request Body",
+            "in": "body",
+            "description": "This is the request body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customPdfId": {
+                  "type": "string",
+                  "x-ms-summary": "Custom PDF",
+                  "x-ms-visibility": "important",
+                  "description": "The custom PDF to generate",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetForm",
+                    "value-path": "id",
+                    "value-collection": "customPDFs",
+                    "value-title": "label",
+                    "parameters": {
+                      "formId": {
+                        "parameter": "formId"
+                      }
+                    }
+                  }
+                },
+                "isCustomPdfEditable": {
+                  "type": "boolean",
+                  "x-ms-summary": "Allow editing PDF",
+                  "x-ms-visibility": "important",
+                  "description": "Allow resulting filled fields on PDF to be edited",
+                  "default": false
+                }
+              },
+              "required": ["customPdfId", "isCustomPdfEditable"]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "description": "Output file content from the PDF Service",
+              "x-ms-summary": "Form Submission PDF Content"
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/APIErrorPayload"
+            }
+          }
+        }
+      }
+    },
+    "/form-submission-meta/{submissionId}/payments/nsw-gov-pay": {
+      "get": {
+        "description": "Allows for a NSW Gov Pay Payment to be retrieved",
+        "summary": "Get NSW Gov Pay Payment",
+        "operationId": "GetFormSubmissionNswGovPayPayment",
+        "x-ms-visibility": "important",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "submissionId",
+            "in": "path",
+            "description": "ID of the form submission",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Submission Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FormSubmissionPaymentNswGovPay"
             }
           },
           "401": {
@@ -723,6 +1180,124 @@
             "webdriver": {
               "type": "boolean",
               "x-ms-summary": "Device: Was Controlled by Automation"
+            }
+          }
+        }
+      }
+    },
+    "FormSubmissionPaymentNswGovPay": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "paymentTransaction": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Payment details specific to NSW GovPay payments",
+          "properties": {
+            "agencyCompletionPayment": {
+              "type": "object",
+              "x-ms-summary": "Transaction",
+              "additionalProperties": true,
+              "description": "The fields returned in the payment completion notification, will be\n`undefined` until the payment is successfully completed",
+              "properties": {
+                "accountToken": {
+                  "description": "Account token for making recurring payment (if it was requested)",
+                  "type": "string",
+                  "x-ms-summary": ": Account Token"
+                },
+                "agencyTransactionId": {
+                  "description": "Transaction ID given to CPP by the agency when the request is made",
+                  "type": "string",
+                  "x-ms-summary": ": Agency Transaction Id"
+                },
+                "amount": {
+                  "description": "Amount collected",
+                  "type": "number",
+                  "x-ms-summary": ": Amount"
+                },
+                "bPay": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Only for BPAY payments",
+                  "x-ms-summary": ": BPAY",
+                  "properties": {
+                    "billerCode": {
+                      "description": "Biller Code for BPAY",
+                      "type": "string",
+                      "x-ms-summary": ": Biller Code"
+                    },
+                    "crn": {
+                      "description": "CRN which was used to make the payment",
+                      "type": "string",
+                      "x-ms-summary": ": CRN"
+                    },
+                    "processingDate": {
+                      "description": "Date on which the payment was processed",
+                      "type": "string",
+                      "x-ms-summary": ": Processing Date"
+                    }
+                  }
+                },
+                "bankReference": {
+                  "description": "Reference generated by the gateway for this payment",
+                  "type": "string",
+                  "x-ms-summary": ": Bank Reference"
+                },
+                "card": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Only for card payments",
+                  "x-ms-summary": ": Card",
+                  "properties": {
+                    "cardPresent": {
+                      "description": "Determine if a card was present",
+                      "type": "boolean",
+                      "x-ms-summary": ": Present"
+                    },
+                    "cardType": {
+                      "description": "The type of card used",
+                      "type": "string",
+                      "x-ms-summary": ": Type"
+                    },
+                    "last4Digits": {
+                      "description": "The last 4 digits of the card used",
+                      "type": "string",
+                      "x-ms-summary": ": Last 4 Digits"
+                    }
+                  }
+                },
+                "emailAddress": {
+                  "description": "Email of the customer for PayID and BPAY payments",
+                  "type": "string",
+                  "x-ms-summary": ": Email Address"
+                },
+                "paymentCompletionReference": {
+                  "description": "Receipt Number generated by CPP to confirm successful payment",
+                  "type": "string",
+                  "x-ms-summary": ": Payment Completion Reference"
+                },
+                "paymentMethod": {
+                  "description": "Payment Method used (CARD, PAYPAL, PAYID, BPAY)",
+                  "enum": ["BPAY", "CARD", "PAYID", "PAYPAL"],
+                  "type": "string",
+                  "x-ms-summary": ": Payment Method"
+                },
+                "paymentReference": {
+                  "description": "Payment Reference shared with the agency",
+                  "type": "string",
+                  "x-ms-summary": ": Payment Reference"
+                },
+                "surcharge": {
+                  "description": "Surcharge collected",
+                  "type": "number",
+                  "x-ms-summary": ": Surcharge"
+                },
+                "surchargeGst": {
+                  "description": "GST collected for the surcharge",
+                  "type": "number",
+                  "x-ms-summary": ": Surcharge GST"
+                }
+              }
             }
           }
         }

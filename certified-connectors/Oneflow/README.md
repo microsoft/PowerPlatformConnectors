@@ -53,7 +53,9 @@ Check Oneflow API availability.
 
 ### Triggers
 
-#### Underway.
+#### When a contract is updated
+
+Trigger your flow based on predifined contract event(s).
 
   
 
@@ -67,7 +69,9 @@ To get the Oneflow connector credentials:
 
 ## Known issues and limitations
 
-#### Currently, there are no known issues or limitations specific to the Oneflow connector.
+### Webhook registration is not deleted in test environment
+
+If you choose to use Oneflow test environment, there is a known issue when a webhook is not deleted in your Oneflow test account after you delete a flow or remove a trigger from a flow. Webhooks should be manually deleted in your Oneflow test account as a workaround.
 
 # Contact us
 

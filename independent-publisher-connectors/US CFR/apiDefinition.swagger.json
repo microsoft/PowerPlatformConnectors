@@ -1,0 +1,1216 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "eCFR (Independent Publisher)",
+    "description": "The US Code of federal regulations, regulation metadata and point-in-time regulation versions. Made available via the Government Publishing Office (GPO).",
+    "version": "1.0",
+    "contact": {
+      "name": "Dan Romano",
+      "email": "dan.romano@swolcat.com",
+      "url": "https://developments.substack.com"
+    }
+  },
+  "host": "www.ecfr.gov",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/versioner/v1/titles.json": {
+      "get": {
+        "tags": [
+          "Versioner"
+        ],
+        "operationId": "GetCfrTitles",
+        "summary": "Get all CFR titles",
+        "description": "Returns a list of all current CFR titles, including their names, amendment history, and up-to-date status.",
+        "x-ms-summary": "Get list of CFR titles",
+        "responses": {
+          "200": {
+            "description": "List of CFR titles with metadata",
+            "schema": {
+              "$ref": "#/definitions/CfrTitlesResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/admin/v1/agencies.json": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAgencies",
+        "summary": "Get List of CFR Agencies",
+        "description": "Returns all agencies that appear in the CFR, including children and title/chapter references.",
+        "x-ms-summary": "Get list of CFR agencies",
+        "responses": {
+          "200": {
+            "description": "Successful response with list of agencies",
+            "schema": {
+              "$ref": "#/definitions/AgencyResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/admin/v1/corrections.json": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetCfrCorrections",
+        "summary": "Get CFR Corrections",
+        "description": "Returns a list of historical corrections to the CFR, including Federal Register citations, titles, and hierarchy metadata.",
+        "x-ms-summary": "Get list of CFR corrections",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Snapshot date",
+            "description": "Return corrections published as of a given date (yyyy-mm-dd)",
+            "required": false
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "type": "integer",
+            "x-ms-summary": "CFR Title Number",
+            "description": "Limit results to a specific CFR title number",
+            "required": false
+          },
+          {
+            "name": "error_corrected_date",
+            "in": "query",
+            "type": "string",
+            "x-ms-summary": "Correction Effective Date",
+            "description": "Limit results to corrections with a given correction effective date (yyyy-mm-dd)",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with CFR corrections",
+            "schema": {
+              "$ref": "#/definitions/CorrectionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/admin/v1/corrections/title/{title}.json": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetTitleCorrections",
+        "summary": "Get CFR Corrections for a Specific Title",
+        "description": "Returns corrections for a specific CFR title, including Federal Register references and structural hierarchy metadata.",
+        "x-ms-summary": "Get CFR corrections by title",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The CFR title number (e.g., 6, 7, 22)",
+            "x-ms-summary": "CFR Title Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with corrections for the title",
+            "schema": {
+              "$ref": "#/definitions/CorrectionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/versioner/v1/versions/title-{title}.json": {
+      "get": {
+        "tags": [
+          "Versioner"
+        ],
+        "summary": "Get Content Versions for a Title",
+        "description": "Returns a list of historical content versions for a specific CFR title.",
+        "operationId": "GetContentVersionsByTitle",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "CFR Title",
+            "description": "The CFR Title number (e.g., 2, 22, 50)"
+          },
+          {
+            "name": "issue_date[on]",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Issue Date On",
+            "description": "Return content added exactly on this date (YYYY-MM-DD)"
+          },
+          {
+            "name": "issue_date[lte]",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Issue Date Before or On",
+            "description": "Return content added on or before this date (YYYY-MM-DD)"
+          },
+          {
+            "name": "issue_date[gte]",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Issue Date After or On",
+            "description": "Return content added on or after this date (YYYY-MM-DD)"
+          },
+          {
+            "name": "subtitle",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Subtitle",
+            "description": "Uppercase subtitle letter (e.g., 'A', 'B')"
+          },
+          {
+            "name": "chapter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Chapter",
+            "description": "Roman numerals or digits for the chapter (e.g., 'I', '2')"
+          },
+          {
+            "name": "subchapter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Subchapter",
+            "description": "Subchapter code (e.g., 'A', 'B', with optional dash or underscore)"
+          },
+          {
+            "name": "part",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Part",
+            "description": "CFR part identifier (e.g., '3474')"
+          },
+          {
+            "name": "subpart",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Subpart",
+            "description": "Subpart code (e.g., 'B')"
+          },
+          {
+            "name": "section",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Section",
+            "description": "CFR section (e.g., '3474.20')"
+          },
+          {
+            "name": "appendix",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Appendix",
+            "description": "Appendix reference (e.g., 'App. A')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ContentVersionsResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/versioner/v1/ancestry/{date}/title-{title}.json": {
+      "get": {
+        "tags": [
+          "Versioner"
+        ],
+        "summary": "Get CFR Title Ancestry for a Given Date",
+        "description": "Returns the full regulatory hierarchy (title to section) for a specific title on a given date.\n",
+        "operationId": "GetTitleAncestry",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Date",
+            "description": "The snapshot date to retrieve ancestry for (YYYY-MM-DD)"
+          },
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "CFR Title",
+            "description": "The CFR Title number (e.g., 2, 22, 50)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ancestry": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/AncestryItem"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/search/v1/results": {
+      "get": {
+        "tags": [
+          "Search Service"
+        ],
+        "operationId": "SearchCfrResults",
+        "summary": "Search CFR results",
+        "description": "Search CFR sections by keyword and filter by date or other criteria.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Search query",
+            "description": "The search term to query for in CFR content."
+          },
+          {
+            "name": "last_modified_on_or_after",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false,
+            "x-ms-summary": "Modified after",
+            "description": "Return only results modified on or after this date (YYYY-MM-DD)."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Results per page",
+            "description": "Number of results per page (default is 20).",
+            "format": "int32"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Page number",
+            "description": "The page number to retrieve.",
+            "format": "int32"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "relevance",
+              "date"
+            ],
+            "required": false,
+            "x-ms-summary": "Sort order",
+            "description": "Sort results by relevance or date."
+          },
+          {
+            "name": "paginate_by",
+            "in": "query",
+            "type": "string",
+            "enum": [
+              "results"
+            ],
+            "required": false,
+            "x-ms-summary": "Pagination mode",
+            "description": "Method of pagination. Must be 'results'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with search results",
+            "schema": {
+              "$ref": "#/definitions/SearchResultsResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/search/v1/counts/hierarchy": {
+      "get": {
+        "tags": [
+          "Search Service"
+        ],
+        "operationId": "GetHierarchyCounts",
+        "summary": "Get search result counts by CFR hierarchy",
+        "description": "Returns the number of CFR search results distributed across hierarchical levels (title, chapter, part, etc.).",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Search query",
+            "description": "The keyword or phrase to search for in the CFR database."
+          },
+          {
+            "name": "agency_slugs",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Filter by agency slugs",
+            "description": "Comma-separated list of agency slugs (e.g., \"epa,doe,faa\")."
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Snapshot date",
+            "description": "Limit results to content present on this date (YYYY-MM-DD)."
+          },
+          {
+            "name": "last_modified_after",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Modified after date",
+            "description": "Limit results to content modified after this date (YYYY-MM-DD)."
+          },
+          {
+            "name": "last_modified_on_or_after",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Modified on or after",
+            "description": "Limit results to content modified on or after this date (YYYY-MM-DD)."
+          },
+          {
+            "name": "last_modified_before",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Modified before date",
+            "description": "Limit results to content modified before this date (YYYY-MM-DD)."
+          },
+          {
+            "name": "last_modified_on_or_before",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Modified on or before",
+            "description": "Limit results to content modified on or before this date (YYYY-MM-DD)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with hierarchical count data",
+            "schema": {
+              "$ref": "#/definitions/HierarchyCountResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/versioner/v1/full/{date}/title-{title}.xml": {
+      "get": {
+        "tags": [
+          "Versioner"
+        ],
+        "summary": "Get Full Regulation XML",
+        "description": "Returns full XML content for a given title on a specified CFR snapshot date.\n",
+        "operationId": "GetFullRegulationXML",
+        "produces": [
+          "application/xml",
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Snapshot Date",
+            "description": "Date of the CFR version (e.g., 2025-05-16)"
+          },
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "CFR Title",
+            "description": "Title number of the CFR (e.g., 21)"
+          },
+          {
+            "name": "subtitle",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Subtitle",
+            "description": "Subtitle of the CFR structure"
+          },
+          {
+            "name": "chapter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Chapter",
+            "description": "Chapter of the CFR structure"
+          },
+          {
+            "name": "subchapter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Subchapter",
+            "description": "Subchapter of the CFR structure"
+          },
+          {
+            "name": "part",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Part",
+            "description": "Part of the CFR structure"
+          },
+          {
+            "name": "subpart",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Subpart",
+            "description": "Subpart of the CFR structure"
+          },
+          {
+            "name": "section",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Section",
+            "description": "Section of the CFR structure"
+          },
+          {
+            "name": "appendix",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Appendix",
+            "description": "Appendix of the CFR structure"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "XML document returned from eCFR",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AncestryItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "label_level": {
+          "type": "string"
+        },
+        "label_description": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "boolean"
+        },
+        "section_range": {
+          "type": "string"
+        }
+      }
+    },
+    "ContentVersionsResponse": {
+      "type": "object",
+      "properties": {
+        "content_versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "amendment_date": {
+                "type": "string"
+              },
+              "issue_date": {
+                "type": "string"
+              },
+              "identifier": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "part": {
+                "type": "string"
+              },
+              "subpart": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "substantive": {
+                "type": "boolean"
+              },
+              "removed": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "result_count": {
+              "type": "string"
+            },
+            "issue_date": {
+              "type": "object",
+              "properties": {
+                "lte": {
+                  "type": "string"
+                },
+                "gte": {
+                  "type": "string"
+                }
+              }
+            },
+            "latest_amendment_date": {
+              "type": "string"
+            },
+            "latest_issue_date": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "CfrTitle": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "latest_amended_on": {
+          "type": "string"
+        },
+        "latest_issue_date": {
+          "type": "string"
+        },
+        "up_to_date_as_of": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "boolean"
+        }
+      }
+    },
+    "CfrTitlesMeta": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "import_in_progress": {
+          "type": "boolean"
+        }
+      }
+    },
+    "CfrTitlesResponse": {
+      "type": "object",
+      "properties": {
+        "titles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CfrTitle"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/CfrTitlesMeta"
+        }
+      }
+    },
+    "AgencyResponse": {
+      "type": "object",
+      "properties": {
+        "agencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Agency"
+          }
+        }
+      }
+    },
+    "AgencyReference": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "integer",
+          "description": "CFR title number"
+        },
+        "chapter": {
+          "type": "string",
+          "description": "CFR chapter designation"
+        }
+      }
+    },
+    "Agency": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "short_name": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "sortable_name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "cfr_references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AgencyReference"
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Agency"
+          }
+        }
+      }
+    },
+    "CorrectionReferenceHierarchy": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "chapter": {
+          "type": "string"
+        },
+        "part": {
+          "type": "string"
+        },
+        "subpart": {
+          "type": "string"
+        },
+        "section": {
+          "type": "string"
+        }
+      }
+    },
+    "CorrectionReference": {
+      "type": "object",
+      "properties": {
+        "cfr_reference": {
+          "type": "string"
+        },
+        "hierarchy": {
+          "$ref": "#/definitions/CorrectionReferenceHierarchy"
+        }
+      }
+    },
+    "Correction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "cfr_references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CorrectionReference"
+          }
+        },
+        "corrective_action": {
+          "type": "string"
+        },
+        "error_corrected": {
+          "type": "string"
+        },
+        "error_occurred": {
+          "type": "string"
+        },
+        "fr_citation": {
+          "type": "string"
+        },
+        "position": {
+          "type": "number"
+        },
+        "display_in_toc": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "number"
+        },
+        "year": {
+          "type": "number"
+        },
+        "last_modified": {
+          "type": "string"
+        }
+      }
+    },
+    "CorrectionResponse": {
+      "type": "object",
+      "properties": {
+        "ecfr_corrections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Correction"
+          }
+        }
+      }
+    },
+    "StructureNode": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "label_level": {
+          "type": "string"
+        },
+        "label_description": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "reserved": {
+          "type": "boolean"
+        },
+        "section_range": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StructureNode"
+          }
+        }
+      }
+    },
+    "SearchResultsResponse": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "starts_on": {
+                "type": "string"
+              },
+              "ends_on": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "hierarchy": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "hierarchy_headings": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "headings": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "full_text_excerpt": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number",
+                "title": "",
+                "format": "float"
+              },
+              "structure_index": {
+                "type": "number"
+              },
+              "reserved": {
+                "type": "boolean"
+              },
+              "removed": {
+                "type": "boolean"
+              },
+              "change_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "current_page": {
+              "type": "number"
+            },
+            "total_pages": {
+              "type": "number"
+            },
+            "total_count": {
+              "type": "number"
+            },
+            "max_score": {
+              "type": "number",
+              "format": "float"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "HierarchyCountResponse": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "relation": {
+              "type": "string"
+            }
+          }
+        },
+        "max_score": {
+          "type": "number",
+          "format": "float"
+        },
+        "shown_count": {
+          "type": "number"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HierarchyNode"
+          }
+        }
+      }
+    },
+    "HierarchyNode": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string"
+        },
+        "hierarchy": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "hierarchy_heading": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "heading": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "structure_index": {
+          "type": "number"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "max_score": {
+          "type": "number",
+          "format": "float"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "string"
+              },
+              "hierarchy": {
+                "type": "string",
+                "x-nullable": true
+              },
+              "hierarchy_heading": {
+                "type": "string",
+                "x-nullable": true
+              },
+              "heading": {
+                "type": "string",
+                "x-nullable": true
+              },
+              "structure_index": {
+                "type": "number"
+              },
+              "count": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "max_score": {
+                "type": "number",
+                "format": "float"
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "level": {
+                      "type": "string"
+                    },
+                    "hierarchy": {
+                      "type": "string",
+                      "x-nullable": true
+                    },
+                    "hierarchy_heading": {
+                      "type": "string",
+                      "x-nullable": true
+                    },
+                    "heading": {
+                      "type": "string",
+                      "x-nullable": true
+                    },
+                    "structure_index": {
+                      "type": "number"
+                    },
+                    "count": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "max_score": {
+                      "type": "number",
+                      "format": "float"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "GeneralXmlTextResponse": {
+      "type": "object",
+      "properties": {
+        "documentType": {
+          "type": "string",
+          "description": "The root tag of the XML document (e.g., DIV8, REGTEXT)"
+        },
+        "contentText": {
+          "type": "string",
+          "description": "Flattened plain text content extracted from all XML nodes"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "statusCode": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.ecfr.gov/reader-aids/ecfr-developer-resources"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.ecfr.gov/reader-aids/government-policy-and-ofr-procedures/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management"
+    }
+  ]
+}
