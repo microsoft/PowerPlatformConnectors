@@ -3,6 +3,12 @@ GOV.UK's Check VAT API provides validation of registered VAT numbers and informa
 
 ## Publisher: Fördős András
 
+## Deprecation
+
+**This connector is deprecated.** Its endpoint (`api.service.hmrc.gov.uk`) no longer works for this connector, so its operations are non-functional and can no longer be relied on.
+
+If you are using it in your flows or apps, please migrate away from it. See the [Recommended Alternative](#recommended-alternative) below, or reach out if you need help migrating.
+
 ## Prerequisites
 There are no prerequisites needed for this connector.
 
@@ -10,16 +16,17 @@ There are no prerequisites needed for this connector.
 This connector does not use authentication, so no credentials are needed.
 
 ## Supported Operations
-### Get VAT registration
+### Get VAT registration (deprecated)
 Allows the retrieval of name and address of a VAT regstered company.
-### Get VAT registration with reference
+### Get VAT registration with reference (deprecated)
 Allows the retrieval of name and address of a VAT registered company while providing proof that you have performed the check.
 
 ## Known Issues and Limitations
-There are no known issues at this time.
+This connector is deprecated and its operations are non-functional, because the underlying endpoint no longer works for this connector (see [Deprecation](#deprecation) above).
 
-Be aware that the source API is currently in BETA version, so breaking changes can be expected.
+## Recommended Alternative
+For maintained VAT number validation, see the **Abstract VAT Validator** independent publisher connector, which validates VAT numbers and returns company details (registered country, name, and address). Note that it uses a different provider and requires an AbstractAPI account/API key, so evaluate it against your needs before migrating.
 
 ## Example
 
-![Example with Microsoft UK](example.png "Example")
+![Example with Microsoft UK](example.png "Example")
