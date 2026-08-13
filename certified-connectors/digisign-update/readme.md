@@ -340,3 +340,4 @@ Returned when endpoint is not found.
 
 ##### HTTP 500 Internal Server Error
 Returned when a server-side error occurs.
+
