@@ -4,12 +4,44 @@ public class Script : ScriptBase
     {
         switch (this.Context.OperationId)
         {
+            case "CreatePledgePayment": 
+                return await this.HandleCreatePledgePaymentOperation().ConfigureAwait(false);
+
             case "ListGiftCustomFields":
                 return await this.HandleListCustomFieldOperation().ConfigureAwait(false);
         }
 
         var response = new HttpResponseMessage(HttpStatusCode.BadRequest);
         response.Content = CreateJsonContent($"Unhandled operation ID '{this.Context.OperationId}'");
+        return response;
+    }
+
+    private async Task<HttpResponseMessage> HandleCreatePledgePaymentOperation()
+    {
+        // transform the installment_payments property to the applied_payments shape
+
+        // first, get the object from the request
+        var requestContent = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var requestJson = JObject.Parse(requestContent);
+        
+        var installmentPayments = (JArray)requestJson["installment_payments"];
+
+        requestJson.Add("apply_payments", new JArray(installmentPayments.GroupBy(item => item["pledge_id"]).Select(group => new JObject() {
+            ["parent_id"] = group.Key,
+            ["installments"] = new JArray(group.Select(item => new JObject() {
+                ["installment_id"] = item["installment_id"],
+                ["amount_applied"] = item["amount_applied"]
+            }))
+        })));
+
+        // remove properties not used by the backend (should be ignored, but let's not risk it)
+        requestJson.Remove("installment_payments");
+
+        var newBody = requestJson;
+
+        // send the request to the backend and return the response
+        this.Context.Request.Content = CreateJsonContent(newBody.ToString());
+        var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
         return response;
     }
 

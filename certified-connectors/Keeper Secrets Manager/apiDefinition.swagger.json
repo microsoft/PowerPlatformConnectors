@@ -1,0 +1,623 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Keeper Secrets Manager",
+    "description": "Keeper Secrets Manager is a cloud-based, zero-knowledge secrets management platform for DevOps and IT teams. Securely retrieve, create, and update secrets (credentials, keys, passwords) stored in your Keeper Vault and automate secret lifecycle workflows.",
+    "x-ms-api-annotation": {
+      "status": "Preview"
+    },
+    "contact": {
+      "name": "Keeper Security Support",
+      "url": "https://www.keepersecurity.com/support.html",
+      "email": "sm@keepersecurity.com"
+    },
+    "license": {
+      "name": "Keeper Security Terms of Use",
+      "url": "https://www.keepersecurity.com/termsOfUse.html"
+    }
+  },
+  "host": "func-keeper-logicapp-qa.azurewebsites.net",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/secrets": {
+      "get": {
+        "summary": "List secrets",
+        "description": "Returns a list of all secrets (records) accessible by the configured Keeper Secrets Manager application. Each entry contains the record UID, title, type, and folder UID.",
+        "operationId": "ListSecrets",
+        "tags": [
+          "Secrets"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of secrets was returned successfully.",
+            "schema": {
+              "$ref": "#/definitions/SecretSummaryArray"
+            },
+            "examples": {
+              "application/json": [
+                {
+                  "uid": "A1b2C3d4E5f6G7h8I9j0",
+                  "title": "Production Database",
+                  "type": "login",
+                  "folder_uid": "Z0Bfs44Ov3OZPvZlqCEd8w"
+                },
+                {
+                  "uid": "K1l2M3n4O5p6Q7r8S9t0",
+                  "title": "AWS API Key",
+                  "type": "login",
+                  "folder_uid": "Z0Bfs44Ov3OZPvZlqCEd8w"
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized. The API key is missing or invalid."
+          },
+          "500": {
+            "description": "Internal server error. The Keeper Secrets Manager configuration may be invalid or the vault is unreachable."
+          }
+        },
+        "x-ms-visibility": "important",
+        "x-ms-api-annotation": {
+          "status": "Production"
+        }
+      },
+      "post": {
+        "summary": "Create secret",
+        "description": "Creates a new login-type secret (record) in the specified Keeper Vault folder. Provide a title, login, password, URL, and optional notes.",
+        "operationId": "CreateSecret",
+        "tags": [
+          "Secrets"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The secret to create.",
+            "schema": {
+              "$ref": "#/definitions/CreateSecretRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The secret was created successfully.",
+            "schema": {
+              "$ref": "#/definitions/CreateSecretResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "Secret created successfully",
+                "title": "New Database Credential",
+                "folder_uid": "Z0Bfs44Ov3OZPvZlqCEd8w",
+                "response": "A1b2C3d4E5f6G7h8I9j0"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The folder_uid is missing, empty, inaccessible, or a string field exceeds its maximum length."
+          },
+          "401": {
+            "description": "Unauthorized. The API key is missing or invalid."
+          },
+          "415": {
+            "description": "Unsupported media type. The Content-Type header must be application/json."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "x-ms-visibility": "important",
+        "x-ms-api-annotation": {
+          "status": "Production"
+        }
+      }
+    },
+    "/secrets/{uid}": {
+      "get": {
+        "summary": "Get secret",
+        "description": "Retrieves the full details of a single secret by its unique record UID. All record-type fields (login, password, URL, host, keyPair, paymentCard, etc.) are returned as flat top-level keys alongside notes, custom fields, and folder information.",
+        "operationId": "GetSecret",
+        "tags": [
+          "Secrets"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier (UID) of the secret to retrieve.",
+            "x-ms-summary": "Secret UID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListSecrets",
+              "value-path": "uid",
+              "value-title": "title"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The secret details were returned successfully.",
+            "schema": {
+              "$ref": "#/definitions/SecretDetail"
+            },
+            "examples": {
+              "application/json": {
+                "uid": "A1b2C3d4E5f6G7h8I9j0",
+                "title": "Production Database",
+                "type": "login",
+                "notes": "Primary production DB credentials",
+                "login": "db_admin",
+                "password": "••••••••",
+                "url": "https://db.example.com",
+                "folder_uid": "Z0Bfs44Ov3OZPvZlqCEd8w"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The uid path segment is missing or whitespace."
+          },
+          "401": {
+            "description": "Unauthorized. The API key is missing or invalid."
+          },
+          "404": {
+            "description": "The secret with the specified UID was not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "x-ms-visibility": "important",
+        "x-ms-api-annotation": {
+          "status": "Production"
+        }
+      },
+      "put": {
+        "summary": "Update secret",
+        "description": "Updates an existing secret identified by its UID. You can modify any combination of title, login, password, URL, and notes. Only the fields you include in the request body will be updated.",
+        "operationId": "UpdateSecret",
+        "tags": [
+          "Secrets"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier (UID) of the secret to update.",
+            "x-ms-summary": "Secret UID",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListSecrets",
+              "value-path": "uid",
+              "value-title": "title"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The fields to update on the secret. Only included fields will be modified.",
+            "schema": {
+              "$ref": "#/definitions/UpdateSecretRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The secret was updated successfully.",
+            "schema": {
+              "$ref": "#/definitions/UpdateSecretResponse"
+            },
+            "examples": {
+              "application/json": {
+                "message": "Secret A1b2C3d4E5f6G7h8I9j0 updated successfully"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. The request body is empty, malformed, or a string field exceeds its maximum length."
+          },
+          "401": {
+            "description": "Unauthorized. The API key is missing or invalid."
+          },
+          "404": {
+            "description": "The secret with the specified UID was not found."
+          },
+          "415": {
+            "description": "Unsupported media type. The Content-Type header must be application/json."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "x-ms-visibility": "important",
+        "x-ms-api-annotation": {
+          "status": "Production"
+        }
+      }
+    },
+    "/folders": {
+      "get": {
+        "summary": "List folders",
+        "description": "Returns a list of all folders accessible by the configured Keeper Secrets Manager application. Each folder includes its UID, name, and parent folder UID.",
+        "operationId": "ListFolders",
+        "tags": [
+          "Folders"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of folders was returned successfully.",
+            "schema": {
+              "$ref": "#/definitions/FolderArray"
+            },
+            "examples": {
+              "application/json": [
+                {
+                  "uid": "Z0Bfs44Ov3OZPvZlqCEd8w",
+                  "name": "Production Secrets",
+                  "parent_uid": ""
+                },
+                {
+                  "uid": "X9y8W7v6U5t4S3r2Q1p0",
+                  "name": "Development",
+                  "parent_uid": "Z0Bfs44Ov3OZPvZlqCEd8w"
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized. The API key is missing or invalid."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "x-ms-visibility": "important",
+        "x-ms-api-annotation": {
+          "status": "Production"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SecretSummary": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the secret record.",
+          "x-ms-summary": "Secret UID",
+          "x-ms-visibility": "important"
+        },
+        "title": {
+          "type": "string",
+          "description": "The display title of the secret.",
+          "x-ms-summary": "Title",
+          "x-ms-visibility": "important"
+        },
+        "type": {
+          "type": "string",
+          "description": "The record type (e.g., login, sshKeys, databaseCredentials).",
+          "x-ms-summary": "Record Type",
+          "x-ms-visibility": "advanced"
+        },
+        "folder_uid": {
+          "type": "string",
+          "description": "The UID of the folder containing this secret.",
+          "x-ms-summary": "Folder UID",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "SecretSummaryArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/SecretSummary"
+      }
+    },
+    "SecretDetail": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Full details of a secret record including login credentials, notes, and folder information.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the secret record.",
+          "x-ms-summary": "Secret UID",
+          "x-ms-visibility": "important"
+        },
+        "title": {
+          "type": "string",
+          "description": "The display title of the secret.",
+          "x-ms-summary": "Title",
+          "x-ms-visibility": "important"
+        },
+        "type": {
+          "type": "string",
+          "description": "The record type (e.g., login, sshKeys, databaseCredentials, bankCard).",
+          "x-ms-summary": "Record Type",
+          "x-ms-visibility": "important"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form notes associated with the secret.",
+          "x-ms-summary": "Notes",
+          "x-ms-visibility": "advanced"
+        },
+        "login": {
+          "type": "string",
+          "description": "The login or username stored in the secret.",
+          "x-ms-summary": "Login",
+          "x-ms-visibility": "important"
+        },
+        "password": {
+          "type": "string",
+          "description": "The password stored in the secret.",
+          "x-ms-summary": "Password",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL associated with the secret.",
+          "x-ms-summary": "URL",
+          "x-ms-visibility": "advanced"
+        },
+        "folder_uid": {
+          "type": "string",
+          "description": "The UID of the folder containing this secret.",
+          "x-ms-summary": "Folder UID",
+          "x-ms-visibility": "advanced"
+        },
+        "is_editable": {
+          "type": "boolean",
+          "description": "Whether the current application has permission to edit this secret.",
+          "x-ms-summary": "Is Editable",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "CreateSecretRequest": {
+      "type": "object",
+      "required": [
+        "folder_uid",
+        "title"
+      ],
+      "properties": {
+        "folder_uid": {
+          "type": "string",
+          "description": "The UID of the target folder where the secret will be created. Must be an accessible shared folder.",
+          "x-ms-summary": "Folder UID",
+          "x-ms-visibility": "important",
+          "x-ms-dynamic-values": {
+            "operationId": "ListFolders",
+            "value-path": "uid",
+            "value-title": "name"
+          }
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S",
+          "description": "The display title for the new secret.",
+          "x-ms-summary": "Title",
+          "x-ms-visibility": "important"
+        },
+        "login": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "The login or username to store.",
+          "x-ms-summary": "Login",
+          "x-ms-visibility": "important"
+        },
+        "password": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "The password to store.",
+          "x-ms-summary": "Password",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "The URL to associate with the secret.",
+          "x-ms-summary": "URL",
+          "x-ms-visibility": "advanced"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Optional free-form notes to attach to the secret.",
+          "x-ms-summary": "Notes",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "CreateSecretResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "A human-readable success message.",
+          "x-ms-summary": "Message"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the created secret.",
+          "x-ms-summary": "Title"
+        },
+        "folder_uid": {
+          "type": "string",
+          "description": "The UID of the folder in which the secret was created.",
+          "x-ms-summary": "Folder UID"
+        },
+        "response": {
+          "type": "string",
+          "description": "The UID of the newly created secret record.",
+          "x-ms-summary": "New Secret UID"
+        }
+      }
+    },
+    "UpdateSecretRequest": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S",
+          "description": "A new display title for the secret.",
+          "x-ms-summary": "Title",
+          "x-ms-visibility": "important"
+        },
+        "login": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "A new login or username.",
+          "x-ms-summary": "Login",
+          "x-ms-visibility": "important"
+        },
+        "password": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "A new password.",
+          "x-ms-summary": "Password",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "A new URL to associate with the secret.",
+          "x-ms-summary": "URL",
+          "x-ms-visibility": "advanced"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "New free-form notes.",
+          "x-ms-summary": "Notes",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "UpdateSecretResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "A human-readable success message.",
+          "x-ms-summary": "Message"
+        }
+      }
+    },
+    "Folder": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the folder.",
+          "x-ms-summary": "Folder UID",
+          "x-ms-visibility": "important"
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the folder.",
+          "x-ms-summary": "Folder Name",
+          "x-ms-visibility": "important"
+        },
+        "parent_uid": {
+          "type": "string",
+          "description": "The UID of the parent folder (empty for root-level folders).",
+          "x-ms-summary": "Parent Folder UID",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "FolderArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Folder"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Secrets",
+      "description": "Operations to list, retrieve, create, and update secrets (records) stored in the Keeper Vault."
+    },
+    {
+      "name": "Folders",
+      "description": "Operations to list folders accessible by the Keeper Secrets Manager application."
+    }
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "x-functions-key",
+      "in": "header",
+      "description": "The Azure Function host key used to authenticate requests to the Keeper Secrets Manager middleware."
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "ListFolders"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.keepersecurity.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.keepersecurity.com/privacypolicy.html"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Security;IT Operations"
+    }
+  ]
+}

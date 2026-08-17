@@ -16,5 +16,8 @@ namespace SnowflakeV2CoreLogic.Providers
         /// </summary>
         public const string SelectItemsQueryWithoutFilter = "SELECT {0} FROM {1} ORDER BY {2} LIMIT {3} OFFSET {4}";
         public const string SelectItemsQueryWithoutFilterAndOrderBy = "SELECT {0} FROM {1}  LIMIT {2} OFFSET {3}";
+
+        public const string SelectItemsQueryWithFilter = "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4}";
+        public const string SelectItemsQueryWithFilterAndOrderBy = "SELECT {0} FROM {1} WHERE {2} ORDER BY {3} LIMIT {4} OFFSET {5}";
     }
 }

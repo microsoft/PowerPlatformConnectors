@@ -6,9 +6,11 @@ namespace SnowflakeV2CoreLogic.Providers
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.Globalization;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using System.Web;
     using System.Web.OData.Extensions;
     using System.Web.OData.Query;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Interfaces;
@@ -63,34 +65,87 @@ namespace SnowflakeV2CoreLogic.Providers
                 throw new ArgumentNullException(nameof(table));
             }
 
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
 
-            SnowflakeTableData? queryResponse = null;
+            NameValueCollection queryParams = HttpUtility.ParseQueryString(request.RequestUri.Query);
+            string? skipToken = queryParams["$skiptoken"];
 
-            queryResponse = await snowflakeDBOperations.ListAllItemsAsync(table, options, connectionParameters).ConfigureAwait(true);
-            var numberOfRecordsResponse = await snowflakeDBOperations.GetNumberOfRecordsInTableAsync(table, connectionParameters).ConfigureAwait(true);
+            bool isPartitionFollowUp = SnowflakeToODataHelper.TryParsePartitionSkipToken(
+                skipToken, out string? sfStatementHandle, out int partitionIndex, out int totalPartitions);
+
+            if (isPartitionFollowUp)
+            {
+                logger.LogInformation($"Fetching partition {partitionIndex} for statement handle");
+
+                var partitionResponse = await snowflakeDBOperations.FetchPartitionAsync(sfStatementHandle!, partitionIndex, connectionParameters).ConfigureAwait(true);
+                logger.LogDebug(Constants.ClientSuccessMessage);
+
+                if (partitionResponse == null)
+                {
+                    return new List<Item>();
+                }
+
+                int rowsReturnedInPartition = partitionResponse.Data?.Count ?? 0;
+
+                Uri? nextUrl = SnowflakeToODataHelper.GeneratePartitionNextLink(
+                    snowflakeConnectionParametersProvider.GetReferralUrl(),
+                    options,
+                    sfStatementHandle!,
+                    partitionIndex + 1,
+                    totalPartitions,
+                    rowsReturnedInPartition);
+                request.ODataProperties().NextLink = nextUrl;
+
+                return partitionResponse.ToListOfItems();
+            }
+
+            bool countRequested = options.Count?.RawValue?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true;
+
+            var dataTask = snowflakeDBOperations.ListAllItemsAsync(table, "GET datasets/{dataset}/tables/{table}/items", options, connectionParameters);
+            Task<SnowflakeTableData>? countTask = countRequested
+                ? snowflakeDBOperations.GetNumberOfRecordsAvailableInTableAsync(table, options, connectionParameters, "GET datasets/{dataset}/tables/{table}/items")
+                : null;
+
+            var queryResponse = await dataTask.ConfigureAwait(true);
 
             logger.LogDebug(Constants.ClientSuccessMessage);
 
-            if (queryResponse != null)
+            if (queryResponse == null)
             {
-                var response = queryResponse.ToListOfItems();
-                var numberOfRecordsAvailable = int.Parse(numberOfRecordsResponse.Data?[0][0].ToString() ?? "0");
-                int numberOfRowsReturned = queryResponse.ResultSetMetaData?.NumRows ?? 0;
-
-                Uri? nextUrl = SnowflakeToODataHelper.GenerateNextLink(snowflakeConnectionParametersProvider.GetReferralUrl(), options, numberOfRowsReturned, numberOfRecordsAvailable);
-
-                if (nextUrl != null)
-                {
-                    request.ODataProperties().NextLink = nextUrl;
-                }
-
-                return response;
+                return new List<Item>();
             }
 
-            // Return an empty list
-            return new List<Item>();
+            int partitionCount = queryResponse.ResultSetMetaData?.PartitionInfo?.Count ?? 1;
+            string? statementHandle = queryResponse.StatementHandle;
+
+            if (partitionCount > 1 && statementHandle != null && statementHandle.Length > 0)
+            {
+                int rowsReturnedInPartition = queryResponse.Data?.Count ?? 0;
+
+                Uri? nextUrl = SnowflakeToODataHelper.GeneratePartitionNextLink(
+                    snowflakeConnectionParametersProvider.GetReferralUrl(),
+                    options,
+                    statementHandle,
+                    1,
+                    partitionCount,
+                    rowsReturnedInPartition);
+                  request.ODataProperties().NextLink = nextUrl;
+            }
+
+            if (countRequested && countTask != null)
+            {
+                var numberOfRecordsResponse = await countTask.ConfigureAwait(true);
+                var numberOfRecordsAvailable = int.Parse(numberOfRecordsResponse.Data?[0][0].ToString() ?? "0");
+                request.ODataProperties().TotalCount = numberOfRecordsAvailable;
+            }
+
+            return queryResponse.ToListOfItems();
         }
 
         /// <inheritdoc />
@@ -115,13 +170,13 @@ namespace SnowflakeV2CoreLogic.Providers
             SnowflakeTableData? primaryKeyData = null;
             SnowflakeTableData? itemsResponse = null;
 
-            primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, connectionParameters).ConfigureAwait(true);
+            primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "GET datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
 
             string? primaryKeyColumn = null;
             try
             {
                 // Grab the first element and look for the column_name property, which will have a value that aligns to the primary key column name.
-                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["COLUMN_NAME"].ToString();
+                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["column_name"].ToString();
             }
             catch (Exception)
             {
@@ -131,7 +186,7 @@ namespace SnowflakeV2CoreLogic.Providers
             }
 
             // Now that we have a primary key, we can construct the select query
-            itemsResponse = await snowflakeDBOperations.GetItemFromTableAsync(table, primaryKeyColumn, id, connectionParameters).ConfigureAwait(true);
+            itemsResponse = await snowflakeDBOperations.GetItemFromTableAsync(table, primaryKeyColumn, id, "GET datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
 
             // Convert the response into a list of OData Items
             var items = itemsResponse?.ToListOfItems();
@@ -148,13 +203,10 @@ namespace SnowflakeV2CoreLogic.Providers
                 // We should have more than 1 item when querying by primaryKey
                 throw new Exception($"Multiple items returned when querying by primary key {primaryKeyColumn}");
             }
-            else
-            {
-                // TODO: What should we return for an emtpy set?
-                return new Item();
-            }
+            return new Item();
         }
 
+        /// <inheritdoc />
         public async Task<CreatedItem<Item>> CreateItemAsync(
             HttpRequestMessage request,
             string dataSet,
@@ -173,7 +225,7 @@ namespace SnowflakeV2CoreLogic.Providers
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
 
             // Construct the body of the insert request
-            var data = await snowflakeDBOperations.InsertRecordAsync(table, item, connectionParameters).ConfigureAwait(true);
+            var data = await snowflakeDBOperations.InsertRecordAsync(table, item, "POST datasets/{dataset}/tables/{table}/items", connectionParameters).ConfigureAwait(true);
 
             // At this time it's unclear how to get the ID (or any info) of the created item from snowflake, so we will return the item that was created
             // https://stackoverflow.com/questions/53837950/get-identity-of-row-inserted-in-snowflake-datawarehouse/53903693#53903693
@@ -199,27 +251,29 @@ namespace SnowflakeV2CoreLogic.Providers
             dataSet.EnsureNotWhiteSpace(nameof(dataSet));
             table.EnsureNotWhiteSpace(nameof(table));
             id.EnsureNotEmpty(nameof(id));
+            item.EnsureNotNull(nameof(item));
 
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
-            SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, connectionParameters).ConfigureAwait(true);
+            SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "PATCH datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
 
             string? primaryKeyColumn = null;
             try
             {
                 // Grab the first element and look for the column_name property, which will have a value that aligns to the primary key column name.
-                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["COLUMN_NAME"].ToString();
+                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["column_name"].ToString();
             }
             catch (Exception)
             {
                 // Unable to get the primary key
-                throw new Exception($"Unable to determine primary key from {table}");
+                string errorMessage = $"Unable to determine primary key from table";
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, Constants.GenericLoggerMessage, methodName, errorMessage));
             }
 
-            // Now that we have a primary key, we can construct the select query
-            SnowflakeTableData updatedItemResponse = await snowflakeDBOperations.UpdateItemAsync(table, primaryKeyColumn, id, item, connectionParameters).ConfigureAwait(true);
+            // Now that we have a primary key, we can construct the update query
+            SnowflakeTableData updatedItemResponse = await snowflakeDBOperations.UpdateItemAsync(table, primaryKeyColumn, id, item, connectionParameters, "PATCH datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
 
             // Convert the response into a list of OData Items
             var items = updatedItemResponse.ToListOfItems();
@@ -236,11 +290,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 // We should have more than 1 item when querying by primaryKey
                 throw new Exception($"Multiple items returned when updating by primary key {primaryKeyColumn}");
             }
-            else
-            {
-                // TODO: What should we return for an emtpy set?
-                return new Item();
-            }
+            return new Item();
         }
 
         public async Task DeleteItemAsync(
@@ -261,13 +311,13 @@ namespace SnowflakeV2CoreLogic.Providers
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
-            SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, connectionParameters).ConfigureAwait(true);
+            SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "DELETE datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
 
-            string? primaryKeyColumn;
+            string? primaryKeyColumn = null;
             try
             {
                 // Grab the first element and look for the column_name property, which will have a value that aligns to the primary key column name.
-                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["COLUMN_NAME"].ToString();
+                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["column_name"].ToString();
             }
             catch (Exception)
             {
@@ -278,7 +328,7 @@ namespace SnowflakeV2CoreLogic.Providers
             }
 
             // Now that we have a primary key, we can construct the select query
-            SnowflakeTableData deletedItemResponse = await snowflakeDBOperations.DeleteItemAsync(table, primaryKeyColumn, id, connectionParameters).ConfigureAwait(true);
+            SnowflakeTableData deletedItemResponse = await snowflakeDBOperations.DeleteItemAsync(table, primaryKeyColumn, id, connectionParameters, "DELETE datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
 
             // Convert the response into a list of OData Items
             var items = deletedItemResponse.ToListOfItems();
