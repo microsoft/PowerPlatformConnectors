@@ -1,0 +1,819 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "SOCRadar Threat Intelligence",
+    "description": "Real-time threat intelligence enrichment, dark web leak monitoring and IOC feeds from SOCRadar Extended Threat Intelligence (XTI) platform.",
+    "version": "1.0",
+    "contact": {
+      "name": "SOCRadar Support",
+      "url": "https://socradar.io/support",
+      "email": "support@socradar.io"
+    }
+  },
+  "host": "platform.socradar.com",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://socradar.io"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://socradar.io/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Security;IT Operations"
+    }
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "API-Key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/ioc_enrichment/get/indicator_details": {
+      "post": {
+        "summary": "Enrich IOC \u2014 indicator details",
+        "description": "Retrieve detailed threat intelligence for a single indicator (IP, domain, URL, hash). Select specific fields to control response depth. Omit indicator_ai_insight for faster responses.",
+        "operationId": "EnrichIOC",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EnrichIOCRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicator enrichment result",
+            "schema": {
+              "$ref": "#/definitions/EnrichIOCResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        }
+      }
+    },
+    "/ioc_enrichment/get/indicator_details_stix": {
+      "post": {
+        "summary": "Enrich IOC \u2014 STIX format",
+        "description": "Retrieve threat intelligence for a single indicator in STIX 2.1 bundle format, compatible with TAXII feeds and Microsoft Sentinel threat intelligence ingestion.",
+        "operationId": "GetIndicatorDetailsSTIX",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EnrichIOCSTIXRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "STIX bundle",
+            "schema": {
+              "$ref": "#/definitions/STIXBundle"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Indicator not found"
+          }
+        }
+      }
+    },
+    "/threatfeed/rapid/reputation": {
+      "get": {
+        "summary": "Rapid reputation check",
+        "description": "Quick reputation lookup for an IP, hostname, URL or hash. Returns a risk score and the list of threat intelligence sources that flagged the indicator.",
+        "operationId": "GetRapidReputation",
+        "parameters": [
+          {
+            "name": "entity_value",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Entity value",
+            "description": "The indicator to check: an IP address, hostname, URL or file hash"
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Entity type",
+            "description": "Type of the indicator being checked",
+            "enum": [
+              "ip",
+              "hostname",
+              "url",
+              "hash"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reputation result",
+            "schema": {
+              "$ref": "#/definitions/RapidReputationResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/threat/intelligence/feed_list/{collection_uuid}.json": {
+      "get": {
+        "summary": "Get IOC feed for a collection",
+        "description": "Download a curated IOC feed for one collection UUID. Each collection is a distinct endpoint; call this operation once per UUID and supply the optional collection_name parameter to identify results when iterating over multiple collections.",
+        "operationId": "GetIOCFeed",
+        "parameters": [
+          {
+            "name": "collection_uuid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Collection UUID",
+            "x-ms-url-encoding": "single",
+            "description": "Unique identifier of the IOC feed collection (e.g. a1b2c3d4-0000-0000-0000-111122223333)"
+          },
+          {
+            "name": "collection_name",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Collection name",
+            "description": "Human-readable label for this collection. Echoed in the response for traceability when iterating over multiple collections.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "IOC feed",
+            "schema": {
+              "$ref": "#/definitions/IOCFeedResponse"
+            }
+          }
+        }
+      }
+    },
+    "/company/{company_id}/dark-web-monitoring/pii-exposure/v2": {
+      "get": {
+        "summary": "Get PII exposure findings",
+        "description": "Retrieve personally identifiable information (PII) exposure findings detected by SOCRadar dark web monitoring.",
+        "operationId": "GetPIIExposure",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "Start date",
+            "description": "Filter findings detected on or after this date (YYYY-MM-DD)"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "x-ms-summary": "End date",
+            "description": "Filter findings detected on or before this date (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Findings",
+            "schema": {
+              "$ref": "#/definitions/DarkWebResponse"
+            }
+          }
+        }
+      }
+    },
+    "/company/{company_id}/dark-web-monitoring/botnet-data/v2": {
+      "get": {
+        "summary": "Get botnet data findings",
+        "description": "Retrieve stealer log and botnet credential findings associated with the company.",
+        "operationId": "GetBotnetData",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "x-ms-url-encoding": "single",
+            "default": "@connectionParameters('company_id')",
+            "description": "SOCRadar Company ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Findings",
+            "schema": {
+              "$ref": "#/definitions/DarkWebResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "EnrichIOCRequest": {
+      "type": "object",
+      "required": [
+        "indicator"
+      ],
+      "properties": {
+        "indicator": {
+          "type": "string",
+          "x-ms-summary": "Indicator",
+          "description": "The indicator value to enrich: IPv4, domain, URL, MD5, SHA1 or SHA256"
+        },
+        "fields": {
+          "type": "array",
+          "x-ms-summary": "Fields",
+          "description": "Fields to include in the response. Omit indicator_ai_insight for faster results.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "indicator_details",
+              "indicator_history",
+              "indicator_relations",
+              "indicator_ai_insight"
+            ]
+          }
+        }
+      }
+    },
+    "EnrichIOCResponse": {
+      "type": "object",
+      "properties": {
+        "api_credit": {
+          "type": "object",
+          "properties": {
+            "max_daily_credit": {
+              "type": "integer"
+            },
+            "max_monthly_credit": {
+              "type": "integer"
+            },
+            "remaining_credit": {
+              "type": "integer"
+            },
+            "remaining_daily_credit": {
+              "type": "integer"
+            },
+            "remaining_monthly_credit": {
+              "type": "integer"
+            },
+            "total_api_credit": {
+              "type": "integer"
+            }
+          }
+        },
+        "categorization": {
+          "type": "object",
+          "properties": {
+            "cdn": {
+              "type": "boolean"
+            },
+            "cloud": {
+              "type": "boolean"
+            },
+            "cryptocurrency": {
+              "type": "boolean"
+            },
+            "honeypot": {
+              "type": "boolean"
+            },
+            "hosting": {
+              "type": "boolean"
+            },
+            "malware": {
+              "type": "boolean"
+            },
+            "proxy": {
+              "type": "boolean"
+            },
+            "scanner": {
+              "type": "boolean"
+            },
+            "threat_actor": {
+              "type": "boolean"
+            },
+            "tor": {
+              "type": "boolean"
+            },
+            "vpn": {
+              "type": "boolean"
+            }
+          }
+        },
+        "classifications": {
+          "type": "object",
+          "properties": {
+            "campaign": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "industries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "malwares": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "region": {
+              "type": "string"
+            },
+            "target_country_list": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "threat_actors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "cross_source_confidence": {
+          "type": "string",
+          "enum": [
+            "Very High",
+            "High",
+            "Medium",
+            "Low"
+          ]
+        },
+        "details": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "score": {
+              "type": "number"
+            },
+            "country_name": {
+              "type": "string"
+            },
+            "asn_name": {
+              "type": "string"
+            },
+            "first_seen_date": {
+              "type": "string"
+            },
+            "last_seen_date": {
+              "type": "string"
+            }
+          }
+        },
+        "history": {
+          "type": "object",
+          "properties": {
+            "indicator_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "event": {
+                    "type": "string"
+                  },
+                  "feed_source": {
+                    "type": "string"
+                  },
+                  "insert_date": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ioc_signal_strength": {
+          "type": "string",
+          "enum": [
+            "Very Strong",
+            "Strong",
+            "Moderate",
+            "Slightly Noisy",
+            "Noisy"
+          ]
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "asn_code": {
+              "type": "integer"
+            },
+            "asn_name": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            }
+          }
+        },
+        "ai_insight": {
+          "type": "object",
+          "description": "AI-generated threat analysis. Returned only when indicator_ai_insight is included in the fields parameter.",
+          "properties": {
+            "insight": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "EnrichIOCSTIXRequest": {
+      "type": "object",
+      "required": [
+        "indicator"
+      ],
+      "properties": {
+        "indicator": {
+          "type": "string",
+          "x-ms-summary": "Indicator",
+          "description": "The indicator value to retrieve in STIX format"
+        },
+        "show_credit_details": {
+          "type": "boolean",
+          "x-ms-summary": "Show credit details",
+          "description": "Include API credit usage details in the response",
+          "default": false,
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "STIXBundle": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "STIX bundle ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "Always 'bundle'"
+        },
+        "objects": {
+          "type": "array",
+          "description": "STIX objects: indicator, identity, relationship",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "pattern": {
+                "type": "string"
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "source_ref": {
+                "type": "string"
+              },
+              "target_ref": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "x_api_credit": {
+          "type": "object",
+          "properties": {
+            "remaining_credit": {
+              "type": "integer"
+            },
+            "total_api_credit": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "RapidReputationResponse": {
+      "type": "object",
+      "properties": {
+        "is_success": {
+          "type": "boolean",
+          "description": "True when the request completed successfully"
+        },
+        "message": {
+          "type": "string",
+          "description": "Response status message"
+        },
+        "response_code": {
+          "type": "integer",
+          "description": "HTTP status code"
+        },
+        "exception": {
+          "type": "string",
+          "description": "Error detail if an exception occurred"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "number",
+              "description": "Reputation risk score (0\u2013100). Higher values indicate greater threat confidence."
+            },
+            "is_whitelisted": {
+              "type": "boolean",
+              "description": "True if the indicator is explicitly whitelisted"
+            },
+            "finding_sources": {
+              "type": "array",
+              "description": "Threat intelligence sources that flagged this indicator",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source_name": {
+                    "type": "string",
+                    "description": "Name of the threat intelligence source"
+                  },
+                  "maintainer_name": {
+                    "type": "string",
+                    "description": "Organisation maintaining the list"
+                  },
+                  "main_category": {
+                    "type": "string",
+                    "description": "Primary threat category (e.g. Attackers, Botnet & Malware)"
+                  },
+                  "first_seen_date": {
+                    "type": "string",
+                    "description": "First observation timestamp"
+                  },
+                  "last_seen_date": {
+                    "type": "string",
+                    "description": "Most recent observation timestamp"
+                  },
+                  "seen_count": {
+                    "type": "integer",
+                    "description": "Number of times observed on this source"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "IOCFeedResponse": {
+      "type": "object",
+      "description": "Response envelope for a single IOC feed collection. Use collection_name to correlate results when iterating over multiple collections.",
+      "properties": {
+        "collection_name": {
+          "type": "string",
+          "description": "Echo of the collection_name query parameter."
+        },
+        "collection_uuid": {
+          "type": "string",
+          "description": "UUID of the collection that produced these results."
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ipv4",
+                  "domain",
+                  "url",
+                  "md5",
+                  "sha1",
+                  "sha256",
+                  "email"
+                ]
+              },
+              "value": {
+                "type": "string"
+              },
+              "score": {
+                "type": "integer"
+              },
+              "confidence": {
+                "type": "integer"
+              },
+              "first_seen": {
+                "type": "string"
+              },
+              "last_seen": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "CollectionInput": {
+      "type": "object",
+      "description": "A single entry in a collection list. Build an array of these and iterate with a loop, calling GetIOCFeed once per item.",
+      "required": [
+        "uuid"
+      ],
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "description": "Collection UUID (e.g. a1b2c3d4-0000-0000-0000-111122223333)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional human-readable label. Pass as collection_name to GetIOCFeed."
+        }
+      }
+    },
+    "DarkWebFinding": {
+      "type": "object",
+      "properties": {
+        "alarmId": {
+          "type": "integer",
+          "description": "Unique alarm identifier in SOCRadar"
+        },
+        "notificationId": {
+          "type": "integer",
+          "description": "Notification identifier"
+        },
+        "contentPreview": {
+          "type": "string",
+          "description": "Excerpt of the discovered content (may include highlighted match spans)"
+        },
+        "discoveryDate": {
+          "type": "string",
+          "description": "Date and time the finding was discovered (YYYY-MM-DD HH:MM:SS)"
+        },
+        "source": {
+          "type": "string",
+          "description": "Origin platform or site (e.g. pastebin.com, Telegram)"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current alarm status (Open, Resolved, FalsePositive)"
+        },
+        "statusReason": {
+          "type": "string",
+          "description": "Reason for the current status"
+        },
+        "relatedAlarm": {
+          "type": "object",
+          "description": "Link and status of the related alarm in the SOCRadar platform",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
+        "history": {
+          "type": "array",
+          "description": "Audit trail of status changes and analyst actions",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              },
+              "operator": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "screenshots": {
+          "type": "string",
+          "description": "URL to screenshot evidence, if available"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer"
+        }
+      }
+    },
+    "DarkWebResponse": {
+      "type": "object",
+      "properties": {
+        "is_success": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        },
+        "response_code": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "total_data_count": {
+              "type": "integer",
+              "description": "Total number of findings"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DarkWebFinding"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

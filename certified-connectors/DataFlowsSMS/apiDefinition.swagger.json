@@ -1,0 +1,731 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "DataFlows SMS",
+    "description": "Send SMS messages, manage delivery status, and track account balance through DataFlows SMS platform. Perfect for automated notifications, alerts, and customer engagement workflows.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "DataFlows Support",
+      "url": "https://dataflows.com.au",
+      "email": "support@dataflows.com.au"
+    }
+  },
+  "host": "sms.dataflows.com.au",
+  "basePath": "/api/http",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter your API token from DataFlows Developer Settings in format: Bearer YOUR_API_TOKEN"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "paths": {
+    "/sms/send": {
+      "post": {
+        "description": "Send SMS message to single or multiple recipients with optional scheduling",
+        "summary": "Send SMS",
+        "operationId": "SendSMS",
+        "tags": [
+          "SMS"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "recipient": {
+                  "type": "string",
+                  "description": "Phone number(s) to send SMS. Use comma (,) to separate multiple numbers",
+                  "title": "Recipient(s)",
+                  "x-ms-summary": "Phone number(s) to receive the SMS"
+                },
+                "sender_id": {
+                  "type": "string",
+                  "description": "Sender ID (max 11 characters for alphanumeric or full phone number)",
+                  "title": "Sender ID",
+                  "x-ms-summary": "The sender name or number that appears in the SMS",
+                  "x-ms-dynamic-values": {
+                    "operationId": "GetSenderIds",
+                    "value-collection": "data/sender_ids",
+                    "value-path": "",
+                    "value-title": ""
+                  }
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Message type",
+                  "title": "Message Type",
+                  "default": "plain",
+                  "enum": [
+                    "plain",
+                    "unicode"
+                  ],
+                  "x-ms-summary": "Type of SMS message (plain for regular text)"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "The SMS message content",
+                  "title": "Message",
+                  "x-ms-summary": "The text content of your SMS message"
+                },
+                "schedule_time": {
+                  "type": "string",
+                  "description": "Schedule message for future delivery (format: YYYY-MM-DD HH:MM)",
+                  "title": "Schedule Time (Optional)",
+                  "x-ms-summary": "When to send the message (leave blank for immediate delivery)"
+                },
+                "dlt_template_id": {
+                  "type": "string",
+                  "description": "DLT template ID for regulatory compliance (if required)",
+                  "title": "DLT Template ID (Optional)",
+                  "x-ms-summary": "Required for certain regions for compliance"
+                }
+              },
+              "required": [
+                "recipient",
+                "sender_id",
+                "type",
+                "message"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SMS sent successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "data": {
+                  "type": "object",
+                  "description": "SMS delivery details including message ID, cost, and status"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid API token"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    },
+    "/sms/{uid}": {
+      "get": {
+        "description": "Get details of a specific SMS message by its unique ID",
+        "summary": "Get SMS Status",
+        "operationId": "GetSMSStatus",
+        "tags": [
+          "SMS"
+        ],
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Unique message identifier",
+            "x-ms-summary": "Message ID returned when SMS was sent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SMS details retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "uid": {
+                      "type": "string",
+                      "description": "Message unique identifier"
+                    },
+                    "recipient": {
+                      "type": "string",
+                      "description": "Recipient phone number"
+                    },
+                    "sender_id": {
+                      "type": "string",
+                      "description": "Sender ID used"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message content"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Delivery status (sent, delivered, failed, etc.)"
+                    },
+                    "cost": {
+                      "type": "number",
+                      "description": "Message cost"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "When the message was created"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "SMS not found"
+          }
+        }
+      }
+    },
+    "/sms": {
+      "get": {
+        "description": "Get a list of all SMS messages for your account with pagination",
+        "summary": "List SMS Messages",
+        "operationId": "ListSMSMessages",
+        "tags": [
+          "SMS"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "description": "Page number for pagination",
+            "default": 1,
+            "x-ms-summary": "Page number (start with 1)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of messages per page (max 100)",
+            "default": 20,
+            "maximum": 100,
+            "x-ms-summary": "Messages per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SMS list retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "messages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "uid": {
+                            "type": "string",
+                            "description": "Message ID"
+                          },
+                          "recipient": {
+                            "type": "string",
+                            "description": "Recipient number"
+                          },
+                          "sender_id": {
+                            "type": "string",
+                            "description": "Sender ID"
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "Message content"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Delivery status"
+                          },
+                          "cost": {
+                            "type": "number",
+                            "description": "Message cost"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "Creation timestamp"
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "description": "Total messages"
+                        },
+                        "per_page": {
+                          "type": "integer",
+                          "description": "Messages per page"
+                        },
+                        "current_page": {
+                          "type": "integer",
+                          "description": "Current page number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/balance": {
+      "get": {
+        "description": "Get current SMS credit balance for your account",
+        "summary": "Get Account Balance",
+        "operationId": "GetAccountBalance",
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "sms_unit": {
+                      "type": "number",
+                      "description": "Available SMS credits"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "description": "Account currency"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "Get account profile information",
+        "summary": "Get Account Profile",
+        "operationId": "GetAccountProfile",
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "first_name": {
+                      "type": "string",
+                      "description": "First name"
+                    },
+                    "last_name": {
+                      "type": "string",
+                      "description": "Last name"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "Email address"
+                    },
+                    "company": {
+                      "type": "string",
+                      "description": "Company name"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "description": "Phone number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sender-ids": {
+      "get": {
+        "description": "Get list of active sender IDs available for the account",
+        "summary": "Get Available Sender IDs",
+        "operationId": "GetSenderIds",
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Sender IDs retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "sender_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "title": "sender_id",
+                        "description": "sender_id"
+                      },
+                      "description": "List of active sender IDs"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/power-automate/webhooks/register": {
+      "x-ms-notification-content": {
+        "description": "SMS Received Notification",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "trigger_type": {
+              "type": "string",
+              "description": "Type of trigger event"
+            },
+            "event_id": {
+              "type": "string",
+              "description": "Unique event identifier"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "Event timestamp"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string",
+                  "description": "Unique message identifier",
+                  "x-ms-summary": "Message ID"
+                },
+                "from": {
+                  "type": "string",
+                  "description": "Sender's phone number",
+                  "x-ms-summary": "From Number"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Your virtual number that received the SMS",
+                  "x-ms-summary": "To Number"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "The received SMS message content",
+                  "x-ms-summary": "Message Content"
+                },
+                "received_at": {
+                  "type": "string",
+                  "description": "When the SMS was received",
+                  "x-ms-summary": "Received Time"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Subscribe to receive notifications when SMS messages are received",
+        "summary": "When an SMS is received",
+        "operationId": "SMSReceivedTrigger",
+        "x-ms-trigger": "single",
+        "tags": [
+          "Triggers"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webhook_url": {
+                  "type": "string",
+                  "description": "The webhook URL that Power Automate will call",
+                  "title": "Webhook URL",
+                  "x-ms-summary": "Webhook URL for receiving notifications",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
+                "trigger_type": {
+                  "type": "string",
+                  "description": "Type of trigger to subscribe to",
+                  "title": "Trigger Type",
+                  "default": "sms_received",
+                  "enum": ["sms_received"],
+                  "x-ms-summary": "SMS Received Trigger"
+                }
+              },
+              "required": [
+                "webhook_url",
+                "trigger_type"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook registered successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "webhook_id": {
+                  "type": "string",
+                  "description": "Webhook registration ID"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Success message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/power-automate/webhooks/status": {
+      "x-ms-notification-content": {
+        "description": "SMS Status Changed Notification",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "trigger_type": {
+              "type": "string",
+              "description": "Type of trigger event"
+            },
+            "event_id": {
+              "type": "string",
+              "description": "Unique event identifier"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "Event timestamp"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string",
+                  "description": "Unique message identifier",
+                  "x-ms-summary": "Message ID"
+                },
+                "recipient": {
+                  "type": "string",
+                  "description": "Recipient phone number",
+                  "x-ms-summary": "Recipient"
+                },
+                "sender_id": {
+                  "type": "string",
+                  "description": "Sender ID used for the message",
+                  "x-ms-summary": "Sender ID"
+                },
+                "old_status": {
+                  "type": "string",
+                  "description": "Previous delivery status",
+                  "x-ms-summary": "Previous Status"
+                },
+                "new_status": {
+                  "type": "string",
+                  "description": "New delivery status",
+                  "x-ms-summary": "New Status"
+                },
+                "status_changed_at": {
+                  "type": "string",
+                  "description": "When the status changed",
+                  "x-ms-summary": "Status Changed Time"
+                },
+                "delivery_report": {
+                  "type": "string",
+                  "description": "Detailed delivery report",
+                  "x-ms-summary": "Delivery Details"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Subscribe to receive notifications when SMS delivery status changes",
+        "summary": "When SMS delivery status changes",
+        "operationId": "SMSStatusChangedTrigger",
+        "x-ms-trigger": "single",
+        "tags": [
+          "Triggers"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webhook_url": {
+                  "type": "string",
+                  "description": "The webhook URL that Power Automate will call",
+                  "title": "Webhook URL",
+                  "x-ms-summary": "Webhook URL for receiving notifications",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                },
+                "trigger_type": {
+                  "type": "string",
+                  "description": "Type of trigger to subscribe to",
+                  "title": "Trigger Type",
+                  "default": "sms_status_changed",
+                  "enum": ["sms_status_changed"],
+                  "x-ms-summary": "SMS Status Changed Trigger"
+                }
+              },
+              "required": [
+                "webhook_url",
+                "trigger_type"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook registered successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "webhook_id": {
+                  "type": "string",
+                  "description": "Webhook registration ID"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Success message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/power-automate/webhooks/{webhookId}": {
+      "delete": {
+        "description": "Unregister a webhook subscription",
+        "summary": "Unregister Webhook",
+        "operationId": "UnregisterWebhook",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The webhook ID to unregister",
+            "x-ms-summary": "Webhook ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook unregistered successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Response status"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Success message"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://dataflows.com.au"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://dataflows.com.au/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ]
+}
