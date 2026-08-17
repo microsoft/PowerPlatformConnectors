@@ -1,4 +1,4 @@
-# U.K. Government Check VAT V2
+# HMRC Check VAT
 
 Check a UK VAT registration number and retrieve the registered business's name and address directly from HM Revenue & Customs (HMRC). This connector uses version 2 of HMRC's *Check a UK VAT number* API.
 
