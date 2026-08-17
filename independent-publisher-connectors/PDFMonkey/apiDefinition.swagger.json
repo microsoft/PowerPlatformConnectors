@@ -1,0 +1,734 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "PDFMonkey",
+    "version": "1.0.0",
+    "description": "Generate PDF and image documents from your PDFMonkey templates. Create a document, watch for generation completion, then download the result. Generation is asynchronous: create returns immediately with status \"pending\" and an empty download_url; use the Watch Documents trigger (or poll Get a Document) to receive the finished document once its status is \"success\".",
+    "contact": {
+      "name": "PDFMonkey Support",
+      "url": "https://www.pdfmonkey.io",
+      "email": "support@pdfmonkey.io"
+    }
+  },
+  "host": "api.pdfmonkey.io",
+  "basePath": "/api/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetCurrentUser"
+    }
+  },
+  "paths": {
+    "/documents": {
+      "post": {
+        "operationId": "GenerateDocument",
+        "summary": "Generate a document",
+        "description": "Create and generate a document from a template. Generation is asynchronous: the response returns immediately with status \"pending\" and an empty download_url. Use the Watch Documents trigger or Get a Document to retrieve the finished file once status is \"success\". To set a custom output filename, add a \"_filename\" property inside the meta object (PDFMonkey reads meta._filename).",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GenerateDocumentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Document created and queued for generation",
+            "schema": {
+              "$ref": "#/definitions/DocumentResponse"
+            }
+          },
+          "200": {
+            "description": "Document created and queued for generation",
+            "schema": {
+              "$ref": "#/definitions/DocumentResponse"
+            }
+          }
+        }
+      }
+    },
+    "/documents/{id}": {
+      "get": {
+        "operationId": "GetDocument",
+        "summary": "Get a document",
+        "description": "Retrieve a document by its ID. Poll this after Generate a Document until status is \"success\" to read the download_url (valid for 1 hour).",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Document ID",
+            "description": "The ID of the document to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document found",
+            "schema": {
+              "$ref": "#/definitions/DocumentResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteDocument",
+        "summary": "Delete a document",
+        "description": "Delete a document by its ID. Returns no content on success.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Document ID",
+            "description": "The ID of the document to delete."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Document deleted"
+          },
+          "200": {
+            "description": "Document deleted"
+          }
+        }
+      }
+    },
+    "/rest_hooks": {
+      "post": {
+        "operationId": "WatchDocuments",
+        "summary": "When a document is generated",
+        "description": "Triggers a flow when a document finishes generating in the selected workspace. Optionally filter to specific templates. This subscribes a webhook with PDFMonkey; Power Automate supplies the callback URL automatically.",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RestHookRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook subscription created",
+            "schema": {
+              "$ref": "#/definitions/RestHookResponse"
+            }
+          },
+          "200": {
+            "description": "Webhook subscription created",
+            "schema": {
+              "$ref": "#/definitions/RestHookResponse"
+            }
+          }
+        }
+      },
+      "x-ms-notification-content": {
+        "description": "The document that was generated",
+        "schema": {
+          "$ref": "#/definitions/WebhookPayload"
+        }
+      }
+    },
+    "/rest_hooks/{id}": {
+      "delete": {
+        "operationId": "UnsubscribeWatchDocuments",
+        "summary": "Unsubscribe from document generation webhook",
+        "description": "Removes a webhook subscription. Used automatically by Power Automate when the Watch Documents trigger is disabled or deleted.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Webhook ID",
+            "description": "The ID of the webhook subscription to remove."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Webhook subscription removed"
+          },
+          "200": {
+            "description": "Webhook subscription removed"
+          }
+        }
+      }
+    },
+    "/current_user": {
+      "get": {
+        "operationId": "GetCurrentUser",
+        "summary": "Get current user",
+        "description": "Returns the authenticated user. Used to test the connection.",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "Authenticated user",
+            "schema": {
+              "$ref": "#/definitions/CurrentUserResponse"
+            }
+          }
+        }
+      }
+    },
+    "/workspace_cards": {
+      "get": {
+        "operationId": "ListWorkspaces",
+        "summary": "List workspaces",
+        "description": "Returns the workspaces available to the authenticated user. Powers the workspace dropdown.",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "Workspaces found",
+            "schema": {
+              "$ref": "#/definitions/WorkspaceCardsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/document_template_cards": {
+      "get": {
+        "operationId": "ListTemplates",
+        "summary": "List templates",
+        "description": "Returns the document templates in a workspace. Powers the template dropdown, filtered by the selected workspace.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "all",
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "internal",
+            "description": "Pagination parameter. Use \"all\" to return every template."
+          },
+          {
+            "name": "q[workspace_id]",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Workspace ID",
+            "x-ms-visibility": "internal",
+            "description": "The ID of the workspace to list templates for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document templates found",
+            "schema": {
+              "$ref": "#/definitions/DocumentTemplateCardsResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GenerateDocumentRequest": {
+      "type": "object",
+      "required": [
+        "document"
+      ],
+      "properties": {
+        "document": {
+          "type": "object",
+          "x-ms-summary": "Document",
+          "description": "The document to generate.",
+          "required": [
+            "document_template_id",
+            "app_id",
+            "payload"
+          ],
+          "properties": {
+            "app_id": {
+              "type": "string",
+              "x-ms-summary": "Workspace",
+              "description": "The ID of the workspace the document belongs to.",
+              "x-ms-dynamic-values": {
+                "operationId": "ListWorkspaces",
+                "value-collection": "workspace_cards",
+                "value-path": "id",
+                "value-title": "identifier"
+              }
+            },
+            "document_template_id": {
+              "type": "string",
+              "x-ms-summary": "Template",
+              "description": "The ID of the document template to use.",
+              "x-ms-dynamic-values": {
+                "operationId": "ListTemplates",
+                "value-collection": "document_template_cards",
+                "value-path": "id",
+                "value-title": "identifier",
+                "parameters": {
+                  "page": "all",
+                  "q[workspace_id]": {
+                    "parameter": "document.app_id"
+                  }
+                }
+              },
+              "x-ms-dynamic-list": {
+                "operationId": "ListTemplates",
+                "itemsPath": "document_template_cards",
+                "itemValuePath": "id",
+                "itemTitlePath": "identifier",
+                "parameters": {
+                  "page": {
+                    "value": "all"
+                  },
+                  "q[workspace_id]": {
+                    "parameterReference": "body/document/app_id"
+                  }
+                }
+              }
+            },
+            "payload": {
+              "type": "object",
+              "x-ms-summary": "Payload",
+              "description": "The data used to fill the template, as a JSON object. PDFMonkey stores and returns it as a JSON string."
+            },
+            "meta": {
+              "type": "object",
+              "x-ms-summary": "Meta",
+              "x-ms-visibility": "advanced",
+              "description": "Optional metadata as a JSON object. Add a \"_filename\" property to set the output filename (e.g. { \"_filename\": \"invoice-42.pdf\" }). PDFMonkey stores and returns meta as a JSON string."
+            },
+            "status": {
+              "type": "string",
+              "x-ms-summary": "Status",
+              "x-ms-visibility": "advanced",
+              "description": "The initial status. Use \"pending\" to start generation immediately, or \"draft\" to create without generating.",
+              "enum": [
+                "draft",
+                "pending"
+              ],
+              "default": "pending"
+            }
+          }
+        }
+      }
+    },
+    "RestHookRequest": {
+      "type": "object",
+      "required": [
+        "rest_hook"
+      ],
+      "properties": {
+        "rest_hook": {
+          "type": "object",
+          "x-ms-summary": "Webhook subscription",
+          "description": "The webhook subscription to create.",
+          "required": [
+            "workspace_id",
+            "url",
+            "event",
+            "platform"
+          ],
+          "properties": {
+            "workspace_id": {
+              "type": "string",
+              "x-ms-summary": "Workspace",
+              "description": "The ID of the workspace to watch.",
+              "x-ms-dynamic-values": {
+                "operationId": "ListWorkspaces",
+                "value-collection": "workspace_cards",
+                "value-path": "id",
+                "value-title": "identifier"
+              }
+            },
+            "document_template_ids": {
+              "type": "array",
+              "x-ms-summary": "Templates",
+              "description": "Optional. Only trigger for documents generated from these templates. Leave empty to watch all templates in the workspace.",
+              "items": {
+                "type": "string",
+                "x-ms-dynamic-values": {
+                  "operationId": "ListTemplates",
+                  "value-collection": "document_template_cards",
+                  "value-path": "id",
+                  "value-title": "identifier",
+                  "parameters": {
+                    "page": "all",
+                    "q[workspace_id]": {
+                      "parameter": "rest_hook.workspace_id"
+                    }
+                  }
+                },
+                "x-ms-dynamic-list": {
+                  "operationId": "ListTemplates",
+                  "itemsPath": "document_template_cards",
+                  "itemValuePath": "id",
+                  "itemTitlePath": "identifier",
+                  "parameters": {
+                    "page": {
+                      "value": "all"
+                    },
+                    "q[workspace_id]": {
+                      "parameterReference": "body/rest_hook/workspace_id"
+                    }
+                  }
+                }
+              }
+            },
+            "event": {
+              "type": "string",
+              "x-ms-summary": "Event",
+              "x-ms-visibility": "internal",
+              "description": "The event to subscribe to.",
+              "default": "documents.generation.success"
+            },
+            "url": {
+              "type": "string",
+              "x-ms-summary": "Callback URL",
+              "x-ms-visibility": "internal",
+              "x-ms-notification-url": true,
+              "description": "The callback URL. Supplied automatically by Power Automate."
+            },
+            "platform": {
+              "type": "string",
+              "x-ms-summary": "Platform",
+              "x-ms-visibility": "internal",
+              "description": "The originating platform.",
+              "default": "Power Automate"
+            }
+          }
+        }
+      }
+    },
+    "RestHookResponse": {
+      "type": "object",
+      "properties": {
+        "rest_hook": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "Webhook ID",
+              "description": "The ID of the created webhook subscription."
+            },
+            "event": {
+              "type": "string",
+              "x-ms-summary": "Event",
+              "description": "The subscribed event."
+            },
+            "url": {
+              "type": "string",
+              "x-ms-summary": "Callback URL",
+              "description": "The callback URL."
+            },
+            "workspace_id": {
+              "type": "string",
+              "x-ms-summary": "Workspace ID",
+              "description": "The ID of the watched workspace."
+            },
+            "platform": {
+              "type": "string",
+              "x-ms-summary": "Platform",
+              "description": "The originating platform."
+            }
+          }
+        }
+      }
+    },
+    "WebhookPayload": {
+      "type": "object",
+      "description": "The body PDFMonkey POSTs to the callback URL when a document is generated.",
+      "properties": {
+        "document": {
+          "$ref": "#/definitions/DocumentCard"
+        }
+      }
+    },
+    "DocumentResponse": {
+      "type": "object",
+      "properties": {
+        "document": {
+          "$ref": "#/definitions/Document"
+        }
+      }
+    },
+    "Document": {
+      "type": "object",
+      "description": "A PDFMonkey document.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Document ID",
+          "description": "The ID of the document."
+        },
+        "app_id": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "The ID of the workspace the document belongs to."
+        },
+        "checksum": {
+          "type": "string",
+          "x-ms-summary": "Checksum",
+          "description": "The checksum of the document."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created at",
+          "description": "The date and time the document was created."
+        },
+        "document_template_id": {
+          "type": "string",
+          "x-ms-summary": "Template ID",
+          "description": "The ID of the document template used."
+        },
+        "download_url": {
+          "type": "string",
+          "x-ms-summary": "Download URL",
+          "description": "A presigned URL to download the generated file, valid for 1 hour. Empty (nil) until status is \"success\"."
+        },
+        "failure_cause": {
+          "type": "string",
+          "x-ms-summary": "Failure cause",
+          "description": "The reason generation failed, when status is \"failure\"."
+        },
+        "filename": {
+          "type": "string",
+          "x-ms-summary": "Filename",
+          "description": "The filename of the generated document."
+        },
+        "meta": {
+          "type": "string",
+          "x-ms-summary": "Meta",
+          "description": "The document metadata, returned as a JSON string."
+        },
+        "output_type": {
+          "type": "string",
+          "x-ms-summary": "Output type",
+          "description": "The output type of the document (pdf or image)."
+        },
+        "payload": {
+          "type": "string",
+          "x-ms-summary": "Payload",
+          "description": "The data used to generate the document, returned as a JSON string."
+        },
+        "preview_url": {
+          "type": "string",
+          "x-ms-summary": "Preview URL",
+          "description": "A URL to preview the document."
+        },
+        "public_share_link": {
+          "type": "string",
+          "x-ms-summary": "Public share link",
+          "description": "A public share link for the document (Premium plans only)."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "The generation status of the document.",
+          "enum": [
+            "draft",
+            "pending",
+            "generating",
+            "success",
+            "failure"
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Updated at",
+          "description": "The date and time the document was last updated."
+        }
+      }
+    },
+    "DocumentCard": {
+      "type": "object",
+      "description": "A compact document representation used in webhooks and lists.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Document ID",
+          "description": "The ID of the document."
+        },
+        "app_id": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID",
+          "description": "The ID of the workspace the document belongs to."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Created at",
+          "description": "The date and time the document was created."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Updated at",
+          "description": "The date and time the document was last updated."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "The generation status of the document.",
+          "enum": [
+            "draft",
+            "pending",
+            "generating",
+            "success",
+            "failure"
+          ]
+        },
+        "document_template_id": {
+          "type": "string",
+          "x-ms-summary": "Template ID",
+          "description": "The ID of the document template used."
+        },
+        "document_template_identifier": {
+          "type": "string",
+          "x-ms-summary": "Template name",
+          "description": "The human-readable name of the document template used."
+        },
+        "download_url": {
+          "type": "string",
+          "x-ms-summary": "Download URL",
+          "description": "A presigned URL to download the generated file, valid for 1 hour. Empty (nil) until status is \"success\"."
+        },
+        "filename": {
+          "type": "string",
+          "x-ms-summary": "Filename",
+          "description": "The filename of the generated document."
+        },
+        "meta": {
+          "type": "string",
+          "x-ms-summary": "Meta",
+          "description": "The document metadata, returned as a JSON string."
+        },
+        "output_type": {
+          "type": "string",
+          "x-ms-summary": "Output type",
+          "description": "The output type of the document (pdf or image)."
+        },
+        "public_share_link": {
+          "type": "string",
+          "x-ms-summary": "Public share link",
+          "description": "A public share link for the document (Premium plans only)."
+        },
+        "preview_url": {
+          "type": "string",
+          "x-ms-summary": "Preview URL",
+          "description": "A URL to preview the document."
+        },
+        "failure_cause": {
+          "type": "string",
+          "x-ms-summary": "Failure cause",
+          "description": "The reason generation failed, when status is \"failure\"."
+        }
+      }
+    },
+    "CurrentUserResponse": {
+      "type": "object",
+      "properties": {
+        "current_user": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "User ID",
+              "description": "The ID of the authenticated user."
+            },
+            "email": {
+              "type": "string",
+              "x-ms-summary": "Email",
+              "description": "The email of the authenticated user."
+            },
+            "desired_name": {
+              "type": "string",
+              "x-ms-summary": "Name",
+              "description": "The display name of the authenticated user."
+            }
+          }
+        }
+      }
+    },
+    "WorkspaceCardsResponse": {
+      "type": "object",
+      "properties": {
+        "workspace_cards": {
+          "type": "array",
+          "x-ms-summary": "Workspaces",
+          "description": "The list of workspaces.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Workspace ID",
+                "description": "The ID of the workspace."
+              },
+              "identifier": {
+                "type": "string",
+                "x-ms-summary": "Workspace name",
+                "description": "The human-readable name of the workspace."
+              }
+            }
+          }
+        }
+      }
+    },
+    "DocumentTemplateCardsResponse": {
+      "type": "object",
+      "properties": {
+        "document_template_cards": {
+          "type": "array",
+          "x-ms-summary": "Templates",
+          "description": "The list of document templates.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Template ID",
+                "description": "The ID of the document template."
+              },
+              "identifier": {
+                "type": "string",
+                "x-ms-summary": "Template name",
+                "description": "The human-readable name of the document template."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
