@@ -1,0 +1,2084 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Qatar Open Data",
+    "description": "Qatar Open Data is the national open data portal of the State of Qatar, published by the National Planning Council. This connector searches the dataset catalogue, reads and filters records, enumerates facets, lists attachments, and exports catalogue or dataset content as files.",
+    "contact": {
+      "name": "Dan Romano",
+      "url": "https://github.com/krautrocker"
+    }
+  },
+  "host": "www.data.gov.qa",
+  "basePath": "/api/explore/v2.1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/catalog/datasets": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "List datasets",
+        "description": "Returns the datasets published on the Qatar Open Data portal, with their metadata and field schema. Use the Filter, Refine and Order By options to narrow and sort the catalogue.",
+        "operationId": "ListDatasets",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "where",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "An ODSQL where expression used to filter the results. It supports full-text search, logical operators such as AND, OR and NOT, and comparison functions. Example: year > 2020 AND nationality like 'Qatari'.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 10,
+            "x-ms-summary": "Limit",
+            "description": "The number of items to return. Use together with Offset to page through results. The maximum value is 100 for a query without a group by expression and 20000 for a query with one. Use an export operation to retrieve larger volumes of data.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 0,
+            "x-ms-summary": "Offset",
+            "description": "The index of the first item to return, starting at 0. Use together with Limit to page through results. Offset plus Limit must remain below 10000 for a query without a group by expression.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "refine",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Refine Facet",
+            "description": "A facet filter that restricts the results to a single facet value, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Exclude Facet",
+            "description": "A facet filter that removes a facet value from the results, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Select Fields",
+            "description": "An ODSQL select expression that controls which fields are returned. Use a field name to return a single field, a wildcard to return every field, or an expression with an 'as' label to return a calculated field. Example: dataset_id, fields.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "A comma-separated list of field names or aggregations to sort on, each optionally followed by asc or desc. Results are sorted in ascending order by default. Example: modified desc.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Group By",
+            "description": "An ODSQL group by expression that aggregates the results by a field, a range function or a date function. A custom name can be set with the 'as' notation. Example: year as reporting_year.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "en",
+              "fr",
+              "nl",
+              "pt",
+              "it",
+              "ar",
+              "de",
+              "es",
+              "ca",
+              "eu",
+              "sv"
+            ],
+            "x-ms-summary": "Language",
+            "description": "The language used to format strings such as dates in the response. Qatar Open Data publishes metadata in English (en) and Arabic (ar).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_links",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Include Links",
+            "description": "Set to true to add HATEOAS navigation links to the response.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_app_metas",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Include Application Metadata",
+            "description": "Set to true to add application metadata to the response.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of datasets matching the query.",
+            "schema": {
+              "$ref": "#/definitions/DatasetResults"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/datasets/{dataset_id}": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Get dataset",
+        "description": "Returns the metadata and field schema of a single dataset published on the Qatar Open Data portal, including its title, publisher, theme, licence and record count.",
+        "operationId": "GetDataset",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID",
+            "description": "The identifier of the dataset to query. It appears in the Information tab of the dataset page and in the dataset URL, immediately after /datasets/.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasets",
+              "parameters": {
+                "limit": 100,
+                "select": "dataset_id"
+              },
+              "value-collection": "results",
+              "value-path": "dataset_id",
+              "value-title": "dataset_id"
+            }
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Select Fields",
+            "description": "An ODSQL select expression that controls which fields are returned. Use a field name to return a single field, a wildcard to return every field, or an expression with an 'as' label to return a calculated field. Example: dataset_id, fields.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "en",
+              "fr",
+              "nl",
+              "pt",
+              "it",
+              "ar",
+              "de",
+              "es",
+              "ca",
+              "eu",
+              "sv"
+            ],
+            "x-ms-summary": "Language",
+            "description": "The language used to format strings such as dates in the response. Qatar Open Data publishes metadata in English (en) and Arabic (ar).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_links",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Include Links",
+            "description": "Set to true to add HATEOAS navigation links to the response.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_app_metas",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Include Application Metadata",
+            "description": "Set to true to add application metadata to the response.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested dataset.",
+            "schema": {
+              "$ref": "#/definitions/Dataset"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/facets": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "List catalogue facets",
+        "description": "Returns the facet values available across the whole catalogue, such as the list of themes, publishers or keywords, together with the number of datasets for each value.",
+        "operationId": "ListCatalogFacets",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "facet",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Facet",
+            "description": "The field to enumerate facet values for. A facet function can also be used to set options such as sort or limit. Example: facet(name=\"theme\", sort=\"count\").",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "where",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "An ODSQL where expression used to filter the results. It supports full-text search, logical operators such as AND, OR and NOT, and comparison functions. Example: year > 2020 AND nationality like 'Qatari'.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "refine",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Refine Facet",
+            "description": "A facet filter that restricts the results to a single facet value, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Exclude Facet",
+            "description": "A facet filter that removes a facet value from the results, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The facet values available across the catalogue.",
+            "schema": {
+              "$ref": "#/definitions/FacetResults"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/exports": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "List catalogue export formats",
+        "description": "Returns the list of file formats that the whole catalogue can be exported to, with the download link for each format.",
+        "operationId": "ListCatalogExportFormats",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The list of available catalogue export formats.",
+            "schema": {
+              "$ref": "#/definitions/LinkResults"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/exports/{format}": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Export catalogue",
+        "description": "Exports the dataset catalogue as a file in the requested format, for example CSV, XLSX or DCAT. The export is not subject to the record limit that applies to list operations.",
+        "operationId": "ExportCatalog",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "json",
+              "csv",
+              "xlsx",
+              "rdf",
+              "ttl",
+              "data.json",
+              "rss",
+              "dcat",
+              "dcat_ap_ch",
+              "dcat_ap_de",
+              "dcat_ap_se",
+              "dcat_ap_sp",
+              "dcat_ap_it",
+              "dcat_ap_vl",
+              "dcat_ap_benap",
+              "dublin_core"
+            ],
+            "x-ms-summary": "Export Format",
+            "description": "The file format of the export. Available formats for the catalogue are listed by the corresponding list export formats operation.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "where",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "An ODSQL where expression used to filter the results. It supports full-text search, logical operators such as AND, OR and NOT, and comparison functions. Example: year > 2020 AND nationality like 'Qatari'.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Select Fields",
+            "description": "An ODSQL select expression that controls which fields are returned. Use a field name to return a single field, a wildcard to return every field, or an expression with an 'as' label to return a calculated field. Example: dataset_id, fields.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "A comma-separated list of field names or aggregations to sort on, each optionally followed by asc or desc. Results are sorted in ascending order by default. Example: modified desc.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Group By",
+            "description": "An ODSQL group by expression that aggregates the results by a field, a range function or a date function. A custom name can be set with the 'as' notation. Example: year as reporting_year.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": -1,
+            "x-ms-summary": "Export Limit",
+            "description": "The number of items to include in the export. Use -1 to export every item. The export operations are not subject to the record limit that applies to the list operations.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 0,
+            "x-ms-summary": "Offset",
+            "description": "The index of the first item to return, starting at 0. Use together with Limit to page through results. Offset plus Limit must remain below 10000 for a query without a group by expression.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "refine",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Refine Facet",
+            "description": "A facet filter that restricts the results to a single facet value, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Exclude Facet",
+            "description": "A facet filter that removes a facet value from the results, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "en",
+              "fr",
+              "nl",
+              "pt",
+              "it",
+              "ar",
+              "de",
+              "es",
+              "ca",
+              "eu",
+              "sv"
+            ],
+            "x-ms-summary": "Language",
+            "description": "The language used to format strings such as dates in the response. Qatar Open Data publishes metadata in English (en) and Arabic (ar).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "delimiter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              ";",
+              ",",
+              "\t",
+              "|"
+            ],
+            "default": ";",
+            "x-ms-summary": "CSV Field Delimiter",
+            "description": "The character used to separate fields. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "list_separator",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": ",",
+            "x-ms-summary": "CSV List Separator",
+            "description": "The character used to separate the values of a multivalued field. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "quote_all",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Quote All Strings",
+            "description": "Set to true to surround every string value with quote characters. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "with_bom",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Include Byte Order Mark",
+            "description": "Set to true to begin the file with a Unicode byte order mark, which helps Microsoft Excel open the file with the correct encoding. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The exported catalogue file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "File Content",
+              "description": "The exported file content."
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/datasets/{dataset_id}/records": {
+      "get": {
+        "tags": [
+          "Dataset"
+        ],
+        "summary": "List records",
+        "description": "Returns the records held in a dataset. Use the Filter, Select, Group By and Order By options to query, aggregate and sort the data before it is returned.",
+        "operationId": "ListRecords",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID",
+            "description": "The identifier of the dataset to query. It appears in the Information tab of the dataset page and in the dataset URL, immediately after /datasets/.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasets",
+              "parameters": {
+                "limit": 100,
+                "select": "dataset_id"
+              },
+              "value-collection": "results",
+              "value-path": "dataset_id",
+              "value-title": "dataset_id"
+            }
+          },
+          {
+            "name": "where",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "An ODSQL where expression used to filter the results. It supports full-text search, logical operators such as AND, OR and NOT, and comparison functions. Example: year > 2020 AND nationality like 'Qatari'.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 10,
+            "x-ms-summary": "Limit",
+            "description": "The number of items to return. Use together with Offset to page through results. The maximum value is 100 for a query without a group by expression and 20000 for a query with one. Use an export operation to retrieve larger volumes of data.",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 0,
+            "x-ms-summary": "Offset",
+            "description": "The index of the first item to return, starting at 0. Use together with Limit to page through results. Offset plus Limit must remain below 10000 for a query without a group by expression.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Select Fields",
+            "description": "An ODSQL select expression that controls which fields are returned. Use a field name to return a single field, a wildcard to return every field, or an expression with an 'as' label to return a calculated field. Example: dataset_id, fields.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Group By",
+            "description": "An ODSQL group by expression that aggregates the results by a field, a range function or a date function. A custom name can be set with the 'as' notation. Example: year as reporting_year.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "A comma-separated list of field names or aggregations to sort on, each optionally followed by asc or desc. Results are sorted in ascending order by default. Example: modified desc.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "refine",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Refine Facet",
+            "description": "A facet filter that restricts the results to a single facet value, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Exclude Facet",
+            "description": "A facet filter that removes a facet value from the results, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "en",
+              "fr",
+              "nl",
+              "pt",
+              "it",
+              "ar",
+              "de",
+              "es",
+              "ca",
+              "eu",
+              "sv"
+            ],
+            "x-ms-summary": "Language",
+            "description": "The language used to format strings such as dates in the response. Qatar Open Data publishes metadata in English (en) and Arabic (ar).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_links",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Include Links",
+            "description": "Set to true to add HATEOAS navigation links to the response.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "include_app_metas",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Include Application Metadata",
+            "description": "Set to true to add application metadata to the response.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of records matching the query.",
+            "schema": {
+              "$ref": "#/definitions/RecordResults"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/datasets/{dataset_id}/records/{record_id}": {
+      "get": {
+        "tags": [
+          "Dataset"
+        ],
+        "summary": "Get record",
+        "description": "Returns a single record from a dataset by its record identifier. Record identifiers are returned by the List records operation when recordid is passed in the Select Fields option.",
+        "operationId": "GetRecord",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID",
+            "description": "The identifier of the dataset to query. It appears in the Information tab of the dataset page and in the dataset URL, immediately after /datasets/.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasets",
+              "parameters": {
+                "limit": 100,
+                "select": "dataset_id"
+              },
+              "value-collection": "results",
+              "value-path": "dataset_id",
+              "value-title": "dataset_id"
+            }
+          },
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Record ID",
+            "description": "The identifier of the record to retrieve. Set the Select Fields option of the List records operation to recordid to return the identifier of each record.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Select Fields",
+            "description": "An ODSQL select expression that controls which fields are returned. Use a field name to return a single field, a wildcard to return every field, or an expression with an 'as' label to return a calculated field. Example: dataset_id, fields.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "en",
+              "fr",
+              "nl",
+              "pt",
+              "it",
+              "ar",
+              "de",
+              "es",
+              "ca",
+              "eu",
+              "sv"
+            ],
+            "x-ms-summary": "Language",
+            "description": "The language used to format strings such as dates in the response. Qatar Open Data publishes metadata in English (en) and Arabic (ar).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested record.",
+            "schema": {
+              "$ref": "#/definitions/Record"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/datasets/{dataset_id}/facets": {
+      "get": {
+        "tags": [
+          "Dataset"
+        ],
+        "summary": "List dataset facets",
+        "description": "Returns the facet values available within a single dataset, together with the number of records for each value. Use it to discover the values that can be passed to Refine and Exclude.",
+        "operationId": "ListDatasetFacets",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID",
+            "description": "The identifier of the dataset to query. It appears in the Information tab of the dataset page and in the dataset URL, immediately after /datasets/.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasets",
+              "parameters": {
+                "limit": 100,
+                "select": "dataset_id"
+              },
+              "value-collection": "results",
+              "value-path": "dataset_id",
+              "value-title": "dataset_id"
+            }
+          },
+          {
+            "name": "facet",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Facet",
+            "description": "The field to enumerate facet values for. A facet function can also be used to set options such as sort or limit. Example: facet(name=\"theme\", sort=\"count\").",
+            "x-ms-visibility": "important"
+          },
+          {
+            "name": "where",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "An ODSQL where expression used to filter the results. It supports full-text search, logical operators such as AND, OR and NOT, and comparison functions. Example: year > 2020 AND nationality like 'Qatari'.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "refine",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Refine Facet",
+            "description": "A facet filter that restricts the results to a single facet value, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Exclude Facet",
+            "description": "A facet filter that removes a facet value from the results, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "en",
+              "fr",
+              "nl",
+              "pt",
+              "it",
+              "ar",
+              "de",
+              "es",
+              "ca",
+              "eu",
+              "sv"
+            ],
+            "x-ms-summary": "Language",
+            "description": "The language used to format strings such as dates in the response. Qatar Open Data publishes metadata in English (en) and Arabic (ar).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The facet values available within the dataset.",
+            "schema": {
+              "$ref": "#/definitions/FacetResults"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/datasets/{dataset_id}/attachments": {
+      "get": {
+        "tags": [
+          "Dataset"
+        ],
+        "summary": "List dataset attachments",
+        "description": "Returns the files attached to a dataset, such as documentation or source spreadsheets, with the download link and media type of each attachment.",
+        "operationId": "ListDatasetAttachments",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID",
+            "description": "The identifier of the dataset to query. It appears in the Information tab of the dataset page and in the dataset URL, immediately after /datasets/.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasets",
+              "parameters": {
+                "limit": 100,
+                "select": "dataset_id"
+              },
+              "value-collection": "results",
+              "value-path": "dataset_id",
+              "value-title": "dataset_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of files attached to the dataset.",
+            "schema": {
+              "$ref": "#/definitions/AttachmentResults"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/datasets/{dataset_id}/exports": {
+      "get": {
+        "tags": [
+          "Dataset"
+        ],
+        "summary": "List dataset export formats",
+        "description": "Returns the list of file formats that the records of a dataset can be exported to, with the download link for each format.",
+        "operationId": "ListDatasetExportFormats",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID",
+            "description": "The identifier of the dataset to query. It appears in the Information tab of the dataset page and in the dataset URL, immediately after /datasets/.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasets",
+              "parameters": {
+                "limit": 100,
+                "select": "dataset_id"
+              },
+              "value-collection": "results",
+              "value-path": "dataset_id",
+              "value-title": "dataset_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of available export formats for the dataset.",
+            "schema": {
+              "$ref": "#/definitions/LinkResults"
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    },
+    "/catalog/datasets/{dataset_id}/exports/{format}": {
+      "get": {
+        "tags": [
+          "Dataset"
+        ],
+        "summary": "Export records",
+        "description": "Exports the records of a dataset as a file in the requested format, for example CSV, XLSX, JSON or GeoJSON. The export is not subject to the record limit that applies to the list records operation.",
+        "operationId": "ExportRecords",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "dataset_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Dataset ID",
+            "description": "The identifier of the dataset to query. It appears in the Information tab of the dataset page and in the dataset URL, immediately after /datasets/.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single",
+            "x-ms-dynamic-values": {
+              "operationId": "ListDatasets",
+              "parameters": {
+                "limit": 100,
+                "select": "dataset_id"
+              },
+              "value-collection": "results",
+              "value-path": "dataset_id",
+              "value-title": "dataset_id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "json",
+              "geojson",
+              "shp",
+              "csv",
+              "xlsx",
+              "parquet",
+              "kml",
+              "fgb",
+              "gpx",
+              "jsonl",
+              "jsonld",
+              "ov2",
+              "rdfxml",
+              "turtle",
+              "n3"
+            ],
+            "x-ms-summary": "Export Format",
+            "description": "The file format of the export. Available formats for a dataset are listed by the corresponding list export formats operation.",
+            "x-ms-visibility": "important",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "where",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter",
+            "description": "An ODSQL where expression used to filter the results. It supports full-text search, logical operators such as AND, OR and NOT, and comparison functions. Example: year > 2020 AND nationality like 'Qatari'.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Select Fields",
+            "description": "An ODSQL select expression that controls which fields are returned. Use a field name to return a single field, a wildcard to return every field, or an expression with an 'as' label to return a calculated field. Example: dataset_id, fields.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order By",
+            "description": "A comma-separated list of field names or aggregations to sort on, each optionally followed by asc or desc. Results are sorted in ascending order by default. Example: modified desc.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Group By",
+            "description": "An ODSQL group by expression that aggregates the results by a field, a range function or a date function. A custom name can be set with the 'as' notation. Example: year as reporting_year.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": -1,
+            "x-ms-summary": "Export Limit",
+            "description": "The number of items to include in the export. Use -1 to export every item. The export operations are not subject to the record limit that applies to the list operations.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "refine",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Refine Facet",
+            "description": "A facet filter that restricts the results to a single facet value, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Exclude Facet",
+            "description": "A facet filter that removes a facet value from the results, using the syntax facet_name:facet_value. Example: theme:Health.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "en",
+              "fr",
+              "nl",
+              "pt",
+              "it",
+              "ar",
+              "de",
+              "es",
+              "ca",
+              "eu",
+              "sv"
+            ],
+            "x-ms-summary": "Language",
+            "description": "The language used to format strings such as dates in the response. Qatar Open Data publishes metadata in English (en) and Arabic (ar).",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "UTC",
+            "x-ms-summary": "Timezone",
+            "description": "The timezone applied to date and datetime fields, given as a Unicode CLDR timezone identifier such as UTC or Asia/Qatar.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "use_labels",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Use Field Labels",
+            "description": "Set to true to output the label of each field instead of its technical name. This applies only to formats that list their fields, such as CSV and XLSX.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "epsg",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 4326,
+            "x-ms-summary": "EPSG Code",
+            "description": "The EPSG code that geometric shapes are projected into, for export formats that support geographic features.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "delimiter",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              ";",
+              ",",
+              "\t",
+              "|"
+            ],
+            "default": ";",
+            "x-ms-summary": "CSV Field Delimiter",
+            "description": "The character used to separate fields. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "list_separator",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": ",",
+            "x-ms-summary": "CSV List Separator",
+            "description": "The character used to separate the values of a multivalued field. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "quote_all",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "x-ms-summary": "Quote All Strings",
+            "description": "Set to true to surround every string value with quote characters. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "with_bom",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": true,
+            "x-ms-summary": "Include Byte Order Mark",
+            "description": "Set to true to begin the file with a Unicode byte order mark, which helps Microsoft Excel open the file with the correct encoding. This option applies to the CSV format only.",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The exported records file.",
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "File Content",
+              "description": "The exported file content."
+            }
+          },
+          "400": {
+            "description": "The request is malformed, usually because an ODSQL expression is invalid."
+          },
+          "429": {
+            "description": "The request was rejected because the call quota of the portal has been exceeded."
+          },
+          "500": {
+            "description": "The Qatar Open Data portal encountered an internal error."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Link": {
+      "type": "object",
+      "description": "A navigation link returned by the portal.",
+      "properties": {
+        "rel": {
+          "type": "string",
+          "x-ms-summary": "Relation",
+          "description": "The relationship of the link to the current resource, for example self, next, last, dataset or an export format name.",
+          "x-ms-visibility": "important"
+        },
+        "href": {
+          "type": "string",
+          "format": "uri",
+          "x-ms-summary": "URL",
+          "description": "The absolute URL of the linked resource.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "LinkResults": {
+      "type": "object",
+      "description": "A response that contains navigation links only.",
+      "properties": {
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-ms-summary": "Links",
+          "description": "The available links, one per related resource or export format.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "DatasetField": {
+      "type": "object",
+      "description": "A field in the schema of a dataset.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Field Name",
+          "description": "The technical name of the field, used in ODSQL expressions.",
+          "x-ms-visibility": "important"
+        },
+        "label": {
+          "type": "string",
+          "x-ms-summary": "Field Label",
+          "description": "The display label of the field.",
+          "x-ms-visibility": "important"
+        },
+        "label_en": {
+          "type": "string",
+          "x-ms-summary": "Field Label (English)",
+          "description": "The English display label of the field.",
+          "x-ms-visibility": "advanced"
+        },
+        "label_ar": {
+          "type": "string",
+          "x-ms-summary": "Field Label (Arabic)",
+          "description": "The Arabic display label of the field.",
+          "x-ms-visibility": "advanced"
+        },
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Field Type",
+          "description": "The data type of the field, for example text, double, date or geo_point_2d.",
+          "x-ms-visibility": "important"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Field Description",
+          "description": "The description of the field, when the publisher has supplied one.",
+          "x-ms-visibility": "advanced"
+        },
+        "description_en": {
+          "type": "string",
+          "x-ms-summary": "Field Description (English)",
+          "description": "The English description of the field, when the publisher has supplied one.",
+          "x-ms-visibility": "advanced"
+        },
+        "description_ar": {
+          "type": "string",
+          "x-ms-summary": "Field Description (Arabic)",
+          "description": "The Arabic description of the field, when the publisher has supplied one.",
+          "x-ms-visibility": "advanced"
+        },
+        "annotations": {
+          "type": "object",
+          "x-ms-summary": "Field Annotations",
+          "description": "Additional processing annotations applied to the field, such as the precision of a time series.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "DatasetMetadata": {
+      "type": "object",
+      "description": "The descriptive metadata of a dataset.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The title of the dataset.",
+          "x-ms-visibility": "important"
+        },
+        "title_en": {
+          "type": "string",
+          "x-ms-summary": "Title (English)",
+          "description": "The English title of the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "title_ar": {
+          "type": "string",
+          "x-ms-summary": "Title (Arabic)",
+          "description": "The Arabic title of the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "description": {
+          "type": "string",
+          "x-ms-summary": "Description",
+          "description": "The description of the dataset, supplied as HTML.",
+          "x-ms-visibility": "important"
+        },
+        "description_en": {
+          "type": "string",
+          "x-ms-summary": "Description (English)",
+          "description": "The English description of the dataset, supplied as HTML.",
+          "x-ms-visibility": "advanced"
+        },
+        "description_ar": {
+          "type": "string",
+          "x-ms-summary": "Description (Arabic)",
+          "description": "The Arabic description of the dataset, supplied as HTML.",
+          "x-ms-visibility": "advanced"
+        },
+        "publisher": {
+          "type": "string",
+          "x-ms-summary": "Publisher",
+          "description": "The government body that publishes the dataset.",
+          "x-ms-visibility": "important"
+        },
+        "publisher_en": {
+          "type": "string",
+          "x-ms-summary": "Publisher (English)",
+          "description": "The English name of the government body that publishes the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "publisher_ar": {
+          "type": "string",
+          "x-ms-summary": "Publisher (Arabic)",
+          "description": "The Arabic name of the government body that publishes the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "theme": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Themes",
+          "description": "The themes the dataset belongs to.",
+          "x-ms-visibility": "important"
+        },
+        "theme_en": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Themes (English)",
+          "description": "The English names of the themes the dataset belongs to.",
+          "x-ms-visibility": "advanced"
+        },
+        "theme_ar": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Themes (Arabic)",
+          "description": "The Arabic names of the themes the dataset belongs to.",
+          "x-ms-visibility": "advanced"
+        },
+        "keyword": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Keywords",
+          "description": "The keywords assigned to the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "keyword_en": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Keywords (English)",
+          "description": "The English keywords assigned to the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "keyword_ar": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Keywords (Arabic)",
+          "description": "The Arabic keywords assigned to the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "license": {
+          "type": "string",
+          "x-ms-summary": "Licence",
+          "description": "The licence the dataset is published under.",
+          "x-ms-visibility": "advanced"
+        },
+        "license_en": {
+          "type": "string",
+          "x-ms-summary": "Licence (English)",
+          "description": "The English name of the licence the dataset is published under.",
+          "x-ms-visibility": "advanced"
+        },
+        "license_ar": {
+          "type": "string",
+          "x-ms-summary": "Licence (Arabic)",
+          "description": "The Arabic name of the licence the dataset is published under.",
+          "x-ms-visibility": "advanced"
+        },
+        "license_url": {
+          "type": "string",
+          "x-ms-summary": "Licence URL",
+          "description": "The URL of the licence text.",
+          "x-ms-visibility": "advanced"
+        },
+        "license_url_en": {
+          "type": "string",
+          "x-ms-summary": "Licence URL (English)",
+          "description": "The URL of the English licence text.",
+          "x-ms-visibility": "advanced"
+        },
+        "license_url_ar": {
+          "type": "string",
+          "x-ms-summary": "Licence URL (Arabic)",
+          "description": "The URL of the Arabic licence text.",
+          "x-ms-visibility": "advanced"
+        },
+        "language": {
+          "type": "string",
+          "x-ms-summary": "Language",
+          "description": "The primary language of the metadata.",
+          "x-ms-visibility": "advanced"
+        },
+        "metadata_languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Metadata Languages",
+          "description": "The languages the metadata is available in.",
+          "x-ms-visibility": "advanced"
+        },
+        "timezone": {
+          "type": "string",
+          "x-ms-summary": "Timezone",
+          "description": "The timezone the date fields are expressed in.",
+          "x-ms-visibility": "advanced"
+        },
+        "modified": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Last Modified",
+          "description": "The date and time the dataset was last modified.",
+          "x-ms-visibility": "important"
+        },
+        "data_processed": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Data Processed",
+          "description": "The date and time the data was last processed.",
+          "x-ms-visibility": "advanced"
+        },
+        "metadata_processed": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Metadata Processed",
+          "description": "The date and time the metadata was last processed.",
+          "x-ms-visibility": "advanced"
+        },
+        "records_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Record Count",
+          "description": "The number of records held in the dataset.",
+          "x-ms-visibility": "important"
+        },
+        "update_frequency": {
+          "type": "string",
+          "x-ms-summary": "Update Frequency",
+          "description": "How often the dataset is updated, for example ANNUAL or MONTHLY.",
+          "x-ms-visibility": "important"
+        },
+        "geographic_reference": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Geographic Reference",
+          "description": "The geographic areas the dataset covers.",
+          "x-ms-visibility": "advanced"
+        },
+        "territory": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Territory",
+          "description": "The territories the dataset covers.",
+          "x-ms-visibility": "advanced"
+        },
+        "geometry_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Geometry Types",
+          "description": "The geometric shape types held in the dataset, such as Point or MultiPolygon. It is empty for a dataset that holds no geographic data.",
+          "x-ms-visibility": "advanced"
+        },
+        "references": {
+          "type": "string",
+          "x-ms-summary": "References",
+          "description": "A reference URL supplied by the publisher.",
+          "x-ms-visibility": "advanced"
+        },
+        "attributions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Attributions",
+          "description": "The attributions requested by the publisher.",
+          "x-ms-visibility": "advanced"
+        },
+        "source_domain": {
+          "type": "string",
+          "x-ms-summary": "Source Domain",
+          "description": "The portal the dataset was federated from, when applicable.",
+          "x-ms-visibility": "advanced"
+        },
+        "federated": {
+          "type": "boolean",
+          "x-ms-summary": "Federated",
+          "description": "Indicates whether the dataset is federated from another portal.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "DatasetAttachment": {
+      "type": "object",
+      "description": "A file attached to a dataset, as listed in the dataset metadata.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Attachment ID",
+          "description": "The identifier of the attachment.",
+          "x-ms-visibility": "important"
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The title of the attachment.",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "URL",
+          "description": "The download URL of the attachment.",
+          "x-ms-visibility": "important"
+        },
+        "mimetype": {
+          "type": "string",
+          "x-ms-summary": "Media Type",
+          "description": "The media type of the attachment.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "description": "A dataset published on the Qatar Open Data portal.",
+      "properties": {
+        "dataset_id": {
+          "type": "string",
+          "x-ms-summary": "Dataset ID",
+          "description": "The identifier of the dataset, used by every other operation.",
+          "x-ms-visibility": "important"
+        },
+        "dataset_uid": {
+          "type": "string",
+          "x-ms-summary": "Dataset UID",
+          "description": "The immutable internal identifier of the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "has_records": {
+          "type": "boolean",
+          "x-ms-summary": "Has Records",
+          "description": "Indicates whether the dataset contains records.",
+          "x-ms-visibility": "important"
+        },
+        "data_visible": {
+          "type": "boolean",
+          "x-ms-summary": "Data Visible",
+          "description": "Indicates whether the data of the dataset is publicly visible.",
+          "x-ms-visibility": "advanced"
+        },
+        "visibility": {
+          "type": "string",
+          "x-ms-summary": "Visibility",
+          "description": "The visibility level of the dataset on the portal.",
+          "x-ms-visibility": "advanced"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Features",
+          "description": "The portal features enabled for the dataset, such as analyze or timeserie.",
+          "x-ms-visibility": "advanced"
+        },
+        "metas": {
+          "$ref": "#/definitions/DatasetMetadataContainer"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetField"
+          },
+          "x-ms-summary": "Fields",
+          "description": "The schema of the dataset, one entry per field.",
+          "x-ms-visibility": "important"
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DatasetAttachment"
+          },
+          "x-ms-summary": "Attachments",
+          "description": "The files attached to the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "alternative_exports": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "x-ms-summary": "Alternative Exports",
+          "description": "The alternative export files published alongside the dataset.",
+          "x-ms-visibility": "advanced"
+        },
+        "_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-ms-summary": "Links",
+          "description": "Navigation links, returned when the Include Links option is enabled.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "DatasetMetadataContainer": {
+      "type": "object",
+      "description": "The metadata templates applied to a dataset.",
+      "properties": {
+        "default": {
+          "$ref": "#/definitions/DatasetMetadata"
+        }
+      }
+    },
+    "DatasetResults": {
+      "type": "object",
+      "description": "A page of datasets returned by a catalogue query.",
+      "properties": {
+        "total_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Count",
+          "description": "The total number of datasets matching the query.",
+          "x-ms-visibility": "important"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Dataset"
+          },
+          "x-ms-summary": "Datasets",
+          "description": "The datasets returned for the current page.",
+          "x-ms-visibility": "important"
+        },
+        "_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-ms-summary": "Links",
+          "description": "Navigation links, returned when the Include Links option is enabled.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "Record": {
+      "type": "object",
+      "description": "A single record of a dataset. The data fields of a record are defined by the schema of its dataset, so they differ from one dataset to another. Use the Get dataset operation to read the field names and types of a dataset.",
+      "properties": {
+        "_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-ms-summary": "Links",
+          "description": "Navigation links, returned when the Include Links option is enabled.",
+          "x-ms-visibility": "advanced"
+        }
+      },
+      "additionalProperties": true
+    },
+    "RecordResults": {
+      "type": "object",
+      "description": "A page of records returned by a dataset query.",
+      "properties": {
+        "total_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Total Count",
+          "description": "The total number of records matching the query.",
+          "x-ms-visibility": "important"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Record"
+          },
+          "x-ms-summary": "Records",
+          "description": "The records returned for the current page.",
+          "x-ms-visibility": "important"
+        },
+        "_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-ms-summary": "Links",
+          "description": "Navigation links, returned when the Include Links option is enabled.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "FacetValue": {
+      "type": "object",
+      "description": "A single value of a facet.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Name",
+          "description": "The display name of the facet value.",
+          "x-ms-visibility": "important"
+        },
+        "value": {
+          "type": "string",
+          "x-ms-summary": "Value",
+          "description": "The value to pass to the Refine or Exclude option.",
+          "x-ms-visibility": "important"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Count",
+          "description": "The number of items that carry this facet value.",
+          "x-ms-visibility": "important"
+        },
+        "state": {
+          "type": "string",
+          "x-ms-summary": "State",
+          "description": "Whether the value is displayed, refined or excluded in the current query.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "Facet": {
+      "type": "object",
+      "description": "A facet and the values enumerated for it.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Facet Name",
+          "description": "The name of the facet field.",
+          "x-ms-visibility": "important"
+        },
+        "facets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FacetValue"
+          },
+          "x-ms-summary": "Values",
+          "description": "The values enumerated for this facet.",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "FacetResults": {
+      "type": "object",
+      "description": "The facets enumerated for a catalogue or dataset query.",
+      "properties": {
+        "facets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Facet"
+          },
+          "x-ms-summary": "Facets",
+          "description": "The facets enumerated for the query.",
+          "x-ms-visibility": "important"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-ms-summary": "Links",
+          "description": "Navigation links returned with the facets.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "AttachmentMetadata": {
+      "type": "object",
+      "description": "The metadata of an attached file.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Attachment ID",
+          "description": "The identifier of the attachment.",
+          "x-ms-visibility": "important"
+        },
+        "title": {
+          "type": "string",
+          "x-ms-summary": "Title",
+          "description": "The title of the attachment.",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "type": "string",
+          "x-ms-summary": "URL",
+          "description": "The download URL of the attachment.",
+          "x-ms-visibility": "important"
+        },
+        "mime-type": {
+          "type": "string",
+          "x-ms-summary": "Media Type",
+          "description": "The media type of the attachment.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "Attachment": {
+      "type": "object",
+      "description": "A file attached to a dataset.",
+      "properties": {
+        "href": {
+          "type": "string",
+          "x-ms-summary": "Download URL",
+          "description": "The URL the attachment can be downloaded from.",
+          "x-ms-visibility": "important"
+        },
+        "metas": {
+          "$ref": "#/definitions/AttachmentMetadata"
+        }
+      }
+    },
+    "AttachmentResults": {
+      "type": "object",
+      "description": "The files attached to a dataset.",
+      "properties": {
+        "attachments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Attachment"
+          },
+          "x-ms-summary": "Attachments",
+          "description": "The files attached to the dataset.",
+          "x-ms-visibility": "important"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-ms-summary": "Links",
+          "description": "Navigation links returned with the attachments.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {},
+  "security": [],
+  "tags": [
+    {
+      "name": "Catalog",
+      "description": "Operations that browse and export the dataset catalogue."
+    },
+    {
+      "name": "Dataset",
+      "description": "Operations that read, filter and export the records of a dataset."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.data.gov.qa"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.data.gov.qa/pages/terms-of-use"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Business Intelligence"
+    }
+  ]
+}
