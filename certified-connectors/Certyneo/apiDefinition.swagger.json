@@ -1,0 +1,943 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Certyneo",
+    "description": "Send documents for eIDAS-compliant electronic signature, create envelopes from templates, and trigger flows on signature events such as sent, signed, completed and declined.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Certyneo Support",
+      "url": "https://certyneo.com/fr/contact",
+      "email": "api-support@certyneo.com"
+    }
+  },
+  "host": "certyneo.com",
+  "basePath": "/api/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Paste \"Bearer sk_live_<your key>\" (or \"Bearer sk_test_<your key>\" for a sandbox key) exactly as shown — Certyneo expects the word Bearer before the key. Generate a key from Certyneo → Settings → API Keys."
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://certyneo.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://certyneo.com/fr/legal/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "IT Operations;Productivity"
+    }
+  ],
+  "paths": {
+    "/account/me": {
+      "get": {
+        "operationId": "GetCurrentAccount",
+        "summary": "Get current account",
+        "description": "Returns the identity tied to the API key. Used to validate the connection when you first sign in.",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "Current account",
+            "schema": {
+              "$ref": "#/definitions/Account"
+            }
+          }
+        }
+      }
+    },
+    "/templates": {
+      "get": {
+        "operationId": "ListTemplates",
+        "summary": "List templates",
+        "description": "Returns your saved envelope templates. Used to power the template picker on \"Create envelope\".",
+        "responses": {
+          "200": {
+            "description": "List of templates",
+            "schema": {
+              "$ref": "#/definitions/TemplateList"
+            }
+          }
+        }
+      }
+    },
+    "/envelopes": {
+      "get": {
+        "operationId": "ListEnvelopes",
+        "summary": "List envelopes",
+        "description": "Retrieve a paginated list of envelopes.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "SCHEDULED",
+              "SENT",
+              "DELIVERED",
+              "PARTIALLY_SIGNED",
+              "COMPLETED",
+              "DECLINED",
+              "VOIDED",
+              "EXPIRED",
+              "RETURNED_TO_SENDER"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of envelopes",
+            "schema": {
+              "$ref": "#/definitions/EnvelopeList"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateEnvelope",
+        "summary": "Create envelope",
+        "description": "Create a new envelope in DRAFT status, either from a saved template or straight from documents you uploaded with \"Upload document\". Fill in exactly one of \"Template\" or \"Documents\". With documents, add \"Fields\" as well so each signer has somewhere to sign — the simplest way is to quote a phrase from the document in \"Anchor text\" instead of working out coordinates.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateEnvelopeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Envelope created in DRAFT status",
+            "schema": {
+              "$ref": "#/definitions/Envelope"
+            }
+          }
+        }
+      }
+    },
+    "/envelopes/{id}": {
+      "get": {
+        "operationId": "GetEnvelope",
+        "summary": "Get envelope",
+        "description": "Get the current status and details of an envelope.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envelope details",
+            "schema": {
+              "$ref": "#/definitions/Envelope"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteDraftEnvelope",
+        "summary": "Delete draft envelope",
+        "description": "Delete an envelope that was never sent — a flow that failed halfway, a wrong document. DRAFT only: once an envelope has gone out, this returns an error and you cannot recall it from a flow.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Draft envelope deleted",
+            "schema": {
+              "$ref": "#/definitions/DeleteResult"
+            }
+          },
+          "409": {
+            "description": "Envelope has already been sent and cannot be deleted",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/envelopes/{id}/send": {
+      "post": {
+        "operationId": "SendEnvelope",
+        "summary": "Send envelope",
+        "description": "Dispatch a DRAFT envelope to its recipients for signature.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envelope sent",
+            "schema": {
+              "$ref": "#/definitions/Envelope"
+            }
+          }
+        }
+      }
+    },
+    "/envelopes/{id}/signed-document": {
+      "get": {
+        "operationId": "DownloadSignedDocument",
+        "summary": "Download signed document",
+        "description": "Get the signed PDF, certificate page included. Only once the envelope is COMPLETED — before that it returns 409, so trigger on \"Envelope completed\" rather than polling.",
+        "produces": [
+          "application/pdf"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signed PDF",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "409": {
+            "description": "Envelope is not COMPLETED yet, nothing to download",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/envelopes/{id}/audit-trail": {
+      "get": {
+        "operationId": "DownloadAuditTrail",
+        "summary": "Download audit trail",
+        "description": "Get the evidence file for a completed envelope — who signed, when, from which IP, with which authentication factors. Archive it alongside the signed PDF: it is what an eIDAS dispute turns on.",
+        "produces": [
+          "application/pdf"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit trail",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "409": {
+            "description": "Envelope is not COMPLETED yet",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/documents": {
+      "post": {
+        "operationId": "UploadDocument",
+        "summary": "Upload document",
+        "description": "Upload a PDF or image (max 50 MB). Returns a document ID — pass it to \"Create envelope\" under \"Documents\".",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "x-ms-summary": "File"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Document name"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Document uploaded",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "x-ms-notification-content": {
+        "description": "Envelope event payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookEventPayload"
+        }
+      },
+      "post": {
+        "operationId": "SubscribeEnvelopeEvents",
+        "summary": "When an envelope event occurs",
+        "description": "Triggers a flow every time one of the selected events happens on any of your envelopes (e.g. signed, completed, declined). Backed by a real-time webhook — no polling.",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateWebhookSubscriptionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscription created",
+            "schema": {
+              "$ref": "#/definitions/WebhookSubscription"
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/{id}": {
+      "delete": {
+        "operationId": "UnsubscribeEnvelopeEvents",
+        "summary": "Unsubscribe from envelope events",
+        "description": "Removes the webhook subscription. Called automatically when the flow is turned off or deleted, so you never add this action to a flow yourself.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Subscription ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription removed",
+            "schema": {
+              "$ref": "#/definitions/DeleteResult"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DeleteResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "x-ms-summary": "Success",
+          "description": "True when the resource was deleted."
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-ms-summary": "Error message",
+          "description": "Human-readable explanation of what went wrong."
+        },
+        "code": {
+          "type": "string",
+          "x-ms-summary": "Error code",
+          "description": "Stable machine-readable code, such as CONFLICT or NOT FOUND. Branch on this rather than on the message, which can be reworded."
+        }
+      }
+    },
+    "Account": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "plan": {
+          "type": "string"
+        }
+      }
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "Template": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "signerCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "documentCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "TemplateList": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Template"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Recipient": {
+      "type": "object",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "x-ms-summary": "Recipient email"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Recipient name"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "SIGNER",
+            "VIEWER",
+            "CARBON_COPY",
+            "APPROVER"
+          ],
+          "default": "SIGNER",
+          "x-ms-summary": "Role"
+        },
+        "status": {
+          "type": "string",
+          "readOnly": true
+        },
+        "signedAt": {
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "accessToken": {
+          "type": "string",
+          "readOnly": true,
+          "x-ms-summary": "Access token",
+          "description": "Opens this recipient's signing page at https://certyneo.com/sign/<token>. In sandbox no invitation email goes out, so this is how you sign a test envelope yourself. Returned by \"Create envelope\" and \"Send envelope\" — not by \"Get envelope\", where it stays empty. Treat it as a credential: anyone holding it can sign as this recipient, so don't log it or drop it in a spreadsheet."
+        }
+      }
+    },
+    "EnvelopeField": {
+      "type": "object",
+      "required": [
+        "recipientEmail",
+        "pageNumber",
+        "fieldType",
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "recipientEmail": {
+          "type": "string",
+          "x-ms-summary": "Signer email",
+          "description": "Must match one of the recipients above, exactly."
+        },
+        "documentIndex": {
+          "type": "integer",
+          "default": 0,
+          "x-ms-summary": "Document number",
+          "description": "Which document carries this field, counting from 0 in the order given above. Leave empty when there is only one document.",
+          "x-ms-visibility": "advanced"
+        },
+        "pageNumber": {
+          "type": "integer",
+          "default": 1,
+          "x-ms-summary": "Page"
+        },
+        "fieldType": {
+          "type": "string",
+          "enum": [
+            "SIGNATURE",
+            "INITIALS",
+            "DATE_SIGNED",
+            "TEXT",
+            "CHECKBOX",
+            "DROPDOWN",
+            "ATTACHMENT",
+            "STAMP",
+            "DRAWING",
+            "RADIO_GROUP"
+          ],
+          "default": "SIGNATURE",
+          "x-ms-summary": "Field type"
+        },
+        "anchorText": {
+          "type": "string",
+          "x-ms-summary": "Anchor text (recommended)",
+          "description": "Text to look for in the document — the field is placed next to it, so you don't need coordinates. Case-insensitive, and found even when the PDF splits the phrase across runs. Leave empty to use X/Y instead."
+        },
+        "anchorPlacement": {
+          "type": "string",
+          "enum": [
+            "right",
+            "below",
+            "above",
+            "left"
+          ],
+          "default": "right",
+          "x-ms-summary": "Anchor placement",
+          "x-ms-visibility": "advanced",
+          "description": "Where to put the field relative to the anchor text."
+        },
+        "anchorIndex": {
+          "type": "integer",
+          "default": 0,
+          "x-ms-summary": "Anchor occurrence",
+          "description": "Which occurrence to use, counting from 0, when the anchor text appears several times.",
+          "x-ms-visibility": "advanced"
+        },
+        "x": {
+          "type": "number",
+          "default": 72,
+          "x-ms-summary": "X",
+          "description": "Points from the left edge. Ignored when the anchor is found — kept as a fallback so the field never vanishes.",
+          "x-ms-visibility": "advanced"
+        },
+        "y": {
+          "type": "number",
+          "default": 700,
+          "x-ms-summary": "Y",
+          "description": "Points from the TOP edge. Ignored when the anchor is found — kept as a fallback.",
+          "x-ms-visibility": "advanced"
+        },
+        "width": {
+          "type": "number",
+          "default": 150,
+          "x-ms-summary": "Width",
+          "x-ms-visibility": "advanced"
+        },
+        "height": {
+          "type": "number",
+          "default": 40,
+          "x-ms-summary": "Height",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "Document": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "mimeType": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "DRAFT",
+            "SCHEDULED",
+            "SENT",
+            "DELIVERED",
+            "PARTIALLY_SIGNED",
+            "COMPLETED",
+            "DECLINED",
+            "VOIDED",
+            "EXPIRED",
+            "RETURNED_TO_SENDER"
+          ]
+        },
+        "signatureLevel": {
+          "type": "string",
+          "enum": [
+            "SIMPLE",
+            "ADVANCED",
+            "QUALIFIED"
+          ]
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Recipient"
+          }
+        },
+        "expiresAt": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "completedAt": {
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "EnvelopeList": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Envelope"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "CreateEnvelopeRequest": {
+      "type": "object",
+      "required": [
+        "subject",
+        "recipients"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "x-ms-summary": "Subject",
+          "description": "Envelope subject / title."
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Message",
+          "description": "Message shown to recipients.",
+          "x-ms-visibility": "advanced"
+        },
+        "templateId": {
+          "type": "string",
+          "x-ms-summary": "Template",
+          "description": "Pick a saved template. Use this OR \"Documents\", not both — a template brings its own documents and signature fields.",
+          "x-ms-dynamic-values": {
+            "operationId": "ListTemplates",
+            "value-collection": "data",
+            "value-path": "id",
+            "value-title": "name"
+          }
+        },
+        "documentIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Documents",
+          "description": "Document IDs from \"Upload document\". Use this OR \"Template\", not both. When you use documents, add \"Fields\" too — an envelope whose signer has no signature field is refused at send time."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EnvelopeField"
+          },
+          "x-ms-summary": "Fields",
+          "description": "Where each signer signs. Required alongside \"Documents\" (a template already carries its own)."
+        },
+        "recipients": {
+          "type": "array",
+          "x-ms-summary": "Recipients",
+          "items": {
+            "$ref": "#/definitions/Recipient"
+          }
+        },
+        "signatureLevel": {
+          "type": "string",
+          "enum": [
+            "SIMPLE",
+            "ADVANCED",
+            "QUALIFIED"
+          ],
+          "default": "SIMPLE",
+          "x-ms-summary": "Signature level",
+          "x-ms-visibility": "advanced"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-ms-summary": "Expires at",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "CreateWebhookSubscriptionRequest": {
+      "type": "object",
+      "required": [
+        "url",
+        "events"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        },
+        "events": {
+          "type": "array",
+          "x-ms-summary": "Events",
+          "description": "Which envelope/recipient events should trigger this flow.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "envelope.created",
+              "envelope.sent",
+              "envelope.completed",
+              "envelope.declined",
+              "envelope.voided",
+              "envelope.expired",
+              "envelope.returned_to_sender",
+              "envelope.resubmitted",
+              "recipient.signed",
+              "recipient.viewed",
+              "recipient.approved"
+            ]
+          }
+        }
+      }
+    },
+    "WebhookSubscription": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isActive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "WebhookEventPayload": {
+      "type": "object",
+      "description": "Delivered signed with HMAC-SHA256 in the X-Certyneo-Signature header (hex digest of the raw JSON body, keyed with the subscription's secret). Verify it before trusting the payload in a flow that acts on it (see /developers/webhooks).",
+      "properties": {
+        "event": {
+          "type": "string",
+          "enum": [
+            "envelope.created",
+            "envelope.sent",
+            "envelope.completed",
+            "envelope.declined",
+            "envelope.voided",
+            "envelope.expired",
+            "envelope.returned_to_sender",
+            "envelope.resubmitted",
+            "recipient.signed",
+            "recipient.viewed",
+            "recipient.approved"
+          ]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "data": {
+          "type": "object",
+          "description": "Event payload. Each field below states whether it comes with envelope events or with recipient events.",
+          "properties": {
+            "envelopeId": {
+              "type": "string",
+              "x-ms-summary": "Envelope ID",
+              "description": "Always present. Feed it into \"Get envelope\" or \"Download signed document\"."
+            },
+            "subject": {
+              "type": "string",
+              "x-ms-summary": "Subject",
+              "description": "Present on envelope events only."
+            },
+            "status": {
+              "type": "string",
+              "x-ms-summary": "Status"
+            },
+            "signatureLevel": {
+              "type": "string",
+              "x-ms-summary": "Signature level",
+              "description": "Present on envelope events only."
+            },
+            "recipientCount": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Recipient count",
+              "description": "Present on envelope events only."
+            },
+            "signedCount": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Signed count",
+              "description": "Present on envelope events only."
+            },
+            "recipientId": {
+              "type": "string",
+              "x-ms-summary": "Recipient ID",
+              "description": "Present on recipient events only."
+            },
+            "email": {
+              "type": "string",
+              "x-ms-summary": "Recipient email",
+              "description": "Present on recipient events only."
+            },
+            "name": {
+              "type": "string",
+              "x-ms-summary": "Recipient name",
+              "description": "Present on recipient events only."
+            },
+            "role": {
+              "type": "string",
+              "x-ms-summary": "Recipient role",
+              "description": "Present on recipient events only."
+            },
+            "signedAt": {
+              "type": "string",
+              "format": "date-time",
+              "x-ms-summary": "Signed at",
+              "description": "Present on recipient events only."
+            },
+            "viewedAt": {
+              "type": "string",
+              "format": "date-time",
+              "x-ms-summary": "Viewed at",
+              "description": "Present on recipient events only."
+            }
+          }
+        }
+      }
+    }
+  }
+}

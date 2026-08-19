@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -41,6 +41,17 @@ namespace SnowflakeV2CoreLogic.Models.SnowflakeAPIModels
 
         public void AddBinding(int index, object value)
         {
+            if (value == null)
+            {
+                JObject nullBinding = new JObject
+                {
+                    ["type"] = "TEXT",
+                    ["value"] = null,
+                };
+                AddBinding(index, nullBinding);
+                return;
+            }
+
             AddTextBinding(index, value.ToString());
         }
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 #nullable enable
@@ -10,6 +10,8 @@ namespace SnowflakeV2CoreLogic.Utilities
     using System.Web.OData.Query;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Constants;
     using Microsoft.Azure.Connectors.SnowflakeV2Contracts.Models;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using SnowflakeV2CoreLogic;
     using SnowflakeV2CoreLogic.Models.SnowflakeAPIModels;
@@ -18,6 +20,26 @@ namespace SnowflakeV2CoreLogic.Utilities
     {
         private const string DateTimeOutputFormat = "yyyy-MM-dd HH:mm:ss.fffffff";
         private const string DateOutputFormat = "yyyy-MM-dd";
+        private const char SkipTokenSeparator = '~';
+
+        // Supported filter functions
+        // When new functions are added, they need to be added to the capabilityFilterFunction array
+        // so that they are returned in the metadata for delegation to work correctly
+        private static readonly CapabilityFilterFunction[] capabilityFilterFunction =
+        {
+            CapabilityFilterFunction.Equal,
+            CapabilityFilterFunction.NotEqual,
+            CapabilityFilterFunction.GreaterThan,
+            CapabilityFilterFunction.GreaterThanOrEqual,
+            CapabilityFilterFunction.LessThan,
+            CapabilityFilterFunction.LessThanOrEqual,
+            CapabilityFilterFunction.And,
+            CapabilityFilterFunction.Or,
+            CapabilityFilterFunction.Contains,
+            CapabilityFilterFunction.StartsWith,
+            CapabilityFilterFunction.EndsWith,
+            CapabilityFilterFunction.Not,
+        };
 
         /// <summary>
         /// Maps the table metadata response from Snowflake to an OData compatible format
@@ -28,12 +50,14 @@ namespace SnowflakeV2CoreLogic.Utilities
             SnowflakeAPIResponseModel primaryKeyResponse,
             string tableName)
         {
+            var numRows = metadataResponse?.ResultSetMetaData?.NumRows ?? 0;
+
             TableMetadata metadata = new TableMetadata()
             {
                 Name = tableName,
                 Title = tableName,
                 Permission = PermissionType.ReadWrite,
-                Capabilities = CreateTableCapabilities(),
+                Capabilities = CreateTableCapabilities(numRows),
             };
 
             // Get the indicies where the following information can be found
@@ -106,6 +130,16 @@ namespace SnowflakeV2CoreLogic.Utilities
                         var keyType = string.Equals(columnName, primaryKey, StringComparison.OrdinalIgnoreCase) ?
                                                KeyType.Primary : KeyType.None;
 
+                        ColumnCapabilitiesMetadata columnCapabilitiesMetadata = new ColumnCapabilitiesMetadata()
+                        {
+                            FilterFunctions = capabilityFilterFunction,
+                        };
+
+                        JsonSerializer serializer = new JsonSerializer();
+                        serializer.TypeNameHandling = TypeNameHandling.None;
+                        serializer.Converters.Add(new StringEnumConverter());
+                        JToken columnCapabilitiesMetadataJson = JToken.FromObject(columnCapabilitiesMetadata, serializer);
+
                         // Create an entry for the current column
                         var rowEntry = new JObject()
                         {
@@ -116,6 +150,7 @@ namespace SnowflakeV2CoreLogic.Utilities
                             [SchemaPropertyConstants.Permission] = "read-write",
                             [SchemaPropertyConstants.KeyType] = keyType,
                             [SchemaPropertyConstants.Required] = isFieldRequired,
+                            [SchemaPropertyConstants.Capabilities] = columnCapabilitiesMetadataJson,
                         };
 
                         if (!string.IsNullOrEmpty(datatype.ConnectorDataFormat))
@@ -141,9 +176,20 @@ namespace SnowflakeV2CoreLogic.Utilities
             return metadata;
         }
 
-        public static TableCapabilitiesMetadata CreateTableCapabilities()
+        public static TableCapabilitiesMetadata CreateTableCapabilities(int numRows)
         {
-            TableFilterRestrictionsMetadata? tableFilterRestrictionsMetadata = null;
+            // Get all possible values of CapabilityFilterFunction
+            var allCapabilities = Enum.GetValues(typeof(CapabilityFilterFunction)).Cast<CapabilityFilterFunction>();
+
+            // Find capabilities not included in capabilityFilterFunction
+            var nonFilterableProperties = allCapabilities.Except(capabilityFilterFunction).Select(c => c.ToString()).ToArray();
+
+            TableFilterRestrictionsMetadata? tableFilterRestrictionsMetadata = new TableFilterRestrictionsMetadata()
+            {
+                Filterable = true,
+                NonFilterableProperties = nonFilterableProperties,
+                RequiredProperties = null
+            };
 
             // Identify sort restrictions
             var sortRestrictions = new TableSortRestrictionsMetadata();
@@ -153,17 +199,116 @@ namespace SnowflakeV2CoreLogic.Utilities
             TableSelectRestrictionsMetadata selectRestrictions = new TableSelectRestrictionsMetadata();
             selectRestrictions.Selectable = true;
 
-            CapabilityFilterFunction[] capabilityFilterFunction = new CapabilityFilterFunction[0];
-
             TableCapabilitiesMetadata tableCapabilitiesMetadata = new TableCapabilitiesMetadata()
             {
                 FilterRestrictions = tableFilterRestrictionsMetadata,
                 SortRestrictions = sortRestrictions,
                 SelectRestrictions = selectRestrictions,
+                CountRestrictions = new TableCountRestrictionsMetadata()
+                {
+                    Countable = numRows > 0,
+                },
                 FilterFunctionSupport = capabilityFilterFunction,
             };
 
             return tableCapabilitiesMetadata;
+        }
+
+        public static Uri? GeneratePartitionNextLink(
+            Uri referrerUri,
+            ODataQueryOptions optionsFromRequest,
+            string statementHandle,
+            int nextPartitionIndex,
+            int totalPartitions,
+            int rowsReturnedInCurrentPartition)
+        {
+            if (nextPartitionIndex >= totalPartitions)
+            {
+                return null;
+            }
+
+            string? filter = optionsFromRequest?.Filter?.RawValue;
+            string endpointUrl = referrerUri.GetLeftPart(UriPartial.Path);
+            string? orderBy = optionsFromRequest?.OrderBy?.RawValue;
+            string? select = optionsFromRequest?.SelectExpand?.RawSelect;
+
+            int? topValue = null;
+            if (optionsFromRequest?.Top != null && int.TryParse(optionsFromRequest.Top.RawValue, out int parsedTop))
+            {
+                topValue = parsedTop - rowsReturnedInCurrentPartition;
+                if (topValue <= 0)
+                {
+                    return null;
+                }
+            }
+
+            StringBuilder nextUrl = new StringBuilder();
+            bool firstOption = true;
+
+            if (endpointUrl != null)
+            {
+                nextUrl.Append(endpointUrl);
+                nextUrl.Append("?");
+            }
+
+            void AppendParam(string key, string value)
+            {
+                if (!firstOption)
+                {
+                    nextUrl.Append("&");
+                }
+
+                nextUrl.Append($"{key}={value}");
+                firstOption = false;
+            }
+
+            if (orderBy != null)
+            {
+                AppendParam("$orderby", orderBy);
+            }
+
+            if (select != null)
+            {
+                AppendParam("$select", select);
+            }
+
+            if (topValue != null)
+            {
+                AppendParam("$top", topValue.Value.ToString());
+            }
+
+            if (filter != null)
+            {
+                AppendParam("$filter", filter);
+            }
+
+            string skipToken = $"{statementHandle}{SkipTokenSeparator}{nextPartitionIndex}{SkipTokenSeparator}{totalPartitions}";
+            AppendParam("$skiptoken", skipToken);
+
+            return new Uri(nextUrl.ToString());
+        }
+
+        public static bool TryParsePartitionSkipToken(string? skipToken, out string? statementHandle, out int partitionIndex, out int totalPartitions)
+        {
+            statementHandle = null;
+            partitionIndex = 0;
+            totalPartitions = 0;
+
+            if (skipToken == null || skipToken.Length == 0)
+            {
+                return false;
+            }
+
+            string[] parts = skipToken.Split(SkipTokenSeparator);
+            if (parts.Length != 3)
+            {
+                return false;
+            }
+
+            statementHandle = parts[0];
+            return !string.IsNullOrEmpty(statementHandle)
+                && int.TryParse(parts[1], out partitionIndex)
+                && int.TryParse(parts[2], out totalPartitions);
         }
 
         /// <summary>
@@ -173,11 +318,15 @@ namespace SnowflakeV2CoreLogic.Utilities
         /// <param name="precision">The amount of digits to the right of the decimal (if relevant), null otherwise.</param>
         /// <param name="data">The value of the data</param>
         /// <returns>Data converted to appropriate .NET data type</returns>
-        public static object CastSnowflakeDataToCorrectType(
+        public static object? CastSnowflakeDataToCorrectType(
             string snowflakeDataType,
             int? precision,
             object data)
         {
+            if (data == null)
+            {
+                return null;
+            }
             snowflakeDataType = snowflakeDataType.ToUpper();
 
             switch (snowflakeDataType)
@@ -205,102 +354,6 @@ namespace SnowflakeV2CoreLogic.Utilities
                 default:
                     return data;
             }
-        }
-
-        public static Uri? GenerateNextLink(
-            Uri referrerUri,
-            ODataQueryOptions optionsFromRequest,
-            int recordsFetched,
-            int totalRecords)
-        {
-            int offset = 0;
-
-            if (optionsFromRequest.Skip?.Value != null)
-            {
-                offset = (int)optionsFromRequest.Skip.Value;
-            }
-
-            int totalNumberOfRecordsRead = (int)recordsFetched + offset;
-
-            // No more records to read
-            if (totalRecords <= totalNumberOfRecordsRead)
-            {
-                return null;
-            }
-
-            // The format of the link should be the baseURL with original filters and adjusted offsets
-            string? filter = (optionsFromRequest.Filter == null) ? null : optionsFromRequest.Filter.RawValue;
-            string endpointUrl = referrerUri.GetLeftPart(UriPartial.Path);
-            string? orderBy = optionsFromRequest.OrderBy != null ? optionsFromRequest.OrderBy.RawValue : null;
-            string? select = optionsFromRequest.SelectExpand != null ? optionsFromRequest.SelectExpand.RawSelect : null;
-            string? top = optionsFromRequest.Top != null ? optionsFromRequest.Top.RawValue : null;
-            string? skip = totalNumberOfRecordsRead.ToString();
-
-            StringBuilder nextUrl = new StringBuilder();
-
-            bool firstOption = true;
-
-            if (endpointUrl != null)
-            {
-                nextUrl.Append(endpointUrl);
-                nextUrl.Append("?");
-            }
-
-            if (orderBy != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$orderby={orderBy}");
-                firstOption = false;
-            }
-
-            if (select != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$select={select}");
-                firstOption = false;
-            }
-
-            if (top != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$top={top}");
-                firstOption = false;
-            }
-
-            if (skip != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$skip={skip}");
-                firstOption = false;
-            }
-
-            if (filter != null)
-            {
-                if (!firstOption)
-                {
-                    nextUrl.Append("&");
-                }
-
-                nextUrl.Append($"$filter={filter}");
-            }
-
-            return new Uri(nextUrl.ToString());
         }
 
         /// <summary>
@@ -337,16 +390,22 @@ namespace SnowflakeV2CoreLogic.Utilities
         private static string ConvertSnowflakeDateTimeNtzToString(
             string snowflakeDateTime)
         {
-            // Snowflake returns data as "unixTime.F9" (meaning utc.9 fractional seconds) which doesn't parse natively with .NET
-            // We need to split the two parts up and parse handle them separately before recombining them
+            // Snowflake returns data as "unixTime.F" (seconds since epoch, optionally followed by fractional
+            // seconds) which doesn't parse natively with .NET. The number of fractional digits depends on the
+            // column's scale (0-9): scale 0 columns are returned with no fractional part at all (no '.'), while
+            // higher scales include that many fractional digits. We split the parts and handle them separately.
             string[] dateTimeParts = snowflakeDateTime.Split('.');
 
             // Convert the time since epoch to a datetimeoffset
             var parsedDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(dateTimeParts[0]));
 
-            DateTimeOffset parsedDateTimeWithFullPrecision = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            // A fractional component is only present when the column scale is greater than 0.
+            if (dateTimeParts.Length > 1)
+            {
+                parsedDateTime = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            }
 
-            return parsedDateTimeWithFullPrecision.ToString(DateTimeOutputFormat);
+            return parsedDateTime.ToString(DateTimeOutputFormat);
         }
 
         /// <summary>
@@ -357,16 +416,21 @@ namespace SnowflakeV2CoreLogic.Utilities
         private static string ConvertSnowflakeDateTimeWithTzToString(
             string snowflakeDateTime)
         {
-            // Snowflake returns data as "unixTime.F9 +0000" which doesn't parse natively with .NET
-            // We need to split the components two parts up and parse them separately before recombining them
+            // Snowflake returns data as "unixTime.F +0000" which doesn't parse natively with .NET.
+            // As with TIMESTAMP_NTZ, the fractional part is only present when the column scale is greater than 0.
+            // We first strip the trailing time zone offset, then split the seconds and fractional parts.
             // Note: the offset is not used because snowflake stores the timestamp in UTC which is what we want to return
-            string[] dateTimeParts = snowflakeDateTime.Split('.', ' ');
+            string timePart = snowflakeDateTime.Split(' ')[0];
+            string[] dateTimeParts = timePart.Split('.');
 
             // Convert the time since epoch to a datetimeoffset
             var parsedDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(dateTimeParts[0]));
 
-            // Include the fractional seconds
-            parsedDateTime = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            // Include the fractional seconds when present (scale > 0)
+            if (dateTimeParts.Length > 1)
+            {
+                parsedDateTime = ParseAndAddFractionalSecondsToDateTime(dateTimeParts[1], parsedDateTime);
+            }
 
             return parsedDateTime.ToString(DateTimeOutputFormat);
         }
@@ -381,8 +445,20 @@ namespace SnowflakeV2CoreLogic.Utilities
             string fractionalSeconds,
             DateTimeOffset dateTime)
         {
-            // Add the nanoseconds to the parsed datetime
-            var nanoseconds = long.Parse(fractionalSeconds);
+            if (string.IsNullOrEmpty(fractionalSeconds))
+            {
+                return dateTime;
+            }
+
+            // The fractional component is a decimal fraction of a second whose length matches the column's
+            // scale (1-9 digits). To interpret it correctly regardless of scale we normalize it to nanosecond
+            // precision (9 digits) by right-padding with zeros, e.g. scale 6 ".123456" -> "123456000" ns.
+            // Anything beyond 9 digits is truncated since nanoseconds are the finest unit Snowflake supports.
+            string nanosecondsString = fractionalSeconds.Length >= 9
+                ? fractionalSeconds.Substring(0, 9)
+                : fractionalSeconds.PadRight(9, '0');
+
+            var nanoseconds = long.Parse(nanosecondsString);
 
             // Convert nanoseconds to Ticks (1 Tick == 100 nanoseconds)
             var ticks = nanoseconds / 100;

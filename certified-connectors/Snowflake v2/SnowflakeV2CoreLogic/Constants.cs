@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Snowflake Inc.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic
@@ -12,6 +12,16 @@ namespace SnowflakeV2CoreLogic
     /// </summary>
     public static class Constants
     {
+        /// <summary>
+        /// Connector version information
+        /// </summary>
+        public static string ConnectorVersion = "2.2.0";
+
+        /// <summary>
+        /// Connector name for version comments
+        /// </summary>
+        public const string ConnectorName = "PowerPlatform-Snowflake-Connector";
+
         /// <summary>
         /// Delimiter for the OData $select query
         /// </summary>
@@ -54,11 +64,6 @@ namespace SnowflakeV2CoreLogic
         public const string DataSets = "datasets";
 
         /// <summary>
-        /// Default dataSet for Snowflake
-        /// </summary>
-        public const string DefaultDataSetName = "default";
-
-        /// <summary>
         /// Default number of records to skip
         /// </summary>
         public const long Skip = 0;
@@ -98,6 +103,7 @@ namespace SnowflakeV2CoreLogic
         public const string Schema = "schema";
         public const string Warehouse = "warehouse";
         public const string Role = "role";
+        public const string UseCaseInsensitiveFilters = "useCaseInsensitiveFilters";
 
         public const string HeaderApimReferrer = "x-ms-apim-referrer";
 
