@@ -1,0 +1,527 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Digisign - Delete",
+    "description": "Custom connector for the Digisign REST API focused on envelope and document deletion. Allows exchanging credentials for a token, discarding envelope drafts, deleting documents, deleting recipients, deleting signature tags, and making restricted universal API calls (GET/DELETE).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "DigiSign podpora",
+      "email": "podpora@digisign.cz",
+      "url": "https://www.digisign.cz/"
+    }
+  },
+  "host": "api.digisign.org",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connection-parameters": {
+    "username": {
+      "type": "securestring",
+      "uiDefinition": {
+        "displayName": "Access Key (accessKey)",
+        "description": "API Access Key from Digisign",
+        "tooltip": "Enter your Digisign accessKey"
+      },
+      "constraints": {
+        "required": "true"
+      }
+    },
+    "password": {
+      "type": "securestring",
+      "uiDefinition": {
+        "displayName": "Secret Key (secretKey)",
+        "description": "API Secret Key from Digisign",
+        "tooltip": "Enter your Digisign secretKey",
+        "uiControl": "password"
+      },
+      "constraints": {
+        "required": "true"
+      }
+    },
+    "environment": {
+      "type": "string",
+      "uiDefinition": {
+        "displayName": "Environment URL",
+        "description": "Base URL of the Digisign API.",
+        "tooltip": "Select Staging or Production, or enter a custom URL",
+        "constraints": {
+          "required": "true",
+          "allowedValues": [
+            {
+              "text": "Production (https://api.digisign.org)",
+              "value": "https://api.digisign.org"
+            },
+            {
+              "text": "Staging (https://api.staging.digisign.org)",
+              "value": "https://api.staging.digisign.org"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "basicAuth": {
+      "type": "basic",
+      "description": "Username = accessKey, Password = secretKey"
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "x-code": {
+    "className": "CustomConnectorCode",
+    "methodName": "PreRequest"
+  },
+  "paths": {
+    "/api/auth-token": {
+      "post": {
+        "summary": "Exchange Keys for Bearer Token",
+        "description": "Exchanges your API accessKey and secretKey for a short-lived Bearer token to authorize subsequent requests.",
+        "operationId": "authToken",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accessKey": {
+                  "type": "string",
+                  "x-ms-summary": "Access Key",
+                  "description": "API Access Key from Digisign",
+                  "example": "019ee470-a0c2-72a9-a666-9ced47485a9b"
+                },
+                "secretKey": {
+                  "type": "string",
+                  "x-ms-summary": "Secret Key",
+                  "description": "API Secret Key from Digisign",
+                  "example": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+                }
+              },
+              "required": [
+                "accessKey",
+                "secretKey"
+              ],
+              "example": {
+                "accessKey": "019ee470-a0c2-72a9-a666-9ced47485a9b",
+                "secretKey": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "accessKey": "019ee470-a0c2-72a9-a666-9ced47485a9b",
+              "secretKey": "c76a5bf4d284a0c8b3e8ee9fbc5a01d3"
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token returned",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "expiresIn": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        }
+      }
+    },
+    "/api/envelopes/{envelopeId}/discard": {
+      "post": {
+        "summary": "Discard Envelope Draft",
+        "description": "Discards and permanently deletes a draft envelope.",
+        "operationId": "discardEnvelope",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Envelope discarded successfully",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Envelopes"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/documents/{documentId}": {
+      "delete": {
+        "summary": "Delete Document",
+        "description": "Removes and deletes a linked document from an envelope draft.",
+        "operationId": "deleteDocument",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Document ID",
+            "description": "Document ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Document deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/recipients/{recipientId}": {
+      "delete": {
+        "summary": "Delete Recipient",
+        "description": "Removes a recipient from an envelope draft.",
+        "operationId": "deleteRecipient",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "recipientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Recipient ID",
+            "description": "Recipient ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Recipient deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Recipients"
+        ]
+      }
+    },
+    "/api/envelopes/{envelopeId}/tags/{tagId}": {
+      "delete": {
+        "summary": "Delete Signature Tag",
+        "description": "Removes a signature tag from an envelope draft.",
+        "operationId": "deleteTag",
+        "parameters": [
+          {
+            "name": "envelopeId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Envelope ID",
+            "description": "Envelope ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Tag ID",
+            "description": "Tag ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Signature tag deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      }
+    },
+    "/api/call-api": {
+      "post": {
+        "summary": "Universal API Call",
+        "description": "Performs an authenticated HTTP request to any Digisign API endpoint.",
+        "operationId": "callApi",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "x-ms-summary": "Method",
+                  "enum": [
+                    "GET",
+                    "DELETE"
+                  ],
+                  "default": "GET",
+                  "description": "HTTP method for the request",
+                  "example": "GET"
+                },
+                "path": {
+                  "type": "string",
+                  "x-ms-summary": "Path",
+                  "description": "Relative API path starting with slash (e.g. /api/envelopes)",
+                  "example": "/api/envelopes"
+                },
+                "queryString": {
+                  "type": "string",
+                  "x-ms-summary": "Query String",
+                  "description": "Query parameters (e.g. page=1&itemsPerPage=30)",
+                  "example": "page=1"
+                },
+                "body": {
+                  "type": "object",
+                  "x-ms-summary": "Body",
+                  "description": "JSON request body payload if needed (not used for standard GET/DELETE requests)",
+                  "example": {}
+                }
+              },
+              "required": [
+                "method",
+                "path"
+              ],
+              "example": {
+                "method": "GET",
+                "path": "/api/envelopes",
+                "queryString": "page=1",
+                "body": {}
+              }
+            },
+            "description": "Request Body",
+            "x-ms-body-example": {
+              "method": "GET",
+              "path": "/api/envelopes",
+              "queryString": "page=1",
+              "body": {}
+            },
+            "x-ms-summary": "Parameters"
+          },
+          {
+            "name": "x-environment",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "default": "https://api.digisign.org",
+            "x-ms-visibility": "advanced",
+            "description": "Target Environment URL",
+            "x-ms-summary": "X Environment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API call completed",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or request body."
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Something went wrong on the server."
+          }
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "brandColor",
+      "propertyValue": "#0F62FE"
+    },
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.digisign.cz/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.digisign.cz/gdpr.pdf"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Productivity"
+    }
+  ],
+  "x-developer": "Lukáš Toman (https://github.com/toman-lukas85)",
+  "x-author": "Lukáš Toman (https://github.com/toman-lukas85)"
+}
