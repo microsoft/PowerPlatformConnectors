@@ -1,0 +1,734 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Akeyless Secrets Manager",
+    "description": "Akeyless connector for api.akeyless.io: list and describe vault items, read secret values, and administer roles, gateways, targets, and authentication methods. Supports optional writes to create or update secrets and move objects per your account RBAC. Connection uses HTTP Basic with Akeyless API Key Access ID and Access Key. See readme.md for credential setup and API references.",
+    "version": "1.0",
+    "contact": {
+      "name": "Akeyless",
+      "url": "https://www.akeyless.io/"
+    }
+  },
+  "host": "api.akeyless.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/connector/list-items": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Folders and items from Akeyless list-items.",
+            "schema": {
+              "type": "object",
+              "description": "Response body from Akeyless (folders, items, pagination fields as returned by the API)."
+            }
+          },
+          "default": {
+            "description": "Error or non-success response."
+          }
+        },
+        "summary": "List Items",
+        "description": "Lists folders and items under a vault path. See [list-items](https://docs.akeyless.io/reference/listitems).",
+        "operationId": "ListItems",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Folder path to list (for example `/` or `/Production`). Leave empty for root.",
+                  "title": "Folder path"
+                },
+                "filter": {
+                  "type": "string",
+                  "description": "Filter by item name or substring.",
+                  "title": "Name filter"
+                },
+                "pagination_token": {
+                  "type": "string",
+                  "description": "Pagination token from a previous response.",
+                  "title": "Pagination token"
+                },
+                "current_folder": {
+                  "type": "boolean",
+                  "description": "If true, list only direct children of the folder.",
+                  "title": "Current folder only",
+                  "default": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/describe-item": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Item metadata from Akeyless describe-item.",
+            "schema": {
+              "type": "object",
+              "description": "Describe-item response JSON from Akeyless."
+            }
+          },
+          "default": {
+            "description": "Error or non-success response."
+          }
+        },
+        "summary": "Describe Item",
+        "description": "Returns metadata for an item by path or id. See [describe-item](https://docs.akeyless.io/reference/describeitem).",
+        "operationId": "DescribeItem",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Full path (item name) in Akeyless, for example `/Prod/DB/creds`.",
+                  "title": "Item path"
+                },
+                "show_versions": {
+                  "type": "boolean",
+                  "description": "Include item versions in the reply (Akeyless `show-versions`).",
+                  "title": "Show versions",
+                  "default": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/list-auth-methods": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Auth methods list from Akeyless.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "List Auth Methods",
+        "description": "Lists authentication methods. See [list-auth-methods](https://docs.akeyless.io/reference/listauthmethods). Optional `type` is an array of method types (for example `api_key`, `ldap`).",
+        "operationId": "ListAuthMethods",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "filter": { "type": "string", "description": "Substring filter on auth method name." },
+                "pagination_token": { "type": "string", "description": "Maps to Akeyless `pagination-token`." },
+                "type": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Restrict to these auth method types; omit for all."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/list-roles": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Roles from Akeyless.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "List Roles",
+        "description": "Lists roles. See [list-roles](https://docs.akeyless.io/reference/listroles).",
+        "operationId": "ListRoles",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "filter": { "type": "string" },
+                "pagination_token": { "type": "string", "description": "Maps to Akeyless `pagination-token`." }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/list-gateways": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Gateways from Akeyless.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "List Gateways",
+        "description": "Lists gateways. See [list-gateways](https://docs.akeyless.io/reference/listgateways).",
+        "operationId": "ListGateways",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": { "type": "object", "properties": {} }
+          }
+        ]
+      }
+    },
+    "/connector/list-targets": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Targets from Akeyless.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "List Targets",
+        "description": "Lists integration targets. See [list-targets](https://docs.akeyless.io/reference/listtargets).",
+        "operationId": "ListTargets",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "filter": { "type": "string" },
+                "pagination_token": { "type": "string" },
+                "type": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Target types to include; omit for all."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/usc-list": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Secrets visible through the USC.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "USC List",
+        "description": "Lists secrets for a Universal Secrets Connector. See [usc-list](https://docs.akeyless.io/reference/usclist).",
+        "operationId": "UscList",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["usc_name"],
+              "properties": {
+                "usc_name": {
+                  "type": "string",
+                  "description": "Universal Secrets Connector item name in Akeyless (sent as `usc-name`)."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/target-get": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Target details.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Target Get",
+        "description": "Returns one target by name. See [target-get](https://docs.akeyless.io/reference/targetget).",
+        "operationId": "TargetGet",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "description": "Exact target name." },
+                "show_versions": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Include all target versions (`show-versions`)."
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/get-tags": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Tags for the item.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Get Tags",
+        "description": "Returns tags for an item path. See [get-tags](https://docs.akeyless.io/reference/gettags).",
+        "operationId": "GetTags",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "description": "Full item path." }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/get-role": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Role details.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Get Role",
+        "description": "Returns one role by name. See [get-role](https://docs.akeyless.io/reference/getrole).",
+        "operationId": "GetRole",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "description": "Exact role name." }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/get-auth-method": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Auth method details.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Get Auth Method",
+        "description": "Returns one authentication method by name. See [get-auth-method](https://docs.akeyless.io/reference/getauthmethod).",
+        "operationId": "GetAuthMethod",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "description": "Exact auth method name." }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/get-analytics-data": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Analytics payload from Akeyless.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Get Analytics Data",
+        "description": "Returns analytics / usage data. See [get-analytics-data](https://docs.akeyless.io/reference/getanalyticsdata).",
+        "operationId": "GetAnalyticsData",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": { "type": "object", "properties": {} }
+          }
+        ]
+      }
+    },
+    "/connector/list-groups": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Groups list.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "List Groups",
+        "description": "Lists groups. See [list-groups](https://docs.akeyless.io/reference/listgroups).",
+        "operationId": "ListGroups",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "filter": { "type": "string", "description": "Substring filter on group name." },
+                "pagination_token": { "type": "string", "description": "Maps to Akeyless `pagination-token`." }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/create-secret": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Create-secret result.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Create Secret",
+        "description": "**Write:** creates a static secret. See [create-secret](https://docs.akeyless.io/reference/createsecret).",
+        "operationId": "CreateSecret",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name", "value"],
+              "properties": {
+                "name": { "type": "string", "description": "Full path of the new secret." },
+                "value": { "type": "string", "description": "Secret material." },
+                "description": { "type": "string" },
+                "tags": { "type": "array", "items": { "type": "string" } },
+                "protection_key": { "type": "string" },
+                "multiline": { "type": "boolean", "default": false },
+                "secret_type": {
+                  "type": "string",
+                  "enum": ["generic", "password"],
+                  "default": "generic"
+                },
+                "format": {
+                  "type": "string",
+                  "enum": ["text", "json", "key-value"],
+                  "default": "text"
+                },
+                "max_versions": { "type": "string" },
+                "delete_protection": { "type": "boolean", "default": false }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/update-item": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Update result (may include both update-item and update-secret-val).",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Update Item",
+        "description": "**Write:** updates item metadata and/or static secret value (uses `/update-item` and/or `/update-secret-val` like MCP). See [update-item](https://docs.akeyless.io/reference/updateitem) and [update-secret-val](https://docs.akeyless.io/reference/updatesecretval).",
+        "operationId": "UpdateItem",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "description": "Current item path." },
+                "new_value": { "type": "string", "description": "New secret value for static secrets." },
+                "keep_prev_version": { "type": "boolean", "default": false },
+                "description": { "type": "string" },
+                "new_name": { "type": "string" },
+                "add_tags": { "type": "array", "items": { "type": "string" } },
+                "remove_tags": { "type": "array", "items": { "type": "string" } },
+                "max_versions": { "type": "string" },
+                "delete_protection": { "type": "boolean" }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/delete-item": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Delete-item result.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Delete Item",
+        "description": "**Write:** deletes or schedules deletion. See [delete-item](https://docs.akeyless.io/reference/deleteitem).",
+        "operationId": "DeleteItem",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string" },
+                "delete_immediately": { "type": "boolean", "default": false },
+                "delete_in_days": { "type": "integer", "format": "int32" },
+                "version": { "type": "integer", "format": "int32" }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/connector/move-objects": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Move-objects result.",
+            "schema": { "type": "object" }
+          },
+          "default": {
+            "description": "Error response."
+          }
+        },
+        "summary": "Move Objects",
+        "description": "**Write:** moves or renames items, auth methods, or roles. See [move-objects](https://docs.akeyless.io/reference/moveobjects).",
+        "operationId": "MoveObjects",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["source_path", "target_path"],
+              "properties": {
+                "source_path": { "type": "string" },
+                "target_path": { "type": "string" },
+                "objects_type": {
+                  "type": "string",
+                  "enum": ["item", "auth_method", "role"],
+                  "default": "item"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/get-secret-value/text": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Secret value returned by Akeyless.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "SecretValue": {
+                  "type": "string",
+                  "description": "Plain-text secret value.",
+                  "title": "Secret value"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error or non-success response."
+          }
+        },
+        "summary": "Get Secret",
+        "description": "Retrieves a secret value. Use the connection for Access Id / Access Key; supply only the secret path.",
+        "operationId": "GetSecret",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "secret_name"
+              ],
+              "properties": {
+                "secret_name": {
+                  "type": "string",
+                  "description": "Full path of the secret in Akeyless (for example /Prod/DB/Password).",
+                  "title": "Secret name"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/get-secret-value/json": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Structured credential fields from Akeyless.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "description": "Username when the secret is stored as credentials."
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Password when the secret is stored as credentials."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error or non-success response."
+          }
+        },
+        "summary": "Get Password",
+        "description": "Retrieves a structured username/password style secret. Same connection; supply only the secret path.",
+        "operationId": "GetPassword",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "secret_name"
+              ],
+              "properties": {
+                "secret_name": {
+                  "type": "string",
+                  "description": "Full path of the secret in Akeyless.",
+                  "title": "Secret name"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {},
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "basic-auth": {
+      "type": "basic",
+      "description": "Akeyless Access ID + Access Key. Power Platform labels the two fields from apiProperties (Akeyless Access ID / Akeyless Access Key); technically they are sent as the HTTP Basic username and password."
+    }
+  },
+  "security": [
+    {
+      "basic-auth": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.akeyless.io/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.akeyless.io/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Security;IT Operations"
+    }
+  ]
+}

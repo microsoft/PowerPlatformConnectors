@@ -5,7 +5,7 @@ Taqnyat offers reliable SMS, Whatsapp and Voice messages for business automation
 
 ## Prerequisites
 You will need the following to proceed:
-* A Taqnyat account With Predifend Token.
+* A Taqnyat account With Predefined Token.
 * Make sure you have enough balance in your Taqnyat account.
 * Make sure you have verified sender name in your Taqnyat account.
 

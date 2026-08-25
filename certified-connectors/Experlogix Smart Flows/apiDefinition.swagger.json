@@ -36,7 +36,8 @@
                             "flowId": {
                                 "parameter": "flowId"
                             }
-                        }
+                        },
+                        "value-path": "schema"
                     },
                     "x-ms-dynamic-properties": {
                         "operationId": "GetFlowSchema",
@@ -44,7 +45,8 @@
                             "flowId": {
                                 "parameterReference": "req/flowId"
                             }
-                        }
+                        },
+                        "itemValuePath": "schema"
                     }
                 },
                 "priority": {
@@ -53,6 +55,13 @@
                     "type": "integer",
                     "format": "int32",
                     "x-ms-visibility": "advanced"
+                },
+                "enableAsynchronousRequestReplyPattern": {
+                    "description": "If enabled, the flow execution will be handled asynchronously by the Power Platform.",
+                    "title": "Asynchronous Request-Reply Pattern",
+                    "type": "boolean",
+                    "x-ms-visibility": "advanced",
+                    "default": true
                 }
             },
             "required": [
@@ -100,6 +109,34 @@
             },
             "type": "object"
         },
+        "MeResponse": {
+            "properties": {
+                "userInfo": {
+                    "properties": {
+                        "id": {
+                            "type": "string"
+                        },
+                        "userName": {
+                            "type": "string"
+                        },
+                        "displayName": {
+                            "type": "string"
+                        },
+                        "firstName": {
+                            "type": "string"
+                        },
+                        "lastName": {
+                            "type": "string"
+                        },
+                        "emailAddress": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
         "GetDocumentsRequest": {
             "properties": {
                 "executionId": {
@@ -138,6 +175,10 @@
                 },
                 "documentName": {
                     "title": "Document Name",
+                    "type": "string"
+                },
+                "downloadUrl": {
+                    "title": "Download URL",
                     "type": "string"
                 }
             },
@@ -200,7 +241,8 @@
                             "recordType": {
                                 "parameter": "recordType"
                             }
-                        }
+                        },
+                        "value-path": "schema"
                     },
                     "x-ms-dynamic-properties": {
                         "operationId": "GetRecordsSchema",
@@ -211,7 +253,8 @@
                             "recordType": {
                                 "parameterReference": "req/recordType"
                             }
-                        }
+                        },
+                        "itemValuePath": "schema"
                     }
                 },
                 "includeAllDependencies": {
@@ -261,9 +304,88 @@
                 "includeHistory"
             ],
             "type": "object"
+        },
+        "ConnectorTypeResponse": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "ExternalConnectorIdentifierResponse": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "connectorType": {
+                    "$ref": "#/definitions/ConnectorTypeResponse"
+                }
+            },
+            "type": "object"
+        },
+        "ExternalConnectorSyncResultResponse": {
+            "properties": {
+                "identifier": {
+                    "$ref": "#/definitions/ExternalConnectorIdentifierResponse"
+                },
+                "syncTime": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "updateCount": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "addCount": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "deactivatedCount": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            },
+            "type": "object"
+        },
+        "ExternalUsersSyncResponse": {
+            "properties": {
+                "connectorSyncResults": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ExternalConnectorSyncResultResponse"
+                    }
+                },
+                "totalSyncTime": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "updateCount": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "addCount": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "deactivatedCount": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            },
+            "type": "object"
         }
     },
-    "host": "powerapps.xpertdoc.com",
+    "host": "da.powerapps.experlogix.com",
     "info": {
         "description": "Smart Flows provides business users with robust yet user-friendly features to simplify, optimize and automate business-critical document processes. From a single, intuitive platform, you are empowered to create simple or complex document templates, capture customer information and data, store and manage enterprise content, electronically sign documents, in batches or through automated flows, resulting in accelerated document processes, increased productivity and reduced dependence on IT.",
         "title": "Experlogix Smart Flows",
@@ -290,6 +412,19 @@
     ],
     "parameters": {},
     "paths": {
+        "/runtime/webhooks/mcp": {
+            "post": {
+                "summary": "Experlogix Smart Flows MCP Server",
+                "description": "Endpoint for Experlogix Smart Flows MCP communication.",
+                "x-ms-agentic-protocol": "mcp-streamable-1.0",
+                "operationId": "InvokeMCP",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
         "/api/Documents": {
             "post": {
                 "consumes": [
@@ -439,6 +574,9 @@
                             "$ref": "#/definitions/FlowExecutionResponse"
                         }
                     },
+                    "202": {
+                        "description": "Success"
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -450,6 +588,57 @@
                 "tags": [
                     "Flows"
                 ]
+            }
+        },
+        "/api/ExecutionProgress": {
+            "get": {
+                "description": "Get the progress of an execution.",
+                "operationId": "GetExecutionProgress",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "executionId",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "timeout",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "startTime",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/FlowExecutionResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Get Flow Schema",
+                "tags": [
+                    "Flows"
+                ],
+                "x-ms-visibility": "internal"
             }
         },
         "/api/Flows": {
@@ -487,6 +676,38 @@
                 "x-ms-visibility": "internal"
             }
         },
+        "/api/Me": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "description": "Get the current user's information.",
+                "operationId": "GetMe",
+                "parameters": [],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/MeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "summary": "Current User Information",
+                "tags": [
+                    "User"
+                ],
+                "x-ms-visibility": "internal"
+            }
+        },
         "/api/FlowSchema": {
             "get": {
                 "consumes": [
@@ -509,7 +730,12 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "object"
+                            "type": "object",
+                            "properties": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
                         }
                     },
                     "400": {
@@ -554,7 +780,12 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "type": "object"
+                            "type": "object",
+                            "properties": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
                         }
                     },
                     "400": {
@@ -599,13 +830,13 @@
                             "title": "Package Content",
                             "type": "string"
                         }
-                        },
-                        "400": {
-                            "description": "Bad Request"
-                        },
-                        "401": {
-                            "description": "Unauthorized"
-                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
                 },
                 "summary": "Export Package",
                 "tags": [
@@ -684,13 +915,13 @@
                             "title": "Package Content",
                             "type": "string"
                         }
-                        },
-                        "400": {
-                            "description": "Bad Request"
-                        },
-                        "401": {
-                            "description": "Unauthorized"
-                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
                 },
                 "summary": "Backup Package",
                 "tags": [
@@ -729,6 +960,34 @@
                 },
                 "tags": [
                     "ImportExport"
+                ]
+            }
+        },
+        "/api/SyncExternalUsers": {
+            "post": {
+                "summary": "Sync External Users",
+                "description": "Synchronize external users with configured connectors.",
+                "operationId": "SyncExternalUsers",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/ExternalUsersSyncResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "tags": [
+                    "User"
                 ]
             }
         }
