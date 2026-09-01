@@ -1,0 +1,560 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Nero AI Image Editing Tool",
+    "description": "Power Automate/Power Apps connector for Nero AI image tasks. Supports ImageUpscaler (2x/4x upscaling), ColorizePhoto (colorize black-and-white photos), BackgroundRemover (remove image backgrounds), ImageDenoiser (reduce image noise), ImageCompressor (compress images), and FaceRestoration (enhance and restore facial features).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Nero AI",
+      "email": "ai@nero.com"
+    }
+  },
+  "host": "api.nero.com",
+  "basePath": "/biz/api",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "Image Processing",
+      "description": "AI-powered image tasks: upscaling, colorization, background removal, noise reduction, compression, and face restoration"
+    }
+  ],
+  "paths": {
+    "/task": {
+      "post": {
+        "tags": [
+          "Image Processing"
+        ],
+        "summary": "Create task",
+        "description": "Submit an image for AI-powered processing. Supports ImageUpscaler (2x/4x), ColorizePhoto, BackgroundRemover, ImageDenoiser, ImageCompressor, and FaceRestoration. Returns a task_id for status monitoring.",
+        "operationId": "CreateImageTask",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Image processing request parameters. Choose the appropriate task type and provide required image URL.",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/ImageUpscaleTaskRequest"
+                },
+                {
+                  "$ref": "#/definitions/ColorizePhotoTaskRequest"
+                },
+                {
+                  "$ref": "#/definitions/BackgroundRemoverTaskRequest"
+                },
+                {
+                  "$ref": "#/definitions/ImageDenoiserTaskRequest"
+                },
+                {
+                  "$ref": "#/definitions/ImageCompressorTaskRequest"
+                },
+                {
+                  "$ref": "#/definitions/FaceRestorationTaskRequest"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response from the API. Check the 'code' field for success (0) or business error (11002/11003/11004).",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/UpscaleImageResponse"
+                },
+                {
+                  "$ref": "#/definitions/ErrorResponse"
+                }
+              ]
+            },
+            "examples": {
+              "success": {
+                "summary": "Success Response",
+                "value": {
+                  "code": 0,
+                  "data": {
+                    "task_id": "bmtrfykh"
+                  }
+                }
+              },
+              "error": {
+                "summary": "Business Error Response",
+                "value": {
+                  "code": 11002,
+                  "msg": "The API key is invalid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters"
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded (10 requests per second)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Image Processing"
+        ],
+        "summary": "Check task status",
+        "description": "Monitor the progress and retrieve results of a task. Check status, progress percentage, and get the final output URL.",
+        "operationId": "CheckTaskStatus",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Unique task identifier returned from CreateImageTask"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response from the API. Check the 'code' field for success or business errors.",
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/CheckTaskStatusResponse"
+                },
+                {
+                  "$ref": "#/definitions/ErrorResponse"
+                }
+              ]
+            },
+            "examples": {
+              "success": {
+                "summary": "Success Response",
+                "value": {
+                  "code": 0,
+                  "data": {
+                    "status": "done",
+                    "result": {
+                      "output": "https://api.nero.com/biz/api/download/upscaled_image_12345.jpg"
+                    }
+                  }
+                }
+              },
+              "error": {
+                "summary": "Business Error Response",
+                "value": {
+                  "code": 11002,
+                  "msg": "The API key is invalid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "429": {
+            "description": "Too Many Requests - rate limit exceeded (10 requests per second)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-neroai-api-key",
+      "description": "Your Nero AI API key for authentication. Do not expose this key publicly as it allows access to all authenticated APIs and will cost your credits."
+    }
+  },
+  "definitions": {
+    "ImageUpscaleTaskRequest": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "AI model type for image upscaling.",
+          "enum": [
+            "ImageUpscaler:Standard",
+            "ImageUpscaler:Photograph",
+            "ImageUpscaler:Anime",
+            "ImageUpscaler:FaceEnhancement"
+          ]
+        },
+        "body": {
+          "$ref": "#/definitions/UpscaleImageRequestBody"
+        },
+        "info": {
+          "$ref": "#/definitions/RequestInfo"
+        }
+      },
+      "required": [
+        "type",
+        "body"
+      ]
+    },
+    "ColorizePhotoTaskRequest": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Task type",
+          "enum": [
+            "ColorizePhoto"
+          ]
+        },
+        "body": {
+          "$ref": "#/definitions/ColorizePhotoRequestBody"
+        },
+        "info": {
+          "$ref": "#/definitions/RequestInfo"
+        }
+      },
+      "required": [
+        "type",
+        "body"
+      ]
+    },
+    "BackgroundRemoverTaskRequest": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Task type",
+          "enum": [
+            "BackgroundRemover"
+          ]
+        },
+        "body": {
+          "$ref": "#/definitions/BackgroundRemoverRequestBody"
+        },
+        "info": {
+          "$ref": "#/definitions/RequestInfo"
+        }
+      },
+      "required": [
+        "type",
+        "body"
+      ]
+    },
+    "ImageDenoiserTaskRequest": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Task type",
+          "enum": [
+            "ImageDenoiser"
+          ]
+        },
+        "body": {
+          "$ref": "#/definitions/ImageDenoiserRequestBody"
+        },
+        "info": {
+          "$ref": "#/definitions/RequestInfo"
+        }
+      },
+      "required": [
+        "type",
+        "body"
+      ]
+    },
+    "ImageCompressorTaskRequest": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Task type",
+          "enum": [
+            "ImageCompressor"
+          ]
+        },
+        "body": {
+          "$ref": "#/definitions/ImageCompressorRequestBody"
+        },
+        "info": {
+          "$ref": "#/definitions/RequestInfo"
+        }
+      },
+      "required": [
+        "type",
+        "body"
+      ]
+    },
+    "FaceRestorationTaskRequest": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Task type",
+          "enum": [
+            "FaceRestoration"
+          ]
+        },
+        "body": {
+          "$ref": "#/definitions/FaceRestorationRequestBody"
+        },
+        "info": {
+          "$ref": "#/definitions/RequestInfo"
+        }
+      },
+      "required": [
+        "type",
+        "body"
+      ]
+    },
+    "UpscaleImageRequestBody": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Public URL of the image. Must be accessible via HTTPS. Supported formats: JPG, JPEG, PNG, BMP, WEBP, JFIF, JFI, JPE, JIF, ICO.",
+          "example": "https://example.com/image.jpg"
+        },
+        "quality_factor": {
+          "type": "integer",
+          "description": "Quality factor for upscaled result. Range: [80, 100], default 95. Only effective for JPG/JPEG/WEBP.",
+          "minimum": 80,
+          "maximum": 100,
+          "default": 95,
+          "example": 95
+        },
+        "upscaling_rate": {
+          "type": "number",
+          "description": "Upscaling multiplier. 2 or 4. Default 4 (face enhancement not supported).",
+          "enum": [
+            2,
+            4
+          ],
+          "default": 4,
+          "example": 4
+        }
+      },
+      "required": [
+        "image"
+      ]
+    },
+    "ColorizePhotoRequestBody": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Public URL of the image. Must be accessible via HTTPS. Supported formats: JPG, JPEG, PNG, BMP, WEBP, JFIF, JFI, JPE, JIF, HEIC, HEIF.",
+          "example": "https://example.com/old-photo.jpg"
+        }
+      },
+      "required": [
+        "image"
+      ]
+    },
+    "BackgroundRemoverRequestBody": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Public URL of the image. Must be accessible via HTTPS. Supported formats: JPG, JPEG, PNG, BMP, WEBP, JFIF, JFI, JPE, JIF, HEIC, HEIF.",
+          "example": "https://example.com/image.jpg"
+        },
+        "action": {
+          "type": "string",
+          "description": "Background removal action type. Do not modify - keep as 'auto' for optimal results.",
+          "enum": [
+            "auto"
+          ],
+          "default": "auto",
+          "example": "auto"
+        }
+      },
+      "required": [
+        "image"
+      ]
+    },
+    "ImageDenoiserRequestBody": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Public URL of the image. Must be accessible via HTTPS. Supported formats: JPG, JPEG, PNG, BMP, WEBP, JFIF, JFI, JPE, JIF, HEIC, HEIF.",
+          "example": "https://example.com/image.jpg"
+        }
+      },
+      "required": [
+        "image"
+      ]
+    },
+    "ImageCompressorRequestBody": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Public URL of the image. Must be accessible via HTTPS. Supported formats: JPG, JPEG, PNG, BMP, WEBP, JFIF, JFI, JPE, JIF, HEIC, HEIF.",
+          "example": "https://example.com/large-image.jpg"
+        }
+      },
+      "required": [
+        "image"
+      ]
+    },
+    "FaceRestorationRequestBody": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Public URL of the image. Must be accessible via HTTPS. Supported formats: JPG, JPEG, PNG, BMP, WEBP, JFIF, JFI, JPE, JIF, HEIC, HEIF.",
+          "example": "https://example.com/face-image.jpg"
+        }
+      },
+      "required": [
+        "image"
+      ]
+    },
+    "RequestInfo": {
+      "type": "object",
+      "properties": {
+        "trace_id": {
+          "type": "string",
+          "description": "Unique identifier for request tracing and support. Do not modify - keep as 'power_automate' for optimal compatibility.",
+          "default": "power_automate",
+          "example": "power_automate"
+        }
+      },
+      "default": {
+        "trace_id": "power_automate"
+      }
+    },
+    "UpscaleImageResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "number",
+          "description": "Response status code. 0 indicates success, other values indicate errors.",
+          "example": 0
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "description": "Unique identifier for the task.",
+              "example": "bmtrfykh"
+            }
+          }
+        }
+      }
+    },
+    "CheckTaskStatusResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "number",
+          "description": "Response status code. 0 indicates success, other values indicate errors.",
+          "example": 0
+        },
+        "data": {
+          "type": "object",
+          "description": "Detailed task information including current status and results",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Current processing status of the task",
+              "enum": [
+                "pending",
+                "running",
+                "done",
+                "failed"
+              ],
+              "example": "running"
+            },
+            "pending_count": {
+              "type": "integer",
+              "description": "Number of tasks ahead in the processing queue (only when status is 'pending')",
+              "example": 5
+            },
+            "progress": {
+              "type": "integer",
+              "description": "Processing progress as a percentage (only when status is 'running')",
+              "minimum": 0,
+              "maximum": 100,
+              "example": 75
+            },
+            "result": {
+              "type": "object",
+              "description": "Final result containing the output URL (only when status is 'done')",
+              "properties": {
+                "output": {
+                  "type": "string",
+                  "description": "Direct download URL for the output image",
+                  "example": "https://api.nero.com/biz/api/download/upscaled_image_12345.jpg"
+                }
+              }
+            },
+            "msg": {
+              "type": "string",
+              "description": "Error message explaining why the task failed (only when status is 'failed')",
+              "example": "Image processing failed due to unsupported format"
+            }
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "description": "Error response format. Business errors: 11002 - invalid API key, 11003 - expired API key, 11004 - insufficient credits.",
+      "properties": {
+        "code": {
+          "type": "number",
+          "enum": [
+            11002,
+            11003,
+            11004
+          ],
+          "example": 11002
+        },
+        "msg": {
+          "type": "string",
+          "description": "Human-readable error description",
+          "example": "The API key is invalid"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "x-ms-connector-metadata": {
+    "uiDefinition": {
+      "displayName": "Nero AI Image Editing Tool",
+      "description": "Connect to Nero AI to upscale images, colorize black-and-white photos, remove image backgrounds, reduce image noise, compress images, and restore facial features.",
+      "iconUri": "https://connectoricons-prod.azureedge.net/releases/v1.0.1638/1.0.1638.3274/nero-ai-image-upscaler/icon.png",
+      "brandColor": "#2AAC6F",
+      "capabilities": [
+        "actions"
+      ]
+    }
+  }
+}
