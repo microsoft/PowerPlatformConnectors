@@ -114,6 +114,8 @@ Retrieve a zone forecast.
 Retrieve a list of observations for a zone.
 ### Get zone stations
 Retrieve a list of observation stations for a zone.
+### Invoke MCP Server
+Sends JSON-RPC 2.0 requests to the Model Context Protocol server for tool execution and capability management.
 
 ## Known Issues and Limitations
 There are no known issues at this time.
