@@ -8,27 +8,39 @@ Get the most up-to-date information on popular seafood harvested or farmed in th
 
 None.
 
+## Deprecation
+
+**This connector is deprecated.** The underlying FishWatch.gov API has been decommissioned: the standalone FishWatch.gov site was folded into fisheries.noaa.gov, and the `www.fishwatch.gov/api` endpoints no longer return data (requests now redirect away from the API). As a result, the connector's operations are non-functional.
+
+If you are using it in your flows or apps, please migrate away from it. See the [Recommended Alternative](#recommended-alternative) below, or reach out if you need help migrating.
+
 ## Supported Operations
 
-### List Species
+### List Species (deprecated)
 
 Lists all species data from the FishWatch database.
 
-### Get Species
+### Get Species (deprecated)
 
 Get specific species data from the FishWatch database.
 
 ## Known Issues and Limitations
 
-No issues and limitations are known at this time regarding the connector.
+This connector is deprecated and its operations are non-functional, because the underlying FishWatch.gov API has been retired (see [Deprecation](#deprecation) above).
 
-The API has the limitation that:
-* it only allows requesting either all data or just one specific species at a time
-* some parameters are returned with markup included
+The API previously had the limitation that:
+* it only allowed requesting either all data or just one specific species at a time
+* some parameters were returned with markup included
 
 ## Getting Started
 
-You can visit [FishWatch.gov API documentation](https://www.fishwatch.gov/developers) to get more information about the data returned by the endpoints.
+The FishWatch.gov API is no longer maintained, and its endpoints no longer return data (see [Deprecation](#deprecation) above). The original developer documentation at `https://www.fishwatch.gov/developers` now redirects to NOAA Fisheries and is no longer available.
+
+For a maintained data source going forward, see the [Recommended Alternative](#recommended-alternative) below.
+
+## Recommended Alternative
+
+As the FishWatch.gov API is retired, the maintained NOAA Fisheries developer API is the **Fisheries One Stop Shop (FOSS)**: [NOAA Fisheries FOSS](https://www.fisheries.noaa.gov/foss/). Note that FOSS exposes a different dataset (commercial landings and related fisheries statistics) and is not a drop-in replacement for FishWatch's seafood species profiles, so evaluate it against your needs before migrating.
 
 ## Disclaimer
 
