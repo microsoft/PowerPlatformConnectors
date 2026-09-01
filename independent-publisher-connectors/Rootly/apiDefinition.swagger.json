@@ -1,0 +1,1485 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Rootly",
+    "description": "Rootly is an AI-powered incident management platform. Create and track incidents, manage alerts, and follow up on action items across your engineering organization.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.rootly.com",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/vnd.api+json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/incidents": {
+      "get": {
+        "operationId": "listIncidents",
+        "summary": "List Incidents",
+        "description": "Retrieves a list of incidents from Rootly with optional filtering by status and severity.",
+        "tags": [
+          "Incidents"
+        ],
+        "parameters": [
+          {
+            "name": "page[number]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page Number"
+          },
+          {
+            "name": "page[size]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 25,
+            "description": "Number of items per page.",
+            "x-ms-summary": "Page Size"
+          },
+          {
+            "name": "filter[status]",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "description": "Filter by incident status (e.g., started, mitigated, resolved, cancelled).",
+            "x-ms-summary": "Status Filter"
+          },
+          {
+            "name": "filter[severity]",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "description": "Filter by severity slug (e.g., sev0, sev1, sev2).",
+            "x-ms-summary": "Severity Filter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of incidents.",
+            "schema": {
+              "$ref": "#/definitions/IncidentListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createIncident",
+        "summary": "Create Incident",
+        "description": "Creates a new incident in Rootly with a title and severity.",
+        "tags": [
+          "Incidents"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "attributes"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "incidents",
+                      "x-ms-visibility": "internal",
+                      "description": "JSON:API resource type.",
+                      "x-ms-summary": "Resource Type"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "title",
+                        "severity_id"
+                      ],
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Title of the incident.",
+                          "x-ms-summary": "Title"
+                        },
+                        "severity_id": {
+                          "type": "string",
+                          "description": "Severity level ID. Use List Severities to find valid IDs.",
+                          "x-ms-summary": "Severity ID"
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "Description or summary of the incident.",
+                          "x-ms-summary": "Summary"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "description": "Incident kind: normal, scheduled, or backfill.",
+                          "x-ms-summary": "Kind",
+                          "enum": [
+                            "normal",
+                            "scheduled",
+                            "backfill"
+                          ]
+                        },
+                        "private": {
+                          "type": "boolean",
+                          "description": "Whether the incident is private.",
+                          "x-ms-summary": "Private"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created incident.",
+            "schema": {
+              "$ref": "#/definitions/IncidentSingleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}": {
+      "get": {
+        "operationId": "getIncident",
+        "summary": "Get Incident",
+        "description": "Retrieves the details of a specific incident by its ID.",
+        "tags": [
+          "Incidents"
+        ],
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the incident to retrieve.",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The incident details.",
+            "schema": {
+              "$ref": "#/definitions/IncidentSingleResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateIncident",
+        "summary": "Update Incident",
+        "description": "Updates an existing incident's status, severity, or other fields.",
+        "tags": [
+          "Incidents"
+        ],
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the incident to update.",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "incidents",
+                      "x-ms-visibility": "internal",
+                      "description": "JSON:API resource type.",
+                      "x-ms-summary": "Resource Type"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Updated incident title.",
+                          "x-ms-summary": "Title"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "New status: started, mitigated, resolved, or cancelled.",
+                          "x-ms-summary": "Status",
+                          "enum": [
+                            "started",
+                            "mitigated",
+                            "resolved",
+                            "cancelled"
+                          ]
+                        },
+                        "severity_id": {
+                          "type": "string",
+                          "description": "Updated severity ID.",
+                          "x-ms-summary": "Severity ID"
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "Updated summary.",
+                          "x-ms-summary": "Summary"
+                        },
+                        "mitigation_message": {
+                          "type": "string",
+                          "description": "Mitigation details.",
+                          "x-ms-summary": "Mitigation Message"
+                        },
+                        "resolution_message": {
+                          "type": "string",
+                          "description": "Resolution details.",
+                          "x-ms-summary": "Resolution Message"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated incident.",
+            "schema": {
+              "$ref": "#/definitions/IncidentSingleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/severities": {
+      "get": {
+        "operationId": "listSeverities",
+        "summary": "List Severities",
+        "description": "Retrieves all severity levels defined in your Rootly organization.",
+        "tags": [
+          "Reference Data"
+        ],
+        "parameters": [
+          {
+            "name": "page[number]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page Number"
+          },
+          {
+            "name": "page[size]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 25,
+            "description": "Number of items per page.",
+            "x-ms-summary": "Page Size"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of severity levels.",
+            "schema": {
+              "$ref": "#/definitions/SeverityListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "operationId": "listServices",
+        "summary": "List Services",
+        "description": "Retrieves all services from the Rootly service catalog.",
+        "tags": [
+          "Reference Data"
+        ],
+        "parameters": [
+          {
+            "name": "page[number]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page Number"
+          },
+          {
+            "name": "page[size]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 25,
+            "description": "Number of items per page.",
+            "x-ms-summary": "Page Size"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of services.",
+            "schema": {
+              "$ref": "#/definitions/ServiceListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/alerts": {
+      "get": {
+        "operationId": "listAlerts",
+        "summary": "List Alerts",
+        "description": "Retrieves a list of alerts from Rootly with optional filtering.",
+        "tags": [
+          "Alerts"
+        ],
+        "parameters": [
+          {
+            "name": "page[number]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page Number"
+          },
+          {
+            "name": "page[size]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 25,
+            "description": "Number of items per page.",
+            "x-ms-summary": "Page Size"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of alerts.",
+            "schema": {
+              "$ref": "#/definitions/AlertListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAlert",
+        "summary": "Create Alert",
+        "description": "Creates a new alert in Rootly from an external source.",
+        "tags": [
+          "Alerts"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "attributes"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "alerts",
+                      "x-ms-visibility": "internal",
+                      "description": "JSON:API resource type.",
+                      "x-ms-summary": "Resource Type"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "source",
+                        "summary"
+                      ],
+                      "properties": {
+                        "source": {
+                          "type": "string",
+                          "description": "Alert source identifier (e.g., datadog, azure-monitor, custom).",
+                          "x-ms-summary": "Source"
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "Short summary of the alert.",
+                          "x-ms-summary": "Summary"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "Detailed description of the alert.",
+                          "x-ms-summary": "Description"
+                        },
+                        "external_id": {
+                          "type": "string",
+                          "description": "ID of the alert in the source system.",
+                          "x-ms-summary": "External ID"
+                        },
+                        "external_url": {
+                          "type": "string",
+                          "description": "URL to the alert in the source system.",
+                          "x-ms-summary": "External URL"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created alert.",
+            "schema": {
+              "$ref": "#/definitions/AlertSingleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/alerts/{alert_id}/acknowledge": {
+      "post": {
+        "operationId": "acknowledgeAlert",
+        "summary": "Acknowledge Alert",
+        "description": "Acknowledges an open alert in Rootly, indicating someone is looking at it.",
+        "tags": [
+          "Alerts"
+        ],
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the alert to acknowledge.",
+            "x-ms-summary": "Alert ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The acknowledged alert.",
+            "schema": {
+              "$ref": "#/definitions/AlertSingleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/alerts/{alert_id}/resolve": {
+      "post": {
+        "operationId": "resolveAlert",
+        "summary": "Resolve Alert",
+        "description": "Resolves an alert in Rootly, marking it as no longer active.",
+        "tags": [
+          "Alerts"
+        ],
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the alert to resolve.",
+            "x-ms-summary": "Alert ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The resolved alert.",
+            "schema": {
+              "$ref": "#/definitions/AlertSingleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}/action_items": {
+      "get": {
+        "operationId": "listActionItems",
+        "summary": "List Action Items",
+        "description": "Retrieves all action items (tasks and follow-ups) for a specific incident.",
+        "tags": [
+          "Action Items"
+        ],
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the parent incident.",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "page[number]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page Number"
+          },
+          {
+            "name": "page[size]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 25,
+            "description": "Number of items per page.",
+            "x-ms-summary": "Page Size"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of action items.",
+            "schema": {
+              "$ref": "#/definitions/ActionItemListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createActionItem",
+        "summary": "Create Action Item",
+        "description": "Creates a new action item (task or follow-up) for an incident.",
+        "tags": [
+          "Action Items"
+        ],
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the parent incident.",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "attributes"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "incident_action_items",
+                      "x-ms-visibility": "internal",
+                      "description": "JSON:API resource type.",
+                      "x-ms-summary": "Resource Type"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "summary"
+                      ],
+                      "properties": {
+                        "summary": {
+                          "type": "string",
+                          "description": "Title of the action item.",
+                          "x-ms-summary": "Summary"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "Detailed description of the action item.",
+                          "x-ms-summary": "Description"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "description": "Type of action item: task or follow_up.",
+                          "x-ms-summary": "Kind",
+                          "enum": [
+                            "task",
+                            "follow_up"
+                          ]
+                        },
+                        "priority": {
+                          "type": "string",
+                          "description": "Priority: high, medium, or low.",
+                          "x-ms-summary": "Priority",
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Status: open, in_progress, or done.",
+                          "x-ms-summary": "Status",
+                          "enum": [
+                            "open",
+                            "in_progress",
+                            "done"
+                          ]
+                        },
+                        "due_date": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Due date for the action item.",
+                          "x-ms-summary": "Due Date"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created action item.",
+            "schema": {
+              "$ref": "#/definitions/ActionItemSingleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}/action_items/{action_item_id}": {
+      "patch": {
+        "operationId": "updateActionItem",
+        "summary": "Update Action Item",
+        "description": "Updates an existing action item's status, priority, or other fields.",
+        "tags": [
+          "Action Items"
+        ],
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the parent incident.",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "action_item_id",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The unique ID of the action item to update.",
+            "x-ms-summary": "Action Item ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "incident_action_items",
+                      "x-ms-visibility": "internal",
+                      "description": "JSON:API resource type.",
+                      "x-ms-summary": "Resource Type"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "string",
+                          "description": "Updated summary.",
+                          "x-ms-summary": "Summary"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "Updated description.",
+                          "x-ms-summary": "Description"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "New status: open, in_progress, or done.",
+                          "x-ms-summary": "Status",
+                          "enum": [
+                            "open",
+                            "in_progress",
+                            "done"
+                          ]
+                        },
+                        "priority": {
+                          "type": "string",
+                          "description": "New priority: high, medium, or low.",
+                          "x-ms-summary": "Priority",
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                          ]
+                        },
+                        "due_date": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Updated due date.",
+                          "x-ms-summary": "Due Date"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated action item.",
+            "schema": {
+              "$ref": "#/definitions/ActionItemSingleResponse"
+            }
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "operationId": "listTeams",
+        "summary": "List Teams",
+        "description": "Retrieves all teams (groups) defined in your Rootly organization.",
+        "tags": [
+          "Reference Data"
+        ],
+        "parameters": [
+          {
+            "name": "page[number]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 1,
+            "description": "Page number for pagination.",
+            "x-ms-summary": "Page Number"
+          },
+          {
+            "name": "page[size]",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "default": 25,
+            "description": "Number of items per page.",
+            "x-ms-summary": "Page Size"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of teams.",
+            "schema": {
+              "$ref": "#/definitions/TeamListResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "PaginationMeta": {
+      "type": "object",
+      "properties": {
+        "current_page": {
+          "type": "integer",
+          "description": "Current page number.",
+          "x-ms-summary": "Current Page"
+        },
+        "total_count": {
+          "type": "integer",
+          "description": "Total number of records.",
+          "x-ms-summary": "Total Count"
+        },
+        "total_pages": {
+          "type": "integer",
+          "description": "Total number of pages.",
+          "x-ms-summary": "Total Pages"
+        }
+      }
+    },
+    "IncidentAttributes": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Incident title.",
+          "x-ms-summary": "Title"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status (started, mitigated, resolved, cancelled).",
+          "x-ms-summary": "Status"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Incident summary or description.",
+          "x-ms-summary": "Summary"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Incident kind (normal, scheduled, backfill).",
+          "x-ms-summary": "Kind"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug.",
+          "x-ms-summary": "Slug"
+        },
+        "url": {
+          "type": "string",
+          "description": "Full Rootly URL for the incident.",
+          "x-ms-summary": "URL"
+        },
+        "sequential_id": {
+          "type": "integer",
+          "description": "Auto-incrementing incident number.",
+          "x-ms-summary": "Sequential ID"
+        },
+        "private": {
+          "type": "boolean",
+          "description": "Whether the incident is private.",
+          "x-ms-summary": "Private"
+        },
+        "severity": {
+          "type": "object",
+          "description": "Nested severity object.",
+          "x-ms-summary": "Severity",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Severity display name.",
+              "x-ms-summary": "Severity Name"
+            },
+            "color": {
+              "type": "string",
+              "description": "Severity color hex code.",
+              "x-ms-summary": "Severity Color"
+            }
+          }
+        },
+        "mitigation_message": {
+          "type": "string",
+          "description": "Mitigation details.",
+          "x-ms-summary": "Mitigation Message"
+        },
+        "resolution_message": {
+          "type": "string",
+          "description": "Resolution details.",
+          "x-ms-summary": "Resolution Message"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Incident creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the incident started.",
+          "x-ms-summary": "Started At"
+        },
+        "detected_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Detection time.",
+          "x-ms-summary": "Detected At"
+        },
+        "acknowledged_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Acknowledgement time.",
+          "x-ms-summary": "Acknowledged At"
+        },
+        "mitigated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Mitigation time.",
+          "x-ms-summary": "Mitigated At"
+        },
+        "resolved_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Resolution time.",
+          "x-ms-summary": "Resolved At"
+        }
+      }
+    },
+    "IncidentResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique incident ID.",
+          "x-ms-summary": "ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON:API resource type.",
+          "x-ms-summary": "Type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/IncidentAttributes"
+        }
+      }
+    },
+    "IncidentListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Array of incident resources.",
+          "items": {
+            "$ref": "#/definitions/IncidentResource"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/PaginationMeta"
+        }
+      }
+    },
+    "IncidentSingleResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/IncidentResource"
+        }
+      }
+    },
+    "SeverityAttributes": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Severity display name.",
+          "x-ms-summary": "Name"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug.",
+          "x-ms-summary": "Slug"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the severity level.",
+          "x-ms-summary": "Description"
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity keyword (critical, high, medium, low).",
+          "x-ms-summary": "Severity Level"
+        },
+        "color": {
+          "type": "string",
+          "description": "Color hex code.",
+          "x-ms-summary": "Color"
+        },
+        "position": {
+          "type": "integer",
+          "description": "Sort order position.",
+          "x-ms-summary": "Position"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "SeverityResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique severity ID.",
+          "x-ms-summary": "ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON:API resource type.",
+          "x-ms-summary": "Type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/SeverityAttributes"
+        }
+      }
+    },
+    "SeverityListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Array of severity resources.",
+          "items": {
+            "$ref": "#/definitions/SeverityResource"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/PaginationMeta"
+        }
+      }
+    },
+    "ServiceAttributes": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Service display name.",
+          "x-ms-summary": "Name"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug.",
+          "x-ms-summary": "Slug"
+        },
+        "description": {
+          "type": "string",
+          "description": "Service description.",
+          "x-ms-summary": "Description"
+        },
+        "color": {
+          "type": "string",
+          "description": "Display color hex code.",
+          "x-ms-summary": "Color"
+        },
+        "position": {
+          "type": "integer",
+          "description": "Sort order.",
+          "x-ms-summary": "Position"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "ServiceResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique service ID.",
+          "x-ms-summary": "ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON:API resource type.",
+          "x-ms-summary": "Type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/ServiceAttributes"
+        }
+      }
+    },
+    "ServiceListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Array of service resources.",
+          "items": {
+            "$ref": "#/definitions/ServiceResource"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/PaginationMeta"
+        }
+      }
+    },
+    "AlertAttributes": {
+      "type": "object",
+      "properties": {
+        "short_id": {
+          "type": "string",
+          "description": "Short human-readable alert ID.",
+          "x-ms-summary": "Short ID"
+        },
+        "source": {
+          "type": "string",
+          "description": "Alert source.",
+          "x-ms-summary": "Source"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Alert summary.",
+          "x-ms-summary": "Summary"
+        },
+        "description": {
+          "type": "string",
+          "description": "Alert description.",
+          "x-ms-summary": "Description"
+        },
+        "status": {
+          "type": "string",
+          "description": "Alert status (open, acknowledged, resolved).",
+          "x-ms-summary": "Status"
+        },
+        "external_id": {
+          "type": "string",
+          "description": "External system ID.",
+          "x-ms-summary": "External ID"
+        },
+        "external_url": {
+          "type": "string",
+          "description": "External system URL.",
+          "x-ms-summary": "External URL"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "AlertResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique alert ID.",
+          "x-ms-summary": "ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON:API resource type.",
+          "x-ms-summary": "Type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/AlertAttributes"
+        }
+      }
+    },
+    "AlertListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Array of alert resources.",
+          "items": {
+            "$ref": "#/definitions/AlertResource"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/PaginationMeta"
+        }
+      }
+    },
+    "AlertSingleResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/AlertResource"
+        }
+      }
+    },
+    "ActionItemAttributes": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "Action item title or summary.",
+          "x-ms-summary": "Summary"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description.",
+          "x-ms-summary": "Description"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Type: task or follow_up.",
+          "x-ms-summary": "Kind"
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority: high, medium, or low.",
+          "x-ms-summary": "Priority"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status: open, in_progress, or done.",
+          "x-ms-summary": "Status"
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Due date.",
+          "x-ms-summary": "Due Date"
+        },
+        "incident_id": {
+          "type": "string",
+          "description": "Parent incident ID.",
+          "x-ms-summary": "Incident ID"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "ActionItemResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique action item ID.",
+          "x-ms-summary": "ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON:API resource type.",
+          "x-ms-summary": "Type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/ActionItemAttributes"
+        }
+      }
+    },
+    "ActionItemListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Array of action item resources.",
+          "items": {
+            "$ref": "#/definitions/ActionItemResource"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/PaginationMeta"
+        }
+      }
+    },
+    "ActionItemSingleResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/ActionItemResource"
+        }
+      }
+    },
+    "TeamAttributes": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Team display name.",
+          "x-ms-summary": "Name"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug.",
+          "x-ms-summary": "Slug"
+        },
+        "description": {
+          "type": "string",
+          "description": "Team description.",
+          "x-ms-summary": "Description"
+        },
+        "color": {
+          "type": "string",
+          "description": "Display color hex code.",
+          "x-ms-summary": "Color"
+        },
+        "position": {
+          "type": "integer",
+          "description": "Sort order.",
+          "x-ms-summary": "Position"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "TeamResource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique team ID.",
+          "x-ms-summary": "ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "JSON:API resource type.",
+          "x-ms-summary": "Type"
+        },
+        "attributes": {
+          "$ref": "#/definitions/TeamAttributes"
+        }
+      }
+    },
+    "TeamListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Array of team resources.",
+          "items": {
+            "$ref": "#/definitions/TeamResource"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/PaginationMeta"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Incidents",
+      "description": "Manage incidents in Rootly."
+    },
+    {
+      "name": "Alerts",
+      "description": "Manage alerts in Rootly."
+    },
+    {
+      "name": "Action Items",
+      "description": "Manage post-incident action items."
+    },
+    {
+      "name": "Reference Data",
+      "description": "Lookup reference data like severities, services, and teams."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://rootly.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://rootly.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "IT Operations"
+    }
+  ]
+}
