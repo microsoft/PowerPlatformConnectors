@@ -6,7 +6,7 @@ Way We Do enables teams to actively use repeatable policies, procedures, process
 
 ## Pre-requisites
 
-To use this connector, you will first need to [sign up for an account](https://app.waywedo.com/Registration) on Way We Do. You will also need to generate an API key to use with this connector by [following the instructions](https://waywedo.zendesk.com/hc/en-us/articles/360000988556-API-Key) on our support site.
+To use this connector, you will first need to [sign up for an account](https://app.waywedo.com/Registration) on Way We Do. You will also need to generate an API key to use with this connector by [following the instructions](https://www.waywedo.com/aakk) on our support site.
 
 
 ## Supported Operations
@@ -17,6 +17,7 @@ The connector supports the following operations:
 - `Add a New User` : Creates and invites a new user.
 - `Complete a Checklist Step` : Mark a specific step in a checklist instance as complete.
 - `Create Checklist Instance` : Creates a new activated checklist instance.
+- `Add Collaborators to a Checklist Instance` : Adds one or more collaborators to a checklist instance.
 - `Find Checklist` : Search for a checklist by title
 - `Find Checklist Instance` : Search for a checklist instance by title.
 - `Find Checklist Step` : Find a step of a checklist instance
