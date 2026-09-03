@@ -1,0 +1,79 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "Direct Line Secret",
+          "description": "The Direct Line Secret for bot communications.",
+          "tooltip": "Provide your Direct Line Secret.",
+          "constraints": {
+            "tabIndex": 2,
+            "clearText": false,
+            "required": "true"
+          }
+        }
+      },
+      "oauth_client_id": {
+        "type": "string",
+        "uiDefinition": {
+          "displayName": "OAuth Client ID",
+          "description": "Azure AD Application Client ID for Agent SDK authentication.",
+          "tooltip": "Optional: Required only for Agent SDK operations (CallAgentSync).",
+          "constraints": {
+            "tabIndex": 3,
+            "required": "false"
+          }
+        }
+      },
+      "token": {
+        "type": "oauthSetting",
+        "uiDefinition": {
+          "displayName": "OAuth2 Token",
+          "description": "OAuth2 token for Agent SDK operations (optional).",
+          "tooltip": "Required only for Agent SDK and Azure Function routing."
+        },
+        "oAuthSettings": {
+          "identityProvider": "oauth2",
+          "clientId": "@connectionParameters('oauth_client_id')",
+          "scopes": ["CopilotStudio.Copilots.Invoke"],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False",
+            "AzureActiveDirectoryResourceId": "https://api.bap.microsoft.com/"
+          },
+          "customParameters": {
+            "authorizationUrl": {
+              "value": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+            },
+            "tokenUrl": {
+              "value": "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+            }
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#da3b01",
+    "scriptOperations": [
+      "StartConversationWithActivity",
+      "SendActivityAndWaitForResponse", 
+      "ExecuteMultiAgentWorkflow",
+      "CallAgentSync"
+    ],
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route Agent SDK calls to Azure Function",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/api/agent-proxy",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplateParameter.routeToOperation": "CallAgentSync"
+        }
+      }
+    ],
+    "publisher": "Troy Taylor",
+    "stackOwner": "Microsoft, Inc."
+  }
+}
