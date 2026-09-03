@@ -24,6 +24,10 @@ public class Script : ScriptBase
       {
         await this.UpdateResponse(response).ConfigureAwait(false);
       }
+      else
+      {
+        await this.UpdateErrorResponse(response).ConfigureAwait(false);
+      }
 
       return response;
     }
@@ -41,6 +45,42 @@ public class Script : ScriptBase
       }
       
       return response;
+    }
+  }
+
+  private async Task UpdateErrorResponse(HttpResponseMessage response)
+  {
+    if ("GetMaestroWorkflowDefinitions".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (response.StatusCode == HttpStatusCode.Unauthorized && content.Equals("Jwt payload is an invalid JSON"))
+      {
+        response.Content = new StringContent("You will need to reconnect to your Docusign account", Encoding.UTF8, "text/plain");
+      }
+    }
+    else if ("GetOrganizations".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (response.StatusCode == HttpStatusCode.Unauthorized && content.Contains("INVALID_SCOPES"))
+      {
+        response.Content = new StringContent("You will need to reconnect to your Docusign account and provide consent to access organization data.", Encoding.UTF8, "text/plain");
+      }
+      else if (response.StatusCode == HttpStatusCode.BadRequest && content.Contains("Organization Connect is not enabled"))
+      {
+        response.Content = new StringContent("Your Docusign account is not enabled for organization management. Please contact Docusign support to enable this feature.", Encoding.UTF8, "text/plain");
+      }
+    }
+    else if ("CreateOrgHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      if (response.StatusCode == HttpStatusCode.BadRequest && content.Contains("Organization Connect is not enabled"))
+      {
+        response.Content = new StringContent("Your Docusign account is not enabled for organization management. Please contact Docusign support to enable this feature.", Encoding.UTF8, "text/plain");
+      }
+      else if (response.StatusCode == HttpStatusCode.BadRequest && content.Contains("exceeding"))
+      {
+        response.Content = new StringContent("Your Docusign organization is exceeding its configuration limits. Please contact Docusign support for assistance.", Encoding.UTF8, "text/plain");
+      }
     }
   }
 
@@ -69,16 +109,30 @@ public class Script : ScriptBase
     {
       var tabTypesArray = new JArray();
       string [,] tabTypes = { 
-        { "signHereTabs", "Signature" }, 
-        { "dateSignedTabs", "Date Signed" }, 
-        { "textTabs", "Text" }, 
-        { "fullNameTabs", "Name" },
-        { "initialHereTabs", "Initial" },
+        { "approveTabs", "Approve" },
         { "checkboxTabs", "Checkbox" },
-        { "titleTabs", "Title" },
-        { "signerAttachmentTabs", "Attachment" },
+        { "companyTabs", "Company" },
+        { "dateSignedTabs", "Date Signed" },
+        { "dateTabs", "Date" },
+        { "declineTabs", "Decline" },
         { "emailTabs", "Email" },
-        { "approveTabs", "Approval" }
+        { "firstNameTabs", "First Name" },
+        { "formulaTabs", "Formula" },
+        { "fullNameTabs", "Full Name" },
+        { "initialHereTabs", "Initial" },
+        { "lastNameTabs", "Last Name" },
+        { "listTabs", "Dropdown" },
+        { "noteTabs", "Note" },
+        { "numberTabs", "Number" },
+        { "numericalTabs", "Numerical" },
+        { "radioGroupTabs", "Radio Group" },
+        { "signHereTabs", "Signature" }, 
+        { "signerAttachmentTabs", "Signer Attachment" },
+        { "ssnTabs", "SSN" },
+        { "tabGroups", "Checkbox Group"},
+        { "textTabs", "Text" },
+        { "titleTabs", "Title" },
+        { "zipTabs", "Zip" }
       };
       for (var i = 0; i < tabTypes.GetLength(0); i++)
       {
@@ -165,7 +219,1093 @@ public class Script : ScriptBase
     {
       var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
       var tabType = query.Get("tabType");
-
+      if (tabType.Equals("radioGroupTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["groupName"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Group Name"
+                  },
+                  ["radios"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "object",
+                        ["x-ms-summary"] = "Radios",
+                        ["properties"] = new JObject
+                        {
+                          ["anchorString"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Anchor String"
+                          },
+                          ["anchorHorizontalAlignment"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Anchor Horizontal Alignment",
+                            ["type"] = "string",
+                            ["description"] = "left/right"
+                          },
+                          ["value"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Value"
+                          },
+                          ["selected"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Selected",
+                            ["description"] = "true/false"
+                          },
+                          ["locked"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Read Only",
+                            ["description"] = "true/false"
+                          },
+                          ["required"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Required",
+                            ["description"] = "true/false"
+                          },
+                          ["anchorXOffset"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Anchor X Offset",
+                            ["type"] = "string"
+                          }
+                          ["anchorYOffset"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Anchor Y Offset",
+                            ["type"] = "string"
+                          }
+                        }
+                      }
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("companyTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "true/false"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("dateTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Value"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "true/false"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("approveTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "label"
+                  },
+                  ["buttonText"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Button Text"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("declineTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["buttonText"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Button Text"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("signerAttachmentTabs", StringComparison.OrdinalIgnoreCase) ||
+      tabType.Equals("signHereTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["optional"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Optional",
+                    ["description"] = "true/false"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("firstNameTabs", StringComparison.OrdinalIgnoreCase) || 
+      tabType.Equals("lastNameTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("formulaTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["formula"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Formula"
+                  },
+                  ["hidden"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Hidden",
+                    ["description"] = "true/false"
+                  },
+                  ["roundDecimalPlaces"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Decimal places"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("listTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["listItems"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "object",
+                        ["x-ms-summary"] = "List Item",
+                        ["properties"] = new JObject
+                        {
+                          ["selected"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Selected",
+                            ["description"] = "true/false"
+                          },
+                          ["text"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Text",
+                            ["type"] = "string"
+                          },
+                          ["value"] = new JObject
+                          {
+                            ["x-ms-summary"] = "Value",
+                            ["type"] = "string"
+                          }
+                        }
+                      }
+                  },
+                  ["listSelectedValue"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Default Option"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "true/false"
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "true/false"
+                  },
+                  ["tooltip"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Tooltip"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("noteTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Note Text"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("numberTabs", StringComparison.OrdinalIgnoreCase) ||
+      (tabType.Equals("ssnTabs", StringComparison.OrdinalIgnoreCase)) ||
+      (tabType.Equals("zipTabs", StringComparison.OrdinalIgnoreCase)))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Value"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "true/false"
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "true/false"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("numericalTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["numericalValue"] = new JObject
+                  {
+                    ["x-ms-summary"] = "Value",
+                    ["type"] = "string"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "true/false"
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "true/false"
+                  },
+                  ["validationType"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Type",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray("Currency", "Number")
+                  },
+                  ["minNumericalValue"] = new JObject
+                  {
+                    ["x-ms-summary"] = "Minimum Amount",
+                    ["type"] = "string"
+                  },
+                  ["maxNumericalValue"] = new JObject
+                  {
+                    ["x-ms-summary"] = "Maximum Amount",
+                    ["type"] = "string"
+                  },
+                  ["localePolicyTab"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["x-ms-summary"] = "Locale Policy",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "object",
+                        ["x-ms-summary"] = "Locale Policy",
+                        ["properties"] = new JObject
+                        {
+                          ["cultureName"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Culture Name",
+                            ["description"] = "The two letter ISO 639-1 language code.",
+                          },
+                          ["currencyCode"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Currency Code",
+                            ["description"] = "The ISO 4217 currency code.",
+                          },
+                          ["currencyPositiveFormat"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Currency Positive Format"
+                          },
+                          ["currencyNegativeFormat"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Currency Negative Format"
+                          },
+                          ["useLongCurrencyFormat"] = new JObject
+                          {
+                            ["type"] = "string",
+                            ["x-ms-summary"] = "Use Long Currency Format",
+                            ["description"] = "true/false",
+                          }
+                        }
+                      }
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("checkboxTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Tab Label"
+                  },
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["anchorHorizontalAlignment"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Horizontal Alignment"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "true/false"
+                  },
+                  ["selected"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Selected",
+                    ["description"] = "true/false"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["tabGroupLabels"] = new JObject
+                  {
+                    ["type"] = "array",
+                    ["x-ms-summary"] = "Tab Group Labels",
+                    ["items"] = new JObject
+                      {
+                        ["type"] = "string",
+                        ["x-ms-summary"] = "",
+                      }
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("dateSignedTabs", StringComparison.OrdinalIgnoreCase) ||
+      tabType.Equals("emailTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("initialHereTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["optional"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Optional",
+                    ["description"] = "true/false"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("fullNameTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  },
+                  ["font"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                      {
+                        ["operationId"] = "StaticResponseForFontFaces",
+                        ["value-collection"] = "fontNames",
+                        ["value-path"] = "name",
+                        ["value-title"] = "name"
+                      },
+                    ["x-ms-summary"] = "Font"
+                  },
+                  ["fontColor"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontColors",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Color"
+                  },
+                  ["fontSize"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontSizes",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Size"
+                  },
+                  ["bold"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Bold",
+                    ["description"] = "true/false"
+                  },
+                  ["italic"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Italic",
+                    ["description"] = "true/false"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["anchorString"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor String"
+                  },
+                  ["value"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Value"
+                  },
+                  ["required"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Required",
+                    ["description"] = "true/false"
+                  },
+                  ["locked"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Read Only",
+                    ["description"] = "true/false"
+                  },
+                  ["validationPattern"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Pattern",
+                    ["description"] = "enter custom regex pattern"
+                  },
+                  ["validationMessage"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Message"
+                  },
+                  ["tabLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Label"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset"
+                  },
+                  ["font"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                      {
+                        ["operationId"] = "StaticResponseForFontFaces",
+                        ["value-collection"] = "fontNames",
+                        ["value-path"] = "name",
+                        ["value-title"] = "name"
+                      },
+                    ["x-ms-summary"] = "Font"
+                  },
+                  ["fontColor"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontColors",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Color"
+                  },
+                  ["fontSize"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-dynamic-values"] = new JObject
+                    {
+                      ["operationId"] = "StaticResponseForFontSizes",
+                      ["value-collection"] = "fontNames",
+                      ["value-path"] = "name",
+                      ["value-title"] = "name"
+                    },
+                    ["x-ms-summary"] = "Font Size"
+                  },
+                  ["bold"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Bold",
+                    ["description"] = "true/false"
+                  },
+                  ["italic"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Italic",
+                    ["description"] = "true/false"
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("titleTabs", StringComparison.OrdinalIgnoreCase))
+      {
       response["name"] = "dynamicSchema";
       response["title"] = "dynamicSchema";
       response["schema"] = new JObject
@@ -184,103 +1324,104 @@ public class Script : ScriptBase
                 ["anchorString"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "anchor string *"
+                  ["x-ms-summary"] = "Anchor String"
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "Required",
+                  ["description"] = "true/false"
                 },
                 ["locked"] = new JObject
                 {
-                  ["x-ms-summary"] = "locked",
-                  ["default"] = "true",
-                  ["type"] = "boolean"
-                },
-                ["optional"] = new JObject
-                {
-                  ["x-ms-summary"] = "optional",
-                  ["default"] = "false",
-                  ["type"] = "boolean"
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "Read Only",
+                  ["description"] = "true/false"
                 },
                 ["tabLabel"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "label"
+                  ["x-ms-summary"] = "Label"
                 },
                 ["anchorXOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "x offset (pixels)"
+                  ["x-ms-summary"] = "Anchor X Offset"
                 },
                 ["anchorYOffset"] = new JObject
                 {
                   ["type"] = "string",
-                  ["x-ms-summary"] = "y offset (pixels)"
+                  ["x-ms-summary"] = "Anchor Y Offset"
+                }
+              }
+              }
+            }
+          }
+        };
+      }
+      if (tabType.Equals("tabGroups", StringComparison.OrdinalIgnoreCase))
+      {
+        response["name"] = "dynamicSchema";
+        response["title"] = "dynamicSchema";
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["tabs"] = new JObject
+            {
+              ["type"] = "array",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["groupLabel"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Group Label"
+                  },
+                  ["documentId"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Document ID"
+                  },
+                  ["validationMessage"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Validation Message"
+                  },
+                  ["groupRule"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Group Rule",
+                    ["description"] = "Select",
+                    ["enum"] = new JArray ("SelectAtLeast", "SelectAtMost", "SelectExactly", "SelectARange")
+                  },
+                  ["minimumRequired"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Minimum Required"
+                  },
+                  ["maximumAllowed"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Maximum Allowed"
+                  },
+                  ["anchorXOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor X Offset"
+                  },
+                  ["anchorYOffset"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "Anchor Y Offset",
+                  }
                 }
               }
             }
           }
-        }
-      };
-
-      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase))
-      {
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["value"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "value"
-        };
-      }
-
-      if (tabType.Equals("textTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("dateSignedTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("fullNameTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("titleTabs", StringComparison.OrdinalIgnoreCase) ||
-          tabType.Equals("emailTabs", StringComparison.OrdinalIgnoreCase))
-      {
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["font"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-dynamic-values"] = new JObject
-            {
-              ["operationId"] = "StaticResponseForFontFaces",
-              ["value-collection"] = "fontNames",
-              ["value-path"] = "name",
-              ["value-title"] = "name"
-            },
-          ["x-ms-summary"] = "font"
-        };
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontColor"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-dynamic-values"] = new JObject
-          {
-            ["operationId"] = "StaticResponseForFontColors",
-            ["value-collection"] = "fontNames",
-            ["value-path"] = "name",
-            ["value-title"] = "name"
-          },
-          ["x-ms-summary"] = "font color"
-        };
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["fontSize"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-dynamic-values"] = new JObject
-          {
-            ["operationId"] = "StaticResponseForFontSizes",
-            ["value-collection"] = "fontNames",
-            ["value-path"] = "name",
-            ["value-title"] = "name"
-          },
-          ["x-ms-summary"] = "font size"
-        }; 
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["bold"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "bold",
-          ["description"] = "true/false"
-        };
-        response["schema"]["properties"]["tabs"]["items"]["properties"]["italic"] = new JObject
-        {
-          ["type"] = "string",
-          ["x-ms-summary"] = "italic",
-          ["description"] = "true/false"
         };
       }
     }
@@ -298,7 +1439,7 @@ public class Script : ScriptBase
       response["schema"]["properties"]["Build Number"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "DS1006"
+          ["x-ms-summary"] = "DS1009.0.6"
       };
     }
 
@@ -325,6 +1466,129 @@ public class Script : ScriptBase
       }
       else {
         response["schema"] = null;
+      }
+    }
+
+    if (operationId.Equals("StaticResponseForEmbeddedSigningSchemaV2", StringComparison.OrdinalIgnoreCase))
+    {
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var returnUrl = query.Get("returnUrl");
+      var isInPersonSigner = query.Get("isInPersonSigner");
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = null;
+
+      if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase) && isInPersonSigner.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject(),
+          ["required"] = new JArray("userName", "email", "recipientId", "returnURL")
+        };
+        response["schema"]["properties"]["userName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Host name",
+          ["description"] = "Host name needs to be sender name"
+        };
+        response["schema"]["properties"]["email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Host email",
+          ["description"] = "Host email needs to be sender email"
+        };
+        response["schema"]["properties"]["recipientId"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Recipient ID"
+        };
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Add return URL"
+        };
+      }
+      else if (returnUrl.Equals("Add A Different URL", StringComparison.OrdinalIgnoreCase) && isInPersonSigner.Equals("No", StringComparison.OrdinalIgnoreCase))
+      {
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject(),
+          ["required"] = new JArray("userName", "email", "clientUserId", "returnURL")
+        };
+        response["schema"]["properties"]["userName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Signer name"
+        };
+        response["schema"]["properties"]["email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Signer email"
+        };
+        response["schema"]["properties"]["clientUserId"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Client user ID"
+        };
+        response["schema"]["properties"]["returnURL"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Add return URL"
+        };
+      }
+      else
+      {
+        if (isInPersonSigner.Equals("No", StringComparison.OrdinalIgnoreCase)) {
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject(),
+          ["required"] = new JArray("userName", "email", "clientUserId")
+        };
+        response["schema"]["properties"]["userName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Signer name"
+        };
+        response["schema"]["properties"]["email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Signer email"
+        };
+        response["schema"]["properties"]["clientUserId"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Client user ID"
+        };
+      }
+      if (isInPersonSigner.Equals("Yes", StringComparison.OrdinalIgnoreCase)) {
+        response["schema"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject(),
+          ["required"] = new JArray("userName", "email", "recipientId")
+        };
+        response["schema"]["properties"]["userName"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Host name",
+          ["description"] = "Host name needs to be sender name"
+        };
+        response["schema"]["properties"]["email"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Host email",
+          ["description"] = "Host email needs to be sender email"
+        };
+        response["schema"]["properties"]["recipientId"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = "Recipient ID"
+        };
+      }
       }
     }
 
@@ -396,7 +1660,8 @@ public class Script : ScriptBase
               ["value-path"] = "type",
               ["value-title"] = "name",
             },
-          ["x-ms-summary"] = "* Workflow IDs"
+          ["description"] = "Select a verification workflow from the dropdown.",
+          ["x-ms-summary"] = "* Verification workflow (IDV workflows with signature types are not supported in this action)"
         };        
       }
       else if (verificationType.Equals("Access Code"))
@@ -426,7 +1691,8 @@ public class Script : ScriptBase
               ["value-path"] = "type",
               ["value-title"] = "name",
             },
-          ["x-ms-summary"] = "* Workflow IDs"
+          ["description"] = "Select a verification workflow from the dropdown.",
+          ["x-ms-summary"] = "* Verification workflow (IDV workflows with signature types are not supported in this action)"
         };
       }
       else {
@@ -480,7 +1746,7 @@ public class Script : ScriptBase
         response["schema"]["properties"]["signerName"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Signer name"
+          ["x-ms-summary"] = "* Signer"
         };
       }
       else if (recipientType.Equals("signers", StringComparison.OrdinalIgnoreCase))
@@ -488,12 +1754,13 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Signer name"
+          ["x-ms-summary"] = "* Signer or signing group name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Signer email"
+          ["x-ms-summary"] = "Signer email",
+          ["description"] = "Signer email or SMS phone number is required"
         };
       }
       else if (recipientType.Equals("witnesses", StringComparison.OrdinalIgnoreCase))
@@ -519,16 +1786,1801 @@ public class Script : ScriptBase
         response["schema"]["properties"]["name"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Name"
+          ["x-ms-summary"] = "* Recipient or signing group name"
         };
         response["schema"]["properties"]["email"] = new JObject
         {
           ["type"] = "string",
-          ["x-ms-summary"] = "* Email"
+          ["x-ms-summary"] = "Recipient email (leave empty if there’s a signing group)"
         };
       }
     }
 
+    // Composite Templates Request Body (please toggle up when not working on this part of code)
+    if (operationId.Equals("StaticResponseForCompositeTemplates", StringComparison.OrdinalIgnoreCase))
+    {
+      var tabsJsonObj = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject
+        {
+          ["- approveTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Approve",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- label"
+                },
+                ["buttonText"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Button Text"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- checkboxTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Checkbox",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Tab Label"
+                },
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["anchorHorizontalAlignment"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Horizontal Alignment"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["selected"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Selected",
+                  ["description"] = "true/false"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["- tabGroupLabels"] = new JObject
+                {
+                  ["type"] = "array",
+                  ["x-ms-summary"] = "- Tab Group Labels",
+                  ["items"] = new JObject
+                    {
+                      ["type"] = "string",
+                      ["x-ms-summary"] = "",
+                    }
+                }
+              }
+            }
+          },
+          ["- tabGroups"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Checkbox Group",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["groupLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Group Label"
+                },
+                ["documentId"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Document ID"
+                },
+                ["validationMessage"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Validation Message"
+                },
+                ["groupRule"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Group Rule",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("SelectAtLeast", "SelectAtMost", "SelectExactly", "SelectARange")
+                },
+                ["minimumRequired"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Minimum Required"
+                },
+                ["maximumAllowed"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Maximum Allowed"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset",
+                }
+              }
+            }
+          },
+          ["- companyTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Company",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray("true", "false")
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- dateTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Date",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Value"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- dateSignedTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Date Signed",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Label"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- declineTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Decline",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["buttonText"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Button Text"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- listTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Dropdown",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["- listItems"] = new JObject
+                {
+                  ["type"] = "array",
+                  ["items"] = new JObject
+                    {
+                      ["type"] = "object",
+                      ["x-ms-summary"] = "- List Item",
+                      ["properties"] = new JObject
+                      {
+                        ["selected"] = new JObject
+                        {
+                          ["type"] = "string",
+                          ["x-ms-summary"] = "- Selected",
+                          ["description"] = "true/false"
+                        },
+                        ["text"] = new JObject
+                        {
+                          ["x-ms-summary"] = "- Text",
+                          ["type"] = "string"
+                        },
+                        ["value"] = new JObject
+                        {
+                          ["x-ms-summary"] = "- Value",
+                          ["type"] = "string"
+                        }
+                      }
+                    }
+                },
+                ["listSelectedValue"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Default Option"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["tooltip"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Tooltip"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- emailTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Email",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Label"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- firstNameTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "First Name",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- formulaTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Formula",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["formula"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Formula"
+                },
+                ["hidden"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Hidden",
+                  ["description"] = "true/false"
+                },
+                ["roundDecimalPlaces"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Decimal places"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- fullNameTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Full Name",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Label"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                },
+                ["font"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Font"
+                },
+                ["fontColor"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Font Color"
+                },
+                ["fontSize"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Font Size"
+                },
+                ["bold"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Bold",
+                  ["description"] = "true/false"
+                },
+                ["italic"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Italic",
+                  ["description"] = "true/false"
+                }
+              }
+            }
+          },
+          ["- initialHereTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Initial",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["optional"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Optional",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray("true", "false")
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- lastNameTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Last Name",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- noteTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Note",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Note Text"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- numberTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Number",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Value"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- numericalTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Numerical",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["numericalValue"] = new JObject
+                {
+                  ["x-ms-summary"] = "- Value",
+                  ["type"] = "string"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["validationType"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Validation Type",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray("Currency", "Number")
+                },
+                ["minNumericalValue"] = new JObject
+                {
+                  ["x-ms-summary"] = "- Minimum Amount",
+                  ["type"] = "string"
+                },
+                ["maxNumericalValue"] = new JObject
+                {
+                  ["x-ms-summary"] = "- Maximum Amount",
+                  ["type"] = "string"
+                },
+                ["- localePolicyTab"] = new JObject
+                {
+                  ["type"] = "array",
+                  ["x-ms-summary"] = "- Locale Policy",
+                  ["items"] = new JObject
+                    {
+                      ["type"] = "object",
+                      ["x-ms-summary"] = "- Locale Policy",
+                      ["properties"] = new JObject
+                      {
+                        ["cultureName"] = new JObject
+                        {
+                          ["type"] = "string",
+                          ["x-ms-summary"] = "Culture Name",
+                          ["description"] = "- The two letter ISO 639-1 language code.",
+                        },
+                        ["currencyCode"] = new JObject
+                        {
+                          ["type"] = "string",
+                          ["x-ms-summary"] = "Currency Code",
+                          ["description"] = "- The ISO 4217 currency code.",
+                        },
+                        ["currencyPositiveFormat"] = new JObject
+                        {
+                          ["type"] = "string",
+                          ["x-ms-summary"] = "- Currency Positive Format"
+                        },
+                        ["currencyNegativeFormat"] = new JObject
+                        {
+                          ["type"] = "string",
+                          ["x-ms-summary"] = "- Currency Negative Format"
+                        },
+                        ["useLongCurrencyFormat"] = new JObject
+                        {
+                          ["type"] = "string",
+                          ["x-ms-summary"] = "- Use Long Currency Format",
+                          ["description"] = "true/false",
+                        }
+                      }
+                    }
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- radioGroupTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Radio Group",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["anchorHorizontalAlignment"] = new JObject
+                {
+                  ["x-ms-summary"] = "- Anchor Horizontal Alignment",
+                  ["type"] = "string",
+                  ["description"] = "left/right"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Value"
+                },
+                ["selected"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Selected",
+                  ["description"] = "true/false"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["x-ms-summary"] = "- Anchor X Offset",
+                  ["type"] = "string"
+                }
+                ["anchorYOffset"] = new JObject
+                {
+                  ["x-ms-summary"] = "- Anchor Y Offset",
+                  ["type"] = "string"
+                }
+              }
+            }
+          },
+          ["- signHereTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Signature",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["optional"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Optional",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- label"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- signerAttachmentTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Signer Attachment",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["optional"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Optional",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- label"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- ssnTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- SSN",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Value"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- textTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Text",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Value"
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["validationPattern"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Validation Pattern",
+                  ["description"] = "enter custom regex pattern"
+                },
+                ["validationMessage"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Validation Message"
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Label"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                },
+                ["font"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Font"
+                },
+                ["fontColor"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Font Color"
+                },
+                ["fontSize"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Font Size"
+                },
+                ["bold"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Bold",
+                  ["description"] = "true/false"
+                },
+                ["italic"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Italic",
+                  ["description"] = "true/false"
+                }
+              }
+            }
+          },
+          ["- titleTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Title",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["tabLabel"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Label"
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          },
+          ["- zipTabs"] = new JObject
+          {
+            ["type"] = "array",
+            ["x-ms-summary"] = "- Zip",
+            ["items"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["anchorString"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor String"
+                },
+                ["value"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Value"
+                },
+                ["locked"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Read Only",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["required"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Required",
+                  ["description"] = "Select",
+                  ["enum"] = new JArray ("true", "false")
+                },
+                ["anchorXOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor X Offset"
+                },
+                ["anchorYOffset"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Anchor Y Offset"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      var query = HttpUtility.ParseQueryString(context.Request.RequestUri.Query);
+      var templateId = query.Get("templateId") ?? "";
+
+      response["name"] = "dynamicSchema";
+      response["title"] = "dynamicSchema";
+      response["schema"] = new JObject
+      {
+        ["type"] = "object",
+        ["properties"] = new JObject()
+      };
+      response["schema"]["properties"]["compositeTemplates"] = new JObject
+      {
+        ["type"] = "array",
+        ["x-ms-summary"] = "Composite Templates",
+        ["items"] = new JObject
+        {
+          ["type"] = "object",
+          ["properties"] = new JObject
+          {
+            ["serverTemplates"] = new JObject
+            {
+              ["type"] = "array",
+              ["x-ms-summary"] = "Server templates",
+              ["description"] = "Server templates",
+              ["x-ms-visibility"] = "important",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["sequence"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "- sequence"
+                  },
+                  ["templateId"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "- Template ID"
+                  }
+                }
+              }
+            },
+            ["document"] = new JObject
+            {
+              ["type"] = "object",
+              ["properties"] = new JObject
+              {
+                ["documentId"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Document ID"
+                },
+                ["name"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Name"
+                },
+                ["fileExtension"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Document type",
+                  ["description"] = "pdf, docx etc."
+                },
+                ["documentBase64"] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = "- Document base64"
+                }
+              }
+            },
+            ["inlineTemplates"] = new JObject
+            {
+              ["type"] = "array",
+              ["x-ms-summary"] = "Inline Templates",
+              ["description"] = "Inline Templates",
+              ["items"] = new JObject
+              {
+                ["type"] = "object",
+                ["properties"] = new JObject
+                {
+                  ["sequence"] = new JObject
+                  {
+                    ["type"] = "string",
+                    ["x-ms-summary"] = "- sequence"
+                  },
+                  ["- Envelope Custom Fields"] = new JObject
+                  {
+                    ["type"] = "object",
+                    ["x-ms-summary"] = "- Envelope Custom Fields",
+                    ["properties"] = new JObject
+                    {
+                      ["- Text Custom Fields"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["x-ms-summary"] = "- Text Custom Fields",
+                          ["properties"] = new JObject
+                          {
+                            ["name"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Name"
+                            },
+                            ["value"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Value"
+                            },
+                            ["show"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Show",
+                              ["description"] = "Select",
+                              ["enum"] = new JArray ("true", "false")
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  ["- recipients"] = new JObject
+                  {
+                    ["type"] = "object",
+                    ["x-ms-summary"] = "recipients",
+                    ["properties"] = new JObject
+                    {
+                      ["- Receives a Copy"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["x-ms-summary"] = "- Receives a Copy",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["properties"] = new JObject
+                          {
+                            ["recipientId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
+                            ["email"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Email"
+                            },
+                            ["- phoneNumber"] = new JObject
+                            {
+                              ["type"] = "object",
+                              ["x-ms-summary"] = "- Phone Number",
+                              ["properties"] = new JObject
+                              {
+                                ["countryCode"] = new JObject
+                                {
+                                  ["type"] = "string",
+                                  ["x-ms-summary"] = "- Country Code"
+                                },
+                                ["number"] = new JObject
+                                {
+                                  ["type"] = "string",
+                                  ["x-ms-summary"] = "- Number"
+                                }
+                              }
+                            },
+                            ["name"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Name"
+                            },
+                            ["roleName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Role Name"
+                            },
+                            ["routingOrder"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Routing Order"
+                            },
+                            ["accessCode"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Access Code"
+                            }
+                          }
+                        }
+                      },
+                      ["- Needs to View"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["x-ms-summary"] = "- Needs to View",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["properties"] = new JObject
+                          {
+                            ["recipientId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
+                            ["email"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Email"
+                            },
+                            ["- phoneNumber"] = new JObject
+                            {
+                              ["type"] = "object",
+                              ["x-ms-summary"] = "- Phone Number",
+                              ["properties"] = new JObject
+                              {
+                                ["countryCode"] = new JObject
+                                {
+                                  ["type"] = "string",
+                                  ["x-ms-summary"] = "- Country Code"
+                                },
+                                ["number"] = new JObject
+                                {
+                                  ["type"] = "string",
+                                  ["x-ms-summary"] = "- Number"
+                                }
+                              }
+                            },
+                            ["name"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Name"
+                            },
+                            ["roleName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Role Name"
+                            },
+                            ["routingOrder"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Routing Order"
+                            },
+                            ["accessCode"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Access Code"
+                            }
+                          }
+                        }
+                      },
+                      ["- Allow to Edit"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["x-ms-summary"] = "- Allow to Edit",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["properties"] = new JObject
+                          {
+                            ["recipientId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
+                            ["email"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Email"
+                            },
+                            ["name"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Name"
+                            },
+                            ["roleName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Role Name"
+                            },
+                            ["routingOrder"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Routing Order"
+                            },
+                            ["accessCode"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Access Code"
+                            }
+                          }
+                        }
+                      },
+                      ["- In Person Signer"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["x-ms-summary"] = "- In Person Signer",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["properties"] = new JObject
+                          {
+                            ["recipientId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
+                            ["hostEmail"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Host Email"
+                            },
+                            ["hostName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Host Name"
+                            },
+                            ["signerEmail"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signer Email"
+                            },
+                            ["signerName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signer Name"
+                            },
+                            ["roleName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Role Name"
+                            },
+                            ["routingOrder"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Routing Order"
+                            },
+                            ["accessCode"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Access Code"
+                            },
+                            ["- tabs"] = tabsJsonObj.DeepClone()
+                          }
+                        }
+                      },
+                      ["- Update Recipients"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["x-ms-summary"] = "- Update Recipients",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["properties"] = new JObject
+                          {
+                            ["recipientId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
+                            ["email"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Email"
+                            },
+                            ["name"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Name"
+                            },
+                            ["roleName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Role Name"
+                            },
+                            ["routingOrder"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Routing Order"
+                            },
+                            ["accessCode"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Access Code"
+                            }
+                          }
+                        }
+                      },
+                      ["- Signs with Witness"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["x-ms-summary"] = "- Signs with Witness",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["properties"] = new JObject
+                          {
+                            ["recipientId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
+                            ["email"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Email"
+                            },
+                            ["name"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Name"
+                            },
+                            ["witnessFor"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Witness For"
+                            },
+                            ["roleName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Role Name"
+                            },
+                            ["routingOrder"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Routing Order"
+                            },
+                            ["accessCode"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Access Code"
+                            },
+                            ["- tabs"] = tabsJsonObj.DeepClone()
+                          }
+                        }
+                      },
+                      ["- Needs to Sign"] = new JObject
+                      {
+                        ["type"] = "array",
+                        ["x-ms-summary"] = "- Needs to Sign",
+                        ["items"] = new JObject
+                        {
+                          ["type"] = "object",
+                          ["properties"] = new JObject
+                          {
+                            ["recipientId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Recipient ID"
+                            },
+                            ["email"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Email"
+                            },
+                            ["name"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Name"
+                            },
+                            ["roleName"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Role Name"
+                            },
+                            ["routingOrder"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Routing Order"
+                            },
+                            ["accessCode"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Access Code"
+                            },
+                            ["clientUserId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Client User ID"
+                            },
+                            ["- phoneNumber"] = new JObject
+                            {
+                              ["type"] = "object",
+                              ["x-ms-summary"] = "- Phone Number",
+                              ["properties"] = new JObject
+                              {
+                                ["countryCode"] = new JObject
+                                {
+                                  ["type"] = "string",
+                                  ["x-ms-summary"] = "- Country Code"
+                                },
+                                ["number"] = new JObject
+                                {
+                                  ["type"] = "string",
+                                  ["x-ms-summary"] = "- Number"
+                                }
+                              }
+                            },
+                            ["- recipientSignatureProviders"] = new JObject
+                            {
+                              ["type"] = "array",
+                              ["x-ms-summary"] = "- Recipient Signature Providers",
+                              ["items"] = new JObject
+                              {
+                                ["type"] = "object",
+                                ["properties"] = new JObject
+                                {
+                                  ["signatureProviderName"] = new JObject
+                                  {
+                                    ["type"] = "string",
+                                    ["x-ms-summary"] = "- Signature Provider Name"
+                                  },
+                                  ["- signatureProviderOptions"] = new JObject
+                                  {
+                                    ["type"] = "object",
+                                    ["properties"] = new JObject
+                                    {
+                                      ["SMS"] = new JObject
+                                      {
+                                        ["type"] = "string",
+                                        ["x-ms-summary"] = "- SMS"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            ["- identityVerification"] = new JObject
+                            {
+                              ["type"] = "object",
+                              ["properties"] = new JObject
+                              {
+                                ["workflowId"] = new JObject
+                                {
+                                  ["type"] = "string",
+                                  ["x-ms-summary"] = "- Workflow ID"
+                                },
+                                ["- inputOptions"] = new JObject
+                                {
+                                  ["type"] = "array",
+                                  ["x-ms-summary"] = "- Input Options",
+                                  ["items"] = new JObject
+                                  {
+                                    ["type"] = "object",
+                                    ["properties"] = new JObject
+                                    {
+                                      ["name"] = new JObject
+                                      {
+                                        ["type"] = "string",
+                                        ["x-ms-summary"] = "- Name"
+                                      },
+                                      ["valueType"] = new JObject
+                                      {
+                                        ["type"] = "string",
+                                        ["x-ms-summary"] = "- Value Type"
+                                      },
+                                      ["- phoneNumberList"] = new JObject
+                                      {
+                                        ["type"] = "array",
+                                        ["x-ms-summary"] = "- Phone Number List",
+                                        ["items"] = new JObject
+                                        {
+                                          ["type"] = "object",
+                                          ["properties"] = new JObject
+                                          {
+                                            ["countryCode"] = new JObject
+                                            {
+                                              ["type"] = "string",
+                                              ["x-ms-summary"] = "- Country Code"
+                                            },
+                                            ["number"] = new JObject
+                                            {
+                                              ["type"] = "string",
+                                              ["x-ms-summary"] = "- Number"
+                                            },
+                                            ["extension"] = new JObject
+                                            {
+                                              ["type"] = "string",
+                                              ["x-ms-summary"] = "- Extension"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            ["signingGroupId"] = new JObject
+                            {
+                              ["type"] = "string",
+                              ["x-ms-summary"] = "- Signing Group ID"
+                            },
+                            ["- tabs"] = tabsJsonObj.DeepClone()
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+    // end of Composite Templates Request Body
     return CreateJsonContent(response.ToString());
   }
 
@@ -553,6 +3605,15 @@ public class Script : ScriptBase
     }
 
     return fontNames;
+  }
+
+  private static JToken FindAccountById(JObject userInfo, string accountId)
+  {
+    if (string.IsNullOrEmpty(accountId) || userInfo?["accounts"] == null)
+      return null;
+      
+    return userInfo["accounts"].FirstOrDefault(a => 
+      string.Equals(a["account_id"]?.ToString(), accountId, StringComparison.OrdinalIgnoreCase));
   }
 
   private static JObject ParseContentAsJObject(string content, bool isRequest)
@@ -840,11 +3901,27 @@ public class Script : ScriptBase
 
     return await this.Context.SendAsync(logicAppsRequest, this.CancellationToken).ConfigureAwait(false);
   }
+  
+  public string GetEnvelopeID(string path)
+    {
+      string envelopeId = null;
+      var segments = path.Split('/');
+      for (int i = 0; i < segments.Length - 1; i++)
+      {
+        if (segments[i].Equals("envelopes", StringComparison.OrdinalIgnoreCase))
+        {
+          envelopeId = segments[i + 1];
+          break;
+        }
+      }
+      return envelopeId;
+    }
 
   private JObject CreateHookEnvelopeV2BodyTransformation(JObject original)
   {
     var body = new JObject();
     
+
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
@@ -887,17 +3964,132 @@ public class Script : ScriptBase
       ["format"] = "json",
       ["includeData"] = includeData
     };
-    
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV2", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
     return body;
   }
   
+    private JObject CreateHookEnvelopeV4BodyTransformation(JObject original)
+  {
+    var body = new JObject();
+
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+    body["events"] = original["events"] ?? new JArray();
+    body["configurationType"] = "custom";
+    body["deliveryMode"] = "sim";
+
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients',
+      'document_fields'
+    ]";
+
+    JArray includeData = JArray.Parse(eventData);
+    body["eventData"] = new JObject
+    {
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
+    };
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+    uriBuilder.Path = uriBuilder.Path.Replace("connectV4", "connect");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    return body;
+  }
+
+  private JObject  GetOrganizationsBodyTransformation(JObject original)
+  {
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+    var url = UpdateRequestUriToDocusignApi() + uriBuilder.Path.Replace("/restapi/v2.1", "");
+
+    var newURL = new UriBuilder(url);
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    newURL.Query = query.ToString();
+    this.Context.Request.RequestUri = newURL.Uri;
+
+    return original;
+  }
+
+  private JObject CreateOrgHookEnvelopeBodyTransformation(JObject original)
+  {
+    var body = new JObject();
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+
+    var uriLogicApps = original["urlToPublishTo"]?.ToString();
+    var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
+    var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+    body["allUsers"] = "true";
+    body["allowEnvelopePublish"] = "true";
+    body["includeDocumentFields"] = "true";
+    body["requiresAcknowledgement"] = "true";
+    body["urlToPublishTo"] = notificationProxyUri.AbsoluteUri;
+    body["name"] = original["name"]?.ToString();
+    body["events"] = original["events"] ?? new JArray();
+    body["configurationType"] = "custom";
+    body["deliveryMode"] = "sim";
+
+    string eventData = @"[
+      'tabs',
+      'custom_fields',
+      'recipients',
+      'document_fields'
+    ]";
+
+    JArray includeData = JArray.Parse(eventData);
+    body["eventData"] = new JObject
+    {
+      ["version"] = "restv2.1",
+      ["format"] = "json",
+      ["includeData"] = includeData
+    };
+
+    var url = UpdateRequestUriToDocusignApi() + uriBuilder.Path.Replace("/restapi/v2.1", "");
+
+    var newURL = new UriBuilder(url);
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    newURL.Query = query.ToString();
+    this.Context.Request.RequestUri = newURL.Uri;
+
+    return body;
+  }
+  
+  
+
+  private String UpdateRequestUriToDocusignApi()
+  {
+
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var apiBaseUri = host.Contains("demo") ?
+        "https://api-d.docusign.net"
+      : host.Contains("stage") ?
+        "https://api-s.docusign.net"
+      : host.Contains(".mil") ?
+        "https://api.docusign.mil"
+      : "https://api.docusign.net";
+
+    return apiBaseUri;
+  }
+  
   private JObject CreateHookEnvelopeV3BodyTransformation(JObject original)
   {
     var body = new JObject();
-    
+
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
@@ -929,7 +4121,7 @@ public class Script : ScriptBase
       ["format"] = "json",
       ["includeData"] = includeData
     };
-    
+
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
     this.Context.Request.RequestUri = uriBuilder.Uri;
@@ -943,6 +4135,7 @@ public class Script : ScriptBase
     var uriLogicApps = original["urlToPublishTo"]?.ToString();
     var uriLogicAppsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(uriLogicApps ?? string.Empty));
     var notificationProxyUri = this.Context.CreateNotificationUri($"/webhook_response?logicAppsUri={uriLogicAppsBase64}");
+
 
     body["allUsers"] = "true";
     body["allowEnvelopePublish"] = "true";
@@ -1026,6 +4219,88 @@ public class Script : ScriptBase
       newBody["status"] = query.Get("status");
     }
 
+    return newBody;
+  }
+
+  private JObject CreateEnvelopeFromTemplateV3BodyTransformation(JObject body)
+  {
+    var templateRoles = new JArray();
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createWithRecipientFields", "/envelopes");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    var newBody = new JObject()
+    {
+      ["templateId"] = query.Get("templateId"),
+      ["emailSubject"] = query.Get("emailSubject"),
+      ["emailBlurb"] = body["emailBlurb"]
+    };
+
+    Dictionary<string, JObject> recipientMapping = new Dictionary<string, JObject>();
+    foreach (var property in body)
+    {
+      var value = (string)property.Value;
+      var key = (string)property.Key;
+      if (key.Equals("emailBlurb"))
+      {
+        continue;
+      }
+      string[] keyArray = key.Split(new string[]{":::"}, StringSplitOptions.None);
+      var roleName = keyArray[0];
+      // custom fields parsing to match request body object from Docusign API
+      if (string.Equals(keyArray[0], "List Custom Fields", StringComparison.OrdinalIgnoreCase))
+      {
+        if (!newBody.ContainsKey("customFields"))
+        {
+          newBody["customFields"] = new JObject();
+        }
+        JObject recipientCustomFieldObj = (JObject) newBody["customFields"];
+        if (!recipientCustomFieldObj.ContainsKey("listCustomFields"))
+        {
+          recipientCustomFieldObj["listCustomFields"] = new JArray();
+        }
+        JArray listCustomFieldsArray = (JArray) recipientCustomFieldObj["listCustomFields"];
+        listCustomFieldsArray.Add(new JObject
+        {
+          ["name"] = keyArray[1],
+          ["value"] = value,
+          ["show"] = "true"
+        });
+        continue;
+      }
+      if (string.Equals(keyArray[0], "Text Custom Fields", StringComparison.OrdinalIgnoreCase))
+      {
+        if (!newBody.ContainsKey("customFields"))
+        {
+          newBody["customFields"] = new JObject();
+        }
+        JObject recipientCustomFieldObj = (JObject) newBody["customFields"];
+        if (!recipientCustomFieldObj.ContainsKey("textCustomFields"))
+        {
+          recipientCustomFieldObj["textCustomFields"] = new JArray();
+        }
+        JArray textCustomFieldsArray = (JArray) recipientCustomFieldObj["textCustomFields"];
+        textCustomFieldsArray.Add(new JObject
+        {
+          ["name"] = keyArray[1],
+          ["value"] = value,
+          ["show"] = "true"
+        });
+        continue;
+      }
+
+      // template roles parsing to match request body object from Docusign API
+      ParseRecipientFields(recipientMapping, keyArray, value, roleName);
+    }
+
+    foreach (JObject value in recipientMapping.Values)
+    {
+      templateRoles.Add(value);
+    }
+
+    newBody["templateRoles"] = templateRoles;
     return newBody;
   }
 
@@ -1182,6 +4457,32 @@ public class Script : ScriptBase
     }
   }
   
+  private JObject CreateBlankEnvelopeBodyTransformationV2(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var textCustomFields = new JArray();
+    var listCustomFields = new JArray();
+    var accountCustomFieldss = body["AccountCustomFields"] as JObject;
+
+    if (accountCustomFieldss is JObject)
+      ParseCustomFields(accountCustomFieldss, textCustomFields, listCustomFields);
+
+    body["customFields"] = new JObject()
+    {
+      ["textCustomFields"] = textCustomFields,
+      ["listCustomFields"] = listCustomFields
+    };
+
+
+    body["emailSubject"] = query.Get("emailSubject");
+ 
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/createBlankEnvelopeV2", "/envelopes");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+
   private JObject CreateBlankEnvelopeBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -1211,6 +4512,120 @@ public class Script : ScriptBase
     return body;
   }
 
+  private JObject CompositeTemplatesBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+
+    body["emailSubject"] = query.Get("emailSubject");
+    var emailBody = query.Get("emailBody");
+
+    if (!string.IsNullOrEmpty(emailBody))
+    {
+      body["emailBlurb"] = emailBody;
+    }
+
+    if (!string.IsNullOrEmpty(query.Get("status")))
+    {
+      body["status"] = query.Get("status");
+    }
+
+    RenameKeysWithoutDashes(body);
+
+    var keyMappings = new Dictionary<string, string> { 
+      { "Envelope Custom Fields", "customFields" },
+      { "Text Custom Fields", "textCustomFields" },
+      { "Receives a Copy", "carbonCopies" },
+      { "Needs to View", "certifiedDeliveries" },
+      { "Allow to Edit", "editors" },
+      { "In Person Signer", "inPersonSigners" },
+      { "Update Recipients", "intermediaries" },
+      { "Signs with Witness", "witnesses" },
+      { "Needs to Sign", "signers" }
+    };
+
+    RenameSpecificKeys(body, keyMappings);
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopes/compositeTemplates", "/envelopes");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    return body;
+  }
+
+// Removes all dashes (-) appended to field names
+private void RenameKeysWithoutDashes(JObject jObject)
+{
+    var propertiesToRename = new List<JProperty>();
+
+    foreach (var property in jObject.Properties())
+    {
+        if (property.Name.StartsWith("-"))
+        {
+            propertiesToRename.Add(property);
+        }
+
+        if (property.Value is JObject nestedObject)
+        {
+            RenameKeysWithoutDashes(nestedObject);
+        }
+        else if (property.Value is JArray array)
+        {
+            foreach (var item in array)
+            {
+                if (item is JObject arrayObject)
+                {
+                    RenameKeysWithoutDashes(arrayObject);
+                }
+            }
+        }
+    }
+
+    foreach (var property in propertiesToRename)
+    {
+        var newKey = property.Name.TrimStart('-', ' ');
+        jObject[newKey] = property.Value;
+        jObject.Remove(property.Name);
+    }
+}
+
+private void RenameSpecificKeys(JObject jObject, Dictionary<string, string> keyMappings)
+{
+    var propertiesToRename = new List<JProperty>();
+
+    // Collect properties that need renaming based on the provided keyMappings
+    foreach (var property in jObject.Properties())
+    {
+        if (keyMappings.ContainsKey(property.Name))
+        {
+            propertiesToRename.Add(property);
+        }
+
+        // If the property is a nested object, recursively call the function
+        if (property.Value is JObject nestedObject)
+        {
+            RenameSpecificKeys(nestedObject, keyMappings);
+        }
+        else if (property.Value is JArray array)
+        {
+            foreach (var item in array)
+            {
+                if (item is JObject arrayObject)
+                {
+                    RenameSpecificKeys(arrayObject, keyMappings);
+                }
+            }
+        }
+    }
+
+    // Rename collected properties
+    foreach (var property in propertiesToRename)
+    {
+        var newKey = keyMappings[property.Name];
+        jObject[newKey] = property.Value;
+        jObject.Remove(property.Name);
+    }
+}
+
   private JObject EnvelopeVoidBodyTransformation(JObject body)
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
@@ -1235,6 +4650,83 @@ public class Script : ScriptBase
     query["resend_envelope"] = "true";
     uriBuilder.Query = query.ToString();
     this.Context.Request.RequestUri = uriBuilder.Uri;
+    return body;
+  }
+  
+  private JObject listEnvelopeIdsBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/envelopeId", "");
+    uriBuilder.Query = query.ToString();
+    this.Context.Request.RequestUri = uriBuilder.Uri;
+    return body;
+  }
+
+  private JObject SearchListEnvelopesTransformation(JObject body)
+  { 
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      uriBuilder.Path = uriBuilder.Path.Replace("/SearchListEnvelopes", "");
+
+      var orderByMapping = new Dictionary<string, string> { 
+      { "Action required", "action_required" },
+      { "Created", "created" },
+      { "Completed", "completed" },
+      { "Envelope name", "envelope_name" },
+      { "Expire", "expire" },
+      { "Last modified", "last_modified" },
+      { "Sent", "sent" },
+      { "Signer list", "signer_list" },
+      { "Status", "status" },
+      { "Subject", "subject" },
+      { "User name", "user_name" },
+      { "Status changed", "status_changed" }
+    };
+
+      var folderIDMapping = new Dictionary<string, string> {
+      { "Awaiting my signature", "awaiting_my_signature" },
+      { "Completed", "completed" },
+      { "Draft", "draft" },
+      { "Drafts", "drafts" },
+      { "Expiring soon", "expiring_soon" },
+      { "Inbox", "inbox" },
+      { "Out for signature", "out_for_signature" },
+      { "Recycle bin", "recyclebin" },
+      { "Sent items", "sent_items" },
+      { "Waiting for others", "waiting_for_others" }
+    };
+
+      var envelopeStatusMapping = new Dictionary<string, string> {
+      { "Any", "any" },
+      { "Created", "created" },
+      { "Sent", "sent" },
+      { "Delivered", "delivered" },
+      { "Signed", "signed" },
+      { "Completed", "completed" },
+      { "Declined", "declined" },
+      { "Voided", "voided" },
+      { "Deleted", "deleted" }
+    };
+      query["include"] = "custom_fields, recipients, documents, folders";
+      query["order"] = "desc";
+
+      query["status"] = string.IsNullOrEmpty(query.Get("envelopeStatus")) ? 
+        null : envelopeStatusMapping[query.Get("envelopeStatus")];
+      query["search_text"] = string.IsNullOrEmpty(query.Get("search_text")) ? 
+        null : query.Get("search_text");
+      query["folder_ids"] = string.IsNullOrEmpty(query.Get("folder_ids")) ? 
+        null : folderIDMapping[query.Get("folder_ids").ToString()];
+       query["order_by"] = string.IsNullOrEmpty(query.Get("order_by")) ? 
+        "status_changed" : orderByMapping[query.Get("order_by")];
+      query["from_date"] = string.IsNullOrEmpty(query.Get("from_date")) ? 
+        "2000-01-02T12:45Z" : query.Get("from_date");
+      query["to_date"] = string.IsNullOrEmpty(query.Get("to_date")) ? 
+        DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") : query.Get("to_date");
+
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+
     return body;
   }
 
@@ -1270,8 +4762,9 @@ public class Script : ScriptBase
     {
       new JObject(),
     };
+
     AddCoreRecipientParams(signers, body);
-    AddParamsForSelectedRecipientType(signers, body);
+    bool missingInput = AddParamsForSelectedRecipientType(signers, body);
 
     if (!string.IsNullOrEmpty(query.Get("embeddedRecipientStartURL")))
     {
@@ -1289,6 +4782,10 @@ public class Script : ScriptBase
     uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
     uriBuilder.Path = uriBuilder.Path.Replace("/recipients/updateRecipient", "/recipients");
     this.Context.Request.RequestUri = uriBuilder.Uri;
+
+    if (missingInput) {
+      throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: at least one of email or phone number is required");
+    }
 
     return body;
   }
@@ -1310,6 +4807,29 @@ public class Script : ScriptBase
     {
       body["returnUrl"] = body["returnURL"];
     }
+
+    return body;
+  }
+
+  private JObject GenerateEmbeddedSigningURLV2BodyTransformation (JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    
+    body["authenticationMethod"] = query.Get("authenticationMethod");
+    
+    var returnUrl = query.Get("returnUrl");
+    if (returnUrl.Equals("Default URL (Not compatible with iframes)") || returnUrl.Equals("Default URL"))
+    {
+      body["returnUrl"] = "https://postsign.docusign.com/postsigning/en/finish-signing";
+    }
+    else if (returnUrl.Equals("Add A Different URL"))
+    {
+      body["returnUrl"] = body["returnURL"];
+    }
+
+    var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+    uriBuilder.Path = uriBuilder.Path.Replace("/recipientV2", "/recipient");
+    this.Context.Request.RequestUri = uriBuilder.Uri;
 
     return body;
   }
@@ -1342,6 +4862,10 @@ public class Script : ScriptBase
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var verificationType = query.Get("verificationType");
+
+
+    var recipientType = query.Get("recipientType");
+
     var recipientTypeMap = new Dictionary<string, string>() {
       {"agent", "agents"},
       {"editor", "editors"},
@@ -1353,7 +4877,6 @@ public class Script : ScriptBase
       {"witness", "witnesses"}
     };
 
-    var recipientType = recipientTypeMap[query.Get("recipientType")];
     var recipientId = query.Get("recipientId");
 
     var recipient = new JObject();
@@ -1418,7 +4941,10 @@ public class Script : ScriptBase
     
     recipient["recipientId"] = recipientId;
     recipientArray.Add(recipient);
-    body[recipientType] = recipientArray;
+
+    body[!string.IsNullOrEmpty(recipientType) && recipientTypeMap.ContainsKey(recipientType) 
+    ? recipientTypeMap[recipientType] :
+     recipientType] = recipientArray;
 
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
     uriBuilder.Path = uriBuilder.Path.Replace("/recipients/addRecipientV2", "/recipients");
@@ -1429,53 +4955,171 @@ public class Script : ScriptBase
 
   private string GetDescriptionNLPForRelatedActivities(JToken envelope)
   {
-    string descriptionNLP = null;
-    int recipientCount = envelope["recipients"]["recipientCount"].ToObject<int>();
-    var recipientCountInNaturalLanguage = (recipientCount > 1) ?
-        (" and " + (recipientCount - 1).ToString() + " others have ") : " "; 
- 
-    JArray documentArray = (envelope["envelopeDocuments"] as JArray) ?? new JArray();
-    var documentCount = documentArray.Count;
-    string documentCountInNaturalLanguage = "";
+    JToken recipientsToken = envelope["recipients"];
+    JToken signersToken = recipientsToken?["signers"];
+    JArray signersArray = signersToken as JArray ?? new JArray();
+    JToken envelopeDocumentsToken = envelope["envelopeDocuments"];
+    JArray documentArray = envelopeDocumentsToken as JArray ?? new JArray();
+    JToken statusToken = envelope["status"];
+    JToken senderToken = envelope["sender"];
+    JToken statusChangedDateTimeToken = envelope["statusChangedDateTime"];
+    JToken emailSubjectToken = envelope["emailSubject"];
+    JToken envelopeIdToken = envelope["envelopeId"];
+    JToken sentDateTimeToken = envelope["sentDateTime"];
 
-    if (documentCount == 3)
+
+    int recipientCount = recipientsToken?["recipientCount"]?.ToObject<int>() ?? 0;
+    string recipientCountInNaturalLanguage = recipientCount > 1 ? $" and {recipientCount - 1} others have " : " ";
+    int documentCount = documentArray.Count;
+    string documentCountInNaturalLanguage = documentCount == 3 ? " and 1 other document" : documentCount > 3 ? $" and {documentCount - 2} other documents" : "";
+    string envelopeStatus = statusToken?.ToString() ?? "Unknown status";
+    string senderName = senderToken?["userName"]?.ToString() ?? "No sender name";
+    string recipientName = signersArray.FirstOrDefault()?["name"]?.ToString() ?? "No recipient name";
+    string envelopeDocumentName = documentArray.FirstOrDefault()?["name"]?.ToString() ?? "No document name";
+    string statusDateChangeTime = statusChangedDateTimeToken?.ToString() ?? "Date is empty";
+
+    var descriptionBuilder = new StringBuilder();
+    if (envelopeStatus.Equals("sent", StringComparison.OrdinalIgnoreCase))
     {
-      documentCountInNaturalLanguage = $" and 1 other document";
+        descriptionBuilder.Append(senderName)
+                          .Append(" ")
+                          .Append(envelopeStatus)
+                          .Append(" ")
+                          .Append(envelopeDocumentName)
+                          .Append(" ")
+                          .Append(documentCountInNaturalLanguage)
+                          .Append("on ")
+                          .Append(statusDateChangeTime);
     }
-    else if (documentCount > 3)
-      {
-        documentCountInNaturalLanguage = $" and {documentCount - 2} other documents";
-      }
-
-    if (envelope["status"].ToString().Equals("sent"))
+    else if (signersArray.Count > 0)
     {
-      descriptionNLP = envelope["sender"]["userName"] + " " +
-        envelope["status"] + " " +
-        envelope["envelopeDocuments"][0]["name"] +
-        documentCountInNaturalLanguage + " on " +
-        envelope["statusChangedDateTime"];
+        descriptionBuilder.Append(recipientName)
+                          .Append(recipientCountInNaturalLanguage)
+                          .Append(envelopeStatus)
+                          .Append(" ")
+                          .Append(envelopeDocumentName)
+                          .Append(documentCountInNaturalLanguage)
+                          .Append("on ")
+                          .Append(statusDateChangeTime);
     }
     else
     {
-      descriptionNLP = envelope["recipients"]["signers"][0]["name"] +
-        recipientCountInNaturalLanguage +
-        envelope["status"] + " " +
-        envelope["envelopeDocuments"][0]["name"] +
-        documentCountInNaturalLanguage + " on " +
-        envelope["statusChangedDateTime"];
+        descriptionBuilder.Append("No signer recipients found for this envelope. Only 'Signer' recipient types are supported in the current response.");
     }
 
-    return descriptionNLP;
+    return descriptionBuilder.ToString();
   }
 
   private string GetEnvelopeUrl(JToken envelope)
   {
     var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-    var envelopeUrl = uriBuilder.Uri.ToString().Contains("demo") ?
-      "https://apps-d.docusign.com/send/documents/details/" + envelope["envelopeId"] :
-      "https://app.docusign.com/documents/details/" + envelope["envelopeId"];
+    var path = uriBuilder.Uri.ToString().Contains("demo") || uriBuilder.Uri.ToString().Contains("stage") ? 
+    "/send/documents/details/" : "/documents/details/";
+    var envelopeUrl = GetDocusignApiBaseUri() + path + envelope["envelopeId"];
 
     return envelopeUrl;
+  }
+
+  private string GetDocusignApiBaseUri()
+  {
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var docusignApiBaseUri = host.Contains("demo") ?
+        "https://apps-d.docusign.com"
+      : host.Contains("stage") ?
+        "https://apps-s.docusign.com"
+      : host.Contains(".mil") ?
+        "https://app.docusign.mil"
+      : "https://app.docusign.com";
+
+    return docusignApiBaseUri;
+  }
+
+  private string GetAccountServerBaseUri()
+  {
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var accountServerBaseUri = host.Contains("demo") ?
+        "https://account-d.docusign.com"
+      : host.Contains("stage") ?
+        "https://account-s.docusign.com"
+      : host.Contains(".mil") ?
+        "https://account.docusign.mil"
+      : "https://account.docusign.com";
+
+    return accountServerBaseUri;
+  }
+
+  private string GetPartnerIntegrationsBaseUri()
+  {
+    var host = this.Context.Request.RequestUri.Host.ToLower();
+    var shard = GetShard(host);
+    var pIBaseUri = host.Contains("demo") ?
+        $"https://{shard}services.demo.docusign.net/partner-integrations/v1.0"
+      : host.Contains("stage") ?
+        $"https://{shard}services.stage.docusign.net/partner-integrations/v1.0"
+      : $"https://{shard}services.docusign.net/partner-integrations/v1.0";
+
+    return pIBaseUri;
+  }
+
+  private string GetShard(string host)
+  {
+	if(host.EndsWith(".mil"))
+	{
+		return "";
+	}
+    var site = host.Split('.')[0];
+    switch (site)
+    {
+      case "stage":
+      case "demo":
+      case "na2":
+      case "na4":
+        return "s1.us.";
+
+      case "na1":
+      case "na3":
+	  case "www":
+        return "s2.us.";
+
+      case "caprod":
+      case "ca":
+        return "s1.ca.";
+
+      case "euprod":
+      case "eu":
+        return "s1.eu.";
+
+      case "auprod":
+      case "au":
+        return "s1.au.";
+
+      case "jp1":
+        return "s1.jp.";
+        
+      default:
+        return "";
+    }
+  }
+
+  private JObject TriggerMaestroWorkflowTransformation(JObject body)
+  {
+      this.Context.Request.Headers.Add("DocuSign-Maestro-Workflow-Origin", "PowerAutomate");
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      var newBody = new JObject();
+      newBody["instanceName"] = query.Get("instanceName");
+      var inputVariables = new JArray();
+      foreach(var property in body)
+      {
+          var key = (string)property.Key;
+          var value = property.Value;
+          inputVariables.Add(new JObject
+          {
+              ["propertyName"] = key,
+              ["value"] = value
+          });
+      }
+      newBody["inputVariables"] = inputVariables;
+      return newBody;
   }
 
   private void AddCoreRecipientParams(JArray signers, JObject body) 
@@ -1533,6 +5177,11 @@ public class Script : ScriptBase
       signers[0]["note"] = query.Get("note");
     }
 
+    if (!string.IsNullOrEmpty(query.Get("signingGroupId")))
+    {
+      signers[0]["signingGroupId"] = query.Get("signingGroupId");
+    }
+
     if (!string.IsNullOrEmpty(query.Get("roleName")))
     {
       signers[0]["roleName"] = query.Get("roleName");
@@ -1543,52 +5192,181 @@ public class Script : ScriptBase
       var phoneNumber = new JObject();
       phoneNumber["countryCode"] = query.Get("countryCode");
       phoneNumber["number"] = query.Get("phoneNumber");
+      if (!string.IsNullOrEmpty(body["email"]?.ToString()))
+      {
+        var additionalNotification = new JObject();
+        additionalNotification["secondaryDeliveryMethod"] = "SMS";
+        additionalNotification["phoneNumber"] = phoneNumber;
 
-      var additionalNotification = new JObject();
-      additionalNotification["secondaryDeliveryMethod"] = "SMS";
-      additionalNotification["phoneNumber"] = phoneNumber;
+        var additionalNotifications = new JArray();
+        additionalNotifications.Add(additionalNotification);
+        signers[0]["additionalNotifications"] = additionalNotifications;
+      }
+      else
+      {
+        signers[0]["phoneNumber"] = phoneNumber;
+      }
+    }
 
-      var additionalNotifications = new JArray();
-      additionalNotifications.Add(additionalNotification);
-      signers[0]["additionalNotifications"] = additionalNotifications;
+    if (!string.IsNullOrEmpty(query.Get("workflowId")))
+    {
+      var identityVerification = new JObject
+      {
+        ["workflowId"] = query.Get("workflowId")
+      };
+      signers[0]["identityVerification"] = identityVerification;
     }
   }
 
-  private JArray GetFilteredEnvelopeDetails(JArray filteredEnvelopes)
+  private JArray GetFilteredEnvelopeDetailsForSalesCopilot(JArray filteredEnvelopes)
   {
     TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
     var filteredEnvelopesDetails = new JArray();
         
     foreach (var envelope in filteredEnvelopes)
     {
-      DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+      DateTime statusUpdateTime = envelope["statusChangedDateTime"]?.ToObject<DateTime>() ?? DateTime.MinValue;
       DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
       System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
 
       JArray recipientNames = new JArray(
-      (envelope["recipients"]["signers"] as JArray)?.Select(recipient => recipient["name"]));
+      (envelope["recipients"]?["signers"] as JArray)?.Select(recipient => recipient["name"]));
       JArray documentNames = new JArray(
       (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
 
+      JObject additionalPropertiesForSalesEnvelope = new JObject()
+        {
+          ["documents"] = string.Join(",", documentNames),
+          ["recipients"] = string.Join(", ", recipientNames),
+          ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+          ["status"] = textInfo.ToTitleCase(envelope["status"]?.ToString() ?? "Unknown status"),
+          ["sender"] = envelope["sender"]?["userName"]?.ToString() ?? "Sender name empty"
+        };
+
       filteredEnvelopesDetails.Add(new JObject()
       {
-        ["title"] = envelope["emailSubject"],
+        ["title"] = envelope["emailSubject"]?.ToString() ?? "Title empty",
+        ["subTitle"] = "Agreement",
+        ["url"] = GetEnvelopeUrl(envelope),
+        ["additionalPropertiesForSalesEnvelope"] = additionalPropertiesForSalesEnvelope
+      });
+    }
+
+    return filteredEnvelopesDetails;
+  }
+
+  private void getRecipientTypes(JArray recipientTypes, JObject recipients)
+  {
+      if (recipients != null)
+      {
+          foreach (var recipientType in recipients.Properties())
+          {
+              if (recipientType.Value is JArray recipientArray && recipientArray.Count > 0)
+              {
+                  recipientTypes.Add(recipientType.Name);
+              }
+          }
+      }
+  }
+
+  private JArray GetFilteredEnvelopeDetails(JArray filteredEnvelopes)
+  {
+    TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+    var filteredEnvelopesDetails = new JArray();
+
+    foreach (var envelope in filteredEnvelopes)
+    {
+      DateTime statusUpdateTime = envelope["statusChangedDateTime"]?.ToObject<DateTime>() ?? DateTime.MinValue;
+      DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+      System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+
+      JArray recipientNames = new JArray(
+        (envelope["recipients"]?["signers"] as JArray)?.Select(recipient => recipient["name"]));
+
+      JArray documentNames = new JArray(
+        (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
+
+      JArray recipientTypes = new JArray();
+      getRecipientTypes(recipientTypes, envelope["recipients"] as JObject);
+
+      filteredEnvelopesDetails.Add(new JObject()
+      {
+        ["Email subject"] = envelope["emailSubject"]?.ToString() ?? "Email subject empty",
         ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
-        ["envelopeId"] = envelope["envelopeId"],
-        ["statusDate"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+        ["envelopeId"] = envelope["envelopeId"]?.ToString() ?? "Envelope ID not found",
+        ["statusDate"] = envelope["statusChangedDateTime"] != null ? envelope["statusChangedDateTime"] : "No status date",
         ["url"] = GetEnvelopeUrl(envelope),
         ["recipients"] = string.Join(", ", recipientNames),
-        ["documents"] = string.Join(",", documentNames),
-        ["sender"] = envelope["sender"]["userName"],
-        ["status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
-        ["dateSent"] = envelope["sentDateTime"]
+        ["documents"] = string.Join(", ", documentNames),
+        ["recipientTypes"] = string.Join(", ", recipientTypes),
+        ["sender"] = envelope["sender"]?["userName"]?.ToString() ?? "Sender username empty",
+        ["status"] = envelope["status"] != null ? textInfo.ToTitleCase(envelope["status"].ToString()) : "Unknown status",
+        ["dateSent"] = envelope["sentDateTime"] != null ? envelope["sentDateTime"] : "No sent date"
       });
     }
 
     return filteredEnvelopesDetails;
   }
   
-  private void AddParamsForSelectedRecipientType(JArray signers, JObject body) 
+  private JArray createRowValueList(Dictionary<int, List<JToken>> tableMap)
+  {
+    var rowValueList = new JArray();
+    foreach (var row in tableMap)
+    {
+      var docGenFormFieldList = new JArray();
+      foreach (var column in row.Value)
+      {
+        docGenFormFieldList.Add(new JObject
+        {
+          ["name"] = column["name"],
+          ["value"] = column["value"],
+          ["label"] = column["label"]
+        });
+      }
+
+      rowValueList.Add(new JObject
+      {
+        ["docGenFormFieldList"] = docGenFormFieldList
+      });
+    }
+
+    return rowValueList;
+  }
+
+  private JArray GetFormFields(JArray docGenFormfields, JArray formFields)
+  {
+    foreach (var doc in docGenFormfields)
+    {
+      var docGenFormFieldList = doc["docGenFormFieldList"] as JArray;
+      if (docGenFormFieldList == null)
+          continue;
+
+      foreach( var field in docGenFormFieldList)
+      {
+        formFields.Add(new JObject()
+        {
+          ["name"] = field["name"],
+          ["type"] = field["type"],
+          ["value"] = field["value"],
+          ["label"] = field["label"],
+          ["documentId"] = doc["documentId"]
+        });
+
+        if (field["type"] != null && field["type"].ToString().Equals("TableRow", StringComparison.OrdinalIgnoreCase))
+        {
+          var rowValues = field["rowValues"] as JArray;
+          if (rowValues != null)
+          {
+            formFields = GetFormFields(rowValues, formFields);
+          }
+        }
+      }
+    }
+
+    return formFields;
+  }
+
+  private bool AddParamsForSelectedRecipientType(JArray signers, JObject body) 
   {
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var recipientType = query.Get("recipientType");
@@ -1608,8 +5386,19 @@ public class Script : ScriptBase
     else
     {
       signers[0]["name"] = body["name"];
-      signers[0]["email"] = body["email"];
+      if (string.IsNullOrEmpty(body["email"]?.ToString()) && string.IsNullOrEmpty(query.Get("signingGroupId")) && string.IsNullOrEmpty(query.Get("phoneNumber"))) 
+      {
+        return true;
+      }
+      else 
+      {
+        if (!string.IsNullOrEmpty(body["email"]?.ToString()))
+        {
+          signers[0]["email"] = body["email"];
+        }
+      }
     }
+    return false;
   }
 
   private void AddParamsForSelectedSignatureType(JArray signers, JObject body)
@@ -1635,6 +5424,50 @@ public class Script : ScriptBase
     }
 
     signers[0]["recipientSignatureProviders"] = recipientSignatureProviders;
+  }
+
+  private string GetHostFromUrl(string url)
+  {
+    if (!string.IsNullOrEmpty(url))
+    {
+      Uri uriResult;
+      bool result = Uri.TryCreate(url, UriKind.Absolute, out uriResult)
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+      if (result)
+      {
+        return uriResult.Host;
+      }
+    }
+    return null;
+  }
+
+  private JArray GetFilteredEnvelopes(JArray envelopes, string[] filters)
+  {
+    JArray filteredRecords = new JArray();
+    foreach (var filter in filters.Where(filter => filter != null)) 
+      {
+        foreach (var envelope in envelopes)
+        {
+          if (envelope.ToString().ToLower().Contains(filter.ToLower()))
+          {
+            filteredRecords.Add(envelope);
+          }
+        }
+
+        if (filteredRecords.Count > 0)
+        {
+          envelopes.Clear();
+          envelopes = new JArray(filteredRecords);
+          filteredRecords.Clear();
+        }
+        else
+        {
+          envelopes.Clear();
+          break;
+        }
+      }
+
+    return envelopes;
   }
 
   private int GenerateId()
@@ -1666,6 +5499,7 @@ public class Script : ScriptBase
     var tabsMap = new Dictionary<string, string>() { 
       { "Text", "textTabs" }, 
       { "Note", "noteTabs" },
+      { "Number", "numberTabs" }
     };
 
     foreach (var tab in body)
@@ -1697,10 +5531,254 @@ public class Script : ScriptBase
     for (var i = 0; i < tabs.Count; i++)
     {
       JObject tab = tabs[i] as JObject;
+      if (tabType.Equals("tabGroups"))
+      {
+        tab["pageNumber"] = "1";
+      }
       res_tabs.Add(tab);
     }
 
     body[tabType] = res_tabs;
+    return body;
+  }
+  private JObject ApplyTemplateBodyTransformation(JObject body)
+  {
+    var documentTemplatesArray = new JArray();
+    var docTemplates = body["documentTemplates"] as JArray;
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var templateId = query.Get("templateId");
+    
+    if (docTemplates == null)
+    {
+      JObject tempObj = new JObject();
+      tempObj["templateId"] = templateId;
+      documentTemplatesArray.Add(tempObj);
+    }
+    else 
+    {
+      for (var i = 0; i < docTemplates.Count; i++)
+      {
+        JObject tempObj = docTemplates[i] as JObject;
+        tempObj["templateId"] = templateId;
+        documentTemplatesArray.Add(tempObj);
+      }
+    }
+
+    body["documentTemplates"] = documentTemplatesArray;
+    return body;
+  }
+
+
+  private JObject BulkSendBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);      
+    var name = query.Get("name");
+    JObject newBody = ParseCSV(body);
+    newBody["name"] = name;
+    return newBody;
+  }
+
+  public static JObject ParseCSV(JObject inputBody)
+  {
+      var input = inputBody["csv"]?.ToString();
+      var body = new JObject();
+      var result = new JObject();
+
+      // Hashmap for mapping docgen fields to their internal names
+      var fieldNameToLabelMap = new Dictionary<string, string>();
+      var labelToFieldNameMap = new Dictionary<string, string>(); // Add this reverse lookup
+
+      // Hashmap for mapping table names to their child fields
+      var tableToChildFieldsMap = new Dictionary<string, List<string>>();
+
+      try
+      {
+        processDocGenFields(inputBody, fieldNameToLabelMap, labelToFieldNameMap, tableToChildFieldsMap);
+      }
+      catch (Exception ex)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Error processing DocGen fields: " + ex.Message);
+      }
+
+      // Hashmap for storing child field names to their parent table names
+      var childFieldToTableMap = new Dictionary<string, string>();
+
+      foreach (var kvp in tableToChildFieldsMap)
+      {
+          var tableName = kvp.Key;
+          var childFields = kvp.Value;
+
+          foreach (var childField in childFields)
+          {
+              if (!childFieldToTableMap.ContainsKey(childField))
+              {
+                  childFieldToTableMap[childField] = tableName;
+              }
+          }
+      }
+
+      if (string.IsNullOrEmpty(input))
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: CSV input is empty");
+      }
+
+      try
+      {
+      // Split lines from the csv 
+      var lines = input.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+      // first line with the headers 
+      var headerLine = lines[0];
+      var headerItems = headerLine.Split(',');
+      var parsedHeaders = new string[headerItems.Length][];
+      string[] recipientFields = { "accessCode", "clientUserId", "deliveryMethod", "email", "embeddedRecipientStartURL", "hostEmail", "hostName", "idCheckConfigurationName", "name", "note", "recipientId", "roleName", "signerName", "signingGroupId" };
+
+      Dictionary<string, JObject> recipientDataMap = new Dictionary<string, JObject>();
+      body["recipients"] = new JArray();
+      result["bulkCopies"] = new JArray();
+      body["docGenFormFields"] = new JArray(); 
+      var recipientObject = new JObject();
+
+      for (int i = 0; i < headerItems.Length; i++)
+      {
+        parsedHeaders[i] = headerItems[i].Split(new string[] { "::" }, StringSplitOptions.None);
+      }
+    
+      // Iterate over the other lines (index at 1 to skip header line)
+      for (var index = 1; index < lines.Length; index++)
+      {
+        if (string.IsNullOrWhiteSpace(lines[index])) continue;
+
+        var fieldValues = lines[index].Split(',');
+        if (fieldValues.Length != parsedHeaders.Length)
+        {
+          continue;
+        }
+        var roleName = "";
+        var fieldName = "";
+        var tabLabelName = "";
+
+        for (var index2 = 0; index2 < Math.Min(fieldValues.Length, parsedHeaders.Length); index2++)
+        {
+          var columnName = parsedHeaders[index2];
+          var value = fieldValues[index2];
+          if (string.IsNullOrEmpty(value))
+          {
+            continue;
+          }
+          
+          // Dynamic Table fields
+          if (columnName.Length > 1 && columnName[0].Equals("Dynamic Table", StringComparison.OrdinalIgnoreCase))
+          {
+            ProcessDynamicTableField(columnName, value, body, labelToFieldNameMap, tableToChildFieldsMap);
+            continue;
+          }
+          
+          // DocGen form fields (Not Dynamic Tables)
+          if (columnName.Length > 1 && columnName[0].Equals("Document Generation", StringComparison.OrdinalIgnoreCase))
+          {
+            var docGenFieldLabel = columnName[1];
+
+            if (labelToFieldNameMap.TryGetValue(docGenFieldLabel, out string matchingFieldName))
+            {
+              var docGenField = new JObject
+              {
+                ["name"] = matchingFieldName,
+                ["value"] = value
+              };
+              
+              ((JArray)body["docGenFormFields"]).Add(docGenField);
+          }
+            continue;
+          }
+
+
+        // recipient info
+        if (columnName.Length > 1)
+        {
+          roleName = columnName[0];
+          fieldName = columnName[1];
+          tabLabelName = columnName[1];
+          fieldName = fieldName.Replace(" ", "");
+          fieldName = char.ToLower(fieldName[0]) + fieldName.Substring(1);
+          JObject recipientObj;
+          if (recipientDataMap.ContainsKey(roleName))
+          {
+            recipientObj = recipientDataMap[roleName];
+          }
+          else
+          {
+            recipientDataMap[roleName] = new JObject();
+            recipientObj = recipientDataMap[roleName];
+            recipientObj["roleName"] = roleName;
+          }
+          if (recipientFields.Contains(fieldName))
+          {
+            recipientObj[fieldName] = value;
+            continue;
+          }
+          if (fieldName.Equals("emailSubject", StringComparison.OrdinalIgnoreCase) ||
+          fieldName.Equals("emailBody", StringComparison.OrdinalIgnoreCase) ||
+          fieldName.Equals("language", StringComparison.OrdinalIgnoreCase))
+          {
+            if (!recipientObj.ContainsKey("emailNotification"))
+            {
+              recipientObj["emailNotification"] = new JObject();
+            }
+            recipientObj["emailNotification"][fieldName] = value;
+          }
+          else
+          {
+            if (!recipientObj.ContainsKey("tabs"))
+            {
+              recipientObj["tabs"] = new JArray();
+            }
+            ((JArray)recipientObj["tabs"]).Add(new JObject()
+            {
+              ["tabLabel"] = tabLabelName,
+              ["initialValue"] = value
+            });
+          }
+        }
+        else
+        {
+          // custom fields info
+          if (!body.ContainsKey("customFields"))
+          {
+            body["customFields"] = new JArray();
+          }
+            ((JArray)body["customFields"]).Add(new JObject()
+            {
+              ["name"] = columnName[0],
+              ["value"] = value
+            });
+        }
+      }
+      foreach (KeyValuePair<string, JObject> pair in recipientDataMap)
+      {
+        var recipientObj = pair.Value;
+        ((JArray)body["recipients"]).Add(recipientObj.DeepClone());
+      }
+      recipientDataMap = new Dictionary<string, JObject>();
+      ((JArray)result["bulkCopies"]).Add(body.DeepClone());
+      body["recipients"] = new JArray();
+      body["docGenFormFields"] = new JArray();
+      body["customFields"] = new JArray();
+      recipientDataMap = new Dictionary<string, JObject>();
+    }
+    }
+      catch (Exception ex)
+      {
+        throw new ConnectorException(HttpStatusCode.BadRequest, "Please refer to Docusign documentations and follow CSV file guidelines. Unable to parse the request body", ex);
+      }
+      return result;
+    }
+
+  private JObject BulkSendRequestBodyTransformation(JObject body)
+  {
+    var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+    var envelopeOrTemplateId = query.Get("envelopeOrTemplateId");
+
+    body["envelopeOrTemplateId"] = envelopeOrTemplateId;
     return body;
   }
 
@@ -1709,17 +5787,54 @@ public class Script : ScriptBase
     var body = ParseContentAsJArray(await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false), true);
     var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
     var fieldList = new JArray();
+    var rowValueList = new JArray();
     var documentId = query.Get("documentGuid");
+    string tableName = string.Empty;
+    Dictionary<int, List<JToken>> tableMap = new Dictionary<int, List<JToken>>();
 
-    foreach (var field in body)
+    try
     {
-      fieldList.Add(new JObject
+      foreach (var field in body)
+      {
+        if ((field["fieldType"] != null) && (field["fieldType"].ToString() == "Table row"))
         {
-          ["name"] = field["name"],
-          ["value"] = field["value"]
-        });
+          var rowNumber = field["rowNumber"].Value<int>();
+          tableName = field["tableName"].ToString();
+
+          if (!tableMap.ContainsKey(rowNumber))
+          {
+            tableMap[rowNumber] = new List<JToken>();
+          }
+          tableMap[rowNumber].Add(field);
+        }
+        else
+        {
+          fieldList.Add(new JObject
+          {
+            ["name"] = field["name"],
+            ["value"] = field["value"]
+          });
+        }
+      }
+    }
+     catch (HttpRequestException ex)
+    {
+      throw new ConnectorException(HttpStatusCode.BadGateway, "Docgen field name not found" + ex.Message, ex);
     }
 
+    if (!string.IsNullOrEmpty(tableName))
+    {
+      rowValueList = createRowValueList(tableMap);
+      fieldList.Add(new JObject
+      {
+        ["label"] = tableName,
+        ["type"] = "TableRow",
+        ["required"] = "True",
+        ["name"] = tableName,
+        ["rowValues"] = rowValueList
+      });
+    }
+    
     var docGenFormFields = new JArray
     {
       new JObject
@@ -1735,10 +5850,360 @@ public class Script : ScriptBase
     this.Context.Request.Content = CreateJsonContent(newBody.ToString());
   }
 
+  private Dictionary<string, JObject> GenerateRecipientsMappings(JObject body)
+  {
+    Dictionary<string, JObject> recipientData = new Dictionary<string, JObject>();
+    string[] recipientTypes = new string[] {"agents", "carbonCopies", "certifiedDeliveries", "editors", "inPersonSigners", "signers", "intermediaries"};
+    if (body["recipients"] != null)
+    {
+      foreach (var recipientType in recipientTypes)
+      {
+        if (body["recipients"][recipientType] != null)
+        {
+          var recipients = body["recipients"][recipientType] as JArray;
+          foreach (JObject recipient in recipients)
+          {
+            if (recipient.ContainsKey("roleName"))
+            {
+              recipientData[recipient["roleName"].ToString()] = recipient as JObject;
+            }
+          }
+        }
+      }
+    }
+    return recipientData;
+  }
+
+  private void GenerateRecipientInformationFields(Dictionary<string, JObject> recipientData, JObject itemProperties)
+  {
+    string[] editableTabs = new string[]{"emailTabs", "formulaTabs", "noteTabs", "ssnTabs", "textTabs", "zipTabs", "checkboxTabs", "numberTabs"};
+
+    foreach (KeyValuePair<string, JObject> pair in recipientData)
+    {
+      var roleName = pair.Key;
+      JObject recipientObj = pair.Value as JObject;
+      // Name fields
+      if (string.Equals(recipientObj["recipientType"].ToString(), "signer"))
+      {
+        itemProperties[roleName + ":::Name"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = roleName + " Recipient Or Signing Group Name"
+        };
+        itemProperties[roleName + ":::Signing Group"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = roleName + " Signing Group",
+          ["x-ms-dynamic-values"] = new JObject
+          {
+            ["operationId"] = "GetSigningGroups",
+            ["value-collection"] = "groups",
+            ["value-path"] = "signingGroupId",
+            ["value-title"] = "groupName",
+            ["parameters"] = new JObject
+            {
+              ["accountId"] = new JObject
+              {
+                ["parameter"] = "accountId"
+              }
+            }
+          }
+        };
+      }
+      else
+      {
+        if (string.Equals(recipientObj["recipientType"].ToString(), "inpersonsigner", StringComparison.OrdinalIgnoreCase))
+        {
+          itemProperties[roleName + ":::In Person Signer"] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-summary"] = roleName + " Signer Name"
+          };
+          itemProperties[roleName + ":::Name"] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-summary"] = roleName + " Host Name"
+          };
+          itemProperties[roleName + ":::Email"] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-summary"] = roleName + " Host Email"
+          };
+        }
+        else
+        {
+          itemProperties[roleName + ":::Name"] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-summary"] = roleName + " Recipient Name"
+          };
+        }
+      }
+
+      // SMS/Email fields
+      if ((recipientObj["additionalNotifications"] != null && 
+      ((JArray) recipientObj["additionalNotifications"]).Count > 0 &&
+      recipientObj["additionalNotifications"][0]["secondaryDeliveryMethod"] != null && 
+      string.Equals(recipientObj["additionalNotifications"][0]["secondaryDeliveryMethod"].ToString(), "SMS", StringComparison.OrdinalIgnoreCase)))
+      {
+        itemProperties[roleName + ":::Secondary Country Code"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = roleName + " SMS Country Code"
+        };
+        itemProperties[roleName + ":::Secondary Phone Number"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = roleName + " SMS Phone Number"
+        };
+      }
+      if (string.Equals(recipientObj["deliveryMethod"].ToString(), "SMS", StringComparison.OrdinalIgnoreCase))
+      {
+        itemProperties[roleName + ":::Country Code"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = roleName + " SMS Country Code"
+        };
+        itemProperties[roleName + ":::Phone Number"] = new JObject
+        {
+          ["type"] = "string",
+          ["x-ms-summary"] = roleName + " SMS Phone Number"
+        };
+      }
+      else
+      {
+        if (string.Equals(recipientObj["recipientType"].ToString(), "signer"))
+        {
+          itemProperties[roleName + ":::Email"] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-summary"] = roleName + " Recipient Email (Leave empty if there’s a signing group)"
+          };
+        }
+        else
+        {
+          if (!string.Equals(recipientObj["recipientType"].ToString(), "inpersonsigner", StringComparison.OrdinalIgnoreCase))
+          {
+            itemProperties[roleName + ":::Email"] = new JObject
+            {
+              ["type"] = "string",
+              ["x-ms-summary"] = roleName + " Recipient Email"
+            };
+          }
+        }
+      }
+
+      // Tabs fields
+      JObject singleRecipientData = recipientObj as JObject;
+      JObject tabsData = singleRecipientData["tabs"] as JObject;
+      if (tabsData != null)
+      {
+        foreach (var tabType in editableTabs)
+        {
+          if (tabsData.ContainsKey(tabType))
+          {
+            foreach (var tab in tabsData[tabType] as JArray)
+            {
+              if (string.Equals(tabType, "checkboxTabs", StringComparison.OrdinalIgnoreCase))
+              {
+                itemProperties[roleName + ":::" + tabType + ":::" + tab["tabLabel"].ToString() + ":::" + tab["name"].ToString()] = new JObject
+                {
+                  ["type"] = "string",
+                  ["enum"] = new JArray("true", "false"),
+                  ["x-ms-summary"] = roleName + " - Tab Type: " + tabType + " - Tab label: " + tab["tabLabel"].ToString() + " - Name: " + tab["name"].ToString() +" Selected"
+                };
+              }
+              else
+              {
+                itemProperties[roleName + ":::" + tabType + ":::" + tab["tabLabel"].ToString()] = new JObject
+                {
+                  ["type"] = "string",
+                  ["x-ms-summary"] = roleName + " - Tab Type: " + tabType + " - Tab label: " + tab["tabLabel"].ToString()
+                };
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private void GenerateCustomFields(JObject body, JObject itemProperties)
+  {
+    if (body["customFields"] != null)
+    {
+      if (body["customFields"]["listCustomFields"] != null)
+      {
+        foreach (var customField in body["customFields"]["listCustomFields"] as JArray)
+        {
+          var required = "";
+          if (string.Equals(customField["required"].ToString(), "true"))
+          {
+            required = " *";
+          }
+          itemProperties["List Custom Fields:::" + customField["name"].ToString()] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-summary"] = "List Custom Fields: " + required + customField["name"].ToString(),
+            ["enum"] = customField["listItems"]
+          };
+        }
+      }
+      if (body["customFields"]["textCustomFields"] != null)
+      {
+        foreach (var customField in body["customFields"]["textCustomFields"] as JArray)
+        {
+          var required = "";
+          if (string.Equals(customField["required"].ToString(), "true"))
+          {
+            required = " *";
+          }
+          itemProperties["Text Custom Fields:::" + customField["name"].ToString()] = new JObject
+          {
+            ["type"] = "string",
+            ["x-ms-summary"] = "Text Custom Fields: " + required + customField["name"].ToString()
+          };
+        }
+      }
+    }
+  }
+
+  private void ParseRecipientFields(Dictionary<string, JObject> recipientMapping, string[] keyArray, string value, string roleName)
+  {
+    if (!recipientMapping.ContainsKey(roleName))
+    {
+      JObject newRecipientObj = new JObject();
+      newRecipientObj["roleName"] = roleName;
+      recipientMapping[roleName] = newRecipientObj;
+    }
+    JObject recipientObj = recipientMapping[roleName];
+
+    if (keyArray.Length > 2)
+    {
+      if (!recipientObj.ContainsKey("tabs"))
+      {
+        recipientObj["tabs"] = new JObject();
+      }
+      var tabType = keyArray[1];
+      var tabLabel = keyArray[2];
+      if (string.Equals(tabType, "checkboxTabs", StringComparison.OrdinalIgnoreCase))
+      {
+        var tabObj = new JObject
+        {
+          ["tabLabel"] = tabLabel,
+          ["name"] = keyArray[3],
+          ["selected"] = value
+        };
+        JObject recipientTabs = (JObject) recipientObj["tabs"];
+        if (!recipientTabs.ContainsKey(tabType))
+        {
+          recipientTabs[tabType] = new JArray();
+        }
+        JArray recipientObjArray = (JArray) recipientTabs[tabType];
+        recipientObjArray.Add(tabObj);
+      }
+      else
+      {
+        var tabObj = new JObject
+        {
+          ["tabLabel"] = tabLabel,
+          ["value"] = value
+        };
+        JObject recipientTabs = (JObject) recipientObj["tabs"];
+        if (!recipientTabs.ContainsKey(tabType))
+        {
+          recipientTabs[tabType] = new JArray();
+        }
+        JArray recipientObjArray = (JArray) recipientTabs[tabType];
+        recipientObjArray.Add(tabObj);
+      }
+    }
+    if (string.Equals(keyArray[1], "Name", StringComparison.OrdinalIgnoreCase))
+    {
+      recipientObj["name"] = value;
+    }
+    if (string.Equals(keyArray[1], "Email", StringComparison.OrdinalIgnoreCase))
+    {
+      recipientObj["email"] = value;
+    }
+    if (string.Equals(keyArray[1], "Signing Group", StringComparison.OrdinalIgnoreCase))
+    {
+      recipientObj["signingGroupId"] = value;
+    }
+    if (string.Equals(keyArray[1], "In Person Signer", StringComparison.OrdinalIgnoreCase))
+    {
+      recipientObj["inPersonSignerName"] = value;
+    }
+    if (string.Equals(keyArray[1], "Secondary Country Code", StringComparison.OrdinalIgnoreCase))
+    {
+      if (!recipientObj.ContainsKey("additionalNotifications"))
+      {
+        recipientObj["additionalNotifications"] = new JArray();
+      }
+      JArray additionalNotificationsArray = recipientObj["additionalNotifications"] as JArray;
+      if (additionalNotificationsArray.Count == 0)
+      {
+        additionalNotificationsArray.Add(new JObject 
+        {
+          ["phoneNumber"] = new JObject 
+          {
+            ["countryCode"] = value
+          },
+          ["secondaryDeliveryMethod"] = "SMS"
+        });
+      }
+      else
+      {
+        additionalNotificationsArray[0]["phoneNumber"]["countryCode"] = value;
+      }
+    }
+    if (string.Equals(keyArray[1], "Secondary Phone Number", StringComparison.OrdinalIgnoreCase))
+    {
+      if (!recipientObj.ContainsKey("additionalNotifications"))
+      {
+        recipientObj["additionalNotifications"] = new JArray();
+      }
+      JArray additionalNotificationsArray = recipientObj["additionalNotifications"] as JArray;
+      if (additionalNotificationsArray.Count == 0)
+      {
+        additionalNotificationsArray.Add(new JObject 
+        {
+          ["phoneNumber"] = new JObject 
+          {
+            ["number"] = value
+          },
+          ["secondaryDeliveryMethod"] = "SMS"
+        });
+      }
+      else
+      {
+        additionalNotificationsArray[0]["phoneNumber"]["number"] = value;
+      }
+    }
+    if (string.Equals(keyArray[1], "Country Code", StringComparison.OrdinalIgnoreCase))
+    {
+      if (!recipientObj.ContainsKey("phoneNumber"))
+      {
+        recipientObj["phoneNumber"] = new JObject();
+      }
+      JObject recipientPhoneObj = (JObject) recipientObj["phoneNumber"];
+      recipientPhoneObj["countryCode"] = value;
+    }
+    if (string.Equals(keyArray[1], "Phone Number", StringComparison.OrdinalIgnoreCase))
+    {
+      if (!recipientObj.ContainsKey("phoneNumber"))
+      {
+        recipientObj["phoneNumber"] = new JObject();
+      }
+      JObject recipientPhoneObj = (JObject) recipientObj["phoneNumber"];
+      recipientPhoneObj["number"] = value;
+    }
+  }
+
   private async Task UpdateApiEndpoint()
   {
     string content = string.Empty;
-    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://account-d.docusign.com/oauth/userinfo");
+    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, GetAccountServerBaseUri() + "/oauth/userinfo");
 
     // Access token is in the authorization header already
     userInfoRequest.Headers.Authorization = this.Context.Request.Headers.Authorization;
@@ -1751,8 +6216,49 @@ public class Script : ScriptBase
       if (userInfoResponse.IsSuccessStatusCode)
       {
         var jsonContent = JObject.Parse(content);
-        var baseUri = jsonContent["accounts"]?[0]?["base_uri"]?.ToString();
-        var accountId = (string)jsonContent["accounts"].Where(a => (bool)a["is_default"]).FirstOrDefault()["account_id"];
+        
+        // Check if theres an accountId in the query
+        var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+        string requestedAccountId = query.Get("accountId");
+
+        // If accountId is not present split query in segments to find the account id in the list of accounts returned by the userinfo endpoint.
+        // Split URI by "/" and check if any segment matches an account ID in the accounts list
+        if (string.IsNullOrEmpty(requestedAccountId))
+        {
+          var uriSegments = this.Context.Request.RequestUri.AbsolutePath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+          foreach (var segment in uriSegments)
+          {
+            // Check if this segment matches any account_id in the accounts
+            if (FindAccountById(jsonContent, segment) != null)
+            {
+              requestedAccountId = segment;
+              break;
+            }
+          }
+        }
+        
+        // Check headers for account ID if not found in URI or query
+        if (string.IsNullOrEmpty(requestedAccountId))
+        {
+          var headerNames = new[] { "AccountId", "X-DocuSign-AccountId" };
+          foreach (var headerName in headerNames)
+          {
+            if (this.Context.Request.Headers.Contains(headerName))
+            {
+              requestedAccountId = this.Context.Request.Headers.GetValues(headerName).FirstOrDefault();
+              break;
+            }
+          }
+        }
+
+        // Find the account using priority: requested -> default -> first available
+        var selectedAccount = FindAccountById(jsonContent, requestedAccountId) 
+                           ?? jsonContent["accounts"]?.FirstOrDefault(a => (bool?)a["is_default"] == true)
+                           ?? jsonContent["accounts"]?.FirstOrDefault();
+        
+        var baseUri = selectedAccount?["base_uri"]?.ToString();
+        var accountId = selectedAccount?["account_id"]?.ToString();
+
         if (!string.IsNullOrEmpty(baseUri))
         {
           this.Context.Request.RequestUri = new Uri(new Uri(baseUri), this.Context.Request.RequestUri.PathAndQuery);
@@ -1824,6 +6330,12 @@ public class Script : ScriptBase
       uriBuilder.Path = uriBuilder.Path.Replace("connectV3", "connect");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
+    if("DeleteHookV4".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("connectV4", "connect");
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
 
     if ("SendDraftEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
@@ -1845,9 +6357,35 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.CreateHookEnvelopeV3BodyTransformation).ConfigureAwait(false);
     }
 
+    if ("CreateHookEnvelopeV4".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateHookEnvelopeV4BodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("CreateOrgHookEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateOrgHookEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("GetOrganizations".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GetOrganizationsBodyTransformation).ConfigureAwait(false);
+    }
+
+
     if ("CreateBlankEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformation).ConfigureAwait(false);
+    }
+
+     if ("CreateBlankEnvelopeV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateBlankEnvelopeBodyTransformationV2).ConfigureAwait(false);
+    }
+
+    if ("CompositeTemplates".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CompositeTemplatesBodyTransformation).ConfigureAwait(false);
     }
 
     if("VoidEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -1859,10 +6397,25 @@ public class Script : ScriptBase
     {
       await this.TransformRequestJsonBody(this.EnvelopeResendBodyTransformation).ConfigureAwait(false);
     }
+    
+    if ("listEnvelopeIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.listEnvelopeIdsBodyTransformation).ConfigureAwait(false);
+    }
+    
+    if ("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.SearchListEnvelopesTransformation).ConfigureAwait(false);
+    }
 
     if ("SendEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV1BodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("SendEnvelopeWithRecipientFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.CreateEnvelopeFromTemplateV3BodyTransformation).ConfigureAwait(false);
     }
 
     if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -1906,6 +6459,11 @@ public class Script : ScriptBase
       await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLBodyTransformation).ConfigureAwait(false);
     }
 
+    if ("GenerateEmbeddedSigningURLV2".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.GenerateEmbeddedSigningURLV2BodyTransformation).ConfigureAwait(false);
+    }
+
     if ("GenerateEmbeddedSenderURL".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.GenerateEmbeddedSenderURLBodyTransformation).ConfigureAwait(false);
@@ -1919,6 +6477,21 @@ public class Script : ScriptBase
     if ("AddRecipientTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       await this.TransformRequestJsonBody(this.AddRecipientTabsBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("ApplyTemplatesToDocuments".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.ApplyTemplateBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("CreateBulkSendList".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.BulkSendBodyTransformation).ConfigureAwait(false);
+    }
+
+    if ("BulkSend".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      await this.TransformRequestJsonBody(this.BulkSendRequestBodyTransformation).ConfigureAwait(false);
     }
 
     if ("UpdateRecipientTabsValues".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -1951,6 +6524,38 @@ public class Script : ScriptBase
       this.Context.Request.Content = CreateJsonContent(newBody.ToString());
     }
 
+    if("scp-get-email-summary".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      uriBuilder.Path = uriBuilder.Path.Replace("/getEmailSummary", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("salesCopilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
+      this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
+      this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
+
+      if (!string.IsNullOrEmpty(query.Get("crmType")))
+      {
+        if (query.Get("crmType").ToString().Equals("Dynamics365"))
+        {
+          query["custom_field"] = "entityLogicalName=" + query.Get("recordType");
+        }
+      }
+
+      query["from_date"] = string.IsNullOrEmpty(query.Get("startDateTime")) ? 
+        "2000-01-02T12:45Z" :
+        query.Get("startDateTime");
+
+      if (!string.IsNullOrEmpty(query.Get("endDateTime")))
+      {
+        query["to_date"] = query.Get("endDateTime");
+      }
+
+      query["include"] = "custom_fields,recipients,documents";
+      query["order"] = "desc";
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if("scp-get-related-activities".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -1980,11 +6585,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if("scp-get-related-records".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if(("scp-get-related-records".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) || 
+    ("scp-get-key-sales".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       uriBuilder.Path = uriBuilder.Path.Replace("/getRelatedRecords", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("/getKeySales", "");
       uriBuilder.Path = uriBuilder.Path.Replace("salesCopilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
       this.Context.Request.Headers.Add("x-ms-client-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("x-ms-user-agent", "sales-copilot");
@@ -2004,11 +6611,13 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
-    if("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if(("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
+    ("SalesCopilotListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       uriBuilder.Path = uriBuilder.Path.Replace("/listEnvelopes", "");
+      uriBuilder.Path = uriBuilder.Path.Replace("ForSalesCopilot", "");
       uriBuilder.Path = uriBuilder.Path.Replace("copilotAccount", this.Context.Request.Headers.GetValues("AccountId").FirstOrDefault());
       this.Context.Request.Headers.Add("generative-ai-request-id", Guid.NewGuid().ToString());
       this.Context.Request.Headers.Add("generative-ai-user-agent", "sales-copilot");
@@ -2084,6 +6693,16 @@ public class Script : ScriptBase
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
+    if ("GetDynamicRecipients".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/signers/accounts/", "/accounts/");
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      query["include"] = "tabs";
+      uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
     if ("GetAccountCustomFields".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
@@ -2101,9 +6720,8 @@ public class Script : ScriptBase
     if ("GetLoginAccounts".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
-      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-      query["include_account_id_guid"] = "true";
-      uriBuilder.Query = query.ToString();
+      uriBuilder.Host =  GetAccountServerBaseUri().Replace("https://", string.Empty);
+      uriBuilder.Path = uriBuilder.Path.Replace("restapi/v2.1", string.Empty);
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -2113,6 +6731,36 @@ public class Script : ScriptBase
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       query["include_items"] = "true";
       uriBuilder.Query = query.ToString();
+      this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
+
+    if( "TriggerMaestroFlow".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase) 
+        || "GetMaestroWorkflowDefinition".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)
+        || "GetMaestroWorkflowDefinitions".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+        
+        var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+        var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+        if("GetMaestroWorkflowDefinitions".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+        {
+          query["triggerType"] = "1" ;
+		  query["httpType"] = "POST" ;
+        }
+        var maestroAPIUrl = GetPartnerIntegrationsBaseUri() + uriBuilder.Path.Replace("/restapi/v2.1", "");
+        var newUriBilder = new UriBuilder(maestroAPIUrl);
+        newUriBilder.Query = query.ToString();
+        this.Context.Request.RequestUri = newUriBilder.Uri;
+    }
+
+    if( "TriggerMaestroFlow".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+        await this.TransformRequestJsonBody(this.TriggerMaestroWorkflowTransformation).ConfigureAwait(false);
+    }
+
+    if ("GetAllWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      uriBuilder.Path = uriBuilder.Path.Replace("/all_identity_verification", "/identity_verification");
       this.Context.Request.RequestUri = uriBuilder.Uri;
     }
 
@@ -2130,7 +6778,29 @@ public class Script : ScriptBase
       var newPath = uriBuilder.Path;
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       string[] documentDownloadOptions = { "Combined", "Archive", "Certificate", "Portfolio" };
-
+      var languageMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Chinese Simplified", "zh_CN" },
+        { "Chinese Traditional", "zh_TW" },
+        { "Dutch", "nl" },
+        { "English (default)", "en" },
+        { "French", "fr" },
+        { "German", "de" },
+        { "Italian", "it" },
+        { "Japanese", "ja" },
+        { "Korean", "ko" },
+        { "Portuguese", "pt" },
+        { "Portuguese (Brazil)", "pt_BR" },
+        { "Russian", "ru" },
+        { "Spanish", "es" }
+    };
+    var lang = query.Get("language");
+    if (!string.IsNullOrEmpty(lang) && languageMap.ContainsKey(lang))
+    {
+        query.Set("language", languageMap[lang]);
+        uriBuilder.Query = query.ToString();
+        this.Context.Request.RequestUri = uriBuilder.Uri;
+    }
       acceptHeaderValue = "application/pdf";
       string documentId = null;
 
@@ -2146,6 +6816,10 @@ public class Script : ScriptBase
       if (HttpUtility.UrlDecode(uriBuilder.Path).Trim().Contains("Combined with COC"))
       {
         query["certificate"] = "true";
+        uriBuilder.Query = query.ToString();
+      } else if (HttpUtility.UrlDecode(uriBuilder.Path).Trim().Contains("Combined without COC"))
+      {
+        query["certificate"] = "false";
         uriBuilder.Query = query.ToString();
       }
       
@@ -2168,6 +6842,23 @@ public class Script : ScriptBase
           "{0}/{1}",
           this.Context.OriginalRequestUri.ToString(),
           body.GetValue("connectId").ToString()));
+    }
+    
+    if ("GetLoginAccounts".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var accounts = body["accounts"] as JArray;
+      var newBody = new JObject();
+      var loginAccounts = new JArray();
+      foreach (var account in accounts)
+      {
+        loginAccounts.Add(new JObject {
+           ["accountIdGuid"] = account["account_id"],
+           ["name"] = account["account_name"]
+        });
+      }
+      newBody["loginAccounts"] = loginAccounts;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
     if ("AddReminders".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
@@ -2195,7 +6886,80 @@ public class Script : ScriptBase
       response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("GetMaestroWorkflowDefinition".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+      var body = JObject.Parse(content);
+      var payload = body["payloadSchema"];
+      var itemProperties = new JObject();
+      foreach (var item in payload as JArray)
+      {
+        var propertyName = (string)item["propertyName"];
+        if (!propertyName.Equals("dacId") && !propertyName.Equals("id") && !propertyName.Equals("workflowBuilder") && !propertyName.Equals("workflowPreparer"))
+        {     
+          itemProperties.Add(propertyName, new JObject());
+          var type = (string)item["type"];
+          itemProperties[propertyName]["type"] = type == "Float" ? "number" : type == "Email" ? "string" : type.ToLower();
+        }
+      }
+      var newBody = new JObject
+      {
+        ["name"] = "dynamicSchema",
+        ["title"] = "dynamicSchema",
+        ["x-ms-permission"] = "read-write",
+        ["schema"] = new JObject
+          {
+            ["type"] = "array",
+            ["items"] = new JObject
+            {
+                ["type"] = "object",
+                ["properties"] = itemProperties,
+            }
+          }
+      };
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("AddDocumentsToEnvelope".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+  
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      
+      if (body["envelopeDocuments"] != null)
+      {
+        foreach (var document in body["envelopeDocuments"] as JArray)
+        {
+          if (document["errorDetails"] != null)
+          {
+            var errorMessage = document["errorDetails"]["message"]?.ToString() ?? "Document processing error";
+            throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: " + errorMessage);
+          }
+        }
+      } 
+    }
+
     if ("GetWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var workflowsArray = new JArray();
+
+      foreach (var id in (body["identityVerification"] as JArray)) {
+        if (!string.Equals(id["defaultName"].ToString(), "DocuSign ID Verification for EU Qualified") &&
+            !string.Equals(id["defaultName"].ToString(), "DocuSign ID Verification for EU Advanced"))
+        {
+          var workflowObj = new JObject()
+          {
+            ["type"] = id["workflowId"],
+            ["name"] = id["defaultName"]
+          };
+          workflowsArray.Add(workflowObj);
+        }
+      }
+      body["workflowIds"] = workflowsArray;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetAllWorkflowIds".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var workflowsArray = new JArray();
@@ -2261,7 +7025,9 @@ public class Script : ScriptBase
             ["recipientId"] = tab["recipientId"],
             ["tabId"] = tab["tabId"],
             ["tabType"] = tabTypes.Name,
-            ["prefill"] = false
+            ["prefill"] = false,
+            ["selected"] = tab["selected"] ?? null,
+            ["name"] = tab["name"] ?? null
           });
         }
       }
@@ -2322,26 +7088,53 @@ public class Script : ScriptBase
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
-      var tabLabel = query.Get("tabLabel");
+      // if tablabels contain a "+" instead of a space from the UI
+      var tabLabel = Uri.UnescapeDataString(query.Get("tabLabel")).Replace("+", " "); 
       var newBody = new JObject();
 
-      foreach(JProperty tabTypes in body.Properties())
+      bool found = false;
+
+      foreach (JProperty tabTypes in body.Properties())
       {
-        foreach(var tab in tabTypes.Value)
+        foreach (var tab in tabTypes.Value)
         {
-          if((tab["tabLabel"].ToString()).Equals(tabLabel))
+
+          if (tab["tabLabel"] != null && (tab["tabLabel"].ToString()).Equals(tabLabel.ToString()))
           {
-            newBody["name"] = tab["name"];
-            newBody["value"] = tab["value"];
+            newBody["name"] = tab["name"] ?? null;
+            newBody["tabLabel"] = tab["tabLabel"];
+            newBody["value"] = tab["value"] ?? null;
+            newBody["documentId"] = tab["documentId"] ?? null;
+            newBody["tabId"] = tab["tabId"] ?? null;
+            newBody["tabType"] = tabTypes.Name;
+            newBody["recipientId"] = tab["recipientId"] ?? null;
+            newBody["selected"] = tab["selected"] ?? null;
+            found = true;
+            break;
+          }
+
+          // Handle radioGroupTabs with groupName
+          if (tabTypes.Name.Equals("radioGroupTabs") && tab["groupName"] != null && (tab["groupName"].ToString()).Equals(tabLabel.ToString()))
+          {
+            newBody["name"] = tab["groupName"];
+            newBody["tabLabel"] = tab["tabLabel"] ?? null;
+            newBody["value"] = tab["value"] ?? null;
+            newBody["documentId"] = tab["documentId"] ?? null;
+            newBody["tabId"] = tab["tabId"] ?? null;
+            newBody["tabType"] = tabTypes.Name;
+            newBody["recipientId"] = tab["recipientId"] ?? null;
+            
+            found = true;
             break;
           }
         }
+        if (found) break;
       }
 
-      if (newBody["name"] == null)
-      {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Could not find the Tab Label for the specified recipient");
-      }
+        if (!found) 
+        {
+          throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Could not find the Tab Type specified recipient");
+        }
 
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
@@ -2378,23 +7171,61 @@ public class Script : ScriptBase
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       JObject newBody = new JObject();
       JArray formFields = new JArray();
+      JArray docGenFormfields = (body["docGenFormFields"] as JArray) ?? new JArray();
 
-      foreach (var doc in (body["docGenFormFields"] as JArray) ?? new JArray())
-      {
-        foreach(var field in (doc["docGenFormFieldList"] as JArray) ?? new JArray())
-        {
-          formFields.Add(new JObject()
-          {
-            ["name"] =  field["name"],
-            ["type"] =  field["type"],
-            ["value"] =  field["value"],
-            ["label"] =  field["label"],
-            ["documentId"] =  doc["documentId"]
-          });
-        }
-      }
+      formFields = GetFormFields(docGenFormfields, formFields);
 
       newBody["docgenFields"] = formFields;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("scp-get-email-summary".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JObject newBody = new JObject();
+      TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+
+      JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
+      JArray emailSummary = new JArray();
+      int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
+      int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
+
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
+      var recordId = query.Get("recordId") ?? null;
+      var crmType = string.IsNullOrEmpty(query.Get("crmType")) ? null
+        : query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken"
+        : "SFToken";
+
+      var recordType = query.Get("recordType");
+      string[] recipientEmail = query.Get("emailContacts").Replace(" ","").Split(',');
+
+      string[] filters = { crmType, crmOrgUrl, recordId, recordType };
+      filters = recipientEmail.Concat(filters).ToArray();
+
+      envelopes = GetFilteredEnvelopes(envelopes, filters);
+
+      foreach (var envelope in envelopes)
+      {
+        DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+        DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+        JArray recipientNames = new JArray();
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+
+        emailSummary.Add(new JObject()
+        {
+          ["Title"] = "Docusign: " + envelope["emailSubject"],
+          ["Description"] = GetDescriptionNLPForRelatedActivities(envelope)
+        });
+      }
+
+      newBody["value"] = (emailSummary.Count < top) ? emailSummary : new JArray(emailSummary.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < emailSummary.Count) ? true : false;
+
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
@@ -2406,40 +7237,17 @@ public class Script : ScriptBase
       TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
-      JArray filteredActivities = new JArray();
       JArray activities = new JArray();
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
-      var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
       var recordId = query.Get("recordId") ?? null;
       var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
       var recordType = query.Get("recordType");
 
       string[] filters = { crmType, crmOrgUrl, recordId, recordType };
-
-      foreach (var filter in filters.Where(filter => filter != null)) 
-      {
-        foreach (var envelope in envelopes)
-        {
-          if (envelope.ToString().ToLower().Contains(filter.ToLower()))
-          {
-            filteredActivities.Add(envelope);
-          }
-        }
-
-        if (filteredActivities.Count > 0)
-        {
-          envelopes.Clear();
-          envelopes = new JArray(filteredActivities);
-          filteredActivities.Clear();
-        }
-        else
-        {
-          envelopes.Clear();
-          break;
-        }
-      }
+      envelopes = GetFilteredEnvelopes(envelopes, filters);
 
       foreach (var envelope in envelopes)
       {
@@ -2475,6 +7283,62 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
+    if ("scp-get-key-sales".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
+      JObject newBody = new JObject();
+      TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
+
+      JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
+      JArray documentRecords = new JArray();
+      int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
+      int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
+
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
+      var recordId = query.Get("recordId") ?? null;
+      var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
+      var recordType = query.Get("recordType");
+      string[] filters = { crmType, recordId, crmOrgUrl, recordType};
+
+      envelopes = GetFilteredEnvelopes(envelopes, filters);
+
+      foreach (var envelope in envelopes)
+      {
+        DateTime statusUpdateTime = envelope["statusChangedDateTime"].ToObject<DateTime>();
+        DateTime statusUpdateTimeInLocalTimeZone = TimeZoneInfo.ConvertTimeFromUtc(statusUpdateTime, userTimeZone);
+        System.Globalization.TextInfo textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+        JArray recipientNames = new JArray();
+        foreach (var recipient in (envelope["recipients"]["signers"] as JArray) ?? new JArray())
+        {
+          recipientNames.Add(recipient["name"]);
+        }
+        JArray documentNames = new JArray(
+        (envelope["envelopeDocuments"] as JArray)?.Select(envelopeDocument => envelopeDocument["name"]));
+
+        JObject additionalProperties = new JObject()
+        {
+          ["Recipients"] = string.Join(", ", recipientNames),
+          ["Sender Name"] = envelope["sender"]["userName"],
+          ["Status"] = textInfo.ToTitleCase(envelope["status"].ToString()),
+          ["Date"] = statusUpdateTimeInLocalTimeZone.ToString("h:mm tt, M/d/yy"),
+          ["Documents"] = string.Join(",", documentNames)
+        };
+
+        documentRecords.Add(new JObject()
+        {
+          ["Title"] = envelope["emailSubject"],
+          ["description"] = GetDescriptionNLPForRelatedActivities(envelope),
+          ["url"] = GetEnvelopeUrl(envelope),
+          ["additionalProperties"] = additionalProperties
+        });
+      }
+
+      newBody["value"] = (documentRecords.Count < top) ? documentRecords : new JArray(documentRecords.Skip(skip).Take(top).ToArray());
+      newBody["hasMoreResults"] = (skip + top < documentRecords.Count) ? true : false;
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
     if ("scp-get-related-records".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
@@ -2483,40 +7347,17 @@ public class Script : ScriptBase
       TimeZoneInfo userTimeZone = TimeZoneInfo.Local;
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
-      JArray filteredRecords = new JArray();
       JArray documentRecords = new JArray();
       int top = string.IsNullOrEmpty(query.Get("top")) ? 3: int.Parse(query.Get("top"));
       int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
 
-      var crmOrgUrl = query.Get("crmOrgUrl") ?? null;
+      var crmOrgUrl = GetHostFromUrl(query.Get("crmOrgUrl"));
       var recordId = query.Get("recordId") ?? null;
       var crmType = query.Get("crmType").ToString().Equals("Dynamics365") ? "CRMToken" : "SFToken";
       var recordType = query.Get("recordType");
-
       string[] filters = { crmType, recordId, crmOrgUrl, recordType};
 
-      foreach (var filter in filters.Where(filter => filter != null)) 
-      {
-        foreach (var envelope in envelopes)
-        {
-          if (envelope.ToString().ToLower().Contains(filter.ToLower()))
-          {
-            filteredRecords.Add(envelope);
-          }
-        }
-
-        if (filteredRecords.Count > 0)
-        {
-          envelopes.Clear();
-          envelopes = new JArray(filteredRecords);
-          filteredRecords.Clear();
-        }
-        else
-        {
-          envelopes.Clear();
-          break;
-        }
-      }
+      envelopes = GetFilteredEnvelopes(envelopes, filters);
 
       foreach (var envelope in envelopes)
       {
@@ -2555,14 +7396,71 @@ public class Script : ScriptBase
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
-    if ("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    if ("GetRecipientStatus".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+       var uriBuilder = new UriBuilder(this.Context.Request.RequestUri);
+      var envelopeId = GetEnvelopeID(uriBuilder.Path);
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      body["envelopeId"] = envelopeId;
+      response.Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetDocGenTemplateTabs".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var newBody = new JObject();
+      var docGenFormFields = new JArray();
+
+      if (body["documents"] != null)
+      {
+        foreach (var document in body["documents"])
+        {
+          if (document["docGenFormFields"] != null)
+          {
+            foreach (var field in document["docGenFormFields"])
+            {
+              var newField = new JObject();
+              newField["documentId"] = document["documentId"];
+              newField["documentName"] = document["name"];
+              newField["label"] = field["label"];
+              newField["type"] = field["type"];
+              newField["required"] = field["required"];
+              newField["name"] = field["name"];
+
+              // Add optional fields if they exist
+              if (field["description"] != null)
+                newField["description"] = field["description"];
+              if (field["options"] != null)
+                newField["options"] = field["options"];
+              if (field["rowValues"] != null)
+                newField["rowValues"] = field["rowValues"];
+
+              docGenFormFields.Add(newField);
+            }
+          }
+        }
+      }
+
+      newBody = new JObject
+      {
+        ["fields"] = docGenFormFields,
+        ["totalCount"] = docGenFormFields.Count,
+        ["docGenFormFields"] = docGenFormFields
+      };
+
+     response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if (("ListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) || 
+    ("SalesCopilotListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)) ||
+    ("SearchListEnvelopes".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase)))
     {
       var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
       var query = HttpUtility.ParseQueryString(this.Context.Request.RequestUri.Query);
       JObject newBody = new JObject();
 
-      int top = string.IsNullOrEmpty(query.Get("top")) ? 10: int.Parse(query.Get("top"));
-      int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0: int.Parse(query.Get("skip"));
+      int top = string.IsNullOrEmpty(query.Get("top")) ? 10 : int.Parse(query.Get("top"));
+      int skip = string.IsNullOrEmpty(query.Get("skip")) ? 0 : int.Parse(query.Get("skip"));
 
       JArray envelopes = (body["envelopes"] as JArray) ?? new JArray();
       JArray filteredEnvelopes = new JArray();
@@ -2580,53 +7478,51 @@ public class Script : ScriptBase
         {"customFieldName", customFieldName},
         {"customFieldValue", customFieldValue}
       };
-
-      foreach (var filter in envelopeFilterMap.Keys) 
+      filteredEnvelopes = new JArray(envelopes.Where(envelope =>
       {
-        if (envelopeFilterMap[filter] != null)
+        // Check recipient filters
+        if ((envelopeFilterMap["recipientName"] != null || envelopeFilterMap["recipientEmailId"] != null))
         {
-          switch (filter)
-          {
-            case "recipientName":
-            case "recipientEmailId":
-              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                envelope["recipients"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
-              break;
-            case "envelopeTitle":
-              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-                envelope["emailSubject"].ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower())));
-              break;
-            case "customFieldName":
-            case "customFieldValue":
-              filteredEnvelopes = new JArray(envelopes.Where(envelope =>
-              {
-                var customFields = envelope["customFields"] as JToken;
-                return customFields?.ToString().ToLower().Contains(envelopeFilterMap[filter].ToString().ToLower()) ?? false;
-              }));
-              break;
-            default:
-              break;
-          }
-
-          if (filteredEnvelopes.Count > 0)
-          {
-            envelopes.Clear();
-            envelopes = new JArray(filteredEnvelopes);
-            filteredEnvelopes.Clear();
-          }
-          else
-          {
-            envelopes.Clear();
-            break;
-          }
+          var recipientsStr = envelope["recipients"]?.ToString().ToLower() ?? "";
+          if (envelopeFilterMap["recipientName"] != null && !recipientsStr.Contains(envelopeFilterMap["recipientName"].ToString().ToLower()))
+            return false;
+          if (envelopeFilterMap["recipientEmailId"] != null && !recipientsStr.Contains(envelopeFilterMap["recipientEmailId"].ToString().ToLower()))
+            return false;
         }
-      }
 
-      filteredEnvelopesDetails = GetFilteredEnvelopeDetails(envelopes);
-      newBody["value"] = (filteredEnvelopesDetails.Count < top) ? 
-        filteredEnvelopesDetails : 
+        // Check envelope title filter
+        if (envelopeFilterMap["envelopeTitle"] != null)
+        {
+          var subject = envelope["emailSubject"]?.ToString().ToLower() ?? "";
+          if (!subject.Contains(envelopeFilterMap["envelopeTitle"].ToString().ToLower()))
+            return false;
+        }
+
+        // Check custom field filters
+        if (envelopeFilterMap["customFieldName"] != null || envelopeFilterMap["customFieldValue"] != null)
+        {
+          var customFieldsStr = envelope["customFields"]?.ToString().ToLower() ?? "";
+          if (envelopeFilterMap["customFieldName"] != null && !customFieldsStr.Contains(envelopeFilterMap["customFieldName"].ToString().ToLower()))
+            return false;
+          if (envelopeFilterMap["customFieldValue"] != null && !customFieldsStr.Contains(envelopeFilterMap["customFieldValue"].ToString().ToLower()))
+            return false;
+        }
+
+        return true;
+      }));
+
+      envelopes = filteredEnvelopes;
+
+      filteredEnvelopesDetails = this.Context.OperationId.Contains("SalesCopilot") ?
+        GetFilteredEnvelopeDetailsForSalesCopilot(envelopes) :
+        GetFilteredEnvelopeDetails(envelopes);
+
+      newBody["value"] = (filteredEnvelopesDetails.Count < top) ?
+        filteredEnvelopesDetails :
         new JArray(filteredEnvelopesDetails.Skip(skip).Take(top).ToArray());
+
       newBody["hasMoreResults"] = (skip + top < filteredEnvelopesDetails.Count) ? true : false;
+
       response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
     }
 
@@ -2638,6 +7534,7 @@ public class Script : ScriptBase
       var matchingSigner = new JObject();
       var newBody = new JObject();
       var recipientEmailId = query.Get("recipientEmail");
+      var recipientId = query.Get("recipientId");
       var phoneNumber = query.Get("areaCode") + " " + query.Get("phoneNumber");
       var signerPhoneNumber = "";
 
@@ -2651,6 +7548,12 @@ public class Script : ScriptBase
         foreach(var signer in body[signerTypes[i]])
         {
           if (recipientEmailId?.ToString() == signer.SelectToken("email")?.ToString())
+          {
+            matchingSigner = signer as JObject;
+            break;
+          }
+
+          if (recipientId?.ToString() == signer.SelectToken("recipientId")?.ToString())
           {
             matchingSigner = signer as JObject;
             break;
@@ -2685,9 +7588,9 @@ public class Script : ScriptBase
         }
       }
 
-      if ((recipientEmailId == null) && (query.Get("phoneNumber") == null))
+      if ((recipientEmailId == null) && (query.Get("phoneNumber") == null) && (recipientId == null))
       {
-        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Phone Number to retrieve Recipient information");
+        throw new ConnectorException(HttpStatusCode.BadRequest, "ValidationFailure: Please fill either Recipient Email or Phone Number or recipient Id to retrieve Recipient information");
       } 
 
       if (string.IsNullOrEmpty((string)matchingSigner["recipientIdGuid"]))
@@ -2754,6 +7657,49 @@ public class Script : ScriptBase
         itemProperties[roleName + " Name"] = basePropertyDefinition.DeepClone();
         itemProperties[roleName + " Email"] = basePropertyDefinition.DeepClone();
       }
+
+      var newBody = new JObject
+      {
+        ["name"] = "dynamicSchema",
+        ["title"] = "dynamicSchema",
+        ["x-ms-permission"] = "read-write",
+        ["schema"] = new JObject
+        {
+          ["type"] = "array",
+          ["items"] = new JObject
+          {
+            ["type"] = "object",
+            ["properties"] = itemProperties,
+          },
+        },
+      };
+
+      response.Content = new StringContent(newBody.ToString(), Encoding.UTF8, "application/json");
+    }
+
+    if ("GetDynamicRecipients".Equals(this.Context.OperationId, StringComparison.OrdinalIgnoreCase))
+    {
+      var body = ParseContentAsJObject(await response.Content.ReadAsStringAsync().ConfigureAwait(false), false);
+      var itemProperties = new JObject();
+
+      // Add email body
+      itemProperties["emailBlurb"] = new JObject
+      {
+        ["type"] = "string",
+        ["x-ms-summary"] = "Email body",
+        ["description"] = "Email body"
+      };
+
+      // Generate a recipient role name to reicipient data object mapping
+      Dictionary<string, JObject> recipientData = GenerateRecipientsMappings(body);
+
+      // generate flattened-recipient related fields and add to itemProperties
+      // for instance, for role name "tester", with tab type "textTab" and tab label "text label",
+      // generate field name: "Tester:::textTabs:::Text label", that can be easily parsed out before sending API request to DS
+      GenerateRecipientInformationFields(recipientData, itemProperties);
+
+      // generate flattened-custom fields and add to itemProperties
+      GenerateCustomFields(body, itemProperties);
 
       var newBody = new JObject
       {
@@ -3082,6 +8028,209 @@ public class Script : ScriptBase
     }
   }
 
+  public static void processDocGenFields(JObject inputBody, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap, Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+  // Grab docgen fields from template
+    if (inputBody["rawOutput"]?["fields"] == null) return;
+
+    foreach (var field in inputBody["rawOutput"]["fields"])
+    {
+      // Save all labels to their names in a table to grab later
+        ProcessFieldMapping(field, fieldNameToLabelMap, labelToFieldNameMap);
+        
+        if (field["rowValues"] != null)
+        {
+          // Map docgen table fields -> table name
+            ProcessTableRowValues(field, fieldNameToLabelMap, labelToFieldNameMap, tableToChildFieldsMap);
+        }
+    }
+}
+
+public static void ProcessFieldMapping(JToken field, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap)
+{
+    if (field["name"] == null || field["label"] == null) return;
+
+    var fieldName = field["name"].ToString();
+    var fieldLabel = field["label"].ToString();
+
+    if (!fieldNameToLabelMap.ContainsKey(fieldName))
+    {
+        fieldNameToLabelMap[fieldName] = fieldLabel;
+        labelToFieldNameMap[fieldLabel] = fieldName;
+    }
+}
+
+public static void ProcessTableRowValues(JToken field, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap, Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+    var parentTableName = field["name"]?.ToString();
+    var parentTableLabel = field["label"]?.ToString();
+
+    if (string.IsNullOrEmpty(parentTableName)) return;
+
+    if (!tableToChildFieldsMap.ContainsKey(parentTableName))
+    {
+        tableToChildFieldsMap[parentTableName] = new List<string>();
+    }
+
+    foreach (var rowValue in field["rowValues"])
+    {
+        if (rowValue["docGenFormFieldList"] != null)
+        {
+            foreach (var nestedField in rowValue["docGenFormFieldList"])
+            {
+                ProcessNestedFieldMapping(nestedField, parentTableName, parentTableLabel, fieldNameToLabelMap, labelToFieldNameMap, tableToChildFieldsMap);
+            }
+        }
+    }
+}
+
+  public static void ProcessNestedFieldMapping(JToken nestedField, string parentTableName, string parentTableLabel, Dictionary<string, string> fieldNameToLabelMap, Dictionary<string, string> labelToFieldNameMap, Dictionary<string, List<string>> tableToChildFieldsMap)
+  {
+    if (nestedField["name"] == null || nestedField["label"] == null) return;
+
+    var nestedFieldName = nestedField["name"].ToString();
+    var nestedFieldLabel = nestedField["label"].ToString();
+
+    // map tablename and fieldnames just like the csv will process
+    var compositeFieldKey = $"{parentTableName}|{nestedFieldName}";
+    var compositeLabelKey = $"{parentTableLabel}|{nestedFieldLabel}";
+
+    //map docgen fields with backwards compatibility
+    fieldNameToLabelMap[compositeFieldKey] = compositeLabelKey;
+    labelToFieldNameMap[compositeLabelKey] = compositeFieldKey;
+
+    // also save child rows to tthe fieldNameLabelMap to find the "name" value
+    if (!fieldNameToLabelMap.ContainsKey(nestedFieldName))
+    {
+      fieldNameToLabelMap[nestedFieldName] = nestedFieldLabel;
+      labelToFieldNameMap[nestedFieldLabel] = nestedFieldName;
+    }
+
+    // add child table fields to their parent table
+    if (!tableToChildFieldsMap[parentTableName].Contains(nestedFieldName))
+    {
+      tableToChildFieldsMap[parentTableName].Add(nestedFieldName);
+    }
+  }
+
+public static void ProcessDynamicTableField(string[] columnName, string value, JObject body, 
+    Dictionary<string, string> labelToFieldNameMap, 
+    Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+  // example of this variable = "table1|first name"
+    var dynamicTablePart = columnName[1]; 
+    var tableParts = dynamicTablePart.Split('|');
+
+    if (tableParts.Length != 2) return;
+
+    var tableName = tableParts[0].Trim();
+    var fieldLabel = tableParts[1].Trim();
+
+
+    // Make sure field name exists
+    if (!TryGetFieldNames(tableName, fieldLabel, labelToFieldNameMap, out string tableFieldName, out string childFieldName))
+      return;
+    // Make sure table and field name are mapped together
+    if (!IsValidTableField(tableFieldName, childFieldName, tableToChildFieldsMap))
+        return;
+
+    var tableObject = GetOrCreateTableObject(body, tableFieldName);
+    ProcessTableRowValues(tableObject, childFieldName, value);
+}
+
+public static bool TryGetFieldNames(string tableName, string fieldLabel, 
+    Dictionary<string, string> labelToFieldNameMap, 
+    out string tableFieldName, out string childFieldName)
+{
+    tableFieldName = null;
+    childFieldName = null;
+
+    if (!labelToFieldNameMap.TryGetValue(tableName, out tableFieldName))
+        return false;
+
+    if (!labelToFieldNameMap.TryGetValue(fieldLabel, out childFieldName))
+        return false;
+
+    return true;
+}
+
+public static bool IsValidTableField(string tableFieldName, string childFieldName, 
+    Dictionary<string, List<string>> tableToChildFieldsMap)
+{
+    return tableToChildFieldsMap.ContainsKey(tableFieldName) &&
+           tableToChildFieldsMap[tableFieldName].Contains(childFieldName);
+}
+
+public static JObject GetOrCreateTableObject(JObject body, string tableFieldName)
+{
+    var docGenFormFields = (JArray)body["docGenFormFields"];
+    
+    foreach (var existingField in docGenFormFields)
+    {
+        if (existingField["name"]?.ToString() == tableFieldName)
+            return (JObject)existingField;
+    }
+
+    var tableObject = new JObject
+    {
+        ["name"] = tableFieldName,
+        ["value"] = null,
+        ["rowValues"] = new JArray()
+    };
+    
+    docGenFormFields.Add(tableObject);
+    return tableObject;
+}
+
+public static void ProcessTableRowValues(JObject tableObject, string childFieldName, string value)
+{
+    var rowValues = value.Split('|');
+    var rowValuesArray = (JArray)tableObject["rowValues"];
+
+    for (int rowIndex = 0; rowIndex < rowValues.Length; rowIndex++)
+    {
+        var rowValue = rowValues[rowIndex].Trim();
+        var rowObject = EnsureRowExists(rowValuesArray, rowIndex);
+        var fieldObject = GetOrCreateFieldInRow(rowObject, childFieldName, rowValue);
+    }
+}
+
+public static JObject EnsureRowExists(JArray rowValuesArray, int rowIndex)
+{
+    while (rowIndex >= rowValuesArray.Count)
+    {
+        rowValuesArray.Add(new JObject
+        {
+            ["docGenFormFieldList"] = new JArray()
+        });
+    }
+    
+    return (JObject)rowValuesArray[rowIndex];
+}
+
+public static JObject GetOrCreateFieldInRow(JObject rowObject, string childFieldName, string rowValue)
+{
+    var docGenFormFieldList = (JArray)rowObject["docGenFormFieldList"];
+    
+    foreach (var existingFieldInRow in docGenFormFieldList)
+    {
+        if (existingFieldInRow["name"]?.ToString() == childFieldName)
+        {
+            existingFieldInRow["value"] = rowValue;
+            return (JObject)existingFieldInRow;
+        }
+    }
+
+    var fieldObject = new JObject
+    {
+        ["name"] = childFieldName,
+        ["value"] = rowValue
+    };
+    
+    docGenFormFieldList.Add(fieldObject);
+    return fieldObject;
+}
+
   public class ConnectorException : Exception
   {
     public ConnectorException(
@@ -3114,7 +8263,7 @@ public class Script : ScriptBase
         error.AppendLine($"Inner exception {level}: {inner.Message}");
         inner = inner.InnerException;
       }
-         
+
       error.AppendLine($"Stack trace: {this.StackTrace}");
       return error.ToString();
     }
