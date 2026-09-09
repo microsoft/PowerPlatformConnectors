@@ -1,0 +1,254 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "VIESAC — EU VAT Validation",
+    "description": "Validate EU, UK, Norwegian and Swiss VAT numbers with a full audit trail, PDF and XML certificates. Coverage: EU member states and Northern Ireland via VIES; Great Britain via HMRC; Norway via Brønnøysundregistrene; Switzerland via the UID register.\n\nGet your API key at https://viesac.eu/app after registration.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "VIESAC Support",
+      "url": "https://viesac.eu/api-docs",
+      "email": "support@viesac.eu"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://viesac.eu/terms-of-service"
+    }
+  },
+  "host": "viesac.eu",
+  "basePath": "/api/v1",
+  "schemes": ["https"],
+  "x-ms-connector-metadata": [
+    { "propertyName": "Website", "propertyValue": "https://viesac.eu" },
+    { "propertyName": "Privacy policy", "propertyValue": "https://viesac.eu/privacy-policy" },
+    { "propertyName": "Categories", "propertyValue": "Finance;Productivity" }
+  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "apiKeyAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "x-ms-key-prefix": "Bearer ",
+      "description": "API key from your VIESAC dashboard (https://viesac.eu/app). The connector prefixes it with \"Bearer \" automatically."
+    }
+  },
+  "security": [{ "apiKeyAuth": [] }],
+  "tags": [
+    { "name": "Audits", "description": "VAT validation audits and certificates" },
+    { "name": "Account", "description": "Plan and usage information" }
+  ],
+  "paths": {
+    "/account": {
+      "get": {
+        "tags": ["Account"],
+        "summary": "Get account",
+        "description": "Returns your current plan, monthly limit, and remaining requests.",
+        "operationId": "getAccount",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": { "description": "Account information returned successfully.", "schema": { "$ref": "#/definitions/Account" } },
+          "401": { "$ref": "#/responses/Unauthorized" }
+        }
+      }
+    },
+    "/audits": {
+      "get": {
+        "tags": ["Audits"],
+        "summary": "List audits",
+        "description": "Returns a filtered list of VAT validation audits for your account. All filter parameters are optional.",
+        "operationId": "listAudits",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "name": "limit", "in": "query", "required": false, "type": "integer", "default": 100, "maximum": 500, "x-ms-summary": "Limit", "description": "Maximum number of records to return (1-500, default 100)." },
+          { "name": "date_from", "in": "query", "required": false, "type": "string", "format": "date", "x-ms-summary": "Date from", "description": "Filter audits from this date (YYYY-MM-DD)." },
+          { "name": "date_to", "in": "query", "required": false, "type": "string", "format": "date", "x-ms-summary": "Date to", "description": "Filter audits up to this date (YYYY-MM-DD)." },
+          { "name": "country_code", "in": "query", "required": false, "type": "string", "x-ms-summary": "Country code", "description": "Filter by two-letter country code (e.g. DE, FR, GB)." },
+          { "name": "vat_number", "in": "query", "required": false, "type": "string", "x-ms-summary": "VAT number", "description": "Filter by VAT number (substring search)." },
+          { "name": "order_number", "in": "query", "required": false, "type": "string", "x-ms-summary": "Order number", "description": "Filter by order number (substring search)." },
+          { "name": "invoice_number", "in": "query", "required": false, "type": "string", "x-ms-summary": "Invoice number", "description": "Filter by invoice number (substring search)." }
+        ],
+        "responses": {
+          "200": { "description": "List of audits returned successfully.", "schema": { "$ref": "#/definitions/AuditListResponse" } },
+          "401": { "$ref": "#/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Audits"],
+        "summary": "Create audit",
+        "description": "Validates a VAT number via the official source (VIES for EU, HMRC for UK, Bronnøysundregistrene for Norway, UID register for Switzerland) and saves the result as an audit with a PDF and XML certificate.",
+        "operationId": "createAudit",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/AuditCreate" } }
+        ],
+        "responses": {
+          "201": { "description": "Audit created successfully.", "schema": { "$ref": "#/definitions/Audit" } },
+          "401": { "$ref": "#/responses/Unauthorized" },
+          "403": { "description": "Monthly quota reached.", "schema": { "$ref": "#/definitions/ErrorBody" } },
+          "422": { "description": "Invalid input.", "schema": { "$ref": "#/definitions/ErrorBody" } }
+        }
+      }
+    },
+    "/audits/{reference_number}": {
+      "get": {
+        "tags": ["Audits"],
+        "summary": "Get audit",
+        "description": "Returns a single VAT validation audit by its reference number.",
+        "operationId": "getAudit",
+        "x-ms-visibility": "important",
+        "parameters": [
+          { "$ref": "#/parameters/ReferenceNumberPath" }
+        ],
+        "responses": {
+          "200": { "description": "Audit returned successfully.", "schema": { "$ref": "#/definitions/Audit" } },
+          "401": { "$ref": "#/responses/Unauthorized" },
+          "404": { "$ref": "#/responses/NotFound" }
+        }
+      }
+    },
+    "/audits/{reference_number}/certificate": {
+      "get": {
+        "tags": ["Audits"],
+        "summary": "Download PDF certificate",
+        "description": "Downloads the PDF compliance certificate for a valid audit. Only available when the audit status is \"valid\".",
+        "operationId": "downloadCertificatePdf",
+        "x-ms-visibility": "important",
+        "produces": ["application/pdf"],
+        "parameters": [
+          { "$ref": "#/parameters/ReferenceNumberPath" },
+          { "name": "locale", "in": "query", "required": false, "type": "string", "default": "en", "x-ms-summary": "Language", "description": "Certificate language code (e.g. en, de, fr, pl, es, it, nl). Defaults to English." }
+        ],
+        "responses": {
+          "200": { "description": "PDF certificate binary content.", "schema": { "type": "string", "format": "binary" } },
+          "401": { "$ref": "#/responses/Unauthorized" },
+          "404": { "$ref": "#/responses/NotFound" }
+        }
+      }
+    },
+    "/audits/{reference_number}/certificate/xml": {
+      "get": {
+        "tags": ["Audits"],
+        "summary": "Download XML certificate",
+        "description": "Downloads the raw XML evidence for a valid audit (VIES checkVatResponse, HMRC response, Brreg data, or Swiss UID XML). Only available when the audit status is \"valid\".",
+        "operationId": "downloadCertificateXml",
+        "x-ms-visibility": "important",
+        "produces": ["application/xml"],
+        "parameters": [
+          { "$ref": "#/parameters/ReferenceNumberPath" }
+        ],
+        "responses": {
+          "200": { "description": "XML evidence content.", "schema": { "type": "string" } },
+          "401": { "$ref": "#/responses/Unauthorized" },
+          "404": { "$ref": "#/responses/NotFound" }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "ReferenceNumberPath": {
+      "name": "reference_number",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Reference number",
+      "description": "Audit reference number (e.g. VAC-20260220-ABC123).",
+      "x-ms-url-encoding": "single"
+    }
+  },
+  "responses": {
+    "Unauthorized": {
+      "description": "Missing or invalid API key.",
+      "schema": { "$ref": "#/definitions/ErrorBody" }
+    },
+    "NotFound": {
+      "description": "Resource not found.",
+      "schema": { "$ref": "#/definitions/ErrorBody" }
+    }
+  },
+  "definitions": {
+    "ErrorBody": {
+      "type": "object",
+      "properties": {
+        "error": { "type": "string", "x-ms-summary": "Error message" },
+        "code": { "type": "string", "x-ms-summary": "Error code" }
+      }
+    },
+    "Account": {
+      "type": "object",
+      "properties": {
+        "plan": { "type": "string", "x-ms-summary": "Plan", "description": "Internal plan identifier (e.g. FREE, STARTER, PRO)." },
+        "plan_label": { "type": "string", "x-ms-summary": "Plan label", "description": "Human-readable plan name." },
+        "monthly_limit": { "type": "integer", "x-nullable": true, "x-ms-summary": "Monthly limit", "description": "Maximum audits per month (null = unlimited)." },
+        "requests_total": { "type": "integer", "x-ms-summary": "Requests total", "description": "Total audits since account creation." },
+        "requests_this_month": { "type": "integer", "x-ms-summary": "Requests this month", "description": "Audits created in the current calendar month." },
+        "requests_remaining": { "type": "integer", "x-nullable": true, "x-ms-summary": "Requests remaining", "description": "Remaining audits this month (null = unlimited)." },
+        "upgrade_url": { "type": "string", "x-ms-summary": "Upgrade URL", "description": "Link to upgrade your plan." }
+      }
+    },
+    "AuditCreate": {
+      "type": "object",
+      "required": ["vat_number"],
+      "properties": {
+        "vat_number": { "type": "string", "x-ms-summary": "VAT number", "description": "Full VAT number to validate (e.g. DE129274202, GB123456789, CHE-123.456.789 MWST)." },
+        "country_code": { "type": "string", "x-ms-summary": "Country code", "description": "Two-letter ISO country code. Optional if the VAT number already includes a country prefix.", "minLength": 2, "maxLength": 2 },
+        "requester_vat": { "type": "string", "x-ms-summary": "Requester VAT", "description": "Your own VAT number for the VIES consultation record (optional)." },
+        "company_name": { "type": "string", "x-ms-summary": "Company name", "description": "Company name to attach to the audit (optional)." },
+        "company_address": { "type": "string", "x-ms-summary": "Company address", "description": "Company address to attach to the audit (optional)." },
+        "order_number": { "type": "string", "x-ms-summary": "Order number", "description": "Your internal order number for cross-reference (optional)." },
+        "invoice_number": { "type": "string", "x-ms-summary": "Invoice number", "description": "Your internal invoice number for cross-reference (optional)." },
+        "comment": { "type": "string", "x-ms-summary": "Comment", "description": "Free-text comment attached to the audit (optional)." },
+        "method": { "type": "string", "default": "microsoft", "enum": ["microsoft","api","woocommerce","magento","make"], "x-ms-summary": "Method", "x-ms-visibility": "internal", "description": "Integration source. Automatically set to microsoft." }
+      }
+    },
+    "AuditListResponse": {
+      "type": "object",
+      "properties": {
+        "data": { "type": "array", "x-ms-summary": "Audits", "items": { "$ref": "#/definitions/AuditSummary" } },
+        "count": { "type": "integer", "x-ms-summary": "Count", "description": "Total number of audits in this response." }
+      }
+    },
+    "AuditSummary": {
+      "type": "object",
+      "description": "Abbreviated audit record as returned in list responses.",
+      "properties": {
+        "reference_number": { "type": "string", "x-ms-summary": "Reference number" },
+        "country_code": { "type": "string", "x-ms-summary": "Country code" },
+        "vat_number": { "type": "string", "x-ms-summary": "VAT number" },
+        "status": { "type": "string", "x-ms-summary": "Status", "enum": ["valid","not_valid","pending","error"] },
+        "vies": { "type": "integer", "x-ms-summary": "VIES result", "description": "1=valid, 0=not valid/error, 2=unavailable." },
+        "company_name": { "type": "string", "x-ms-summary": "Company name" },
+        "requested_at": { "type": "string", "format": "date-time", "x-ms-summary": "Requested at" },
+        "certificate_url": { "type": "string", "x-ms-summary": "Certificate PDF URL" },
+        "certificate_xml_url": { "type": "string", "x-ms-summary": "Certificate XML URL" }
+      }
+    },
+    "Audit": {
+      "type": "object",
+      "description": "Full audit record.",
+      "properties": {
+        "reference_number": { "type": "string", "x-ms-summary": "Reference number", "description": "Unique audit reference (e.g. VAC-20260220-ABC123)." },
+        "country_code": { "type": "string", "x-ms-summary": "Country code" },
+        "vat_number": { "type": "string", "x-ms-summary": "VAT number" },
+        "status": { "type": "string", "x-ms-summary": "Status", "enum": ["valid","not_valid","pending","error"] },
+        "vies": { "type": "integer", "x-ms-summary": "VIES result", "description": "1=valid, 0=not valid/error, 2=temporarily unavailable." },
+        "company_name": { "type": "string", "x-ms-summary": "Company name" },
+        "company_address": { "type": "string", "x-ms-summary": "Company address" },
+        "consultation_number": { "type": "string", "x-ms-summary": "Consultation number", "description": "VIES consultation number (EU audits only)." },
+        "requester_vat": { "type": "string", "x-ms-summary": "Requester VAT" },
+        "order_number": { "type": "string", "x-ms-summary": "Order number" },
+        "invoice_number": { "type": "string", "x-ms-summary": "Invoice number" },
+        "comment": { "type": "string", "x-ms-summary": "Comment" },
+        "audit_details": { "type": "object", "x-ms-summary": "Audit details", "description": "Client metadata object attached at creation." },
+        "verification_evidence": { "type": "object", "x-ms-summary": "Verification evidence", "description": "Client-safe summary of the official source response." },
+        "method": { "type": "string", "x-ms-summary": "Method", "description": "Integration source that created this audit." },
+        "requested_at": { "type": "string", "format": "date-time", "x-ms-summary": "Requested at" },
+        "certificate_url": { "type": "string", "x-ms-summary": "Certificate PDF URL" },
+        "certificate_xml_url": { "type": "string", "x-ms-summary": "Certificate XML URL" },
+        "certificate_urls": { "type": "object", "x-ms-summary": "Certificate URLs", "description": "All certificate URLs (pdf_en, pdf_locale, xml)." },
+        "message": { "type": "string", "x-ms-summary": "Message", "description": "Additional message, e.g. when VIES is temporarily unavailable." }
+      }
+    }
+  }
+}
