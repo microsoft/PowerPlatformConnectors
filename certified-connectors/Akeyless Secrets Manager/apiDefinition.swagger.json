@@ -3,7 +3,7 @@
   "info": {
     "title": "Akeyless Secrets Manager",
     "description": "Akeyless connector for api.akeyless.io: list and describe vault items, read secret values, and administer roles, gateways, targets, and authentication methods. Supports optional writes to create or update secrets and move objects per your account RBAC. Connection uses HTTP Basic with Akeyless API Key Access ID and Access Key. See readme.md for credential setup and API references.",
-    "version": "1.0",
+    "version": "1.0.1",
     "contact": {
       "name": "Akeyless",
       "url": "https://www.akeyless.io/"
@@ -28,7 +28,38 @@
             "description": "Folders and items from Akeyless list-items.",
             "schema": {
               "type": "object",
-              "description": "Response body from Akeyless (folders, items, pagination fields as returned by the API)."
+              "description": "Folders and items returned by Akeyless list-items.",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "description": "Items under the requested path.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "item_name": {
+                        "type": "string",
+                        "description": "Item path."
+                      },
+                      "item_type": {
+                        "type": "string",
+                        "description": "Akeyless item type."
+                      },
+                      "display_id": {
+                        "type": "string",
+                        "description": "Display id."
+                      }
+                    }
+                  }
+                },
+                "next_page": {
+                  "type": "string",
+                  "description": "Token for the next page of results."
+                },
+                "has_next": {
+                  "type": "boolean",
+                  "description": "True when another page is available."
+                }
+              }
             }
           },
           "default": {
@@ -49,28 +80,34 @@
                 "path": {
                   "type": "string",
                   "description": "Folder path to list (for example `/` or `/Production`). Leave empty for root.",
-                  "title": "Folder path"
+                  "title": "Folder path",
+                  "x-ms-summary": "Folder path"
                 },
                 "filter": {
                   "type": "string",
                   "description": "Filter by item name or substring.",
-                  "title": "Name filter"
+                  "title": "Name filter",
+                  "x-ms-summary": "Name filter"
                 },
                 "pagination_token": {
                   "type": "string",
                   "description": "Pagination token from a previous response.",
-                  "title": "Pagination token"
+                  "title": "Pagination token",
+                  "x-ms-summary": "Pagination token"
                 },
                 "current_folder": {
                   "type": "boolean",
                   "description": "If true, list only direct children of the folder.",
                   "title": "Current folder only",
-                  "default": false
+                  "default": false,
+                  "x-ms-summary": "Current folder only"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "important",
+        "x-ms-summary": "List Items"
       }
     },
     "/connector/describe-item": {
@@ -104,18 +141,22 @@
                 "name": {
                   "type": "string",
                   "description": "Full path (item name) in Akeyless, for example `/Prod/DB/creds`.",
-                  "title": "Item path"
+                  "title": "Item path",
+                  "x-ms-summary": "Item path"
                 },
                 "show_versions": {
                   "type": "boolean",
                   "description": "Include item versions in the reply (Akeyless `show-versions`).",
                   "title": "Show versions",
-                  "default": false
+                  "default": false,
+                  "x-ms-summary": "Show versions"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "important",
+        "x-ms-summary": "Describe Item"
       }
     },
     "/connector/list-auth-methods": {
@@ -123,7 +164,9 @@
         "responses": {
           "200": {
             "description": "Auth methods list from Akeyless.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -140,17 +183,30 @@
             "schema": {
               "type": "object",
               "properties": {
-                "filter": { "type": "string", "description": "Substring filter on auth method name." },
-                "pagination_token": { "type": "string", "description": "Maps to Akeyless `pagination-token`." },
+                "filter": {
+                  "type": "string",
+                  "description": "Substring filter on auth method name.",
+                  "x-ms-summary": "Filter"
+                },
+                "pagination_token": {
+                  "type": "string",
+                  "description": "Maps to Akeyless `pagination-token`.",
+                  "x-ms-summary": "Pagination Token"
+                },
                 "type": {
                   "type": "array",
-                  "items": { "type": "string" },
-                  "description": "Restrict to these auth method types; omit for all."
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Restrict to these auth method types; omit for all.",
+                  "x-ms-summary": "Type"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "List Auth Methods"
       }
     },
     "/connector/list-roles": {
@@ -158,7 +214,9 @@
         "responses": {
           "200": {
             "description": "Roles from Akeyless.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -175,12 +233,22 @@
             "schema": {
               "type": "object",
               "properties": {
-                "filter": { "type": "string" },
-                "pagination_token": { "type": "string", "description": "Maps to Akeyless `pagination-token`." }
+                "filter": {
+                  "type": "string",
+                  "x-ms-summary": "Filter",
+                  "description": "Filter."
+                },
+                "pagination_token": {
+                  "type": "string",
+                  "description": "Maps to Akeyless `pagination-token`.",
+                  "x-ms-summary": "Pagination Token"
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "List Roles"
       }
     },
     "/connector/list-gateways": {
@@ -188,7 +256,9 @@
         "responses": {
           "200": {
             "description": "Gateways from Akeyless.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -202,9 +272,14 @@
             "name": "body",
             "in": "body",
             "required": false,
-            "schema": { "type": "object", "properties": {} }
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "List Gateways"
       }
     },
     "/connector/list-targets": {
@@ -212,7 +287,9 @@
         "responses": {
           "200": {
             "description": "Targets from Akeyless.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -229,17 +306,30 @@
             "schema": {
               "type": "object",
               "properties": {
-                "filter": { "type": "string" },
-                "pagination_token": { "type": "string" },
+                "filter": {
+                  "type": "string",
+                  "x-ms-summary": "Filter",
+                  "description": "Filter."
+                },
+                "pagination_token": {
+                  "type": "string",
+                  "x-ms-summary": "Pagination Token",
+                  "description": "Pagination Token."
+                },
                 "type": {
                   "type": "array",
-                  "items": { "type": "string" },
-                  "description": "Target types to include; omit for all."
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Target types to include; omit for all.",
+                  "x-ms-summary": "Type"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "List Targets"
       }
     },
     "/connector/usc-list": {
@@ -247,7 +337,9 @@
         "responses": {
           "200": {
             "description": "Secrets visible through the USC.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -263,16 +355,21 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["usc_name"],
+              "required": [
+                "usc_name"
+              ],
               "properties": {
                 "usc_name": {
                   "type": "string",
-                  "description": "Universal Secrets Connector item name in Akeyless (sent as `usc-name`)."
+                  "description": "Universal Secrets Connector item name in Akeyless (sent as `usc-name`).",
+                  "x-ms-summary": "Usc Name"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "USC List"
       }
     },
     "/connector/target-get": {
@@ -280,7 +377,9 @@
         "responses": {
           "200": {
             "description": "Target details.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -296,18 +395,27 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "name": { "type": "string", "description": "Exact target name." },
+                "name": {
+                  "type": "string",
+                  "description": "Exact target name.",
+                  "x-ms-summary": "Name"
+                },
                 "show_versions": {
                   "type": "boolean",
                   "default": false,
-                  "description": "Include all target versions (`show-versions`)."
+                  "description": "Include all target versions (`show-versions`).",
+                  "x-ms-summary": "Show Versions"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Target Get"
       }
     },
     "/connector/get-tags": {
@@ -315,7 +423,9 @@
         "responses": {
           "200": {
             "description": "Tags for the item.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -331,13 +441,21 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "name": { "type": "string", "description": "Full item path." }
+                "name": {
+                  "type": "string",
+                  "description": "Full item path.",
+                  "x-ms-summary": "Name"
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Get Tags"
       }
     },
     "/connector/get-role": {
@@ -345,7 +463,9 @@
         "responses": {
           "200": {
             "description": "Role details.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -361,13 +481,21 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "name": { "type": "string", "description": "Exact role name." }
+                "name": {
+                  "type": "string",
+                  "description": "Exact role name.",
+                  "x-ms-summary": "Name"
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Get Role"
       }
     },
     "/connector/get-auth-method": {
@@ -375,7 +503,9 @@
         "responses": {
           "200": {
             "description": "Auth method details.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -391,13 +521,21 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "name": { "type": "string", "description": "Exact auth method name." }
+                "name": {
+                  "type": "string",
+                  "description": "Exact auth method name.",
+                  "x-ms-summary": "Name"
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Get Auth Method"
       }
     },
     "/connector/get-analytics-data": {
@@ -405,7 +543,9 @@
         "responses": {
           "200": {
             "description": "Analytics payload from Akeyless.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -419,9 +559,14 @@
             "name": "body",
             "in": "body",
             "required": false,
-            "schema": { "type": "object", "properties": {} }
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Get Analytics Data"
       }
     },
     "/connector/list-groups": {
@@ -429,7 +574,9 @@
         "responses": {
           "200": {
             "description": "Groups list.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -446,12 +593,22 @@
             "schema": {
               "type": "object",
               "properties": {
-                "filter": { "type": "string", "description": "Substring filter on group name." },
-                "pagination_token": { "type": "string", "description": "Maps to Akeyless `pagination-token`." }
+                "filter": {
+                  "type": "string",
+                  "description": "Substring filter on group name.",
+                  "x-ms-summary": "Filter"
+                },
+                "pagination_token": {
+                  "type": "string",
+                  "description": "Maps to Akeyless `pagination-token`.",
+                  "x-ms-summary": "Pagination Token"
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "List Groups"
       }
     },
     "/connector/create-secret": {
@@ -459,7 +616,9 @@
         "responses": {
           "200": {
             "description": "Create-secret result.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -475,30 +634,84 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["name", "value"],
+              "required": [
+                "name",
+                "value"
+              ],
               "properties": {
-                "name": { "type": "string", "description": "Full path of the new secret." },
-                "value": { "type": "string", "description": "Secret material." },
-                "description": { "type": "string" },
-                "tags": { "type": "array", "items": { "type": "string" } },
-                "protection_key": { "type": "string" },
-                "multiline": { "type": "boolean", "default": false },
+                "name": {
+                  "type": "string",
+                  "description": "Full path of the new secret.",
+                  "x-ms-summary": "Name"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Secret material.",
+                  "x-ms-summary": "Value",
+                  "x-ms-visibility": "important"
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Description."
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Tags",
+                  "description": "Tags."
+                },
+                "protection_key": {
+                  "type": "string",
+                  "x-ms-summary": "Protection Key",
+                  "description": "Protection Key."
+                },
+                "multiline": {
+                  "type": "boolean",
+                  "default": false,
+                  "x-ms-summary": "Multiline",
+                  "description": "Multiline."
+                },
                 "secret_type": {
                   "type": "string",
-                  "enum": ["generic", "password"],
-                  "default": "generic"
+                  "enum": [
+                    "generic",
+                    "password"
+                  ],
+                  "default": "generic",
+                  "x-ms-summary": "Secret Type",
+                  "description": "Secret Type."
                 },
                 "format": {
                   "type": "string",
-                  "enum": ["text", "json", "key-value"],
-                  "default": "text"
+                  "enum": [
+                    "text",
+                    "json",
+                    "key-value"
+                  ],
+                  "default": "text",
+                  "x-ms-summary": "Format",
+                  "description": "Format."
                 },
-                "max_versions": { "type": "string" },
-                "delete_protection": { "type": "boolean", "default": false }
+                "max_versions": {
+                  "type": "string",
+                  "x-ms-summary": "Max Versions",
+                  "description": "Max Versions."
+                },
+                "delete_protection": {
+                  "type": "boolean",
+                  "default": false,
+                  "x-ms-summary": "Delete Protection",
+                  "description": "Delete Protection."
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Create Secret"
       }
     },
     "/connector/update-item": {
@@ -506,7 +719,9 @@
         "responses": {
           "200": {
             "description": "Update result (may include both update-item and update-secret-val).",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -522,21 +737,69 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "name": { "type": "string", "description": "Current item path." },
-                "new_value": { "type": "string", "description": "New secret value for static secrets." },
-                "keep_prev_version": { "type": "boolean", "default": false },
-                "description": { "type": "string" },
-                "new_name": { "type": "string" },
-                "add_tags": { "type": "array", "items": { "type": "string" } },
-                "remove_tags": { "type": "array", "items": { "type": "string" } },
-                "max_versions": { "type": "string" },
-                "delete_protection": { "type": "boolean" }
+                "name": {
+                  "type": "string",
+                  "description": "Current item path.",
+                  "x-ms-summary": "Name"
+                },
+                "new_value": {
+                  "type": "string",
+                  "description": "New secret value for static secrets.",
+                  "x-ms-summary": "New Value",
+                  "x-ms-visibility": "important"
+                },
+                "keep_prev_version": {
+                  "type": "boolean",
+                  "default": false,
+                  "x-ms-summary": "Keep Prev Version",
+                  "description": "Keep Prev Version."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Description."
+                },
+                "new_name": {
+                  "type": "string",
+                  "x-ms-summary": "New Name",
+                  "description": "New Name."
+                },
+                "add_tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Add Tags",
+                  "description": "Add Tags."
+                },
+                "remove_tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Remove Tags",
+                  "description": "Remove Tags."
+                },
+                "max_versions": {
+                  "type": "string",
+                  "x-ms-summary": "Max Versions",
+                  "description": "Max Versions."
+                },
+                "delete_protection": {
+                  "type": "boolean",
+                  "x-ms-summary": "Delete Protection",
+                  "description": "Delete Protection."
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Update Item"
       }
     },
     "/connector/delete-item": {
@@ -544,7 +807,9 @@
         "responses": {
           "200": {
             "description": "Delete-item result.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -560,16 +825,39 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "name": { "type": "string" },
-                "delete_immediately": { "type": "boolean", "default": false },
-                "delete_in_days": { "type": "integer", "format": "int32" },
-                "version": { "type": "integer", "format": "int32" }
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "Name."
+                },
+                "delete_immediately": {
+                  "type": "boolean",
+                  "default": false,
+                  "x-ms-summary": "Delete Immediately",
+                  "description": "Delete Immediately."
+                },
+                "delete_in_days": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Delete In Days",
+                  "description": "Delete In Days."
+                },
+                "version": {
+                  "type": "integer",
+                  "format": "int32",
+                  "x-ms-summary": "Version",
+                  "description": "Version."
+                }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Delete Item"
       }
     },
     "/connector/move-objects": {
@@ -577,7 +865,9 @@
         "responses": {
           "200": {
             "description": "Move-objects result.",
-            "schema": { "type": "object" }
+            "schema": {
+              "type": "object"
+            }
           },
           "default": {
             "description": "Error response."
@@ -593,19 +883,38 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["source_path", "target_path"],
+              "required": [
+                "source_path",
+                "target_path"
+              ],
               "properties": {
-                "source_path": { "type": "string" },
-                "target_path": { "type": "string" },
+                "source_path": {
+                  "type": "string",
+                  "x-ms-summary": "Source Path",
+                  "description": "Source Path."
+                },
+                "target_path": {
+                  "type": "string",
+                  "x-ms-summary": "Target Path",
+                  "description": "Target Path."
+                },
                 "objects_type": {
                   "type": "string",
-                  "enum": ["item", "auth_method", "role"],
-                  "default": "item"
+                  "enum": [
+                    "item",
+                    "auth_method",
+                    "role"
+                  ],
+                  "default": "item",
+                  "x-ms-summary": "Objects Type",
+                  "description": "Objects Type."
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "advanced",
+        "x-ms-summary": "Move Objects"
       }
     },
     "/get-secret-value/text": {
@@ -619,7 +928,9 @@
                 "SecretValue": {
                   "type": "string",
                   "description": "Plain-text secret value.",
-                  "title": "Secret value"
+                  "title": "Secret value",
+                  "x-ms-summary": "Secret value",
+                  "x-ms-visibility": "important"
                 }
               }
             }
@@ -645,12 +956,15 @@
                 "secret_name": {
                   "type": "string",
                   "description": "Full path of the secret in Akeyless (for example /Prod/DB/Password).",
-                  "title": "Secret name"
+                  "title": "Secret name",
+                  "x-ms-summary": "Secret name"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "important",
+        "x-ms-summary": "Get Secret"
       }
     },
     "/get-secret-value/json": {
@@ -663,11 +977,15 @@
               "properties": {
                 "username": {
                   "type": "string",
-                  "description": "Username when the secret is stored as credentials."
+                  "description": "Username when the secret is stored as credentials.",
+                  "x-ms-summary": "Username",
+                  "x-ms-visibility": "important"
                 },
                 "password": {
                   "type": "string",
-                  "description": "Password when the secret is stored as credentials."
+                  "description": "Password when the secret is stored as credentials.",
+                  "x-ms-summary": "Password",
+                  "x-ms-visibility": "important"
                 }
               }
             }
@@ -693,12 +1011,15 @@
                 "secret_name": {
                   "type": "string",
                   "description": "Full path of the secret in Akeyless.",
-                  "title": "Secret name"
+                  "title": "Secret name",
+                  "x-ms-summary": "Secret name"
                 }
               }
             }
           }
-        ]
+        ],
+        "x-ms-visibility": "important",
+        "x-ms-summary": "Get Password"
       }
     }
   },
@@ -729,6 +1050,10 @@
     {
       "propertyName": "Categories",
       "propertyValue": "Security;IT Operations"
+    },
+    {
+      "propertyName": "Support",
+      "propertyValue": "https://www.akeyless.io/support/"
     }
   ]
 }
