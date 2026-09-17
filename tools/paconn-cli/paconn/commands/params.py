@@ -288,6 +288,12 @@ def load_arguments(self, command):
             required=False,
             help=API_DEFINITION_HELP)
         arg_context.argument(
+            SCRIPT,
+            options_list=SCRIPT_OPTIONS,
+            type=str,
+            required=False,
+            help='Location for the C# script file (.csx) to validate. Cannot be used with --api-def.')
+        arg_context.argument(
             POWERAPPS_URL,
             options_list=POWERAPPS_URL_OPTIONS,
             type=str,

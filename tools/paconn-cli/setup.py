@@ -9,7 +9,7 @@
 import os
 from setuptools import setup
 
-__VERSION__ = '0.0.21'
+__VERSION__ = '0.1.0'
 
 
 def read(fname):
@@ -59,7 +59,8 @@ setup(
         'requests',
         'adal',
         'msrestazure',
-        'azure-storage-blob>=2.1,<12.0'
+        'azure-storage-blob>=2.1,<12.0',
+        'regex>=2022.1.18'  # Enhanced regex support for C# script validation
     ],
     extras_require={
         ":python_version<'3.0'": ['pylint~=1.9.2'],
