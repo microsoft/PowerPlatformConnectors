@@ -266,6 +266,73 @@ Arguments
                    line parameters are ignored.
    ```
 
+### Package Power Platform Solution Components
+
+The package operation creates a structured Power Platform solution package from component ZIP files. This is useful for creating distributable packages that contain multiple Power Platform components (connectors, flows, AI plugins) in a standardized format.
+
+Package solution components by running:
+
+`paconn package`
+
+or
+
+`paconn package --source [Path to directory containing ZIP files]`
+
+or
+
+`paconn package --source [Path to directory] --custom-mappings '{"*MyConnector*": "Connector.zip", "*MyFlow*": "Flow.zip"}'`
+
+The packaging process follows these steps:
+
+1. **Rename ZIP files** according to Power Platform conventions:
+   - Files containing "Connector" → "Connector.zip" (required)
+   - Files containing "Flow" → "Flow.zip" (required)
+   - Files containing "AIPlugin" → "AIPlugin.zip" (optional)
+
+2. **Move all ZIP files** to a "PkgAssets" folder
+
+3. **Create intro.md** from "readme.md" (or first available .md file)
+
+4. **Compress PkgAssets** folder into "package.zip"
+
+5. **Create final ConnectorPackage.zip** containing intro.md and package.zip
+
+6. **Clean up intermediate files** and folders
+
+The final ConnectorPackage.zip is ready for distribution and deployment to Power Platform environments.
+
+```
+Arguments
+   --source -src         : Source directory containing the Power Platform solution ZIP 
+                          files to package. Defaults to current directory.
+   --dest -d            : Destination path for the final ConnectorPackage.zip file. 
+                          Defaults to current directory.
+   --format -f          : Package format. Currently only "standard" format is supported 
+                          (ConnectorPackage.zip with intro.md and package.zip).
+   --custom-mappings -cm : JSON string containing custom file renaming mappings. 
+                          Example: '{"*MyConnector*": "Connector.zip", "*MyFlow*": "Flow.zip"}'.
+   --overwrite -w       : Overwrite existing package files if they exist.
+   --settings -s        : A settings file containing required parameters.
+                          When a settings file is specified some command 
+                          line parameters are ignored.
+```
+
+**Package Examples:**
+
+```bash
+# Package solution components in current directory
+paconn package
+
+# Package components from specific source directory
+paconn package --source ./my-solution
+
+# Package with custom file mappings
+paconn package --custom-mappings '{"*MyConnector*": "Connector.zip", "*MyFlow*": "Flow.zip"}'
+
+# Package and overwrite existing files
+paconn package --overwrite
+```
+
 
 ### Best Practice
 
