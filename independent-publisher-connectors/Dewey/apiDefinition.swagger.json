@@ -1,0 +1,1356 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Dewey",
+    "description": "Dewey turns document collections into a research-grade knowledge base. Ingest PDFs, Word docs, and more; then search, query, and extract structured insights — all from your automation flows.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Dewey Support",
+      "url": "https://meetdewey.com",
+      "email": "support@meetdewey.com"
+    }
+  },
+  "host": "api.meetdewey.com",
+  "basePath": "/v1",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://meetdewey.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://meetdewey.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Productivity"
+    }
+  ],
+  "paths": {
+    "/integration/webhooks/document-ready": {
+      "x-ms-notification-content": {
+        "description": "Document ready event payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookPayload"
+        }
+      },
+      "post": {
+        "summary": "When a document is ready",
+        "description": "Triggers when a document finishes processing and is ready to search. Use this to start a flow as soon as a newly uploaded document has been indexed.",
+        "operationId": "TriggerDocumentReady",
+        "x-ms-trigger": "single",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["url"],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "title": "Webhook URL",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscription registered",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Subscription ID",
+                  "x-ms-summary": "Subscription ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/webhooks/document-error": {
+      "x-ms-notification-content": {
+        "description": "Document error event payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookPayload"
+        }
+      },
+      "post": {
+        "summary": "When a document has an error",
+        "description": "Triggers when a document fails to process. Use this to alert your team or retry ingestion when processing fails.",
+        "operationId": "TriggerDocumentError",
+        "x-ms-trigger": "single",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["url"],
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "title": "Webhook URL",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Subscription registered",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Subscription ID",
+                  "x-ms-summary": "Subscription ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/webhooks/{id}": {
+      "delete": {
+        "summary": "Unsubscribe from document event",
+        "description": "Removes a webhook subscription. Called automatically when a flow is deleted or disabled.",
+        "operationId": "UnsubscribeDocumentEvent",
+        "x-ms-visibility": "internal",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Subscription ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Unsubscribed successfully"
+          }
+        }
+      }
+    },
+    "/collections": {
+      "get": {
+        "summary": "List collections",
+        "description": "Returns all collections in your organisation.",
+        "operationId": "ListCollections",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of collections",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Collection"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create collection",
+        "description": "Creates a new collection. A collection is the top-level namespace for documents, sections, and chunks. You need a project ID from the Dewey dashboard (Settings → Projects) to create one.",
+        "operationId": "CreateCollection",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name", "projectId"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Name",
+                  "x-ms-summary": "Name",
+                  "description": "Display name for the collection (max 100 characters)"
+                },
+                "projectId": {
+                  "type": "string",
+                  "title": "Project ID",
+                  "x-ms-summary": "Project ID",
+                  "description": "ID of the project this collection belongs to. Find it in the Dewey dashboard under Settings → Projects."
+                },
+                "visibility": {
+                  "type": "string",
+                  "title": "Visibility",
+                  "x-ms-summary": "Visibility",
+                  "description": "Whether the collection is accessible without an API key (default: private)",
+                  "x-ms-visibility": "advanced",
+                  "enum": ["private", "public"],
+                  "default": "private"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Collection created",
+            "schema": {
+              "$ref": "#/definitions/Collection"
+            }
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}": {
+      "get": {
+        "summary": "Get collection",
+        "description": "Returns details for a single collection.",
+        "operationId": "GetCollection",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Collection details",
+            "schema": {
+              "$ref": "#/definitions/Collection"
+            }
+          },
+          "404": {
+            "description": "Collection not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete collection",
+        "description": "Permanently deletes a collection and all of its documents, sections, and chunks. This cannot be undone.",
+        "operationId": "DeleteCollection",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Collection deleted"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/documents": {
+      "post": {
+        "summary": "Upload document",
+        "description": "Uploads a document file directly to a collection and queues it for processing. Simpler than 'Get document upload URL' — no hash computation, HTTP PUT, or separate confirmation step required. Returns immediately; pair with 'Wait for document' if the flow needs to block until the document is fully indexed and searchable.",
+        "operationId": "UploadDocument",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "x-ms-summary": "File",
+            "description": "The document file to upload (PDF, DOCX, PPTX, etc.)"
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filename",
+            "x-ms-visibility": "advanced",
+            "description": "Display name stored in Dewey (e.g. 'Q4 Report.pdf'). Set this explicitly when the file comes from a 'Get file content' action that does not preserve the original filename. Leave blank to use the filename from the uploaded file."
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Document accepted and ingestion queued. Use 'Wait for document' to block until processing is complete.",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List documents",
+        "description": "Returns documents in a collection, ordered by creation date (newest first). Supports pagination and optional status filtering.",
+        "operationId": "ListDocuments",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status filter",
+            "description": "Return only documents with this status",
+            "x-ms-visibility": "advanced",
+            "enum": [
+              "uploading",
+              "processing",
+              "sectioned",
+              "embedded",
+              "ready",
+              "error"
+            ]
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of documents to return (default 100, max 500)",
+            "x-ms-visibility": "advanced",
+            "default": 100,
+            "maximum": 500
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Offset",
+            "description": "Number of documents to skip (for pagination)",
+            "x-ms-visibility": "advanced",
+            "default": 0
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of documents",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "documents": {
+                  "type": "array",
+                  "title": "Documents",
+                  "x-ms-summary": "Documents",
+                  "items": {
+                    "$ref": "#/definitions/Document"
+                  }
+                },
+                "total": {
+                  "type": "integer",
+                  "title": "Total",
+                  "x-ms-summary": "Total",
+                  "description": "Total number of documents matching the filter (before pagination)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/documents/upload-url": {
+      "post": {
+        "summary": "Get document upload URL",
+        "description": "Returns a pre-signed S3 URL to upload a document. After uploading the file directly to that URL with an HTTP PUT, call 'Confirm document upload' to begin processing. Use 'Wait for document' to block until the document is indexed.",
+        "operationId": "GetDocumentUploadUrl",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "filename",
+                "contentType",
+                "fileSizeBytes",
+                "contentHash"
+              ],
+              "properties": {
+                "filename": {
+                  "type": "string",
+                  "title": "Filename",
+                  "x-ms-summary": "Filename",
+                  "description": "Original filename including extension (e.g. report.pdf)"
+                },
+                "contentType": {
+                  "type": "string",
+                  "title": "Content Type",
+                  "x-ms-summary": "Content Type",
+                  "description": "MIME type of the file (e.g. application/pdf)"
+                },
+                "fileSizeBytes": {
+                  "type": "integer",
+                  "title": "File Size (bytes)",
+                  "x-ms-summary": "File Size (bytes)",
+                  "description": "Exact byte length of the file"
+                },
+                "contentHash": {
+                  "type": "string",
+                  "title": "SHA-256 Hash",
+                  "x-ms-summary": "SHA-256 Hash",
+                  "description": "SHA-256 hex digest of the file contents, used for deduplication"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Upload URL ready. documentId is always returned; uploadUrl is null when the file was already indexed (duplicate).",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "documentId": {
+                  "type": "string",
+                  "title": "Document ID",
+                  "x-ms-summary": "Document ID"
+                },
+                "uploadUrl": {
+                  "type": "string",
+                  "title": "Upload URL",
+                  "x-ms-summary": "Upload URL",
+                  "description": "Pre-signed S3 URL. PUT your file to this URL (expires in 15 minutes). Null when the file is already indexed."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/documents/{documentId}/confirm": {
+      "post": {
+        "summary": "Confirm document upload",
+        "description": "Tells Dewey that the file upload to S3 is complete and processing should begin. Call this after a successful PUT to the upload URL.",
+        "operationId": "ConfirmDocumentUpload",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Processing started",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          "404": {
+            "description": "Document not found"
+          }
+        }
+      }
+    },
+    "/documents/{documentId}": {
+      "get": {
+        "summary": "Get document",
+        "description": "Returns the current status and metadata for a document.",
+        "operationId": "GetDocument",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/documentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document details",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          "404": {
+            "description": "Document not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete document",
+        "description": "Permanently deletes a document and all of its sections, chunks, and embeddings.",
+        "operationId": "DeleteDocument",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/documentId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Document deleted"
+          },
+          "404": {
+            "description": "Document not found"
+          }
+        }
+      }
+    },
+    "/documents/{documentId}/wait": {
+      "get": {
+        "summary": "Wait for document",
+        "description": "Blocks until the document reaches a terminal state (ready or error) and returns the result. Times out after 5 minutes with a 408 response. Use this after 'Confirm document upload' to pause a flow until the document is searchable.",
+        "operationId": "WaitForDocument",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/documentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document reached terminal state",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          "404": {
+            "description": "Document not found"
+          },
+          "408": {
+            "description": "Timed out waiting for processing to complete"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/research/sync": {
+      "post": {
+        "summary": "Research collection",
+        "description": "Runs an agentic research loop against the collection and returns a complete answer with cited sources. Ideal for deep question-answering flows where you need a synthesised response rather than raw chunks.",
+        "operationId": "ResearchCollection",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["q"],
+              "properties": {
+                "q": {
+                  "type": "string",
+                  "title": "Question",
+                  "x-ms-summary": "Question",
+                  "description": "Research question to answer"
+                },
+                "depth": {
+                  "type": "string",
+                  "title": "Depth",
+                  "x-ms-summary": "Depth",
+                  "description": "Controls how thoroughly the collection is searched (default: balanced)",
+                  "x-ms-visibility": "advanced",
+                  "enum": ["quick", "balanced", "deep", "exhaustive"],
+                  "default": "balanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Research complete",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "answer": {
+                  "type": "string",
+                  "title": "Answer",
+                  "x-ms-summary": "Answer",
+                  "description": "Full research answer with inline source citations"
+                },
+                "sessionId": {
+                  "type": "string",
+                  "title": "Session ID",
+                  "x-ms-summary": "Session ID"
+                },
+                "sources": {
+                  "type": "array",
+                  "title": "Sources",
+                  "x-ms-summary": "Sources",
+                  "items": {
+                    "$ref": "#/definitions/ResearchSource"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/query": {
+      "post": {
+        "summary": "Search collection",
+        "description": "Runs a hybrid semantic and keyword search against the collection and returns the most relevant text chunks. Ideal for RAG flows where you want to feed context into a subsequent AI step.",
+        "operationId": "SearchCollection",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["q"],
+              "properties": {
+                "q": {
+                  "type": "string",
+                  "title": "Query",
+                  "x-ms-summary": "Query",
+                  "description": "Natural language search query"
+                },
+                "limit": {
+                  "type": "integer",
+                  "title": "Result limit",
+                  "x-ms-summary": "Result limit",
+                  "description": "Maximum number of chunks to return (default 10, max 50)",
+                  "x-ms-visibility": "advanced",
+                  "default": 10,
+                  "maximum": 50
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SearchResult"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{documentId}/retry": {
+      "post": {
+        "summary": "Retry document",
+        "description": "Re-queues a document that failed processing. Only documents with status 'error' can be retried. Use the 'When a document has an error' trigger to detect failures automatically.",
+        "operationId": "RetryDocument",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/documentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document re-queued for processing",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          "404": {
+            "description": "Document not found"
+          },
+          "409": {
+            "description": "Document is not in error state"
+          }
+        }
+      }
+    },
+    "/documents/{documentId}/sections": {
+      "get": {
+        "summary": "List sections",
+        "description": "Returns the heading hierarchy extracted from a document — titles, levels, and positions. Use this to navigate document structure before fetching full content, or to feed section titles into a search or AI step.",
+        "operationId": "ListSections",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/documentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Section list",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Section"
+              }
+            }
+          },
+          "404": {
+            "description": "Document not found"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/sections/scan": {
+      "post": {
+        "summary": "Scan sections",
+        "description": "Searches section titles and summaries (not chunk content) using hybrid semantic and keyword matching. Returns a ranked list of the most relevant sections across all documents in the collection. Use this to identify which parts of the corpus are relevant before loading full chunk content — a cheaper alternative to a full search when you only need to locate the right sections.",
+        "operationId": "ScanSections",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/collectionId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["query"],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "title": "Query",
+                  "x-ms-summary": "Query",
+                  "description": "Natural language query to match against section titles and summaries"
+                },
+                "top_k": {
+                  "type": "integer",
+                  "title": "Result limit",
+                  "x-ms-summary": "Result limit",
+                  "description": "Maximum number of sections to return (default 20, max 100)",
+                  "x-ms-visibility": "advanced",
+                  "default": 20,
+                  "maximum": 100
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked section results",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "title": "Results",
+                  "x-ms-summary": "Results",
+                  "items": {
+                    "$ref": "#/definitions/SectionScanResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sections/{sectionId}": {
+      "get": {
+        "summary": "Get section",
+        "description": "Returns a section's metadata and its full Markdown content. Use this after 'Scan sections' or 'List sections' to read the actual text of a relevant section without loading the entire document.",
+        "operationId": "GetSection",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/sectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Section with content",
+            "schema": {
+              "$ref": "#/definitions/SectionWithContent"
+            }
+          },
+          "404": {
+            "description": "Section not found"
+          }
+        }
+      }
+    },
+    "/sections/{sectionId}/chunks": {
+      "get": {
+        "summary": "Get section chunks",
+        "description": "Returns the individual text chunks that make up a section. Chunks are the unit Dewey uses for embedding and retrieval. Use this instead of 'Get section' when you want to feed section content into an AI Builder or Azure OpenAI step as pre-split passages rather than a single Markdown block.",
+        "operationId": "GetSectionChunks",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/sectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chunks belonging to the section",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Chunk"
+              }
+            }
+          },
+          "404": {
+            "description": "Section not found"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "collectionId": {
+      "name": "collectionId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Collection",
+      "description": "The collection ID",
+      "x-ms-url-encoding": "single",
+      "x-ms-dynamic-values": {
+        "operationId": "ListCollections",
+        "value-collection": "",
+        "value-path": "id",
+        "value-title": "name"
+      }
+    },
+    "documentId": {
+      "name": "documentId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Document ID",
+      "description": "The document ID",
+      "x-ms-url-encoding": "single"
+    },
+    "sectionId": {
+      "name": "sectionId",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "x-ms-summary": "Section ID",
+      "description": "The section ID",
+      "x-ms-url-encoding": "single"
+    }
+  },
+  "definitions": {
+    "Collection": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "ID",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "x-ms-summary": "Name"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description",
+          "x-ms-summary": "Description"
+        },
+        "visibility": {
+          "type": "string",
+          "title": "Visibility",
+          "x-ms-summary": "Visibility"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "Document": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "ID",
+          "x-ms-summary": "ID"
+        },
+        "collectionId": {
+          "type": "string",
+          "title": "Collection ID",
+          "x-ms-summary": "Collection ID"
+        },
+        "filename": {
+          "type": "string",
+          "title": "Filename",
+          "x-ms-summary": "Filename"
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "x-ms-summary": "Status",
+          "description": "One of: pending, uploading, processing, sectioned, embedded, ready, error"
+        },
+        "pageCount": {
+          "type": "integer",
+          "title": "Page Count",
+          "x-ms-summary": "Page Count"
+        },
+        "sectionCount": {
+          "type": "integer",
+          "title": "Section Count",
+          "x-ms-summary": "Section Count"
+        },
+        "chunkCount": {
+          "type": "integer",
+          "title": "Chunk Count",
+          "x-ms-summary": "Chunk Count"
+        },
+        "fileSizeBytes": {
+          "type": "integer",
+          "title": "File Size (bytes)",
+          "x-ms-summary": "File Size (bytes)"
+        },
+        "errorMessage": {
+          "type": "string",
+          "title": "Error Message",
+          "x-ms-summary": "Error Message"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "SearchResult": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "title": "Content",
+          "x-ms-summary": "Content"
+        },
+        "documentId": {
+          "type": "string",
+          "title": "Document ID",
+          "x-ms-summary": "Document ID"
+        },
+        "filename": {
+          "type": "string",
+          "title": "Filename",
+          "x-ms-summary": "Filename"
+        },
+        "sectionTitle": {
+          "type": "string",
+          "title": "Section Title",
+          "x-ms-summary": "Section Title"
+        },
+        "score": {
+          "type": "number",
+          "title": "Relevance Score",
+          "x-ms-summary": "Relevance Score"
+        }
+      }
+    },
+    "ResearchSource": {
+      "type": "object",
+      "properties": {
+        "chunkId": {
+          "type": "string",
+          "title": "Chunk ID",
+          "x-ms-summary": "Chunk ID"
+        },
+        "content": {
+          "type": "string",
+          "title": "Content",
+          "x-ms-summary": "Content"
+        },
+        "documentId": {
+          "type": "string",
+          "title": "Document ID",
+          "x-ms-summary": "Document ID"
+        },
+        "filename": {
+          "type": "string",
+          "title": "Filename",
+          "x-ms-summary": "Filename"
+        },
+        "sectionId": {
+          "type": "string",
+          "title": "Section ID",
+          "x-ms-summary": "Section ID"
+        },
+        "sectionTitle": {
+          "type": "string",
+          "title": "Section Title",
+          "x-ms-summary": "Section Title"
+        },
+        "sectionLevel": {
+          "type": "integer",
+          "title": "Section Level",
+          "x-ms-summary": "Section Level"
+        }
+      }
+    },
+    "WebhookPayload": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Event ID",
+          "x-ms-summary": "Event ID"
+        },
+        "type": {
+          "type": "string",
+          "title": "Event Type",
+          "x-ms-summary": "Event Type"
+        },
+        "created": {
+          "type": "integer",
+          "title": "Timestamp",
+          "x-ms-summary": "Timestamp"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "documentId": {
+              "type": "string",
+              "title": "Document ID",
+              "x-ms-summary": "Document ID"
+            },
+            "collectionId": {
+              "type": "string",
+              "title": "Collection ID",
+              "x-ms-summary": "Collection ID"
+            },
+            "filename": {
+              "type": "string",
+              "title": "Filename",
+              "x-ms-summary": "Filename"
+            },
+            "status": {
+              "type": "string",
+              "title": "Status",
+              "x-ms-summary": "Status"
+            },
+            "errorMessage": {
+              "type": "string",
+              "title": "Error Message",
+              "x-ms-summary": "Error Message"
+            }
+          }
+        }
+      }
+    },
+    "Section": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Section ID",
+          "x-ms-summary": "Section ID"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title",
+          "x-ms-summary": "Title"
+        },
+        "level": {
+          "type": "integer",
+          "title": "Heading Level",
+          "x-ms-summary": "Heading Level",
+          "description": "Heading depth (1 = top-level, 6 = deepest)"
+        },
+        "position": {
+          "type": "integer",
+          "title": "Position",
+          "x-ms-summary": "Position",
+          "description": "Order of this section within the document"
+        },
+        "markdownOffsetStart": {
+          "type": "integer",
+          "title": "Markdown Offset Start",
+          "x-ms-summary": "Markdown Offset Start"
+        },
+        "markdownOffsetEnd": {
+          "type": "integer",
+          "title": "Markdown Offset End",
+          "x-ms-summary": "Markdown Offset End"
+        }
+      }
+    },
+    "SectionScanResult": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "type": "number",
+          "title": "Relevance Score",
+          "x-ms-summary": "Relevance Score"
+        },
+        "section": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Section ID",
+              "x-ms-summary": "Section ID"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "x-ms-summary": "Title"
+            },
+            "level": {
+              "type": "integer",
+              "title": "Heading Level",
+              "x-ms-summary": "Heading Level"
+            },
+            "summary": {
+              "type": "string",
+              "title": "Summary",
+              "x-ms-summary": "Summary"
+            },
+            "summaryType": {
+              "type": "string",
+              "title": "Summary Type",
+              "x-ms-summary": "Summary Type",
+              "description": "Whether the summary was AI-generated or extractive"
+            },
+            "position": {
+              "type": "integer",
+              "title": "Position",
+              "x-ms-summary": "Position"
+            },
+            "chunkCount": {
+              "type": "integer",
+              "title": "Chunk Count",
+              "x-ms-summary": "Chunk Count"
+            }
+          }
+        },
+        "document": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "title": "Document ID",
+              "x-ms-summary": "Document ID"
+            },
+            "filename": {
+              "type": "string",
+              "title": "Filename",
+              "x-ms-summary": "Filename"
+            }
+          }
+        }
+      }
+    },
+    "SectionWithContent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Section ID",
+          "x-ms-summary": "Section ID"
+        },
+        "documentId": {
+          "type": "string",
+          "title": "Document ID",
+          "x-ms-summary": "Document ID"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title",
+          "x-ms-summary": "Title"
+        },
+        "level": {
+          "type": "integer",
+          "title": "Heading Level",
+          "x-ms-summary": "Heading Level",
+          "description": "Heading depth (1 = top-level, 6 = deepest)"
+        },
+        "summary": {
+          "type": "string",
+          "title": "Summary",
+          "x-ms-summary": "Summary"
+        },
+        "summaryType": {
+          "type": "string",
+          "title": "Summary Type",
+          "x-ms-summary": "Summary Type",
+          "description": "Whether the summary was AI-generated or extractive"
+        },
+        "position": {
+          "type": "integer",
+          "title": "Position",
+          "x-ms-summary": "Position"
+        },
+        "chunkCount": {
+          "type": "integer",
+          "title": "Chunk Count",
+          "x-ms-summary": "Chunk Count"
+        },
+        "content": {
+          "type": "string",
+          "title": "Content",
+          "x-ms-summary": "Content",
+          "description": "Full Markdown text of the section. Null if the document has not finished processing."
+        }
+      }
+    },
+    "Chunk": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Chunk ID",
+          "x-ms-summary": "Chunk ID"
+        },
+        "sectionId": {
+          "type": "string",
+          "title": "Section ID",
+          "x-ms-summary": "Section ID"
+        },
+        "documentId": {
+          "type": "string",
+          "title": "Document ID",
+          "x-ms-summary": "Document ID"
+        },
+        "collectionId": {
+          "type": "string",
+          "title": "Collection ID",
+          "x-ms-summary": "Collection ID"
+        },
+        "content": {
+          "type": "string",
+          "title": "Content",
+          "x-ms-summary": "Content"
+        },
+        "position": {
+          "type": "integer",
+          "title": "Position",
+          "x-ms-summary": "Position"
+        },
+        "tokenCount": {
+          "type": "integer",
+          "title": "Token Count",
+          "x-ms-summary": "Token Count"
+        }
+      }
+    }
+  }
+}
