@@ -1,0 +1,1780 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "NotionV2",
+    "description": "Access Notion workspaces to create and update pages, query databases, manage content blocks, search across pages, and monitor databases for new or updated items.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.notion.com",
+  "basePath": "/v1/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/pages": {
+      "post": {
+        "operationId": "createPage",
+        "summary": "Create a Page",
+        "description": "Creates a new page in a Notion database or as a child of an existing page.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "parent_type",
+                "parent_id",
+                "title"
+              ],
+              "properties": {
+                "parent_type": {
+                  "type": "string",
+                  "enum": [
+                    "database_id",
+                    "page_id"
+                  ],
+                  "x-ms-summary": "Parent Type",
+                  "description": "Whether the parent is a database or a page."
+                },
+                "parent_id": {
+                  "type": "string",
+                  "x-ms-summary": "Parent ID",
+                  "description": "The ID of the parent database or page."
+                },
+                "title": {
+                  "type": "string",
+                  "x-ms-summary": "Title",
+                  "description": "The title of the new page."
+                },
+                "properties": {
+                  "type": "object",
+                  "x-ms-summary": "Properties",
+                  "description": "Additional page properties matching the parent database schema (JSON object).",
+                  "properties": {}
+                },
+                "markdown": {
+                  "type": "string",
+                  "x-ms-summary": "Markdown Content",
+                  "description": "Page content in Notion-flavored Markdown. Mutually exclusive with children."
+                },
+                "children": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "x-ms-summary": "Children Blocks",
+                  "description": "Array of block objects for page content (max 100). Mutually exclusive with markdown."
+                },
+                "icon_emoji": {
+                  "type": "string",
+                  "x-ms-summary": "Icon Emoji",
+                  "description": "Emoji character for the page icon (e.g. 📝)."
+                },
+                "cover_url": {
+                  "type": "string",
+                  "x-ms-summary": "Cover URL",
+                  "description": "External URL for the page cover image."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created page object.",
+            "schema": {
+              "$ref": "#/definitions/PageObject"
+            }
+          }
+        },
+        "tags": [
+          "Pages"
+        ]
+      }
+    },
+    "/pages/{page_id}": {
+      "get": {
+        "operationId": "getPage",
+        "summary": "Get a Page",
+        "description": "Retrieves the properties of a Notion page by its ID. Does not return page content.",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Page ID",
+            "description": "The ID of the page to retrieve.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The page object.",
+            "schema": {
+              "$ref": "#/definitions/PageObjectFull"
+            }
+          }
+        },
+        "tags": [
+          "Pages"
+        ]
+      },
+      "patch": {
+        "operationId": "updatePage",
+        "summary": "Update a Page",
+        "description": "Updates the properties, icon, cover, or archived status of a Notion page.",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Page ID",
+            "description": "The ID of the page to update.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "properties": {
+                  "type": "object",
+                  "x-ms-summary": "Properties",
+                  "description": "Properties to update (JSON object matching database schema).",
+                  "properties": {}
+                },
+                "archived": {
+                  "type": "boolean",
+                  "x-ms-summary": "Archived",
+                  "description": "Set to true to archive the page, false to unarchive."
+                },
+                "icon_emoji": {
+                  "type": "string",
+                  "x-ms-summary": "Icon Emoji",
+                  "description": "Emoji character for the page icon. Set to null to remove."
+                },
+                "cover_url": {
+                  "type": "string",
+                  "x-ms-summary": "Cover URL",
+                  "description": "External URL for the page cover image. Set to null to remove."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated page object.",
+            "schema": {
+              "$ref": "#/definitions/PageObjectUpdated"
+            }
+          }
+        },
+        "tags": [
+          "Pages"
+        ]
+      }
+    },
+    "/databases/{database_id}/query": {
+      "post": {
+        "operationId": "queryDatabase",
+        "summary": "Query a Database",
+        "description": "Queries pages in a Notion database with optional filters and sorts. Returns a paginated list of matching pages.",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Database ID",
+            "description": "The ID of the database to query.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "filter": {
+                  "type": "object",
+                  "x-ms-summary": "Filter",
+                  "description": "Filter conditions as a JSON object. Example: {\"property\": \"Status\", \"select\": {\"equals\": \"Done\"}}.",
+                  "properties": {}
+                },
+                "sorts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "x-ms-summary": "Sorts",
+                  "description": "Array of sort objects. Example: [{\"property\": \"Created\", \"direction\": \"descending\"}]."
+                },
+                "start_cursor": {
+                  "type": "string",
+                  "x-ms-summary": "Start Cursor",
+                  "description": "Cursor for pagination from a previous response."
+                },
+                "page_size": {
+                  "type": "integer",
+                  "x-ms-summary": "Page Size",
+                  "description": "Number of results per page (max 100, default 100)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of page objects.",
+            "schema": {
+              "$ref": "#/definitions/DatabaseQueryResponse"
+            }
+          }
+        },
+        "tags": [
+          "Databases"
+        ]
+      }
+    },
+    "/databases/{database_id}": {
+      "get": {
+        "operationId": "getDatabase",
+        "summary": "Get a Database",
+        "description": "Retrieves the schema and metadata of a Notion database, including its property definitions.",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Database ID",
+            "description": "The ID of the database to retrieve.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The database object.",
+            "schema": {
+              "$ref": "#/definitions/DatabaseObject"
+            }
+          }
+        },
+        "tags": [
+          "Databases"
+        ]
+      }
+    },
+    "/blocks/{block_id}/children": {
+      "patch": {
+        "operationId": "appendBlockChildren",
+        "summary": "Append Block Children",
+        "description": "Appends new content blocks as children of a specified page or block.",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Block ID",
+            "description": "The ID of the page or block to append children to.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "children"
+              ],
+              "properties": {
+                "children": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "x-ms-summary": "Children Blocks",
+                  "description": "Array of block objects to append (max 100)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of appended block objects.",
+            "schema": {
+              "$ref": "#/definitions/BlockListResponse"
+            }
+          }
+        },
+        "tags": [
+          "Blocks"
+        ]
+      },
+      "get": {
+        "operationId": "getBlockChildren",
+        "summary": "Get Block Children",
+        "description": "Retrieves the content blocks of a page or block. Returns only first-level children.",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Block ID",
+            "description": "The ID of the page or block to get children of.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Start Cursor",
+            "description": "Cursor for pagination from a previous response."
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Page Size",
+            "description": "Number of results per page (max 100, default 100)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of child block objects.",
+            "schema": {
+              "$ref": "#/definitions/BlockListResponse"
+            }
+          }
+        },
+        "tags": [
+          "Blocks"
+        ]
+      }
+    },
+    "/search": {
+      "post": {
+        "operationId": "search",
+        "summary": "Search Pages and Databases",
+        "description": "Searches all pages and databases shared with the integration. Can filter by object type and sort by last edited time.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "x-ms-summary": "Search Query",
+                  "description": "Search term to match against page and database titles. Leave empty to return all."
+                },
+                "filter": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "enum": [
+                        "page",
+                        "database"
+                      ],
+                      "x-ms-summary": "Object Type Filter",
+                      "description": "Filter results to only pages or only databases."
+                    },
+                    "property": {
+                      "type": "string",
+                      "default": "object",
+                      "x-ms-summary": "Filter Property",
+                      "description": "Always set to object.",
+                      "enum": [
+                        "object"
+                      ]
+                    }
+                  },
+                  "x-ms-summary": "Filter",
+                  "description": "Filter results by object type."
+                },
+                "sort": {
+                  "type": "object",
+                  "properties": {
+                    "direction": {
+                      "type": "string",
+                      "enum": [
+                        "ascending",
+                        "descending"
+                      ],
+                      "x-ms-summary": "Sort Direction",
+                      "description": "Sort direction for results by last edited time."
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "default": "last_edited_time",
+                      "x-ms-summary": "Sort Timestamp",
+                      "description": "Always set to last_edited_time.",
+                      "enum": [
+                        "last_edited_time"
+                      ]
+                    }
+                  },
+                  "x-ms-summary": "Sort",
+                  "description": "Sort results by last edited time."
+                },
+                "start_cursor": {
+                  "type": "string",
+                  "x-ms-summary": "Start Cursor",
+                  "description": "Cursor for pagination."
+                },
+                "page_size": {
+                  "type": "integer",
+                  "x-ms-summary": "Page Size",
+                  "description": "Number of results per page (max 100, default 100)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of matching page and database objects.",
+            "schema": {
+              "$ref": "#/definitions/SearchResponse"
+            }
+          }
+        },
+        "tags": [
+          "Search"
+        ]
+      }
+    },
+    "/databases/{database_id}/query/new": {
+      "post": {
+        "operationId": "triggerNewDatabaseItem",
+        "summary": "When a database item is created",
+        "description": "Triggers when a new item (page) is added to a specified Notion database.",
+        "x-ms-trigger": "batch",
+        "x-ms-trigger-hint": "Triggers when a new item is added to the specified Notion database.",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Database ID",
+            "description": "The ID of the Notion database to monitor for new items.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sorts": {
+                  "type": "array",
+                  "default": [
+                    {
+                      "timestamp": "created_time",
+                      "direction": "descending"
+                    }
+                  ],
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Sorts",
+                  "description": "Sort by creation time descending."
+                },
+                "page_size": {
+                  "type": "integer",
+                  "default": 100,
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Page Size",
+                  "description": "Number of results per poll."
+                }
+              },
+              "required": [
+                "sorts",
+                "page_size"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of new page objects.",
+            "schema": {
+              "$ref": "#/definitions/DatabaseQueryResponse"
+            }
+          }
+        },
+        "tags": [
+          "Triggers"
+        ]
+      }
+    },
+    "/databases/{database_id}/query/updated": {
+      "post": {
+        "operationId": "triggerUpdatedDatabaseItem",
+        "summary": "When a database item is updated",
+        "description": "Triggers when an existing item (page) is modified in a specified Notion database.",
+        "x-ms-trigger": "batch",
+        "x-ms-trigger-hint": "Triggers when an item is updated in the specified Notion database.",
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Database ID",
+            "description": "The ID of the Notion database to monitor for updated items.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sorts": {
+                  "type": "array",
+                  "default": [
+                    {
+                      "timestamp": "last_edited_time",
+                      "direction": "descending"
+                    }
+                  ],
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Sorts",
+                  "description": "Sort by last edited time descending."
+                },
+                "page_size": {
+                  "type": "integer",
+                  "default": 100,
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Page Size",
+                  "description": "Number of results per poll."
+                }
+              },
+              "required": [
+                "sorts",
+                "page_size"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of updated page objects.",
+            "schema": {
+              "$ref": "#/definitions/DatabaseQueryResponse"
+            }
+          }
+        },
+        "tags": [
+          "Triggers"
+        ]
+      }
+    },
+    "/comments": {
+      "post": {
+        "operationId": "createComment",
+        "summary": "Create a Comment",
+        "description": "Creates a comment on a Notion page or replies to an existing discussion thread.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "rich_text"
+              ],
+              "properties": {
+                "parent": {
+                  "type": "object",
+                  "properties": {
+                    "page_id": {
+                      "type": "string",
+                      "x-ms-summary": "Page ID",
+                      "description": "The ID of the page to comment on."
+                    }
+                  },
+                  "x-ms-summary": "Parent",
+                  "description": "Parent page for the comment."
+                },
+                "discussion_id": {
+                  "type": "string",
+                  "x-ms-summary": "Discussion ID",
+                  "description": "The ID of an existing discussion thread to reply to."
+                },
+                "rich_text": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "default": "text",
+                        "x-ms-visibility": "internal",
+                        "x-ms-summary": "Type",
+                        "description": "The type of rich text object."
+                      },
+                      "text": {
+                        "type": "object",
+                        "properties": {
+                          "content": {
+                            "type": "string",
+                            "x-ms-summary": "Comment Text",
+                            "description": "The text content of the comment."
+                          }
+                        },
+                        "x-ms-summary": "Text",
+                        "description": "Text content object."
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  },
+                  "x-ms-summary": "Rich Text",
+                  "description": "The comment content as rich text array."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created comment object.",
+            "schema": {
+              "$ref": "#/definitions/CommentObject"
+            }
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      },
+      "get": {
+        "operationId": "listComments",
+        "summary": "List Comments",
+        "description": "Retrieves unresolved comments from a Notion page or block.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "block_id",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Block ID",
+            "description": "The ID of the page or block to retrieve comments for."
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Start Cursor",
+            "description": "Cursor for pagination."
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Page Size",
+            "description": "Number of results per page (max 100)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of comment objects.",
+            "schema": {
+              "$ref": "#/definitions/CommentListResponse"
+            }
+          }
+        },
+        "tags": [
+          "Comments"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "List Users",
+        "description": "Retrieves all users in the Notion workspace. Does not include guests.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/NotionVersion"
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Start Cursor",
+            "description": "Cursor for pagination."
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Page Size",
+            "description": "Number of results per page (max 100)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of user objects.",
+            "schema": {
+              "$ref": "#/definitions/UserListResponse"
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "operationId": "getUser",
+        "summary": "Get a User",
+        "description": "Retrieves a specific Notion user by their ID.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "User ID",
+            "description": "The ID of the user to retrieve.",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user object.",
+            "schema": {
+              "$ref": "#/definitions/UserObject"
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/blocks/{block_id}": {
+      "delete": {
+        "operationId": "deleteBlock",
+        "summary": "Delete a Block",
+        "description": "Moves a block to trash (soft delete). The block can be restored.",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Block ID",
+            "description": "The ID of the block to delete (move to trash).",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "$ref": "#/parameters/NotionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted block object.",
+            "schema": {
+              "$ref": "#/definitions/DeletedBlockObject"
+            }
+          }
+        },
+        "tags": [
+          "Blocks"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "PageObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the created page.",
+          "x-ms-summary": "Page ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "Always page.",
+          "x-ms-summary": "Object Type"
+        },
+        "url": {
+          "type": "string",
+          "description": "Notion URL to the page.",
+          "x-ms-summary": "URL"
+        },
+        "created_time": {
+          "type": "string",
+          "description": "When the page was created.",
+          "x-ms-summary": "Created Time"
+        },
+        "last_edited_time": {
+          "type": "string",
+          "description": "When the page was last edited.",
+          "x-ms-summary": "Last Edited Time"
+        },
+        "parent": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Parent type.",
+              "x-ms-summary": "Parent Type"
+            },
+            "database_id": {
+              "type": "string",
+              "description": "Parent database ID if applicable.",
+              "x-ms-summary": "Parent Database ID"
+            },
+            "page_id": {
+              "type": "string",
+              "description": "Parent page ID if applicable.",
+              "x-ms-summary": "Parent Page ID"
+            }
+          },
+          "description": "Parent reference.",
+          "x-ms-summary": "Parent"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Page property values.",
+          "x-ms-summary": "Properties",
+          "properties": {}
+        },
+        "icon": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Icon type (emoji or external).",
+              "x-ms-summary": "Icon Type"
+            },
+            "emoji": {
+              "type": "string",
+              "description": "Emoji character if icon type is emoji.",
+              "x-ms-summary": "Emoji"
+            }
+          },
+          "description": "Page icon.",
+          "x-ms-summary": "Icon"
+        },
+        "cover": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Cover type.",
+              "x-ms-summary": "Cover Type"
+            },
+            "external": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "External cover URL.",
+                  "x-ms-summary": "Cover URL"
+                }
+              },
+              "description": "External cover details.",
+              "x-ms-summary": "External"
+            }
+          },
+          "description": "Page cover image.",
+          "x-ms-summary": "Cover"
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "Whether the page is archived.",
+          "x-ms-summary": "Archived"
+        }
+      }
+    },
+    "PageObjectFull": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the page.",
+          "x-ms-summary": "Page ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "Always page.",
+          "x-ms-summary": "Object Type"
+        },
+        "url": {
+          "type": "string",
+          "description": "Notion URL to the page.",
+          "x-ms-summary": "URL"
+        },
+        "created_time": {
+          "type": "string",
+          "description": "When the page was created.",
+          "x-ms-summary": "Created Time"
+        },
+        "last_edited_time": {
+          "type": "string",
+          "description": "When the page was last edited.",
+          "x-ms-summary": "Last Edited Time"
+        },
+        "created_by": {
+          "type": "object",
+          "properties": {
+            "object": {
+              "type": "string",
+              "description": "Always user.",
+              "x-ms-summary": "Object"
+            },
+            "id": {
+              "type": "string",
+              "description": "User ID of creator.",
+              "x-ms-summary": "User ID"
+            }
+          },
+          "description": "User who created the page.",
+          "x-ms-summary": "Created By"
+        },
+        "last_edited_by": {
+          "type": "object",
+          "properties": {
+            "object": {
+              "type": "string",
+              "description": "Always user.",
+              "x-ms-summary": "Object"
+            },
+            "id": {
+              "type": "string",
+              "description": "User ID of last editor.",
+              "x-ms-summary": "User ID"
+            }
+          },
+          "description": "User who last edited the page.",
+          "x-ms-summary": "Last Edited By"
+        },
+        "parent": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Parent type.",
+              "x-ms-summary": "Parent Type"
+            },
+            "database_id": {
+              "type": "string",
+              "description": "Parent database ID if applicable.",
+              "x-ms-summary": "Parent Database ID"
+            },
+            "page_id": {
+              "type": "string",
+              "description": "Parent page ID if applicable.",
+              "x-ms-summary": "Parent Page ID"
+            }
+          },
+          "description": "Parent reference.",
+          "x-ms-summary": "Parent"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Page property values.",
+          "x-ms-summary": "Properties",
+          "properties": {}
+        },
+        "icon": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Icon type.",
+              "x-ms-summary": "Icon Type"
+            },
+            "emoji": {
+              "type": "string",
+              "description": "Emoji character.",
+              "x-ms-summary": "Emoji"
+            }
+          },
+          "description": "Page icon.",
+          "x-ms-summary": "Icon"
+        },
+        "cover": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Cover type.",
+              "x-ms-summary": "Cover Type"
+            },
+            "external": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "External cover URL.",
+                  "x-ms-summary": "Cover URL"
+                }
+              },
+              "description": "External cover details.",
+              "x-ms-summary": "External"
+            }
+          },
+          "description": "Page cover image.",
+          "x-ms-summary": "Cover"
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "Whether the page is archived.",
+          "x-ms-summary": "Archived"
+        },
+        "in_trash": {
+          "type": "boolean",
+          "description": "Whether the page is in trash.",
+          "x-ms-summary": "In Trash"
+        }
+      }
+    },
+    "PageObjectUpdated": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the updated page.",
+          "x-ms-summary": "Page ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "Always page.",
+          "x-ms-summary": "Object Type"
+        },
+        "url": {
+          "type": "string",
+          "description": "Notion URL to the page.",
+          "x-ms-summary": "URL"
+        },
+        "last_edited_time": {
+          "type": "string",
+          "description": "Updated timestamp.",
+          "x-ms-summary": "Last Edited Time"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Updated property values.",
+          "x-ms-summary": "Properties",
+          "properties": {}
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "Current archived state.",
+          "x-ms-summary": "Archived"
+        },
+        "icon": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Icon type.",
+              "x-ms-summary": "Icon Type"
+            },
+            "emoji": {
+              "type": "string",
+              "description": "Emoji character.",
+              "x-ms-summary": "Emoji"
+            }
+          },
+          "description": "Current icon.",
+          "x-ms-summary": "Icon"
+        },
+        "cover": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Cover type.",
+              "x-ms-summary": "Cover Type"
+            },
+            "external": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "External cover URL.",
+                  "x-ms-summary": "Cover URL"
+                }
+              },
+              "description": "External cover details.",
+              "x-ms-summary": "External"
+            }
+          },
+          "description": "Current cover.",
+          "x-ms-summary": "Cover"
+        }
+      }
+    },
+    "DatabaseQueryResponse": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Always list.",
+          "x-ms-summary": "Object Type"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PageObject"
+          },
+          "description": "Array of page objects matching the query.",
+          "x-ms-summary": "Results"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "True if more results exist beyond this page.",
+          "x-ms-summary": "Has More"
+        },
+        "next_cursor": {
+          "type": "string",
+          "description": "Cursor for the next page of results.",
+          "x-ms-summary": "Next Cursor"
+        },
+        "type": {
+          "type": "string",
+          "description": "Always page_or_database.",
+          "x-ms-summary": "Type"
+        }
+      }
+    },
+    "DatabaseObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the database.",
+          "x-ms-summary": "Database ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "Always database.",
+          "x-ms-summary": "Object Type"
+        },
+        "title": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {}
+          },
+          "description": "Database title as rich text array.",
+          "x-ms-summary": "Title"
+        },
+        "description": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {}
+          },
+          "description": "Database description as rich text array.",
+          "x-ms-summary": "Description"
+        },
+        "url": {
+          "type": "string",
+          "description": "Notion URL to the database.",
+          "x-ms-summary": "URL"
+        },
+        "created_time": {
+          "type": "string",
+          "description": "When the database was created.",
+          "x-ms-summary": "Created Time"
+        },
+        "last_edited_time": {
+          "type": "string",
+          "description": "When the database was last edited.",
+          "x-ms-summary": "Last Edited Time"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Database property schema (column definitions with types).",
+          "x-ms-summary": "Properties",
+          "properties": {}
+        },
+        "parent": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Parent type.",
+              "x-ms-summary": "Parent Type"
+            },
+            "page_id": {
+              "type": "string",
+              "description": "Parent page ID.",
+              "x-ms-summary": "Parent Page ID"
+            }
+          },
+          "description": "Parent reference.",
+          "x-ms-summary": "Parent"
+        },
+        "icon": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Icon type.",
+              "x-ms-summary": "Icon Type"
+            },
+            "emoji": {
+              "type": "string",
+              "description": "Emoji character.",
+              "x-ms-summary": "Emoji"
+            }
+          },
+          "description": "Database icon.",
+          "x-ms-summary": "Icon"
+        },
+        "cover": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Cover type.",
+              "x-ms-summary": "Cover Type"
+            },
+            "external": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "External cover URL.",
+                  "x-ms-summary": "Cover URL"
+                }
+              },
+              "description": "External cover details.",
+              "x-ms-summary": "External"
+            }
+          },
+          "description": "Database cover image.",
+          "x-ms-summary": "Cover"
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "Whether the database is archived.",
+          "x-ms-summary": "Archived"
+        },
+        "is_inline": {
+          "type": "boolean",
+          "description": "Whether the database is inline within a page.",
+          "x-ms-summary": "Is Inline"
+        }
+      }
+    },
+    "BlockListResponse": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Always list.",
+          "x-ms-summary": "Object Type"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "UUID of the block.",
+                "x-ms-summary": "Block ID"
+              },
+              "object": {
+                "type": "string",
+                "description": "Always block.",
+                "x-ms-summary": "Object Type"
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the block (paragraph, heading_1, etc).",
+                "x-ms-summary": "Block Type"
+              },
+              "has_children": {
+                "type": "boolean",
+                "description": "Whether the block has nested children.",
+                "x-ms-summary": "Has Children"
+              },
+              "created_time": {
+                "type": "string",
+                "description": "When the block was created.",
+                "x-ms-summary": "Created Time"
+              },
+              "last_edited_time": {
+                "type": "string",
+                "description": "When the block was last edited.",
+                "x-ms-summary": "Last Edited Time"
+              }
+            }
+          },
+          "description": "Array of block objects.",
+          "x-ms-summary": "Results"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "Whether more blocks exist.",
+          "x-ms-summary": "Has More"
+        },
+        "next_cursor": {
+          "type": "string",
+          "description": "Pagination cursor.",
+          "x-ms-summary": "Next Cursor"
+        }
+      }
+    },
+    "SearchResponse": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Always list.",
+          "x-ms-summary": "Object Type"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "UUID of the result.",
+                "x-ms-summary": "ID"
+              },
+              "object": {
+                "type": "string",
+                "description": "Object type (page or database).",
+                "x-ms-summary": "Object Type"
+              },
+              "url": {
+                "type": "string",
+                "description": "Notion URL.",
+                "x-ms-summary": "URL"
+              },
+              "created_time": {
+                "type": "string",
+                "description": "When the object was created.",
+                "x-ms-summary": "Created Time"
+              },
+              "last_edited_time": {
+                "type": "string",
+                "description": "When the object was last edited.",
+                "x-ms-summary": "Last Edited Time"
+              },
+              "properties": {
+                "type": "object",
+                "description": "Object properties.",
+                "x-ms-summary": "Properties",
+                "properties": {}
+              },
+              "parent": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Parent type.",
+                    "x-ms-summary": "Parent Type"
+                  }
+                },
+                "description": "Parent reference.",
+                "x-ms-summary": "Parent"
+              }
+            }
+          },
+          "description": "Array of matching page and database objects.",
+          "x-ms-summary": "Results"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "Whether more results exist.",
+          "x-ms-summary": "Has More"
+        },
+        "next_cursor": {
+          "type": "string",
+          "description": "Cursor for next page.",
+          "x-ms-summary": "Next Cursor"
+        }
+      }
+    },
+    "CommentObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the created comment.",
+          "x-ms-summary": "Comment ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "Always comment.",
+          "x-ms-summary": "Object Type"
+        },
+        "parent": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Parent type.",
+              "x-ms-summary": "Parent Type"
+            },
+            "page_id": {
+              "type": "string",
+              "description": "Parent page ID.",
+              "x-ms-summary": "Page ID"
+            }
+          },
+          "description": "Parent reference.",
+          "x-ms-summary": "Parent"
+        },
+        "discussion_id": {
+          "type": "string",
+          "description": "Discussion thread ID.",
+          "x-ms-summary": "Discussion ID"
+        },
+        "created_time": {
+          "type": "string",
+          "description": "When the comment was created.",
+          "x-ms-summary": "Created Time"
+        },
+        "created_by": {
+          "type": "object",
+          "properties": {
+            "object": {
+              "type": "string",
+              "description": "Always user.",
+              "x-ms-summary": "Object"
+            },
+            "id": {
+              "type": "string",
+              "description": "User ID of creator.",
+              "x-ms-summary": "User ID"
+            }
+          },
+          "description": "User who created the comment.",
+          "x-ms-summary": "Created By"
+        },
+        "rich_text": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Rich text type.",
+                "x-ms-summary": "Type"
+              },
+              "text": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "Text content.",
+                    "x-ms-summary": "Content"
+                  }
+                },
+                "description": "Text object.",
+                "x-ms-summary": "Text"
+              },
+              "plain_text": {
+                "type": "string",
+                "description": "Plain text content.",
+                "x-ms-summary": "Plain Text"
+              }
+            }
+          },
+          "description": "Comment content as rich text.",
+          "x-ms-summary": "Rich Text"
+        }
+      }
+    },
+    "CommentListResponse": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Always list.",
+          "x-ms-summary": "Object Type"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommentObject"
+          },
+          "description": "Array of comment objects.",
+          "x-ms-summary": "Results"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "Whether more comments exist.",
+          "x-ms-summary": "Has More"
+        },
+        "next_cursor": {
+          "type": "string",
+          "description": "Cursor for next page.",
+          "x-ms-summary": "Next Cursor"
+        }
+      }
+    },
+    "UserObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the user.",
+          "x-ms-summary": "User ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "Always user.",
+          "x-ms-summary": "Object Type"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name.",
+          "x-ms-summary": "Name"
+        },
+        "avatar_url": {
+          "type": "string",
+          "description": "URL to avatar image.",
+          "x-ms-summary": "Avatar URL"
+        },
+        "type": {
+          "type": "string",
+          "description": "User type (person or bot).",
+          "x-ms-summary": "Type"
+        },
+        "person": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "Email address.",
+              "x-ms-summary": "Email"
+            }
+          },
+          "description": "Person-specific details.",
+          "x-ms-summary": "Person"
+        }
+      }
+    },
+    "UserListResponse": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Always list.",
+          "x-ms-summary": "Object Type"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserObject"
+          },
+          "description": "Array of user objects.",
+          "x-ms-summary": "Results"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "Whether more users exist.",
+          "x-ms-summary": "Has More"
+        },
+        "next_cursor": {
+          "type": "string",
+          "description": "Cursor for next page.",
+          "x-ms-summary": "Next Cursor"
+        }
+      }
+    },
+    "DeletedBlockObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the deleted block.",
+          "x-ms-summary": "Block ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "Always block.",
+          "x-ms-summary": "Object Type"
+        },
+        "type": {
+          "type": "string",
+          "description": "Block type.",
+          "x-ms-summary": "Block Type"
+        },
+        "in_trash": {
+          "type": "boolean",
+          "description": "Always true after deletion.",
+          "x-ms-summary": "In Trash"
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "Archive status.",
+          "x-ms-summary": "Archived"
+        }
+      }
+    }
+  },
+  "parameters": {
+    "NotionVersion": {
+      "name": "Notion-Version",
+      "in": "header",
+      "required": true,
+      "type": "string",
+      "default": "2025-09-03",
+      "x-ms-visibility": "internal",
+      "x-ms-summary": "Notion API Version",
+      "description": "The Notion API version to use."
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Pages",
+      "description": "Operations for creating, reading, and updating Notion pages."
+    },
+    {
+      "name": "Databases",
+      "description": "Operations for querying and retrieving Notion databases."
+    },
+    {
+      "name": "Blocks",
+      "description": "Operations for managing content blocks within pages."
+    },
+    {
+      "name": "Search",
+      "description": "Operations for searching pages and databases."
+    },
+    {
+      "name": "Triggers",
+      "description": "Polling triggers for monitoring database changes."
+    },
+    {
+      "name": "Comments",
+      "description": "Operations for creating and listing comments."
+    },
+    {
+      "name": "Users",
+      "description": "Operations for listing and retrieving users."
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.notion.so"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.notion.so/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Collaboration"
+    }
+  ]
+}
