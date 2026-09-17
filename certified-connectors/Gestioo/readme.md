@@ -1,4 +1,4 @@
-# Gestioo
+# Send to Gestioo
 
 Gestioo helps organizations manage, classify and archive their documents in a secure vault. This connector deposits PDF and Word documents with the user's authorized classification and access groups, requests archival, and checks the final result.
 
@@ -25,7 +25,7 @@ The document transfer does not require a Dataverse database or Power BI. Power B
 
 ## Getting started
 
-1. Create a Gestioo connection and sign in with your authorized Microsoft work account. Your Gestioo organization is resolved from that account. An administrator may need to approve access under your tenant's consent policy.
+1. Select **Send to Gestioo**, create a connection and sign in with your authorized Microsoft work account. Your Gestioo organization is resolved from that account. An administrator may need to approve access under your tenant's consent policy.
 2. Run **Get deposit options** and choose the destination classification and access groups. Supply an event date when the selected classification requires it.
 3. Read the file content and create a durable idempotency key for this file version. Store that key before the first upload and reuse it for retries.
 4. Run **Create deposit** with the original file name, title, metadata and file bytes encoded once as base64. When the source connector returns a binary object, use its `$content` value. Store the returned `depositId`.
@@ -57,7 +57,7 @@ Archival seals the document and is irreversible. Configure automatic archival on
 
 ## Support
 
-Contact [Gestioo support](https://gestioo.co/support) or email support@gestioo.co. Provide the operation, timestamp and safe error code. Do not send credentials or document contents in a support request.
+Contact [Gestioo support](https://gestioo.co/contact) or email support@gestioo.co. Provide the operation, timestamp and safe error code. Do not send credentials or document contents in a support request.
 
 [Terms of use](https://gestioo.co/conditions-utilisation) · [Privacy policy](https://gestioo.co/politique-confidentialite)
 
