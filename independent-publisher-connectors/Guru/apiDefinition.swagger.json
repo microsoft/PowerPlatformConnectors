@@ -1,0 +1,878 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Guru",
+    "description": "Guru is a knowledge management platform that helps teams capture, organize, and share verified information. Use this connector to search, create, update, and verify knowledge cards, browse collections and folders, and manage your team's knowledge base.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.getguru.com",
+  "basePath": "/api/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/search/query": {
+      "get": {
+        "operationId": "searchCards",
+        "summary": "Search Cards",
+        "description": "Search for cards using free-text terms and Guru Query Language filters.",
+        "parameters": [
+          {
+            "name": "searchTerms",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "description": "Free-text search across card title, content, and properties.",
+            "x-ms-summary": "Search Terms"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "description": "Guru Query Language filter string (e.g., lastModified < 7_days_ago).",
+            "x-ms-summary": "Query Filter"
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "description": "Sort results by the specified field.",
+            "x-ms-summary": "Sort Field",
+            "enum": [
+              "lastModified",
+              "dateCreated",
+              "title",
+              "viewCount",
+              "favoriteCount",
+              "verificationState",
+              "popularity"
+            ]
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "description": "Sort order, either ascending or descending.",
+            "x-ms-summary": "Sort Order",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "description": "Maximum number of results per page (1-50). Default is 50.",
+            "x-ms-summary": "Max Results"
+          },
+          {
+            "name": "showArchived",
+            "in": "query",
+            "type": "boolean",
+            "required": false,
+            "description": "Include archived cards in search results. Default is false.",
+            "x-ms-summary": "Show Archived"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of matching cards.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CardSummary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cards/{cardId}": {
+      "get": {
+        "operationId": "getCard",
+        "summary": "Get Card",
+        "description": "Retrieve a single card by ID with full content, verification state, and collection info.",
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the card to retrieve.",
+            "x-ms-summary": "Card ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The card details.",
+            "schema": {
+              "$ref": "#/definitions/CardResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateCard",
+        "summary": "Update Card",
+        "description": "Update an existing card's title, content, or sharing status.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the card to update.",
+            "x-ms-summary": "Card ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "preferredPhrase": {
+                  "type": "string",
+                  "description": "Updated card title.",
+                  "x-ms-summary": "Title"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Updated HTML body content of the card.",
+                  "x-ms-summary": "Content"
+                },
+                "shareStatus": {
+                  "type": "string",
+                  "description": "Updated sharing level for the card.",
+                  "x-ms-summary": "Share Status",
+                  "enum": [
+                    "TEAM",
+                    "PRIVATE",
+                    "PUBLIC"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated card details.",
+            "schema": {
+              "$ref": "#/definitions/CardResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "archiveCard",
+        "summary": "Archive Card",
+        "description": "Archive (soft-delete) a card, removing it from active views.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the card to archive.",
+            "x-ms-summary": "Card ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The card has been archived successfully."
+          }
+        }
+      }
+    },
+    "/cards/extended": {
+      "post": {
+        "operationId": "createCard",
+        "summary": "Create Card",
+        "description": "Create a new knowledge card in a collection with title, HTML content, and sharing options.",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "preferredPhrase",
+                "content",
+                "collection"
+              ],
+              "properties": {
+                "preferredPhrase": {
+                  "type": "string",
+                  "description": "The title of the card.",
+                  "x-ms-summary": "Title"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "HTML body content of the card.",
+                  "x-ms-summary": "Content"
+                },
+                "collection": {
+                  "type": "object",
+                  "description": "The collection to create the card in.",
+                  "required": [
+                    "id"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "UUID of the collection to create the card in.",
+                      "x-ms-summary": "Collection ID",
+                      "x-ms-dynamic-values": {
+                        "operationId": "listCollections",
+                        "value-path": "id",
+                        "value-title": "name"
+                      }
+                    }
+                  }
+                },
+                "shareStatus": {
+                  "type": "string",
+                  "description": "Sharing level for the card. Default is TEAM.",
+                  "x-ms-summary": "Share Status",
+                  "enum": [
+                    "TEAM",
+                    "PRIVATE",
+                    "PUBLIC"
+                  ],
+                  "default": "TEAM"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created card details.",
+            "schema": {
+              "$ref": "#/definitions/CardResponse"
+            }
+          }
+        }
+      }
+    },
+    "/cards/{cardId}/verify": {
+      "put": {
+        "operationId": "verifyCard",
+        "summary": "Verify Card",
+        "description": "Mark a card as verified (trusted), confirming its content is accurate and up-to-date.",
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the card to verify.",
+            "x-ms-summary": "Card ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Card verified successfully."
+          },
+          "204": {
+            "description": "Card verified successfully. No content returned."
+          }
+        }
+      }
+    },
+    "/cards/{cardId}/unverify": {
+      "post": {
+        "operationId": "unverifyCard",
+        "summary": "Unverify Card",
+        "description": "Remove verification from a card, marking it as needing review.",
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the card to unverify.",
+            "x-ms-summary": "Card ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The card with updated verification details.",
+            "schema": {
+              "$ref": "#/definitions/CardResponse"
+            }
+          }
+        }
+      }
+    },
+    "/cards/{cardId}/versions": {
+      "get": {
+        "operationId": "listCardVersions",
+        "summary": "List Card Versions",
+        "description": "Get all historical versions of a card to track changes over time.",
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the card.",
+            "x-ms-summary": "Card ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of card versions.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CardVersion"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections": {
+      "get": {
+        "operationId": "listCollections",
+        "summary": "List Collections",
+        "description": "Get all knowledge collections accessible to the authenticated user.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of collections.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CollectionResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}": {
+      "get": {
+        "operationId": "getCollection",
+        "summary": "Get Collection",
+        "description": "Get details of a specific knowledge collection by ID.",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the collection.",
+            "x-ms-summary": "Collection ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The collection details.",
+            "schema": {
+              "$ref": "#/definitions/CollectionResponse"
+            }
+          }
+        }
+      }
+    },
+    "/folders/{folderId}": {
+      "get": {
+        "operationId": "getFolder",
+        "summary": "Get Folder",
+        "description": "Retrieve details of a specific folder by ID.",
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the folder.",
+            "x-ms-summary": "Folder ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The folder details.",
+            "schema": {
+              "$ref": "#/definitions/FolderResponse"
+            }
+          }
+        }
+      }
+    },
+    "/folders/{folderId}/items": {
+      "get": {
+        "operationId": "getFolderItems",
+        "summary": "Get Folder Items",
+        "description": "List all cards and subfolders within a specific folder.",
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the folder.",
+            "x-ms-summary": "Folder ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of folder items (cards and subfolders).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FolderItem"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/tagcategories": {
+      "get": {
+        "operationId": "listTagCategories",
+        "summary": "List Tag Categories",
+        "description": "Get all tag categories and their tags for the team.",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "description": "The UUID of the team.",
+            "x-ms-summary": "Team ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of tag categories with their tags.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TagCategory"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CardResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the card.",
+          "title": "Card ID"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The current version number of the card.",
+          "title": "Version"
+        },
+        "preferredPhrase": {
+          "type": "string",
+          "description": "The title of the card.",
+          "title": "Title"
+        },
+        "content": {
+          "type": "string",
+          "description": "The HTML body content of the card.",
+          "title": "Content"
+        },
+        "verificationState": {
+          "type": "string",
+          "description": "The verification state of the card (TRUSTED, NEEDS_VERIFICATION, or UNVERIFIED).",
+          "title": "Verification State"
+        },
+        "lastModified": {
+          "type": "string",
+          "description": "The ISO-8601 timestamp of last modification.",
+          "title": "Last Modified"
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "The ISO-8601 timestamp of creation.",
+          "title": "Date Created"
+        },
+        "collection": {
+          "type": "object",
+          "description": "The collection containing this card.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The collection UUID.",
+              "title": "Collection ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "The collection name.",
+              "title": "Collection Name"
+            }
+          }
+        },
+        "shareStatus": {
+          "type": "string",
+          "description": "The sharing level of the card (TEAM, PRIVATE, or PUBLIC).",
+          "title": "Share Status"
+        },
+        "slug": {
+          "type": "string",
+          "description": "The URL slug for the card.",
+          "title": "Slug"
+        },
+        "owner": {
+          "type": "object",
+          "description": "The owner of the card.",
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "The email address of the card owner.",
+              "title": "Owner Email"
+            }
+          }
+        },
+        "lastVerified": {
+          "type": "string",
+          "description": "The ISO-8601 timestamp of last verification.",
+          "title": "Last Verified"
+        },
+        "nextVerificationDate": {
+          "type": "string",
+          "description": "The ISO-8601 timestamp of next required verification.",
+          "title": "Next Verification Date"
+        }
+      }
+    },
+    "CardSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the card.",
+          "title": "Card ID"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The current version number of the card.",
+          "title": "Version"
+        },
+        "preferredPhrase": {
+          "type": "string",
+          "description": "The title of the card.",
+          "title": "Title"
+        },
+        "content": {
+          "type": "string",
+          "description": "The HTML body content of the card.",
+          "title": "Content"
+        },
+        "verificationState": {
+          "type": "string",
+          "description": "The verification state of the card.",
+          "title": "Verification State"
+        },
+        "lastModified": {
+          "type": "string",
+          "description": "The ISO-8601 timestamp of last modification.",
+          "title": "Last Modified"
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "The ISO-8601 timestamp of creation.",
+          "title": "Date Created"
+        },
+        "collection": {
+          "type": "object",
+          "description": "The collection containing this card.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The collection UUID.",
+              "title": "Collection ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "The collection name.",
+              "title": "Collection Name"
+            }
+          }
+        },
+        "shareStatus": {
+          "type": "string",
+          "description": "The sharing level of the card.",
+          "title": "Share Status"
+        },
+        "slug": {
+          "type": "string",
+          "description": "The URL slug for the card.",
+          "title": "Slug"
+        }
+      }
+    },
+    "CollectionResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the collection.",
+          "title": "Collection ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the collection.",
+          "title": "Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the collection.",
+          "title": "Description"
+        },
+        "color": {
+          "type": "string",
+          "description": "The color code of the collection.",
+          "title": "Color"
+        },
+        "collectionType": {
+          "type": "string",
+          "description": "The type of collection (e.g., INTERNAL).",
+          "title": "Collection Type"
+        },
+        "publicCardsEnabled": {
+          "type": "boolean",
+          "description": "Whether public cards are enabled in this collection.",
+          "title": "Public Cards Enabled"
+        },
+        "slug": {
+          "type": "string",
+          "description": "The URL slug for the collection.",
+          "title": "Slug"
+        }
+      }
+    },
+    "FolderResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the folder.",
+          "title": "Folder ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "The name of the folder.",
+          "title": "Title"
+        },
+        "slug": {
+          "type": "string",
+          "description": "The URL slug for the folder.",
+          "title": "Slug"
+        },
+        "itemCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of items in the folder.",
+          "title": "Item Count"
+        },
+        "collection": {
+          "type": "object",
+          "description": "The parent collection.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The parent collection UUID.",
+              "title": "Collection ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "The parent collection name.",
+              "title": "Collection Name"
+            }
+          }
+        }
+      }
+    },
+    "FolderItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of item (card or folder).",
+          "title": "Type"
+        },
+        "itemId": {
+          "type": "string",
+          "description": "The unique identifier of the item.",
+          "title": "Item ID"
+        },
+        "id": {
+          "type": "string",
+          "description": "The card or folder UUID.",
+          "title": "ID"
+        },
+        "preferredPhrase": {
+          "type": "string",
+          "description": "The card title (for card items).",
+          "title": "Card Title"
+        },
+        "title": {
+          "type": "string",
+          "description": "The folder name (for folder items).",
+          "title": "Folder Title"
+        },
+        "shareStatus": {
+          "type": "string",
+          "description": "The sharing level (for card items).",
+          "title": "Share Status"
+        },
+        "verificationState": {
+          "type": "string",
+          "description": "The verification state (for card items).",
+          "title": "Verification State"
+        },
+        "slug": {
+          "type": "string",
+          "description": "The URL slug (for card items).",
+          "title": "Slug"
+        }
+      }
+    },
+    "TagCategory": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the tag category.",
+          "title": "Category ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the tag category.",
+          "title": "Category Name"
+        },
+        "tags": {
+          "type": "array",
+          "description": "The tags in this category.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The tag UUID.",
+                "title": "Tag ID"
+              },
+              "value": {
+                "type": "string",
+                "description": "The tag display name.",
+                "title": "Tag Value"
+              },
+              "categoryName": {
+                "type": "string",
+                "description": "The parent category name.",
+                "title": "Category Name"
+              }
+            }
+          }
+        }
+      }
+    },
+    "CardVersion": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The version number.",
+          "title": "Version"
+        },
+        "content": {
+          "type": "string",
+          "description": "The HTML content at this version.",
+          "title": "Content"
+        },
+        "preferredPhrase": {
+          "type": "string",
+          "description": "The card title at this version.",
+          "title": "Title"
+        },
+        "lastModified": {
+          "type": "string",
+          "description": "The ISO-8601 timestamp of this version.",
+          "title": "Last Modified"
+        },
+        "saveType": {
+          "type": "string",
+          "description": "The type of save (e.g., USER, IMPORT).",
+          "title": "Save Type"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "basic-auth": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "basic-auth": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.getguru.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.getguru.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Collaboration;Productivity"
+    }
+  ]
+}
