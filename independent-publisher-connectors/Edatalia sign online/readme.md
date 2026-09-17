@@ -2,7 +2,7 @@
 Edatalia sign Online is a connector to provide access to their sign platform using Power Platform services. This connector give you the posibility of send document to sign with diferent method like OTP, Acceptance Signature, Bio Signature, etc
 
 ## Publisher: Axazure
-![Icon](./img/AxazureLogo.png)
+![Icon](./AxazureLogo.png)
 
 https://www.axazure.com/en/
 
@@ -20,11 +20,11 @@ You can create a test instance in https://firmar.online/
 
 Once you have an account with firmar.online, go to the integration panel and get your API key
 
-![Icon](./img/integrationAPI.png)
-![Icon](./img/APIKey.png)
+![Icon](./integrationAPI.png)
+![Icon](./APIKey.png)
 
 Then go to the connector and create the connexion.
-![Icon](./img/Connexion.png)
+![Icon](./Connexion.png)
 
 ## Connector methods
 
