@@ -31,7 +31,7 @@ Use this connector to automate VAT compliance in Power Automate, Power Apps, and
 
 ## Authentication
 
-This connector uses API Key authentication. Enter your VIESAC API key when creating a connection — the connector automatically prepends `Bearer ` to every request.
+This connector uses API Key authentication. When creating a connection, enter `Bearer ` followed by your VIESAC API key (for example, `Bearer vac_your_api_key`). Power Automate sends the header value exactly as entered.
 
 ## Common Use Cases
 
