@@ -7,10 +7,9 @@
 """
 User profile management class.`
 """
-import adal
-from urllib.parse import urljoin
-# AADTokenCredentials for multi-factor authentication
-from msrestazure.azure_active_directory import AADTokenCredentials
+import json
+import msal
+import time
 
 
 class Profile:
@@ -24,32 +23,96 @@ class Profile:
         self.resource = resource
         self.authority_url = authority_url
 
-    def _get_authentication_context(self):
-        auth_url = urljoin(self.authority_url, self.tenant)
-
-        return adal.AuthenticationContext(
-            authority=auth_url,
-            api_version=None)
+    def _get_msal_app(self):
+        """
+        Creates and returns an MSAL PublicClientApplication instance.
+        """
+        authority = f"{self.authority_url.rstrip('/')}/{self.tenant}"
+        
+        return msal.PublicClientApplication(
+            client_id=self.client_id,
+            authority=authority
+        )
 
     def authenticate_device_code(self):
         """
         Authenticate the end-user using device auth.
         """
-        context = self._get_authentication_context()
+        app = self._get_msal_app()
+        
+        # Start device flow
+        flow = app.initiate_device_flow(scopes=[f"{self.resource}/.default"])
+        
+        if "user_code" not in flow:
+            raise ValueError(
+                "Fail to create device flow. Error: %s" % json.dumps(flow, indent=2))
+        
+        print(flow["message"])
+        
+        # Block until the user has entered the device code
+        result = app.acquire_token_by_device_flow(flow)
+        
+        if "access_token" in result:
+            # Convert MSAL result to the expected format
+            token_data = {
+                'access_token': result['access_token'],
+                'token_type': result.get('token_type', 'Bearer'),
+                'expires_on': int(time.time()) + result.get('expires_in', 3600),
+                'resource': self.resource
+            }
+            
+            if 'id_token_claims' in result and 'oid' in result['id_token_claims']:
+                token_data['oid'] = result['id_token_claims']['oid']
+            
+            return token_data
+        else:
+            raise Exception(f"Failed to acquire token: {result.get('error_description', 'Unknown error')}")
 
-        code = context.acquire_user_code(
-            resource=self.resource,
-            client_id=self.client_id)
-
-        print(code['message'])
-
-        mgmt_token = context.acquire_token_with_device_code(
-            resource=self.resource,
-            user_code_info=code,
-            client_id=self.client_id)
-
-        credentials = AADTokenCredentials(
-            token=mgmt_token,
-            client_id=self.client_id)
-
-        return credentials.token
+    def authenticate_interactive(self):
+        """
+        Authenticate the end-user using interactive authentication (browser).
+        """
+        app = self._get_msal_app()
+        
+        # Try to get token silently first
+        accounts = app.get_accounts()
+        if accounts:
+            result = app.acquire_token_silent(
+                scopes=[f"{self.resource}/.default"],
+                account=accounts[0]
+            )
+            if result and "access_token" in result:
+                # Convert MSAL result to the expected format
+                token_data = {
+                    'access_token': result['access_token'],
+                    'token_type': result.get('token_type', 'Bearer'),
+                    'expires_on': int(time.time()) + result.get('expires_in', 3600),
+                    'resource': self.resource
+                }
+                
+                if 'id_token_claims' in result and 'oid' in result['id_token_claims']:
+                    token_data['oid'] = result['id_token_claims']['oid']
+                
+                return token_data
+        
+        # If silent acquisition fails, perform interactive authentication
+        result = app.acquire_token_interactive(
+            scopes=[f"{self.resource}/.default"],
+            prompt="select_account"  # Force account selection
+        )
+        
+        if "access_token" in result:
+            # Convert MSAL result to the expected format
+            token_data = {
+                'access_token': result['access_token'],
+                'token_type': result.get('token_type', 'Bearer'),
+                'expires_on': int(time.time()) + result.get('expires_in', 3600),
+                'resource': self.resource
+            }
+            
+            if 'id_token_claims' in result and 'oid' in result['id_token_claims']:
+                token_data['oid'] = result['id_token_claims']['oid']
+            
+            return token_data
+        else:
+            raise Exception(f"Failed to acquire token: {result.get('error_description', 'Unknown error')}")
