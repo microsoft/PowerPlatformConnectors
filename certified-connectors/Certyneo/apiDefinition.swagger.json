@@ -7,7 +7,7 @@
     "contact": {
       "name": "Certyneo Support",
       "url": "https://certyneo.com/fr/contact",
-      "email": "api-support@certyneo.com"
+      "email": "support@certyneo.com"
     }
   },
   "host": "certyneo.com",
@@ -26,7 +26,7 @@
       "type": "apiKey",
       "in": "header",
       "name": "Authorization",
-      "description": "Paste \"Bearer sk_live_<your key>\" (or \"Bearer sk_test_<your key>\" for a sandbox key) exactly as shown — Certyneo expects the word Bearer before the key. Generate a key from Certyneo → Settings → API Keys."
+      "description": "Paste your Certyneo API key: \"sk_live_<your key>\", or \"sk_test_<your key>\" for a sandbox key. The \"Bearer \" prefix is optional — the key on its own works. Generate a key from Certyneo → Settings → API Keys, and copy it in full when it is displayed: it is shown only once."
     }
   },
   "security": [
@@ -91,20 +91,26 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "default": 1
+            "default": 1,
+            "x-ms-summary": "Page",
+            "description": "Which page of results to return. Starts at 1."
           },
           {
             "name": "limit",
             "in": "query",
             "required": false,
             "type": "integer",
-            "default": 20
+            "default": 20,
+            "x-ms-summary": "Page size",
+            "description": "How many envelopes to return per page."
           },
           {
             "name": "status",
             "in": "query",
             "required": false,
             "type": "string",
+            "x-ms-summary": "Status",
+            "description": "Return only the envelopes in this status. Leave empty to return every status.",
             "enum": [
               "DRAFT",
               "SCHEDULED",
@@ -131,7 +137,7 @@
       "post": {
         "operationId": "CreateEnvelope",
         "summary": "Create envelope",
-        "description": "Create a new envelope in DRAFT status, either from a saved template or straight from documents you uploaded with \"Upload document\". Fill in exactly one of \"Template\" or \"Documents\". With documents, add \"Fields\" as well so each signer has somewhere to sign — the simplest way is to quote a phrase from the document in \"Anchor text\" instead of working out coordinates.",
+        "description": "Create a new envelope in DRAFT status, either from a saved template or straight from documents you uploaded with \"Upload document\". Fill in exactly one of \"Template\" or \"Documents\". With documents, add \"Fields\" as well so each signer has somewhere to sign — the simplest way is to quote a phrase from the document in \"Anchor text\" instead of working out coordinates. IMPORTANT: this action only creates the envelope — no email is sent yet. Add the \"Send envelope\" action right after this one in your flow to actually dispatch it to recipients.",
         "parameters": [
           {
             "name": "body",
@@ -139,7 +145,9 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/CreateEnvelopeRequest"
-            }
+            },
+            "x-ms-summary": "Envelope",
+            "description": "The envelope to create, with its recipients and its content."
           }
         ],
         "responses": {
@@ -163,7 +171,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Envelope ID"
+            "x-ms-summary": "Envelope ID",
+            "description": "Identifier of the envelope to retrieve."
           }
         ],
         "responses": {
@@ -185,7 +194,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Envelope ID"
+            "x-ms-summary": "Envelope ID",
+            "description": "Identifier of the draft envelope to delete."
           }
         ],
         "responses": {
@@ -208,14 +218,15 @@
       "post": {
         "operationId": "SendEnvelope",
         "summary": "Send envelope",
-        "description": "Dispatch a DRAFT envelope to its recipients for signature.",
+        "description": "Dispatch a DRAFT envelope to its recipients for signature — this is the step that actually sends the email. \"Create envelope\" only saves it as a draft; it does not send anything on its own. Always chain this action right after \"Create envelope\" in your flow, using the envelope ID it returned.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Envelope ID"
+            "x-ms-summary": "Envelope ID",
+            "description": "Identifier of the draft envelope to dispatch to its recipients."
           }
         ],
         "responses": {
@@ -242,7 +253,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Envelope ID"
+            "x-ms-summary": "Envelope ID",
+            "description": "Identifier of the envelope whose signed document you want to download."
           }
         ],
         "responses": {
@@ -276,7 +288,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Envelope ID"
+            "x-ms-summary": "Envelope ID",
+            "description": "Identifier of the envelope whose audit trail you want to download."
           }
         ],
         "responses": {
@@ -310,14 +323,16 @@
             "in": "formData",
             "required": true,
             "type": "file",
-            "x-ms-summary": "File"
+            "x-ms-summary": "File",
+            "description": "The PDF or image to upload, 50 MB at most."
           },
           {
             "name": "name",
             "in": "formData",
             "required": false,
             "type": "string",
-            "x-ms-summary": "Document name"
+            "x-ms-summary": "Document name",
+            "description": "Name to file the document under. Defaults to the uploaded file's own name."
           }
         ],
         "responses": {
@@ -349,7 +364,9 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/CreateWebhookSubscriptionRequest"
-            }
+            },
+            "x-ms-summary": "Subscription",
+            "description": "The events to subscribe to, and where to deliver them."
           }
         ],
         "responses": {
@@ -374,7 +391,8 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "x-ms-summary": "Subscription ID"
+            "x-ms-summary": "Subscription ID",
+            "description": "Identifier of the webhook subscription to remove."
           }
         ],
         "responses": {
@@ -785,6 +803,52 @@
           "type": "string",
           "format": "date-time",
           "x-ms-summary": "Expires at",
+          "x-ms-visibility": "advanced"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "CONTRACT",
+            "AGREEMENT",
+            "INVOICE",
+            "LETTER",
+            "QUOTE",
+            "NDA",
+            "HR",
+            "LEGAL",
+            "REPORT",
+            "PROPOSAL",
+            "OTHER"
+          ],
+          "x-ms-summary": "Category",
+          "description": "Business classification shown on the envelope list. Leave empty and Certyneo infers one from the subject.",
+          "x-ms-visibility": "advanced"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-summary": "Tags",
+          "description": "Free-form labels — project code, customer reference, internal status. Up to 10, each up to 40 characters. Lowercased and de-duplicated server-side.",
+          "x-ms-visibility": "advanced"
+        },
+        "locale": {
+          "type": "string",
+          "x-ms-summary": "Language",
+          "description": "Language of everything the signer sees: signing page, invitation, reminders, completion email. BCP-47 code, e.g. nl, nl-BE, en-GB, de, fr. Leave empty to inherit the language of the Certyneo account sending the envelope. An unsupported code is rejected with a 400.",
+          "x-ms-visibility": "advanced"
+        },
+        "redirectUrl": {
+          "type": "string",
+          "x-ms-summary": "Redirect URL",
+          "description": "Where the signer is sent after signing. Replaces the default Certyneo call-to-action with a single \"Continue\" button pointing here. Must start with https:// — anything else is rejected with a 400.",
+          "x-ms-visibility": "advanced"
+        },
+        "initialsOnEveryPage": {
+          "type": "boolean",
+          "x-ms-summary": "Initials on every page",
+          "description": "Automatically stamp the signer's initials at the bottom of every page of every document, in addition to any field you place yourself. No per-page setup needed — the signer fills their initials once and it applies everywhere. Skips a page where that signer already has a field (e.g. the signature on the last page).",
           "x-ms-visibility": "advanced"
         }
       }
