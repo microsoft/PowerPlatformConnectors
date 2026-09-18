@@ -39,8 +39,8 @@ the subscription secret. Verify it before a flow acts on the payload.
 | Action | What it does |
 | --- | --- |
 | List templates | Your saved envelope templates. Powers the template picker. |
-| Create envelope | Creates a DRAFT envelope, from a template or from uploaded documents. |
-| Send envelope | Dispatches a DRAFT envelope to its recipients. |
+| Create envelope | Creates a DRAFT envelope, from a template or from uploaded documents. Sends nothing on its own. |
+| Send envelope | Dispatches a DRAFT envelope to its recipients — the step that actually emails them. |
 | Get envelope | Current status and recipient details. |
 | List envelopes | Paginated list, filterable by status. |
 | Upload document | Uploads a PDF or image and returns a document ID. |
@@ -54,9 +54,9 @@ The connector authenticates with a Certyneo API key.
 
 1. Sign in to Certyneo and open **Settings → API Keys**.
 2. Create a key. Live keys start with `sk_live_`, sandbox keys with `sk_test_`.
-3. When the connector asks for the API key, paste the word `Bearer`, a space, and
-   then the key — for example `Bearer sk_live_abc123`. Certyneo expects the word
-   `Bearer` in front of the key, and a key pasted on its own is rejected with 401.
+3. When the connector asks for the API key, paste the key as shown — for example
+   `sk_live_abc123`. Copy it in full when it is displayed: it is shown only once.
+   A `Bearer ` prefix is optional; the key works with or without it.
 
 The key carries scopes. A key without `envelopes:write` cannot create or send, and
 a key without `webhooks:write` cannot back the trigger. Grant the scopes the flow
@@ -113,7 +113,7 @@ under the retention policy and is never coming back. A retry loop should give up
 
 | Response | Cause | Remedy |
 | --- | --- | --- |
-| 401 | Key missing, or pasted without `Bearer` in front | Re-enter the connection as `Bearer sk_live_...` |
+| 401 | Key missing, revoked, or truncated when copied | Re-enter the connection with the full key, e.g. `sk_live_...` |
 | 403 | The key lacks the scope for this operation | Re-issue the key with the scopes the flow needs |
 | 409 on download | Envelope is not COMPLETED yet | Trigger on `envelope.completed` rather than polling |
 | 409 on send | `signer_without_field` — a signer has no signature field | Add **Fields**, or build from a template |
