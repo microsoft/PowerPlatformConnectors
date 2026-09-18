@@ -1,0 +1,1630 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Mark Sign",
+    "description": "Mark Sign is a qualified electronic signature service compliant with eIDAS regulation. Send documents for signing, wait for the signatures, download and validate the signed files.",
+    "version": "1.0",
+    "contact": {
+      "name": "Mark ID, UAB",
+      "url": "https://marksign.eu",
+      "email": "pagalba@marksign.lt"
+    }
+  },
+  "host": "api.marksign.eu",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v2/document/upload": {
+      "post": {
+        "operationId": "UploadDocument",
+        "summary": "Document: Upload",
+        "description": "Uploads a document and prepares it for signing.",
+        "consumes": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "file_name",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "File Name",
+            "description": "The name of the file with its extension, for example contract.pdf. It becomes the document title."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "binary",
+              "x-ms-summary": "File Content",
+              "description": "The content of the file to send for signing (PDF, ADoc, BDoc or ASiC-E)."
+            }
+          },
+          {
+            "name": "access",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "enum": [
+              "private",
+              "public"
+            ],
+            "default": "private",
+            "x-ms-summary": "Access",
+            "x-ms-visibility": "advanced",
+            "description": "Who can view the document. Default is private.",
+            "x-ms-enum-values": [
+              {
+                "value": "private",
+                "displayName": "Private"
+              },
+              {
+                "value": "public",
+                "displayName": "Public"
+              }
+            ]
+          },
+          {
+            "name": "billing_type",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "document_owner",
+              "each_signer"
+            ],
+            "default": "document_owner",
+            "x-ms-summary": "Billing Type",
+            "description": "Who pays for the signatures.",
+            "x-ms-enum-values": [
+              {
+                "value": "document_owner",
+                "displayName": "Document owner"
+              },
+              {
+                "value": "each_signer",
+                "displayName": "Each signer"
+              }
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document uploaded.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "object",
+                  "x-ms-summary": "Document",
+                  "description": "The uploaded document.",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "x-ms-summary": "Document ID",
+                      "description": "The ID of the document."
+                    },
+                    "filename": {
+                      "type": "string",
+                      "x-ms-summary": "File Name",
+                      "description": "The name of the file."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/v2/document/{documentId}/signer": {
+      "post": {
+        "operationId": "InviteSigner",
+        "summary": "Signing: Invite by email",
+        "description": "Invites a person to sign the document. Mark Sign sends the invitation by email.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "surname",
+                "email"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "First Name",
+                  "description": "The signer's first name."
+                },
+                "surname": {
+                  "type": "string",
+                  "x-ms-summary": "Last Name",
+                  "description": "The signer's last name."
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "x-ms-summary": "Email",
+                  "description": "The signer's email address."
+                },
+                "language": {
+                  "type": "string",
+                  "enum": [
+                    "lt",
+                    "en",
+                    "pl"
+                  ],
+                  "x-ms-summary": "Language",
+                  "x-ms-visibility": "advanced",
+                  "description": "The language of the invitation. Default is Lithuanian.",
+                  "x-ms-enum-values": [
+                    {
+                      "value": "lt",
+                      "displayName": "Lithuanian"
+                    },
+                    {
+                      "value": "en",
+                      "displayName": "English"
+                    },
+                    {
+                      "value": "pl",
+                      "displayName": "Polish"
+                    }
+                  ]
+                },
+                "success_url": {
+                  "type": "string",
+                  "x-ms-summary": "Success URL",
+                  "x-ms-visibility": "advanced",
+                  "description": "Where to send the signer after they finish signing."
+                },
+                "purpose": {
+                  "$ref": "#/definitions/SignerPurpose"
+                },
+                "callback_url": {
+                  "type": "string",
+                  "x-ms-summary": "Callback URL",
+                  "x-ms-visibility": "advanced",
+                  "description": "A URL to notify when the document is signed."
+                }
+              }
+            },
+            "description": "The signer to invite."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signer invited.",
+            "schema": {
+              "$ref": "#/definitions/AcknowledgedResponse"
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetSigners",
+        "summary": "Document: Get signers",
+        "description": "Lists the signers of a document with their signing status.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signers retrieved.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "array",
+                  "x-ms-summary": "Signers:",
+                  "description": "The signers of the document.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-ms-summary": "Signer ID",
+                        "description": "The ID of the signer."
+                      },
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "First Name",
+                        "description": "The signer's first name."
+                      },
+                      "surname": {
+                        "type": "string",
+                        "x-ms-summary": "Last Name",
+                        "description": "The signer's last name."
+                      },
+                      "email": {
+                        "type": "string",
+                        "x-ms-summary": "Email",
+                        "description": "The signer's email address."
+                      },
+                      "status": {
+                        "type": "string",
+                        "x-ms-summary": "Signing Status",
+                        "description": "Whether the signer has signed: pending, signed, rejected, reviewing, confirmed, denied or reviewed."
+                      },
+                      "rejection_reason": {
+                        "type": "string",
+                        "x-ms-summary": "Rejection Reason",
+                        "description": "The reason the signer gave when rejecting the document."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/{documentId}/wait-event": {
+      "x-ms-notification-content": {
+        "description": "The signature event that resumed the flow.",
+        "schema": {
+          "$ref": "#/definitions/SigningEvent"
+        }
+      },
+      "post": {
+        "operationId": "WaitForSignatureEvent",
+        "summary": "Signing: Wait for next signer",
+        "description": "Waits until the next signer signs or rejects the document, without sending any invitations. Use it in a loop to wait for several signers without polling.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "callbackUrl"
+              ],
+              "properties": {
+                "callbackUrl": {
+                  "type": "string",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "description": "The callback URL."
+                }
+              }
+            },
+            "description": "The notification registration."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The wait is registered.",
+            "schema": {
+              "$ref": "#/definitions/AcknowledgedResponse"
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/{documentId}/wait-for-signing": {
+      "get": {
+        "operationId": "WaitForSignature",
+        "summary": "Signing: Wait for all signers",
+        "description": "Waits until every signer has signed or someone rejected the document, then lets the flow continue. Ends with the timed_out status when the time runs out.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          },
+          {
+            "name": "timeout_minutes",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Timeout (Minutes)",
+            "x-ms-visibility": "advanced",
+            "description": "How long to wait, in minutes, before ending with the timed_out status. Default is 41760 (29 days), maximum is 43200 (30 days)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The document was signed or rejected, or the wait timed out.",
+            "schema": {
+              "$ref": "#/definitions/SigningWaitResponse"
+            }
+          },
+          "202": {
+            "description": "The signing is still in progress. Power Automate follows the Location header and polls again."
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/document/{documentId}/check-status": {
+      "get": {
+        "operationId": "GetDocumentStatus",
+        "summary": "Document: Get status",
+        "description": "Gets the signing status of a document.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status retrieved.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "object",
+                  "x-ms-summary": "Result",
+                  "description": "The status check result.",
+                  "properties": {
+                    "document_status": {
+                      "type": "string",
+                      "x-ms-summary": "Document Status",
+                      "description": "The signing status: saved (waiting for signatures), signed_partially (some have signed) or signed (everyone has signed)."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/v2/document/{documentId}/download": {
+      "get": {
+        "operationId": "DownloadDocument",
+        "summary": "Document: Download",
+        "description": "Downloads the document with all signatures collected so far.",
+        "produces": [
+          "application/pdf",
+          "application/vnd.etsi.asic-e+zip",
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The document file.",
+            "schema": {
+              "type": "file",
+              "x-ms-summary": "File Content",
+              "description": "The content of the document file."
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/v2/document": {
+      "get": {
+        "operationId": "ListDocuments",
+        "summary": "Document: List",
+        "description": "Lists the documents in your workspace, newest first.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Search",
+            "description": "A phrase to look for in document titles and file names."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Offset",
+            "x-ms-visibility": "advanced",
+            "description": "How many documents to skip."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Limit",
+            "x-ms-visibility": "advanced",
+            "description": "How many documents to return. Default is 10."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documents retrieved.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "array",
+                  "x-ms-summary": "Documents:",
+                  "description": "The documents.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": {
+                        "type": "string",
+                        "x-ms-summary": "Document ID",
+                        "description": "The ID of the document."
+                      },
+                      "filename": {
+                        "type": "string",
+                        "x-ms-summary": "File Name",
+                        "description": "The name of the file."
+                      },
+                      "status": {
+                        "type": "string",
+                        "x-ms-summary": "Document Status",
+                        "description": "The signing status of the document, such as saved (waiting for signatures), signed_partially or signed."
+                      },
+                      "uploaded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "x-ms-summary": "Uploaded At",
+                        "description": "When the document was uploaded."
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer",
+                  "x-ms-summary": "Total",
+                  "description": "The total number of matching documents."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/v2/document/{documentId}": {
+      "delete": {
+        "operationId": "RemoveDocument",
+        "summary": "Document: Remove",
+        "description": "Removes a document from your workspace.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document removed.",
+            "schema": {
+              "$ref": "#/definitions/AcknowledgedResponse"
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/create-container": {
+      "post": {
+        "operationId": "CreateContainer",
+        "summary": "Document: Upload as container",
+        "description": "Combines several files into one signable container document, such as an ADoc or ASiC-E. The files are uploaded and combined in a single step.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "document_type",
+                "files"
+              ],
+              "properties": {
+                "document_type": {
+                  "type": "string",
+                  "enum": [
+                    "adoc.cedoc",
+                    "adoc.bedoc",
+                    "adoc.gedoc",
+                    "adoc.ggedoc",
+                    "bdoc",
+                    "asice"
+                  ],
+                  "x-ms-summary": "Document Type",
+                  "description": "The type of document to create.",
+                  "x-ms-enum-values": [
+                    {
+                      "value": "adoc.cedoc",
+                      "displayName": "ADoc (CeDoc)"
+                    },
+                    {
+                      "value": "adoc.bedoc",
+                      "displayName": "ADoc (BeDoc)"
+                    },
+                    {
+                      "value": "adoc.gedoc",
+                      "displayName": "ADoc (GeDoc)"
+                    },
+                    {
+                      "value": "adoc.ggedoc",
+                      "displayName": "ADoc (GGeDoc)"
+                    },
+                    {
+                      "value": "bdoc",
+                      "displayName": "BDoc"
+                    },
+                    {
+                      "value": "asice",
+                      "displayName": "ASiC-E"
+                    }
+                  ]
+                },
+                "files": {
+                  "type": "array",
+                  "x-ms-summary": "Files",
+                  "description": "The files to combine into the container.",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "file_name",
+                      "file_content"
+                    ],
+                    "properties": {
+                      "file_name": {
+                        "type": "string",
+                        "x-ms-summary": "File Name",
+                        "description": "The name of the file with its extension, for example contract.pdf."
+                      },
+                      "file_content": {
+                        "type": "string",
+                        "format": "byte",
+                        "x-ms-summary": "File Content",
+                        "description": "The content of the file."
+                      },
+                      "adoc_file_type": {
+                        "type": "string",
+                        "enum": [
+                          "main",
+                          "appendix",
+                          "attachment"
+                        ],
+                        "x-ms-summary": "File Type (ADoc only)",
+                        "x-ms-visibility": "advanced",
+                        "description": "The role of the file in the container. Only used when the document type is an ADoc.",
+                        "x-ms-enum-values": [
+                          {
+                            "value": "main",
+                            "displayName": "Main document"
+                          },
+                          {
+                            "value": "appendix",
+                            "displayName": "Appendix"
+                          },
+                          {
+                            "value": "attachment",
+                            "displayName": "Attachment"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The document to create."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document created.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "object",
+                  "x-ms-summary": "Document",
+                  "description": "The created document.",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "x-ms-summary": "Document ID",
+                      "description": "The ID of the document."
+                    },
+                    "filename": {
+                      "type": "string",
+                      "x-ms-summary": "File Name",
+                      "description": "The name of the document file."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/v2/document/generate-temporary-signing-link": {
+      "post": {
+        "operationId": "CreateSignerLinks",
+        "summary": "Signing: Create signer links",
+        "description": "Creates a personal signing link for each signer. You deliver the links yourself, for example by email or Teams message.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "documents": {
+                  "type": "array",
+                  "x-ms-summary": "Document IDs",
+                  "description": "The documents to create signing links for. Use Document ID values from upload or list steps.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "signers": {
+                  "type": "array",
+                  "x-ms-summary": "Signers",
+                  "description": "The people to create links for. Give each one an email or a signer ID. At least one of the two is required.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-ms-summary": "Signer ID",
+                        "description": "Your own ID for the signer, unique within the request. Required when Email is empty."
+                      },
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "First Name",
+                        "description": "The signer's first name."
+                      },
+                      "surname": {
+                        "type": "string",
+                        "x-ms-summary": "Last Name",
+                        "description": "The signer's last name."
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "x-ms-summary": "Email",
+                        "description": "The signer's email address. Required when Signer ID is empty."
+                      },
+                      "personal_code": {
+                        "type": "string",
+                        "x-ms-summary": "Personal Code",
+                        "x-ms-visibility": "advanced",
+                        "description": "The signer's personal code. Needed when authentication is required."
+                      },
+                      "authentication_required": {
+                        "type": "boolean",
+                        "x-ms-summary": "Require Authentication",
+                        "x-ms-visibility": "advanced",
+                        "description": "If yes, the signer must verify their identity before opening the link."
+                      },
+                      "position": {
+                        "type": "string",
+                        "x-ms-summary": "Position (ADoc only)",
+                        "x-ms-visibility": "advanced",
+                        "description": "The signer's job position, shown in ADoc signatures."
+                      },
+                      "structural_subdivision": {
+                        "type": "string",
+                        "x-ms-summary": "Department (ADoc only)",
+                        "x-ms-visibility": "advanced",
+                        "description": "The signer's department, shown in ADoc signatures."
+                      },
+                      "signing_purpose": {
+                        "type": "string",
+                        "enum": [
+                          "signature",
+                          "confirmation",
+                          "visa",
+                          "conciliation",
+                          "registration",
+                          "registration-of-incomming-documents",
+                          "acknowledgement",
+                          "notarisation",
+                          "copy-certification",
+                          "resolution",
+                          "end-of-execution",
+                          "authenticity"
+                        ],
+                        "x-ms-summary": "Signing Purpose (ADoc only)",
+                        "x-ms-visibility": "advanced",
+                        "description": "Why the person signs, shown in ADoc signatures.",
+                        "x-ms-enum-values": [
+                          {
+                            "value": "signature",
+                            "displayName": "Signature"
+                          },
+                          {
+                            "value": "confirmation",
+                            "displayName": "Confirmation"
+                          },
+                          {
+                            "value": "visa",
+                            "displayName": "Visa"
+                          },
+                          {
+                            "value": "conciliation",
+                            "displayName": "Conciliation"
+                          },
+                          {
+                            "value": "registration",
+                            "displayName": "Registration"
+                          },
+                          {
+                            "value": "registration-of-incomming-documents",
+                            "displayName": "Registration of incoming documents"
+                          },
+                          {
+                            "value": "acknowledgement",
+                            "displayName": "Acknowledgement"
+                          },
+                          {
+                            "value": "notarisation",
+                            "displayName": "Notarisation"
+                          },
+                          {
+                            "value": "copy-certification",
+                            "displayName": "Copy certification"
+                          },
+                          {
+                            "value": "resolution",
+                            "displayName": "Resolution"
+                          },
+                          {
+                            "value": "end-of-execution",
+                            "displayName": "End of execution"
+                          },
+                          {
+                            "value": "authenticity",
+                            "displayName": "Authenticity"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "callback_url": {
+                  "type": "string",
+                  "x-ms-summary": "Callback URL",
+                  "x-ms-visibility": "advanced",
+                  "description": "A URL to notify when the document is signed."
+                },
+                "reject_callback_url": {
+                  "type": "string",
+                  "x-ms-summary": "Rejection Callback URL",
+                  "x-ms-visibility": "advanced",
+                  "description": "A URL to notify when a signer rejects the document."
+                },
+                "expire_after": {
+                  "type": "integer",
+                  "x-ms-summary": "Expire After (Minutes)",
+                  "x-ms-visibility": "advanced",
+                  "description": "Minutes until the link expires. Default is 2880 (two days)."
+                },
+                "show_reject_button": {
+                  "type": "boolean",
+                  "x-ms-summary": "Show Reject Button",
+                  "x-ms-visibility": "advanced",
+                  "description": "Whether signers can reject the document on the signing page. Default is yes."
+                },
+                "delete_document_after": {
+                  "type": "integer",
+                  "x-ms-summary": "Delete Document After (Minutes)",
+                  "x-ms-visibility": "advanced",
+                  "description": "Minutes until the document is deleted from the workspace. By default it is kept."
+                }
+              },
+              "required": [
+                "documents",
+                "signers"
+              ]
+            },
+            "description": "The signing link to create."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signing links created.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "temporary_signing_links": {
+                  "type": "array",
+                  "x-ms-summary": "Signing Links:",
+                  "description": "One signing link per signer.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-ms-summary": "Signer ID",
+                        "description": "Your own ID for the signer."
+                      },
+                      "member_name": {
+                        "type": "string",
+                        "x-ms-summary": "First Name",
+                        "description": "The signer's first name."
+                      },
+                      "member_surname": {
+                        "type": "string",
+                        "x-ms-summary": "Last Name",
+                        "description": "The signer's last name."
+                      },
+                      "member_email": {
+                        "type": "string",
+                        "x-ms-summary": "Email",
+                        "description": "The signer's email address."
+                      },
+                      "temporary_signing_link": {
+                        "type": "string",
+                        "x-ms-summary": "Signing Link",
+                        "description": "The link the signer opens to sign the document."
+                      },
+                      "temporary_signing_link_id": {
+                        "type": "string",
+                        "x-ms-summary": "Signing Link ID",
+                        "description": "The ID of the signing link."
+                      },
+                      "valid_until": {
+                        "type": "integer",
+                        "x-ms-summary": "Valid Until",
+                        "description": "When the link expires, as a Unix timestamp."
+                      }
+                    }
+                  }
+                },
+                "documents": {
+                  "type": "array",
+                  "x-ms-summary": "Documents:",
+                  "description": "The documents the links were created for.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": {
+                        "type": "string",
+                        "x-ms-summary": "Document ID",
+                        "description": "The ID of the document."
+                      },
+                      "filename": {
+                        "type": "string",
+                        "x-ms-summary": "File Name",
+                        "description": "The name of the document file."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/v2/document/signing-link/{temporarySigningLinkId}": {
+      "delete": {
+        "operationId": "DeleteSigningLink",
+        "summary": "Signing: Delete link",
+        "description": "Deletes a signer link or shared link before it expires. Invitation links cannot be deleted.",
+        "parameters": [
+          {
+            "name": "temporarySigningLinkId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Signing Link ID",
+            "x-ms-url-encoding": "single",
+            "description": "The Signing Link ID from the output of \"Signing: Create signer links\" or \"Signing: Create shared link\"."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signing link deleted.",
+            "schema": {
+              "$ref": "#/definitions/AcknowledgedResponse"
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/{documentId}/extend": {
+      "post": {
+        "operationId": "ExtendSignatures",
+        "summary": "Document: Extend signature validity",
+        "description": "Upgrades the document signatures for long-term validity or archiving.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "level"
+              ],
+              "properties": {
+                "level": {
+                  "type": "string",
+                  "enum": [
+                    "LT",
+                    "LTA"
+                  ],
+                  "x-ms-summary": "Level",
+                  "description": "LT for long-term validity, LTA for long-term archiving.",
+                  "x-ms-enum-values": [
+                    {
+                      "value": "LT",
+                      "displayName": "Long-term (LT)"
+                    },
+                    {
+                      "value": "LTA",
+                      "displayName": "Long-term with archive timestamp (LTA)"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "The signature level to extend to."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signatures extended.",
+            "schema": {
+              "$ref": "#/definitions/AcknowledgedResponse"
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/{documentId}/validate": {
+      "get": {
+        "operationId": "ValidateDocument",
+        "summary": "Document: Validate",
+        "description": "Checks the signatures of a document and returns the validation report. The flow waits until the check finishes.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation finished.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "object",
+                  "x-ms-summary": "Validation Report",
+                  "description": "The validation report.",
+                  "properties": {
+                    "document": {
+                      "type": "object",
+                      "x-ms-summary": "Document",
+                      "description": "The overall result for the document.",
+                      "properties": {
+                        "is_valid": {
+                          "type": "boolean",
+                          "x-ms-summary": "Is Valid",
+                          "description": "Whether the document signatures are valid."
+                        },
+                        "valid_to": {
+                          "type": "string",
+                          "x-ms-summary": "Valid To",
+                          "description": "How long the document stays valid."
+                        },
+                        "name": {
+                          "type": "string",
+                          "x-ms-summary": "Document Name",
+                          "description": "The title of the document."
+                        },
+                        "mimetype": {
+                          "type": "string",
+                          "x-ms-summary": "MIME Type",
+                          "description": "The file type of the document."
+                        }
+                      }
+                    },
+                    "signatures": {
+                      "type": "array",
+                      "x-ms-summary": "Signatures:",
+                      "description": "The result for each signature.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "x-ms-summary": "Signature ID",
+                            "description": "The ID of the signature."
+                          },
+                          "signing_time": {
+                            "type": "string",
+                            "x-ms-summary": "Signing Time",
+                            "description": "When the signature was made."
+                          },
+                          "signature_format": {
+                            "type": "string",
+                            "x-ms-summary": "Signature Format",
+                            "description": "The format of the signature."
+                          },
+                          "is_valid": {
+                            "type": "boolean",
+                            "x-ms-summary": "Is Valid",
+                            "description": "Whether the signature is valid."
+                          },
+                          "valid_to": {
+                            "type": "string",
+                            "x-ms-summary": "Valid To",
+                            "description": "How long the signature stays valid."
+                          }
+                        }
+                      }
+                    },
+                    "certificates": {
+                      "type": "array",
+                      "x-ms-summary": "Certificates",
+                      "x-ms-visibility": "advanced",
+                      "description": "The certificates used by the signatures.",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "timestamps": {
+                      "type": "array",
+                      "x-ms-summary": "Timestamps",
+                      "x-ms-visibility": "advanced",
+                      "description": "The timestamps applied to the document.",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                },
+                "metadata": {
+                  "type": "object",
+                  "x-ms-summary": "Metadata",
+                  "x-ms-visibility": "advanced",
+                  "description": "Details about the validation run.",
+                  "properties": {
+                    "validation_time": {
+                      "type": "string",
+                      "x-ms-summary": "Validation Time",
+                      "description": "When the validation was performed."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The validation is still running. Power Automate follows the Location header and polls again."
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/{documentId}/wait-for-signer": {
+      "get": {
+        "operationId": "WaitForSigner",
+        "summary": "Signing: Wait for one signer",
+        "description": "Waits until one particular signer signs the document, then lets the flow continue. Ends with the timed_out status when the time runs out.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          },
+          {
+            "name": "signer_email",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Signer Email",
+            "description": "The email of the signer to wait for, the same email used when inviting them."
+          },
+          {
+            "name": "timeout_minutes",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Timeout (Minutes)",
+            "x-ms-visibility": "advanced",
+            "description": "How long to wait, in minutes, before ending with the timed_out status. Default is 41760 (29 days), maximum is 43200 (30 days)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The signer signed, someone rejected the document, or the wait timed out.",
+            "schema": {
+              "$ref": "#/definitions/SigningWaitResponse"
+            }
+          },
+          "202": {
+            "description": "The signing is still in progress. Power Automate follows the Location header and polls again."
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/shared-link": {
+      "post": {
+        "operationId": "CreateSharedLink",
+        "summary": "Signing: Create shared link",
+        "description": "Creates one signing link that anyone can open to sign the documents. You deliver it yourself.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "documents"
+              ],
+              "properties": {
+                "documents": {
+                  "type": "array",
+                  "x-ms-summary": "Document IDs",
+                  "description": "The documents the link signs. Use Document ID values from upload or list steps.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "callback_url": {
+                  "type": "string",
+                  "x-ms-summary": "Callback URL",
+                  "x-ms-visibility": "advanced",
+                  "description": "A URL to notify when the document is signed."
+                },
+                "expire_after": {
+                  "type": "integer",
+                  "x-ms-summary": "Expire After (Minutes)",
+                  "x-ms-visibility": "advanced",
+                  "description": "Minutes until the link expires. Default is 2880 (two days)."
+                },
+                "delete_document_after": {
+                  "type": "integer",
+                  "x-ms-summary": "Delete Document After (Minutes)",
+                  "x-ms-visibility": "advanced",
+                  "description": "Minutes until the document is deleted from the workspace. By default it is kept."
+                }
+              }
+            },
+            "description": "The link to create."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Link created.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "object",
+                  "x-ms-summary": "Link",
+                  "description": "The created link.",
+                  "properties": {
+                    "signing_link": {
+                      "type": "string",
+                      "x-ms-summary": "Signing Link",
+                      "description": "The link anyone can open to sign."
+                    },
+                    "signing_link_id": {
+                      "type": "string",
+                      "x-ms-summary": "Signing Link ID",
+                      "description": "The ID of the link, for \"Signing: Delete link\"."
+                    },
+                    "valid_until": {
+                      "type": "integer",
+                      "x-ms-summary": "Valid Until",
+                      "description": "When the link expires, as a Unix timestamp."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    },
+    "/power-automate/document/{documentId}/invite-by-link": {
+      "post": {
+        "operationId": "InviteByLink",
+        "summary": "Signing: Invite by URL",
+        "description": "Adds a signer to the document without sending an email, and returns their personal invitation link for you to deliver. The link does not expire and cannot be deleted; use \"Signing: Create signer links\" when you need links you can revoke.",
+        "parameters": [
+          {
+            "$ref": "#/parameters/DocumentId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "surname",
+                "email"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "First Name",
+                  "description": "The signer's first name."
+                },
+                "surname": {
+                  "type": "string",
+                  "x-ms-summary": "Last Name",
+                  "description": "The signer's last name."
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "x-ms-summary": "Email",
+                  "description": "The signer's email address."
+                },
+                "success_url": {
+                  "type": "string",
+                  "x-ms-summary": "Success URL",
+                  "x-ms-visibility": "advanced",
+                  "description": "Where to send the signer after they finish signing."
+                },
+                "purpose": {
+                  "$ref": "#/definitions/SignerPurpose"
+                },
+                "callback_url": {
+                  "type": "string",
+                  "x-ms-summary": "Callback URL",
+                  "x-ms-visibility": "advanced",
+                  "description": "A URL to notify when the document is signed."
+                }
+              }
+            },
+            "description": "The signer to add."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signer added.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/definitions/RequestStatus"
+                },
+                "data": {
+                  "type": "object",
+                  "x-ms-summary": "Invitation",
+                  "description": "The created invitation.",
+                  "properties": {
+                    "invitation_url": {
+                      "type": "string",
+                      "x-ms-summary": "Invitation URL",
+                      "description": "The personal signing page link to deliver to the signer."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid."
+          },
+          "401": {
+            "description": "The access token is missing or invalid."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SigningEvent": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "x-ms-summary": "Document ID",
+          "description": "The ID of the document."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Document Status",
+          "description": "The signing status of the document, such as signed or signed_partially. A rejection shows in the signer statuses."
+        },
+        "members_count": {
+          "type": "integer",
+          "x-ms-summary": "Signer Count",
+          "description": "How many people were invited to sign."
+        },
+        "signed_members_count": {
+          "type": "integer",
+          "x-ms-summary": "Signed Count",
+          "description": "How many people have signed."
+        },
+        "members": {
+          "type": "array",
+          "x-ms-summary": "Signers:",
+          "description": "Everyone invited to sign.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Signer ID",
+                "description": "The ID of the signer."
+              },
+              "member_name": {
+                "type": "string",
+                "x-ms-summary": "First Name",
+                "description": "The signer's first name."
+              },
+              "member_surname": {
+                "type": "string",
+                "x-ms-summary": "Last Name",
+                "description": "The signer's last name."
+              },
+              "member_email": {
+                "type": "string",
+                "x-ms-summary": "Email",
+                "description": "The signer's email address."
+              },
+              "status": {
+                "type": "string",
+                "x-ms-summary": "Signing Status",
+                "description": "The signer status, such as pending, signed or rejected."
+              }
+            }
+          }
+        }
+      }
+    },
+    "AcknowledgedResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/RequestStatus"
+        }
+      }
+    },
+    "SigningWaitResponse": {
+      "type": "object",
+      "properties": {
+        "document_status": {
+          "type": "string",
+          "x-ms-summary": "Document Status",
+          "description": "How the waiting ended: signed, rejected or timed_out."
+        },
+        "rejected_by": {
+          "type": "string",
+          "x-ms-summary": "Rejected By",
+          "description": "Who rejected the document, if it was rejected."
+        },
+        "rejection_reason": {
+          "type": "string",
+          "x-ms-summary": "Rejection Reason",
+          "description": "The reason the signer gave, if the document was rejected."
+        }
+      }
+    },
+    "SignerPurpose": {
+      "type": "string",
+      "enum": [
+        "e_signature",
+        "review",
+        "confirmation",
+        "visa",
+        "acknowledgement"
+      ],
+      "x-ms-summary": "Purpose",
+      "x-ms-visibility": "advanced",
+      "description": "Why the person is invited. Choose review to invite for viewing only.",
+      "x-ms-enum-values": [
+        {
+          "value": "e_signature",
+          "displayName": "Electronic signature"
+        },
+        {
+          "value": "review",
+          "displayName": "Review"
+        },
+        {
+          "value": "confirmation",
+          "displayName": "Confirmation"
+        },
+        {
+          "value": "visa",
+          "displayName": "Visa"
+        },
+        {
+          "value": "acknowledgement",
+          "displayName": "Acknowledgement"
+        }
+      ]
+    },
+    "RequestStatus": {
+      "type": "string",
+      "x-ms-summary": "Status",
+      "x-ms-visibility": "advanced",
+      "description": "The status of the request."
+    }
+  },
+  "parameters": {
+    "DocumentId": {
+      "name": "documentId",
+      "in": "path",
+      "type": "string",
+      "required": true,
+      "x-ms-summary": "Document ID",
+      "x-ms-url-encoding": "single",
+      "description": "The ID of the document, from the output of \"Document: Upload\", \"Document: Upload as container\" or \"Document: List\"."
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://marksign.eu"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://marksign.eu/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Productivity;Content and Files"
+    }
+  ]
+}
