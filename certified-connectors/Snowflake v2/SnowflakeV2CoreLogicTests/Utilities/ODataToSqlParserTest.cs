@@ -397,5 +397,60 @@ namespace SnowflakeV2CoreLogic.Tests.Utilities
         }
 
         #endregion
+
+        #region String literal escaping ($filter injection defense)
+
+        [TestMethod]
+        public void ParseFilterToSql_EscapesSingleQuotesInStringLiteral()
+        {
+            var filter = ParseFilter("Name eq 'O''Brien'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name = 'O''Brien'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_NeutralizesInjectionInStringValue()
+        {
+            // The doubled quotes keep the payload inside the literal; it cannot terminate the string.
+            var filter = ParseFilter("Name eq 'x'';DROP TABLE SECRETS--'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name = 'x'';DROP TABLE SECRETS--'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_EscapesBackslashInStringLiteral()
+        {
+            var filter = ParseFilter(@"Name eq 'a\b'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual(@"Name = 'a\\b'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_EscapesTrailingBackslash()
+        {
+            // A trailing backslash must be doubled so it cannot escape the closing quote in Snowflake.
+            var filter = ParseFilter(@"Name eq 'a\'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual(@"Name = 'a\\'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_NeutralizesBackslashQuoteBreakout()
+        {
+            // Backslash is doubled first, then the quote, so neither can break out of the literal.
+            var filter = ParseFilter(@"Name eq '\''; DROP'");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual(@"Name = '\\''; DROP'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ContainsEscapesQuotesInValue()
+        {
+            var filter = ParseFilter("contains(Name, 'a''b')");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name LIKE '%a''b%'", result);
+        }
+
+        #endregion
     }
 }
