@@ -1,0 +1,1134 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "FireHydrant",
+    "description": "Manage the full incident lifecycle with FireHydrant. Declare, track, update, resolve, and close incidents. Coordinate response teams and post status updates.",
+    "version": "1.0",
+    "contact": {
+      "name": "Aaron Mah",
+      "url": "https://github.com/aaronmah",
+      "email": "aaronmah@microsoft.com"
+    }
+  },
+  "host": "api.firehydrant.io",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/incidents": {
+      "get": {
+        "operationId": "listIncidents",
+        "summary": "List Incidents",
+        "description": "Retrieves a list of incidents from FireHydrant, optionally filtered by status, severity, or search query.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced",
+            "description": "Page number for pagination (default: 1)."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "x-ms-summary": "Items Per Page",
+            "x-ms-visibility": "advanced",
+            "description": "Number of items per page (default: 20, max: 200)."
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Search Query",
+            "description": "Search query to filter incidents by name or description."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Status",
+            "description": "Filter by incident status (e.g., open, resolved, closed)."
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Severity",
+            "description": "Filter by severity slug (e.g., SEV1, SEV2)."
+          },
+          {
+            "name": "environments",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Environment IDs",
+            "x-ms-visibility": "advanced",
+            "description": "Comma-separated environment IDs to filter by."
+          },
+          {
+            "name": "services",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Service IDs",
+            "x-ms-visibility": "advanced",
+            "description": "Comma-separated service IDs to filter by."
+          },
+          {
+            "name": "teams",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Team IDs",
+            "x-ms-visibility": "advanced",
+            "description": "Comma-separated team IDs to filter by."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of incidents.",
+            "schema": {
+              "$ref": "#/definitions/IncidentListResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createIncident",
+        "summary": "Create Incident",
+        "description": "Declares a new incident in FireHydrant with the specified name, severity, and optional details.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Incident Name",
+                  "description": "Name or title of the incident (e.g., Database Latency Issues)."
+                },
+                "severity": {
+                  "type": "string",
+                  "x-ms-summary": "Severity",
+                  "description": "Severity slug (e.g., SEV1, SEV2). Use List Severities to get valid values."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Detailed description of the incident."
+                },
+                "customer_impact_summary": {
+                  "type": "string",
+                  "x-ms-summary": "Customer Impact Summary",
+                  "x-ms-visibility": "advanced",
+                  "description": "Customer-facing summary of the impact."
+                },
+                "priority": {
+                  "type": "string",
+                  "x-ms-summary": "Priority",
+                  "x-ms-visibility": "advanced",
+                  "description": "Priority slug (e.g., P1, P2)."
+                },
+                "tag_list": {
+                  "type": "string",
+                  "x-ms-summary": "Tags",
+                  "x-ms-visibility": "advanced",
+                  "description": "Comma-separated list of tags to apply to the incident."
+                },
+                "team_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Team IDs",
+                  "x-ms-visibility": "advanced",
+                  "description": "Array of team IDs to assign to the incident."
+                },
+                "service_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Service IDs",
+                  "x-ms-visibility": "advanced",
+                  "description": "Array of service IDs to associate with the incident."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The newly created incident.",
+            "schema": {
+              "$ref": "#/definitions/Incident"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}": {
+      "get": {
+        "operationId": "getIncident",
+        "summary": "Get Incident",
+        "description": "Retrieves the full details of a specific incident by its ID.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique ID of the incident to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The incident details.",
+            "schema": {
+              "$ref": "#/definitions/Incident"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateIncident",
+        "summary": "Update Incident",
+        "description": "Updates the fields of an existing incident, such as severity, description, or customer impact summary.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique ID of the incident to update."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Incident Name",
+                  "description": "Updated incident name."
+                },
+                "severity": {
+                  "type": "string",
+                  "x-ms-summary": "Severity",
+                  "description": "Updated severity slug."
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Updated description."
+                },
+                "customer_impact_summary": {
+                  "type": "string",
+                  "x-ms-summary": "Customer Impact Summary",
+                  "x-ms-visibility": "advanced",
+                  "description": "Updated customer impact summary."
+                },
+                "priority": {
+                  "type": "string",
+                  "x-ms-summary": "Priority",
+                  "x-ms-visibility": "advanced",
+                  "description": "Updated priority slug."
+                },
+                "tag_list": {
+                  "type": "string",
+                  "x-ms-summary": "Tags",
+                  "x-ms-visibility": "advanced",
+                  "description": "Comma-separated list of tags (replaces existing tags)."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated incident.",
+            "schema": {
+              "$ref": "#/definitions/Incident"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}/notes": {
+      "post": {
+        "operationId": "createIncidentNote",
+        "summary": "Create Incident Note",
+        "description": "Adds a status update note to an incident's timeline.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique ID of the incident to add the note to."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "body"
+              ],
+              "properties": {
+                "body": {
+                  "type": "string",
+                  "x-ms-summary": "Note Content",
+                  "description": "The content of the note. Supports Markdown formatting."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The newly created note.",
+            "schema": {
+              "$ref": "#/definitions/Note"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}/events": {
+      "get": {
+        "operationId": "listIncidentEvents",
+        "summary": "List Incident Timeline",
+        "description": "Retrieves the timeline of events for a specific incident, including notes, milestone changes, and status updates.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique ID of the incident."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced",
+            "description": "Page number for pagination (default: 1)."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "x-ms-summary": "Items Per Page",
+            "x-ms-visibility": "advanced",
+            "description": "Number of items per page (default: 20, max: 200)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of timeline events.",
+            "schema": {
+              "$ref": "#/definitions/EventListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}/resolve": {
+      "put": {
+        "operationId": "resolveIncident",
+        "summary": "Resolve Incident",
+        "description": "Marks an incident as resolved, setting the resolved milestone timestamp.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique ID of the incident to resolve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The resolved incident.",
+            "schema": {
+              "$ref": "#/definitions/Incident"
+            }
+          }
+        }
+      }
+    },
+    "/incidents/{incident_id}/close": {
+      "put": {
+        "operationId": "closeIncident",
+        "summary": "Close Incident",
+        "description": "Closes an incident, marking it as fully complete after post-incident review.",
+        "parameters": [
+          {
+            "name": "incident_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Incident ID",
+            "x-ms-url-encoding": "single",
+            "description": "The unique ID of the incident to close."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The closed incident.",
+            "schema": {
+              "$ref": "#/definitions/Incident"
+            }
+          }
+        }
+      }
+    },
+    "/severities": {
+      "get": {
+        "operationId": "listSeverities",
+        "summary": "List Severities",
+        "description": "Retrieves all severity levels configured in the FireHydrant organization.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced",
+            "description": "Page number for pagination (default: 1)."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "x-ms-summary": "Items Per Page",
+            "x-ms-visibility": "advanced",
+            "description": "Number of items per page (default: 20, max: 200)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of severity levels.",
+            "schema": {
+              "$ref": "#/definitions/SeverityListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "operationId": "listTeams",
+        "summary": "List Teams",
+        "description": "Retrieves all teams configured in the FireHydrant organization.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced",
+            "description": "Page number for pagination (default: 1)."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "x-ms-summary": "Items Per Page",
+            "x-ms-visibility": "advanced",
+            "description": "Number of items per page (default: 20, max: 200)."
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Search Query",
+            "description": "Search query to filter teams by name."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of teams.",
+            "schema": {
+              "$ref": "#/definitions/TeamListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "List Users",
+        "description": "Retrieves all users in the FireHydrant organization.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 1,
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced",
+            "description": "Page number for pagination (default: 1)."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32",
+            "default": 20,
+            "x-ms-summary": "Items Per Page",
+            "x-ms-visibility": "advanced",
+            "description": "Number of items per page (default: 20, max: 200)."
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Search Query",
+            "description": "Search query to filter users by name or email."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users.",
+            "schema": {
+              "$ref": "#/definitions/UserListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/current_user": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "summary": "Get Current User",
+        "description": "Retrieves the profile of the currently authenticated bot user, useful for verifying the connection is working.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The current user profile.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Incident": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique incident ID.",
+          "x-ms-summary": "Incident ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Incident name or title.",
+          "x-ms-summary": "Name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed incident description.",
+          "x-ms-summary": "Description"
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity slug (e.g., SEV1).",
+          "x-ms-summary": "Severity"
+        },
+        "severity_condition": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "Full severity details (null when unset).",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Severity ID.",
+              "x-ms-summary": "Severity Condition ID"
+            },
+            "slug": {
+              "type": "string",
+              "description": "Severity slug.",
+              "x-ms-summary": "Severity Condition Slug"
+            },
+            "name": {
+              "type": "string",
+              "description": "Severity display name.",
+              "x-ms-summary": "Severity Condition Name"
+            },
+            "position": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Sort position.",
+              "x-ms-summary": "Severity Condition Position"
+            }
+          }
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority slug.",
+          "x-ms-summary": "Priority"
+        },
+        "current_milestone": {
+          "type": "string",
+          "description": "Current milestone stage (e.g., started, detected, mitigated, resolved).",
+          "x-ms-summary": "Current Milestone"
+        },
+        "started_at": {
+          "type": "string",
+          "description": "When the incident was declared.",
+          "x-ms-summary": "Started At"
+        },
+        "resolved_at": {
+          "type": "string",
+          "description": "When the incident was resolved.",
+          "x-ms-summary": "Resolved At"
+        },
+        "closed_at": {
+          "type": "string",
+          "description": "When the incident was closed.",
+          "x-ms-summary": "Closed At"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "Last update timestamp.",
+          "x-ms-summary": "Updated At"
+        },
+        "incident_url": {
+          "type": "string",
+          "description": "URL to the incident in the FireHydrant UI.",
+          "x-ms-summary": "Incident URL"
+        },
+        "customer_impact_summary": {
+          "type": "string",
+          "description": "Customer-facing impact description.",
+          "x-ms-summary": "Customer Impact Summary"
+        },
+        "tag_list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags applied to the incident.",
+          "x-ms-summary": "Tags"
+        },
+        "team_assignments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Assignment ID.",
+                "x-ms-summary": "Assignment ID"
+              },
+              "team": {
+                "type": "object",
+                "description": "Assigned team.",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Team ID.",
+                    "x-ms-summary": "Team ID"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Team name.",
+                    "x-ms-summary": "Team Name"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Teams assigned to the incident."
+        },
+        "role_assignments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Assignment ID.",
+                "x-ms-summary": "Assignment ID"
+              },
+              "incident_role": {
+                "type": "object",
+                "description": "The incident role.",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Role name.",
+                    "x-ms-summary": "Role Name"
+                  }
+                }
+              },
+              "user": {
+                "type": "object",
+                "description": "Assigned user.",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "User name.",
+                    "x-ms-summary": "User Name"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Role assignments on the incident."
+        },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Milestone type.",
+                "x-ms-summary": "Milestone Type"
+              },
+              "occurred_at": {
+                "type": "string",
+                "description": "When the milestone occurred.",
+                "x-ms-summary": "Milestone Occurred At"
+              }
+            }
+          },
+          "description": "Milestone timestamps."
+        },
+        "created_by": {
+          "type": "object",
+          "x-nullable": true,
+          "description": "User who created the incident.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "User ID.",
+              "x-ms-summary": "Creator ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "User name.",
+              "x-ms-summary": "Creator Name"
+            },
+            "email": {
+              "type": "string",
+              "description": "User email.",
+              "x-ms-summary": "Creator Email"
+            }
+          }
+        }
+      }
+    },
+    "IncidentListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Incident"
+          },
+          "description": "List of incidents."
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Severity": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Severity ID.",
+          "x-ms-summary": "Severity ID"
+        },
+        "slug": {
+          "type": "string",
+          "description": "Severity slug (e.g., SEV1).",
+          "x-ms-summary": "Slug"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this severity level.",
+          "x-ms-summary": "Description"
+        },
+        "type": {
+          "type": "string",
+          "description": "Severity type.",
+          "x-ms-summary": "Type"
+        },
+        "position": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Sort order position.",
+          "x-ms-summary": "Position"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "SeverityListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Severity"
+          },
+          "description": "List of severities."
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Team": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Team ID.",
+          "x-ms-summary": "Team ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Team name.",
+          "x-ms-summary": "Name"
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly team slug.",
+          "x-ms-summary": "Slug"
+        },
+        "description": {
+          "type": "string",
+          "description": "Team description.",
+          "x-ms-summary": "Description"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation timestamp.",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "TeamListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Team"
+          },
+          "description": "List of teams."
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "User ID.",
+          "x-ms-summary": "User ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name.",
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address.",
+          "x-ms-summary": "Email"
+        },
+        "slack_linked": {
+          "type": "boolean",
+          "description": "Whether Slack is connected.",
+          "x-ms-summary": "Slack Linked"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Account creation timestamp.",
+          "x-ms-summary": "Created At"
+        }
+      }
+    },
+    "UserListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/User"
+          },
+          "description": "List of users."
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Note": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Note ID.",
+          "x-ms-summary": "Note ID"
+        },
+        "body": {
+          "type": "string",
+          "description": "Note content.",
+          "x-ms-summary": "Body"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "When the note was created.",
+          "x-ms-summary": "Created At"
+        },
+        "created_by": {
+          "type": "object",
+          "description": "Author of the note.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "User ID.",
+              "x-ms-summary": "Author ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "User name.",
+              "x-ms-summary": "Author Name"
+            },
+            "email": {
+              "type": "string",
+              "description": "User email.",
+              "x-ms-summary": "Author Email"
+            }
+          }
+        }
+      }
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Event ID.",
+          "x-ms-summary": "Event ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "Event type (e.g., note, milestone_change, role_assignment).",
+          "x-ms-summary": "Type"
+        },
+        "occurred_at": {
+          "type": "string",
+          "description": "When the event occurred.",
+          "x-ms-summary": "Occurred At"
+        },
+        "visibility": {
+          "type": "string",
+          "description": "Event visibility (public or internal).",
+          "x-ms-summary": "Visibility"
+        },
+        "data": {
+          "type": "object",
+          "description": "Event-specific data.",
+          "properties": {
+            "body": {
+              "type": "string",
+              "description": "Note body (for note events).",
+              "x-ms-summary": "Event Body"
+            },
+            "milestone": {
+              "type": "string",
+              "description": "Milestone name (for milestone events).",
+              "x-ms-summary": "Event Milestone"
+            }
+          }
+        },
+        "author": {
+          "type": "object",
+          "description": "Event author.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "User ID.",
+              "x-ms-summary": "Author ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "User name.",
+              "x-ms-summary": "Author Name"
+            },
+            "email": {
+              "type": "string",
+              "description": "User email.",
+              "x-ms-summary": "Author Email"
+            }
+          }
+        }
+      }
+    },
+    "EventListResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Event"
+          },
+          "description": "List of events."
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of items.",
+          "x-ms-summary": "Total Count"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Current page number.",
+          "x-ms-summary": "Current Page"
+        },
+        "items": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of items on this page.",
+          "x-ms-summary": "Items Per Page"
+        },
+        "pages": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of pages.",
+          "x-ms-summary": "Total Pages"
+        },
+        "last": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Last page number.",
+          "x-ms-summary": "Last Page"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "API Key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "API Key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://firehydrant.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://firehydrant.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "IT Operations;Collaboration"
+    }
+  ]
+}
