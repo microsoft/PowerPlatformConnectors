@@ -8,7 +8,7 @@ The Workable MCP server gives an agent authenticated, permission-aware access to
 
 ## Prerequisites
 
-- A Workable account on a plan that includes API access.
+- A Workable account.
 - Microsoft Copilot Studio with **generative orchestration** and **MCP tools** enabled in your environment.
 - A Workable user account. The tools act on behalf of the signed-in user, so the data and actions available depend on that user's role and permissions in Workable.
 
@@ -51,7 +51,7 @@ The server exposes just over 100 tools. They are grouped as follows; the authori
 | Time tracking | List, create and update time entries, including bulk entry, and clock in or out | `list_time_entries`, `clock_in`, `clock_out`, `bulk_create_time_entries` |
 | Performance reviews | Read review cycles, tasks, forms and results; create cycle templates; submit, share and sign reviews | `get_review_cycles`, `list_review_tasks`, `submit_review`, `sign_review` |
 | Organization | Read and manage departments, legal entities and work schedules | `get_departments`, `create_department`, `get_legal_entities`, `get_work_schedules` |
-| Reporting | Run filtered searches over employees, detailed candidate records and profile updates, after discovering the available fields and filter options | `get_employee_fields`, `search_employees`, `search_candidates_detailed`, `search_profile_updates` |
+| Reporting | Run filtered searches over employees and detailed candidate records after discovering the available fields and filter options | `get_employee_fields`, `search_employees`, `search_candidates_detailed` |
 | Reference data | Read pipeline stages, disqualification reasons, account custom attributes and events | `get_stages`, `get_disqualification_reasons`, `get_account_custom_attributes`, `get_events` |
 
 Read-only tools are annotated as such, and tools that change or remove data are annotated as destructive, so a host that surfaces tool annotations can prompt for confirmation before a write.
