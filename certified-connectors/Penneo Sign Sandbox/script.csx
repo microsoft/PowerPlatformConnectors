@@ -1,27 +1,32 @@
 public class Script : ScriptBase
 {
+    private static readonly HashSet<string> LegacyAuthOperations = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "GetCaseFileDetails",
+        "DownloadDocument"
+    };
+
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        // Get the Authorization header value (which contains "Bearer {access_token}")
         if (this.Context.Request.Headers.TryGetValues("Authorization", out var authHeaderValues))
         {
             var authHeader = authHeaderValues.FirstOrDefault();
             if (!string.IsNullOrEmpty(authHeader))
             {
-                // Remove the "Authorization" header
-                this.Context.Request.Headers.Remove("Authorization");
-                
-                // Extract just the token (remove "Bearer " prefix if present)
-                var token = authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) 
-                    ? authHeader.Substring(7) 
+                var token = authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                    ? authHeader.Substring(7)
                     : authHeader;
-                
-                // Add the token to "X-Auth-Token" header WITHOUT "Bearer " prefix
+
+                this.Context.Request.Headers.Remove("Authorization");
                 this.Context.Request.Headers.Add("X-Auth-Token", token);
+
+                if (LegacyAuthOperations.Contains(this.Context.OperationId))
+                {
+                    this.Context.Request.Headers.TryAddWithoutValidation("Authorization", "JWT");
+                }
             }
         }
 
-        // Send the request to the backend API
         var response = await this.Context.SendAsync(this.Context.Request, this.CancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 
         return response;

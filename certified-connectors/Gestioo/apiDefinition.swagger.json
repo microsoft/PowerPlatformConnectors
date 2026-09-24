@@ -1,0 +1,668 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Send to Gestioo",
+    "version": "1.0.3",
+    "description": "Deposit PDF and Word documents into Gestioo with authorized access groups and records classification, then confirm their archival in the secure vault.",
+    "contact": {
+      "name": "Gestioo Support",
+      "url": "https://gestioo.co/contact",
+      "email": "support@gestioo.co"
+    }
+  },
+  "host": "gestioo.co",
+  "basePath": "/api/integrations",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "oauth2-auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://gestioo.co/api/integrations/oauth/authorize",
+      "tokenUrl": "https://gestioo.co/api/integrations/oauth/token",
+      "scopes": {
+        "https://gestioo.co/api/mcp/access_as_user offline_access": "https://gestioo.co/api/mcp/access_as_user offline_access"
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2-auth": [
+        "https://gestioo.co/api/mcp/access_as_user offline_access"
+      ]
+    }
+  ],
+  "paths": {
+    "/context": {
+      "get": {
+        "operationId": "GetDepositOptions",
+        "summary": "Get deposit options",
+        "x-ms-visibility": "important",
+        "responses": {
+          "200": {
+            "description": "Authorized deposit options.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "organizationName": {
+                  "type": "string",
+                  "x-ms-summary": "Organization",
+                  "description": "The organization resolved from the signed in account."
+                },
+                "maxUploadBytes": {
+                  "type": "integer",
+                  "x-ms-summary": "Maximum upload size",
+                  "description": "The maximum original file size accepted by Gestioo, in bytes.",
+                  "format": "int32"
+                },
+                "supportedFormats": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Supported formats",
+                  "description": "The supported original file extensions."
+                },
+                "accessGroups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-ms-summary": "Access group ID",
+                        "description": "The authorized access group identifier."
+                      },
+                      "nameFr": {
+                        "type": "string",
+                        "x-ms-summary": "French name",
+                        "description": "The access group name in French."
+                      },
+                      "nameEn": {
+                        "type": "string",
+                        "x-ms-summary": "English name",
+                        "description": "The access group name in English."
+                      }
+                    }
+                  },
+                  "x-ms-summary": "Authorized access groups",
+                  "description": "The access groups available to this account."
+                },
+                "classifications": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-ms-summary": "Classification rubric ID",
+                        "description": "The authorized classification rubric identifier."
+                      },
+                      "label": {
+                        "type": "string",
+                        "x-ms-summary": "Classification label",
+                        "description": "The rubric code and title."
+                      },
+                      "requiresEventDate": {
+                        "type": "boolean",
+                        "x-ms-summary": "Event date required",
+                        "description": "Whether the classification requires a retention event date."
+                      }
+                    }
+                  },
+                  "x-ms-summary": "Classification choices",
+                  "description": "The authorized classification rubrics and their event date requirements."
+                },
+                "administrativeUnits": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-ms-summary": "Administrative unit ID",
+                        "description": "The administrative unit identifier."
+                      },
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "Unit name",
+                        "description": "The administrative unit name."
+                      }
+                    }
+                  },
+                  "x-ms-summary": "Administrative units",
+                  "description": "The active administrative units in the organization."
+                },
+                "classificationSeries": {
+                  "type": "array",
+                  "x-ms-summary": "Classification series",
+                  "description": "The authorized classification hierarchy and default retention metadata.",
+                  "x-ms-visibility": "advanced",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "seriesCode": {
+                        "type": "string",
+                        "x-ms-summary": "Series code",
+                        "description": "The classification series code."
+                      },
+                      "seriesTitle": {
+                        "type": "string",
+                        "x-ms-summary": "Series title",
+                        "description": "The classification series title."
+                      },
+                      "rubrics": {
+                        "type": "array",
+                        "x-ms-summary": "Rubrics",
+                        "description": "The authorized rubrics in this classification series.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "x-ms-summary": "Rubric ID",
+                              "description": "The classification rubric identifier."
+                            },
+                            "code": {
+                              "type": "string",
+                              "x-ms-summary": "Rubric code",
+                              "description": "The classification rubric code."
+                            },
+                            "title": {
+                              "type": "string",
+                              "x-ms-summary": "Rubric title",
+                              "description": "The classification rubric title."
+                            },
+                            "seriesCode": {
+                              "type": "string",
+                              "x-ms-summary": "Series code",
+                              "description": "The parent classification series code."
+                            },
+                            "seriesTitle": {
+                              "type": "string",
+                              "x-ms-summary": "Series title",
+                              "description": "The parent classification series title."
+                            },
+                            "subSeriesCode": {
+                              "type": "string",
+                              "x-ms-summary": "Subseries code",
+                              "description": "The classification subseries code, when available.",
+                              "x-nullable": true
+                            },
+                            "subSeriesTitle": {
+                              "type": "string",
+                              "x-ms-summary": "Subseries title",
+                              "description": "The classification subseries title, when available.",
+                              "x-nullable": true
+                            },
+                            "optionalFunction": {
+                              "type": "string",
+                              "x-ms-summary": "Optional function",
+                              "description": "The optional classification function, when available.",
+                              "x-nullable": true
+                            },
+                            "defaultRetentionLineId": {
+                              "type": "string",
+                              "x-ms-summary": "Default retention rule ID",
+                              "description": "The default retention rule identifier, when available.",
+                              "x-nullable": true
+                            },
+                            "defaultRetentionActiveKind": {
+                              "type": "string",
+                              "x-ms-summary": "Active retention type",
+                              "description": "The type of active retention period, when available.",
+                              "x-nullable": true
+                            },
+                            "defaultRetentionTriggerType": {
+                              "type": "string",
+                              "x-ms-summary": "Retention event type",
+                              "description": "The suggested retention event type, when available.",
+                              "x-nullable": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "required": [
+                "organizationName",
+                "maxUploadBytes",
+                "supportedFormats",
+                "accessGroups",
+                "classifications",
+                "administrativeUnits",
+                "classificationSeries"
+              ]
+            }
+          },
+          "401": {
+            "description": "Sign in with an authorized account.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The account or document access is not authorized.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests. Wait before trying again.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service is temporarily unavailable. Retry with the same deposit details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "description": "Get the access groups, classification rubrics and administrative units available to the connected user."
+      }
+    },
+    "/documents": {
+      "post": {
+        "operationId": "CreateDeposit",
+        "summary": "Create a deposit",
+        "x-ms-visibility": "important",
+        "description": "Upload a PDF or Word document with a stable file version key. Word files are converted to PDF. Follow this action with Archive a deposit until the status is archived, and keep the local original.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Deposit"
+            },
+            "x-ms-summary": "Document deposit",
+            "description": "The original file bytes and authorized classification metadata."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deposit status. Only archived confirms completed archival.",
+            "schema": {
+              "$ref": "#/definitions/DepositStatus"
+            }
+          },
+          "400": {
+            "description": "The request is invalid.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Sign in with an authorized account.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The account or document access is not authorized.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "The deposit is not available to this connection.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "The file version key conflicts with an earlier deposit, or the document cannot be archived in its current state.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "413": {
+            "description": "The request exceeds the upload limit.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "415": {
+            "description": "The request content type is not supported.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests. Wait before trying again.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service is temporarily unavailable. Retry with the same deposit details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/documents/{depositId}": {
+      "get": {
+        "operationId": "GetDepositStatus",
+        "summary": "Get deposit status",
+        "parameters": [
+          {
+            "name": "depositId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Deposit ID",
+            "description": "The deposit ID returned by Create a deposit."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deposit status. Only archived confirms completed archival.",
+            "schema": {
+              "$ref": "#/definitions/DepositStatus"
+            }
+          },
+          "400": {
+            "description": "The request is invalid.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Sign in with an authorized account.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The account or document access is not authorized.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "The deposit is not available to this connection.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests. Wait before trying again.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service is temporarily unavailable. Retry with the same deposit details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "description": "Check a deposit created by the connected user. Only archived confirms delivery to the secure vault.",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/documents/{depositId}/archive": {
+      "post": {
+        "operationId": "ArchiveDeposit",
+        "summary": "Archive a deposit",
+        "description": "Seal the deposited PDF in the secure vault using its current classification and retention rules. Archival is irreversible. Repeat with the same deposit ID while processing, and stop on failed or interrupted.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "depositId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Deposit ID",
+            "description": "The deposit ID returned by Create a deposit."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deposit status. Only archived confirms completed archival.",
+            "schema": {
+              "$ref": "#/definitions/DepositStatus"
+            }
+          },
+          "400": {
+            "description": "The request is invalid.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Sign in with an authorized account.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "The account or document access is not authorized.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "The deposit is not available to this connection.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "The file version key conflicts with an earlier deposit, or the document cannot be archived in its current state.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "429": {
+            "description": "Too many requests. Wait before trying again.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "503": {
+            "description": "The service is temporarily unavailable. Retry with the same deposit details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Deposit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idempotencyKey",
+        "fileName",
+        "contentBase64",
+        "title",
+        "accessGroupIds",
+        "classificationRubricId"
+      ],
+      "properties": {
+        "idempotencyKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "A stable identifier for this file version. Reuse the same key, bytes and metadata on retries.",
+          "x-ms-summary": "File version key"
+        },
+        "fileName": {
+          "type": "string",
+          "maxLength": 240,
+          "description": "The original PDF or DOCX file name without a folder path.",
+          "x-ms-summary": "File name",
+          "minLength": 1
+        },
+        "contentBase64": {
+          "type": "string",
+          "format": "byte",
+          "description": "The original file bytes encoded in base64 exactly once. Do not send extracted text.",
+          "x-ms-summary": "File content",
+          "minLength": 4,
+          "maxLength": 69905068
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 240,
+          "x-ms-summary": "Document title",
+          "description": "The title displayed in the Gestioo vault.",
+          "minLength": 1
+        },
+        "accessGroupIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "type": "string"
+          },
+          "description": "Identifiers of one or more access groups returned by Get deposit options.",
+          "x-ms-summary": "Access groups"
+        },
+        "classificationRubricId": {
+          "type": "string",
+          "x-ms-dynamic-values": {
+            "operationId": "GetDepositOptions",
+            "value-collection": "classifications",
+            "value-path": "id",
+            "value-title": "label",
+            "parameters": {}
+          },
+          "x-ms-summary": "Classification rubric",
+          "description": "The authorized classification rubric for the document."
+        },
+        "classificationCopyType": {
+          "type": "string",
+          "enum": [
+            "principal",
+            "secondaire"
+          ],
+          "default": "principal",
+          "x-ms-summary": "Copy type",
+          "description": "The document copy type. Use principal for the primary record or secondaire for a secondary copy."
+        },
+        "administrativeUnitId": {
+          "type": "string",
+          "x-ms-dynamic-values": {
+            "operationId": "GetDepositOptions",
+            "value-collection": "administrativeUnits",
+            "value-path": "id",
+            "value-title": "name",
+            "parameters": {}
+          },
+          "x-ms-summary": "Administrative unit",
+          "description": "The authorized administrative unit, when applicable.",
+          "x-nullable": true
+        },
+        "triggerEventAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The retention event date in ISO 8601 format with a time zone, when required by the classification.",
+          "x-ms-summary": "Retention event date",
+          "x-nullable": true
+        }
+      }
+    },
+    "DepositStatus": {
+      "type": "object",
+      "required": [
+        "depositId",
+        "documentId",
+        "status"
+      ],
+      "properties": {
+        "depositId": {
+          "type": "string",
+          "x-ms-summary": "Deposit ID",
+          "description": "The stable deposit receipt identifier."
+        },
+        "documentId": {
+          "type": "string",
+          "x-ms-summary": "Document ID",
+          "description": "The identifier reserved for the deposited document."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "receiving",
+            "processing",
+            "archived",
+            "failed",
+            "interrupted"
+          ],
+          "x-ms-summary": "Status",
+          "description": "The current deposit state. Only archived confirms successful archival."
+        },
+        "archivedAt": {
+          "type": "string",
+          "x-ms-summary": "Archived at",
+          "description": "The archive timestamp in ISO 8601 format, available after archival."
+        },
+        "error": {
+          "type": "string",
+          "x-ms-summary": "Error code",
+          "description": "A safe error code when the deposit has failed."
+        },
+        "nextAction": {
+          "type": "string",
+          "x-ms-summary": "Next action",
+          "description": "The next action required while the document is processing.",
+          "enum": [
+            "archive_document"
+          ]
+        },
+        "retryAfterSeconds": {
+          "type": "integer",
+          "x-ms-summary": "Retry after seconds",
+          "description": "The delay before checking or requesting archival again.",
+          "format": "int32"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-ms-summary": "Error code",
+          "description": "A safe error code without document content or credentials."
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://gestioo.co"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://gestioo.co/politique-confidentialite"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Productivity"
+    }
+  ]
+}

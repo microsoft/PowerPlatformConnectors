@@ -182,6 +182,9 @@ namespace SnowflakeV2CoreLogic.Controllers
             {
                 throw new ArgumentException($"The Instance parameter cannot contain a trailing slash. Please remove it and try again.");
             }
+
+            // Validate that the instance belongs to a valid Snowflake domain
+            instanceUrl.EnsureValidSnowflakeUrl("Instance");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿public class Script : ScriptBase
+public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
@@ -77,16 +77,25 @@
             }
 
             var signers = (body["roles"] as JArray) ?? new JArray();
+            var signersLocale = new HashSet<string>();
 
             foreach (var signer in signers)
             {
                 var roleName = signer["name"];
+                var roleIndex = signer["index"];
+                var locale = signer["locale"]?.ToString()?.ToUpperInvariant();
+                signersLocale.Add(locale);
+
                 var signerNameDefinition = basePropertyDefinition.DeepClone();
                 signerNameDefinition["description"] = "Provide signer name";
+                signerNameDefinition["title"] = roleName + " Name";
+
                 var signerEmailDefinition = basePropertyDefinition.DeepClone();
                 signerEmailDefinition["description"] = "Provide signer email";
-                itemProperties[roleName + " Name"] = signerNameDefinition;
-                itemProperties[roleName + " Email"] = signerEmailDefinition;
+                signerEmailDefinition["title"] = roleName + " Email";
+
+                itemProperties[$"{roleName}||{roleIndex}||{locale}||Name"] = signerNameDefinition;
+                itemProperties[$"{roleName}||{roleIndex}||{locale}||Email"] = signerEmailDefinition;
 
                 var signerFormFields = (signer["formFields"] as JArray) ?? new JArray();
                 var radioButtonFields = new JArray();
@@ -184,6 +193,23 @@
 
                         itemProperties[group.Key + " (Radio button)"] = radioGroupDefinition;
                     }
+                }
+            }
+
+            if(signersLocale.Count == 1 && signersLocale.Contains("EN"))
+            {
+                var documentTitle = basePropertyDefinition.DeepClone();
+                documentTitle["description"] = "Enter document title";
+                itemProperties["Document title"] = documentTitle;
+            }
+            else
+            {
+                foreach (var loc in signersLocale)
+                {
+                    var documentTitleDefinition = basePropertyDefinition.DeepClone();
+                    documentTitleDefinition["description"] = $"Enter document title";
+
+                    itemProperties[$"Document title ({loc})"] = documentTitleDefinition;
                 }
             }
 
@@ -285,9 +311,9 @@
 
         var newBody = new JObject()
         {
-            ["title"] = query.Get("title"),
             ["message"] = query.Get("message"),
             ["brandId"] = query.Get("brandId"),
+            ["expiryDateType"] = "Days",
             ["expiryValue"] = query.Get("expiryDays"),
             ["enablePrintAndSign"] = query.Get("enablePrintAndSign"),
             ["enableReassign"] = query.Get("enableReassign"),
@@ -343,20 +369,27 @@
         this.Context.Request.RequestUri = uriBuilder.Uri;
 
         var roleIndex = 1;
+        var selectedLocales = new HashSet<string>();
 
         foreach (var property in body)
         {
             var value = (string)property.Value;
             var key = (string)property.Key;
-
-            if (key.Contains(" Name"))
+            
+            if (key.EndsWith("||Name"))
             {
-                signer["signerRole"] = key.Substring(0, key.Length - 5);
+                var parts = key.Split(new[] { "||" }, StringSplitOptions.None);
+                var role = parts[0];
+                var locale = parts[2];
+                selectedLocales.Add(locale);
+
+                signer["signerRole"] = role;
                 signer["signerName"] = value;
                 signer["roleIndex"] = roleIndex++;
+                signer["locale"] = locale;
             }
 
-            if (key.Contains(" Email"))
+            if (key.EndsWith("||Email"))
             {
                 signer["signerEmail"] = value;
                 templateRoles.Add(signer);
@@ -451,6 +484,31 @@
         }
 
         newBody["roles"] = templateRoles;
+        if (selectedLocales.Count == 1 && selectedLocales.Contains("EN"))
+        {
+            newBody["title"] = body["Document title"];
+        }
+        else
+        {
+            var documentInfoArray = new JArray();
+
+            foreach (var locale in selectedLocales)
+            {
+                var keyName = $"Document title ({locale})";
+
+                if (body[keyName] != null)
+                {
+                    var documentInfo = new JObject
+                    {
+                        ["title"] = body[keyName],
+                        ["locale"] = locale
+                    };
+
+                    documentInfoArray.Add(documentInfo);
+                }
+            }
+            newBody["documentInfo"] = documentInfoArray;
+        }
 
         return newBody;
     }
