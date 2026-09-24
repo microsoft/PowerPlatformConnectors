@@ -8,7 +8,7 @@ The `paconn` command-line tool is designed to aid Microsoft Power Platform custo
 
 ## Installing
 
-1. Install Python 3.5+ from [https://www.python.org/downloads](Python downloads). Select the 'Download' link on any version of Python greater than Python 3.5. For Linux and macOS X, follow the appropriate link on the page. You can also install using an OS-specific package manager of your choice.
+1. Install Python 3.5+ from [Python downloads](https://www.python.org/downloads). Select the 'Download' link on any version of Python greater than Python 3.5. For Linux and macOS X, follow the appropriate link on the page. You can also install using an OS-specific package manager of your choice.
 
 2. Run the installer to begin installation and be sure to check the box 'Add Python X.X to PATH'.
 
