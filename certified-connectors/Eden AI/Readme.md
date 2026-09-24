@@ -40,7 +40,7 @@ The connector supports the following operations:
 
 ### Convert Text into Speech
 Converts normal language text into speech.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/audio_text_to_speech_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/audio_text_to_speech_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/audio_text_to_speech_create).
 * `text`: Enter the text you want to convert into audio.
 * `option`: Enter MALE or FEMALE to choose the voice gender.
@@ -53,12 +53,12 @@ Converts normal language text into speech.
 
 ### Detect Explicit Content in Images
 Detects adult explicit content in images, that is generally inappropriate for people under the age of 18 and includes nudity, sexual activity and pornography...
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_explicit_content_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_explicit_content_create).
 * `file`: Choose the file you want to analyze.
 
 ### Text Generation
 Generates text based on a given prompt.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_generation_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_generation_create).
 * `text`: Enter your prompt.
 * `temperature`: A value between 0 and 1. Higher values mean the model will take more risks and value 0 (argmax sampling) works better for scenarios with a well-defined answer.
 * `max_tokens`: A value between 1 and 2048. The maximum number of tokens to generate in the completion. The token count of your prompt plus max_tokens cannot exceed the model's context length.
@@ -66,7 +66,7 @@ Generates text based on a given prompt.
 
 ### Generate Chat Responses
 Generates human-like responses to various inputs and queries.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_chat_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_chat_create).
 * `text`: Enter your prompt.
 * `chat_global_action`: A system message that helps set the behavior of the assistant. For example, 'You are a helpful assistant'.
 * `temperature`: A value between 0 and 1. Higher values mean the model will take more risks and value 0 (argmax sampling) works better for scenarios with a well-defined answer.
@@ -75,55 +75,55 @@ Generates human-like responses to various inputs and queries.
 
 ### Extract Topic from Text
 Extracts general topics in a text.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_topic_extraction_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_topic_extraction_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/text_topic_extraction_create).
 * `text`: Tap or paste the text you want to analyze.
 
 ### Extract Keywords from Text
 Extracts the most important words and expressions in a text.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_keyword_extraction_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_keyword_extraction_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/text_keyword_extraction_create).
 * `text`: Tap or paste the text you want to analyze.
 
 ### Extract Named Entities in Text
 Generates human-like responses to various inputs and queries.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_named_entity_recognition_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_named_entity_recognition_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/text_named_entity_recognition_create).
 * `text`: Tap or paste the text you want to analyze.
 
 ### Anonymize Images
 Anonymizes an image by bluring sensitive parts (faces, car plates, etc.)
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_anonymization_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_anonymization_create).
 * `file`: Choose the file you want to analyze.
 
 ### Detect Faces in Images
 Identifies human faces in digital images: position, sex, age, smile, glasses, etc.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_face_detection_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_face_detection_create).
 * `file`: Choose the file you want to analyze.
 
 ### Image Generation
 Generates compelling images based on a given prompt.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_generation_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/image_generation_create).
 * `text`: Tap or paste the text you want to analyze.
 * `resolution`: Enter the resolution, it can only be 256x256, 512x512 or 1024x1024.
 * `num_images`: Enter the number of images you want.
 
 ### Translate Text into another Language
 Translates a text into another language using rules, statics or ML technics.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/translation_automatic_translation_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/translation_automatic_translation_create).
 * `text`: Tap or paste the text you want to analyze.
 * `source_language`: Enter the language of your text. Check languages supported [here](https://docs.edenai.co/reference/translation_automatic_translation_create).
 * `target_language`: Enter the language of the output text. Check languages supported [here](https://docs.edenai.co/reference/translation_automatic_translation_create).
 
 ### Moderate Texts
 Moderates a text by detecting explicit content.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_moderation_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_moderation_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/text_moderation_create).
 * `text`: Tap or paste the text you want to analyze.
 
 ### Summarize a Text
 Extracts the most important sentences from a text in order to create a smaller version of the text.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_summarize_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_summarize_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/text_summarize_create).
 * `text`: Tap or paste the text you want to analyze.
 * `output_sentences`: Enter the sentence number of the summary.
@@ -131,34 +131,34 @@ Extracts the most important sentences from a text in order to create a smaller v
 
 ### Detect Language of Text
 identify the specific linguistic features that are unique to each language.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/translation_language_detection_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/translation_language_detection_create).
 * `text`: Tap or paste the text you want to analyze.
 
 ### Identify General Sentiment of a Text
 Identifies general sentiment of a text and returns positive, negative or neutral.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_sentiment_analysis_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/text_sentiment_analysis_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/text_sentiment_analysis_create).
 * `text`: Tap or paste the text you want to analyze.
 
 ### Extract Information in Invoices
 Extracts the data in contains (items, prices, addresses, vendor name, etc.) to automate the invoice processing.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_invoice_parser_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_invoice_parser_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/ocr_invoice_parser_create).
 * `file`: Choose the file you want to analyze.
 
 ### Extract Information in Resumes
 Extracts structured data (name, job list, education, skills) to automate the resume processing.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_resume_parser_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_resume_parser_create).
 * `file`: Choose the file you want to analyze.
 
 ### Extract Informations in Identity Documents
 Extracts structured information in identity documents (passports, identity cards, driver license, etc.).
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_identity_parser_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_identity_parser_create).
 * `file`: Choose the file you want to analyze.
 
 ### Extract Information in Receipts
 Extracts structured information like products purchased, quantity, price, date and VAT from receipts.
-* `providers`: Enter the selected providers seperated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_receipt_parser_create).
+* `providers`: Enter the selected providers separated by a coma. Check the providers available [here](https://docs.edenai.co/reference/ocr_receipt_parser_create).
 * `language`: Check languages supported [here](https://docs.edenai.co/reference/ocr_receipt_parser_create).
 * `file`: Choose the file you want to analyze.
 
