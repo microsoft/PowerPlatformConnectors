@@ -4,7 +4,9 @@ This connector provides Power Automate and Logic Apps access to live EXPOCAD 3e 
 ## Publisher: A.C.T. / EXPOCAD
 
 ## Prerequisites
-Your events must be set up in 3e and accessible to an API user. When creating a connection, enter your EXPOCAD client subdomain. For example, enter `contoso` for `contoso.expocad.com`. You will be prompted for an event ID when adding a trigger.
+
+Requires that your event(s) be set up in 3e and accessible by an api user.  You will be prompted for an event id when adding a trigger.
+
 
 ## Supported Triggers
 
