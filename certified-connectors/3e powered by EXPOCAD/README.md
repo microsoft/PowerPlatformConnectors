@@ -4,7 +4,7 @@ This connector provides Power Automate and Logic Apps access to live EXPOCAD 3e 
 ## Publisher: A.C.T. / EXPOCAD
 
 ## Prerequisites
-Requires that your event(s) be set up in 3e amd accessible by an api user.  You will be prompted for an event id when adding a trigger.
+Requires that your event(s) be set up in 3e and accessible by an api user.  You will be prompted for an event id when adding a trigger.
 
 ## Supported Triggers
 
