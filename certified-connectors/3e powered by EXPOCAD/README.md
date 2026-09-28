@@ -4,11 +4,11 @@ This connector provides Power Automate and Logic Apps access to live EXPOCAD 3e 
 ## Publisher: A.C.T. / EXPOCAD
 
 ## Prerequisites
-Requires that your event(s) be set up in 3e amd accessible by an api user.  You will be prompted for an event id when adding a trigger.
+Your events must be set up in 3e and accessible to an API user. When creating a connection, enter your EXPOCAD client subdomain. For example, enter `contoso` for `contoso.expocad.com`. You will be prompted for an event ID when adding a trigger.
 
 ## Supported Triggers
 
-Webhook triggers subscribe Power Automate to EXPOCAD 3e events. Each trigger requires a client identifier and, when applicable, an event identifier. The callback URL is supplied automatically by the Power Platform.
+Webhook triggers subscribe Power Automate to EXPOCAD 3e events. Each trigger requires an event identifier when applicable. The client name comes from the connection, and the callback URL is supplied automatically by the Power Platform.
 
 - When a booth is rented
 - When a booth is unrented
@@ -55,10 +55,6 @@ Webhook triggers subscribe Power Automate to EXPOCAD 3e events. Each trigger req
 Webhook payload fields vary by trigger and can include fields such as `NotificationType`, `eventIdentifier`, `boothNumber`, `customerId`, `exhibitorName`, `otherBooths`, `oldValue`, `misc`, `timestamp`, and `callId`.
 
 ## Supported Actions
-
-### Webhook Management
-
-- Unsubscribe from a webhook by `webhookId`
 
 ### Booths
 
@@ -139,8 +135,7 @@ Webhook payload fields vary by trigger and can include fields such as `Notificat
 
 
 ## Obtaining Credentials
-You may obtain your clientId from EXPOCAD support.
-You will need to enter an api user's email as username and apiKey as password when making a connection. You can create an api user in the users and teams section of 3e.
+You may obtain your client name from EXPOCAD support. When creating a connection, enter the client subdomain, an API user's email address as the username, and the API key as the password. You can create an API user in the Users and Teams section of 3e.
 
 ## Authentication
 
@@ -148,14 +143,15 @@ This connector uses basic authentication. Keep authorization codes and credentia
 
 ## Known Issues and Limitations
 - Triggers are not always received in the order they fired in.  A timestamp property is available on all trigger payloads, allowing for scenarios where the order of operations is significant.
-- The connector is designed for event-driven EXPOCAD 3e scenarios and must be paired with valid EXPOCAD client and event identifiers.
+- Each connection targets one EXPOCAD client subdomain. Create a separate connection for each client.
+- The connector must be paired with valid EXPOCAD client and event identifiers.
 - Write operations such as rent, hold, combine, delete, update, and default-rate-plan changes modify live event data and should be used with care.
 - Please contact [developer@expocad.com](mailto:developer@expocad.com) for production access.
 
 ## Deployment Instructions
 
 1. Import the connector to Power Automate or Logic Apps.
-2. Provide your EXPOCAD credentials when prompted.
+2. Provide your EXPOCAD client subdomain and credentials when prompted.
 3. Choose the trigger or action needed for the flow.
 
 ## Terms
