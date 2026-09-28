@@ -104,11 +104,6 @@ namespace Microsoft.Azure.Connectors.SnowflakeV2Contracts.Constants
         public const string CurrencyCodeField = "x-ms-currency-code-field";
 
         /// <summary>
-        /// Default Value.
-        /// </summary>
-        public const string Default = "default";
-
-        /// <summary>
         /// Value that corresponds to internal visibility
         /// </summary>
         public const string VisibilityInternal = "internal";

@@ -1,0 +1,748 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Instafill.ai",
+    "description": "Fill PDF forms automatically with AI. Upload forms, create fill sessions, and get filled PDFs.",
+    "version": "0.1.0",
+    "contact": {
+      "name": "Instafill.ai Support",
+      "url": "https://docs.instafill.ai",
+      "email": "support@instafill.ai"
+    }
+  },
+  "host": "api.instafill.ai",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "x-ms-connector-metadata": [
+    { "propertyName": "Website", "propertyValue": "https://instafill.ai" },
+    { "propertyName": "Privacy policy", "propertyValue": "https://instafill.ai/home/privacy" },
+    { "propertyName": "Categories", "propertyValue": "Productivity" }
+  ],
+  "x-ms-api-annotation": {
+    "status": "Preview"
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "API key for Instafill.ai. Enter as: Bearer YOUR_API_KEY"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "x-ms-capabilities": {
+    "testConnection": {
+      "operationId": "GetCurrentAccount",
+      "parameters": {}
+    }
+  },
+  "paths": {
+    "/v1/integrations/power-automate/hooks/subscribe": {
+      "x-ms-notification-content": {
+        "description": "Webhook event payload.",
+        "schema": {
+          "$ref": "#/definitions/WebhookPayload"
+        }
+      },
+      "post": {
+        "summary": "When an event occurs",
+        "description": "Triggers when a form is filled or a PDF is converted to fillable.",
+        "operationId": "WebhookSubscribe",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["hookUrl", "event_type"],
+              "properties": {
+                "hookUrl": {
+                  "type": "string",
+                  "description": "URL for Power Automate to receive event notifications.",
+                  "x-ms-notification-url": true,
+                  "x-ms-visibility": "internal",
+                  "x-ms-summary": "Callback URL"
+                },
+                "event_type": {
+                  "type": "string",
+                  "enum": ["form_filled", "form_converted"],
+                  "x-ms-summary": "Event Type",
+                  "description": "The type of event to subscribe to."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Webhook registered successfully.",
+            "schema": {
+              "$ref": "#/definitions/WebhookRegistration"
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/integrations/power-automate/hooks/{id}": {
+      "delete": {
+        "summary": "Delete webhook",
+        "description": "Removes a registered webhook.",
+        "operationId": "DeleteWebhook",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Webhook ID",
+            "description": "Unique identifier of the webhook to delete."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Webhook deleted successfully."
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/account/me": {
+      "get": {
+        "summary": "Get current account",
+        "description": "Returns the current user account information.",
+        "operationId": "GetCurrentAccount",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Account information returned successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "x-ms-summary": "Email",
+                  "description": "Email address of the account owner."
+                },
+                "name": {
+                  "type": "string",
+                  "x-ms-summary": "Name",
+                  "description": "Display name of the account owner."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sessions": {
+      "post": {
+        "summary": "Fill a form",
+        "description": "Creates a new fill job to fill a PDF form with AI.",
+        "operationId": "FillForm",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["form_id"],
+              "properties": {
+                "form_id": {
+                  "type": "string",
+                  "x-ms-summary": "Form ID",
+                  "description": "The ID of the form to fill."
+                },
+                "file_urls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Source File URLs",
+                  "description": "URLs to source documents (PDF, image) to extract data from.",
+                  "x-ms-visibility": "advanced"
+                },
+                "text_info": {
+                  "type": "string",
+                  "x-ms-summary": "Text Information",
+                  "description": "Text data to fill the form with.",
+                  "x-ms-visibility": "advanced"
+                },
+                "profile_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Profile IDs",
+                  "description": "Profile IDs to use for prefilling.",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Fill session created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "session_id": {
+                  "type": "string",
+                  "x-ms-summary": "Session ID",
+                  "description": "The ID of the created fill session."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/sessions/{id}": {
+      "get": {
+        "summary": "Get fill job status",
+        "description": "Returns the status and result of a fill job.",
+        "operationId": "GetFillStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Session ID",
+            "description": "The ID of the fill session."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session details returned successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "Session status: queued, processing, completed, or failed."
+                },
+                "filled_form_url": {
+                  "type": "string",
+                  "x-ms-summary": "Filled Form URL",
+                  "description": "URL to view the filled form in a web browser."
+                },
+                "fields": {
+                  "type": "array",
+                  "x-ms-summary": "Fields",
+                  "description": "Array of form fields with their filled values.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-ms-summary": "Field ID",
+                        "description": "Unique identifier of the field."
+                      },
+                      "name": {
+                        "type": "string",
+                        "x-ms-summary": "Field Name",
+                        "description": "Display name of the field."
+                      },
+                      "value": {
+                        "type": "string",
+                        "x-ms-summary": "Value",
+                        "description": "Filled value of the field."
+                      },
+                      "group": {
+                        "type": "string",
+                        "x-ms-summary": "Group",
+                        "description": "Group or section the field belongs to."
+                      },
+                      "page_num": {
+                        "type": "integer",
+                        "format": "int32",
+                        "x-ms-summary": "Page Number",
+                        "description": "Page number where the field is located."
+                      }
+                    }
+                  }
+                },
+                "filling_status": {
+                  "type": "object",
+                  "x-ms-summary": "Filling Status",
+                  "description": "Detailed status of the filling process.",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "x-ms-summary": "Filling Status",
+                      "description": "Current filling status."
+                    },
+                    "fields_total": {
+                      "type": "integer",
+                      "format": "int32",
+                      "x-ms-summary": "Fields Total",
+                      "description": "Total number of fields to fill."
+                    },
+                    "fields_filled": {
+                      "type": "integer",
+                      "format": "int32",
+                      "x-ms-summary": "Fields Filled",
+                      "description": "Number of fields that have been filled."
+                    },
+                    "cost": {
+                      "type": "number",
+                      "x-ms-summary": "Cost",
+                      "description": "Cost of the filling operation."
+                    },
+                    "duration": {
+                      "type": "number",
+                      "x-ms-summary": "Duration",
+                      "description": "Duration of the filling process in seconds."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/forms": {
+      "get": {
+        "summary": "List forms",
+        "description": "Returns all forms in the current workspace.",
+        "operationId": "ListForms",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Forms returned successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "forms": {
+                  "type": "array",
+                  "x-ms-summary": "Forms",
+                  "items": {
+                    "$ref": "#/definitions/Form"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/forms/{id}": {
+      "get": {
+        "summary": "Get form",
+        "description": "Returns details for a specific form.",
+        "operationId": "GetForm",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Form ID",
+            "description": "The ID of the form."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Form details returned successfully.",
+            "schema": {
+              "$ref": "#/definitions/FormDetails"
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/utils/convert": {
+      "post": {
+        "summary": "Convert flat PDF to fillable",
+        "description": "Converts a non-fillable (flat) PDF into a fillable form.",
+        "operationId": "ConvertPdf",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            },
+            "x-ms-summary": "PDF File"
+          },
+          {
+            "name": "X-File-Name",
+            "in": "header",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "File Name",
+            "description": "Original file name of the PDF."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversion job created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "job_id": {
+                  "type": "string",
+                  "x-ms-summary": "Job ID",
+                  "description": "The ID of the conversion job."
+                },
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "Job status."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/utils/convert/{jobId}/status": {
+      "get": {
+        "summary": "Get conversion status",
+        "description": "Returns the status of a flat-to-fillable PDF conversion job.",
+        "operationId": "GetConversionStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-url-encoding": "single",
+            "x-ms-summary": "Job ID",
+            "description": "The ID of the conversion job."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversion status returned successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "description": "Job status: queued, processing, completed, or failed."
+                },
+                "form_id": {
+                  "type": "string",
+                  "x-ms-summary": "Form ID",
+                  "description": "ID of the form created from the converted PDF."
+                },
+                "reviewed": {
+                  "type": "boolean",
+                  "x-ms-summary": "Reviewed",
+                  "description": "Whether the converted form has been reviewed."
+                },
+                "review_url": {
+                  "type": "string",
+                  "x-ms-summary": "Review URL",
+                  "description": "URL to review the converted form in a web browser."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    },
+    "/v1/utils/check-flat": {
+      "post": {
+        "summary": "Check if PDF is flat",
+        "description": "Checks whether a PDF is flat (non-fillable) or already fillable.",
+        "operationId": "CheckIfFlat",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            },
+            "x-ms-summary": "PDF File"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flat check completed successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "is_flat": {
+                  "type": "boolean",
+                  "x-ms-summary": "Is Flat",
+                  "description": "True if the PDF is flat (non-fillable)."
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Operation failed."
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "WebhookRegistration": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Webhook ID",
+          "description": "Unique identifier of the registered webhook."
+        },
+        "signing_secret": {
+          "type": "string",
+          "x-ms-summary": "Signing Secret",
+          "description": "Secret key used to verify webhook payload signatures."
+        }
+      }
+    },
+    "WebhookPayload": {
+      "type": "object",
+      "properties": {
+        "event_type": {
+          "type": "string",
+          "x-ms-summary": "Event Type",
+          "description": "The type of event: form_filled or form_converted."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Event status: completed or failed."
+        },
+        "form_id": {
+          "type": "string",
+          "x-ms-summary": "Form ID",
+          "description": "The ID of the form."
+        },
+        "form_name": {
+          "type": "string",
+          "x-ms-summary": "Form Name",
+          "description": "The name of the form."
+        },
+        "session_id": {
+          "type": "string",
+          "x-ms-summary": "Session ID",
+          "description": "The ID of the fill session (form_filled events)."
+        },
+        "filled_pdf_url": {
+          "type": "string",
+          "x-ms-summary": "Filled PDF URL",
+          "description": "URL to download the filled PDF (form_filled events)."
+        },
+        "filled_at": {
+          "type": "string",
+          "x-ms-summary": "Filled At",
+          "description": "Timestamp when the form was filled (form_filled events)."
+        },
+        "job_id": {
+          "type": "string",
+          "x-ms-summary": "Job ID",
+          "description": "The ID of the conversion job (form_converted events)."
+        },
+        "converted_pdf_url": {
+          "type": "string",
+          "x-ms-summary": "Converted PDF URL",
+          "description": "URL to download the converted PDF (form_converted events)."
+        },
+        "review_url": {
+          "type": "string",
+          "x-ms-summary": "Review URL",
+          "description": "URL to review the converted form (form_converted events)."
+        },
+        "converted_at": {
+          "type": "string",
+          "x-ms-summary": "Converted At",
+          "description": "Timestamp when the conversion completed (form_converted events)."
+        }
+      }
+    },
+    "FormDetails": {
+      "type": "object",
+      "properties": {
+        "form_id": {
+          "type": "string",
+          "x-ms-summary": "Form ID",
+          "description": "Unique identifier of the form."
+        },
+        "template_id": {
+          "type": "string",
+          "x-ms-summary": "Template ID",
+          "description": "Identifier of the form template."
+        },
+        "file_name": {
+          "type": "string",
+          "x-ms-summary": "File Name",
+          "description": "Original file name of the uploaded PDF."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Processing status of the form."
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created",
+          "description": "Timestamp when the form was uploaded."
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "description": "Timestamp when the form was last modified."
+        },
+        "processed": {
+          "type": "boolean",
+          "x-ms-summary": "Processed",
+          "description": "Whether the form has been processed."
+        },
+        "form_pages_number": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Page Count",
+          "description": "Number of pages in the PDF form."
+        },
+        "fields_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Fields Count",
+          "description": "Number of fillable fields in the form."
+        },
+        "static_fields_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Static Fields Count",
+          "description": "Number of static (non-editable) fields."
+        },
+        "table_fields_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Table Fields Count",
+          "description": "Number of table fields in the form."
+        },
+        "dependencies_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Dependencies Count",
+          "description": "Number of field dependencies."
+        },
+        "sections_count": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Sections Count",
+          "description": "Number of sections in the form."
+        }
+      }
+    },
+    "Form": {
+      "type": "object",
+      "properties": {
+        "form_id": {
+          "type": "string",
+          "x-ms-summary": "Form ID",
+          "description": "Unique identifier of the form."
+        },
+        "template_id": {
+          "type": "string",
+          "x-ms-summary": "Template ID",
+          "description": "Identifier of the form template."
+        },
+        "form_url": {
+          "type": "string",
+          "x-ms-summary": "Form URL",
+          "description": "URL to download the form PDF."
+        },
+        "file_name": {
+          "type": "string",
+          "x-ms-summary": "File Name",
+          "description": "Original file name of the uploaded PDF."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "Processing status of the form."
+        },
+        "processed": {
+          "type": "boolean",
+          "x-ms-summary": "Processed",
+          "description": "Whether the form has been processed."
+        },
+        "has_filled_fields": {
+          "type": "boolean",
+          "x-ms-summary": "Has Filled Fields",
+          "description": "Whether the form has any pre-filled fields."
+        },
+        "form_pages_number": {
+          "type": "integer",
+          "format": "int32",
+          "x-ms-summary": "Page Count",
+          "description": "Number of pages in the PDF form."
+        },
+        "created": {
+          "type": "string",
+          "x-ms-summary": "Created",
+          "description": "Timestamp when the form was uploaded."
+        },
+        "modified": {
+          "type": "string",
+          "x-ms-summary": "Modified",
+          "description": "Timestamp when the form was last modified."
+        },
+        "file_size_mb": {
+          "type": "number",
+          "x-ms-summary": "File Size (MB)",
+          "description": "File size of the PDF in megabytes."
+        },
+        "converted_from_flat": {
+          "type": "boolean",
+          "x-ms-summary": "Converted From Flat",
+          "description": "Whether the form was converted from a flat PDF."
+        }
+      }
+    }
+  }
+}

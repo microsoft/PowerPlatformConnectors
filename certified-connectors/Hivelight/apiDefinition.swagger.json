@@ -1,0 +1,2228 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Hivelight",
+    "description": "Hivelight is a legal practice management platform that helps teams organise work and collaborate efficiently. Use this connector to create, update, and manage matters, tasks, workflows, users, and workspaces within Hivelight, enabling automated legal operations and streamlined processes.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Hivelight Support",
+      "url": "https://docs.hivelight.com",
+      "email": "support@hivelight.com"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.hivelight.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.hivelight.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management;Productivity"
+    }
+  ],
+  "host": "api.hivelight.com",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/vnd.api+json"
+  ],
+  "produces": [
+    "application/vnd.api+json"
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-api-key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/matters": {
+      "get": {
+        "summary": "Get Matters",
+        "description": "Get all matters the current user has access to in a workspace.",
+        "operationId": "GetMatters",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Starting index for pagination.",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "From"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Number of items to return.",
+            "required": false,
+            "type": "integer",
+            "x-ms-summary": "Size"
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "description": "Filter matters by archived status.",
+            "required": false,
+            "type": "boolean",
+            "x-ms-summary": "Archived"
+          },
+          {
+            "name": "userIds",
+            "in": "query",
+            "description": "Comma-separated user IDs to filter matters by participants.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "User IDs"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/MatterBasic"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/PaginationMeta"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Matter",
+        "description": "Create a new matter and optionally apply workflows to it.",
+        "operationId": "CreateMatter",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/MatterBasic"
+                },
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "workflows": {
+                      "type": "array",
+                      "description": "Workflows to apply to this matter.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The Workflow ID."
+                          },
+                          "startDate": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Start date as milliseconds since Unix epoch."
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The matter data to create."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Matter created",
+            "schema": {
+              "$ref": "#/definitions/MatterWithMilestonesResponse"
+            }
+          }
+        }
+      }
+    },
+    "/matters/{matterId}": {
+      "get": {
+        "summary": "Get Matter",
+        "description": "Get details of a specific matter by ID.",
+        "operationId": "GetMatter",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matter details",
+            "schema": {
+              "$ref": "#/definitions/MatterWithMilestonesResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Update Matter Details",
+        "description": "Update the details of an existing matter.",
+        "operationId": "UpdateMatterDetails",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "matters"
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "The matter ID."
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the matter."
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "The description of the matter."
+                        },
+                        "external-reference": {
+                          "type": "object",
+                          "description": "External reference for the matter.",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "External reference ID."
+                            },
+                            "source": {
+                              "type": "string",
+                              "description": "Source of the external reference."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The matter data to update."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matter updated",
+            "schema": {
+              "$ref": "#/definitions/MatterWithMilestonesResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Matter",
+        "description": "Delete a matter. Only archived matters can be deleted. This operation is irreversible.",
+        "operationId": "DeleteMatter",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matter deleted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/matters/{matterId}/apply/{workflowId}": {
+      "post": {
+        "summary": "Apply Workflow to Matter",
+        "description": "Apply a workflow (roadmap or task list) to a matter.",
+        "operationId": "ApplyWorkflowToMatter",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          },
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the workflow to apply.",
+            "x-ms-summary": "Workflow ID"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "description": "Start date as milliseconds since Unix epoch.",
+            "x-ms-summary": "Start Date"
+          },
+          {
+            "name": "milestoneId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Milestone ID to apply a task list to (defaults to general tasks).",
+            "x-ms-summary": "Milestone ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workflow applied",
+            "schema": {
+              "$ref": "#/definitions/MatterWithMilestonesResponse"
+            }
+          }
+        }
+      }
+    },
+    "/matters/{matterId}/roles": {
+      "post": {
+        "summary": "Update Matter Roles",
+        "description": "Update roles for a matter. This replaces existing roles with the provided values.",
+        "operationId": "UpdateMatterRoles",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "matters"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "roles": {
+                          "$ref": "#/definitions/MatterRoles"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The roles data to update."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles updated",
+            "schema": {
+              "$ref": "#/definitions/MatterWithMilestonesResponse"
+            }
+          }
+        }
+      }
+    },
+    "/matters/{matterId}/archive": {
+      "post": {
+        "summary": "Archive Matter",
+        "description": "Archive a matter.",
+        "operationId": "ArchiveMatter",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matter archived",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/MatterBasic"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Unarchive Matter",
+        "description": "Un-archive a previously archived matter.",
+        "operationId": "UnarchiveMatter",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matter un-archived",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/MatterBasic"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/matters/{matterId}/notes": {
+      "post": {
+        "summary": "Create Matter Note",
+        "description": "Create a note on a matter.",
+        "operationId": "CreateMatterNote",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "notes"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "description": "Content of the note in text or HTML."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The note data to create."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Note created",
+            "schema": {
+              "$ref": "#/definitions/NoteResponse"
+            }
+          }
+        }
+      }
+    },
+    "/matters/{matterId}/tasks/{taskId}/notes": {
+      "post": {
+        "summary": "Create Task Note",
+        "description": "Create a note on a task within a matter.",
+        "operationId": "CreateTaskNote",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the matter.",
+            "x-ms-summary": "Matter ID"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the task.",
+            "x-ms-summary": "Task ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "notes"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "description": "Content of the note in text or HTML."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The note data to create."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Note created",
+            "schema": {
+              "$ref": "#/definitions/NoteResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Get All Users",
+        "description": "Get all users in the workspace.",
+        "operationId": "GetUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A list of users",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "summary": "Get User by ID",
+        "description": "Get a specific user by ID. Use 'whoami' to get the current user's details.",
+        "operationId": "GetUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "User ID or 'whoami' for current user.",
+            "x-ms-summary": "User ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "summary": "Get Tasks",
+        "description": "Get tasks in the workspace with optional pagination and filtering.",
+        "operationId": "GetTasks",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Starting index for pagination.",
+            "x-ms-summary": "From"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items to return.",
+            "x-ms-summary": "Size"
+          },
+          {
+            "name": "matterId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter tasks by matter.",
+            "x-ms-summary": "Matter ID"
+          },
+          {
+            "name": "milestoneId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter tasks by milestone.",
+            "x-ms-summary": "Milestone ID"
+          },
+          {
+            "name": "dueDateFrom",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "description": "Tasks with due date after this value (ms since epoch).",
+            "x-ms-summary": "Due Date From"
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "description": "Tasks with due date before this value (ms since epoch).",
+            "x-ms-summary": "Due Date To"
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Comma-separated statuses: TODO, INPROGRESS, INREVIEW, DONE.",
+            "x-ms-summary": "Statuses"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tasks",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Task"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/PaginationMeta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{taskId}": {
+      "get": {
+        "summary": "Get Task by ID",
+        "description": "Get details of a specific task.",
+        "operationId": "GetTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the task.",
+            "x-ms-summary": "Task ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task details",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{taskId}/status": {
+      "post": {
+        "summary": "Update Task Status",
+        "description": "Update the status of a task.",
+        "operationId": "UpdateTaskStatus",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the task.",
+            "x-ms-summary": "Task ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "tasks"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "description": "New status for the task.",
+                          "enum": [
+                            "TODO",
+                            "INPROGRESS",
+                            "INREVIEW",
+                            "DONE"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The status data to update."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task updated",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks": {
+      "get": {
+        "summary": "Get Webhooks",
+        "description": "Retrieve all webhooks for the current workspace.",
+        "operationId": "GetWebhooks",
+        "x-ms-visibility": "internal",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of webhooks",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Webhook"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Webhook (Internal)",
+        "description": "Create a new webhook for the current workspace.",
+        "operationId": "CreateWebhookInternal",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "webhooks"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "events": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "Callback URL for the webhook.",
+                          "x-ms-notification-url": true,
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "required": [
+                        "events",
+                        "url"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The webhook data to create."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Webhook"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/{webhookId}": {
+      "get": {
+        "summary": "Get Webhook",
+        "description": "Retrieve a webhook by its ID.",
+        "operationId": "GetWebhook",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Webhook ID",
+            "description": "The unique identifier of the webhook."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook details",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Webhook"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Webhook",
+        "description": "Delete a webhook by its ID.",
+        "operationId": "DeleteWebhook",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "webhookId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Webhook ID",
+            "description": "The unique identifier of the webhook."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Webhook deleted"
+          }
+        }
+      }
+    },
+    "/trigger/matter-created": {
+      "x-ms-notification-content": {
+        "description": "Matter Created payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookMatterPayload"
+        }
+      },
+      "post": {
+        "summary": "When a Matter is Created",
+        "description": "Triggers when a new matter is created in Hivelight.",
+        "operationId": "TriggerMatterCreated",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "webhooks",
+                      "x-ms-visibility": "internal"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "events": {
+                          "type": "array",
+                          "default": [
+                            "matter.created"
+                          ],
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-ms-visibility": "internal"
+                        },
+                        "url": {
+                          "type": "string",
+                          "x-ms-notification-url": true,
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "required": [
+                        "events",
+                        "url"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              }
+            },
+            "description": "The webhook registration payload."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger registered"
+          }
+        }
+      }
+    },
+    "/trigger/task-created": {
+      "x-ms-notification-content": {
+        "description": "Task Created payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookTaskPayload"
+        }
+      },
+      "post": {
+        "summary": "When a Task is Created",
+        "description": "Triggers when a new task is created within a matter.",
+        "operationId": "TriggerTaskCreated",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "webhooks",
+                      "x-ms-visibility": "internal"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "events": {
+                          "type": "array",
+                          "default": [
+                            "task.created"
+                          ],
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-ms-visibility": "internal"
+                        },
+                        "url": {
+                          "type": "string",
+                          "x-ms-notification-url": true,
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "required": [
+                        "events",
+                        "url"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              }
+            },
+            "description": "The webhook registration payload."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger registered"
+          }
+        }
+      }
+    },
+    "/trigger/task-status-updated": {
+      "x-ms-notification-content": {
+        "description": "Task Status Updated payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookTaskPayload"
+        }
+      },
+      "post": {
+        "summary": "When a Task Status is Updated",
+        "description": "Triggers when the status of a task is updated.",
+        "operationId": "TriggerTaskStatusUpdated",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "webhooks",
+                      "x-ms-visibility": "internal"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "events": {
+                          "type": "array",
+                          "default": [
+                            "task.status.updated"
+                          ],
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-ms-visibility": "internal"
+                        },
+                        "url": {
+                          "type": "string",
+                          "x-ms-notification-url": true,
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "required": [
+                        "events",
+                        "url"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              }
+            },
+            "description": "The webhook registration payload."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger registered"
+          }
+        }
+      }
+    },
+    "/trigger/milestone-created": {
+      "x-ms-notification-content": {
+        "description": "Milestone Created payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookMilestonePayload"
+        }
+      },
+      "post": {
+        "summary": "When a Milestone is Created",
+        "description": "Triggers when a new milestone is created.",
+        "operationId": "TriggerMilestoneCreated",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "webhooks",
+                      "x-ms-visibility": "internal"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "events": {
+                          "type": "array",
+                          "default": [
+                            "milestone.created"
+                          ],
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-ms-visibility": "internal"
+                        },
+                        "url": {
+                          "type": "string",
+                          "x-ms-notification-url": true,
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "required": [
+                        "events",
+                        "url"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              }
+            },
+            "description": "The webhook registration payload."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger registered"
+          }
+        }
+      }
+    },
+    "/trigger/milestone-status-updated": {
+      "x-ms-notification-content": {
+        "description": "Milestone Status Updated payload",
+        "schema": {
+          "$ref": "#/definitions/WebhookMilestonePayload"
+        }
+      },
+      "post": {
+        "summary": "When a Milestone Status is Updated",
+        "description": "Triggers when the status of a milestone is updated.",
+        "operationId": "TriggerMilestoneStatusUpdated",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "webhooks",
+                      "x-ms-visibility": "internal"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "events": {
+                          "type": "array",
+                          "default": [
+                            "milestone.status.updated"
+                          ],
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-ms-visibility": "internal"
+                        },
+                        "url": {
+                          "type": "string",
+                          "x-ms-notification-url": true,
+                          "x-ms-visibility": "internal"
+                        }
+                      },
+                      "required": [
+                        "events",
+                        "url"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              }
+            },
+            "description": "The webhook registration payload."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger registered"
+          }
+        }
+      }
+    },
+    "/workflows": {
+      "get": {
+        "summary": "Get Workflows",
+        "description": "Fetch a list of workflows for the workspace.",
+        "operationId": "GetWorkflows",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Starting point for pagination.",
+            "x-ms-summary": "From"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "description": "Number of workflows to return.",
+            "x-ms-summary": "Size"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter by type: ROADMAP (default) or TASK_LIST.",
+            "x-ms-summary": "Workflow Type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workflows",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Workflow"
+                  }
+                },
+                "meta": {
+                  "$ref": "#/definitions/PaginationMeta"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workflows/{workflowId}": {
+      "get": {
+        "summary": "Get Workflow by ID",
+        "description": "Fetch details of a specific workflow by ID.",
+        "operationId": "GetWorkflow",
+        "parameters": [
+          {
+            "name": "workflowId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the workflow.",
+            "x-ms-summary": "Workflow ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workflow details",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/Workflow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace": {
+      "get": {
+        "summary": "Get Current Workspace",
+        "description": "Retrieve the current workspace along with its related matter types.",
+        "operationId": "GetWorkspace",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Workspace details",
+            "schema": {
+              "$ref": "#/definitions/WorkspaceResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "PaginationMeta": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "description": "Total number of items."
+        },
+        "showing": {
+          "type": "integer",
+          "description": "Number of items returned."
+        },
+        "from": {
+          "type": "integer",
+          "description": "Current starting index."
+        }
+      }
+    },
+    "MatterBasic": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/definitions/MatterAttributes"
+        }
+      }
+    },
+    "MatterAttributes": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the matter."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the matter."
+        },
+        "external-reference": {
+          "type": "object",
+          "description": "External reference for the matter.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "External reference ID."
+            },
+            "source": {
+              "type": "string",
+              "description": "Source of the external reference."
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags associated with the matter.",
+          "items": {
+            "$ref": "#/definitions/Tag"
+          }
+        },
+        "types": {
+          "type": "array",
+          "description": "Matter type identifiers.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jurisdictions": {
+          "type": "array",
+          "description": "ISO 3166-2 jurisdiction codes.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "roles": {
+          "$ref": "#/definitions/MatterRoles"
+        }
+      }
+    },
+    "MatterRoles": {
+      "type": "object",
+      "description": "Roles and users associated with the matter.",
+      "properties": {
+        "OWNER": {
+          "type": "array",
+          "description": "Matter owner (limited to one user).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "LEAD": {
+          "type": "array",
+          "description": "Matter lead (limited to one user).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "BUSINESS_1": {
+          "type": "array",
+          "description": "Business Administrators.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ADVOCATE_1": {
+          "type": "array",
+          "description": "Advocates or Barristers.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "CONSULTANT_1": {
+          "type": "array",
+          "description": "Consultants.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "LEGAL_1": {
+          "type": "array",
+          "description": "Senior Lawyers.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "LEGAL_2": {
+          "type": "array",
+          "description": "Junior Lawyers.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "LEGAL_3": {
+          "type": "array",
+          "description": "Law Clerks or Paralegals.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ADMINISTRATIVE_1": {
+          "type": "array",
+          "description": "Senior Legal Assistants.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ADMINISTRATIVE_2": {
+          "type": "array",
+          "description": "Junior Legal Assistants.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "MatterWithMilestonesResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "attributes": {
+              "$ref": "#/definitions/MatterAttributes"
+            },
+            "relationships": {
+              "type": "object",
+              "properties": {
+                "milestones": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "included": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Milestone"
+          }
+        }
+      }
+    },
+    "Milestone": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Milestone name."
+            },
+            "description": {
+              "type": "string",
+              "description": "Milestone description."
+            },
+            "status": {
+              "type": "string",
+              "description": "Milestone status.",
+              "enum": [
+                "NOTSTARTED",
+                "INPROGRESS",
+                "DONE"
+              ]
+            },
+            "created-date": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Created date (ms since epoch)."
+            },
+            "due-date": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Due date (ms since epoch)."
+            },
+            "target-date": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Target date (ms since epoch)."
+            },
+            "total-tasks": {
+              "type": "integer",
+              "description": "Total tasks in milestone."
+            },
+            "completed-tasks": {
+              "type": "integer",
+              "description": "Completed tasks."
+            },
+            "pending-tasks": {
+              "type": "integer",
+              "description": "Pending tasks."
+            }
+          }
+        }
+      }
+    },
+    "NoteResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "description": "Note content."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": "User status.",
+          "enum": [
+            "ACTIVE",
+            "INVITED",
+            "REVOKED"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "description": "User workspace role.",
+          "enum": [
+            "OWNER",
+            "ADMIN",
+            "MEMBER",
+            "GUEST"
+          ]
+        },
+        "matterRole": {
+          "type": "string",
+          "description": "Default matter role.",
+          "enum": [
+            "PRINCIPAL",
+            "BUSINESS_1",
+            "ADVOCATE_1",
+            "CONSULTANT_1",
+            "LEGAL_1",
+            "LEGAL_2",
+            "LEGAL_3",
+            "ADMINISTRATIVE_1",
+            "ADMINISTRATIVE_2"
+          ]
+        }
+      }
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Task name."
+            },
+            "description": {
+              "type": "string",
+              "description": "Rich-text description."
+            },
+            "status": {
+              "type": "string",
+              "description": "Task status.",
+              "enum": [
+                "TODO",
+                "INPROGRESS",
+                "INREVIEW",
+                "DONE"
+              ]
+            },
+            "dueDate": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Due date (ms since epoch)."
+            },
+            "isPriority": {
+              "type": "boolean",
+              "description": "Whether the task is a priority."
+            },
+            "createdDate": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Created date (ms since epoch)."
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Tag"
+              }
+            },
+            "assignees": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Assigned user IDs."
+            },
+            "reviewers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Reviewer user IDs."
+            },
+            "matterId": {
+              "type": "string",
+              "description": "Associated matter ID."
+            },
+            "matterName": {
+              "type": "string",
+              "description": "Associated matter name."
+            },
+            "milestoneId": {
+              "type": "string",
+              "description": "Associated milestone ID."
+            },
+            "milestoneName": {
+              "type": "string",
+              "description": "Associated milestone name."
+            }
+          }
+        }
+      }
+    },
+    "Tag": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Tag label."
+        },
+        "value": {
+          "type": "string",
+          "description": "Tag value."
+        }
+      }
+    },
+    "Webhook": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "events": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "url": {
+              "type": "string"
+            },
+            "lastEventDate": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "eventCount": {
+              "type": "integer"
+            },
+            "createdDate": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "createdBy": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "Workflow": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Workflow name."
+            },
+            "description": {
+              "type": "string",
+              "description": "Workflow description."
+            },
+            "types": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Matter type identifiers."
+            },
+            "jurisdictions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Jurisdiction codes."
+            }
+          }
+        }
+      }
+    },
+    "WorkspaceResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Workspace name."
+                },
+                "jurisdictions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "country": {
+                  "type": "string",
+                  "description": "Country code."
+                },
+                "timezone": {
+                  "type": "string",
+                  "description": "Timezone."
+                }
+              }
+            },
+            "relationships": {
+              "type": "object",
+              "properties": {
+                "types": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "included": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Matter type name."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "WebhookMatterPayload": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string",
+              "description": "Matter ID."
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Matter name."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Matter description."
+                },
+                "jurisdictions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "types": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "roles": {
+                  "$ref": "#/definitions/MatterRoles"
+                },
+                "createdDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "createdBy": {
+                  "type": "string"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Tag"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "WebhookTaskPayload": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string",
+              "description": "Task ID."
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "createdDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "dueDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "lastModifiedBy": {
+                  "type": "string"
+                },
+                "lastModifiedDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "createdBy": {
+                  "type": "string"
+                },
+                "assignees": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "reviewers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Tag"
+                  }
+                }
+              }
+            },
+            "relationships": {
+              "type": "object",
+              "properties": {
+                "milestone": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "matter": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "WebhookMilestonePayload": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string",
+              "description": "Milestone ID."
+            },
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "createdDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "dueDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "targetDate": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "matter": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "totalTasks": {
+                  "type": "integer"
+                },
+                "completedTasks": {
+                  "type": "integer"
+                },
+                "pendingTasks": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

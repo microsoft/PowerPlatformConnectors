@@ -2,12 +2,15 @@
   "swagger": "2.0",
   "info": {
     "title": "absentify",
-    "description": "Integrate absentify into your existing systems with this connector. Use employee absence data in other systems.",
-    "version": "1.0",
+    "description": "absentify is a comprehensive absence management solution designed for Microsoft 365. This connector enables seamless integration, allowing you to automate workflows based on employee leave requests, track approval statuses, and synchronize absence data across your business systems.",
+    "version": "2.0",
     "contact": {
       "name": "absentify Support",
-      "url": "https://support.absentify.com/",
+      "url": "https://absentify.com/docs",
       "email": "support@absentify.com"
+    },
+    "x-ms-api-annotation": {
+      "status": "Production"
     }
   },
   "x-ms-connector-metadata": [
@@ -27,145 +30,59 @@
   "host": "api.absentify.com",
   "basePath": "/api/",
   "schemes": ["https"],
-  "consumes": [],
-  "produces": [],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
     "/webhooks/manage_ms_webhook/request_created": {
       "x-ms-notification-content": {
-        "description": "Notification content for request creation",
+        "description": "Webhook payload when a leave request is created.",
         "schema": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "title": "Request ID",
-              "description": "Unique identifier of the request",
-              "x-ms-summary": "Request ID"
-            },
-            "request_creator_member": {
-              "type": "object",
-              "title": "Request Creator",
-              "description": "Information about the member who created the request",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "title": "Creator's Email",
-                  "description": "The email address of the person who created the request.",
-                  "x-ms-summary": "Creator's Email"
-                },
-                "name": {
-                  "type": "string",
-                  "title": "Creator's Name",
-                  "description": "The name of the person who created the request.",
-                  "x-ms-summary": "Creator's Name"
-                },
-                "id": {
-                  "type": "string",
-                  "title": "Creator's ID",
-                  "description": "The unique identifier of the person who created the request.",
-                  "x-ms-summary": "Creator's ID"
-                },
-                "custom_id": {
-                  "type": "string",
-                  "title": "Creator's Custom ID",
-                  "description": "A custom identifier for the person who created the request.",
-                  "x-ms-summary": "Creator's Custom ID"
-                }
-              }
-            },
-            "createdAt": {
-              "type": "string",
-              "title": "Creation Date",
-              "description": "Timestamp when the request was created.",
-              "x-ms-summary": "Creation Date"
-            },
-            "updatedAt": {
-              "type": "string",
-              "title": "Last Updated",
-              "description": "Timestamp when the request was last updated.",
-              "x-ms-summary": "Last Updated"
-            },
-            "start": {
-              "type": "string",
-              "title": "Start Date",
-              "description": "Start date of the request.",
-              "x-ms-summary": "Start Date"
-            },
-            "start_at": {
-              "type": "string",
-              "title": "Start Time of Day",
-              "description": "Time of day when the request starts.",
-              "x-ms-summary": "Start Time of Day",
-              "enum": ["morning", "afternoon"]
-            },
-            "end": {
-              "type": "string",
-              "title": "End Date",
-              "description": "End date of the request.",
-              "x-ms-summary": "End Date"
-            },
-            "end_at": {
-              "type": "string",
-              "title": "End Time of Day",
-              "description": "Time of day when the request ends.",
-              "x-ms-summary": "End Time of Day",
-              "enum": ["lunchtime", "end_of_day"]
-            },
-            "leave_unit": {
-              "type": "string",
-              "title": "Leave Unit",
-              "description": "Unit of leave taken.",
-              "x-ms-summary": "Leave Unit",
-              "enum": ["days", "half_days", "hours", "minutes_30", "minutes_15", "minutes_10", "minutes_5", "minutes_1"]
-            },
-            "year": {
-              "type": "integer",
-              "format": "int32",
-              "title": "Year",
-              "description": "Year of the request.",
-              "x-ms-summary": "Year"
-            },
-            "details": {
-              "$ref": "#/definitions/Details"
-            },
-            "duration": {
-              "type": "number",
-              "format": "float",
-              "title": "Total Duration",
-              "description": "Total duration of the request including weekends and holidays.",
-              "x-ms-summary": "Total Duration"
-            }
-          }
+          "$ref": "#/definitions/RequestWebhookPayloadV2"
         }
       },
       "post": {
         "responses": {
+          "200": {
+            "description": "Webhook subscription created successfully."
+          },
+          "201": {
+            "description": "Webhook subscription created successfully."
+          },
           "default": {
-            "description": "Default response",
-            "schema": {}
+            "description": "Operation failed."
           }
         },
-        "summary": "Request created",
-        "description": "This trigger is executed when a new request is created within your company.",
-        "operationId": "TriggerRequestCreated",
+        "summary": "When a leave request is created",
+        "description": "Triggers when any employee in your organization submits a new leave or absence request. Use this to start approval workflows, send notifications, or update external calendars.",
+        "operationId": "TriggerRequestCreatedV2",
         "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "tags": ["Triggers"],
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "url": {
                   "type": "string",
                   "title": "Webhook URL",
-                  "description": "The webhook URL for the notification.",
+                  "description": "The callback URL where absentify will send notifications.",
                   "x-ms-visibility": "internal",
                   "x-ms-notification-url": true
+                },
+                "payload_version": {
+                  "type": "string",
+                  "title": "Payload Version",
+                  "description": "Version of the webhook payload format.",
+                  "x-ms-visibility": "internal",
+                  "default": "v2",
+                  "enum": ["v2"]
                 }
               },
-              "required": ["url"]
+              "required": ["url", "payload_version"]
             }
           }
         ]
@@ -173,151 +90,1741 @@
     },
     "/webhooks/manage_ms_webhook/request_status_changed": {
       "x-ms-notification-content": {
-        "description": "Notification content for request status change",
+        "description": "Webhook payload when a leave request status changes.",
         "schema": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "title": "Request ID",
-              "description": "Unique identifier of the request.",
-              "x-ms-summary": "Request ID"
-            },
-            "request_creator_member": {
-              "type": "object",
-              "title": "Request Creator",
-              "description": "Information about the member who created the request.",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "title": "Creator's Email",
-                  "description": "The email address of the person who created the request.",
-                  "x-ms-summary": "Creator's Email"
-                },
-                "name": {
-                  "type": "string",
-                  "title": "Creator's Name",
-                  "description": "The name of the person who created the request.",
-                  "x-ms-summary": "Creator's Name"
-                },
-                "id": {
-                  "type": "string",
-                  "title": "Creator's ID",
-                  "description": "The unique identifier of the person who created the request.",
-                  "x-ms-summary": "Creator's ID"
-                },
-                "custom_id": {
-                  "type": "string",
-                  "title": "Creator's Custom ID",
-                  "description": "A custom identifier for the person who created the request.",
-                  "x-ms-summary": "Creator's Custom ID"
-                }
-              }
-            },
-            "createdAt": {
-              "type": "string",
-              "title": "Creation Date",
-              "description": "Timestamp when the request was created.",
-              "x-ms-summary": "Creation Date"
-            },
-            "updatedAt": {
-              "type": "string",
-              "title": "Last Updated",
-              "description": "Timestamp when the request was last updated.",
-              "x-ms-summary": "Last Updated"
-            },
-            "start": {
-              "type": "string",
-              "title": "Start Date",
-              "description": "Start date of the request.",
-              "x-ms-summary": "Start Date"
-            },
-            "start_at": {
-              "type": "string",
-              "title": "Start Time of Day",
-              "description": "Time of day when the request starts.",
-              "x-ms-summary": "Start Time of Day",
-              "enum": ["morning", "afternoon"]
-            },
-            "end": {
-              "type": "string",
-              "title": "End Date",
-              "description": "End date of the request.",
-              "x-ms-summary": "End Date"
-            },
-            "end_at": {
-              "type": "string",
-              "title": "End Time of Day",
-              "description": "Time of day when the request ends.",
-              "x-ms-summary": "End Time of Day",
-              "enum": ["lunchtime", "end_of_day"]
-            },
-            "leave_unit": {
-              "type": "string",
-              "title": "Leave Unit",
-              "description": "Unit of leave taken.",
-              "x-ms-summary": "Leave Unit",
-              "enum": ["days", "half_days", "hours", "minutes_30", "minutes_15", "minutes_10", "minutes_5", "minutes_1"]
-            },
-            "year": {
-              "type": "integer",
-              "format": "int32",
-              "title": "Year",
-              "description": "Year of the request.",
-              "x-ms-summary": "Year"
-            },
-            "details": {
-              "$ref": "#/definitions/Details"
-            },
-            "duration": {
-              "type": "number",
-              "format": "float",
-              "title": "Total Duration",
-              "description": "Total duration of the request including weekends and holidays.",
-              "x-ms-summary": "Total Duration"
-            }
-          }
+          "$ref": "#/definitions/RequestWebhookPayloadV2"
         }
       },
       "post": {
         "responses": {
+          "200": {
+            "description": "Webhook subscription created successfully."
+          },
+          "201": {
+            "description": "Webhook subscription created successfully."
+          },
           "default": {
-            "description": "Default response",
-            "schema": {}
+            "description": "Operation failed."
           }
         },
-        "summary": "Request status updated",
-        "description": "This trigger is executed when the status of an existing request is changed.",
-        "operationId": "TriggerRequestStatusChanged",
+        "summary": "When a leave request status changes",
+        "description": "Triggers when the status of a leave request changes (approved, declined, or canceled). Use this to notify employees, update HR systems, or sync calendar entries.",
+        "operationId": "TriggerRequestStatusChangedV2",
         "x-ms-trigger": "single",
+        "x-ms-visibility": "important",
+        "tags": ["Triggers"],
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "url": {
                   "type": "string",
                   "title": "Webhook URL",
-                  "description": "The webhook URL for the notification.",
+                  "description": "The callback URL where absentify will send notifications.",
                   "x-ms-visibility": "internal",
                   "x-ms-notification-url": true
+                },
+                "payload_version": {
+                  "type": "string",
+                  "title": "Payload Version",
+                  "description": "Version of the webhook payload format.",
+                  "x-ms-visibility": "internal",
+                  "default": "v2",
+                  "enum": ["v2"]
                 }
               },
-              "required": ["url"]
+              "required": ["url", "payload_version"]
             }
           }
         ]
       }
+    },
+    "/v1/members": {
+      "get": {
+        "operationId": "GetMembers",
+        "summary": "[Plus] Get all members",
+        "description": "Get all members with optional filters for departments, status, employment dates, admin status, approval process, approvers, allowance types, name, birthday month, and manager type. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "department_ids",
+            "in": "query",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by department IDs.",
+            "x-ms-summary": "Department IDs",
+            "required": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["INACTIVE", "ACTIVE", "ARCHIVED"],
+            "description": "Filter by member status.",
+            "x-ms-summary": "Status",
+            "required": false
+          },
+          {
+            "name": "employment_start_date_from",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by employment start date (from).",
+            "x-ms-summary": "Employment Start From",
+            "required": false
+          },
+          {
+            "name": "employment_start_date_to",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by employment start date (to).",
+            "x-ms-summary": "Employment Start To",
+            "required": false
+          },
+          {
+            "name": "employment_end_date_from",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by employment end date (from).",
+            "x-ms-summary": "Employment End From",
+            "required": false
+          },
+          {
+            "name": "employment_end_date_to",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by employment end date (to).",
+            "x-ms-summary": "Employment End To",
+            "required": false
+          },
+          {
+            "name": "is_admin",
+            "in": "query",
+            "type": "boolean",
+            "description": "Filter by admin status.",
+            "x-ms-summary": "Is Admin",
+            "required": false
+          },
+          {
+            "name": "approval_process",
+            "in": "query",
+            "type": "string",
+            "enum": ["Linear_all_have_to_agree", "Linear_one_has_to_agree", "Parallel_all_have_to_agree", "Parallel_one_has_to_agree"],
+            "description": "Filter by approval process type.",
+            "x-ms-summary": "Approval Process",
+            "required": false
+          },
+          {
+            "name": "has_approvers",
+            "in": "query",
+            "type": "boolean",
+            "description": "Filter by whether member has approvers.",
+            "x-ms-summary": "Has Approvers",
+            "required": false
+          },
+          {
+            "name": "allowance_type_id",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by allowance type ID.",
+            "x-ms-summary": "Allowance Type ID",
+            "required": false
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by member name.",
+            "x-ms-summary": "Name",
+            "required": false
+          },
+          {
+            "name": "birthday_month",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Filter by birthday month (1-12).",
+            "x-ms-summary": "Birthday Month",
+            "required": false
+          },
+          {
+            "name": "manager_type",
+            "in": "query",
+            "type": "string",
+            "enum": ["Member", "Manager"],
+            "description": "Filter by manager type.",
+            "x-ms-summary": "Manager Type",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Member"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "InviteMember",
+        "summary": "[Plus] Invite a member",
+        "description": "Invite a new member to the workspace. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/InviteMemberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member invited successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the invited member."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/members/{id}": {
+      "get": {
+        "operationId": "GetMemberById",
+        "summary": "[Plus] Get member by ID",
+        "description": "Retrieve a specific member by their unique ID. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the member.",
+            "x-ms-summary": "Member ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/MemberDetail"
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpdateMember",
+        "summary": "[Plus] Update a member",
+        "description": "Update an existing member's information. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the member.",
+            "x-ms-summary": "Member ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateMemberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member updated successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the updated member."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteMember",
+        "summary": "[Plus] Delete a member",
+        "description": "Delete a member. All data will be deleted permanently. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the member.",
+            "x-ms-summary": "Member ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member deleted successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the deleted member."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/members/microsoft/{microsoft_user_id}": {
+      "get": {
+        "operationId": "GetMemberByMicrosoftId",
+        "summary": "[Plus] Get member by Microsoft ID",
+        "description": "Retrieve a member by their Microsoft user ID. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "microsoft_user_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The Microsoft user ID.",
+            "x-ms-summary": "Microsoft User ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/MemberDetail"
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/members/email/{email}": {
+      "get": {
+        "operationId": "GetMemberByEmail",
+        "summary": "[Plus] Get member by email",
+        "description": "Retrieve a member by their email address. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The email address of the member.",
+            "x-ms-summary": "Email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/MemberDetail"
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/members/custom_id/{custom_id}": {
+      "get": {
+        "operationId": "GetMemberByCustomId",
+        "summary": "[Plus] Get member by custom ID",
+        "description": "Retrieve a member by their custom ID. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "custom_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The custom ID of the member.",
+            "x-ms-summary": "Custom ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/MemberDetail"
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/members/{id}/approvers": {
+      "put": {
+        "operationId": "UpdateMemberApprovers",
+        "summary": "[Plus] Update member approvers",
+        "description": "Update the approvers for a specific member. Supports Microsoft profile managers, department settings, or custom approvers. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the member.",
+            "x-ms-summary": "Member ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateMemberApproversRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approvers updated successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the member."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/members/{id}/allowance/{allowance_type_id}/{year}": {
+      "put": {
+        "operationId": "UpdateMemberAllowance",
+        "summary": "[Plus] Update member allowance",
+        "description": "Update a member's allowance for a specific allowance type and year. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the member.",
+            "x-ms-summary": "Member ID"
+          },
+          {
+            "name": "allowance_type_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the allowance type.",
+            "x-ms-summary": "Allowance Type ID"
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The year for the allowance.",
+            "x-ms-summary": "Year"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateMemberAllowanceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Allowance updated successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the member."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member or allowance type not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/members/{id}/schedule": {
+      "post": {
+        "operationId": "AddMemberSchedule",
+        "summary": "[Plus] Add member schedule",
+        "description": "Add a new work schedule for a member. Requires absentify Plus plan.",
+        "tags": ["Members"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the member.",
+            "x-ms-summary": "Member ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddMemberScheduleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule added successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the schedule."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Member not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/departments": {
+      "get": {
+        "operationId": "GetDepartments",
+        "summary": "[Plus] Get all departments",
+        "description": "Retrieve all departments in the workspace. Requires absentify Plus plan.",
+        "tags": ["Departments"],
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Department"
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateDepartment",
+        "summary": "[Plus] Create a department",
+        "description": "Create a new department in the workspace. Requires absentify Plus plan.",
+        "tags": ["Departments"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateDepartmentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Department created successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the created department."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/departments/{id}": {
+      "put": {
+        "operationId": "UpdateDepartment",
+        "summary": "[Plus] Update a department",
+        "description": "Update an existing department. Requires absentify Plus plan.",
+        "tags": ["Departments"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the department.",
+            "x-ms-summary": "Department ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateDepartmentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Department updated successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the updated department."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Department not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteDepartment",
+        "summary": "[Plus] Delete a department",
+        "description": "Delete a department from the workspace. Requires absentify Plus plan.",
+        "tags": ["Departments"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the department.",
+            "x-ms-summary": "Department ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Department deleted successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the deleted department."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Department not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/leave_types": {
+      "get": {
+        "operationId": "GetLeaveTypes",
+        "summary": "[Plus] Get all leave types",
+        "description": "Retrieve all leave types configured in the workspace. Requires absentify Plus plan.",
+        "tags": ["Leave Types"],
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LeaveType"
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateLeaveType",
+        "summary": "[Plus] Create a leave type",
+        "description": "Create a new leave type in the workspace. Requires absentify Plus plan.",
+        "tags": ["Leave Types"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateLeaveTypeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leave type created successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the created leave type."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/leave_types/{id}": {
+      "put": {
+        "operationId": "UpdateLeaveType",
+        "summary": "[Plus] Update a leave type",
+        "description": "Update an existing leave type. Requires absentify Plus plan.",
+        "tags": ["Leave Types"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the leave type.",
+            "x-ms-summary": "Leave Type ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateLeaveTypeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leave type updated successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the updated leave type."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Leave type not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteLeaveType",
+        "summary": "[Plus] Delete a leave type",
+        "description": "Delete a leave type from the workspace. Requires absentify Plus plan.",
+        "tags": ["Leave Types"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the leave type.",
+            "x-ms-summary": "Leave Type ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leave type deleted successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the deleted leave type."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Leave type not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/requests": {
+      "get": {
+        "operationId": "GetRequests",
+        "summary": "[Plus] Get all requests",
+        "description": "Retrieve all leave requests with optional filters. Requires absentify Plus plan.",
+        "tags": ["Requests"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "member_id",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by member ID.",
+            "x-ms-summary": "Member ID",
+            "required": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["PENDING", "APPROVED", "DECLINED", "CANCELED"],
+            "description": "Filter by request status.",
+            "x-ms-summary": "Status",
+            "required": false
+          },
+          {
+            "name": "start_from",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by start date (from).",
+            "x-ms-summary": "Start From",
+            "required": false
+          },
+          {
+            "name": "start_to",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by start date (to).",
+            "x-ms-summary": "Start To",
+            "required": false
+          },
+          {
+            "name": "end_from",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by end date (from).",
+            "x-ms-summary": "End From",
+            "required": false
+          },
+          {
+            "name": "end_to",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by end date (to).",
+            "x-ms-summary": "End To",
+            "required": false
+          },
+          {
+            "name": "leave_type_id",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by leave type ID.",
+            "x-ms-summary": "Leave Type ID",
+            "required": false
+          },
+          {
+            "name": "department_id",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by department ID.",
+            "x-ms-summary": "Department ID",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Request"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateRequest",
+        "summary": "[Plus] Create a request",
+        "description": "Create a new leave request for a member. Requires absentify Plus plan.",
+        "tags": ["Requests"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request created successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the created request."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/requests/{id}": {
+      "get": {
+        "operationId": "GetRequestById",
+        "summary": "[Plus] Get request by ID",
+        "description": "Retrieve a specific leave request by its unique ID. Requires absentify Plus plan.",
+        "tags": ["Requests"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the request.",
+            "x-ms-summary": "Request ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/Request"
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Request not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpdateRequest",
+        "summary": "[Plus] Update a request",
+        "description": "Update the status of a leave request (approve, decline, or cancel). Requires absentify Plus plan.",
+        "tags": ["Requests"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the request.",
+            "x-ms-summary": "Request ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request updated successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the updated request."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Request not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteRequest",
+        "summary": "[Plus] Delete a request",
+        "description": "Delete a leave request permanently. Requires absentify Plus plan.",
+        "tags": ["Requests"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the request.",
+            "x-ms-summary": "Request ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request deleted successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the deleted request."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Request not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/public_holidays": {
+      "get": {
+        "operationId": "GetPublicHolidays",
+        "summary": "[Plus] Get all public holiday calendars",
+        "description": "Retrieve all public holiday calendars configured in the workspace. Requires absentify Plus plan.",
+        "tags": ["Public Holidays"],
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PublicHolidayCalendar"
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreatePublicHoliday",
+        "summary": "[Plus] Create a public holiday calendar",
+        "description": "Create a new public holiday calendar in the workspace. Requires absentify Plus plan.",
+        "tags": ["Public Holidays"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePublicHolidayRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public holiday calendar created successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the created public holiday calendar."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/public_holidays/{id}": {
+      "get": {
+        "operationId": "GetPublicHolidayById",
+        "summary": "[Plus] Get public holiday calendar by ID",
+        "description": "Retrieve a specific public holiday calendar with all its holidays. Requires absentify Plus plan.",
+        "tags": ["Public Holidays"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the public holiday calendar.",
+            "x-ms-summary": "Public Holiday Calendar ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/PublicHolidayCalendarDetail"
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Public holiday calendar not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpdatePublicHoliday",
+        "summary": "[Plus] Update a public holiday calendar",
+        "description": "Update an existing public holiday calendar. Requires absentify Plus plan.",
+        "tags": ["Public Holidays"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the public holiday calendar.",
+            "x-ms-summary": "Public Holiday Calendar ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePublicHolidayRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public holiday calendar updated successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the updated public holiday calendar."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Public holiday calendar not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeletePublicHoliday",
+        "summary": "[Plus] Delete a public holiday calendar",
+        "description": "Delete a public holiday calendar from the workspace. Requires absentify Plus plan.",
+        "tags": ["Public Holidays"],
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the public holiday calendar.",
+            "x-ms-summary": "Public Holiday Calendar ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public holiday calendar deleted successfully.",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the deleted public holiday calendar."
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "404": {
+            "description": "Public holiday calendar not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/workspace": {
+      "get": {
+        "operationId": "GetWorkspace",
+        "summary": "[Plus] Get workspace settings",
+        "description": "Retrieve the workspace settings and configuration. Requires absentify Plus plan.",
+        "tags": ["Workspace"],
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "$ref": "#/definitions/Workspace"
+            }
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/v1/absences": {
+      "get": {
+        "operationId": "GetAbsences",
+        "summary": "[Plus] Get absences",
+        "description": "Retrieve absences for a specific date range. Returns approved leave requests within the specified period. Requires absentify Plus plan.",
+        "tags": ["Absences"],
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "description": "Start date for the absence query (YYYY-MM-DD).",
+            "x-ms-summary": "Start Date",
+            "required": true
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "description": "End date for the absence query (YYYY-MM-DD).",
+            "x-ms-summary": "End Date",
+            "required": true
+          },
+          {
+            "name": "member_id",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by member ID.",
+            "x-ms-summary": "Member ID",
+            "required": false
+          },
+          {
+            "name": "department_id",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by department ID.",
+            "x-ms-summary": "Department ID",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Absence"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data."
+          },
+          "401": {
+            "description": "Authorization not provided."
+          },
+          "403": {
+            "description": "Insufficient access."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
     }
   },
   "definitions": {
-    "LeaveType": {
+    "RequestWebhookPayloadV2": {
+      "type": "object",
+      "title": "Request Webhook Payload",
+      "description": "Webhook payload containing leave request data.",
+      "properties": {
+        "event_type": {
+          "type": "string",
+          "title": "Event Type",
+          "description": "The type of event that triggered this webhook.",
+          "x-ms-summary": "Event Type",
+          "enum": ["request_created", "request_status_changed"]
+        },
+        "body": {
+          "$ref": "#/definitions/RequestBodyV2"
+        }
+      }
+    },
+    "RequestBodyV2": {
+      "type": "object",
+      "title": "Request Body",
+      "description": "The leave request details.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Request ID",
+          "description": "Unique identifier of the leave request.",
+          "x-ms-summary": "Request ID"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the request was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the request was last updated.",
+          "x-ms-summary": "Updated At"
+        },
+        "start": {
+          "type": "string",
+          "title": "Start Date",
+          "description": "Start date of the leave request.",
+          "x-ms-summary": "Start Date"
+        },
+        "start_at": {
+          "type": "string",
+          "title": "Start Time",
+          "description": "Time of day when the leave starts.",
+          "x-ms-summary": "Start Time",
+          "enum": ["morning", "afternoon"]
+        },
+        "end": {
+          "type": "string",
+          "title": "End Date",
+          "description": "End date of the leave request.",
+          "x-ms-summary": "End Date"
+        },
+        "end_at": {
+          "type": "string",
+          "title": "End Time",
+          "description": "Time of day when the leave ends.",
+          "x-ms-summary": "End Time",
+          "enum": ["lunchtime", "end_of_day"]
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit used for measuring the leave duration.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "hours"]
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Current status of the leave request.",
+          "x-ms-summary": "Status",
+          "enum": ["PENDING", "APPROVED", "DECLINED", "CANCELED"]
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "Reason provided for the leave request.",
+          "x-ms-summary": "Reason"
+        },
+        "approval_process": {
+          "type": "string",
+          "title": "Approval Process",
+          "description": "Type of approval process for this request.",
+          "x-ms-summary": "Approval Process",
+          "enum": ["ONE_APPROVAL", "ALL_APPROVAL", "AUTOMATIC"]
+        },
+        "cancel_reason": {
+          "type": "string",
+          "title": "Cancel Reason",
+          "description": "Reason for cancellation if the request was canceled.",
+          "x-ms-summary": "Cancel Reason"
+        },
+        "canceld_date": {
+          "type": "string",
+          "title": "Canceled Date",
+          "description": "Date when the request was canceled.",
+          "x-ms-summary": "Canceled Date"
+        },
+        "canceld_by_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "workday_absence_duration": {
+          "type": "number",
+          "format": "float",
+          "title": "Workday Duration",
+          "description": "Duration of absence in workdays.",
+          "x-ms-summary": "Workday Duration"
+        },
+        "duration": {
+          "type": "number",
+          "format": "float",
+          "title": "Total Duration",
+          "description": "Total duration of the leave request.",
+          "x-ms-summary": "Total Duration"
+        },
+        "take_from_allowance": {
+          "type": "boolean",
+          "title": "Take From Allowance",
+          "description": "Whether this leave is deducted from the allowance.",
+          "x-ms-summary": "Take From Allowance"
+        },
+        "request_creator_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "requester_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "leave_type": {
+          "$ref": "#/definitions/LeaveTypeV2"
+        },
+        "allowance_type": {
+          "$ref": "#/definitions/AllowanceTypeV2"
+        },
+        "request_approvers": {
+          "type": "array",
+          "title": "Request Approvers",
+          "description": "List of approvers for this request.",
+          "items": {
+            "$ref": "#/definitions/RequestApproverV2"
+          }
+        }
+      }
+    },
+    "MemberReference": {
+      "type": "object",
+      "title": "Member",
+      "description": "Reference to a member.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Member ID",
+          "description": "Unique identifier of the member.",
+          "x-ms-summary": "Member ID"
+        },
+        "custom_id": {
+          "type": "string",
+          "title": "Custom ID",
+          "description": "Custom identifier for the member.",
+          "x-ms-summary": "Custom ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the member.",
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email",
+          "description": "Email address of the member.",
+          "x-ms-summary": "Email"
+        }
+      }
+    },
+    "LeaveTypeV2": {
       "type": "object",
       "title": "Leave Type",
-      "description": "Information about the type of leave.",
+      "description": "Information about the leave type.",
       "properties": {
         "id": {
           "type": "string",
@@ -331,28 +1838,19 @@
           "description": "Name of the leave type.",
           "x-ms-summary": "Leave Type Name"
         },
-        "take_from_allowance": {
-          "type": "boolean",
-          "title": "Take from Allowance",
-          "description": "Indicates if the leave is deducted from the allowance.",
-          "x-ms-summary": "Take from Allowance"
-        },
         "leave_unit": {
           "type": "string",
           "title": "Leave Unit",
-          "description": "Unit of leave.",
+          "description": "Unit of the leave type.",
           "x-ms-summary": "Leave Unit",
-          "enum": ["days", "half_days", "hours", "minutes_30", "minutes_15", "minutes_10", "minutes_5", "minutes_1"]
-        },
-        "allowance_type": {
-          "$ref": "#/definitions/AllowanceType"
+          "enum": ["days", "hours"]
         }
       }
     },
-    "AllowanceType": {
+    "AllowanceTypeV2": {
       "type": "object",
       "title": "Allowance Type",
-      "description": "Details of the allowance type.",
+      "description": "Information about the allowance type.",
       "properties": {
         "id": {
           "type": "string",
@@ -368,9 +1866,9 @@
         },
         "ignore_allowance_limit": {
           "type": "boolean",
-          "title": "Ignore Allowance Limit",
-          "description": "Indicates if the allowance limit should be ignored.",
-          "x-ms-summary": "Ignore Allowance Limit"
+          "title": "Ignore Limit",
+          "description": "Whether the allowance limit should be ignored.",
+          "x-ms-summary": "Ignore Limit"
         },
         "allowance_unit": {
           "type": "string",
@@ -381,261 +1879,1229 @@
         }
       }
     },
-    "Allowances": {
-      "type": "array",
-      "title": "Allowances",
-      "description": "Allowance details for the requester.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "allowance": {
-            "type": "number",
-            "format": "float",
-            "title": "Allowance",
-            "description": "Total allowance for the year.",
-            "x-ms-summary": "Allowance"
-          },
-          "brought_forward": {
-            "type": "number",
-            "format": "float",
-            "title": "Brought Forward",
-            "description": "Brought forward days from the previous year.",
-            "x-ms-summary": "Brought Forward"
-          },
-          "compensatory_time_off": {
-            "type": "number",
-            "format": "float",
-            "title": "Compensatory Time Off",
-            "description": "Compensatory time off.",
-            "x-ms-summary": "Compensatory Time Off"
-          },
-          "remaining": {
-            "type": "number",
-            "format": "float",
-            "title": "Remaining Allowance",
-            "description": "Remaining allowance.",
-            "x-ms-summary": "Remaining Allowance"
-          },
-          "taken": {
-            "type": "number",
-            "format": "float",
-            "title": "Taken Allowance",
-            "description": "Taken allowance.",
-            "x-ms-summary": "Taken Allowance"
-          },
-          "year": {
-            "type": "integer",
-            "format": "int32",
-            "title": "Allowance Year",
-            "description": "Year for the allowance.",
-            "x-ms-summary": "Allowance Year"
-          }
-        }
-      }
-    },
-    "Details": {
+    "RequestApproverV2": {
       "type": "object",
-      "title": "Request Details",
-      "description": "Details of the request.",
+      "title": "Request Approver",
+      "description": "Information about a request approver.",
       "properties": {
-        "workday_absence_duration": {
-          "type": "number",
-          "format": "float",
-          "title": "Workday Absence Duration",
-          "description": "Duration of absence in workdays (only counting the employee's workdays).",
-          "x-ms-summary": "Workday Absence Duration"
-        },
         "status": {
           "type": "string",
-          "title": "Request Status",
-          "description": "Current status of the request.",
-          "x-ms-summary": "Request Status",
-          "enum": ["PENDING", "APPROVED", "DECLINED", "CANCELED"]
-        },
-        "cancel_reason": {
-          "type": "string",
-          "title": "Cancellation Reason",
-          "description": "Reason for request cancellation.",
-          "x-ms-summary": "Cancellation Reason"
-        },
-        "canceld_date": {
-          "type": "string",
-          "title": "Cancellation Date",
-          "description": "Date when the request was canceled.",
-          "x-ms-summary": "Cancellation Date"
+          "title": "Approver Status",
+          "description": "Current approval status.",
+          "x-ms-summary": "Approver Status",
+          "enum": ["PENDING", "APPROVED", "DECLINED"]
         },
         "reason": {
           "type": "string",
-          "title": "Request Reason",
-          "description": "Reason provided for the request.",
-          "x-ms-summary": "Request Reason"
+          "title": "Approver Reason",
+          "description": "Reason provided by the approver.",
+          "x-ms-summary": "Approver Reason"
+        },
+        "status_changed_date": {
+          "type": "string",
+          "title": "Status Changed Date",
+          "description": "Date when the approval status was changed.",
+          "x-ms-summary": "Status Changed Date"
+        },
+        "status_changed_by_member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "approver_member": {
+          "$ref": "#/definitions/MemberReference"
+        }
+      }
+    },
+    "Member": {
+      "type": "object",
+      "title": "Member",
+      "description": "A member in the workspace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Member ID",
+          "description": "Unique identifier of the member.",
+          "x-ms-summary": "Member ID"
+        },
+        "custom_id": {
+          "type": "string",
+          "title": "Custom ID",
+          "description": "Custom identifier for the member.",
+          "x-ms-summary": "Custom ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the member.",
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email",
+          "description": "Email address of the member.",
+          "x-ms-summary": "Email"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the member was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the member was last updated.",
+          "x-ms-summary": "Updated At"
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Current status of the member.",
+          "x-ms-summary": "Status",
+          "enum": ["INACTIVE", "ACTIVE", "ARCHIVED"]
+        },
+        "birthday": {
+          "type": "string",
+          "title": "Birthday",
+          "description": "Birthday of the member.",
+          "x-ms-summary": "Birthday"
+        },
+        "employment_start_date": {
+          "type": "string",
+          "title": "Employment Start Date",
+          "description": "Employment start date of the member.",
+          "x-ms-summary": "Employment Start Date"
+        },
+        "employment_end_date": {
+          "type": "string",
+          "title": "Employment End Date",
+          "description": "Employment end date of the member.",
+          "x-ms-summary": "Employment End Date"
+        },
+        "is_admin": {
+          "type": "boolean",
+          "title": "Is Admin",
+          "description": "Whether the member is an admin.",
+          "x-ms-summary": "Is Admin"
         },
         "approval_process": {
           "type": "string",
           "title": "Approval Process",
-          "description": "Approval process type for the request.",
+          "description": "Approval process type for this member.",
           "x-ms-summary": "Approval Process",
-          "enum": [
-            "Linear_all_have_to_agree",
-            "Linear_one_has_to_agree",
-            "Parallel_all_have_to_agree",
-            "Parallel_one_has_to_agree"
-          ]
+          "enum": ["Linear_all_have_to_agree", "Linear_one_has_to_agree", "Parallel_all_have_to_agree", "Parallel_one_has_to_agree"]
         },
-        "request_approvers": {
+        "departments": {
           "type": "array",
-          "title": "Request Approvers",
-          "description": "List of approvers for the request.",
+          "title": "Departments",
+          "description": "Departments the member belongs to.",
+          "items": {
+            "$ref": "#/definitions/MemberDepartment"
+          }
+        },
+        "allowances": {
+          "type": "array",
+          "title": "Allowances",
+          "description": "Allowances for the member.",
+          "items": {
+            "$ref": "#/definitions/MemberAllowance"
+          }
+        }
+      }
+    },
+    "MemberDetail": {
+      "type": "object",
+      "title": "Member Detail",
+      "description": "Detailed member information including schedules.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Member ID",
+          "description": "Unique identifier of the member.",
+          "x-ms-summary": "Member ID"
+        },
+        "custom_id": {
+          "type": "string",
+          "title": "Custom ID",
+          "description": "Custom identifier for the member.",
+          "x-ms-summary": "Custom ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the member.",
+          "x-ms-summary": "Name"
+        },
+        "email": {
+          "type": "string",
+          "title": "Email",
+          "description": "Email address of the member.",
+          "x-ms-summary": "Email"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the member was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the member was last updated.",
+          "x-ms-summary": "Updated At"
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Current status of the member.",
+          "x-ms-summary": "Status",
+          "enum": ["INACTIVE", "ACTIVE", "ARCHIVED"]
+        },
+        "birthday": {
+          "type": "string",
+          "title": "Birthday",
+          "description": "Birthday of the member.",
+          "x-ms-summary": "Birthday"
+        },
+        "employment_start_date": {
+          "type": "string",
+          "title": "Employment Start Date",
+          "description": "Employment start date of the member.",
+          "x-ms-summary": "Employment Start Date"
+        },
+        "employment_end_date": {
+          "type": "string",
+          "title": "Employment End Date",
+          "description": "Employment end date of the member.",
+          "x-ms-summary": "Employment End Date"
+        },
+        "is_admin": {
+          "type": "boolean",
+          "title": "Is Admin",
+          "description": "Whether the member is an admin.",
+          "x-ms-summary": "Is Admin"
+        },
+        "approval_process": {
+          "type": "string",
+          "title": "Approval Process",
+          "description": "Approval process type for this member.",
+          "x-ms-summary": "Approval Process",
+          "enum": ["Linear_all_have_to_agree", "Linear_one_has_to_agree", "Parallel_all_have_to_agree", "Parallel_one_has_to_agree"]
+        },
+        "departments": {
+          "type": "array",
+          "title": "Departments",
+          "description": "Departments the member belongs to.",
+          "items": {
+            "$ref": "#/definitions/MemberDepartment"
+          }
+        },
+        "allowances": {
+          "type": "array",
+          "title": "Allowances",
+          "description": "Allowances for the member.",
+          "items": {
+            "$ref": "#/definitions/MemberAllowance"
+          }
+        },
+        "has_approvers": {
+          "type": "array",
+          "title": "Approvers",
+          "description": "List of approvers for this member.",
+          "items": {
+            "$ref": "#/definitions/ApproverInfo"
+          }
+        },
+        "schedules": {
+          "type": "array",
+          "title": "Schedules",
+          "description": "Work schedules for the member.",
+          "items": {
+            "$ref": "#/definitions/Schedule"
+          }
+        }
+      }
+    },
+    "MemberDepartment": {
+      "type": "object",
+      "title": "Member Department",
+      "description": "Department assignment for a member.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Department ID",
+          "description": "Unique identifier of the department.",
+          "x-ms-summary": "Department ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Department Name",
+          "description": "Name of the department.",
+          "x-ms-summary": "Department Name"
+        },
+        "manager_type": {
+          "type": "string",
+          "title": "Manager Type",
+          "description": "Role of the member in the department.",
+          "x-ms-summary": "Manager Type",
+          "enum": ["Member", "Manager"]
+        }
+      }
+    },
+    "MemberAllowance": {
+      "type": "object",
+      "title": "Member Allowance",
+      "description": "Allowance information for a member.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Allowance ID",
+          "description": "Unique identifier of the allowance record.",
+          "x-ms-summary": "Allowance ID"
+        },
+        "year": {
+          "type": "integer",
+          "title": "Year",
+          "description": "Year for this allowance.",
+          "x-ms-summary": "Year"
+        },
+        "allowance": {
+          "type": "number",
+          "title": "Allowance",
+          "description": "Total allowance amount.",
+          "x-ms-summary": "Allowance"
+        },
+        "taken": {
+          "type": "number",
+          "title": "Taken",
+          "description": "Amount of allowance already taken.",
+          "x-ms-summary": "Taken"
+        },
+        "remaining": {
+          "type": "number",
+          "title": "Remaining",
+          "description": "Remaining allowance amount.",
+          "x-ms-summary": "Remaining"
+        },
+        "brought_forward": {
+          "type": "number",
+          "title": "Brought Forward",
+          "description": "Allowance brought forward from previous year.",
+          "x-ms-summary": "Brought Forward"
+        },
+        "compensatory_time_off": {
+          "type": "number",
+          "title": "Compensatory Time Off",
+          "description": "Compensatory time off added.",
+          "x-ms-summary": "Compensatory Time Off"
+        },
+        "allowance_type": {
+          "$ref": "#/definitions/AllowanceTypeV2"
+        }
+      }
+    },
+    "ApproverInfo": {
+      "type": "object",
+      "title": "Approver Info",
+      "description": "Information about an approver.",
+      "properties": {
+        "member": {
+          "$ref": "#/definitions/MemberReference"
+        }
+      }
+    },
+    "Schedule": {
+      "type": "object",
+      "title": "Schedule",
+      "description": "Work schedule for a member.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Schedule ID",
+          "description": "Unique identifier of the schedule.",
+          "x-ms-summary": "Schedule ID"
+        },
+        "from": {
+          "type": "string",
+          "title": "From Date",
+          "description": "Start date of this schedule.",
+          "x-ms-summary": "From Date"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the schedule was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the schedule was last updated.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "InviteMemberRequest": {
+      "type": "object",
+      "title": "Invite Member Request",
+      "description": "Request body for inviting a new member.",
+      "required": ["name", "department_ids", "public_holiday_id"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the member to invite.",
+          "x-ms-summary": "Name",
+          "maxLength": 255
+        },
+        "email": {
+          "type": "string",
+          "title": "Email",
+          "description": "Email address of the member.",
+          "x-ms-summary": "Email"
+        },
+        "department_ids": {
+          "type": "array",
+          "title": "Department IDs",
+          "description": "IDs of departments to assign the member to.",
+          "x-ms-summary": "Department IDs",
           "items": {
             "type": "object",
             "properties": {
-              "uuid": {
+              "id": {
                 "type": "string",
-                "title": "Approver ID",
-                "description": "Unique identifier of the approver.",
-                "x-ms-summary": "Approver ID"
-              },
-              "status": {
-                "type": "string",
-                "title": "Approver Status",
-                "description": "Current approval status.",
-                "x-ms-summary": "Approver Status",
-                "enum": [
-                  "PENDING",
-                  "APPROVED",
-                  "DECLINED",
-                  "CANCELED",
-                  "APPROVED_BY_ANOTHER_MANAGER",
-                  "DECLINED_BY_ANOTHER_MANAGER",
-                  "CANCELED_BY_ANOTHER_MANAGER"
-                ]
-              },
-              "status_changed_by_member": {
-                "type": "object",
-                "title": "Status Changed By",
-                "description": "Member who changed the approval status.",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "title": "Member Email",
-                    "description": "Email of the member who changed the status.",
-                    "x-ms-summary": "Member Email"
-                  },
-                  "name": {
-                    "type": "string",
-                    "title": "Member Name",
-                    "description": "Name of the member who changed the status.",
-                    "x-ms-summary": "Member Name"
-                  },
-                  "id": {
-                    "type": "string",
-                    "title": "Member ID",
-                    "description": "ID of the member who changed the status.",
-                    "x-ms-summary": "Member ID"
-                  },
-                  "custom_id": {
-                    "type": "string",
-                    "title": "Custom ID",
-                    "description": "Custom ID of the member who changed the status.",
-                    "x-ms-summary": "Custom ID"
-                  }
-                }
-              },
-              "status_change_date": {
-                "type": "string",
-                "title": "Status Change Date",
-                "description": "Date when the approval status was changed.",
-                "x-ms-summary": "Status Change Date"
-              },
-              "predecessor_request_member_approver_id": {
-                "type": "string",
-                "title": "Predecessor Approver ID",
-                "description": "ID of the predecessor approver, if applicable.",
-                "x-ms-summary": "Predecessor Approver ID"
-              },
-              "reason": {
-                "type": "string",
-                "title": "Approval Reason",
-                "description": "Reason provided by the approver.",
-                "x-ms-summary": "Approval Reason"
+                "title": "Department ID",
+                "description": "Department ID.",
+                "x-ms-summary": "Department ID"
               }
             }
           }
         },
-        "requester_member": {
-          "type": "object",
-          "title": "Requester",
-          "description": "Information about the requester.",
-          "properties": {
-            "email": {
-              "type": "string",
-              "title": "Requester Email",
-              "description": "Email of the requester.",
-              "x-ms-summary": "Requester Email"
-            },
-            "name": {
-              "type": "string",
-              "title": "Requester Name",
-              "description": "Name of the requester.",
-              "x-ms-summary": "Requester Name"
-            },
-            "id": {
-              "type": "string",
-              "title": "Requester ID",
-              "description": "ID of the requester.",
-              "x-ms-summary": "Requester ID"
-            },
-            "custom_id": {
-              "type": "string",
-              "title": "Requester Custom ID",
-              "description": "Custom ID of the requester.",
-              "x-ms-summary": "Requester Custom ID"
-            },
-            "allowances": {
-              "$ref": "#/definitions/Allowances"
+        "employment_start_date": {
+          "type": "string",
+          "title": "Employment Start Date",
+          "description": "Employment start date.",
+          "x-ms-summary": "Employment Start Date"
+        },
+        "public_holiday_id": {
+          "type": "string",
+          "title": "Public Holiday Calendar ID",
+          "description": "ID of the public holiday calendar to assign.",
+          "x-ms-summary": "Public Holiday Calendar ID"
+        },
+        "birthday": {
+          "type": "string",
+          "title": "Birthday",
+          "description": "Birthday of the member.",
+          "x-ms-summary": "Birthday"
+        },
+        "custom_id": {
+          "type": "string",
+          "title": "Custom ID",
+          "description": "Custom identifier for the member.",
+          "x-ms-summary": "Custom ID"
+        }
+      }
+    },
+    "UpdateMemberRequest": {
+      "type": "object",
+      "title": "Update Member Request",
+      "description": "Request body for updating a member.",
+      "properties": {
+        "is_admin": {
+          "type": "boolean",
+          "title": "Is Admin",
+          "description": "Whether the member should be an admin.",
+          "x-ms-summary": "Is Admin"
+        },
+        "department_ids": {
+          "type": "array",
+          "title": "Department IDs",
+          "description": "IDs of departments to assign the member to.",
+          "x-ms-summary": "Department IDs",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Department ID",
+                "description": "Department ID.",
+                "x-ms-summary": "Department ID"
+              }
             }
           }
         },
-        "canceld_by_member": {
-          "type": "object",
-          "title": "Canceled By",
-          "description": "Member who canceled the request.",
-          "properties": {
-            "email": {
-              "type": "string",
-              "title": "Canceling Member's Email",
-              "description": "Email of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's Email"
-            },
-            "name": {
-              "type": "string",
-              "title": "Canceling Member's Name",
-              "description": "Name of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's Name"
-            },
-            "id": {
-              "type": "string",
-              "title": "Canceling Member's ID",
-              "description": "ID of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's ID"
-            },
-            "custom_id": {
-              "type": "string",
-              "title": "Canceling Member's Custom ID",
-              "description": "Custom ID of the member who canceled the request.",
-              "x-ms-summary": "Canceling Member's Custom ID"
+        "employment_start_date": {
+          "type": "string",
+          "title": "Employment Start Date",
+          "description": "Employment start date.",
+          "x-ms-summary": "Employment Start Date"
+        },
+        "employment_end_date": {
+          "type": "string",
+          "title": "Employment End Date",
+          "description": "Employment end date.",
+          "x-ms-summary": "Employment End Date"
+        },
+        "public_holiday_id": {
+          "type": "string",
+          "title": "Public Holiday Calendar ID",
+          "description": "ID of the public holiday calendar to assign.",
+          "x-ms-summary": "Public Holiday Calendar ID"
+        },
+        "birthday": {
+          "type": "string",
+          "title": "Birthday",
+          "description": "Birthday of the member.",
+          "x-ms-summary": "Birthday"
+        },
+        "custom_id": {
+          "type": "string",
+          "title": "Custom ID",
+          "description": "Custom identifier for the member.",
+          "x-ms-summary": "Custom ID"
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Status of the member.",
+          "x-ms-summary": "Status",
+          "enum": ["INACTIVE", "ACTIVE", "ARCHIVED"]
+        }
+      }
+    },
+    "UpdateMemberApproversRequest": {
+      "type": "object",
+      "title": "Update Member Approvers Request",
+      "description": "Request body for updating member approvers.",
+      "required": ["approval_process"],
+      "properties": {
+        "approval_process": {
+          "type": "string",
+          "title": "Approval Process",
+          "description": "Type of approval process.",
+          "x-ms-summary": "Approval Process",
+          "enum": ["Linear_all_have_to_agree", "Linear_one_has_to_agree", "Parallel_all_have_to_agree", "Parallel_one_has_to_agree"]
+        },
+        "approvers": {
+          "type": "array",
+          "title": "Approvers",
+          "description": "List of custom approvers. Pass empty array for self-approval.",
+          "x-ms-summary": "Approvers",
+          "items": {
+            "type": "object",
+            "properties": {
+              "member_id": {
+                "type": "string",
+                "title": "Member ID",
+                "description": "ID of the approver member.",
+                "x-ms-summary": "Member ID"
+              },
+              "predecessor_manager_id": {
+                "type": "string",
+                "title": "Predecessor Manager ID",
+                "description": "ID of the predecessor manager (for linear approval).",
+                "x-ms-summary": "Predecessor Manager ID"
+              }
             }
           }
+        }
+      }
+    },
+    "UpdateMemberAllowanceRequest": {
+      "type": "object",
+      "title": "Update Member Allowance Request",
+      "description": "Request body for updating member allowance.",
+      "required": ["allowance", "compensatory_time_off"],
+      "properties": {
+        "allowance": {
+          "type": "number",
+          "title": "Allowance",
+          "description": "Total allowance amount.",
+          "x-ms-summary": "Allowance"
+        },
+        "compensatory_time_off": {
+          "type": "number",
+          "title": "Compensatory Time Off",
+          "description": "Compensatory time off to add.",
+          "x-ms-summary": "Compensatory Time Off"
+        },
+        "brought_forward": {
+          "type": "number",
+          "title": "Brought Forward",
+          "description": "Allowance brought forward from previous year.",
+          "x-ms-summary": "Brought Forward"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "Reason for the allowance update.",
+          "x-ms-summary": "Reason"
+        },
+        "overwrite_brought_forward": {
+          "type": "boolean",
+          "title": "Overwrite Brought Forward",
+          "description": "Whether to overwrite the brought forward value.",
+          "x-ms-summary": "Overwrite Brought Forward"
+        },
+        "set_as_default": {
+          "type": "boolean",
+          "title": "Set as Default",
+          "description": "Whether to set this allowance type as default for the member.",
+          "x-ms-summary": "Set as Default"
+        },
+        "disabled": {
+          "type": "boolean",
+          "title": "Disabled",
+          "description": "Whether to disable this allowance type for the member.",
+          "x-ms-summary": "Disabled"
+        }
+      }
+    },
+    "AddMemberScheduleRequest": {
+      "type": "object",
+      "title": "Add Member Schedule Request",
+      "description": "Request body for adding a member schedule.",
+      "properties": {
+        "from": {
+          "type": "string",
+          "title": "From Date",
+          "description": "Start date for this schedule (YYYY-MM-DD).",
+          "x-ms-summary": "From Date"
+        },
+        "monday_am_enabled": {
+          "type": "boolean",
+          "title": "Monday AM Enabled",
+          "description": "Whether Monday morning is enabled.",
+          "x-ms-summary": "Monday AM Enabled"
+        },
+        "monday_pm_enabled": {
+          "type": "boolean",
+          "title": "Monday PM Enabled",
+          "description": "Whether Monday afternoon is enabled.",
+          "x-ms-summary": "Monday PM Enabled"
+        },
+        "tuesday_am_enabled": {
+          "type": "boolean",
+          "title": "Tuesday AM Enabled",
+          "description": "Whether Tuesday morning is enabled.",
+          "x-ms-summary": "Tuesday AM Enabled"
+        },
+        "tuesday_pm_enabled": {
+          "type": "boolean",
+          "title": "Tuesday PM Enabled",
+          "description": "Whether Tuesday afternoon is enabled.",
+          "x-ms-summary": "Tuesday PM Enabled"
+        },
+        "wednesday_am_enabled": {
+          "type": "boolean",
+          "title": "Wednesday AM Enabled",
+          "description": "Whether Wednesday morning is enabled.",
+          "x-ms-summary": "Wednesday AM Enabled"
+        },
+        "wednesday_pm_enabled": {
+          "type": "boolean",
+          "title": "Wednesday PM Enabled",
+          "description": "Whether Wednesday afternoon is enabled.",
+          "x-ms-summary": "Wednesday PM Enabled"
+        },
+        "thursday_am_enabled": {
+          "type": "boolean",
+          "title": "Thursday AM Enabled",
+          "description": "Whether Thursday morning is enabled.",
+          "x-ms-summary": "Thursday AM Enabled"
+        },
+        "thursday_pm_enabled": {
+          "type": "boolean",
+          "title": "Thursday PM Enabled",
+          "description": "Whether Thursday afternoon is enabled.",
+          "x-ms-summary": "Thursday PM Enabled"
+        },
+        "friday_am_enabled": {
+          "type": "boolean",
+          "title": "Friday AM Enabled",
+          "description": "Whether Friday morning is enabled.",
+          "x-ms-summary": "Friday AM Enabled"
+        },
+        "friday_pm_enabled": {
+          "type": "boolean",
+          "title": "Friday PM Enabled",
+          "description": "Whether Friday afternoon is enabled.",
+          "x-ms-summary": "Friday PM Enabled"
+        },
+        "saturday_am_enabled": {
+          "type": "boolean",
+          "title": "Saturday AM Enabled",
+          "description": "Whether Saturday morning is enabled.",
+          "x-ms-summary": "Saturday AM Enabled"
+        },
+        "saturday_pm_enabled": {
+          "type": "boolean",
+          "title": "Saturday PM Enabled",
+          "description": "Whether Saturday afternoon is enabled.",
+          "x-ms-summary": "Saturday PM Enabled"
+        },
+        "sunday_am_enabled": {
+          "type": "boolean",
+          "title": "Sunday AM Enabled",
+          "description": "Whether Sunday morning is enabled.",
+          "x-ms-summary": "Sunday AM Enabled"
+        },
+        "sunday_pm_enabled": {
+          "type": "boolean",
+          "title": "Sunday PM Enabled",
+          "description": "Whether Sunday afternoon is enabled.",
+          "x-ms-summary": "Sunday PM Enabled"
+        }
+      }
+    },
+    "Department": {
+      "type": "object",
+      "title": "Department",
+      "description": "A department in the workspace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Department ID",
+          "description": "Unique identifier of the department.",
+          "x-ms-summary": "Department ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the department.",
+          "x-ms-summary": "Name"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the department was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the department was last updated.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "CreateDepartmentRequest": {
+      "type": "object",
+      "title": "Create Department Request",
+      "description": "Request body for creating a department.",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the department.",
+          "x-ms-summary": "Name"
+        }
+      }
+    },
+    "UpdateDepartmentRequest": {
+      "type": "object",
+      "title": "Update Department Request",
+      "description": "Request body for updating a department.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the department.",
+          "x-ms-summary": "Name"
+        }
+      }
+    },
+    "LeaveType": {
+      "type": "object",
+      "title": "Leave Type",
+      "description": "A leave type in the workspace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Leave Type ID",
+          "description": "Unique identifier of the leave type.",
+          "x-ms-summary": "Leave Type ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the leave type.",
+          "x-ms-summary": "Name"
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit for this leave type.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "hours"]
+        },
+        "color": {
+          "type": "string",
+          "title": "Color",
+          "description": "Color code for this leave type.",
+          "x-ms-summary": "Color"
+        },
+        "icon": {
+          "type": "string",
+          "title": "Icon",
+          "description": "Icon for this leave type.",
+          "x-ms-summary": "Icon"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the leave type was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the leave type was last updated.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "CreateLeaveTypeRequest": {
+      "type": "object",
+      "title": "Create Leave Type Request",
+      "description": "Request body for creating a leave type.",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the leave type.",
+          "x-ms-summary": "Name"
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit for this leave type.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "hours"]
+        },
+        "color": {
+          "type": "string",
+          "title": "Color",
+          "description": "Color code for this leave type.",
+          "x-ms-summary": "Color"
+        },
+        "icon": {
+          "type": "string",
+          "title": "Icon",
+          "description": "Icon for this leave type.",
+          "x-ms-summary": "Icon"
+        }
+      }
+    },
+    "UpdateLeaveTypeRequest": {
+      "type": "object",
+      "title": "Update Leave Type Request",
+      "description": "Request body for updating a leave type.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the leave type.",
+          "x-ms-summary": "Name"
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit for this leave type.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "hours"]
+        },
+        "color": {
+          "type": "string",
+          "title": "Color",
+          "description": "Color code for this leave type.",
+          "x-ms-summary": "Color"
+        },
+        "icon": {
+          "type": "string",
+          "title": "Icon",
+          "description": "Icon for this leave type.",
+          "x-ms-summary": "Icon"
+        }
+      }
+    },
+    "Request": {
+      "type": "object",
+      "title": "Request",
+      "description": "A leave request.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Request ID",
+          "description": "Unique identifier of the request.",
+          "x-ms-summary": "Request ID"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the request was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the request was last updated.",
+          "x-ms-summary": "Updated At"
+        },
+        "start": {
+          "type": "string",
+          "title": "Start Date",
+          "description": "Start date of the request.",
+          "x-ms-summary": "Start Date"
+        },
+        "start_at": {
+          "type": "string",
+          "title": "Start Time",
+          "description": "Time of day when the leave starts.",
+          "x-ms-summary": "Start Time",
+          "enum": ["morning", "afternoon"]
+        },
+        "end": {
+          "type": "string",
+          "title": "End Date",
+          "description": "End date of the request.",
+          "x-ms-summary": "End Date"
+        },
+        "end_at": {
+          "type": "string",
+          "title": "End Time",
+          "description": "Time of day when the leave ends.",
+          "x-ms-summary": "End Time",
+          "enum": ["lunchtime", "end_of_day"]
+        },
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "Current status of the request.",
+          "x-ms-summary": "Status",
+          "enum": ["PENDING", "APPROVED", "DECLINED", "CANCELED"]
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "Reason for the leave request.",
+          "x-ms-summary": "Reason"
+        },
+        "duration": {
+          "type": "number",
+          "title": "Duration",
+          "description": "Duration of the leave.",
+          "x-ms-summary": "Duration"
+        },
+        "workday_absence_duration": {
+          "type": "number",
+          "title": "Workday Duration",
+          "description": "Duration in workdays.",
+          "x-ms-summary": "Workday Duration"
+        },
+        "leave_unit": {
+          "type": "string",
+          "title": "Leave Unit",
+          "description": "Unit for this leave.",
+          "x-ms-summary": "Leave Unit",
+          "enum": ["days", "hours"]
+        },
+        "requester_member": {
+          "$ref": "#/definitions/MemberReference"
         },
         "leave_type": {
-          "$ref": "#/definitions/LeaveType"
+          "$ref": "#/definitions/LeaveTypeV2"
         },
-        "deducted": {
+        "request_approvers": {
+          "type": "array",
+          "title": "Approvers",
+          "description": "List of approvers for this request.",
+          "items": {
+            "$ref": "#/definitions/RequestApproverV2"
+          }
+        }
+      }
+    },
+    "CreateRequestBody": {
+      "type": "object",
+      "title": "Create Request Body",
+      "description": "Request body for creating a leave request.",
+      "required": ["member_id", "leave_type_id", "start", "end"],
+      "properties": {
+        "member_id": {
+          "type": "string",
+          "title": "Member ID",
+          "description": "ID of the member requesting leave.",
+          "x-ms-summary": "Member ID"
+        },
+        "leave_type_id": {
+          "type": "string",
+          "title": "Leave Type ID",
+          "description": "ID of the leave type.",
+          "x-ms-summary": "Leave Type ID"
+        },
+        "start": {
+          "type": "string",
+          "title": "Start Date",
+          "description": "Start date of the leave (YYYY-MM-DD).",
+          "x-ms-summary": "Start Date"
+        },
+        "start_at": {
+          "type": "string",
+          "title": "Start Time",
+          "description": "Time of day when the leave starts.",
+          "x-ms-summary": "Start Time",
+          "enum": ["morning", "afternoon"]
+        },
+        "end": {
+          "type": "string",
+          "title": "End Date",
+          "description": "End date of the leave (YYYY-MM-DD).",
+          "x-ms-summary": "End Date"
+        },
+        "end_at": {
+          "type": "string",
+          "title": "End Time",
+          "description": "Time of day when the leave ends.",
+          "x-ms-summary": "End Time",
+          "enum": ["lunchtime", "end_of_day"]
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "Reason for the leave request.",
+          "x-ms-summary": "Reason"
+        }
+      }
+    },
+    "UpdateRequestBody": {
+      "type": "object",
+      "title": "Update Request Body",
+      "description": "Request body for updating a leave request status.",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "title": "Status",
+          "description": "New status for the request.",
+          "x-ms-summary": "Status",
+          "enum": ["APPROVED", "DECLINED", "CANCELED"]
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "Reason for the status change.",
+          "x-ms-summary": "Reason"
+        }
+      }
+    },
+    "PublicHolidayCalendar": {
+      "type": "object",
+      "title": "Public Holiday Calendar",
+      "description": "A public holiday calendar.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Calendar ID",
+          "description": "Unique identifier of the calendar.",
+          "x-ms-summary": "Calendar ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the public holiday calendar.",
+          "x-ms-summary": "Name"
+        },
+        "country": {
+          "type": "string",
+          "title": "Country",
+          "description": "Country for the public holidays.",
+          "x-ms-summary": "Country"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the calendar was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the calendar was last updated.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "PublicHolidayCalendarDetail": {
+      "type": "object",
+      "title": "Public Holiday Calendar Detail",
+      "description": "Detailed public holiday calendar with holidays.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Calendar ID",
+          "description": "Unique identifier of the calendar.",
+          "x-ms-summary": "Calendar ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the public holiday calendar.",
+          "x-ms-summary": "Name"
+        },
+        "country": {
+          "type": "string",
+          "title": "Country",
+          "description": "Country for the public holidays.",
+          "x-ms-summary": "Country"
+        },
+        "holidays": {
+          "type": "array",
+          "title": "Holidays",
+          "description": "List of holidays in this calendar.",
+          "items": {
+            "$ref": "#/definitions/PublicHoliday"
+          }
+        }
+      }
+    },
+    "PublicHoliday": {
+      "type": "object",
+      "title": "Public Holiday",
+      "description": "A public holiday.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Holiday ID",
+          "description": "Unique identifier of the holiday.",
+          "x-ms-summary": "Holiday ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the holiday.",
+          "x-ms-summary": "Name"
+        },
+        "date": {
+          "type": "string",
+          "title": "Date",
+          "description": "Date of the holiday.",
+          "x-ms-summary": "Date"
+        },
+        "duration": {
           "type": "number",
-          "format": "float",
-          "title": "Deducted Amount",
-          "description": "Amount deducted from the user's allowance.",
-          "x-ms-summary": "Deducted Amount"
+          "title": "Duration",
+          "description": "Duration of the holiday (0.5 for half day, 1 for full day).",
+          "x-ms-summary": "Duration"
+        }
+      }
+    },
+    "CreatePublicHolidayRequest": {
+      "type": "object",
+      "title": "Create Public Holiday Calendar Request",
+      "description": "Request body for creating a public holiday calendar.",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the public holiday calendar.",
+          "x-ms-summary": "Name"
+        },
+        "country": {
+          "type": "string",
+          "title": "Country",
+          "description": "Country code for the public holidays.",
+          "x-ms-summary": "Country"
+        }
+      }
+    },
+    "UpdatePublicHolidayRequest": {
+      "type": "object",
+      "title": "Update Public Holiday Calendar Request",
+      "description": "Request body for updating a public holiday calendar.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the public holiday calendar.",
+          "x-ms-summary": "Name"
+        },
+        "country": {
+          "type": "string",
+          "title": "Country",
+          "description": "Country code for the public holidays.",
+          "x-ms-summary": "Country"
+        }
+      }
+    },
+    "Workspace": {
+      "type": "object",
+      "title": "Workspace",
+      "description": "Workspace settings and configuration.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Workspace ID",
+          "description": "Unique identifier of the workspace.",
+          "x-ms-summary": "Workspace ID"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "Name of the workspace.",
+          "x-ms-summary": "Name"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Created At",
+          "description": "Timestamp when the workspace was created.",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "title": "Updated At",
+          "description": "Timestamp when the workspace was last updated.",
+          "x-ms-summary": "Updated At"
+        }
+      }
+    },
+    "Absence": {
+      "type": "object",
+      "title": "Absence",
+      "description": "An absence entry.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Absence ID",
+          "description": "Unique identifier of the absence.",
+          "x-ms-summary": "Absence ID"
+        },
+        "date": {
+          "type": "string",
+          "title": "Date",
+          "description": "Date of the absence.",
+          "x-ms-summary": "Date"
+        },
+        "duration": {
+          "type": "number",
+          "title": "Duration",
+          "description": "Duration of the absence.",
+          "x-ms-summary": "Duration"
+        },
+        "member": {
+          "$ref": "#/definitions/MemberReference"
+        },
+        "leave_type": {
+          "$ref": "#/definitions/LeaveTypeV2"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request ID",
+          "description": "ID of the associated leave request.",
+          "x-ms-summary": "Request ID"
         }
       }
     }
@@ -643,7 +3109,7 @@
   "parameters": {},
   "responses": {},
   "securityDefinitions": {
-    "undefined": {
+    "oauth2_auth": {
       "type": "oauth2",
       "flow": "accessCode",
       "authorizationUrl": "https://login.windows.net/common/oauth2/authorize",
@@ -653,8 +3119,41 @@
   },
   "security": [
     {
-      "undefined": []
+      "oauth2_auth": []
     }
   ],
-  "tags": []
+  "tags": [
+    {
+      "name": "Triggers",
+      "description": "Webhook triggers for leave request events."
+    },
+    {
+      "name": "Members",
+      "description": "Manage workspace members. Requires Plus plan."
+    },
+    {
+      "name": "Departments",
+      "description": "Manage departments. Requires Plus plan."
+    },
+    {
+      "name": "Leave Types",
+      "description": "Manage leave types. Requires Plus plan."
+    },
+    {
+      "name": "Requests",
+      "description": "Manage leave requests. Requires Plus plan."
+    },
+    {
+      "name": "Public Holidays",
+      "description": "Manage public holiday calendars. Requires Plus plan."
+    },
+    {
+      "name": "Workspace",
+      "description": "Get workspace settings. Requires Plus plan."
+    },
+    {
+      "name": "Absences",
+      "description": "Query absences. Requires Plus plan."
+    }
+  ]
 }

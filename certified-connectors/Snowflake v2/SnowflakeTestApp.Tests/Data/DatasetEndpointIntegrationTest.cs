@@ -45,7 +45,7 @@ namespace SnowflakeTestApp.Tests.Data
             Assert.AreEqual("dataset", displayNameElement.Value);
 
             var nameElement = dataSetElement.Elements().First(e => e.Name.LocalName == "Name");
-            Assert.AreEqual("default", nameElement.Value);
+            Assert.AreEqual($"{TestData.DefaultSnowflakeHostname},{TestData.DefaultDatabase}", nameElement.Value);
 
             var tablesElement = dataSetElement.Elements().FirstOrDefault(e => e.Name.LocalName == "tables");
             Assert.IsNotNull(tablesElement, "tables element should exist");

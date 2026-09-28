@@ -1,0 +1,1897 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Wauld",
+    "description": "Wauld is an all-in-one credentialing platform to design, issue, and manage digital credentials that are secure, shareable, and globally verifiable.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Wauld Support",
+      "url": "https://feedback.wauld.com",
+      "email": "support@wauld.com"
+    }
+  },
+  "host": "wauld.app",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/wauld.CredentialService/PublishAdhocCredential": {
+      "post": {
+        "tags": ["CredentialService"],
+        "summary": "Issue credential",
+        "description": "Issues a new credential using the selected document and recipient details.",
+        "operationId": "PublishAdhocCredential",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "type": "integer",
+            "enum": [1],
+            "default": 1,
+            "x-ms-visibility": "internal",
+            "description": "Required by the Connect RPC protocol. Always sent as 1; not shown in the UI."
+          },
+          {
+            "name": "account",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-summary": "Account ID",
+            "description": "Find your Wauld account ID in the URL after wauld.app/. It starts with acc_. Copy and paste it here."
+          },
+          {
+            "name": "workspace",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-summary": "Workspace",
+            "description": "Choose the Wauld workspace where the document to be issued is located.",
+            "x-ms-dynamic-list": {
+              "operationId": "ListWorkspaces",
+              "itemsPath": "workspaces",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "parameters": {
+                "body/parent": {
+                  "parameterReference": "account"
+                },
+                "body/pageSize": {
+                  "value": 25
+                }
+              }
+            }
+          },
+          {
+            "name": "engagement",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "important",
+            "x-ms-summary": "Engagement",
+            "description": "Choose the engagement that contains the document to be issued.",
+            "x-ms-dynamic-list": {
+              "operationId": "ListEngagements",
+              "itemsPath": "engagements",
+              "itemValuePath": "id",
+              "itemTitlePath": "name",
+              "parameters": {
+                "body/parent": {
+                  "parameterReference": "workspace"
+                },
+                "body/pageSize": {
+                  "value": 10
+                }
+              }
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PublishAdhocCredentialRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credential issued successfully.",
+            "schema": {
+              "$ref": "#/definitions/wauld_Credential"
+            }
+          },
+          "400": {
+            "description": "The request was invalid or missing required fields.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "401": {
+            "description": "The access token is missing, invalid, or expired.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "404": {
+            "description": "The specified workspace, engagement, or document was not found.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred while issuing the credential.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          }
+        }
+      }
+    },
+    "/wauld.DocumentService/ListDocuments": {
+      "post": {
+        "tags": ["DocumentService"],
+        "summary": "List documents",
+        "description": "Lists the documents available under an engagement.",
+        "operationId": "ListDocuments",
+        "x-ms-visibility": "internal",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "type": "integer",
+            "enum": [1],
+            "default": 1,
+            "x-ms-visibility": "internal",
+            "description": "Required by the Connect RPC protocol. Always sent as 1; not shown in the UI."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ListDocumentsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documents retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/ListDocumentsResponse"
+            }
+          },
+          "400": {
+            "description": "The request was invalid or missing required fields.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "401": {
+            "description": "The access token is missing, invalid, or expired.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred while retrieving documents.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          }
+        }
+      }
+    },
+    "/wauld.DocumentService/GetDocument": {
+      "post": {
+        "tags": ["DocumentService"],
+        "summary": "Get document",
+        "description": "Fetches a single document, including its custom attributes.",
+        "operationId": "GetDocument",
+        "x-ms-visibility": "internal",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "type": "integer",
+            "enum": [1],
+            "default": 1,
+            "x-ms-visibility": "internal",
+            "description": "Required by the Connect RPC protocol. Always sent as 1; not shown in the UI."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetDocumentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/GetDocumentResponse"
+            }
+          },
+          "400": {
+            "description": "The request was invalid or missing required fields.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "401": {
+            "description": "The access token is missing, invalid, or expired.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "404": {
+            "description": "The specified document was not found.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred while retrieving the document.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          }
+        }
+      }
+    },
+    "/wauld.EngagementService/ListEngagements": {
+      "post": {
+        "tags": ["EngagementService"],
+        "summary": "List engagements",
+        "description": "Lists the engagements available under a workspace.",
+        "operationId": "ListEngagements",
+        "x-ms-visibility": "internal",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "type": "integer",
+            "enum": [1],
+            "default": 1,
+            "x-ms-visibility": "internal",
+            "description": "Required by the Connect RPC protocol. Always sent as 1; not shown in the UI."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ListEngagementsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Engagements retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/ListEngagementsResponse"
+            }
+          },
+          "400": {
+            "description": "The request was invalid or missing required fields.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "401": {
+            "description": "The access token is missing, invalid, or expired.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred while retrieving engagements.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          }
+        }
+      }
+    },
+    "/wauld.WorkspaceService/ListWorkspaces": {
+      "post": {
+        "tags": ["WorkspaceService"],
+        "summary": "List workspaces",
+        "description": "Lists the workspaces available under the given account ID.",
+        "operationId": "ListWorkspaces",
+        "x-ms-visibility": "internal",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "type": "integer",
+            "enum": [1],
+            "default": 1,
+            "x-ms-visibility": "internal",
+            "description": "Required by the Connect RPC protocol. Always sent as 1; not shown in the UI."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/ListWorkspacesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workspaces retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/ListWorkspacesResponse"
+            }
+          },
+          "400": {
+            "description": "The request was invalid or missing required fields.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "401": {
+            "description": "The access token is missing, invalid, or expired.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred while retrieving workspaces.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          }
+        }
+      }
+    },
+    "/wauld.WebhookService/CreateWebhook": {
+      "x-ms-notification-content": {
+        "description": "Payload sent when a credential is issued.",
+        "schema": {
+          "$ref": "#/definitions/WebhookNotificationPayload"
+        }
+      },
+      "post": {
+        "tags": ["WebhookService"],
+        "summary": "When a new credential is issued",
+        "description": "This operation triggers when a new credential is issued.",
+        "operationId": "CreateWebhookTrigger",
+        "x-ms-trigger": "single",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "type": "integer",
+            "enum": [1],
+            "default": 1,
+            "x-ms-visibility": "internal",
+            "description": "Required by the Connect RPC protocol. Always sent as 1; not shown in the UI."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "title": "CreateWebhookTriggerRequest",
+              "properties": {
+                "parent": {
+                  "type": "string",
+                  "title": "Account ID",
+                  "x-ms-summary": "Account ID",
+                  "description": "Find your Wauld account ID in the URL after wauld.app/. It starts with acc_. Copy and paste it here.",
+                  "x-ms-visibility": "important"
+                },
+                "url": {
+                  "type": "string",
+                  "title": "url",
+                  "x-ms-visibility": "internal",
+                  "x-ms-notification-url": true,
+                  "description": "Populated automatically with the callback URL for this flow."
+                },
+                "events": {
+                  "type": "array",
+                  "title": "events",
+                  "x-ms-visibility": "internal",
+                  "default": ["CREDENTIAL_ISSUED"],
+                  "description": "Fixed to the credential-issued event for this trigger.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "name": {
+                  "type": "string",
+                  "title": "name",
+                  "x-ms-summary": "Webhook Name",
+                  "x-ms-visibility": "advanced",
+                  "default": "Wauld Webhook",
+                  "description": "Label for this webhook inside Wauld. Under 50 characters."
+                }
+              },
+              "required": ["parent", "url", "events"],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A new credential was issued.",
+            "schema": {
+              "$ref": "#/definitions/CreateWebhookTriggerResponse"
+            },
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "Path to this webhook, used to unsubscribe when the flow is turned off or deleted."
+              }
+            }
+          },
+          "400": {
+            "description": "The request was invalid or missing required fields.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "401": {
+            "description": "The access token is missing, invalid, or expired.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred while creating the subscription.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          }
+        }
+      }
+    },
+    "/wauld.WebhookService/DeleteWebhook/{id}": {
+      "delete": {
+        "tags": ["WebhookService"],
+        "summary": "Delete webhook",
+        "description": "Unsubscribes a webhook. Called automatically when the trigger's flow is turned off or deleted, using the path returned in the Location header of the trigger response.",
+        "operationId": "DeleteWebhookTrigger",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal",
+            "description": "Webhook ID.",
+            "default": "wbhk_sample"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The webhook subscription was removed successfully.",
+            "schema": {
+              "type": "object",
+              "title": "DeleteWebhookResponse",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "id",
+                  "x-ms-summary": "Webhook ID",
+                  "description": "The identifier of the webhook subscription that was removed."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "400": {
+            "description": "The request was invalid.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "401": {
+            "description": "The access token is missing, invalid, or expired.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "404": {
+            "description": "The specified webhook was not found.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred while removing the webhook.",
+            "schema": {
+              "$ref": "#/definitions/connect_error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DocumentSummary": {
+      "type": "object",
+      "title": "Document",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Document ID",
+          "description": "The unique identifier of the document."
+        },
+        "parent": {
+          "type": "string",
+          "title": "parent",
+          "x-ms-summary": "Engagement ID",
+          "description": "The identifier of the engagement this document belongs to."
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Document Name",
+          "description": "The name of the document."
+        }
+      },
+      "additionalProperties": false
+    },
+    "EngagementSummary": {
+      "type": "object",
+      "title": "Engagement",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Engagement ID",
+          "description": "The unique identifier of the engagement."
+        },
+        "parent": {
+          "type": "string",
+          "title": "parent",
+          "x-ms-summary": "Workspace ID",
+          "description": "The identifier of the workspace this engagement belongs to."
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Engagement Name",
+          "description": "The name of the engagement."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ListDocumentsRequest": {
+      "type": "object",
+      "title": "ListDocumentsRequest",
+      "properties": {
+        "parent": {
+          "type": "string",
+          "title": "parent",
+          "x-ms-summary": "Engagement ID",
+          "description": "The fully qualified ID of the engagement."
+        },
+        "pageToken": {
+          "type": "string",
+          "title": "page_token",
+          "x-ms-summary": "Page Token",
+          "description": "Token for retrieving the next page of results."
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32",
+          "title": "page_size",
+          "x-ms-summary": "Page Size",
+          "description": "The maximum number of documents to return per page."
+        },
+        "hasImageAttributes": {
+          "type": "boolean",
+          "title": "has_image_attributes",
+          "x-ms-summary": "Has Image Attributes",
+          "description": "Whether to only return documents that have image attributes.",
+          "default": false
+        }
+      },
+      "required": ["parent"],
+      "additionalProperties": false
+    },
+    "ListDocumentsResponse": {
+      "type": "object",
+      "title": "ListDocumentsResponse",
+      "properties": {
+        "documents": {
+          "type": "array",
+          "title": "documents",
+          "x-ms-summary": "Documents",
+          "description": "The list of documents returned for this page.",
+          "items": {
+            "$ref": "#/definitions/DocumentSummary"
+          }
+        },
+        "nextPageToken": {
+          "type": "string",
+          "title": "next_page_token",
+          "x-ms-summary": "Next Page Token",
+          "description": "Token for retrieving the next page of results, if any."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ListEngagementsRequest": {
+      "type": "object",
+      "title": "ListEngagementsRequest",
+      "properties": {
+        "parent": {
+          "type": "string",
+          "title": "parent",
+          "x-ms-summary": "Workspace ID",
+          "description": "The fully qualified ID of the workspace."
+        },
+        "pageToken": {
+          "type": "string",
+          "title": "page_token",
+          "x-ms-summary": "Page Token",
+          "description": "Token for retrieving the next page of results."
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32",
+          "title": "page_size",
+          "x-ms-summary": "Page Size",
+          "description": "The maximum number of engagements to return per page. Can be up to 10."
+        }
+      },
+      "required": ["parent"],
+      "additionalProperties": false
+    },
+    "ListEngagementsResponse": {
+      "type": "object",
+      "title": "ListEngagementsResponse",
+      "properties": {
+        "engagements": {
+          "type": "array",
+          "title": "engagements",
+          "x-ms-summary": "Engagements",
+          "description": "The list of engagements returned for this page.",
+          "items": {
+            "$ref": "#/definitions/EngagementSummary"
+          }
+        },
+        "nextPageToken": {
+          "type": "string",
+          "title": "next_page_token",
+          "x-ms-summary": "Next Page Token",
+          "description": "Token for retrieving the next page of results, if any."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ListWorkspacesRequest": {
+      "type": "object",
+      "title": "ListWorkspacesRequest",
+      "properties": {
+        "parent": {
+          "type": "string",
+          "title": "parent",
+          "x-ms-summary": "Account ID",
+          "description": "The ID of the account this workspace belongs to."
+        },
+        "pageToken": {
+          "type": "string",
+          "title": "page_token",
+          "x-ms-summary": "Page Token",
+          "description": "Token for retrieving the next page of results."
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32",
+          "title": "page_size",
+          "x-ms-summary": "Page Size",
+          "description": "The maximum number of workspaces to return per page. Can be up to 25."
+        }
+      },
+      "additionalProperties": false,
+      "required": ["parent"]
+    },
+    "ListWorkspacesResponse": {
+      "type": "object",
+      "title": "ListWorkspacesResponse",
+      "properties": {
+        "workspaces": {
+          "type": "array",
+          "title": "workspaces",
+          "x-ms-summary": "Workspaces",
+          "description": "The list of workspaces returned for this page.",
+          "items": {
+            "$ref": "#/definitions/WorkspaceSummary"
+          }
+        },
+        "nextPageToken": {
+          "type": "string",
+          "title": "next_page_token",
+          "x-ms-summary": "Next Page Token",
+          "description": "Token for retrieving the next page of results, if any."
+        }
+      },
+      "additionalProperties": false
+    },
+    "PublishAdhocCredentialRequest": {
+      "type": "object",
+      "title": "PublishAdhocCredentialRequest",
+      "properties": {
+        "parent": {
+          "type": "string",
+          "title": "document",
+          "x-ms-summary": "Document",
+          "description": "Choose the document that is to be issued as a credential.",
+          "x-ms-dynamic-list": {
+            "operationId": "ListDocuments",
+            "itemsPath": "documents",
+            "itemValuePath": "id",
+            "itemTitlePath": "name",
+            "parameters": {
+              "body/parent": {
+                "parameterReference": "engagement"
+              },
+              "body/pageSize": {
+                "value": 10
+              }
+            }
+          },
+          "x-ms-visibility": "important"
+        },
+        "recipient": {
+          "$ref": "#/definitions/wauld_Credential_Recipient",
+          "x-ms-summary": "Recipient",
+          "x-ms-visibility": "important"
+        },
+        "attributes": {
+          "type": "array",
+          "title": "attributes",
+          "x-ms-summary": "Attributes",
+          "items": {
+            "$ref": "#/definitions/wauld_Credential_Attribute"
+          },
+          "x-ms-visibility": "important",
+          "description": "Map any custom fields required by the selected document. These are recipient-specific values."
+        },
+        "sharable": {
+          "type": "boolean",
+          "title": "sharable",
+          "x-ms-summary": "Sharable",
+          "description": "Choose whether recipients can share issued credentials externally.",
+          "x-ms-visibility": "advanced"
+        },
+        "wallet": {
+          "type": "boolean",
+          "title": "wallet",
+          "x-ms-visibility": "internal",
+          "default": true,
+          "enum": [true, false]
+        },
+        "linkedIn": {
+          "type": "boolean",
+          "title": "linked_in",
+          "x-ms-summary": "Add to LinkedIn",
+          "x-ms-visibility": "advanced",
+          "description": "Choose whether recipients can add issued credentials to their LinkedIn profiles."
+        },
+        "expireTime": {
+          "type": "string",
+          "format": "date-time",
+          "title": "expire_time",
+          "x-ms-summary": "Expiry Time",
+          "description": "Enter the expiry date in RFC3339 format (for example, 2026-12-31T23:59:59Z) for the credential to be issued. Leave this field blank if the credential should never expire.",
+          "x-ms-visibility": "advanced"
+        }
+      },
+      "required": ["parent", "recipient", "wallet"],
+      "additionalProperties": false
+    },
+    "WorkspaceSummary": {
+      "type": "object",
+      "title": "Workspace",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Workspace ID",
+          "description": "The unique identifier of the workspace."
+        },
+        "parent": {
+          "type": "string",
+          "title": "parent",
+          "x-ms-summary": "Account ID",
+          "description": "The identifier of the account this workspace belongs to."
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Workspace Name",
+          "description": "The name of the workspace."
+        }
+      },
+      "additionalProperties": false
+    },
+    "connect_error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "canceled",
+            "unknown",
+            "invalid_argument",
+            "deadline_exceeded",
+            "not_found",
+            "already_exists",
+            "permission_denied",
+            "resource_exhausted",
+            "failed_precondition",
+            "aborted",
+            "out_of_range",
+            "unimplemented",
+            "internal",
+            "unavailable",
+            "data_loss",
+            "unauthenticated"
+          ],
+          "x-ms-summary": "Error Code",
+          "description": "The status code for this error.",
+          "example": "not_found"
+        },
+        "message": {
+          "type": "string",
+          "x-ms-summary": "Error Message",
+          "description": "A developer-facing message that describes the error."
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/connect_error_details_Any"
+          },
+          "x-ms-summary": "Error Details",
+          "description": "A list of messages that carry additional error details."
+        }
+      },
+      "title": "Connect Error",
+      "additionalProperties": true,
+      "description": "Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation"
+    },
+    "connect_error_details_Any": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "x-ms-summary": "Type",
+          "description": "A URL that identifies the type of the serialized error detail message."
+        },
+        "value": {
+          "type": "string",
+          "format": "binary",
+          "x-ms-summary": "Value",
+          "description": "The serialized error detail message, base64-encoded."
+        },
+        "debug": {
+          "title": "Debug",
+          "x-ms-summary": "Debug",
+          "description": "A deserialized version of the error detail payload, provided for easier debugging.",
+          "type": "object"
+        }
+      },
+      "additionalProperties": true,
+      "description": "Contains a serialized error detail message along with its type."
+    },
+    "google_protobuf_Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2023-01-15T01:30:15.01Z"
+    },
+    "wauld_Credential": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Credential ID",
+          "description": "The unique identifier of the issued credential."
+        },
+        "parent": {
+          "type": "string",
+          "title": "parent",
+          "x-ms-summary": "Document ID",
+          "description": "The fully qualified ID of the document this credential was issued from."
+        },
+        "published": {
+          "type": "boolean",
+          "title": "published",
+          "x-ms-summary": "Published",
+          "description": "Whether the credential has been published."
+        },
+        "document": {
+          "title": "document",
+          "x-ms-summary": "Document",
+          "description": "The document details for this credential. Only available for published credentials.",
+          "$ref": "#/definitions/wauld_Credential_Document"
+        },
+        "recipient": {
+          "title": "recipient",
+          "x-ms-summary": "Recipient",
+          "$ref": "#/definitions/wauld_Credential_Recipient"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/wauld_Credential_Attribute"
+          },
+          "title": "attributes",
+          "x-ms-summary": "Attributes",
+          "description": "The custom attribute values set on this credential."
+        },
+        "expireTime": {
+          "title": "expire_time",
+          "x-ms-summary": "Expiry Time",
+          "description": "The expiry date and time of the credential, if one was set.",
+          "$ref": "#/definitions/google_protobuf_Timestamp"
+        },
+        "publishTime": {
+          "title": "publish_time",
+          "x-ms-summary": "Publish Time",
+          "description": "The date and time the credential was published.",
+          "$ref": "#/definitions/google_protobuf_Timestamp"
+        },
+        "viewCount": {
+          "type": "integer",
+          "title": "view_count",
+          "format": "int64",
+          "x-ms-summary": "View Count",
+          "description": "The number of times the credential has been viewed."
+        },
+        "downloadable": {
+          "type": "boolean",
+          "title": "downloadable",
+          "x-ms-summary": "Downloadable",
+          "description": "Whether the credential can be downloaded."
+        },
+        "sharable": {
+          "type": "boolean",
+          "title": "sharable",
+          "x-ms-summary": "Sharable",
+          "description": "Whether the recipient can share this credential externally."
+        },
+        "wallet": {
+          "type": "boolean",
+          "title": "wallet",
+          "x-ms-summary": "Wallet",
+          "description": "Whether the recipient can add this credential to Apple Wallet or Google Wallet."
+        },
+        "linkedIn": {
+          "type": "boolean",
+          "title": "linked_in",
+          "x-ms-summary": "Add to LinkedIn",
+          "description": "Whether the recipient can add this credential to their LinkedIn profile."
+        },
+        "void": {
+          "type": "boolean",
+          "title": "void",
+          "x-ms-summary": "Void",
+          "description": "Whether the credential has been voided. This is a non-reversible state."
+        },
+        "accessRevoked": {
+          "type": "boolean",
+          "title": "access_revoked",
+          "x-ms-summary": "Access Revoked",
+          "description": "Whether the recipient's access to this credential has been removed. This is a reversible state."
+        },
+        "verifyCount": {
+          "type": "integer",
+          "title": "verify_count",
+          "format": "int64",
+          "x-ms-summary": "Verify Count",
+          "description": "The number of times the credential has been verified."
+        },
+        "changeRequest": {
+          "title": "change_request",
+          "x-ms-summary": "Change Request",
+          "description": "Details of any pending change request for this credential.",
+          "$ref": "#/definitions/wauld_Credential_ChangeRequest"
+        },
+        "voidTime": {
+          "title": "void_time",
+          "x-ms-summary": "Void Time",
+          "description": "The date and time the credential was voided, if applicable.",
+          "$ref": "#/definitions/google_protobuf_Timestamp"
+        },
+        "downloadCount": {
+          "type": "integer",
+          "title": "download_count",
+          "format": "int64",
+          "x-ms-summary": "Download Count",
+          "description": "The number of times the credential has been downloaded."
+        },
+        "ancestor": {
+          "type": "string",
+          "title": "ancestor",
+          "x-ms-summary": "Ancestor Credential ID",
+          "description": "The ID of the credential that this credential replaced, if any."
+        },
+        "successor": {
+          "type": "string",
+          "title": "successor",
+          "x-ms-summary": "Successor Credential ID",
+          "description": "The ID of the credential that replaced this credential, if any."
+        }
+      },
+      "title": "Credential",
+      "additionalProperties": false
+    },
+    "wauld_Credential_Attribute": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Attribute Name",
+          "description": "Pick one of the selected document's custom attributes.",
+          "x-ms-dynamic-list": {
+            "operationId": "GetDocument",
+            "itemsPath": "customAttributes",
+            "parameters": {
+              "body/id": {
+                "parameterReference": "body/parent"
+              }
+            }
+          }
+        },
+        "value": {
+          "type": "string",
+          "title": "value",
+          "x-ms-summary": "Attribute Value",
+          "description": "The value for this attribute, shown on the credential."
+        }
+      },
+      "title": "Attribute",
+      "additionalProperties": false
+    },
+    "wauld_Credential_ChangeRequest": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "type": "string",
+          "title": "subject",
+          "x-ms-summary": "Subject",
+          "description": "The subject line of the change request."
+        },
+        "body": {
+          "type": "string",
+          "title": "body",
+          "x-ms-summary": "Body",
+          "description": "The message content of the change request."
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "attachments",
+          "x-ms-summary": "Attachments",
+          "description": "Files attached to the change request."
+        }
+      },
+      "title": "ChangeRequest",
+      "additionalProperties": false
+    },
+    "wauld_Credential_Document": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Document Name",
+          "description": "The name of the document."
+        },
+        "issuingAuthority": {
+          "title": "issuing_authority",
+          "x-ms-summary": "Issuing Authority",
+          "description": "The organization that issued the credential.",
+          "$ref": "#/definitions/wauld_Credential_IssuingAuthority"
+        },
+        "engagementName": {
+          "type": "string",
+          "title": "engagement_name",
+          "x-ms-summary": "Engagement Name",
+          "description": "The name of the engagement this document belongs to."
+        },
+        "template": {
+          "title": "template",
+          "x-ms-summary": "Template",
+          "description": "The visual template used to render this document.",
+          "$ref": "#/definitions/wauld_Document_Template"
+        },
+        "type": {
+          "title": "type",
+          "x-ms-summary": "Document Type",
+          "$ref": "#/definitions/wauld_Document_Type"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "skills",
+          "x-ms-summary": "Skills",
+          "description": "The skills associated with this document."
+        },
+        "criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/wauld_Document_EarningCriterion"
+          },
+          "title": "criteria",
+          "x-ms-summary": "Earning Criteria",
+          "description": "The criteria a recipient must meet to earn this credential."
+        }
+      },
+      "title": "Document",
+      "additionalProperties": false,
+      "description": "A partial view of a document that stays fixed for the lifetime of a credential once it is published."
+    },
+    "wauld_Credential_IssuingAuthority": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Issuer Name",
+          "description": "The name of the issuing organization."
+        },
+        "websiteUrl": {
+          "type": "string",
+          "title": "website_url",
+          "x-ms-summary": "Website URL",
+          "description": "The website address of the issuing organization."
+        },
+        "logo": {
+          "type": "string",
+          "title": "logo",
+          "x-ms-summary": "Logo",
+          "description": "The logo image of the issuing organization."
+        },
+        "verified": {
+          "type": "boolean",
+          "title": "verified",
+          "x-ms-summary": "Verified",
+          "description": "Whether the issuing organization has been verified."
+        },
+        "linkedinOrganizationId": {
+          "type": "string",
+          "title": "linkedin_organization_id",
+          "x-ms-summary": "LinkedIn Organization ID",
+          "description": "The LinkedIn organization identifier for the issuer."
+        },
+        "bio": {
+          "type": "string",
+          "title": "bio",
+          "x-ms-summary": "Bio",
+          "description": "A short biography of the issuing organization."
+        },
+        "timezone": {
+          "type": "string",
+          "title": "timezone",
+          "x-ms-summary": "Timezone",
+          "description": "The timezone of the issuing organization."
+        }
+      },
+      "title": "IssuingAuthority",
+      "additionalProperties": false
+    },
+    "wauld_Credential_Recipient": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Recipient Name",
+          "description": "Enter the full name of the recipient who will receive the credential."
+        },
+        "email": {
+          "type": "string",
+          "title": "email",
+          "x-ms-summary": "Recipient Email",
+          "description": "Enter the email address of the recipient. Wauld sends the issued credential to this address."
+        }
+      },
+      "title": "Recipient",
+      "additionalProperties": false
+    },
+    "wauld_Document_EarningCriterion": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "type",
+          "x-ms-summary": "Criterion Type",
+          "description": "The type of earning criterion."
+        },
+        "description": {
+          "type": "string",
+          "title": "description",
+          "x-ms-summary": "Criterion Description",
+          "description": "A description of how this criterion is met."
+        },
+        "supportingLink": {
+          "type": "string",
+          "title": "supporting_link",
+          "x-ms-summary": "Supporting Link",
+          "description": "A link that supports evidence of this criterion."
+        }
+      },
+      "title": "EarningCriterion",
+      "additionalProperties": false,
+      "description": "Describes how the credential is earned."
+    },
+    "wauld_Document_Template": {
+      "type": "object",
+      "title": "Template",
+      "additionalProperties": false,
+      "properties": {
+        "bounds": {
+          "title": "bounds",
+          "x-ms-summary": "Bounds",
+          "description": "The maximum X and Y coordinates of the template canvas.",
+          "$ref": "#/definitions/wauld_Document_Template_Vector2"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/wauld_Document_Template_Element"
+          },
+          "title": "elements",
+          "x-ms-summary": "Elements",
+          "description": "The elements that make up the template, rendered in the order they appear."
+        },
+        "fill": {
+          "type": "string",
+          "title": "fill",
+          "x-ms-summary": "Fill Color",
+          "description": "The background fill color to use."
+        },
+        "image": {
+          "type": "string",
+          "title": "image",
+          "x-ms-summary": "Background Image",
+          "description": "The image URL to load as the background."
+        }
+      }
+    },
+    "wauld_Document_Template_Element": {
+      "type": "object",
+      "title": "Element",
+      "additionalProperties": false,
+      "properties": {
+        "position": {
+          "title": "position",
+          "x-ms-summary": "Position",
+          "description": "The position of the element from the top-left corner of the canvas.",
+          "$ref": "#/definitions/wauld_Document_Template_Vector2"
+        },
+        "size": {
+          "title": "size",
+          "x-ms-summary": "Size",
+          "description": "The size of the element.",
+          "$ref": "#/definitions/wauld_Document_Template_Vector2"
+        },
+        "rotation": {
+          "type": "integer",
+          "title": "rotation",
+          "format": "int32",
+          "x-ms-summary": "Rotation",
+          "description": "The rotation angle in degrees from the y-axis (north)."
+        },
+        "image": {
+          "title": "image",
+          "x-ms-summary": "Image",
+          "$ref": "#/definitions/wauld_Document_Template_Image"
+        },
+        "qr": {
+          "title": "qr",
+          "x-ms-summary": "QR Code",
+          "$ref": "#/definitions/wauld_Document_Template_QR"
+        },
+        "signature": {
+          "title": "signature",
+          "x-ms-summary": "Signature",
+          "$ref": "#/definitions/wauld_Document_Template_Signature"
+        },
+        "svg": {
+          "title": "svg",
+          "x-ms-summary": "SVG",
+          "$ref": "#/definitions/wauld_Document_Template_Svg"
+        },
+        "text": {
+          "title": "text",
+          "x-ms-summary": "Text",
+          "$ref": "#/definitions/wauld_Document_Template_Text"
+        }
+      }
+    },
+    "wauld_Document_Template_Image": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Image ID",
+          "description": "The identifier of the uploaded raster or SVG image."
+        }
+      },
+      "title": "Image",
+      "additionalProperties": false,
+      "description": "An image asset uploaded by the user."
+    },
+    "wauld_Document_Template_QR": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string",
+          "title": "color",
+          "x-ms-summary": "QR Color",
+          "description": "The color of the QR pattern."
+        },
+        "background": {
+          "type": "string",
+          "title": "background",
+          "x-ms-summary": "QR Background",
+          "description": "The background color of the QR code."
+        },
+        "image": {
+          "type": "string",
+          "title": "image",
+          "x-ms-summary": "QR Image",
+          "description": "The ID of an image asset placed inside the QR code, if any."
+        },
+        "url": {
+          "type": "string",
+          "title": "url",
+          "x-ms-summary": "QR Data",
+          "description": "The data encoded in the QR code. Use \"@self\" for the verification QR code."
+        }
+      },
+      "title": "QR",
+      "additionalProperties": false
+    },
+    "wauld_Document_Template_Signature": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "title": "content",
+          "x-ms-summary": "Signature Content",
+          "description": "The text content of the signature."
+        },
+        "color": {
+          "type": "string",
+          "title": "color",
+          "x-ms-summary": "Signature Color",
+          "description": "The color of the signature text."
+        },
+        "fontFamily": {
+          "type": "string",
+          "title": "font_family",
+          "x-ms-summary": "Font Family",
+          "description": "The font family used for the signature."
+        },
+        "fontSize": {
+          "type": "number",
+          "title": "font_size",
+          "format": "float",
+          "x-ms-summary": "Font Size",
+          "description": "The font size used for the signature."
+        }
+      },
+      "title": "Signature",
+      "additionalProperties": false,
+      "description": "A special kind of text element with limited styling controls."
+    },
+    "wauld_Document_Template_Svg": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "SVG ID",
+          "description": "The identifier of the predefined SVG element to use."
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "colors",
+          "x-ms-summary": "SVG Colors",
+          "description": "The colors to substitute into the SVG's color placeholders, in order."
+        }
+      },
+      "title": "Svg",
+      "additionalProperties": false,
+      "description": "An SVG element similar to an image, but with support for simple color substitutions before rendering."
+    },
+    "wauld_Document_Template_Text": {
+      "type": "object",
+      "properties": {
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/wauld_Document_Template_Text_Paragraph"
+          },
+          "title": "paragraphs",
+          "x-ms-summary": "Paragraphs",
+          "description": "The paragraphs that make up this text element."
+        }
+      },
+      "title": "Text",
+      "additionalProperties": false
+    },
+    "wauld_Document_Template_Text_Paragraph": {
+      "type": "object",
+      "properties": {
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/wauld_Document_Template_Text_Span"
+          },
+          "title": "spans",
+          "x-ms-summary": "Spans",
+          "description": "The spans of text that make up this paragraph."
+        },
+        "textAlign": {
+          "title": "text_align",
+          "x-ms-summary": "Text Alignment",
+          "description": "The text alignment of the paragraph. Defaults to left if unspecified.",
+          "$ref": "#/definitions/wauld_Document_Template_Text_TextAlign"
+        }
+      },
+      "title": "Paragraph",
+      "additionalProperties": false,
+      "description": "A block of contiguous text without any line breaks."
+    },
+    "wauld_Document_Template_Text_Span": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "title": "content",
+          "x-ms-summary": "Content",
+          "description": "The text content of the span."
+        },
+        "attribute": {
+          "title": "attribute",
+          "x-ms-summary": "Attribute",
+          "description": "If set, this span of text represents a document attribute.",
+          "$ref": "#/definitions/wauld_Document_Template_Text_Span_Attribute"
+        },
+        "color": {
+          "type": "string",
+          "title": "color",
+          "x-ms-summary": "Text Color",
+          "description": "The color of the text."
+        },
+        "fontSize": {
+          "type": "number",
+          "title": "font_size",
+          "format": "float",
+          "x-ms-summary": "Font Size",
+          "description": "The font size of the text."
+        },
+        "fontFamily": {
+          "type": "string",
+          "title": "font_family",
+          "x-ms-summary": "Font Family",
+          "description": "The font family of the text."
+        },
+        "fontWeight": {
+          "type": "string",
+          "title": "font_weight",
+          "x-ms-summary": "Font Weight",
+          "description": "The font weight of the text."
+        },
+        "fontStyle": {
+          "type": "string",
+          "title": "font_style",
+          "x-ms-summary": "Font Style",
+          "description": "The font style of the text."
+        },
+        "textDecoration": {
+          "type": "string",
+          "title": "text_decoration",
+          "x-ms-summary": "Text Decoration",
+          "description": "The text decoration applied to the text."
+        }
+      },
+      "title": "Span",
+      "additionalProperties": false,
+      "description": "A segment of text that shares the same styles and attributes."
+    },
+    "wauld_Document_Template_Text_Span_Attribute": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Attribute Name",
+          "description": "The name of the attribute represented by this span."
+        }
+      },
+      "title": "Attribute",
+      "additionalProperties": false
+    },
+    "wauld_Document_Template_Text_TextAlign": {
+      "type": "string",
+      "title": "TextAlign",
+      "enum": ["TEXT_ALIGN_UNSPECIFIED", "LEFT", "RIGHT", "CENTER", "JUSTIFY"]
+    },
+    "wauld_Document_Template_Vector2": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "title": "x",
+          "format": "float",
+          "x-ms-summary": "X",
+          "description": "The X coordinate."
+        },
+        "y": {
+          "type": "number",
+          "title": "y",
+          "format": "float",
+          "x-ms-summary": "Y",
+          "description": "The Y coordinate."
+        }
+      },
+      "title": "Vector2",
+      "additionalProperties": false
+    },
+    "wauld_Document_Type": {
+      "type": "string",
+      "title": "Type",
+      "enum": ["TYPE_UNSPECIFIED", "CERTIFICATE", "BADGE"]
+    },
+    "GetDocumentRequest": {
+      "type": "object",
+      "title": "GetDocumentRequest",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Document ID",
+          "description": "The fully qualified ID of the document. This is the same value as the selected document field."
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "GetDocumentResponse": {
+      "type": "object",
+      "title": "Document",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Document ID",
+          "description": "The unique identifier of the document."
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Document Name",
+          "description": "The name of the document."
+        },
+        "customAttributes": {
+          "type": "array",
+          "title": "custom_attributes",
+          "x-ms-summary": "Custom Attributes",
+          "description": "The names of the user-defined attributes on this document. Each name is unique.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "imageAttributes": {
+          "type": "array",
+          "title": "image_attributes",
+          "x-ms-summary": "Image Attributes",
+          "description": "The names of the image-based attributes on this document.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "CreateWebhookTriggerRequest": {
+      "type": "object",
+      "title": "CreateWebhookTriggerRequest",
+      "properties": {
+        "parent": {
+          "type": "string",
+          "title": "Account ID",
+          "x-ms-summary": "Account ID",
+          "description": "Your Wauld account ID.",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "type": "string",
+          "title": "url",
+          "x-ms-visibility": "internal",
+          "x-ms-notification-url": true,
+          "description": "Populated automatically with the callback URL for this flow."
+        },
+        "events": {
+          "type": "array",
+          "title": "events",
+          "x-ms-visibility": "internal",
+          "default": ["CREDENTIAL_ISSUED"],
+          "description": "Fixed to the credential-issued event for this trigger.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Webhook Name",
+          "x-ms-visibility": "advanced",
+          "default": "Wauld Webhook",
+          "description": "Label for this webhook inside Wauld. Under 50 characters."
+        }
+      },
+      "required": ["parent", "url", "events"],
+      "additionalProperties": false
+    },
+    "CreateWebhookTriggerResponse": {
+      "type": "object",
+      "title": "CreateWebhookTriggerResponse",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Webhook ID",
+          "description": "The webhook ID. Also returned as the Location header path segment used to unsubscribe."
+        }
+      },
+      "additionalProperties": true
+    },
+    "WebhookNotificationDocument": {
+      "type": "object",
+      "title": "Document",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Document ID",
+          "description": "The unique identifier of the document."
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Document Name",
+          "description": "The name of the document."
+        },
+        "type": {
+          "type": "string",
+          "title": "type",
+          "x-ms-summary": "Document Type",
+          "description": "The type of document, for example CERTIFICATE or BADGE."
+        },
+        "skills": {
+          "type": "array",
+          "title": "skills",
+          "x-ms-summary": "Skills",
+          "description": "The skills associated with this document.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "earningCriteria": {
+          "type": "array",
+          "title": "earningCriteria",
+          "x-ms-summary": "Earning Criteria",
+          "description": "The criteria a recipient must meet to earn this credential.",
+          "items": {
+            "$ref": "#/definitions/WebhookNotificationEarningCriterion"
+          }
+        }
+      }
+    },
+    "WebhookNotificationIssuer": {
+      "type": "object",
+      "title": "Issuer",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Issuer ID",
+          "description": "The unique identifier of the issuing organization."
+        },
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Issuer Name",
+          "description": "The name of the issuing organization."
+        },
+        "website": {
+          "type": "string",
+          "title": "website",
+          "x-ms-summary": "Issuer Website",
+          "description": "The website address of the issuing organization."
+        }
+      }
+    },
+    "WebhookNotificationRecipient": {
+      "type": "object",
+      "title": "Recipient",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "name",
+          "x-ms-summary": "Recipient Name",
+          "description": "The full name of the recipient."
+        },
+        "email": {
+          "type": "string",
+          "title": "email",
+          "x-ms-summary": "Recipient Email",
+          "description": "The email address of the recipient."
+        }
+      }
+    },
+    "WebhookNotificationPayload": {
+      "type": "object",
+      "title": "CredentialIssued",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id",
+          "x-ms-summary": "Credential ID",
+          "description": "The ID of the issued credential."
+        },
+        "document": {
+          "x-ms-summary": "Document",
+          "description": "The document the credential was issued from.",
+          "$ref": "#/definitions/WebhookNotificationDocument"
+        },
+        "issuer": {
+          "x-ms-summary": "Issuer",
+          "description": "The organization that issued the credential.",
+          "$ref": "#/definitions/WebhookNotificationIssuer"
+        },
+        "attributes": {
+          "type": "array",
+          "title": "attributes",
+          "x-ms-summary": "Attributes",
+          "description": "The custom attribute values set on this credential.",
+          "items": {
+            "$ref": "#/definitions/wauld_Credential_Attribute"
+          }
+        },
+        "issueTime": {
+          "type": "string",
+          "format": "date-time",
+          "title": "issueTime",
+          "x-ms-summary": "Issue Time",
+          "description": "The date and time the credential was issued."
+        },
+        "recipient": {
+          "x-ms-summary": "Recipient",
+          "description": "The recipient who received the credential.",
+          "$ref": "#/definitions/WebhookNotificationRecipient"
+        },
+        "expireTime": {
+          "type": "string",
+          "format": "date-time",
+          "title": "expireTime",
+          "x-ms-summary": "Expiry Time",
+          "description": "The expiry date and time of the credential. Present only if the credential was issued with an expiry."
+        }
+      }
+    },
+    "WebhookNotificationEarningCriterion": {
+      "type": "object",
+      "title": "Earning Criterion",
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "type",
+          "x-ms-summary": "Criterion Type",
+          "description": "The type of earning criterion."
+        },
+        "description": {
+          "type": "string",
+          "title": "description",
+          "x-ms-summary": "Criterion Description",
+          "description": "A description of how this criterion is met."
+        },
+        "supportingLink": {
+          "type": "string",
+          "title": "supportingLink",
+          "x-ms-summary": "Supporting Link",
+          "description": "A link that supports evidence of this criterion."
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "CredentialService"
+    },
+    {
+      "name": "DocumentService"
+    },
+    {
+      "name": "EngagementService"
+    },
+    {
+      "name": "WorkspaceService"
+    },
+    {
+      "name": "WebhookService"
+    }
+  ],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.wauld.com/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://wauld.com/privacy-policy"
+    },
+    {
+      "propertyName": "Terms",
+      "propertyValue": "https://wauld.com/terms-of-use"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Business Management;Productivity"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
 namespace SnowflakeV2CoreLogic.Models.SnowflakeAPIModels
@@ -9,6 +9,25 @@ namespace SnowflakeV2CoreLogic.Models.SnowflakeAPIModels
 
     public class SnowflakeTableData : SnowflakeAPIResponseModel
     {
+        public static SnowflakeTableData FromPartitionResponse(
+            ResultSetMetaData metadata,
+            SnowflakeAPIResponseModel partitionData)
+        {
+            return new SnowflakeTableData
+            {
+                ResultSetMetaData = metadata,
+                Data = partitionData.Data,
+                Code = partitionData.Code,
+                StatementStatusUrl = partitionData.StatementStatusUrl,
+                RequestId = partitionData.RequestId,
+                SqlState = partitionData.SqlState,
+                StatementHandle = partitionData.StatementHandle,
+                Message = partitionData.Message,
+                CreatedOn = partitionData.CreatedOn,
+                StatementHandles = partitionData.StatementHandles,
+            };
+        }
+
         public List<Item> ToListOfItems()
         {
             List<Item> items = new List<Item>();

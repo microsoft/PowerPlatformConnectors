@@ -1,0 +1,578 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Gravity SMS",
+    "description": "Send and receive SMS messages through RingCentral. Connect your RingCentral account to send SMS, check delivery status, and trigger flows when messages arrive.",
+    "version": "1.0",
+    "termsOfService": "https://gravitysms.com/terms",
+    "contact": {
+      "name": "Gravity SMS Support",
+      "url": "https://gravitysms.com"
+    }
+  },
+  "host": "smsgateway-api.onrender.com",
+  "basePath": "/v1",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "name": "X-API-Key",
+      "in": "header",
+      "description": "Your Gravity SMS API key (sgw_...)"
+    }
+  },
+  "security": [{ "apiKey": [] }],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://gravitysms.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://gravitysms.com/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Communication"
+    }
+  ],
+  "paths": {
+    "/sms/send": {
+      "post": {
+        "operationId": "SendSms",
+        "summary": "Send an SMS message",
+        "tags": ["SMS"],
+        "description": "Queue an outbound SMS message for delivery through RingCentral.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SendSmsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Message queued for delivery",
+            "schema": {
+              "$ref": "#/definitions/SendSmsResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sms/status/{messageId}": {
+      "get": {
+        "operationId": "GetMessageStatus",
+        "summary": "Get message delivery status",
+        "tags": ["SMS"],
+        "description": "Retrieve the current status and details of a specific SMS message.",
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique message identifier",
+            "x-ms-summary": "Message ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message details",
+            "schema": {
+              "$ref": "#/definitions/MessageDetail"
+            }
+          },
+          "400": {
+            "description": "Invalid messageId format",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Message not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sms/messages": {
+      "get": {
+        "operationId": "ListMessages",
+        "summary": "List message history",
+        "tags": ["SMS"],
+        "description": "Retrieve a paginated list of SMS messages with optional filters.",
+        "parameters": [
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": ["outbound", "inbound"],
+            "description": "Filter by message direction",
+            "x-ms-summary": "Direction",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": ["queued", "sending", "sent", "delivered", "failed", "received"],
+            "description": "Filter by message status",
+            "x-ms-summary": "Status",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter by sender phone number (E.164 format)",
+            "x-ms-summary": "From Number",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Filter by recipient phone number (E.164 format)",
+            "x-ms-summary": "To Number",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter messages created on or after this date (ISO 8601)",
+            "x-ms-summary": "Start Date",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter messages created on or before this date (ISO 8601)",
+            "x-ms-summary": "End Date",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "description": "Page number for pagination",
+            "x-ms-summary": "Page",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "description": "Number of messages per page (max 100)",
+            "x-ms-summary": "Page Size",
+            "x-ms-visibility": "advanced"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of messages",
+            "schema": {
+              "$ref": "#/definitions/ListMessagesResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/rc/status": {
+      "get": {
+        "operationId": "GetConnectionStatus",
+        "summary": "Check RingCentral connection",
+        "tags": ["Account"],
+        "description": "Check whether your RingCentral account is connected and the token status.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Connection status",
+            "schema": {
+              "$ref": "#/definitions/ConnectionStatus"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/triggers/sms-received/subscribe": {
+      "x-ms-notification-content": {
+        "description": "Inbound SMS payload",
+        "schema": {
+          "$ref": "#/definitions/InboundSmsPayload"
+        }
+      },
+      "post": {
+        "operationId": "SmsReceived",
+        "summary": "When an SMS is received",
+        "tags": ["Triggers"],
+        "description": "Triggers when an inbound SMS message is received on your RingCentral number.",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TriggerSubscribeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Trigger subscription created",
+            "headers": {
+              "Location": {
+                "description": "URL of the created trigger subscription for unsubscribe",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/TriggerSubscribeResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid callback URL",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/triggers/sms-received/subscribe/{triggerId}": {
+      "delete": {
+        "operationId": "SmsReceivedUnsubscribe",
+        "summary": "Unsubscribe from SMS received trigger",
+        "description": "Remove a previously registered inbound SMS trigger subscription.",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "name": "triggerId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The trigger subscription identifier",
+            "x-ms-summary": "Trigger ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trigger unsubscribed",
+            "schema": {
+              "$ref": "#/definitions/OkResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Trigger not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SendSmsRequest": {
+      "type": "object",
+      "required": ["to", "from", "body"],
+      "properties": {
+        "to": {
+          "type": "string",
+          "description": "Recipient phone number in E.164 format (e.g. +14155551234)",
+          "x-ms-summary": "To"
+        },
+        "from": {
+          "type": "string",
+          "description": "Sender phone number in E.164 format (must be a RingCentral number on your account)",
+          "x-ms-summary": "From"
+        },
+        "body": {
+          "type": "string",
+          "description": "SMS message text (1-1600 characters)",
+          "maxLength": 1600,
+          "x-ms-summary": "Message"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Optional user identifier for tracking",
+          "x-ms-summary": "User ID",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "SendSmsResponse": {
+      "type": "object",
+      "properties": {
+        "messageId": {
+          "type": "string",
+          "description": "Unique identifier for the queued message",
+          "x-ms-summary": "Message ID"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current message status",
+          "x-ms-summary": "Status"
+        }
+      }
+    },
+    "MessageDetail": {
+      "type": "object",
+      "properties": {
+        "messageId": {
+          "type": "string",
+          "description": "Unique message identifier",
+          "x-ms-summary": "Message ID"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current delivery status",
+          "enum": ["queued", "sending", "sent", "delivered", "failed", "received"],
+          "x-ms-summary": "Status"
+        },
+        "rcMessageId": {
+          "type": "string",
+          "description": "RingCentral message identifier",
+          "x-ms-summary": "RC Message ID",
+          "x-ms-visibility": "advanced"
+        },
+        "error": {
+          "type": "string",
+          "description": "Error message if delivery failed",
+          "x-ms-summary": "Error",
+          "x-ms-visibility": "advanced"
+        },
+        "to": {
+          "type": "string",
+          "description": "Recipient phone number",
+          "x-ms-summary": "To"
+        },
+        "from": {
+          "type": "string",
+          "description": "Sender phone number",
+          "x-ms-summary": "From"
+        },
+        "body": {
+          "type": "string",
+          "description": "Message text",
+          "x-ms-summary": "Message"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the message was created",
+          "x-ms-summary": "Created At"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the message was last updated",
+          "x-ms-summary": "Updated At",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "ListMessagesResponse": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "description": "List of messages",
+          "items": {
+            "$ref": "#/definitions/MessageDetail"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "description": "Total number of messages matching the filter",
+          "x-ms-summary": "Total Count"
+        },
+        "page": {
+          "type": "integer",
+          "description": "Current page number",
+          "x-ms-summary": "Page"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Number of messages per page",
+          "x-ms-summary": "Page Size"
+        }
+      }
+    },
+    "ConnectionStatus": {
+      "type": "object",
+      "properties": {
+        "connected": {
+          "type": "boolean",
+          "description": "Whether RingCentral is connected",
+          "x-ms-summary": "Connected"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the current token expires",
+          "x-ms-summary": "Expires At",
+          "x-ms-visibility": "advanced"
+        },
+        "rcAccountId": {
+          "type": "string",
+          "description": "RingCentral account identifier",
+          "x-ms-summary": "RC Account ID",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "TriggerSubscribeRequest": {
+      "type": "object",
+      "required": ["callbackUrl"],
+      "properties": {
+        "callbackUrl": {
+          "type": "string",
+          "description": "URL to receive inbound SMS notifications",
+          "x-ms-summary": "Callback URL",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Phone number to monitor for inbound SMS (E.164 format, e.g. +15551234567). Leave empty to trigger on all numbers.",
+          "x-ms-summary": "Phone Number",
+          "x-ms-visibility": "important"
+        }
+      }
+    },
+    "TriggerSubscribeResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Trigger subscription identifier",
+          "x-ms-summary": "Trigger ID"
+        }
+      }
+    },
+    "InboundSmsPayload": {
+      "type": "object",
+      "properties": {
+        "messageId": {
+          "type": "string",
+          "description": "Unique message identifier for status lookups",
+          "x-ms-summary": "Message ID"
+        },
+        "from": {
+          "type": "string",
+          "description": "Sender phone number in E.164 format (e.g. +15551234567)",
+          "x-ms-summary": "From Number"
+        },
+        "to": {
+          "type": "string",
+          "description": "Recipient phone number in E.164 format",
+          "x-ms-summary": "To Number"
+        },
+        "text": {
+          "type": "string",
+          "description": "SMS message body content",
+          "x-ms-summary": "Message Text"
+        },
+        "receivedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the message was received (ISO 8601)",
+          "x-ms-summary": "Received At"
+        }
+      }
+    },
+    "OkResponse": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded",
+          "x-ms-summary": "Success"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "description": "Error message describing what went wrong",
+          "x-ms-summary": "Error"
+        }
+      }
+    }
+  }
+}

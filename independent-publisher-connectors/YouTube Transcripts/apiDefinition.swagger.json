@@ -1,0 +1,246 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "YouTube Transcript",
+        "description": "A custom service to retrieve transcripts from YouTube videos using the internal YouTube API.",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Troy Taylor",
+            "url": "https://github.com/troystaylor/PowerPlatformConnectors",
+            "email": "troy@troystaylor.com"
+        }
+    },
+    "host": "www.youtube.com",
+    "basePath": "/",
+    "schemes": [
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "securityDefinitions": {},
+    "security": [],
+    "paths": {
+        "/youtubei/v1/get_transcript": {
+            "post": {
+                "operationId": "GetTranscript",
+                "summary": "Get Video Transcript",
+                "description": "Retrieves and transforms the transcript for a specified YouTube video into a clean, Power Platform-friendly format. Simply provide the YouTube video ID and the custom code handles all complex parameter generation automatically.",
+                "x-ms-summary": "Get Video Transcript",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TranscriptRequest"
+                        },
+                        "x-ms-summary": "Request Body",
+                        "description": "The request body containing video ID and parameters."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response from YouTube transcript API - may contain success or error information.",
+                        "x-ms-summary": "API Response",
+                        "schema": {
+                            "$ref": "#/definitions/TranscriptResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "TranscriptRequest": {
+            "type": "object",
+            "required": [
+                "externalVideoId"
+            ],
+            "properties": {
+                "context": {
+                    "$ref": "#/definitions/RequestContext"
+                },
+                "externalVideoId": {
+                    "type": "string",
+                    "description": "The YouTube video ID (11 characters) - found at the end of YouTube video URLs (e.g., youtube.com/watch?v=DC2p3kFjcK0)",
+                    "x-ms-summary": "YouTube Video ID",
+                    "x-ms-visibility": "important",
+                    "pattern": "^[a-zA-Z0-9_-]{11}$",
+                    "x-ms-test-value": "DC2p3kFjcK0"
+                }
+            }
+        },
+        "RequestContext": {
+            "type": "object",
+            "description": "Context information for the API request.",
+            "x-ms-summary": "Request Context",
+            "required": [
+                "client"
+            ],
+            "properties": {
+                "client": {
+                    "$ref": "#/definitions/ClientInfo"
+                }
+            }
+        },
+        "ClientInfo": {
+            "type": "object",
+            "description": "Client details for the API request.",
+            "x-ms-summary": "Client Information",
+            "required": [
+                "clientName",
+                "clientVersion"
+            ],
+            "properties": {
+                "clientName": {
+                    "type": "string",
+                    "description": "The client name identifier (static value - does not impact request).",
+                    "x-ms-summary": "Client Name",
+                    "default": "WEB",
+                    "x-ms-visibility": "internal"
+                },
+                "clientVersion": {
+                    "type": "string",
+                    "description": "The client version string (static value - does not impact request).",
+                    "x-ms-summary": "Client Version",
+                    "default": "2.20250923.08.00",
+                    "x-ms-visibility": "internal"
+                }
+            }
+        },
+        "TranscriptResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "x-ms-summary": "Success",
+                    "description": "Indicates if the transcript was successfully retrieved."
+                },
+                "segments": {
+                    "type": "array",
+                    "x-ms-summary": "Transcript Segments",
+                    "description": "Array of transcript segments with text and timing information.",
+                    "items": {
+                        "$ref": "#/definitions/TranscriptSegment"
+                    }
+                },
+                "totalSegments": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "Total Segments",
+                    "description": "Total number of transcript segments."
+                },
+                "totalDurationMs": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "Total Duration (ms)",
+                    "description": "Total video duration in milliseconds."
+                },
+                "totalDurationFormatted": {
+                    "type": "string",
+                    "x-ms-summary": "Total Duration",
+                    "description": "Total video duration in human-readable format (e.g., '4:36')"
+                },
+                "fullTranscript": {
+                    "type": "string",
+                    "x-ms-summary": "Full Transcript",
+                    "description": "Complete transcript text as a single string."
+                },
+                "language": {
+                    "type": "string",
+                    "x-ms-summary": "Language",
+                    "description": "Language of the transcript (e.g., 'English (auto-generated)')"
+                },
+                "processedAt": {
+                    "type": "string",
+                    "x-ms-summary": "Processed At",
+                    "description": "ISO 8601 timestamp when the response was processed."
+                },
+                "error": {
+                    "type": "string",
+                    "x-ms-summary": "Error Message",
+                    "description": "Error message if success is false."
+                }
+            }
+        },
+        "TranscriptSegment": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "x-ms-summary": "Text",
+                    "description": "The transcript text for this segment (cleaned)."
+                },
+                "startMs": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "Start Time (ms)",
+                    "description": "Start time in milliseconds."
+                },
+                "endMs": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "End Time (ms)",
+                    "description": "End time in milliseconds."
+                },
+                "durationMs": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "Duration (ms)",
+                    "description": "Duration of this segment in milliseconds."
+                },
+                "startTime": {
+                    "type": "string",
+                    "x-ms-summary": "Start Time (Original)",
+                    "description": "Original YouTube time format (e.g., '3:24')"
+                },
+                "startTimeFormatted": {
+                    "type": "string",
+                    "x-ms-summary": "Start Time (Formatted)",
+                    "description": "Formatted start time (e.g., '3:24')"
+                },
+                "endTimeFormatted": {
+                    "type": "string",
+                    "x-ms-summary": "End Time (Formatted)",
+                    "description": "Formatted end time (e.g., '3:26')"
+                },
+                "durationFormatted": {
+                    "type": "string",
+                    "x-ms-summary": "Duration (Formatted)",
+                    "description": "Formatted duration (e.g., '0:02')"
+                },
+                "wordCount": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "Word Count",
+                    "description": "Number of words in this segment."
+                },
+                "characterCount": {
+                    "type": "integer",
+                    "format": "int32",
+                    "x-ms-summary": "Character Count",
+                    "description": "Number of characters in this segment."
+                }
+            }
+        }
+    },
+    "x-ms-connector-metadata": [
+        {
+            "propertyName": "Website",
+            "propertyValue": "https://www.youtube.com"
+        },
+        {
+            "propertyName": "Privacy policy",
+            "propertyValue": "https://policies.google.com/privacy"
+        },
+        {
+            "propertyName": "Categories",
+            "propertyValue": "Content and Files;Productivity"
+        }
+    ]
+}

@@ -21,7 +21,7 @@ namespace SnowflakeV2CoreLogic.Utilities
         private static readonly Regex IdentifierRegexPattern = new Regex(IdentifierFullRegex, RegexOptions.Compiled);
 
         // Setup the regex for the snowflake URL
-        private static readonly string UrlFullRegex = @"[a-zA-Z0-9-_.]+\.snowflakecomputing\.com|[a-zA-Z0-9-_.]+\.privatelink\.snowflakecomputing\.com";
+        private static readonly string UrlFullRegex = @"^([a-zA-Z0-9-_.]+\.snowflakecomputing\.com|[a-zA-Z0-9-_.]+\.privatelink\.snowflakecomputing\.com)$";
         private static readonly Regex UrlRegexPattern = new Regex(UrlFullRegex, RegexOptions.Compiled);
 
         /// <summary>

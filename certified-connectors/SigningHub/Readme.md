@@ -1,24 +1,26 @@
+# SigningHub Connector
 
-## SigningHub Connector
-SigningHub is a complete solution for document approval workflows, advanced digital signatures and document status tracking. It is designed to quickly optimize the way businesses deliver, review, approve and sign their business documents
+This connector integrates SigningHub with Power Automate to enhance document workflows and streamline the signing process across various systems. It enables the automation of document signing or other SigningHub actions, all within custom flows designed to suit organisational needs.
 
-##Publisher
-### Jhan Zaib (@jhan-zaib) Power Automate Developer and Consultant from SigningHub
+## Publisher: Ascertia
 
-## Pre-requisites
-You will require a SigningHub account (https://www.signinghub.com/). You can get a free SignUp account from https://web.signinghub.com/
+## Prerequisites
+To use this connector, you must have:
+* An active account with **SigningHub**.
+* A valid **Integration** defined in **SigningHub**.
 
-## Deploying the sample
-First, update the clientId value in the apiProperties.json with your own.
+## Supported Operations
+This connector provides some coverage of the **SigningHub REST API**. For a list of supported actions and their parameters, please refer to [SigningHub API Guide](https://manuals.ascertia.com/SigningHub/10.0/Api).
 
-Run the following commands and follow the prompts:
+## How to get credentials
+Fill the Login Form fields with the following values:
+- **Email**: The SigningHub account email.
+- **Password**: The SigningHub account password.
+- **API Client ID**: Ascertia or your company administrator will provide the API Client ID to use the connector.
+- **API Client Secret**: Ascertia or your company administrator will provide the API Client Secret to use the connector.
+- **API URL**: The SigningHub API URL, by default https://api.signinghub.com
 
-```paconn
-paconn create --api-def apiDefinition.swagger.json --api-prop apiProperties.json --secret <client_secret>
-```
-## Supported Actions and Triggers
-See [documentation](https://docs.microsoft.com/en-gb/connectors/signinghub/) for more details.
-
-
-
-
+## Support & Links
+* [Official API Documentation](https://manuals.ascertia.com/SigningHub/10.0/Api)
+* [Support URL](https://signinghub.com)
+* [Privacy Policy](https://www.signinghub.com/privacy-policy)

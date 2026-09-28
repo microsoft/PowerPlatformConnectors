@@ -1,0 +1,459 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Snapforms",
+    "description": "Create and share online forms to improve processes and collect accurate data with ease. Build custom workflows and connect form responses with your own systems.",
+    "version": "1.0.0",
+    "termsOfService": "https://snapforms.com.au/cloud-services-agreement/",
+    "contact": {
+      "name": "Snapforms Support",
+      "url": "https://snapforms.com.au/contact-us/",
+      "email": "contact@snapforms.com.au"
+    }
+  },
+  "host": "user.snapforms.com.au",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "parameters": {
+    "FormSlugParameter": {
+      "name": "form-slug",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "The slug of the form.",
+      "x-ms-url-encoding": "single",
+      "x-ms-summary": "Form",
+      "x-ms-visibility": "important",
+      "x-ms-dynamic-values": {
+        "operationId": "GetAvailableForms",
+        "value-path": "slug",
+        "value-title": "name"
+      }
+    },
+    "ResponseIdParameter": {
+      "name": "response-id",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "The ID of the form response.",
+      "x-ms-url-encoding": "single",
+      "x-ms-summary": "Response ID",
+      "x-ms-visibility": "important"
+    },
+    "FileKeyParameter": {
+      "name": "file-key",
+      "in": "path",
+      "required": true,
+      "type": "string",
+      "description": "The file key from the form response payload.",
+      "x-ms-url-encoding": "single",
+      "x-ms-summary": "File Key",
+      "x-ms-visibility": "important"
+    },
+    "HookIdParameter": {
+      "name": "hook-id",
+      "in": "path",
+      "required": true,
+      "type": "integer",
+      "format": "int32",
+      "description": "The ID of the webhook subscription.",
+      "x-ms-url-encoding": "single",
+      "x-ms-summary": "Webhook ID",
+      "x-ms-visibility": "advanced"
+    }
+  },
+  "definitions": {
+    "AvailableForm": {
+      "type": "object",
+      "description": "An available Snapforms form.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "The form name."
+        },
+        "slug": {
+          "type": "string",
+          "title": "Slug",
+          "description": "The unique form slug."
+        }
+      }
+    },
+    "FormListResponse": {
+      "type": "array",
+      "description": "A list of forms available to the connected user.",
+      "x-ms-summary": "Available Forms",
+      "items": {
+        "$ref": "#/definitions/AvailableForm"
+      }
+    },
+    "FormSchemaEnvelope": {
+      "type": "object",
+      "description": "A response containing the dynamic schema for the selected form.",
+      "required": [
+        "schema"
+      ],
+      "properties": {
+        "schema": {
+          "type": "object",
+          "description": "The dynamic schema for a submitted form response.",
+          "properties": {}
+        }
+      }
+    },
+    "FormSchema": {
+      "type": "object",
+      "properties": {},
+      "x-ms-dynamic-schema": {
+        "operationId": "GetFormSchema",
+        "parameters": {
+          "form-slug": {
+            "parameter": "form-slug"
+          }
+        },
+        "value-path": "schema"
+      },
+      "x-ms-dynamic-properties": {
+        "operationId": "GetFormSchema",
+        "itemValuePath": "schema",
+        "parameters": {
+          "form-slug": {
+            "parameterReference": "form-slug"
+          }
+        }
+      }
+    },
+    "WebhookRequestBody": {
+      "type": "object",
+      "description": "Connector-managed webhook subscription settings.",
+      "required": [
+        "url",
+        "active",
+        "type",
+        "event"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "title": "Notification URL",
+          "description": "The callback URL used by Power Platform to receive webhook events.",
+          "x-ms-notification-url": true,
+          "x-ms-visibility": "internal"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the webhook subscription is active.",
+          "default": true,
+          "x-ms-visibility": "internal"
+        },
+        "type": {
+          "type": "string",
+          "description": "The webhook transport type.",
+          "default": "web",
+          "x-ms-visibility": "internal"
+        },
+        "event": {
+          "type": "string",
+          "description": "The Snapforms event to subscribe to.",
+          "default": "responses",
+          "x-ms-visibility": "internal"
+        }
+      }
+    },
+    "WebhookCreationResource": {
+      "type": "object",
+      "description": "The created webhook subscription.",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "title": "ID",
+          "description": "The webhook ID."
+        },
+        "type": {
+          "type": "string",
+          "title": "Type",
+          "description": "The webhook type."
+        },
+        "active": {
+          "type": "boolean",
+          "title": "Active",
+          "description": "Whether the webhook is active."
+        },
+        "events": {
+          "type": "array",
+          "title": "Events",
+          "description": "The list of events the webhook listens for.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "title": "URL",
+          "description": "The webhook callback URL."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At",
+          "description": "When the webhook was created."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At",
+          "description": "When the webhook was last updated."
+        }
+      }
+    },
+    "TemporaryUrl": {
+      "type": "object",
+      "description": "A temporary URL for downloading a Snapforms file or PDF.",
+      "required": [
+        "name",
+        "url"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "File Name",
+          "description": "The file name.",
+          "x-ms-summary": "File Name",
+          "x-ms-visibility": "important"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "title": "File URL",
+          "description": "The temporary URL to use for downloading the file.",
+          "x-ms-summary": "File URL",
+          "x-ms-visibility": "important"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/forms": {
+      "get": {
+        "summary": "Get available forms",
+        "description": "Get the list of forms available to the connected Snapforms user.",
+        "operationId": "GetAvailableForms",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "The list of available forms.",
+            "schema": {
+              "$ref": "#/definitions/FormListResponse"
+            }
+          },
+          "default": {
+            "description": "The operation failed."
+          }
+        }
+      }
+    },
+    "/api/forms/{form-slug}/schema": {
+      "get": {
+        "summary": "Get form schema",
+        "description": "Get the dynamic response schema for the selected form.",
+        "operationId": "GetFormSchema",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "$ref": "#/parameters/FormSlugParameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The form schema.",
+            "schema": {
+              "$ref": "#/definitions/FormSchemaEnvelope"
+            }
+          },
+          "404": {
+            "description": "The form was not found."
+          },
+          "default": {
+            "description": "The operation failed."
+          }
+        }
+      }
+    },
+    "/api/forms/{form-slug}/responses/hooks": {
+      "x-ms-notification-content": {
+        "description": "The submitted form response payload.",
+        "schema": {
+          "$ref": "#/definitions/FormSchema"
+        }
+      },
+      "post": {
+        "summary": "When a form response is submitted",
+        "description": "Trigger a flow when a response is submitted to the selected Snapforms form.",
+        "operationId": "WebhookTrigger",
+        "x-ms-trigger": "single",
+        "parameters": [
+          {
+            "$ref": "#/parameters/FormSlugParameter"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The webhook subscription settings.",
+            "schema": {
+              "$ref": "#/definitions/WebhookRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The webhook subscription was created.",
+            "schema": {
+              "$ref": "#/definitions/WebhookCreationResource"
+            }
+          },
+          "404": {
+            "description": "The form was not found."
+          },
+          "default": {
+            "description": "The operation failed."
+          }
+        }
+      }
+    },
+    "/api/forms/{form-slug}/responses/hooks/{hook-id}": {
+      "delete": {
+        "summary": "Delete webhook",
+        "description": "Delete a Snapforms webhook subscription.",
+        "operationId": "DeleteWebhookTrigger",
+        "x-ms-visibility": "internal",
+        "parameters": [
+          {
+            "$ref": "#/parameters/FormSlugParameter"
+          },
+          {
+            "$ref": "#/parameters/HookIdParameter"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The webhook subscription was deleted."
+          },
+          "404": {
+            "description": "The webhook subscription was not found."
+          },
+          "default": {
+            "description": "The operation failed."
+          }
+        }
+      }
+    },
+    "/api/forms/{form-slug}/responses/{response-id}/temporary-file-url/{file-key}": {
+      "get": {
+        "summary": "Retrieve file URL for download",
+        "description": "Get a temporary URL for downloading a file from a Snapforms response.",
+        "operationId": "TemporaryFileUrl",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "$ref": "#/parameters/FormSlugParameter"
+          },
+          {
+            "$ref": "#/parameters/ResponseIdParameter"
+          },
+          {
+            "$ref": "#/parameters/FileKeyParameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The temporary file download URL.",
+            "schema": {
+              "$ref": "#/definitions/TemporaryUrl"
+            }
+          },
+          "404": {
+            "description": "The file or form response was not found."
+          },
+          "default": {
+            "description": "The operation failed."
+          }
+        }
+      }
+    },
+    "/api/forms/{form-slug}/responses/{response-id}/temporary-pdf-url": {
+      "get": {
+        "summary": "Retrieve PDF URL for download",
+        "description": "Get a temporary URL for downloading a PDF generated from a Snapforms response.",
+        "operationId": "TemporaryPdfUrl",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "$ref": "#/parameters/FormSlugParameter"
+          },
+          {
+            "$ref": "#/parameters/ResponseIdParameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The temporary PDF download URL.",
+            "schema": {
+              "$ref": "#/definitions/TemporaryUrl"
+            }
+          },
+          "400": {
+            "description": "The selected form type does not support PDF generation."
+          },
+          "404": {
+            "description": "The form or form response was not found."
+          },
+          "default": {
+            "description": "The operation failed."
+          }
+        }
+      }
+    }
+  },
+  "responses": {},
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://user.snapforms.com.au/oauth/authorize",
+      "tokenUrl": "https://user.snapforms.com.au/oauth/token",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://snapforms.com.au/"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://snapforms.com.au/privacy-policy/"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;Productivity"
+    }
+  ]
+}

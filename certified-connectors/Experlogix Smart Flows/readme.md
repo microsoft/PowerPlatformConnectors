@@ -23,6 +23,9 @@ This operation will retrieve a list of flows in Smart Flows.
 ### GetExecutionStatus
 This operation will retrieve the status of the provided execution.
 
+### SyncExternalUsers
+This operation will synchronize external users with configured connectors.
+
 ### Export
 This operation will create an export package that can be imported in another project.
 

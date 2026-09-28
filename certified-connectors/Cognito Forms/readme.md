@@ -130,6 +130,14 @@ The output will be an object containing the import status, counts, and error inf
 - `form`: The internal form name or Id
 - `importId`: The ID of the import to check status for
 
+#### UploadFile
+
+This action will upload a file to Cognito Forms.
+
+##### Parameters:
+- `fileContent`: The binary data of the file
+- `fileName`: The name of the file
+
 #### GetEntryViewEntries
 
 This action will get all entries for a specified view.

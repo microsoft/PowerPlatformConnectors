@@ -1,0 +1,390 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ZeroTrain AI Core",
+    "description": "ZeroTrain Ai Core adds reliable decision automation to your workflow. It evaluates incoming data and returns a recommended action, confidence score, and traceable result. No training or complex setup required. Ideal for approvals, routing, compliance checks, and workflow automation.",
+    "version": "3.0",
+    "contact": {
+      "name": "ZeroTrain Support",
+      "email": "support@zerotrain.ai",
+      "url": "https://www.zerotrain.ai/support"
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.zerotrain.ai"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.zerotrain.ai/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Business Intelligence"
+    }
+  ],
+  "host": "pa.zerotrain.ai",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-ms-connection-parameters": {
+    "api_key": {
+      "type": "securestring",
+      "required": true,
+      "x-ms-visibility": "important",
+      "uiDefinition": {
+        "displayName": "API Key",
+        "description": "Enter your ZeroTrain API key. Subscription required. Get your subscription and API key at https://www.zerotrain.ai/powerautomate"
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "x-engine-access-key",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/ZeroTrainCore/PowerAutomate/Evaluate": {
+      "post": {
+        "x-ms-visibility": "important",
+        "operationId": "ComputeZeroTrainDecision",
+        "summary": "Get ZeroTrain Decision",
+        "description": "Evaluates decision data to produce deterministic actions with confidence scoring.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ZeroTrainRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful computation",
+            "schema": {
+              "$ref": "#/definitions/ZeroTrainResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/MessageItem"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/MessageItem"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/MessageItem"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/MessageItem"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ZeroTrainRequest": {
+      "type": "object",
+      "required": [
+        "InputSource",
+        "ModelSource"
+      ],
+      "description": "Provide the data to evaluate and the decision table to use.",
+      "properties": {
+        "InputSource": {
+          "type": "object",
+          "description": "The data values to evaluate. These values are compared against the rows in the decision table.",
+          "x-ms-summary": "Input Data",
+          "x-ms-visibility": "important"
+        },
+        "ModelSource": {
+          "type": "object",
+          "description": "The decision table that defines the conditions and the action to return. Each row represents a possible outcome.",
+          "x-ms-summary": "Decision Table",
+          "x-ms-visibility": "important"
+        },
+        "Options": {
+          "type": "object",
+          "format": "json",
+          "description": "Optional execution settings that influence how ZeroTrain processes the request.",
+          "x-ms-summary": "Options",
+          "x-ms-visibility": "advanced",
+          "additionalProperties": true
+        },
+        "ActionColumnName": {
+          "type": "string",
+          "default": "Action",
+          "description": "Name of the column that contains the action. If not provided or if the column is not found in the decision table, the last column will be used.",
+          "x-ms-visibility": "advanced"
+        },
+        "DecisionIdColumnName": {
+          "type": "string",
+          "default": "ID",
+          "description": "Name of the column in the decision table that contains the row identifier.",
+          "x-ms-visibility": "advanced"
+        },
+        "PriorityColumnName": {
+          "type": "string",
+          "description": "Optional column used to sort the decision rows. Higher priority rows are returned first after evaluation.",
+          "x-ms-visibility": "advanced"
+        },
+        "WeightColumnName": {
+          "type": "string",
+          "description": "Optional column used to further refine the ranking of decision rows. It influences ordering within the same priority level.",
+          "x-ms-visibility": "advanced"
+        },
+        "RowFilter": {
+          "type": "string",
+          "description": "Optional filter used to limit which rows are evaluated (example: Age \u003E 30).",
+          "x-ms-visibility": "advanced"
+        },
+        "ModelName": {
+          "type": "string",
+          "default": "My Model",
+          "description": "Optional name of the decision process being executed. This value is returned in the response to identify the root-level process used for evaluation.",
+          "x-ms-visibility": "advanced"
+        },
+        "CustomTag": {
+          "type": "string",
+          "default": "My Custom Tag",
+          "description": "Optional value provided with the request and returned unchanged in the response. Can be used for identification or correlation if needed.",
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "ZeroTrainResponse": {
+      "type": "object",
+      "description": "The result of the evaluation.",
+      "properties": {
+        "Header": {
+          "$ref": "#/definitions/ResponseHeader"
+        },
+        "Result": {
+          "$ref": "#/definitions/DecisionResult"
+        },
+        "UsageInfo": {
+          "$ref": "#/definitions/UsageInfo"
+        },
+        "BatchInfo": {
+          "$ref": "#/definitions/BatchInfo"
+        },
+        "Errors": {
+          "type": "array",
+          "description": "Errors returned during evaluation.",
+          "items": {
+            "$ref": "#/definitions/MessageItem"
+          }
+        },
+        "Warnings": {
+          "type": "array",
+          "description": "Warnings returned during evaluation.",
+          "items": {
+            "$ref": "#/definitions/MessageItem"
+          }
+        }
+      }
+    },
+    "ResponseHeader": {
+      "type": "object",
+      "description": "Information about this evaluation.",
+      "properties": {
+        "product": {
+          "type": "string",
+          "description": "Name of the product."
+        },
+        "correlationId": {
+          "type": "string",
+          "description": "Unique request ID."
+        },
+        "customTag": {
+          "type": "string",
+          "description": "Custom value provided in the request."
+        },
+        "createdUTC": {
+          "type": "string",
+          "description": "Time the evaluation completed."
+        },
+        "processingTime": {
+          "type": "string",
+          "description": "How long the evaluation took."
+        },
+        "rowsEvaluated": {
+          "type": "integer",
+          "description": "Number of rows evaluated."
+        },
+        "resultCount": {
+          "type": "integer",
+          "description": "Number of results returned."
+        },
+        "errorCount": {
+          "type": "integer",
+          "description": "Number of errors."
+        },
+        "warningCount": {
+          "type": "integer",
+          "description": "Number of warnings."
+        }
+      }
+    },
+    "DecisionResult": {
+      "type": "object",
+      "description": "The selected result.",
+      "properties": {
+        "modelName": {
+          "type": "string",
+          "description": "Name of the model used."
+        },
+        "decisionId": {
+          "type": "string",
+          "description": "Identifier of the selected row."
+        },
+        "inputID": {
+          "type": "string",
+          "description": "Identifier of the data evaluated."
+        },
+        "action": {
+          "type": "string",
+          "description": "The action selected from the decision table.",
+          "x-ms-visibility": "important"
+        },
+        "confidenceScore": {
+          "type": "number",
+          "description": "Score showing how closely the data matched the selected row.",
+          "x-ms-visibility": "important"
+        },
+        "logicPassed": {
+          "type": "boolean",
+          "x-nullable": true,
+          "description": "Indicates whether required conditions were satisfied.",
+          "x-ms-visibility": "important"
+        },
+        "logicTrace": {
+          "type": "array",
+          "description": "List of row identifiers that contributed to the result.",
+          "items": {
+            "type": "string"
+          },
+          "x-ms-visibility": "advanced"
+        }
+      }
+    },
+    "MessageItem": {
+      "type": "object",
+      "description": "An error or warning message.",
+      "properties": {
+        "Code": {
+          "type": "integer",
+          "description": "Numeric code."
+        },
+        "Message": {
+          "type": "string",
+          "description": "Message description."
+        }
+      }
+    },
+    "UsageInfo": {
+      "type": "object",
+      "description": "Information about workload consumption and processing metrics for this request.",
+      "properties": {
+        "requestedBytes": {
+          "type": "integer",
+          "description": "Total size of the incoming request payload in bytes."
+        },
+        "modelRows": {
+          "type": "integer",
+          "description": "Number of rows in the decision table."
+        },
+        "modelColumns": {
+          "type": "integer",
+          "description": "Number of columns in the decision table."
+        },
+        "inputSets": {
+          "type": "integer",
+          "description": "Number of input sets included in the request."
+        },
+        "workLoadUnits": {
+          "type": "integer",
+          "description": "Total workload units (WU) calculated for this request (rows \u00D7 columns \u00D7 input sets)."
+        },
+        "inputSetsUsed": {
+          "type": "integer",
+          "description": "Number of input sets processed."
+        },
+        "workLoadUnitsUsed": {
+          "type": "integer",
+          "description": "Total workload units consumed during execution."
+        },
+        "workLoadUnitsInWindowUsed": {
+          "type": "integer",
+          "description": "Workload units consumed within the current rate window."
+        },
+        "workLoadUnitsInWindowRemaining": {
+          "type": "integer",
+          "description": "Remaining workload units available within the current rate window."
+        },
+        "totalElapsedTime": {
+          "type": "string",
+          "description": "Total time taken to process the request."
+        },
+        "totalInferenceTime": {
+          "type": "string",
+          "description": "Time spent evaluating decision logic."
+        },
+        "totalDeserializeTime": {
+          "type": "string",
+          "description": "Time spent deserializing the incoming request."
+        }
+      }
+    },
+    "BatchInfo": {
+      "type": "object",
+      "description": "Information about batched request execution.",
+      "properties": {
+        "isBatched": {
+          "type": "boolean",
+          "description": "Indicates whether the request contained multiple input sets."
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "Indicates whether all input sets were processed."
+        },
+        "inputSets": {
+          "type": "integer",
+          "description": "Total number of input sets submitted."
+        },
+        "cursor": {
+          "type": "integer",
+          "description": "Position of the last processed input set."
+        }
+      }
+    }
+  }
+}

@@ -5,36 +5,20 @@ The Recorded Future Sandbox Connector enables security and IT teams to analyze a
 
 ## Prerequisites
 
-To enable the Recorded Future Sandbox for Microsoft Azure integration, users must be provisioned two API tokens, one Recorded Future API token and one Sandbox API token. Please reach out to your account manager to obtain the necessary API token.
+To enable the Recorded Future Sandbox for Microsoft Azure integration, you must have a Recorded Future API token. If you are using the Enterprise Sandbox, you need one additional Enterprise Sandbox API token.
 
 ## How to obtain Recorded Future API token
 
-Recorded Future clients interested in API access for custom scripts or to enable a paid integration can request an API Token via this [Integration Support Ticket form](https://support.recordedfuture.com/hc/en-us/requests/new?ticket_form_id=360004119534).  Please fill out the following fields, based on intended API usage.
+Go to https://app.recordedfuture.com, click on Integration Center, and search for "Microsoft Sentinel For Sandbox". If you are an admin for your Recorded Future Enterprise, you can issue an API key from there.
 
-Recorded Future API Services - Choose if your token is pertaining to one of the below Recorded Future API offerings:
-- Connect API
-- Entity Match API
-- List API
-- Identity API (Note:  Identity API is included with a license to Identity Intelligence Module)
-- Detection Rule API
-- Playbook Alert API (currently in Beta)
-
-Integration Partner Category - Choose if your token is pertaining to a supported partner integration offering:
-- Premier Integrations
-- Partner Owned Integrations
-- Client Owned Integration
-- Intelligence Card Extensions
-
-Select Your Problem - Choose "Upgrade" or "New Installation"
-
-Note that for API access to enable a paid integration, Recorded Future Support will connect with your account team to confirm licensing and ensure the token is set up with the correct specifications and permissions.
-
-Additional questions about API token requests not covered by the above can be sent via email to our support team, support@recordedfuture.com.
+Any questions about API tokens not covered by the above can be sent via email to our support team, support@recordedfuture.com.
 
 
 <a id="how_to_contact_Recorded_Future"></a>
-## How to obtain Recorded Future Sandbox API token
-To obtain the Sandbox API token sign in with your Recorded Future account [here](https://sandbox.recordedfuture.com/). Click on your account settings in the upper right corner. There you can find your API key in API Access.
+## How to obtain Recorded Future Enterprise Sandbox API token
+If you are an Enterprise Sandbox customer, you need an additional API key.
+
+To obtain the Enterprise Sandbox API token, sign in with your Recorded Future account [here](https://sandbox.recordedfuture.com/). Click on your account settings in the upper right corner. There you can find your API key in API Access.
 
 If you were not able to sign in and obtain the Sandbox API token, request the token via this [Integration Support Ticket form](https://support.recordedfuture.com/hc/en-us/requests/new?ticket_form_id=360004119534) or support@recordedfuture.com.
 
