@@ -39,7 +39,7 @@ the subscription secret. Verify it before a flow acts on the payload.
 | Action | What it does |
 | --- | --- |
 | List templates | Your saved envelope templates. Powers the template picker. |
-| Create envelope | Creates a DRAFT envelope, from a template or from uploaded documents. Sends nothing on its own. |
+| Create envelope | Creates a DRAFT envelope, from a template or from uploaded documents, optionally filed in a shared workspace. Sends nothing on its own. |
 | Send envelope | Dispatches a DRAFT envelope to its recipients — the step that actually emails them. |
 | Get envelope | Current status and recipient details. |
 | List envelopes | Paginated list, filterable by status. |
@@ -91,6 +91,13 @@ it. If a trigger appears to do nothing on real traffic, check the plan first.
 *and* its own signature fields. When you build from uploaded documents instead, you
 must also supply **Fields** — an envelope whose signer has nowhere to sign is
 refused at send time with 409 `signer_without_field`.
+
+**File envelopes in a shared workspace to make them visible to a team.** By
+default an envelope belongs to the account behind the API key, so when flows run on
+a service account nobody else sees what they send. Pick a **Workspace** in the
+advanced options of *Create envelope* and the envelope appears to every member of
+that workspace. The picker lists the workspaces the key's account owns or belongs
+to; any other value is refused with 403.
 
 **Prefer anchor text over coordinates.** Placing a field by quoting a phrase from
 the document survives a layout change and needs no measuring. X and Y remain as a
