@@ -1,5 +1,5 @@
 # 3e powered by EXPOCAD Connector
-This connector provides Power Automate and Logic Apps access to live EXPOCAD 3e exposition data. It supports webhook-based triggers for floorplan and exhibitor activity, plus actions for reading and managing booths, exhibitors, event metadata, financial data, booth classes, rate plans, pavilions, and show-in-show records.
+This connector provides Power Automate and Logic Apps access to live 3e event data. It supports webhook-based triggers for floorplan and exhibitor activity, plus actions for reading and managing booths, exhibitors, event metadata, financial data, booth classes, rate plans, pavilions, and show-in-show records.
 
 ## Publisher: A.C.T. / EXPOCAD
 
@@ -148,7 +148,7 @@ This connector uses basic authentication. Keep authorization codes and credentia
 - Each connection targets one EXPOCAD client subdomain. Create a separate connection for each client.
 - The connector must be paired with valid EXPOCAD client and event identifiers.
 - Write operations such as rent, hold, combine, delete, update, and default-rate-plan changes modify live event data and should be used with care.
-- Please contact [developer@expocad.com](mailto:developer@expocad.com) for production access.
+- Please contact [tech@expocad.com](mailto:tech@expocad.com) for production access.
 
 ## Deployment Instructions
 
