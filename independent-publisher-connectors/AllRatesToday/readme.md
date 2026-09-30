@@ -1,6 +1,6 @@
 # AllRatesToday (Independent Publisher)
 
-Real-time and historical currency exchange rate API supporting 160+ currencies. Rates are sourced from institutional interbank market data, updated every 60 seconds.
+Real-time and historical currency exchange rate API supporting 160+ currencies. Mid-market rates, updated every 60 seconds.
 
 ## Publisher: Cahthurana G
 
@@ -55,7 +55,7 @@ List all 160+ supported currency codes, names, and symbols. No authentication re
 - Free plan has monthly request limits. Upgrade to a paid plan for higher limits.
 - Historical data requires an authenticated API key.
 - The public rate endpoint (`/api/rate`) does not require authentication but returns only a single pair at a time.
-- Rate data is sourced from institutional interbank market data and updated every 60 seconds.
+- Rate data is mid-market and updated every 60 seconds.
 
 ## Deployment Instructions
 
