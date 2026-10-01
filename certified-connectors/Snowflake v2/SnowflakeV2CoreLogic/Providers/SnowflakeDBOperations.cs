@@ -148,6 +148,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 try
                 {
                     queryOptions = QueryOptions.Parse(options);
+                    filter = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
                 }
                 catch (ArgumentException ex)
                 {
@@ -162,7 +163,6 @@ namespace SnowflakeV2CoreLogic.Providers
                 orderBy = options.OrderBy != null ? options.OrderBy.RawValue : null;
                 top = queryOptions.IsTopSet ? queryOptions.Top.ToString() : Constants.DefaultNumberOfRowsToReturn.ToString();
                 skip = queryOptions.Skip.ToString();
-                filter = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
             }
 
             using (var latencyLogger = new LatencyLogger(Constants.ListAllItemsAsync, logger))
@@ -408,6 +408,12 @@ namespace SnowflakeV2CoreLogic.Providers
                 try
                 {
                     queryOptions = QueryOptions.Parse(options);
+
+                    if (options.Filter != null)
+                    {
+                        var filterText = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
+                        query = $"SELECT COUNT(*) FROM {table} WHERE {filterText}";
+                    }
                 }
                 catch (ArgumentException ex)
                 {
@@ -416,14 +422,6 @@ namespace SnowflakeV2CoreLogic.Providers
                         HttpStatusCode.BadRequest,
                         ex.Message));
                 }
-
-                // Apply OData `$filter` conditions, ignore `$select` and `$orderby`
-                string filterText = string.Empty;
-                if (options.Filter != null)
-                {
-                    filterText = ConvertODataFilterToSql(options, connectionParameters?.UseCaseInsensitiveFilters ?? false);
-                    query = $"SELECT COUNT(*) FROM {table} WHERE {filterText}";
-                }   
             }
 
             SnowflakeRequestBindings queryBindings = new SnowflakeRequestBindings();

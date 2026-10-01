@@ -397,5 +397,70 @@ namespace SnowflakeV2CoreLogic.Tests.Utilities
         }
 
         #endregion
+
+        #region LIKE search term must be a string literal
+
+        [DataTestMethod]
+        [DataRow("contains(Name, tolower(' OR 1=0 UNION SELECT CURRENT_USER() --'))")]
+        [DataRow("contains(Name, toupper(' OR 1=0 UNION SELECT CURRENT_USER() --'))")]
+        [DataRow("startswith(Name, tolower(' OR 1=0 UNION SELECT CURRENT_USER() --'))")]
+        [DataRow("startswith(Name, toupper(' OR 1=0 UNION SELECT CURRENT_USER() --'))")]
+        [DataRow("endswith(Name, tolower(' OR 1=0 UNION SELECT CURRENT_USER() --'))")]
+        [DataRow("endswith(Name, toupper(' OR 1=0 UNION SELECT CURRENT_USER() --'))")]
+        [DataRow("contains(tolower(Name), tolower('ali'))")]
+        [DataRow("contains(Name, Email)")]
+        public void ParseFilterToSql_LikeFunctionWithNonLiteralSearchTerm_ThrowsArgumentException(string filterString)
+        {
+            var filter = ParseFilter(filterString);
+            Assert.ThrowsException<ArgumentException>(() => parser.ParseFilterToSql(filter));
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_CaseInsensitive_LikeFunctionWithNestedSearchTerm_ThrowsArgumentException()
+        {
+            var ciParser = new ODataToSqlParser(useCaseInsensitiveFilters: true);
+            var filter = ParseFilter("contains(Name, tolower(' OR 1=0 UNION SELECT CURRENT_USER() --'))");
+            Assert.ThrowsException<ArgumentException>(() => ciParser.ParseFilterToSql(filter));
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_StartsWithEscapesQuotesInValue()
+        {
+            var filter = ParseFilter("startswith(Name, 'O''B')");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name LIKE 'O''B%'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_EndsWithEscapesBackslashInValue()
+        {
+            var filter = ParseFilter(@"endswith(Name, 'a\')");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual(@"Name LIKE '%a\\'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ContainsNeutralizesQuoteBreakoutInLiteral()
+        {
+            var filter = ParseFilter("contains(Name, ''' OR 1=1 --')");
+            var result = parser.ParseFilterToSql(filter);
+            Assert.AreEqual("Name LIKE '%'' OR 1=1 --%'", result);
+        }
+
+        [TestMethod]
+        public void ParseFilterToSql_ContainsWithConvertedStringConstant_UsesLiteral()
+        {
+            var propertyNode = new SingleValueOpenPropertyAccessNode(new ConstantNode("dummy"), "Name");
+            var convertedConstant = new ConvertNode(new ConstantNode("Ali"), EdmCoreModel.Instance.GetString(true));
+            var functionNode = new SingleValueFunctionCallNode(
+                "contains",
+                new QueryNode[] { propertyNode, convertedConstant },
+                EdmCoreModel.Instance.GetBoolean(false));
+
+            var result = parser.ParseFilterToSql(MakeFilterClause(functionNode));
+            Assert.AreEqual("Name LIKE '%Ali%'", result);
+        }
+
+        #endregion
     }
 }

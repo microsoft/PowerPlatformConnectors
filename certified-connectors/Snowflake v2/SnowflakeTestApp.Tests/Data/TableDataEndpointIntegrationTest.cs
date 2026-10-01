@@ -434,6 +434,58 @@ namespace SnowflakeTestApp.Tests.Data
         }
 
         /// <summary>
+        /// contains/startswith/endswith with a string literal search term (the form Power Apps and
+        /// Dataverse send) must keep working, including on a tolower()'d column. Other tests in this
+        /// class add rows such as "New John Doe", so this asserts on seeded rows that must and must not
+        /// match rather than on the exact result set.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow("contains(NAME, 'Doe')", "John Doe")]
+        [DataRow("startswith(NAME, 'Jane')", "Jane Smith")]
+        [DataRow("endswith(NAME, 'Johnson')", "Bob Johnson")]
+        [DataRow("contains(tolower(NAME), 'john doe')", "John Doe")]
+        [DataRow("startswith(NAME, 'Jane') and IS_ACTIVE eq true", "Jane Smith")]
+        public async Task GetItemsEndpoint_FilterWithLikeFunctionLiteral_ReturnsMatchingRecords(string filter, string expectedName)
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.GetAsync(
+                $"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$filter={Uri.EscapeDataString(filter)}");
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, $"Filter '{filter}' should succeed. Body: {content}");
+
+            var data = JsonConvert.DeserializeObject<ODataResponse<TestDataRecord>>(content);
+            Assert.IsNotNull(data?.Value, $"Filter '{filter}' response should contain data");
+            Assert.IsTrue(data.Value.Any(item => item.Name == expectedName), $"Filter '{filter}' should return the seeded record '{expectedName}'");
+            Assert.IsFalse(data.Value.Any(item => item.Name == "Alice Brown"), $"Filter '{filter}' should not return the non-matching seeded record 'Alice Brown'");
+        }
+
+        /// <summary>
+        /// Quotes and SQL fragments inside a string literal search term must stay inside the LIKE literal:
+        /// the request succeeds (no SQL syntax error) and matches nothing in the seeded data.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow("contains(NAME, 'O''Brien')")]
+        [DataRow("contains(NAME, ''' OR 1=1 --')")]
+        [DataRow("startswith(NAME, ''' OR ''1''=''1')")]
+        public async Task GetItemsEndpoint_FilterWithLikeFunctionQuotedLiteral_ReturnsNoRecords(string filter)
+        {
+            var testToken = GetTestToken();
+            HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {testToken}");
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await HttpClient.GetAsync($"{BaseUrl}/datasets('{TestDataset}')/tables('{TestTable}')/items?$filter={Uri.EscapeDataString(filter)}");
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, $"Filter '{filter}' should succeed. Body: {content}");
+
+            var data = JsonConvert.DeserializeObject<ODataResponse<TestDataRecord>>(content);
+            Assert.IsNotNull(data?.Value, $"Filter '{filter}' response should be parseable");
+            Assert.AreEqual(0, data.Value.Count, $"Filter '{filter}' should not match any seeded record");
+        }
+
+        /// <summary>
         /// End-to-end test validating complete CRUD operation lifecycle with database verification
         /// </summary>
         [TestMethod]
