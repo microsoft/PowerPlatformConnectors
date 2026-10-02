@@ -80,6 +80,22 @@
         }
       }
     },
+    "/workspaces": {
+      "get": {
+        "operationId": "ListWorkspaces",
+        "summary": "List workspaces",
+        "description": "Returns the workspaces you own or belong to. Used to power the workspace picker on \"Create envelope\".",
+        "x-ms-visibility": "internal",
+        "responses": {
+          "200": {
+            "description": "List of workspaces",
+            "schema": {
+              "$ref": "#/definitions/WorkspaceList"
+            }
+          }
+        }
+      }
+    },
     "/envelopes": {
       "get": {
         "operationId": "ListEnvelopes",
@@ -506,6 +522,42 @@
         }
       }
     },
+    "Workspace": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Workspace ID"
+        },
+        "name": {
+          "type": "string",
+          "x-ms-summary": "Workspace name"
+        },
+        "slug": {
+          "type": "string",
+          "x-ms-summary": "Workspace slug"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "OWNER",
+            "MEMBER"
+          ],
+          "x-ms-summary": "Your role"
+        }
+      }
+    },
+    "WorkspaceList": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Workspace"
+          }
+        }
+      }
+    },
     "Recipient": {
       "type": "object",
       "required": [
@@ -850,6 +902,18 @@
           "x-ms-summary": "Initials on every page",
           "description": "Automatically stamp the signer's initials at the bottom of every page of every document, in addition to any field you place yourself. No per-page setup needed — the signer fills their initials once and it applies everywhere. Skips a page where that signer already has a field (e.g. the signature on the last page).",
           "x-ms-visibility": "advanced"
+        },
+        "workspaceId": {
+          "type": "string",
+          "x-ms-summary": "Workspace",
+          "description": "Create the envelope in a shared workspace so every member of that workspace can see and follow it up. Leave empty to keep it in your own account. You must own the workspace or be a member of it.",
+          "x-ms-dynamic-values": {
+            "operationId": "ListWorkspaces",
+            "value-collection": "data",
+            "value-path": "id",
+            "value-title": "name"
+          },
+          "x-ms-visibility": "advanced"
         }
       }
     },
@@ -953,7 +1017,33 @@
             "signatureLevel": {
               "type": "string",
               "x-ms-summary": "Signature level",
-              "description": "Present on envelope events only."
+              "description": "Present on envelope.completed and recipient.signed."
+            },
+            "aesSignerCount": {
+              "type": "integer",
+              "format": "int32",
+              "x-ms-summary": "Advanced signature signers with a personal key",
+              "description": "envelope.completed on an ADVANCED envelope only."
+            },
+            "aesCertificateSerial": {
+              "type": "string",
+              "x-ms-summary": "Advanced signature certificate serial",
+              "description": "recipient.signed, when the signer signed with a personal advanced-signature key."
+            },
+            "aesCertificateSha256": {
+              "type": "string",
+              "x-ms-summary": "Advanced signature certificate SHA256",
+              "description": "recipient.signed, when the signer signed with a personal advanced-signature key."
+            },
+            "aesManifestSha256": {
+              "type": "string",
+              "x-ms-summary": "Advanced signature manifest SHA256",
+              "description": "recipient.signed, when the signer signed with a personal advanced-signature key."
+            },
+            "aesTimestamped": {
+              "type": "boolean",
+              "x-ms-summary": "Advanced signature timestamped",
+              "description": "recipient.signed, when the signer signed with a personal advanced-signature key."
             },
             "recipientCount": {
               "type": "integer",

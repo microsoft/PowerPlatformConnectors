@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class Script : ScriptBase
@@ -160,7 +161,7 @@ public class Script : ScriptBase
     {
         var body = await ReadBodyObjectAsync();
 
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
         var tToken = auth.Token;
@@ -194,7 +195,7 @@ public class Script : ScriptBase
     {
         var body = await ReadBodyObjectAsync();
 
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
         var tToken = auth.Token;
@@ -228,10 +229,9 @@ public class Script : ScriptBase
     {
         var body = await ReadBodyObjectAsync();
 
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
-        var tToken = auth.Token;
 
         var secretName = GetString(body, "secret_name", "Secret Name", "name");
         if (string.IsNullOrEmpty(secretName))
@@ -242,21 +242,44 @@ public class Script : ScriptBase
         }
 
         var useJsonOutput = string.Equals(operationId, "GetPassword", StringComparison.OrdinalIgnoreCase);
-
-        return await PostAkeylessAsync("/get-secret-value", new JObject
+        var akeylessResp = await PostAkeylessAsync("/get-secret-value", new JObject
         {
             ["names"] = new JArray { secretName },
-            ["token"] = tToken,
+            ["token"] = auth.Token,
             ["accessibility"] = "regular",
             ["ignore-cache"] = "false",
             ["json"] = useJsonOutput
         });
+
+        if (!akeylessResp.IsSuccessStatusCode)
+            return akeylessResp;
+
+        var text = await akeylessResp.Content.ReadAsStringAsync();
+        JToken parsed;
+        try
+        {
+            parsed = JToken.Parse(text);
+        }
+        catch (JsonReaderException)
+        {
+            var err = new HttpResponseMessage(HttpStatusCode.BadGateway);
+            err.Content = CreateJsonContent("{\"error\":\"Akeyless returned a non-JSON secret payload.\"}");
+            return err;
+        }
+
+        var mapped = useJsonOutput
+            ? MapPasswordPayload(parsed, secretName)
+            : MapSecretPayload(parsed, secretName);
+
+        var ok = new HttpResponseMessage(HttpStatusCode.OK);
+        ok.Content = CreateJsonContent(mapped.ToString());
+        return ok;
     }
 
     private async Task<HttpResponseMessage> HandleListAuthMethodsAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -281,7 +304,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleListRolesAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -298,7 +321,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleListGatewaysAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -312,7 +335,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleListTargetsAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -332,7 +355,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleUscListAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -355,7 +378,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleTargetGetAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -381,7 +404,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleGetTagsAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -404,7 +427,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleGetRoleAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -427,7 +450,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleGetAuthMethodAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -450,7 +473,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleGetAnalyticsDataAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -464,7 +487,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleListGroupsAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -481,7 +504,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleCreateSecretAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -534,7 +557,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleUpdateItemAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
         var token = auth.Token;
@@ -627,7 +650,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleDeleteItemAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -674,7 +697,7 @@ public class Script : ScriptBase
     private async Task<HttpResponseMessage> HandleMoveObjectsAsync()
     {
         var body = await ReadBodyObjectAsync();
-        var auth = await AuthenticateAsync(body);
+        var auth = await AuthenticateAsync();
         if (auth.Error != null)
             return auth.Error;
 
@@ -706,13 +729,13 @@ public class Script : ScriptBase
         });
     }
 
-    private async Task<AuthOutcome> AuthenticateAsync(JObject body)
+    private async Task<AuthOutcome> AuthenticateAsync()
     {
-        if (!TryGetCredentials(out var accessId, out var accessKey, body))
+        if (!TryGetCredentials(out var accessId, out var accessKey))
         {
             var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
             err.Content = CreateJsonContent(
-                "{\"error\":\"Set Access Id and Access Key on the connection, or pass access-id and access-key in the action body.\"}");
+                "{\"error\":\"Set Access Id and Access Key on the connection.\"}");
             return new AuthOutcome { Error = err };
         }
 
@@ -730,16 +753,24 @@ public class Script : ScriptBase
         if (!authResp.IsSuccessStatusCode)
         {
             var err = new HttpResponseMessage(authResp.StatusCode);
-            err.Content = CreateJsonContent(
-                new JObject { ["error"] = "Authentication failed", ["details"] = authText }.ToString());
+            err.Content = CreateJsonContent("{\"error\":\"Authentication failed\"}");
             return new AuthOutcome { Error = err };
         }
 
-        var tToken = (string)JObject.Parse(authText)["token"];
+        string tToken = null;
+        try
+        {
+            tToken = (string)JObject.Parse(authText)["token"];
+        }
+        catch (JsonReaderException)
+        {
+            tToken = null;
+        }
+
         if (string.IsNullOrEmpty(tToken))
         {
             var err = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            err.Content = CreateJsonContent("{\"error\":\"Auth response did not include a token\"}");
+            err.Content = CreateJsonContent("{\"error\":\"Authentication failed\"}");
             return new AuthOutcome { Error = err };
         }
 
@@ -752,39 +783,133 @@ public class Script : ScriptBase
         public string Token { get; set; }
     }
 
-    private bool TryGetCredentials(out string accessId, out string accessKey, JObject body)
+    private bool TryGetCredentials(out string accessId, out string accessKey)
     {
         accessId = null;
         accessKey = null;
 
-        if (this.Context.Request.Headers.TryGetValues("Authorization", out var authHeaders))
+        if (!this.Context.Request.Headers.TryGetValues("Authorization", out var authHeaders))
+            return false;
+
+        var authHeader = authHeaders.FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(authHeader) ||
+            !authHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        try
         {
-            var authHeader = authHeaders.FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(authHeader) &&
-                authHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var encoded = authHeader.Substring(6).Trim();
-                    var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
-                    var sep = decoded.IndexOf(':');
-                    if (sep > 0)
-                    {
-                        accessId = decoded.Substring(0, sep);
-                        accessKey = decoded.Substring(sep + 1);
-                        if (!string.IsNullOrEmpty(accessId) && !string.IsNullOrEmpty(accessKey))
-                            return true;
-                    }
-                }
-                catch
-                {
-                    // fall through to body
-                }
-            }
+            var encoded = authHeader.Substring(6).Trim();
+            var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
+            var sep = decoded.IndexOf(':');
+            if (sep <= 0)
+                return false;
+
+            accessId = decoded.Substring(0, sep);
+            accessKey = decoded.Substring(sep + 1);
+            return !string.IsNullOrEmpty(accessId) && !string.IsNullOrEmpty(accessKey);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
+
+    private static JToken ExtractNamedValue(JToken parsed, string secretName)
+    {
+        if (parsed == null || parsed.Type != JTokenType.Object)
+            return parsed;
+
+        var obj = (JObject)parsed;
+        var direct = obj[secretName];
+        if (direct != null && direct.Type != JTokenType.Null)
+            return direct;
+
+        if (!string.IsNullOrEmpty(secretName) && secretName[0] == '/')
+        {
+            var noSlash = obj[secretName.Substring(1)];
+            if (noSlash != null && noSlash.Type != JTokenType.Null)
+                return noSlash;
+        }
+        else if (!string.IsNullOrEmpty(secretName))
+        {
+            var withSlash = obj["/" + secretName];
+            if (withSlash != null && withSlash.Type != JTokenType.Null)
+                return withSlash;
         }
 
-        accessId = (string)body["access-id"] ?? (string)body["Access Id"] ?? (string)body["accessId"];
-        accessKey = (string)body["access-key"] ?? (string)body["Access Key"] ?? (string)body["accessKey"];
-        return !string.IsNullOrEmpty(accessId) && !string.IsNullOrEmpty(accessKey);
+        var props = obj.Properties()
+            .Where(p => !string.Equals(p.Name, "error", StringComparison.OrdinalIgnoreCase)
+                        && !string.Equals(p.Name, "errors", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return props.Count == 1 ? props[0].Value : null;
+    }
+
+    private static string TokenAsString(JToken value)
+    {
+        if (value == null || value.Type == JTokenType.Null)
+            return "";
+        if (value.Type == JTokenType.String)
+            return (string)value ?? "";
+        return value.ToString(Formatting.None);
+    }
+
+    private static JObject MapSecretPayload(JToken parsed, string secretName)
+    {
+        var value = ExtractNamedValue(parsed, secretName);
+        if (value == null)
+            value = parsed;
+        return new JObject { ["SecretValue"] = TokenAsString(value) };
+    }
+
+    private static string FirstString(JObject obj, params string[] keys)
+    {
+        foreach (var key in keys)
+        {
+            var token = obj[key];
+            if (token != null && token.Type != JTokenType.Null)
+            {
+                var s = TokenAsString(token);
+                if (!string.IsNullOrEmpty(s))
+                    return s;
+            }
+        }
+        return "";
+    }
+
+    private static JObject MapPasswordPayload(JToken parsed, string secretName)
+    {
+        var value = ExtractNamedValue(parsed, secretName) ?? parsed;
+        JObject creds = null;
+
+        if (value != null && value.Type == JTokenType.Object)
+        {
+            creds = (JObject)value;
+        }
+        else if (value != null && value.Type == JTokenType.String)
+        {
+            var raw = (string)value;
+            try
+            {
+                var nested = JToken.Parse(raw);
+                if (nested != null && nested.Type == JTokenType.Object)
+                    creds = (JObject)nested;
+            }
+            catch (JsonReaderException)
+            {
+                creds = null;
+            }
+
+            if (creds == null)
+                return new JObject { ["username"] = "", ["password"] = raw ?? "" };
+        }
+
+        if (creds == null)
+            return new JObject { ["username"] = "", ["password"] = TokenAsString(value) };
+
+        return new JObject
+        {
+            ["username"] = FirstString(creds, "username", "user", "User", "login", "Login"),
+            ["password"] = FirstString(creds, "password", "pass", "secret", "value", "Password")
+        };
     }
 }
