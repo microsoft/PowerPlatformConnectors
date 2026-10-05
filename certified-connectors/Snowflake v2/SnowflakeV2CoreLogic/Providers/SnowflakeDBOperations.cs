@@ -5,6 +5,7 @@
 namespace SnowflakeV2CoreLogic.Providers
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Net;
@@ -247,8 +248,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
         public async Task<SnowflakeTableData?> GetItemFromTableAsync(
             string tableName,
-            string? fieldToQuery,
-            string itemId,
+            IReadOnlyList<(string Column, string Value)> itemKey,
             string endpoint,
             SnowflakeConnectionParameters? connectionParameters = null)
         {
@@ -256,15 +256,14 @@ namespace SnowflakeV2CoreLogic.Providers
 
             // Check the table name and field name adhere to the Snowflake schema
             tableName.EnsureValidSnowflakeIdentifier("Table Name");
-            fieldToQuery.EnsureValidSnowflakeIdentifier("Field Name");
 
             using (var latencyLogger = new LatencyLogger(Constants.GetObjectAsync, logger))
             {
-                var query = $"SELECT * FROM {tableName} where {fieldToQuery}=?";
-
                 // Add request bindings
                 SnowflakeRequestBindings queryBindings = new SnowflakeRequestBindings();
-                queryBindings.AddTextBinding(1, itemId);
+                string keyCondition = BuildItemKeyCondition(itemKey, queryBindings, 1);
+
+                var query = $"SELECT * FROM {tableName} WHERE {keyCondition}";
 
                 // Fetch the metadata
                 data = await snowflakeClient.CallAPIAsync(httpClient, query, $"{endpoint} - GetItemFromTable", queryBindings, connectionParameters, null, false).ConfigureAwait(true);
@@ -320,8 +319,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
         internal async Task<SnowflakeTableData> UpdateItemAsync(
             string table,
-            string? primaryKeyColumn,
-            string id,
+            IReadOnlyList<(string Column, string Value)> itemKey,
             Item item,
             SnowflakeConnectionParameters connectionParameters,
             string endpoint)
@@ -357,10 +355,10 @@ namespace SnowflakeV2CoreLogic.Providers
                     queryBindings.AddBinding(bindingCounter++, values[i]);
                 }
 
-                // Add the primary key binding
-                queryBindings.AddBinding(bindingCounter, id);
+                // Add the primary key bindings
+                string keyCondition = BuildItemKeyCondition(itemKey, queryBindings, bindingCounter);
 
-                var query = $"UPDATE {table} SET {sqlUpdateString} WHERE {primaryKeyColumn} = ?";
+                var query = $"UPDATE {table} SET {sqlUpdateString} WHERE {keyCondition}";
 
                 // Fetch the metadata
                 data = await snowflakeClient.CallAPIAsync(httpClient, query, $"{endpoint} - UpdateItem", queryBindings, connectionParameters, null, false).ConfigureAwait(true);
@@ -371,8 +369,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
         internal async Task<SnowflakeTableData> DeleteItemAsync(
             string table,
-            string? primaryKeyColumn,
-            string id,
+            IReadOnlyList<(string Column, string Value)> itemKey,
             SnowflakeConnectionParameters connectionParameters,
             string endpoint)
         {
@@ -380,11 +377,11 @@ namespace SnowflakeV2CoreLogic.Providers
 
             using (var latencyLogger = new LatencyLogger(Constants.DeleteItemAsync, logger))
             {
-                var query = $"DELETE FROM {table} where {primaryKeyColumn}=?";
-
                 // Add request bindings
                 SnowflakeRequestBindings queryBindings = new SnowflakeRequestBindings();
-                queryBindings.AddBinding(1, id);
+                string keyCondition = BuildItemKeyCondition(itemKey, queryBindings, 1);
+
+                var query = $"DELETE FROM {table} WHERE {keyCondition}";
 
                 // Fetch the metadata
                 data = await snowflakeClient.CallAPIAsync(httpClient, query, $"{endpoint} - DeleteItem", queryBindings, connectionParameters, null, false).ConfigureAwait(true);
@@ -453,6 +450,35 @@ namespace SnowflakeV2CoreLogic.Providers
             };
             var dataWithValidation = await snowflakeClient.CallAPIAsync(httpClient, queryWithSnowflakeConfigValidation, $"{endpoint} - GetInformationSchemaValidation", null, null, requestParameters, true).ConfigureAwait(true);
             return dataWithValidation;
+        }
+
+        /// <summary>
+        /// Builds a condition matching every primary key column of an item and binds the key values.
+        /// </summary>
+        /// <param name="itemKey">The primary key columns paired with their values.</param>
+        /// <param name="bindings">The bindings the key values are added to.</param>
+        /// <param name="firstBindingIndex">The binding index of the first key value.</param>
+        /// <returns>The condition, for example <c>ORDER_ID = ? AND LINE_NO = ?</c>.</returns>
+        private static string BuildItemKeyCondition(
+            IReadOnlyList<(string Column, string Value)> itemKey,
+            SnowflakeRequestBindings bindings,
+            int firstBindingIndex)
+        {
+            if (itemKey == null || itemKey.Count == 0)
+            {
+                throw new ArgumentException("At least one primary key column is required", nameof(itemKey));
+            }
+
+            var conditions = new List<string>(itemKey.Count);
+            int bindingIndex = firstBindingIndex;
+            foreach (var (column, value) in itemKey)
+            {
+                column.EnsureValidSnowflakeIdentifier("Primary Key Column");
+                conditions.Add($"{column} = ?");
+                bindings.AddTextBinding(bindingIndex++, value);
+            }
+
+            return string.Join(" AND ", conditions);
         }
     }
 }
