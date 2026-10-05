@@ -252,17 +252,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             logger.LogInformation(string.Format(CultureInfo.InvariantCulture, Constants.FinishedMethodLoggerMessage, methodName, "_", "_"));
 
-            // there should only be one item returned from a GetItem query
-            if (items.Count == 1)
-            {
-                return items[0];
-            }
-            else if (items.Count > 1)
-            {
-                // We should have more than 1 item when querying by primaryKey
-                throw new Exception($"Multiple items returned when updating by primary key {DescribeKeyColumns(itemKey)}");
-            }
-            return new Item();
+            return items.FirstOrDefault() ?? new Item();
         }
 
         public async Task DeleteItemAsync(
@@ -285,20 +275,8 @@ namespace SnowflakeV2CoreLogic.Providers
             // First we need to resolve the primarKey since we were only given an ID
             var itemKey = await ResolveItemKeyAsync(table, id, "DELETE datasets/{dataset}/tables/{table}/items/{id}", connectionParameters, methodName).ConfigureAwait(true);
 
-            // Now that we have a primary key, we can construct the select query
-            SnowflakeTableData deletedItemResponse = await snowflakeDBOperations.DeleteItemAsync(table, itemKey, connectionParameters, "DELETE datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
-
-            // Convert the response into a list of OData Items
-            var items = deletedItemResponse.ToListOfItems();
-
-            // there should only be one item returned from a GetItem query
-            if (items.Count > 1)
-            {
-                // We should have more than 1 item when querying by primaryKey
-                string errorMessage = $"Multiple items returned when deleting by primary key {DescribeKeyColumns(itemKey)}";
-
-                throw new Exception(string.Format(CultureInfo.InvariantCulture, Constants.GenericLoggerMessage, methodName, errorMessage));
-            }
+            // Now that we have a primary key, we can construct the delete query
+            await snowflakeDBOperations.DeleteItemAsync(table, itemKey, connectionParameters, "DELETE datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
         }
 
         private static string DescribeKeyColumns(IReadOnlyList<(string Column, string Value)> itemKey)
