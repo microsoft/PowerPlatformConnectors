@@ -269,6 +269,7 @@ Once the admin has shared the environment variables, users follow these steps to
 1. Other limitations with Virtual Tables are listed [here](https://learn.microsoft.com/power-apps/maker/data-platform/create-edit-virtual-entities#considerations-when-you-use-virtual-tables).
 1. Virtual tables are only supported with connections created with 'Service Principal' authentication. 
 1. When using Service Principle authentication, the user needs to have Read access to the **information_schema.columns** table. 
+1. The server and database stored on a flow action or virtual table must match the Snowflake SaaS URL and database on the connection. Flows and virtual tables keep the values from when they were created. Changing either value on the connection makes those requests fail until the dataset is selected again in each flow action, or the virtual table is created again. Schema, warehouse, and role are read from the connection on each request. The database name is case-sensitive.
 1. Snowflake connections cannot be created directly in Canvas apps, error information and steps which are needed to resolve the issue are as follows:  
    
  
