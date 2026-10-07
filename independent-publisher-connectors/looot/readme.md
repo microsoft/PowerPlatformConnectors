@@ -26,7 +26,7 @@ Reads the available credit, the reserved credit and the top-up link. Free.
 The connector uses an API key sent in the `Authorization` header.
 1. Sign in at [looot.ai](https://looot.ai) and open the dashboard.
 2. Go to Settings, Agent tokens, and create a token. Tick `catalog.read`, `runs.read`, `runs.execute` and `usage.read`.
-3. When Power Automate asks for the key, enter `Bearer ` followed by the token, for example `Bearer lt_xxxxxxxx`.
+3. When Power Automate asks for the key, enter `Bearer ` followed by the token, for example `Bearer YOUR_TOKEN`.
 
 ## Getting Started
 1. Create a connection with your agent token.
