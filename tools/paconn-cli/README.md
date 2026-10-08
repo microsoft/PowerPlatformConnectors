@@ -244,26 +244,45 @@ Arguments
                    line parameters are ignored.
    ```
 
-### Validate a Swagger JSON
+### Validate a Swagger JSON or C# Script
 
-The validate operation takes a swagger file and verfies if it follows all the recommended rules. Validate a swagger file by running:
+The validate operation takes either a swagger file or a C# script file and verifies if it follows all the recommended rules. 
+
+**Validate a swagger file:**
    
 `paconn validate --api-def [Path to apiDefinition.swagger.json]`
 
-or
+**Validate a C# script file (always in strict mode):**
+
+`paconn validate --script [Path to script.csx]`
+
+**Using settings file:**
 
 `paconn validate -s [Path to settings.json]`
 
-The command will print the error, warning, or success message depending result of the validation.
+Note: You can validate either a swagger file OR a script file, but not both simultaneously.
+
+The command will print the error, warning, or success message depending on the result of the validation.
+
+**C# Script Validation Features:**
+- Validates required Script class inheritance from ScriptBase
+- Checks for mandatory ExecuteAsync method implementation
+- Ensures only allowed namespaces are used (21 specific namespaces)
+- Validates file size (1MB limit)
+- Checks for best practices (ConfigureAwait, Context.SendAsync usage)
+- Always runs in strict mode with comprehensive security checks
   
 ```
 Arguments
    --api-def     : Location for the Open API definition JSON document.
+                   Cannot be used with --script.
+   --script -x   : Location for the C# script file (.csx) to validate.
+                   Validation is always performed in strict mode.
+                   Cannot be used with --api-def.
    --pau -u      : Power Platform URL.
    --pav -v      : Power Platform API version.
    --settings -s : A settings file containing required parameters.
-                   When a settings file is specified some command 
-                   line parameters are ignored.
+                   Settings file must contain either 'apiDefinition' OR 'script', not both.
    ```
 
 
