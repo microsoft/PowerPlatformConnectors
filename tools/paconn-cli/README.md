@@ -141,7 +141,15 @@ Log in to Power Platform by running:
    
 `paconn login`
 
-This command will ask you to log in using the device code login process. Follow the prompt for the log in. Service Principle authentication is not supported at this point. Please review [a customer workaround posted in the issues page](https://github.com/microsoft/PowerPlatformConnectors/issues/287).
+This command will ask you to log in using the device code login process. Follow the prompt for the log in. 
+
+For interactive browser authentication, use:
+
+`paconn login --interactive`
+
+This will open your default browser and prompt you to log in interactively instead of using device code flow.
+
+Service Principle authentication is not supported at this point. Please review [a customer workaround posted in the issues page](https://github.com/microsoft/PowerPlatformConnectors/issues/287).
 
 ### Logout
 
