@@ -41,7 +41,8 @@ namespace SnowflakeV2CoreLogic.Providers
 
         public async Task<SnowflakeTableData?> GetTableMetadataAsync(
             string tableName,
-            string endpoint)
+            string endpoint,
+            SnowflakeConnectionParameters? connectionParameters = null)
         {
             SnowflakeTableData? metadataResponse = null;
 
@@ -54,7 +55,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 metaDataBindings.AddTextBinding(1, tableName);
 
                 // Fetch the metadata
-                metadataResponse = await snowflakeClient.CallAPIAsync(httpClient, metadataStatement, $"{endpoint} - GetTableMetadata", metaDataBindings, null, null, false).ConfigureAwait(true);
+                metadataResponse = await snowflakeClient.CallAPIAsync(httpClient, metadataStatement, $"{endpoint} - GetTableMetadata", metaDataBindings, connectionParameters, null, false).ConfigureAwait(true);
             }
 
             return metadataResponse;
@@ -93,7 +94,7 @@ namespace SnowflakeV2CoreLogic.Providers
                 stmtBindings.AddTextBinding(1, connectionParameters.Schema);
 
                 // Fetch the metadata
-                snowflakeTableData = await snowflakeClient.CallAPIAsync(httpClient, sqlCommand, $"{endpoint} - GetTablesForSchema", stmtBindings, null, null, false).ConfigureAwait(true);
+                snowflakeTableData = await snowflakeClient.CallAPIAsync(httpClient, sqlCommand, $"{endpoint} - GetTablesForSchema", stmtBindings, connectionParameters, null, false).ConfigureAwait(true);
             }
 
             return snowflakeTableData;

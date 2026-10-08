@@ -72,6 +72,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
+            SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             NameValueCollection queryParams = HttpUtility.ParseQueryString(request.RequestUri.Query);
             string? skipToken = queryParams["$skiptoken"];
@@ -165,6 +166,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
+            SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
             SnowflakeTableData? primaryKeyData = null;
@@ -223,6 +225,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
+            SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             // Construct the body of the insert request
             var data = await snowflakeDBOperations.InsertRecordAsync(table, item, "POST datasets/{dataset}/tables/{table}/items", connectionParameters).ConfigureAwait(true);
@@ -255,6 +258,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
+            SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
             SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "PATCH datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
@@ -309,6 +313,7 @@ namespace SnowflakeV2CoreLogic.Providers
 
             SnowflakeConnectionParameters connectionParameters = snowflakeConnectionParametersProvider.GetConnectionParameters();
             connectionParameters = SnowflakeConnectionParametersProvider.UpdateConnParametersToUseDataset(request, dataSet, connectionParameters);
+            SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
             SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "DELETE datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
