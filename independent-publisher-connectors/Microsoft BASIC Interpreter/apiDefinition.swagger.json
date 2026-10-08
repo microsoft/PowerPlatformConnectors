@@ -1,0 +1,570 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Microsoft BASIC Interpreter",
+        "description": "Execute Microsoft BASIC commands using the original M6502 interpreter logic with enhanced error handling and debugging capabilities",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Troy Taylor",
+            "email": "troy@troystaylor.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "troystaylor.com",
+    "basePath": "/",
+    "schemes": [
+        "https"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/execute": {
+            "post": {
+                "summary": "Execute BASIC program",
+                "description": "Execute a BASIC program using the Microsoft M6502 interpreter engine with comprehensive error handling and variable tracking",
+                "operationId": "ExecuteBasicCode",
+                "x-ms-summary": "Execute BASIC Code",
+                "x-ms-visibility": "important",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BasicExecutionRequest"
+                        },
+                        "x-ms-summary": "BASIC Execution Request"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Execution completed successfully",
+                        "x-ms-summary": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/BasicExecutionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid BASIC code or request format",
+                        "x-ms-summary": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during execution",
+                        "x-ms-summary": "Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/validate": {
+            "post": {
+                "summary": "Validate BASIC syntax",
+                "description": "Validate BASIC program syntax without executing the code",
+                "operationId": "ValidateBasicCode",
+                "x-ms-summary": "Validate BASIC Syntax",
+                "x-ms-visibility": "advanced",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BasicValidationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Validation completed",
+                        "schema": {
+                            "$ref": "#/definitions/BasicValidationResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/functions": {
+            "get": {
+                "summary": "Get supported BASIC functions",
+                "description": "Retrieve a list of all supported BASIC functions and their syntax",
+                "operationId": "GetBasicFunctions",
+                "x-ms-summary": "Get Supported Functions",
+                "x-ms-visibility": "advanced",
+                "responses": {
+                    "200": {
+                        "description": "List of supported functions",
+                        "schema": {
+                            "$ref": "#/definitions/FunctionsResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "BasicExecutionRequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "The BASIC program code to execute",
+                    "x-ms-summary": "BASIC Code",
+                    "x-ms-visibility": "important",
+                    "x-ms-test-value": "10 PRINT \"HELLO WORLD\"\n20 FOR I = 1 TO 5\n30 PRINT I\n40 NEXT I\n50 END"
+                },
+                "variables": {
+                    "type": "object",
+                    "description": "Initial variable values for the program",
+                    "x-ms-summary": "Initial Variables",
+                    "x-ms-visibility": "advanced",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "maxExecutionTime": {
+                    "type": "integer",
+                    "description": "Maximum execution time in seconds (default: 30)",
+                    "x-ms-summary": "Max Execution Time",
+                    "x-ms-visibility": "advanced",
+                    "default": 30,
+                    "minimum": 1,
+                    "maximum": 120
+                },
+                "enableDebug": {
+                    "type": "boolean",
+                    "description": "Enable debug mode for detailed execution trace",
+                    "x-ms-summary": "Enable Debug Mode",
+                    "x-ms-visibility": "advanced",
+                    "default": false
+                },
+                "caseSensitive": {
+                    "type": "boolean",
+                    "description": "Enable case-sensitive variable names",
+                    "x-ms-summary": "Case Sensitive Variables",
+                    "x-ms-visibility": "advanced",
+                    "default": false
+                },
+                "enableGraphics": {
+                    "type": "boolean",
+                    "description": "Enable graphics commands (PLOT, HLIN, VLIN) and return graphics output",
+                    "x-ms-summary": "Enable Graphics",
+                    "x-ms-visibility": "advanced",
+                    "default": false
+                },
+                "enableFileIO": {
+                    "type": "boolean",
+                    "description": "Enable virtual file I/O operations (OPEN, CLOSE, PRINT#, INPUT#)",
+                    "x-ms-summary": "Enable File I/O",
+                    "x-ms-visibility": "advanced",
+                    "default": false
+                },
+                "enableMemory": {
+                    "type": "boolean",
+                    "description": "Enable virtual memory operations (PEEK, POKE, CALL)",
+                    "x-ms-summary": "Enable Memory Operations",
+                    "x-ms-visibility": "advanced",
+                    "default": false
+                },
+                "files": {
+                    "type": "object",
+                    "description": "Virtual files to load (filename: content)",
+                    "x-ms-summary": "Input Files",
+                    "x-ms-visibility": "advanced",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "BasicExecutionResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "Indicates if execution was successful",
+                    "x-ms-summary": "Success"
+                },
+                "output": {
+                    "type": "array",
+                    "description": "Program output lines",
+                    "x-ms-summary": "Output Lines",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "variables": {
+                    "type": "object",
+                    "description": "Final variable values after execution",
+                    "x-ms-summary": "Final Variables",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "executionTime": {
+                    "type": "number",
+                    "description": "Execution time in seconds",
+                    "x-ms-summary": "Execution Time"
+                },
+                "linesExecuted": {
+                    "type": "integer",
+                    "description": "Number of program lines executed",
+                    "x-ms-summary": "Lines Executed"
+                },
+                "debugTrace": {
+                    "type": "array",
+                    "description": "Debug trace information (if debug mode enabled)",
+                    "x-ms-summary": "Debug Trace",
+                    "items": {
+                        "$ref": "#/definitions/DebugTraceEntry"
+                    }
+                },
+                "graphics": {
+                    "type": "array",
+                    "description": "Graphics commands output (if graphics mode enabled)",
+                    "x-ms-summary": "Graphics Output",
+                    "items": {
+                        "$ref": "#/definitions/GraphicsCommand"
+                    }
+                },
+                "files": {
+                    "type": "object",
+                    "description": "Virtual files modified during execution",
+                    "x-ms-summary": "Output Files",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "memory": {
+                    "$ref": "#/definitions/VirtualMemory"
+                },
+                "error": {
+                    "$ref": "#/definitions/BasicError"
+                }
+            }
+        },
+        "BasicValidationRequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "The BASIC program code to validate",
+                    "x-ms-summary": "BASIC Code"
+                }
+            }
+        },
+        "BasicValidationResponse": {
+            "type": "object",
+            "properties": {
+                "isValid": {
+                    "type": "boolean",
+                    "description": "Indicates if the syntax is valid",
+                    "x-ms-summary": "Is Valid"
+                },
+                "errors": {
+                    "type": "array",
+                    "description": "Syntax errors found",
+                    "x-ms-summary": "Syntax Errors",
+                    "items": {
+                        "$ref": "#/definitions/SyntaxError"
+                    }
+                },
+                "warnings": {
+                    "type": "array",
+                    "description": "Syntax warnings",
+                    "x-ms-summary": "Warnings",
+                    "items": {
+                        "$ref": "#/definitions/SyntaxWarning"
+                    }
+                }
+            }
+        },
+        "FunctionsResponse": {
+            "type": "object",
+            "properties": {
+                "functions": {
+                    "type": "array",
+                    "description": "List of supported BASIC functions",
+                    "x-ms-summary": "Supported Functions",
+                    "items": {
+                        "$ref": "#/definitions/BasicFunction"
+                    }
+                }
+            }
+        },
+        "BasicFunction": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Function name",
+                    "x-ms-summary": "Function Name"
+                },
+                "syntax": {
+                    "type": "string",
+                    "description": "Function syntax",
+                    "x-ms-summary": "Syntax"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Function description",
+                    "x-ms-summary": "Description"
+                },
+                "category": {
+                    "type": "string",
+                    "description": "Function category",
+                    "x-ms-summary": "Category",
+                    "enum": [
+                        "Math",
+                        "String",
+                        "Control",
+                        "I/O",
+                        "Array"
+                    ]
+                }
+            }
+        },
+        "DebugTraceEntry": {
+            "type": "object",
+            "properties": {
+                "lineNumber": {
+                    "type": "integer",
+                    "description": "Line number being executed",
+                    "x-ms-summary": "Line Number"
+                },
+                "instruction": {
+                    "type": "string",
+                    "description": "BASIC instruction",
+                    "x-ms-summary": "Instruction"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Execution timestamp",
+                    "x-ms-summary": "Timestamp"
+                },
+                "variables": {
+                    "type": "object",
+                    "description": "Variable state at this point",
+                    "x-ms-summary": "Variable State"
+                }
+            }
+        },
+        "BasicError": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Error type",
+                    "x-ms-summary": "Error Type",
+                    "enum": [
+                        "SyntaxError",
+                        "RuntimeError",
+                        "TimeoutError",
+                        "MemoryError"
+                    ]
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Error message",
+                    "x-ms-summary": "Error Message"
+                },
+                "lineNumber": {
+                    "type": "integer",
+                    "description": "Line number where error occurred",
+                    "x-ms-summary": "Line Number"
+                },
+                "position": {
+                    "type": "integer",
+                    "description": "Character position in line",
+                    "x-ms-summary": "Position"
+                }
+            }
+        },
+        "SyntaxError": {
+            "type": "object",
+            "properties": {
+                "lineNumber": {
+                    "type": "integer",
+                    "description": "Line number with syntax error",
+                    "x-ms-summary": "Line Number"
+                },
+                "position": {
+                    "type": "integer",
+                    "description": "Character position of error",
+                    "x-ms-summary": "Position"
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Error description",
+                    "x-ms-summary": "Error Message"
+                },
+                "severity": {
+                    "type": "string",
+                    "description": "Error severity",
+                    "x-ms-summary": "Severity",
+                    "enum": [
+                        "Error",
+                        "Warning"
+                    ]
+                }
+            }
+        },
+        "SyntaxWarning": {
+            "type": "object",
+            "properties": {
+                "lineNumber": {
+                    "type": "integer",
+                    "description": "Line number with warning",
+                    "x-ms-summary": "Line Number"
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Warning description",
+                    "x-ms-summary": "Warning Message"
+                }
+            }
+        },
+        "GraphicsCommand": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "Graphics command name (PLOT, HLIN, VLIN)",
+                    "x-ms-summary": "Command"
+                },
+                "parameters": {
+                    "type": "object",
+                    "description": "Command parameters (coordinates, etc.)",
+                    "x-ms-summary": "Parameters",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                "lineNumber": {
+                    "type": "integer",
+                    "description": "Source line number",
+                    "x-ms-summary": "Line Number"
+                },
+                "color": {
+                    "type": "string",
+                    "description": "Graphics color",
+                    "x-ms-summary": "Color"
+                },
+                "thickness": {
+                    "type": "integer",
+                    "description": "Line thickness",
+                    "x-ms-summary": "Thickness"
+                },
+                "style": {
+                    "type": "string",
+                    "description": "Line style",
+                    "x-ms-summary": "Style"
+                }
+            }
+        },
+        "VirtualMemory": {
+            "type": "object",
+            "properties": {
+                "memory": {
+                    "type": "object",
+                    "description": "Memory contents (address: value)",
+                    "x-ms-summary": "Memory State",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "operations": {
+                    "type": "array",
+                    "description": "Memory operations performed",
+                    "x-ms-summary": "Memory Operations",
+                    "items": {
+                        "$ref": "#/definitions/MemoryOperation"
+                    }
+                }
+            }
+        },
+        "MemoryOperation": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "description": "Operation type (PEEK, POKE, CALL)",
+                    "x-ms-summary": "Operation"
+                },
+                "address": {
+                    "type": "integer",
+                    "description": "Memory address",
+                    "x-ms-summary": "Address"
+                },
+                "value": {
+                    "type": "integer",
+                    "description": "Value (for POKE operations)",
+                    "x-ms-summary": "Value"
+                },
+                "lineNumber": {
+                    "type": "integer",
+                    "description": "Source line number",
+                    "x-ms-summary": "Line Number"
+                }
+            }
+        },
+        "ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "description": "Error message",
+                    "x-ms-summary": "Error"
+                },
+                "details": {
+                    "type": "string",
+                    "description": "Detailed error information",
+                    "x-ms-summary": "Details"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Error timestamp",
+                    "x-ms-summary": "Timestamp"
+                }
+            }
+        }
+    },
+    "x-ms-capabilities": {
+        "testConnection": {
+            "operationId": "GetBasicFunctions"
+        }
+    },
+    "x-ms-connector-metadata": [
+        {
+            "propertyName": "Website",
+            "propertyValue": "https://github.com/microsoft/BASIC-M6502"
+        },
+        {
+            "propertyName": "Privacy policy",
+            "propertyValue": "https://github.com/microsoft/BASIC-M6502/blob/main/PRIVACY.md"
+        },
+        {
+            "propertyName": "Categories",
+            "propertyValue": "IT Operations"
+        }
+    ]
+}
