@@ -1,0 +1,315 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Morfee",
+    "description": "Morfee turns a saved HTML template plus JSON into a finished PDF document: a quote, an invoice, a work order, a certificate. Paste your HTML once, point at the fields that come from your data, and every call after that is one POST request. Get an API key at https://morfee.furo.solutions/keys.",
+    "contact": {
+      "name": "furo solutions",
+      "url": "https://furo.solutions",
+      "email": "info@furo.solutions"
+    }
+  },
+  "host": "morfee.furo.solutions",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "description": "A key from https://morfee.furo.solutions/keys. It belongs to one organization and reaches nothing outside it.",
+      "name": "X-Api-Key",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/api/templates": {
+      "get": {
+        "description": "Every template in your library, with its id, name and how many fields it has. Start here: you need a template id to render a document. Paged; loop on nextOffset until it is null to see everything.",
+        "summary": "List templates",
+        "operationId": "ListTemplates",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "x-ms-summary": "Search",
+            "required": false,
+            "type": "string",
+            "description": "Filter on template name"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "x-ms-summary": "Limit",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "description": "How many templates to return, up to 500"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "x-ms-summary": "Offset",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "description": "Where to start, for paging past the first 'limit' templates"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of templates",
+            "schema": {
+              "$ref": "#/definitions/TemplateList"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/render": {
+      "post": {
+        "description": "Renders one document from a saved template and your data. Use format=url so the answer is a small JSON object holding a download link, which is what a workflow tool wants: a link survives being passed between steps, raw PDF bytes do not.",
+        "summary": "Render a document",
+        "operationId": "RenderDocument",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "x-ms-summary": "Response format",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "url",
+              "pdf",
+              "html"
+            ],
+            "default": "url",
+            "description": "'url' returns a JSON object with a download link, valid for an hour. 'pdf' returns the raw PDF bytes. 'html' returns the rendered HTML, to check before making paper."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "x-ms-summary": "Idempotency key",
+            "required": false,
+            "type": "string",
+            "description": "A key of your own (a GUID will do). The same key sent again returns the first answer instead of rendering a second document, which is what makes a retry in a flow safe."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "The template id and the data to fill it with",
+            "schema": {
+              "$ref": "#/definitions/RenderRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "With format=url, a JSON object holding the download link. With format=pdf, the raw PDF bytes. With format=html, the rendered HTML.",
+            "schema": {
+              "$ref": "#/definitions/RenderUrlResponse"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    },
+    "/api/usage": {
+      "get": {
+        "description": "What your plan allows and what you have used against it this month. Ask this before you need it: included is what you pay for and going over it costs money per document, while limit is where rendering stops. Amounts are in cents.",
+        "summary": "Get plan and usage",
+        "operationId": "GetUsage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Plan, limits and use",
+            "schema": {
+              "$ref": "#/definitions/Usage"
+            }
+          }
+        },
+        "x-ms-visibility": "important"
+      }
+    }
+  },
+  "definitions": {
+    "RenderRequest": {
+      "type": "object",
+      "properties": {
+        "templateId": {
+          "type": "string",
+          "x-ms-summary": "Template ID",
+          "description": "The id of a saved template, from List templates or from the builder's URL"
+        },
+        "data": {
+          "type": "object",
+          "x-ms-summary": "Data",
+          "description": "The JSON your template's fields come from. Its shape is whatever the template expects: read it back with 'Read one template' first if you are not sure."
+        }
+      },
+      "required": [
+        "templateId",
+        "data"
+      ]
+    },
+    "RenderUrlResponse": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "A download link for the PDF, valid for an hour and needing no key"
+        },
+        "filename": {
+          "type": "string",
+          "description": "The suggested file name"
+        },
+        "bytes": {
+          "type": "integer",
+          "description": "The size of the document in bytes",
+          "format": "int32"
+        }
+      }
+    },
+    "TemplateMeta": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "integer",
+          "description": "How many fields this template has bound"
+        }
+      }
+    },
+    "TemplateList": {
+      "type": "object",
+      "properties": {
+        "templates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TemplateMeta"
+          }
+        },
+        "total": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "nextOffset": {
+          "type": "integer",
+          "description": "Where the next page starts, or null on the last page"
+        }
+      }
+    },
+    "Usage": {
+      "type": "object",
+      "properties": {
+        "plan": {
+          "type": "string",
+          "title": "Plan",
+          "description": "The name of your plan",
+          "x-ms-summary": "Plan"
+        },
+        "planUntil": {
+          "type": "string",
+          "title": "Plan until",
+          "description": "The day the agreement ends, if it has one",
+          "x-ms-summary": "Plan until",
+          "x-nullable": true
+        },
+        "planDaysLeft": {
+          "type": "integer",
+          "title": "Days left",
+          "description": "Days until the agreement ends",
+          "x-ms-summary": "Days left",
+          "x-nullable": true,
+          "format": "int32"
+        },
+        "templates": {
+          "type": "object",
+          "title": "Templates",
+          "properties": {
+            "used": {
+              "type": "integer",
+              "title": "Used",
+              "x-ms-summary": "Templates used",
+              "format": "int32"
+            },
+            "included": {
+              "type": "integer",
+              "title": "Included",
+              "x-ms-summary": "Templates included",
+              "format": "int32"
+            },
+            "limit": {
+              "type": "integer",
+              "title": "Limit",
+              "x-ms-summary": "Template limit",
+              "format": "int32"
+            }
+          }
+        },
+        "renders": {
+          "type": "object",
+          "title": "Documents",
+          "properties": {
+            "thisMonth": {
+              "type": "integer",
+              "title": "This month",
+              "x-ms-summary": "Documents this month",
+              "format": "int32"
+            },
+            "included": {
+              "type": "integer",
+              "title": "Included",
+              "x-ms-summary": "Documents included",
+              "format": "int32"
+            },
+            "limit": {
+              "type": "integer",
+              "title": "Limit",
+              "x-ms-summary": "Document limit",
+              "format": "int32"
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://morfee.furo.solutions"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://morfee.furo.solutions/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Content and Files;Productivity"
+    }
+  ]
+}
