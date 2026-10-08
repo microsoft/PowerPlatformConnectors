@@ -78,7 +78,15 @@ More information on each of the properties are given below:
 
 * `connectionParameters`: Defines the connection parameter for the service.
 
+* `connectionParameterSets`: Defines named authentication alternatives for [multi-auth](https://learn.microsoft.com/en-us/connectors/custom-connectors/multi-auth). Each entry in `values` has a `name` and `parameters` using the same schema as `connectionParameters`. The collection and individual sets can include display metadata in `uiDefinition`.
+
+* `connectionParameters.<name>.uiDefinition.schema`: Optional connection UI metadata with string-valued `type` and `description`, as shown in the [multi-auth examples](https://learn.microsoft.com/en-us/connectors/custom-connectors/multi-auth). This is not a request-body JSON Schema; for example, `securestring` is a supported UI type. Existing `uiDefinition.description` and string-valued constraints remain supported.
+
+* `connectionParameters.<name>.oAuthSettings.redirectMode`: Supports `GlobalPerConnector` for a [per-connector OAuth redirect URI](https://learn.microsoft.com/en-us/connectors/custom-connectors/#21-oauth-20), in addition to the existing `Global` and `Direct` values. The same options apply within parameter sets.
+
 * `iconBrandColor`: The icon brand color in HTML hex code for the custom connector. Independent Publisher connectors must set the color to `"#da3b01"`.
+
+* `scriptOperations`: A list of operation names that execute with the script file. An empty list selects all operations, as described in the [CLI documentation](https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#api-properties-file). The schema also accepts the `null` value emitted by [pac connector init](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/connector#pac-connector-init).
 
 * `capabilities`: Describes the capabilities for the connector, e.g. cloud only, on-prem gateway etc.
 
@@ -168,6 +176,34 @@ If the connector uses OAuth, I have provided detailed steps on how to create an 
 Follow the same instructions on submitting for certification, create a directory under the custom-connectors directory and place the connector files in the sub-folder. Add a tag by selecting the labels option to "custom-connector".
 
 ### Tooling and Validation
+
+#### API properties schema tests
+
+The local tests in `schemas/tests` use pytest and Draft 7 validation. With Python
+3.9 or later, install the test dependencies in a virtual environment and run:
+
+```powershell
+python -m pip install -r schemas\tests\requirements.txt
+python -B -m pytest schemas\tests -q -p no:cacheprovider
+```
+
+The two multi-auth fixtures adapt the public [Basic/API key and OAuth examples](https://learn.microsoft.com/en-us/connectors/custom-connectors/multi-auth).
+The schema already contains an inline comment, so the tests use `json5` to parse
+the schema before calling `Draft7Validator.check_schema`; connector files are
+still parsed as JSON.
+
+For a compatibility comparison, export the schema from the desired baseline
+revision to a file outside the repository, then set `API_PROPERTIES_BASELINE` to
+that file's absolute path. Optionally set `API_PROPERTIES_REPORT` to an output
+JSON path outside the repository and run the same command with `-s`. These checks
+verify the intended additive structural changes and validate every tracked
+`apiProperties.json` against both versions. They fail if any previously valid
+file becomes invalid, and report pre-existing schema-invalid and malformed JSON
+files separately. Without a baseline file, the two comparison tests are skipped.
+The corpus report includes total old-valid, new-valid and preserved counts.
+Targeted tests also check that parameter and OAuth provider `oneOf` branches stay
+mutually exclusive and that existing `additionalProperties` guards still reject
+unsupported fields.
 
 #### CLA
 

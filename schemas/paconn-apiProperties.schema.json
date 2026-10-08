@@ -55,6 +55,19 @@
             }
           }
         },
+        "connectionParameterSets": {
+          "$ref": "#/definitions/ConnectionParameterSets"
+        },
+        "scriptOperations": {
+          "description": "Operations that execute with the script file; an empty list selects all operations. Also accepts the null value emitted by pac connector init. See https://learn.microsoft.com/en-us/connectors/custom-connectors/paconn-cli#api-properties-file and https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/connector#pac-connector-init.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
         "policyTemplateInstances": {
           "type": "array",
           "items": {
@@ -65,6 +78,58 @@
     }
   },
   "definitions": {
+    "ConnectionParameterSets": {
+      "description": "Named authentication alternatives. Each set uses the same parameter schema as connectionParameters. See https://learn.microsoft.com/en-us/connectors/custom-connectors/multi-auth.",
+      "type": "object",
+      "required": [
+        "values"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "uiDefinition": {
+          "$ref": "#/definitions/ConnectionParameterSet-uiDefinition"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "parameters"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uiDefinition": {
+                "$ref": "#/definitions/ConnectionParameterSet-uiDefinition"
+              },
+              "parameters": {
+                "$ref": "#/properties/properties/properties/connectionParameters"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ConnectionParameterSet-uiDefinition": {
+      "description": "Authentication selection metadata. Both displayName and displayname appear in the documented multi-auth examples.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "$ref": "#/definitions/ConnectionParameter-uiDefinition/properties/displayName"
+        },
+        "displayname": {
+          "$ref": "#/definitions/ConnectionParameter-uiDefinition/properties/displayName"
+        },
+        "description": {
+          "$ref": "#/definitions/ConnectionParameter-uiDefinition/properties/description"
+        }
+      }
+    },
     "ConnectionParameter": {
       "type": "object",
       "required": [
@@ -215,6 +280,19 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "schema": {
+          "description": "Connection UI metadata, not a request-body JSON Schema. The documented type can be string or securestring. See https://learn.microsoft.com/en-us/connectors/custom-connectors/multi-auth#how-to-enable-multi-auth.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        },
         "displayName": {
           "type": "string"
         },
@@ -319,10 +397,12 @@
           ]
         },
         "redirectMode": {
+          "description": "OAuth redirect behavior. GlobalPerConnector selects a unique per-connector redirect URI. See https://learn.microsoft.com/en-us/connectors/custom-connectors/#21-oauth-20.",
           "type": "string",
           "enum": [
             "Global",
-            "Direct"
+            "Direct",
+            "GlobalPerConnector"
           ]
         },
         "redirectUrl": {
