@@ -1,6 +1,6 @@
 # PDF Tools by Tachytelic
 
-PDF Tools is a free set of actions for working with PDF files in Power Automate. It provides capabilities to merge, split, extract pages, extract text, optimize file size, and manage PDF metadata. Designed to simplify PDF operations in your flows without requiring a premium license.
+PDF Tools is a free set of actions for working with PDF files in Power Automate. It provides capabilities to merge, split, extract pages, extract text, optimize file size, manage PDF metadata, convert PDFs to Markdown, generate PDFs from web pages or HTML, and read and fill PDF form fields. Designed to simplify PDF operations in your flows without requiring a premium license.
 
 ## Publisher: Paul Murana
 
@@ -30,6 +30,18 @@ Splits a PDF file either by a fixed number of pages or by specified page ranges.
 
 ### Merge PDFs
 Merges multiple PDF files provided as base64 strings into a single PDF.
+
+### Convert PDF to Markdown
+Converts a PDF into Markdown text. Takes a base64-encoded PDF and returns the extracted content as Markdown, useful for feeding document content into AI models or text-based workflows.
+
+### Convert Web Page or HTML to PDF
+Generates a PDF from either a web page URL or raw HTML content. Optional settings for landscape orientation, printing background graphics, and scale. Returns a base64-encoded PDF.
+
+### Get Form Fields
+Lists the fillable form fields in a PDF. For each field it returns the name, type (Text, Checkbox, Radio, Dropdown, ListBox), current value, whether it is read-only, and the valid Options for choice fields (dropdown/list choices, radio values, checkbox on-state). Run this first to discover field names and valid values before using Fill Form.
+
+### Fill Form
+Fills form fields in a PDF from a list of Field/Value pairs. Supports text, checkbox (true/false), radio, dropdown, and list box fields. Returns the filled PDF along with which fields were applied, which were not found, and which were skipped (an unfillable type or a value that was not valid for the field).
 
 ## Obtaining Credentials
 
