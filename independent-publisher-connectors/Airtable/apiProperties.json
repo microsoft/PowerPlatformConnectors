@@ -5,8 +5,8 @@
         "type": "securestring",
         "uiDefinition": {
           "displayName": "API Key",
-          "description": "The API Key for this api",
-          "tooltip": "Provide your API Key",
+          "description": "Your Airtable Personal Access Token (starts with 'pat').",
+          "tooltip": "Go to https://airtable.com/create/tokens/new to create a Personal Access Token.",
           "constraints": {
             "tabIndex": 2,
             "clearText": false,
@@ -17,7 +17,93 @@
     },
     "iconBrandColor": "#da3b01",
     "capabilities": [],
-    "publisher": "Woong Choi",
+    "policyTemplateInstances": [
+      {
+        "templateId": "pollingtrigger",
+        "title": "Polling trigger state tracking for new records",
+        "type": "PollingTrigger",
+        "parameters": {
+          "x-ms-apimTemplateParameter.triggerConfig": {
+            "since": "@{triggerBody().records[0].createdTime}"
+          },
+          "x-ms-apimTemplateParameter.triggerDataPath": "@triggerBody().records",
+          "x-ms-apimTemplate-operationName": [
+            "triggerNewRecords"
+          ]
+        }
+      },
+      {
+        "templateId": "routerequesttoendpoint",
+        "title": "Route trigger to list records endpoint",
+        "parameters": {
+          "x-ms-apimTemplateParameter.newPath": "/@queryParameters('x-base-id')/@queryParameters('x-table-name')",
+          "x-ms-apimTemplateParameter.httpMethod": "@Request.OriginalHTTPMethod",
+          "x-ms-apimTemplate-operationName": [
+            "triggerNewRecords"
+          ]
+        }
+      },
+      {
+        "templateId": "setqueryparameter",
+        "title": "Convert since param to Airtable filterByFormula",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "filterByFormula",
+          "x-ms-apimTemplateParameter.value": "CREATED_TIME()>'@queryParameters('since')'",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-operationName": [
+            "triggerNewRecords"
+          ]
+        }
+      },
+      {
+        "templateId": "setqueryparameter",
+        "title": "Sort trigger results by created time field descending",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "sort[0][field]",
+          "x-ms-apimTemplateParameter.value": "@queryParameters('x-sort-field')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-operationName": [
+            "triggerNewRecords"
+          ]
+        }
+      },
+      {
+        "templateId": "setqueryparameter",
+        "title": "Set sort direction to descending for trigger",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "sort[0][direction]",
+          "x-ms-apimTemplateParameter.value": "desc",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-operationName": [
+            "triggerNewRecords"
+          ]
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Authorization header with Bearer prefix",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Authorization",
+          "x-ms-apimTemplateParameter.value": "Bearer @connectionParameters('api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set Retry-After header on polling trigger responses",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "Retry-After",
+          "x-ms-apimTemplateParameter.value": "120",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Response",
+          "x-ms-apimTemplate-operationName": [
+            "triggerNewRecords"
+          ]
+        }
+      }
+    ],
+    "publisher": "Aaron Mah",
     "stackOwner": "Formagrid, Inc."
   }
 }
