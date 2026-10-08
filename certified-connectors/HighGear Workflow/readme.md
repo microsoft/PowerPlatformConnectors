@@ -14,7 +14,7 @@ Our total commitment to supporting our customers and making them highly successf
 
 ## Prerequisites
 
-To use this connector, you will need the HighGear application, version 9.1.0 or above.
+To use this connector, you will need the HighGear application, version 10.4.0 or above.
 
 You will also need the following:
 - **The base URL of your HighGear system:**
@@ -133,6 +133,7 @@ This action returns the ID of the task and a boolean stating the task was modifi
 
 ### When a task enters a web request node
 Triggers a new flow when a task enters a Make Web Request node within a workflow defined in your HighGear System.
+The trigger outputs include the Task Id and the task fields selected in the node's **Task Fields to Send**.
 
 | **Name** | **Key** | **Required** | **Type** | **Description** |
 | - | - | - | - | - |
@@ -153,12 +154,12 @@ Please go to the help in your HighGear system and refer to the following article
 To get started with the HighGear Workflow connector and to trigger a flow when a task enters a workflow web request node in your HighGear system, follow these steps:
 1. Create a HighGear Workflow connection if not created. For a new connection, enter the base URL and subdomain for your HighGear system in addition to the API Key for your integration account.
 2. Add a **When a task enters a web request node** trigger and select a HighGear workflow and node. This will trigger your flow when a task enters the selected workflow node.
-3. Add a **Get task** action to get data from the task. Use the Task Id from the **When a task enters a web request node** trigger and select the task form with the data fields you want to load.
+3. Use the task data from the **When a task enters a web request node** trigger. The Task Id and any task fields selected in the node's **Task Fields to Send** are available as outputs of the trigger. If you need task fields not sent with the trigger, add a **Get task** action. Use the Task Id from the trigger and select the task form with the data fields you want to load.
 4. Add another connector to send task data to. Some common use cases are to create an Outlook event from the start and end date of a HighGear task, send an email about a task to the assignee's email address, or update the status of a corresponding record in another system.
 
 ## Known Issues and Limitations
 
-- Additional data (i.e. Task Fields to Send) included with outbound web requests from a HighGear workflow is not currently supported with the connector. For now, get the data you need via the **Get task** action after receiving a trigger from your HighGear system.
+There are no known issues or limitations at this time.
 
 For issues with the HighGear Workflow connector, please contact [HighGear support](https://www.highgear.com/support/).
 
