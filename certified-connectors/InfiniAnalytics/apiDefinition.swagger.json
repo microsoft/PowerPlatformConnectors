@@ -1,0 +1,195 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Infini Analytics",
+    "description": "Track and monitor the complete lifecycle of your automations with Infini Analytics.\n\nSend start events (START), intermediate milestones (EVENT), non-critical warnings (WARNING), errors (ERROR) and completion events (END) to get full traceability and audit trails for every execution in your organization.\n\n**Getting started:**\n\n1. Get your **organization token** from the Infini platform (Settings → Organization).\n\n2. Find your **automation ID** (`automation_id`) in the automations list.\n\n3. Define a unique **execution ID** (`execution_id`) — it can be an internal system ID or a timestamp.\n\n4. Record events throughout the execution using the *Register event* action.\n\nAn execution is considered **successful** if it ends with END without any prior ERROR. As soon as an ERROR is recorded, the execution is marked as **failed**.",
+    "version": "1.0",
+    "contact": {
+      "name": "Infini Support",
+      "email": "analytics@infini.es",
+      "url": "https://analytics.infini.es/documentacion"
+    }
+  },
+  "host": "api.analytics.infini.es",
+  "basePath": "/v1",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "x-ms-connector-metadata": [
+    {
+      "property": "Website",
+      "value": "https://analytics.infini.es/signup"
+    },
+    {
+      "property": "Privacy policy",
+      "value": "https://analytics.infini.es/tyc"
+    },
+    {
+      "property": "Categories",
+      "value": "IT Operations;Productivity"
+    }
+  ],
+  "paths": {
+    "/register/": {
+      "post": {
+        "summary": "Register Execution Event",
+        "description": "Records an event in the lifecycle of an automation. Use this action at each key point of your flow to get complete traceability.\n\n**Recommended event flow:**\n\n- **START** → at the beginning of the flow, before any business logic.\n\n- **EVENT** → at important milestones (data reading, processing, sending...).\n\n- **WARNING** → if something is not ideal but the flow can continue.\n\n- **ERROR** → if an exception or failure occurs. Marks the execution as failed.\n\n- **END** → upon successful completion. Marks the execution as successful.\n\n**Note:** The `error_id` and `error_description` fields only apply when the event type is ERROR.",
+        "operationId": "registerEvent",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["automation_id", "execution_id", "event"],
+              "properties": {
+                "automation_id": {
+                  "type": "string",
+                  "x-ms-summary": "Automation ID",
+                  "description": "Unique identifier (UUID) of the automation in the Infini platform. Find it in the automations list or ask your administrator. Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.",
+                  "example": "3571c1e0-88b9-4104-a0b0-f060b7fcc6eb",
+                  "x-ms-visibility": "important"
+                },
+                "execution_id": {
+                  "type": "string",
+                  "x-ms-summary": "Execution ID",
+                  "description": "Unique identifier for this specific execution. Must be unique across simultaneous executions of the same automation. Use the same value for all events within the same execution. Can be an internal system ID or a timestamp (e.g. \"2025-03-03T15:32:17\").",
+                  "example": "2025-03-03T15:32:17.571404",
+                  "x-ms-visibility": "important"
+                },
+                "event": {
+                  "type": "string",
+                  "x-ms-summary": "Event Type",
+                  "description": "Event type to record in this call. START: start of execution. EVENT: relevant intermediate milestone. WARNING: non-critical warning (flow continues). ERROR: failure or exception (marks execution as failed). END: successful end of execution.",
+                  "enum": ["START", "EVENT", "WARNING", "END", "ERROR"],
+                  "x-ms-visibility": "important"
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Free text describing the event. It will appear in the execution history on the Infini platform. Being descriptive is recommended to facilitate subsequent auditing.",
+                  "example": "Starting daily sales file processing",
+                  "x-ms-visibility": "important"
+                },
+                "error_id": {
+                  "type": "string",
+                  "x-ms-summary": "Error Code",
+                  "description": "Only for ERROR event type. Error identifier code. Can be a code defined by your team (e.g. \"e0001\") or one automatically provided by the automation platform.",
+                  "example": "e0001",
+                  "x-ms-visibility": "advanced"
+                },
+                "error_description": {
+                  "type": "string",
+                  "x-ms-summary": "Detailed Error Description",
+                  "description": "Only for ERROR event type. Full error message, including the stacktrace or exception message provided by your automation platform (Power Automate, Python, etc.).",
+                  "example": "NullReferenceException: Object reference not set to an instance of an object.",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Event registered successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "automation": {
+                  "type": "string",
+                  "x-ms-summary": "Automation ID",
+                  "description": "UUID of the automation where the event was recorded"
+                },
+                "execution_id": {
+                  "type": "string",
+                  "x-ms-summary": "Execution ID",
+                  "description": "Execution identifier, as sent in the request"
+                },
+                "type_of_event": {
+                  "type": "string",
+                  "x-ms-summary": "Recorded Event Type",
+                  "description": "Type of event that was recorded (START, EVENT, WARNING, END or ERROR)"
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description",
+                  "description": "Event description as recorded"
+                },
+                "error_id": {
+                  "type": "string",
+                  "x-ms-summary": "Error Code",
+                  "description": "Recorded error code (only applies for ERROR events)"
+                },
+                "error_description_detail": {
+                  "type": "string",
+                  "x-ms-summary": "Error Detail",
+                  "description": "Detailed error description (only applies for ERROR events)"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "x-ms-summary": "Registration Date and Time",
+                  "description": "UTC date and time when the event was recorded in the Infini system"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing authentication token. Verify that the \"token\" header contains the correct value obtained from the Infini platform.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error. This may indicate an unusually high load or a temporary issue. If it persists, contact analytics@infini.es.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [{"api_key": []}],
+        "tags": ["Event Logging"]
+      }
+    }
+  },
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-ms-summary": "Error Message",
+          "description": "Description of the error that occurred"
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "token",
+      "description": "Organization token obtained from the Infini platform. Find it under Settings → Organization → Token. Without this token or with an invalid token you will receive an HTTP 401 error."
+    }
+  },
+  "security": [{"api_key": []}],
+  "tags": [
+    {
+      "name": "Event Logging",
+      "description": "Records the lifecycle of automation executions"
+    }
+  ],
+  "x-ms-openai-manifest": {
+    "humanName": "Infini Analytics",
+    "modelDescription": "Connector to record and monitor the complete lifecycle of automations using Infini Analytics. Allows sending START (execution start), EVENT (intermediate milestone), WARNING (non-critical notice), ERROR (failure, marks execution as failed) and END (successful completion) events, associated with a specific automation and execution. Requires an organization token from the Infini platform."
+  }
+}
