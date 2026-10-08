@@ -1,0 +1,617 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "GitHub Models",
+    "description": "Access GitHub Models service for AI inference with various open-source and proprietary models including GPT-4o, DeepSeek-R1, and more. GitHub Models provides OpenAI-compatible REST endpoints for chat completions and embeddings.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Troy Taylor",
+      "email": "ttaylor@hitachisolutions.com",
+      "url": "https://www.hitachisolutions.com"
+    }
+  },
+  "host": "models.github.ai",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/inference/chat/completions": {
+      "post": {
+        "tags": [
+          "Inference"
+        ],
+        "summary": "Create chat completion",
+        "description": "Creates a chat completion using GitHub Models. This endpoint is compatible with OpenAI's chat completions API and supports various models including GPT-4o, DeepSeek-R1, and Llama 3.",
+        "operationId": "CreateChatCompletion",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChatCompletionRequest"
+            },
+            "description": "Chat completion request parameters including model, messages, and optional settings.",
+            "x-ms-summary": "Request Body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/ChatCompletionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/inference/embeddings": {
+      "post": {
+        "tags": [
+          "Embeddings"
+        ],
+        "summary": "Create embeddings",
+        "description": "Creates embeddings for the given input text using GitHub Models embedding models. Embeddings are useful for semantic search, text classification, and similarity analysis.",
+        "operationId": "CreateEmbeddings",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EmbeddingRequest"
+            },
+            "description": "Embedding request parameters including model and input text.",
+            "x-ms-summary": "Request Body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/EmbeddingResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/catalog/models": {
+      "get": {
+        "tags": [
+          "Models"
+        ],
+        "summary": "List available models",
+        "description": "Retrieves a list of all available models in the GitHub Models catalog. Use this to discover available models and their capabilities.",
+        "operationId": "ListModels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/ModelListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ChatCompletionRequest": {
+      "type": "object",
+      "required": [
+        "model",
+        "messages"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "The model to use for completion. Examples: 'openai/gpt-4o', 'meta-llama/llama-3-8b-instruct', 'deepseek/deepseek-r1'.",
+          "example": "openai/gpt-4o",
+          "x-ms-summary": "Model"
+        },
+        "messages": {
+          "type": "array",
+          "description": "The messages to generate chat completions for. Each message should have a role (system, user, or assistant) and content.",
+          "x-ms-summary": "Messages",
+          "items": {
+            "$ref": "#/definitions/ChatMessage"
+          }
+        },
+        "temperature": {
+          "type": "number",
+          "format": "float",
+          "description": "Controls randomness in the output. Higher values make output more random, lower values make it more focused and deterministic.",
+          "x-ms-summary": "Temperature",
+          "minimum": 0,
+          "maximum": 2,
+          "default": 1
+        },
+        "max_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The maximum number of tokens to generate in the completion.",
+          "x-ms-summary": "Max Tokens",
+          "minimum": 1,
+          "default": 1024
+        },
+        "top_p": {
+          "type": "number",
+          "format": "float",
+          "description": "An alternative to sampling with temperature, called nucleus sampling",
+          "x-ms-summary": "Top P",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        },
+        "frequency_penalty": {
+          "type": "number",
+          "format": "float",
+          "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far.",
+          "x-ms-summary": "Frequency Penalty",
+          "minimum": -2,
+          "maximum": 2,
+          "default": 0
+        },
+        "presence_penalty": {
+          "type": "number",
+          "format": "float",
+          "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far.",
+          "x-ms-summary": "Presence Penalty",
+          "minimum": -2,
+          "maximum": 2,
+          "default": 0
+        },
+        "stop": {
+          "type": "array",
+          "description": "Up to 4 sequences where the API will stop generating further tokens.",
+          "x-ms-summary": "Stop Sequences",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4
+        },
+        "stream": {
+          "type": "boolean",
+          "description": "Whether to stream back partial progress",
+          "x-ms-summary": "Stream",
+          "default": false
+        }
+      }
+    },
+    "ChatMessage": {
+      "type": "object",
+      "required": [
+        "role",
+        "content"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "system",
+            "user",
+            "assistant"
+          ],
+          "description": "The role of the message author.",
+          "x-ms-summary": "Role"
+        },
+        "content": {
+          "type": "string",
+          "description": "The content of the message.",
+          "x-ms-summary": "Content"
+        },
+        "name": {
+          "type": "string",
+          "description": "An optional name for the participant.",
+          "x-ms-summary": "Name"
+        }
+      }
+    },
+    "ChatCompletionResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A unique identifier for the chat completion",
+          "x-ms-summary": "ID"
+        },
+        "object": {
+          "type": "string",
+          "description": "The object type, which is always 'chat.completion'",
+          "x-ms-summary": "Object Type"
+        },
+        "created": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The Unix timestamp (in seconds) when the chat completion was created",
+          "x-ms-summary": "Created"
+        },
+        "model": {
+          "type": "string",
+          "description": "The model used for the chat completion",
+          "x-ms-summary": "Model"
+        },
+        "choices": {
+          "type": "array",
+          "description": "A list of chat completion choices",
+          "x-ms-summary": "Choices",
+          "items": {
+            "$ref": "#/definitions/ChatChoice"
+          }
+        },
+        "usage": {
+          "$ref": "#/definitions/Usage"
+        }
+      }
+    },
+    "ChatChoice": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The index of the choice in the list of choices",
+          "x-ms-summary": "Index"
+        },
+        "message": {
+          "$ref": "#/definitions/ChatMessage"
+        },
+        "finish_reason": {
+          "type": "string",
+          "enum": [
+            "stop",
+            "length",
+            "content_filter"
+          ],
+          "description": "The reason the model stopped generating tokens",
+          "x-ms-summary": "Finish Reason"
+        }
+      }
+    },
+    "EmbeddingRequest": {
+      "type": "object",
+      "required": [
+        "model",
+        "input"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "The model to use for embeddings (e.g., 'text-embedding-3-small', 'text-embedding-3-large')",
+          "x-ms-summary": "Model",
+          "example": "text-embedding-3-small"
+        },
+        "input": {
+          "type": "array",
+          "description": "Input text to get embeddings for",
+          "x-ms-summary": "Input",
+          "items": {
+            "type": "string"
+          }
+        },
+        "encoding_format": {
+          "type": "string",
+          "enum": [
+            "float",
+            "base64"
+          ],
+          "description": "The format to return the embeddings in",
+          "x-ms-summary": "Encoding Format",
+          "default": "float"
+        }
+      }
+    },
+    "EmbeddingResponse": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "The object type, which is always 'list'",
+          "x-ms-summary": "Object Type"
+        },
+        "data": {
+          "type": "array",
+          "description": "A list of embedding objects",
+          "x-ms-summary": "Data",
+          "items": {
+            "$ref": "#/definitions/Embedding"
+          }
+        },
+        "model": {
+          "type": "string",
+          "description": "The model used for the embeddings",
+          "x-ms-summary": "Model"
+        },
+        "usage": {
+          "$ref": "#/definitions/Usage"
+        }
+      }
+    },
+    "Embedding": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "The object type, which is always 'embedding'",
+          "x-ms-summary": "Object Type"
+        },
+        "embedding": {
+          "type": "array",
+          "description": "The embedding vector",
+          "x-ms-summary": "Embedding",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "index": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The index of the embedding in the list of embeddings",
+          "x-ms-summary": "Index"
+        }
+      }
+    },
+    "ModelListResponse": {
+      "type": "array",
+      "description": "A list of model objects",
+      "x-ms-summary": "Models",
+      "items": {
+        "$ref": "#/definitions/ModelResponse"
+      }
+    },
+    "ModelResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The model identifier",
+          "x-ms-summary": "ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "The human-readable name of the model",
+          "x-ms-summary": "Name"
+        },
+        "publisher": {
+          "type": "string",
+          "description": "The publisher of the model",
+          "x-ms-summary": "Publisher"
+        },
+        "registry": {
+          "type": "string",
+          "description": "The registry where the model is hosted",
+          "x-ms-summary": "Registry"
+        },
+        "summary": {
+          "type": "string",
+          "description": "A summary description of the model",
+          "x-ms-summary": "Summary"
+        },
+        "html_url": {
+          "type": "string",
+          "description": "The URL to the model's marketplace page",
+          "x-ms-summary": "Marketplace URL"
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the model",
+          "x-ms-summary": "Version"
+        },
+        "capabilities": {
+          "type": "array",
+          "description": "The capabilities of the model",
+          "x-ms-summary": "Capabilities",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "type": "object",
+          "description": "Token limits for the model",
+          "x-ms-summary": "Limits",
+          "properties": {
+            "max_input_tokens": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Maximum input tokens",
+              "x-ms-summary": "Max Input Tokens"
+            },
+            "max_output_tokens": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Maximum output tokens",
+              "x-ms-summary": "Max Output Tokens"
+            }
+          }
+        },
+        "rate_limit_tier": {
+          "type": "string",
+          "description": "The rate limit tier for this model",
+          "x-ms-summary": "Rate Limit Tier"
+        },
+        "supported_input_modalities": {
+          "type": "array",
+          "description": "Supported input modalities (text, image, audio)",
+          "x-ms-summary": "Input Modalities",
+          "items": {
+            "type": "string"
+          }
+        },
+        "supported_output_modalities": {
+          "type": "array",
+          "description": "Supported output modalities (text, image, audio)",
+          "x-ms-summary": "Output Modalities",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags describing the model's characteristics",
+          "x-ms-summary": "Tags",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Usage": {
+      "type": "object",
+      "properties": {
+        "prompt_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of tokens in the prompt",
+          "x-ms-summary": "Prompt Tokens"
+        },
+        "completion_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of tokens in the generated completion",
+          "x-ms-summary": "Completion Tokens"
+        },
+        "total_tokens": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of tokens used in the request (prompt + completion)",
+          "x-ms-summary": "Total Tokens"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "x-ms-summary": "Error",
+          "properties": {
+            "message": {
+              "type": "string",
+              "description": "A human-readable error message",
+              "x-ms-summary": "Message"
+            },
+            "type": {
+              "type": "string",
+              "description": "The type of error",
+              "x-ms-summary": "Type"
+            },
+            "code": {
+              "type": "string",
+              "description": "An error code",
+              "x-ms-summary": "Code"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "GitHub Personal Access Token (PAT) with models:read scope. Format: 'Bearer {your_github_token}'"
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Inference",
+      "description": "Operations for AI model inference"
+    },
+    {
+      "name": "Embeddings",
+      "description": "Operations for creating text embeddings"
+    },
+    {
+      "name": "Models",
+      "description": "Operations for retrieving model catalog information"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://docs.github.com/en/github-models"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Data"
+    }
+  ]
+}
