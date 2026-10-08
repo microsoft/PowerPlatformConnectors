@@ -198,10 +198,11 @@
     "/api/v1/documents/{documentId}/content": {
       "get": {
         "summary": "Download document",
-        "description": "Downloads the content of a document from Penneo as a base64 encoded string. By default, the signed version of the document is returned.",
+        "description": "Downloads the content of a document from Penneo. Choose the JSON format to get the document as a base64 encoded string, or the PDF format to get the raw file content that can be passed straight into actions that create files. By default, the signed version of the document is returned.",
         "operationId": "DownloadDocument",
         "produces": [
-          "application/json"
+          "application/json",
+          "application/pdf"
         ],
         "parameters": [
           {
@@ -221,11 +222,24 @@
             "default": true,
             "x-ms-summary": "Signed",
             "description": "Get the signed or the unsigned document. By default, the signed document is returned if the document has been signed."
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "type": "string",
+            "default": "json",
+            "enum": [
+              "json",
+              "pdf"
+            ],
+            "x-ms-summary": "Format",
+            "description": "The format of the response. \"json\" returns an object with the document as a base64 encoded string. \"pdf\" returns the raw PDF file content, ready to be used by actions such as \"Create file\"."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved the document content.",
+            "description": "Successfully retrieved the document content. Returns an object holding the base64 encoded content, or the raw PDF file content when the PDF format is selected.",
             "schema": {
               "$ref": "#/definitions/DocumentContent"
             }
@@ -358,9 +372,9 @@
         },
         "role": {
           "type": "string",
-          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9 ,_-]*[a-zA-Z0-9,_-]$",
+          "pattern": "^\\S.*\\S$",
           "minLength": 3,
-          "description": "Role for the signer. Allowed: letters, numbers, spaces, comma, underscore, hyphen. Must start with a letter/number and must not end with a space."
+          "description": "Role for the signer. Any characters are allowed, including national characters such as \u00e6\u00f8\u00e5, punctuation and spaces. Must not start or end with a space."
         },
         "email": {
           "type": "string",
@@ -553,7 +567,7 @@
           "description": "Signer roles allowed to sign this document. Defaults to all signers if empty.",
           "items": {
             "type": "string",
-            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9 ,_-]*[a-zA-Z0-9,_-]$",
+            "pattern": "^\\S.*\\S$",
             "minLength": 3
           }
         },
