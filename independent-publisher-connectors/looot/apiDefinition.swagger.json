@@ -1,0 +1,509 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "looot",
+    "description": "looot gives an AI agent or a flow one key and one prepaid balance for more than 2,500 data endpoints from 90+ providers: work emails, phone numbers, companies, people, Google results, web pages and news. Search the catalog, see the price before a run, pay per call. A failed call costs nothing.",
+    "contact": {
+      "name": "Walid Boulanouar",
+      "url": "https://looot.ai/contact",
+      "email": "hello@looot.ai"
+    }
+  },
+  "host": "api.looot.ai",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [],
+  "produces": [],
+  "paths": {
+    "/v1/catalog/search": {
+      "get": {
+        "summary": "Search the catalog",
+        "description": "Finds data endpoints by what you want to do, in plain words. Free. Returns endpoint IDs, providers, categories and estimated prices.",
+        "operationId": "SearchCatalog",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Query",
+            "description": "What you want to do, in plain words. For example: find the work email of a person at a company."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Limit",
+            "description": "Maximum number of results to return.",
+            "default": 50,
+            "minimum": 1
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Category",
+            "description": "Only endpoints in this category."
+          },
+          {
+            "name": "provider",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Provider",
+            "description": "Only endpoints from this provider."
+          },
+          {
+            "name": "maxPriceMicros",
+            "in": "query",
+            "type": "integer",
+            "required": false,
+            "x-ms-summary": "Max price (micros)",
+            "description": "Only endpoints that cost at most this many millionths of a dollar."
+          },
+          {
+            "name": "prefer",
+            "in": "query",
+            "type": "string",
+            "required": false,
+            "x-ms-summary": "Prefer",
+            "description": "How to order results.",
+            "enum": [
+              "balanced",
+              "cheapest",
+              "fastest",
+              "reliable"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SearchResult"
+            }
+          },
+          "default": {
+            "description": "Operation failed.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/v1/operations/{endpointId}": {
+      "get": {
+        "summary": "Get endpoint details",
+        "description": "Reads the exact inputs, output and price of an endpoint or job. Free. Use it before Run Endpoint.",
+        "operationId": "GetOperation",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "endpointId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Endpoint ID",
+            "description": "An endpoint ID from Search Catalog, or a job written as job:people.email.find."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Operation"
+            }
+          },
+          "default": {
+            "description": "Operation failed.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs": {
+      "post": {
+        "summary": "Run an endpoint",
+        "description": "Runs an endpoint or a job and spends prepaid credit. The price is shown by Get Endpoint Details first. A failed call costs nothing.",
+        "operationId": "RunOperation",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "x-ms-summary": "Request",
+            "description": "The run request.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "endpointId",
+                "input"
+              ],
+              "properties": {
+                "endpointId": {
+                  "type": "string",
+                  "x-ms-summary": "Endpoint ID",
+                  "description": "An endpoint ID from Search Catalog, or job:<job id> such as job:people.email.find to let looot pick the provider."
+                },
+                "input": {
+                  "type": "object",
+                  "x-ms-summary": "Input",
+                  "description": "The input object. Use the exact field names that Inspect Endpoint lists."
+                },
+                "idempotencyKey": {
+                  "type": "string",
+                  "x-ms-summary": "Idempotency key",
+                  "description": "Same key and same input never pays twice."
+                },
+                "wait": {
+                  "type": "integer",
+                  "x-ms-summary": "Wait (seconds)",
+                  "description": "Seconds to wait for the result before returning a run ID. 0 to 60."
+                },
+                "fallback": {
+                  "type": "boolean",
+                  "x-ms-summary": "Fallback",
+                  "description": "Whether to try the next provider of the same job when the first finds nothing. Only works with job: IDs."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Run"
+            }
+          },
+          "default": {
+            "description": "Operation failed.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/v1/runs/{runId}": {
+      "get": {
+        "summary": "Get a run",
+        "description": "Reads one run: status, result and cost. Use it when Run Endpoint returned before the result was ready.",
+        "operationId": "GetRun",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "type": "string",
+            "required": true,
+            "x-ms-summary": "Run ID",
+            "description": "The run ID returned by Run Endpoint."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Run"
+            }
+          },
+          "default": {
+            "description": "Operation failed.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/v1/balance": {
+      "get": {
+        "summary": "Get the balance",
+        "description": "Reads the available credit, the reserved credit and the top-up link. Free.",
+        "operationId": "GetBalance",
+        "x-ms-visibility": "important",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Balance"
+            }
+          },
+          "default": {
+            "description": "Operation failed.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SearchResult": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "x-ms-summary": "Query",
+          "description": "The search words that were used."
+        },
+        "total": {
+          "type": "integer",
+          "x-ms-summary": "Total",
+          "description": "Number of matching endpoints."
+        },
+        "nextOffset": {
+          "type": "integer",
+          "x-ms-summary": "Next offset",
+          "description": "Offset to pass for the next page. Empty when there are no more results."
+        },
+        "endpoints": {
+          "type": "array",
+          "x-ms-summary": "Endpoints",
+          "description": "Matching endpoints, best match first.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "endpointId": {
+                "type": "string",
+                "x-ms-summary": "Endpoint ID",
+                "description": "ID to pass to Inspect Endpoint or Run Endpoint."
+              },
+              "provider": {
+                "type": "string",
+                "x-ms-summary": "Provider",
+                "description": "The data provider behind the endpoint."
+              },
+              "name": {
+                "type": "string",
+                "x-ms-summary": "Name",
+                "description": "Short name of the endpoint."
+              },
+              "capability": {
+                "type": "string",
+                "x-ms-summary": "Capability",
+                "description": "The job this endpoint does, for example people.email.find."
+              },
+              "category": {
+                "type": "string",
+                "x-ms-summary": "Category",
+                "description": "Category of the endpoint."
+              },
+              "access": {
+                "type": "string",
+                "x-ms-summary": "Access",
+                "description": "runs_now, needs_your_account or coming_soon."
+              },
+              "estimatedPrice": {
+                "type": "number",
+                "x-ms-summary": "Estimated price",
+                "description": "Estimated price of one call in US dollars."
+              },
+              "async": {
+                "type": "boolean",
+                "x-ms-summary": "Asynchronous",
+                "description": "Whether the provider answers later instead of at once."
+              }
+            }
+          }
+        }
+      }
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "endpoint": {
+          "type": "object",
+          "x-ms-summary": "Endpoint",
+          "description": "The endpoint or job that was inspected.",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-ms-summary": "Endpoint ID",
+              "description": "The endpoint ID."
+            },
+            "capability": {
+              "type": "string",
+              "x-ms-summary": "Capability",
+              "description": "The job this endpoint does."
+            },
+            "price": {
+              "type": "object",
+              "x-ms-summary": "Price",
+              "description": "Price details.",
+              "properties": {
+                "estimateFormula": {
+                  "type": "string",
+                  "x-ms-summary": "Estimate formula",
+                  "description": "How the price of a call is worked out."
+                }
+              }
+            }
+          }
+        },
+        "inputSchema": {
+          "type": "object",
+          "x-ms-summary": "Input schema",
+          "description": "JSON Schema of the input object that Run Endpoint expects."
+        },
+        "usageHints": {
+          "type": "object",
+          "x-ms-summary": "Usage hints",
+          "description": "Hints for calling this endpoint."
+        }
+      }
+    },
+    "Run": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "x-ms-summary": "Run ID",
+          "description": "ID of the run. Pass it to Get Run."
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status",
+          "description": "queued, running, completed, failed, blocked, stopped, reconciliation_pending or pending_provider."
+        },
+        "endpointId": {
+          "type": "string",
+          "x-ms-summary": "Endpoint ID",
+          "description": "The endpoint that served the run."
+        },
+        "outcome": {
+          "type": "string",
+          "x-ms-summary": "Outcome",
+          "description": "hit, weak, miss, error, rejected, skipped or pending."
+        },
+        "outcomeReason": {
+          "type": "string",
+          "x-ms-summary": "Outcome reason",
+          "description": "Why the run has this outcome."
+        },
+        "result": {
+          "type": "object",
+          "x-ms-summary": "Result",
+          "description": "The provider answer. Its fields depend on the endpoint."
+        },
+        "normalized": {
+          "type": "object",
+          "x-ms-summary": "Normalized result",
+          "description": "The answer in looot's common field names, when the job defines them."
+        },
+        "estimatedCost": {
+          "type": "number",
+          "x-ms-summary": "Estimated cost",
+          "description": "Estimated cost in US dollars, held before the call."
+        },
+        "actualCost": {
+          "type": "number",
+          "x-ms-summary": "Actual cost",
+          "description": "Final cost in US dollars. A failed call costs nothing."
+        },
+        "replayed": {
+          "type": "boolean",
+          "x-ms-summary": "Replayed",
+          "description": "True when the idempotency key matched an earlier run and that run is returned."
+        },
+        "error": {
+          "type": "object",
+          "x-ms-summary": "Error",
+          "description": "Present when the run failed.",
+          "properties": {
+            "code": {
+              "type": "string",
+              "x-ms-summary": "Error code",
+              "description": "Machine readable error code."
+            },
+            "message": {
+              "type": "string",
+              "x-ms-summary": "Error message",
+              "description": "What went wrong."
+            },
+            "retryable": {
+              "type": "boolean",
+              "x-ms-summary": "Retryable",
+              "description": "Whether the same call can be tried again."
+            }
+          }
+        }
+      }
+    },
+    "Balance": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "number",
+          "x-ms-summary": "Available",
+          "description": "Credit you can spend, in US dollars."
+        },
+        "reserved": {
+          "type": "number",
+          "x-ms-summary": "Reserved",
+          "description": "Credit held for runs in progress, in US dollars."
+        },
+        "topUpUrl": {
+          "type": "string",
+          "x-ms-summary": "Top-up link",
+          "description": "Link to add credit."
+        },
+        "topUpLink": {
+          "type": "object",
+          "x-ms-summary": "Top-up details",
+          "description": "Top-up rules.",
+          "properties": {
+            "minimumUsd": {
+              "type": "number",
+              "x-ms-summary": "Minimum top-up",
+              "description": "Smallest top-up in US dollars."
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {},
+  "responses": {},
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter Bearer followed by a space and your looot agent token."
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://looot.ai"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://looot.ai/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Data;AI"
+    }
+  ]
+}
