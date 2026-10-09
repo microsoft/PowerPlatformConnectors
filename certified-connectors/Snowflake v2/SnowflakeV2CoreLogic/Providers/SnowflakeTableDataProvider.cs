@@ -8,6 +8,7 @@ namespace SnowflakeV2CoreLogic.Providers
     using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.Globalization;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
     using System.Web;
@@ -169,26 +170,10 @@ namespace SnowflakeV2CoreLogic.Providers
             SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
-            SnowflakeTableData? primaryKeyData = null;
-            SnowflakeTableData? itemsResponse = null;
-
-            primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "GET datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
-
-            string? primaryKeyColumn = null;
-            try
-            {
-                // Grab the first element and look for the column_name property, which will have a value that aligns to the primary key column name.
-                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["column_name"].ToString();
-            }
-            catch (Exception)
-            {
-                // Unable to get the primary key
-                string errorMessage = $"Unable to determine primary key from table";
-                throw new Exception(string.Format(CultureInfo.InvariantCulture, Constants.GenericLoggerMessage, methodName, errorMessage));
-            }
+            var itemKey = await ResolveItemKeyAsync(table, id, "GET datasets/{dataset}/tables/{table}/items/{id}", connectionParameters, methodName).ConfigureAwait(true);
 
             // Now that we have a primary key, we can construct the select query
-            itemsResponse = await snowflakeDBOperations.GetItemFromTableAsync(table, primaryKeyColumn, id, "GET datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
+            SnowflakeTableData? itemsResponse = await snowflakeDBOperations.GetItemFromTableAsync(table, itemKey, "GET datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
 
             // Convert the response into a list of OData Items
             var items = itemsResponse?.ToListOfItems();
@@ -203,7 +188,7 @@ namespace SnowflakeV2CoreLogic.Providers
             else if (items?.Count > 1)
             {
                 // We should have more than 1 item when querying by primaryKey
-                throw new Exception($"Multiple items returned when querying by primary key {primaryKeyColumn}");
+                throw new Exception($"Multiple items returned when querying by primary key {DescribeKeyColumns(itemKey)}");
             }
             return new Item();
         }
@@ -261,40 +246,17 @@ namespace SnowflakeV2CoreLogic.Providers
             SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
-            SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "PATCH datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
-
-            string? primaryKeyColumn = null;
-            try
-            {
-                // Grab the first element and look for the column_name property, which will have a value that aligns to the primary key column name.
-                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["column_name"].ToString();
-            }
-            catch (Exception)
-            {
-                // Unable to get the primary key
-                string errorMessage = $"Unable to determine primary key from table";
-                throw new Exception(string.Format(CultureInfo.InvariantCulture, Constants.GenericLoggerMessage, methodName, errorMessage));
-            }
+            var itemKey = await ResolveItemKeyAsync(table, id, "PATCH datasets/{dataset}/tables/{table}/items/{id}", connectionParameters, methodName).ConfigureAwait(true);
 
             // Now that we have a primary key, we can construct the update query
-            SnowflakeTableData updatedItemResponse = await snowflakeDBOperations.UpdateItemAsync(table, primaryKeyColumn, id, item, connectionParameters, "PATCH datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
+            SnowflakeTableData updatedItemResponse = await snowflakeDBOperations.UpdateItemAsync(table, itemKey, item, connectionParameters, "PATCH datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
 
             // Convert the response into a list of OData Items
             var items = updatedItemResponse.ToListOfItems();
 
             logger.LogInformation(string.Format(CultureInfo.InvariantCulture, Constants.FinishedMethodLoggerMessage, methodName, "_", "_"));
 
-            // there should only be one item returned from a GetItem query
-            if (items.Count == 1)
-            {
-                return items[0];
-            }
-            else if (items.Count > 1)
-            {
-                // We should have more than 1 item when querying by primaryKey
-                throw new Exception($"Multiple items returned when updating by primary key {primaryKeyColumn}");
-            }
-            return new Item();
+            return items.FirstOrDefault() ?? new Item();
         }
 
         public async Task DeleteItemAsync(
@@ -316,36 +278,44 @@ namespace SnowflakeV2CoreLogic.Providers
             SnowflakeConnectionParametersProvider.EnsureTableWithinConnection(table, connectionParameters);
 
             // First we need to resolve the primarKey since we were only given an ID
-            SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, "DELETE datasets/{dataset}/tables/{table}/items/{id}", connectionParameters).ConfigureAwait(true);
+            var itemKey = await ResolveItemKeyAsync(table, id, "DELETE datasets/{dataset}/tables/{table}/items/{id}", connectionParameters, methodName).ConfigureAwait(true);
 
-            string? primaryKeyColumn = null;
-            try
-            {
-                // Grab the first element and look for the column_name property, which will have a value that aligns to the primary key column name.
-                primaryKeyColumn = primaryKeyData?.ToGenericDictionaryList()[0]["column_name"].ToString();
-            }
-            catch (Exception)
+            // Now that we have a primary key, we can construct the delete query
+            await snowflakeDBOperations.DeleteItemAsync(table, itemKey, connectionParameters, "DELETE datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
+        }
+
+        private static string DescribeKeyColumns(IReadOnlyList<(string Column, string Value)> itemKey)
+        {
+            return string.Join(", ", itemKey.Select(k => k.Column));
+        }
+
+        /// <summary>
+        /// Resolves the primary key columns of a table and pairs them with the values from the item id.
+        /// </summary>
+        /// <param name="table">The table name.</param>
+        /// <param name="id">The item id.</param>
+        /// <param name="endpoint">The endpoint name used for logging.</param>
+        /// <param name="connectionParameters">The connection parameters.</param>
+        /// <param name="methodName">The calling method name used in error messages.</param>
+        /// <returns>The primary key columns, ordered by their position in the key, paired with their values.</returns>
+        private async Task<IReadOnlyList<(string Column, string Value)>> ResolveItemKeyAsync(
+            string table,
+            string id,
+            string endpoint,
+            SnowflakeConnectionParameters connectionParameters,
+            string methodName)
+        {
+            SnowflakeTableData? primaryKeyData = await snowflakeDBOperations.GetPrimaryKeyAsync(table, endpoint, connectionParameters).ConfigureAwait(true);
+
+            IReadOnlyList<string> keyColumns = PrimaryKeyHelper.GetPrimaryKeyColumns(primaryKeyData);
+            if (keyColumns.Count == 0)
             {
                 // Unable to get the primary key
-                string errorMessage = $"Unable to determine primary key from {table}";
-
+                string errorMessage = $"Unable to determine primary key from table";
                 throw new Exception(string.Format(CultureInfo.InvariantCulture, Constants.GenericLoggerMessage, methodName, errorMessage));
             }
 
-            // Now that we have a primary key, we can construct the select query
-            SnowflakeTableData deletedItemResponse = await snowflakeDBOperations.DeleteItemAsync(table, primaryKeyColumn, id, connectionParameters, "DELETE datasets/{dataset}/tables/{table}/items/{id}").ConfigureAwait(true);
-
-            // Convert the response into a list of OData Items
-            var items = deletedItemResponse.ToListOfItems();
-
-            // there should only be one item returned from a GetItem query
-            if (items.Count > 1)
-            {
-                // We should have more than 1 item when querying by primaryKey
-                string errorMessage = $"Multiple items returned when deleting by primary key {primaryKeyColumn}";
-
-                throw new Exception(string.Format(CultureInfo.InvariantCulture, Constants.GenericLoggerMessage, methodName, errorMessage));
-            }
+            return PrimaryKeyHelper.ParseItemId(id, keyColumns, table);
         }
     }
 }

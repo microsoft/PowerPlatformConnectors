@@ -70,6 +70,15 @@ namespace SnowflakeV2CoreLogic {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The item id does not match the primary key of table &apos;{0}&apos;. The primary key has {1} columns, so the id must contain {1} comma-separated values in this order: {2}. The id contains {3} values..
+        /// </summary>
+        internal static string SnowflakeCompositeItemIdMismatch {
+            get {
+                return ResourceManager.GetString("SnowflakeCompositeItemIdMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A value must be provided for data set.
         /// </summary>
         internal static string SnowflakeDataSetMissing {

@@ -266,6 +266,7 @@ Once the admin has shared the environment variables, users follow these steps to
 
 ## Known issues and limitations
 1. We currently do not support duplicate columns when the join command is executed. A workaround would be to add aliases to the duplicated columns. 
+1. A row of a table with a composite primary key is identified by its key values separated by commas, in the order of the primary key columns (for example `1,2` for `PRIMARY KEY (ORDER_ID, LINE_NO)`). Rows whose composite key values contain a comma cannot be read, updated or deleted individually.
 1. Other limitations with Virtual Tables are listed [here](https://learn.microsoft.com/power-apps/maker/data-platform/create-edit-virtual-entities#considerations-when-you-use-virtual-tables).
 1. Virtual tables are only supported with connections created with 'Service Principal' authentication. 
 1. When using Service Principle authentication, the user needs to have Read access to the **information_schema.columns** table. 
