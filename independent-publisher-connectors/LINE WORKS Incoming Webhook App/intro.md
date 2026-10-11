@@ -1,47 +1,32 @@
-# LINE WORKS Incoming Webhook App - Proposal
+# LINE WORKS Incoming Webhook (Independent Publisher)
 
-## Overview
-The LINE WORKS Incoming Webhook App connector enables Microsoft Power Platform users to seamlessly integrate with LINE WORKS, a popular business communication platform widely used in Japan and Asia. This connector simplifies the process of sending automated notifications and messages to LINE WORKS chat rooms without requiring complex authentication setup or API development.
+LINE WORKS is a business chat and collaboration service that is widely used in Japan. This connector posts notification messages to LINE WORKS talk rooms through the LINE WORKS Incoming Webhook app, so flows can send alerts and updates without an API app or tokens.
 
-## Purpose and Value
-This connector addresses the growing need for businesses to integrate their workflow automation with LINE WORKS. Key benefits include:
+## Publisher: iwaohig
 
-1. **No-Code Integration**: Users can send messages to LINE WORKS without writing code or managing authentication tokens
-2. **Workflow Automation**: Enables automated notifications for various business scenarios (system alerts, order notifications, task reminders)
-3. **Simple Setup**: Uses webhook URLs that can be generated directly in LINE WORKS, requiring minimal configuration
-4. **Enterprise Communication**: Bridges the gap between Microsoft Power Platform and LINE WORKS ecosystems
+## Prerequisites
 
-## Use Cases
-- **IT Operations**: Send system monitoring alerts and deployment notifications
-- **Sales Teams**: Notify teams about new leads, orders, or customer inquiries
-- **HR Processes**: Send automated reminders for timesheet submissions or meeting notifications
-- **Project Management**: Update teams on task completions or milestone achievements
-- **Customer Service**: Alert support teams about urgent customer issues
+- A LINE WORKS tenant on the Free, Standard or Advanced plan.
+- The Incoming Webhook app installed from the LINE WORKS App Directory, with a webhook URL added for the target talk room. For setup steps, see the [Incoming Webhook documentation](https://developers.worksmobile.com/jp/docs/webhook).
 
-## Target Audience
-- Business users who need to send automated notifications to LINE WORKS
-- IT administrators managing system alerts and notifications
-- Power Automate users looking for simple LINE WORKS integration
-- Organizations using LINE WORKS as their primary communication platform
+## Obtaining Credentials
 
-## Technical Implementation
-The connector implements the LINE WORKS Incoming Webhook API specification with:
-- Support for text messages with optional titles
-- Mention functionality for notifying specific users
-- Optional button links for actionable notifications
-- Comprehensive error handling and rate limit information
+This connector does not use authentication. Each request is routed by the webhook ID, which is the last part of the webhook URL (`https://webhook.worksmobile.com/message/{webhookId}`). Anyone who has the webhook ID can post to the talk room, so treat it as a secret.
 
-## Community Contribution
-As an Independent Publisher, I am committed to:
-- Maintaining the connector and ensuring compatibility with LINE WORKS updates
-- Providing documentation and support through GitHub
-- Responding to community feedback and feature requests
-- Ensuring the connector meets Microsoft's quality standards
+## Supported Operations
 
-This connector will empower thousands of LINE WORKS users to leverage Power Automate for their business automation needs, particularly in markets where LINE WORKS has significant adoption.
+### Send message
 
-## Contact Information
-**Publisher**: iwaohig  
-**Email**: iwaohig@gmail.com
+Sends a message to the talk room that is linked to the webhook ID. The message has an optional title, the message text (which can mention members with `<m userId="user@example.com">`), and an optional link button with a label and a URL.
 
-I am open to collaboration and welcome feedback from the community to make this connector as valuable as possible for LINE WORKS users worldwide.
+## Example Scenarios
+
+- Send monitoring alerts and deployment results to an operations talk room.
+- Notify a sales team about new orders or inquiries.
+- Remind members about approvals or timesheet deadlines.
+
+## Known Issues and Limitations
+
+- A tenant can add up to 5 webhook URLs.
+- The rate limit is 120 requests per minute per LINE WORKS domain, shared by all webhook URLs. Requests over the limit return HTTP 429.
+- The Incoming Webhook app sends text messages only. It cannot send images or files, or use other message types.
